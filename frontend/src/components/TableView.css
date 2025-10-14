@@ -197,6 +197,41 @@
   font-weight: 600;
 }
 
+/* Estados Kanban */
+.estado-badge {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.estado-por_contactar {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.estado-contactada {
+  background: #e0e7ff;
+  color: #5b21b6;
+}
+
+.estado-interesada {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.estado-no_interesa {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.estado-convertida {
+  background: #d1fae5;
+  color: #065f46;
+}
+
 @media (max-width: 768px) {
   .properties-table {
     font-size: 0.813rem;

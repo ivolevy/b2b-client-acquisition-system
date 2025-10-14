@@ -48,8 +48,10 @@ function TableViewB2B({ empresas }) {
               <th>Email</th>
               <th>Teléfono</th>
               <th>Website</th>
+              <th>Redes</th>
+              <th>Score</th>
               <th>Ciudad/País</th>
-              <th>Validada</th>
+              <th>Estado</th>
             </tr>
           </thead>
           <tbody>
@@ -96,9 +98,9 @@ function TableViewB2B({ empresas }) {
                   )}
                 </td>
                 <td>
-                  {empresa.website ? (
+                  {empresa.website || empresa.sitio_web ? (
                     <a 
-                      href={empresa.website} 
+                      href={empresa.website || empresa.sitio_web} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="link"
@@ -108,18 +110,67 @@ function TableViewB2B({ empresas }) {
                   ) : (
                     <span className="no-data">Sin web</span>
                   )}
-                  {empresa.linkedin && (
-                    <div>
-                      <a 
-                        href={empresa.linkedin} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="link"
-                        style={{ fontSize: '12px' }}
-                      >
-                        💼 LinkedIn
+                </td>
+                <td>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {empresa.instagram && (
+                      <a href={empresa.instagram} target="_blank" rel="noopener noreferrer" title="Instagram">
+                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>📸</span>
                       </a>
+                    )}
+                    {empresa.facebook && (
+                      <a href={empresa.facebook} target="_blank" rel="noopener noreferrer" title="Facebook">
+                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>🔵</span>
+                      </a>
+                    )}
+                    {empresa.twitter && (
+                      <a href={empresa.twitter} target="_blank" rel="noopener noreferrer" title="Twitter/X">
+                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>🐦</span>
+                      </a>
+                    )}
+                    {empresa.linkedin && (
+                      <a href={empresa.linkedin} target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>💼</span>
+                      </a>
+                    )}
+                    {empresa.youtube && (
+                      <a href={empresa.youtube} target="_blank" rel="noopener noreferrer" title="YouTube">
+                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>📺</span>
+                      </a>
+                    )}
+                    {empresa.tiktok && (
+                      <a href={empresa.tiktok} target="_blank" rel="noopener noreferrer" title="TikTok">
+                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>🎵</span>
+                      </a>
+                    )}
+                    {!empresa.instagram && !empresa.facebook && !empresa.twitter && 
+                     !empresa.linkedin && !empresa.youtube && !empresa.tiktok && (
+                      <span className="no-data">-</span>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  {empresa.lead_score !== undefined && empresa.lead_score !== null ? (
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '6px',
+                      fontSize: '14px',
+                      fontWeight: 'bold'
+                    }}>
+                      <span style={{ 
+                        color: empresa.lead_score >= 80 ? '#059669' : 
+                               empresa.lead_score >= 50 ? '#d97706' : '#dc2626'
+                      }}>
+                        {empresa.lead_score}
+                      </span>
+                      <span style={{ fontSize: '18px' }}>
+                        {empresa.lead_score >= 80 ? '🔥' : 
+                         empresa.lead_score >= 50 ? '⭐' : '❄️'}
+                      </span>
                     </div>
+                  ) : (
+                    <span className="no-data">-</span>
                   )}
                 </td>
                 <td>
@@ -129,7 +180,15 @@ function TableViewB2B({ empresas }) {
                   )}
                 </td>
                 <td>
-                  {empresa.validada ? (
+                  {empresa.estado ? (
+                    <span className={`estado-badge estado-${empresa.estado}`}>
+                      {empresa.estado === 'por_contactar' && '📝 Por contactar'}
+                      {empresa.estado === 'contactada' && '📞 Contactada'}
+                      {empresa.estado === 'interesada' && '⭐ Interesada'}
+                      {empresa.estado === 'no_interesa' && '❌ No interesa'}
+                      {empresa.estado === 'convertida' && '🎯 Convertida'}
+                    </span>
+                  ) : empresa.validada ? (
                     <span style={{ color: 'green', fontWeight: 'bold' }}>✓ Válida</span>
                   ) : (
                     <span style={{ color: 'orange' }}>⚠️ Pendiente</span>

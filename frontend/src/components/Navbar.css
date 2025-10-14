@@ -43,6 +43,7 @@
   align-items: center;
 }
 
+.theme-toggle-btn,
 .export-btn,
 .db-viewer-btn,
 .clear-btn {
@@ -55,6 +56,11 @@
   font-size: 0.875rem;
   font-weight: 600;
   transition: all 0.3s ease;
+}
+
+.theme-toggle-btn {
+  font-size: 1.25rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .export-btn:hover,

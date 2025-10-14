@@ -19,6 +19,8 @@ from overpass_client import (
 )
 from scraper import enriquecer_empresa_b2b
 from validators import filtrar_empresas_validas
+from social_scraper import enriquecer_con_redes_sociales
+from lead_utils import procesar_lead_nuevo, detectar_duplicado, fusionar_empresas
 from db import (
     init_db_b2b, 
     insertar_empresa, 
@@ -86,6 +88,15 @@ class ExportRequest(BaseModel):
     rubro: Optional[str] = None
     formato: str = "csv"  # csv o json
     solo_validas: bool = True
+
+class ActualizarEstadoRequest(BaseModel):
+    id: int
+    estado: str
+    notas: Optional[str] = None
+
+class ActualizarNotasRequest(BaseModel):
+    id: int
+    notas: str
 
 # Inicializar BD
 @app.on_event("startup")
@@ -173,7 +184,15 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             for empresa in empresas:
                 if empresa.get('website'):
                     logger.info(f"🔄 Enriqueciendo: {empresa.get('nombre')}")
+                    # Enriquecer con datos de scraping
                     empresa = enriquecer_empresa_b2b(empresa)
+                    
+                    # Extraer redes sociales
+                    sitio_web = empresa.get('website') or empresa.get('sitio_web')
+                    if sitio_web:
+                        redes = enriquecer_con_redes_sociales(sitio_web)
+                        empresa.update(redes)  # Agregar instagram, facebook, twitter, etc.
+                        
                 empresas_enriquecidas.append(empresa)
             empresas = empresas_enriquecidas
         
@@ -182,12 +201,20 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         empresas_validadas_completas = []
         empresas_validas = []
         
+        # Obtener empresas existentes para detectar duplicados
+        empresas_existentes = obtener_todas_empresas()
+        
         for empresa in empresas:
+            # Validar empresa
             es_valida, empresa_validada, mensaje = validar_empresa(empresa)
-            empresas_validadas_completas.append(empresa_validada)  # TODAS con campo validada
+            
+            # Procesar lead: calcular score, detectar duplicados
+            empresa_procesada = procesar_lead_nuevo(empresa_validada, empresas_existentes)
+            
+            empresas_validadas_completas.append(empresa_procesada)  # TODAS con campo validada
             if es_valida:
-                empresas_validas.append(empresa_validada)
-                logger.info(f"✓ {empresa['nombre']}: {mensaje}")
+                empresas_validas.append(empresa_procesada)
+                logger.info(f"✓ {empresa['nombre']}: {mensaje} | Score: {empresa_procesada.get('lead_score', 0)}/100")
             else:
                 logger.warning(f"✗ {empresa.get('nombre', 'Sin nombre')}: {mensaje}")
         
@@ -365,6 +392,82 @@ async def clear_database():
             
     except Exception as e:
         logger.error(f"Error limpiando base de datos: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/empresa/estado")
+async def actualizar_estado(request: ActualizarEstadoRequest):
+    """Actualiza el estado Kanban de una empresa"""
+    try:
+        from lead_utils import validar_estado
+        import sqlite3
+        from datetime import datetime
+        
+        if not validar_estado(request.estado):
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Estado inválido. Estados válidos: por_contactar, contactada, interesada, no_interesa, convertida"
+            )
+        
+        # Actualizar en BD
+        conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), '..', 'data', 'empresas_b2b.db'))
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            UPDATE empresas 
+            SET estado = ?, 
+                notas = COALESCE(?, notas),
+                fecha_ultimo_contacto = ?,
+                updated_at = ?
+            WHERE id = ?
+        ''', (request.estado, request.notas, datetime.now(), datetime.now(), request.id))
+        
+        conn.commit()
+        conn.close()
+        
+        logger.info(f"✅ Estado actualizado - ID: {request.id} → {request.estado}")
+        
+        return {
+            "success": True,
+            "message": f"Estado actualizado a '{request.estado}'",
+            "id": request.id,
+            "estado": request.estado
+        }
+        
+    except Exception as e:
+        logger.error(f"Error actualizando estado: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/empresa/notas")
+async def actualizar_notas(request: ActualizarNotasRequest):
+    """Actualiza las notas de una empresa"""
+    try:
+        import sqlite3
+        from datetime import datetime
+        
+        # Actualizar en BD
+        conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), '..', 'data', 'empresas_b2b.db'))
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            UPDATE empresas 
+            SET notas = ?,
+                updated_at = ?
+            WHERE id = ?
+        ''', (request.notas, datetime.now(), request.id))
+        
+        conn.commit()
+        conn.close()
+        
+        logger.info(f"✅ Notas actualizadas - ID: {request.id}")
+        
+        return {
+            "success": True,
+            "message": "Notas actualizadas correctamente",
+            "id": request.id
+        }
+        
+    except Exception as e:
+        logger.error(f"Error actualizando notas: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

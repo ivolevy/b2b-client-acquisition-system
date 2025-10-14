@@ -1,7 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Navbar.css';
 
 function Navbar({ onExport, onViewDatabase, onClearDatabase, stats }) {
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Cargar preferencia de tema desde localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setDarkMode(true);
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  }, []);
+
+  // Toggle tema oscuro
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    
+    if (newMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+    }
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -15,6 +40,10 @@ function Navbar({ onExport, onViewDatabase, onClearDatabase, stats }) {
         </div>
         
         <div className="navbar-actions">
+          <button className="theme-toggle-btn" onClick={toggleDarkMode} title={darkMode ? 'Modo claro' : 'Modo oscuro'}>
+            {darkMode ? '☀️' : '🌙'}
+          </button>
+          
           <button className="export-btn" onClick={onExport}>
             📥 Exportar
           </button>
