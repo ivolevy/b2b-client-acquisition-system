@@ -63,6 +63,7 @@
   padding: 0.5rem 0.75rem;
 }
 
+.theme-toggle-btn:hover,
 .export-btn:hover,
 .db-viewer-btn:hover,
 .clear-btn:hover {
@@ -91,6 +92,29 @@
 .clear-btn:hover {
   background: var(--gray-900);
   border-color: var(--gray-900);
+}
+
+/* Tema oscuro para navbar */
+[data-theme="dark"] .navbar {
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+[data-theme="dark"] .navbar-brand h1 {
+  color: #fafafa;
+}
+
+[data-theme="dark"] .navbar-stats {
+  background: #18181b;
+  color: #d4d4d8;
+}
+
+[data-theme="dark"] .theme-toggle-btn,
+[data-theme="dark"] .export-btn,
+[data-theme="dark"] .clear-btn {
+  background: #18181b;
+  border-color: #3f3f46;
+  color: #fafafa;
 }
 
 @media (max-width: 768px) {

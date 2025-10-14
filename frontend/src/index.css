@@ -10,7 +10,7 @@ html {
 }
 
 :root {
-  /* Paleta estilo Dota Solutions - Modo Claro */
+  /* Paleta estilo Dota Solutions */
   --primary: #FF69B4;
   --primary-dark: #FF1493;
   --primary-light: #FFB6D9;
@@ -19,7 +19,7 @@ html {
   --warning: #f59e0b;
   --danger: #ef4444;
   
-  /* Grises suaves - Modo Claro */
+  /* Grises suaves */
   --gray-50: #fafafa;
   --gray-100: #f4f4f5;
   --gray-200: #e4e4e7;
@@ -30,34 +30,6 @@ html {
   --gray-700: #3f3f46;
   --gray-800: #27272a;
   --gray-900: #18181b;
-  
-  /* Colores de fondo y texto */
-  --bg-primary: #ffffff;
-  --bg-secondary: #fafafa;
-  --text-primary: #18181b;
-  --text-secondary: #52525b;
-}
-
-/* Tema Oscuro */
-[data-theme="dark"] {
-  /* Grises invertidos */
-  --gray-50: #18181b;
-  --gray-100: #27272a;
-  --gray-200: #3f3f46;
-  --gray-300: #52525b;
-  --gray-400: #71717a;
-  --gray-500: #a1a1aa;
-  --gray-600: #d4d4d8;
-  --gray-700: #e4e4e7;
-  --gray-800: #f4f4f5;
-  --gray-900: #fafafa;
-  
-  /* Colores de fondo y texto - Modo Oscuro */
-  --bg-primary: #18181b;
-  --bg-secondary: #27272a;
-  --text-primary: #fafafa;
-  --text-secondary: #d4d4d8;
-}
   
   /* Espaciado */
   --spacing-xs: 0.25rem;
@@ -82,12 +54,60 @@ html {
   --shadow-pink: 0 8px 24px 0 rgb(255 105 180 / 0.25);
 }
 
+/* Tema Oscuro */
+[data-theme="dark"] {
+  --gray-50: #18181b;
+  --gray-100: #27272a;
+  --gray-200: #3f3f46;
+  --gray-300: #52525b;
+  --gray-400: #71717a;
+  --gray-500: #a1a1aa;
+  --gray-600: #d4d4d8;
+  --gray-700: #e4e4e7;
+  --gray-800: #f4f4f5;
+  --gray-900: #fafafa;
+}
+
+[data-theme="dark"] body {
+  background: linear-gradient(180deg, #18181b 0%, #27272a 100%);
+  color: #fafafa;
+}
+
+[data-theme="dark"] .filter-section,
+[data-theme="dark"] .table-container,
+[data-theme="dark"] .navbar,
+[data-theme="dark"] .map-container {
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] .filter-input {
+  background: #18181b;
+  color: #fafafa;
+  border-color: #3f3f46;
+}
+
+[data-theme="dark"] .properties-table th {
+  background: #18181b;
+  color: #fafafa;
+}
+
+[data-theme="dark"] .properties-table tbody tr {
+  border-color: #3f3f46;
+}
+
+[data-theme="dark"] .properties-table tbody tr:hover {
+  background: #3f3f46;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+  color: var(--gray-900);
   line-height: 1.6;
   min-height: 100vh;
   overscroll-behavior: none;
