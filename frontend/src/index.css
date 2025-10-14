@@ -1,0 +1,103 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  overscroll-behavior: none;
+  -webkit-overscroll-behavior: none;
+}
+
+:root {
+  /* Paleta estilo Dota Solutions */
+  --primary: #FF69B4;
+  --primary-dark: #FF1493;
+  --primary-light: #FFB6D9;
+  --secondary: #1a1a1a;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  
+  /* Grises suaves */
+  --gray-50: #fafafa;
+  --gray-100: #f4f4f5;
+  --gray-200: #e4e4e7;
+  --gray-300: #d4d4d8;
+  --gray-400: #a1a1aa;
+  --gray-500: #71717a;
+  --gray-600: #52525b;
+  --gray-700: #3f3f46;
+  --gray-800: #27272a;
+  --gray-900: #18181b;
+  
+  /* Espaciado */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Bordes estilo Dota - Muy redondeados */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-pill: 9999px;
+  
+  /* Sombras suaves estilo Dota */
+  --shadow-sm: 0 2px 8px 0 rgb(0 0 0 / 0.08);
+  --shadow-md: 0 4px 16px 0 rgb(0 0 0 / 0.12);
+  --shadow-lg: 0 8px 24px 0 rgb(0 0 0 / 0.15);
+  --shadow-xl: 0 16px 40px 0 rgb(0 0 0 / 0.18);
+  --shadow-pink: 0 8px 24px 0 rgb(255 105 180 / 0.25);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+  color: var(--gray-900);
+  line-height: 1.6;
+  min-height: 100vh;
+  overscroll-behavior: none;
+  -webkit-overscroll-behavior: none;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Scrollbar minimalista */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+/* Fix z-index para Leaflet - Asegurar que no pase por encima del navbar */
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 400 !important;
+}
+
+.leaflet-control {
+  z-index: 500 !important;
+}
+
