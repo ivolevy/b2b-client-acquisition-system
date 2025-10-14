@@ -6,7 +6,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
   // Estados para búsqueda
   const [rubro, setRubro] = useState('');
   const [locationData, setLocationData] = useState(null);
-  const [scrapearWebsites] = useState(false); // Deshabilitado - próximamente
+  const [scrapearWebsites, setScrapearWebsites] = useState(true); // ✅ ACTIVADO - Scraping de redes sociales
   const [soloValidadas, setSoloValidadas] = useState(false); // Desmarcado por defecto para ver todas
   
   // Estados para filtros
@@ -90,13 +90,14 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
 
           <div className="form-row">
             <div className="form-group checkbox-group">
-              <label style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+              <label>
                 <input
                   type="checkbox"
-                  checked={false}
-                  disabled={true}
+                  checked={scrapearWebsites}
+                  onChange={(e) => setScrapearWebsites(e.target.checked)}
+                  disabled={loading}
                 />
-                <span>🔄 Scrapear sitios web para obtener más contactos <span style={{ background: '#fbbf24', color: '#78350f', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>PRÓXIMAMENTE</span></span>
+                <span>🔄 Scrapear sitios web para obtener redes sociales <span style={{ background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', marginLeft: '6px' }}>✅ ACTIVO</span></span>
               </label>
             </div>
 
@@ -118,7 +119,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
           </button>
           
           <p style={{ fontSize: '12px', marginTop: '10px', color: '#666' }}>
-            💡 El sistema busca empresas en un radio alrededor de la ubicación seleccionada y valida automáticamente emails y teléfonos
+            💡 El sistema busca empresas, valida emails/teléfonos y extrae redes sociales (Instagram, Facebook, LinkedIn, etc.)
           </p>
         </form>
       </div>
