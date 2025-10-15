@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './TableView.css';
+import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok } from 'react-icons/fa6';
 
 function TableViewB2B({ empresas }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,24 +113,30 @@ function TableViewB2B({ empresas }) {
                   )}
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {empresa.instagram && (
                       <a 
                         href={empresa.instagram} 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        title="Instagram"
                         style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '6px',
                           background: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
                           color: 'white',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          fontWeight: 'bold',
-                          textDecoration: 'none',
-                          display: 'inline-block'
+                          fontSize: '18px',
+                          transition: 'transform 0.2s',
+                          cursor: 'pointer'
                         }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       >
-                        IG
+                        <FaInstagram />
                       </a>
                     )}
                     {empresa.facebook && (
@@ -137,18 +144,24 @@ function TableViewB2B({ empresas }) {
                         href={empresa.facebook} 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        title="Facebook"
                         style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '6px',
                           background: '#1877f2',
                           color: 'white',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          fontWeight: 'bold',
-                          textDecoration: 'none',
-                          display: 'inline-block'
+                          fontSize: '18px',
+                          transition: 'transform 0.2s',
+                          cursor: 'pointer'
                         }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       >
-                        FB
+                        <FaFacebook />
                       </a>
                     )}
                     {empresa.twitter && (
@@ -156,37 +169,49 @@ function TableViewB2B({ empresas }) {
                         href={empresa.twitter} 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        title="Twitter/X"
                         style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '6px',
                           background: '#000000',
                           color: 'white',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          fontWeight: 'bold',
-                          textDecoration: 'none',
-                          display: 'inline-block'
+                          fontSize: '18px',
+                          transition: 'transform 0.2s',
+                          cursor: 'pointer'
                         }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       >
-                        𝕏
+                        <FaXTwitter />
                       </a>
-                    )}
-                    {empresa.linkedin && (
+                  )}
+                  {empresa.linkedin && (
                       <a 
                         href={empresa.linkedin} 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        title="LinkedIn"
                         style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '6px',
                           background: '#0077b5',
                           color: 'white',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          fontWeight: 'bold',
-                          textDecoration: 'none',
-                          display: 'inline-block'
+                          fontSize: '18px',
+                          transition: 'transform 0.2s',
+                          cursor: 'pointer'
                         }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       >
-                        IN
+                        <FaLinkedin />
                       </a>
                     )}
                     {empresa.youtube && (
@@ -194,18 +219,24 @@ function TableViewB2B({ empresas }) {
                         href={empresa.youtube} 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        title="YouTube"
                         style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '6px',
                           background: '#ff0000',
                           color: 'white',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          fontWeight: 'bold',
-                          textDecoration: 'none',
-                          display: 'inline-block'
+                          fontSize: '18px',
+                          transition: 'transform 0.2s',
+                          cursor: 'pointer'
                         }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       >
-                        YT
+                        <FaYoutube />
                       </a>
                     )}
                     {empresa.tiktok && (
@@ -213,18 +244,24 @@ function TableViewB2B({ empresas }) {
                         href={empresa.tiktok} 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        title="TikTok"
                         style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '6px',
                           background: '#000000',
                           color: '#00f2ea',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          fontWeight: 'bold',
-                          textDecoration: 'none',
-                          display: 'inline-block'
+                          fontSize: '18px',
+                          transition: 'transform 0.2s',
+                          cursor: 'pointer'
                         }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       >
-                        TT
+                        <FaTiktok />
                       </a>
                     )}
                     {!empresa.instagram && !empresa.facebook && !empresa.twitter && 
