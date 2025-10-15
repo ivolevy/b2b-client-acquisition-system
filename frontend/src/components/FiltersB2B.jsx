@@ -109,7 +109,17 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
                   onChange={(e) => setSoloValidadas(e.target.checked)}
                   disabled={loading}
                 />
-                <span>✅ Solo empresas con email O teléfono válido (desmarca para ver todas)</span>
+                <span>
+                  {soloValidadas ? '✅ Solo con contacto válido' : '📋 Mostrar todas (con y sin contacto)'}
+                  {' '}
+                  <span style={{ 
+                    fontSize: '11px', 
+                    color: soloValidadas ? '#dc2626' : '#059669',
+                    fontWeight: 'bold'
+                  }}>
+                    {soloValidadas ? '⚠️ Menos resultados' : '✓ Recomendado'}
+                  </span>
+                </span>
               </label>
             </div>
           </div>

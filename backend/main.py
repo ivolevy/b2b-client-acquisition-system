@@ -251,7 +251,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             "validas": len(empresas_validas),
             "guardadas": len(empresas_a_guardar),
             "estadisticas_validacion": stats,
-            "data": empresas_validas if request.solo_validadas else empresas
+            "data": empresas_validas if request.solo_validadas else empresas_validadas_completas
         }
         
     except Exception as e:
