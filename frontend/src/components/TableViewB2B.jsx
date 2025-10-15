@@ -112,35 +112,119 @@ function TableViewB2B({ empresas }) {
                   )}
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {empresa.instagram && (
-                      <a href={empresa.instagram} target="_blank" rel="noopener noreferrer" title="Instagram">
-                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>📸</span>
+                      <a 
+                        href={empresa.instagram} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                          background: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
+                          color: 'white',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          textDecoration: 'none',
+                          display: 'inline-block'
+                        }}
+                      >
+                        IG
                       </a>
                     )}
                     {empresa.facebook && (
-                      <a href={empresa.facebook} target="_blank" rel="noopener noreferrer" title="Facebook">
-                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>🔵</span>
+                      <a 
+                        href={empresa.facebook} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                          background: '#1877f2',
+                          color: 'white',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          textDecoration: 'none',
+                          display: 'inline-block'
+                        }}
+                      >
+                        FB
                       </a>
                     )}
                     {empresa.twitter && (
-                      <a href={empresa.twitter} target="_blank" rel="noopener noreferrer" title="Twitter/X">
-                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>🐦</span>
+                      <a 
+                        href={empresa.twitter} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                          background: '#000000',
+                          color: 'white',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          textDecoration: 'none',
+                          display: 'inline-block'
+                        }}
+                      >
+                        𝕏
                       </a>
                     )}
                     {empresa.linkedin && (
-                      <a href={empresa.linkedin} target="_blank" rel="noopener noreferrer" title="LinkedIn">
-                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>💼</span>
+                      <a 
+                        href={empresa.linkedin} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                          background: '#0077b5',
+                          color: 'white',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          textDecoration: 'none',
+                          display: 'inline-block'
+                        }}
+                      >
+                        IN
                       </a>
                     )}
                     {empresa.youtube && (
-                      <a href={empresa.youtube} target="_blank" rel="noopener noreferrer" title="YouTube">
-                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>📺</span>
+                      <a 
+                        href={empresa.youtube} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                          background: '#ff0000',
+                          color: 'white',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          textDecoration: 'none',
+                          display: 'inline-block'
+                        }}
+                      >
+                        YT
                       </a>
                     )}
                     {empresa.tiktok && (
-                      <a href={empresa.tiktok} target="_blank" rel="noopener noreferrer" title="TikTok">
-                        <span style={{ fontSize: '20px', cursor: 'pointer' }}>🎵</span>
+                      <a 
+                        href={empresa.tiktok} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                          background: '#000000',
+                          color: '#00f2ea',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          textDecoration: 'none',
+                          display: 'inline-block'
+                        }}
+                      >
+                        TT
                       </a>
                     )}
                     {!empresa.instagram && !empresa.facebook && !empresa.twitter && 
@@ -150,27 +234,33 @@ function TableViewB2B({ empresas }) {
                   </div>
                 </td>
                 <td>
-                  {empresa.lead_score !== undefined && empresa.lead_score !== null ? (
+                  {empresa.lead_score !== undefined && empresa.lead_score !== null && empresa.lead_score > 0 ? (
                     <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '6px',
-                      fontSize: '14px',
-                      fontWeight: 'bold'
+                      display: 'inline-block',
+                      background: empresa.lead_score >= 80 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 
+                                 empresa.lead_score >= 60 ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 
+                                 empresa.lead_score >= 30 ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' :
+                                 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+                      color: 'white',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 'bold',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                      textAlign: 'center',
+                      minWidth: '50px'
                     }}>
-                      <span style={{ 
-                        color: empresa.lead_score >= 80 ? '#059669' : 
-                               empresa.lead_score >= 50 ? '#d97706' : '#dc2626'
-                      }}>
+                      <div style={{ fontSize: '16px', lineHeight: '1' }}>
                         {empresa.lead_score}
-                      </span>
-                      <span style={{ fontSize: '18px' }}>
-                        {empresa.lead_score >= 80 ? '🔥' : 
-                         empresa.lead_score >= 50 ? '⭐' : '❄️'}
-                      </span>
+                      </div>
+                      <div style={{ fontSize: '9px', opacity: '0.9', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {empresa.lead_score >= 80 ? 'HOT' : 
+                         empresa.lead_score >= 60 ? 'WARM' : 
+                         empresa.lead_score >= 30 ? 'COLD' : 'LOW'}
+                      </div>
                     </div>
                   ) : (
-                    <span className="no-data">-</span>
+                    <span className="no-data" style={{ fontSize: '11px' }}>Sin score</span>
                   )}
                 </td>
                 <td>
