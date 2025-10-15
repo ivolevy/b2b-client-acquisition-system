@@ -88,49 +88,41 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
             <LocationPicker onLocationChange={setLocationData} />
           </div>
 
-          <div className="form-row">
-            <div className="form-group checkbox-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={scrapearWebsites}
-                  onChange={(e) => setScrapearWebsites(e.target.checked)}
-                  disabled={loading}
-                />
-                <span>🔄 Scrapear sitios web para obtener redes sociales <span style={{ background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', marginLeft: '6px' }}>✅ ACTIVO</span></span>
-              </label>
-            </div>
+          <div className="filters-row-compact">
+            <label className="checkbox-inline">
+              <input
+                type="checkbox"
+                checked={scrapearWebsites}
+                onChange={(e) => setScrapearWebsites(e.target.checked)}
+                disabled={loading}
+              />
+              <span>Scrapear redes sociales</span>
+              <span className="status-badge success">Activo</span>
+            </label>
 
-            <div className="form-group checkbox-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={soloValidadas}
-                  onChange={(e) => setSoloValidadas(e.target.checked)}
-                  disabled={loading}
-                />
-                <span>
-                  {soloValidadas ? '✅ Solo con contacto válido' : '📋 Mostrar todas (con y sin contacto)'}
-                  {' '}
-                  <span style={{ 
-                    fontSize: '11px', 
-                    color: soloValidadas ? '#dc2626' : '#059669',
-                    fontWeight: 'bold'
-                  }}>
-                    {soloValidadas ? '⚠️ Menos resultados' : '✓ Recomendado'}
-                  </span>
-                </span>
-              </label>
-            </div>
+            <label className="checkbox-inline">
+              <input
+                type="checkbox"
+                checked={soloValidadas}
+                onChange={(e) => setSoloValidadas(e.target.checked)}
+                disabled={loading}
+              />
+              <span>
+                {soloValidadas ? 'Solo con contacto válido' : 'Mostrar todas'}
+              </span>
+              <span className={`status-badge ${soloValidadas ? 'warn' : 'info'}`}>
+                {soloValidadas ? 'Menos resultados' : 'Recomendado'}
+              </span>
+            </label>
+
+            <button type="submit" className="btn btn-success btn-compact" disabled={loading || !locationData}>
+              {loading ? 'Buscando...' : '🚀 Buscar en el área'}
+            </button>
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={loading || !locationData}>
-            {loading ? 'Buscando y validando...' : '🚀 Buscar Empresas en el Área'}
-          </button>
-          
-          <p style={{ fontSize: '12px', marginTop: '10px', color: '#666' }}>
-            💡 El sistema busca empresas, valida emails/teléfonos y extrae redes sociales (Instagram, Facebook, LinkedIn, etc.)
-          </p>
+          <div className="hint-row">
+            <span>💡 Busca empresas, valida email/teléfono y extrae redes (Instagram, Facebook, LinkedIn, etc.).</span>
+          </div>
         </form>
       </div>
 

@@ -205,6 +205,28 @@
   flex-wrap: wrap;
 }
 
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.status-badge.success {
+  background: #d1fae5; /* emerald-100 */
+  color: #065f46; /* emerald-800 */
+}
+.status-badge.info {
+  background: #e0e7ff; /* indigo-100 */
+  color: #3730a3; /* indigo-800 */
+}
+.status-badge.warn {
+  background: #fee2e2; /* red-100 */
+  color: #991b1b; /* red-800 */
+}
+
 .filter-input {
   flex: 1;
   min-width: 150px;
@@ -265,6 +287,12 @@
   flex-wrap: wrap;
   padding-top: var(--spacing-xs);
   border-top: 1px solid var(--gray-200);
+}
+
+.hint-row {
+  margin-top: var(--spacing-sm);
+  color: var(--gray-600);
+  font-size: 0.8rem;
 }
 
 /* View toggle en header de filtros */
