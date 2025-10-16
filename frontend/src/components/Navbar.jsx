@@ -1,33 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './Navbar.css';
+import HelpModal from './HelpModal';
 
 function Navbar({ onExport, onViewDatabase, onClearDatabase, stats }) {
-  const [darkMode, setDarkMode] = useState(false);
-
-  // Cargar preferencia de tema desde localStorage
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-  }, []);
-
-  // Toggle tema oscuro
-  const toggleDarkMode = () => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    
-    if (newMode) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
-    }
-  };
+  const [showHelp, setShowHelp] = useState(false);
 
   return (
+    <>
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-brand">
@@ -40,10 +19,6 @@ function Navbar({ onExport, onViewDatabase, onClearDatabase, stats }) {
         </div>
         
         <div className="navbar-actions">
-          <button className="theme-toggle-btn" onClick={toggleDarkMode} title={darkMode ? 'Modo claro' : 'Modo oscuro'}>
-            {darkMode ? '☀️' : '🌙'}
-          </button>
-          
           <button className="export-btn" onClick={onExport}>
             📥 Exportar
           </button>
@@ -58,6 +33,17 @@ function Navbar({ onExport, onViewDatabase, onClearDatabase, stats }) {
         </div>
       </div>
     </nav>
+    {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+    
+    {/* Botón de ayuda flotante */}
+    <button 
+      className="floating-help-btn" 
+      onClick={() => setShowHelp(true)} 
+      title="Ayuda"
+    >
+      Ayuda
+    </button>
+    </>
   );
 }
 

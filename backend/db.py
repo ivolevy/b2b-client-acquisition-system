@@ -51,6 +51,8 @@ def init_db_b2b():
                 facebook TEXT,
                 twitter TEXT,
                 instagram TEXT,
+                youtube TEXT,
+                tiktok TEXT,
                 
                 -- Metadata
                 descripcion TEXT,
@@ -94,9 +96,9 @@ def insertar_empresa(empresa: Dict) -> bool:
             INSERT OR REPLACE INTO empresas 
             (nombre, rubro, rubro_key, email, email_valido, telefono, telefono_valido,
              website, website_valido, direccion, ciudad, pais, codigo_postal,
-             latitud, longitud, linkedin, facebook, twitter, instagram,
+             latitud, longitud, linkedin, facebook, twitter, instagram, youtube, tiktok,
              descripcion, horario, osm_id, osm_type, validada, scrapeada, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             empresa.get('nombre'),
             empresa.get('rubro'),
@@ -117,6 +119,8 @@ def insertar_empresa(empresa: Dict) -> bool:
             empresa.get('facebook', ''),
             empresa.get('twitter', ''),
             empresa.get('instagram', ''),
+            empresa.get('youtube', ''),
+            empresa.get('tiktok', ''),
             empresa.get('descripcion', ''),
             empresa.get('horario', ''),
             empresa.get('osm_id'),
@@ -287,7 +291,7 @@ def exportar_a_csv(rubro: Optional[str] = None, solo_validas: bool = True) -> st
                 'email', 'email_valido', 
                 'telefono', 'telefono_valido',
                 'direccion', 'ciudad', 'pais', 
-                'sitio_web', 'linkedin', 'facebook',
+                'sitio_web', 'linkedin', 'facebook', 'instagram', 'twitter', 'youtube', 'tiktok',
                 'validada', 'descripcion', 
                 'latitud', 'longitud',
                 'created_at'
@@ -310,6 +314,10 @@ def exportar_a_csv(rubro: Optional[str] = None, solo_validas: bool = True) -> st
                 'sitio_web': 'Sitio Web',
                 'linkedin': 'LinkedIn',
                 'facebook': 'Facebook',
+                'instagram': 'Instagram',
+                'twitter': 'Twitter/X',
+                'youtube': 'YouTube',
+                'tiktok': 'TikTok',
                 'validada': 'Estado',
                 'descripcion': 'Descripción',
                 'latitud': 'Latitud',

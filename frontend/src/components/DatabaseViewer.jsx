@@ -1,7 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import './DatabaseViewer.css';
 
 function DatabaseViewer({ empresas, stats, onClose }) {
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRubro, setFilterRubro] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
@@ -339,6 +345,22 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                                       ) : (
                                         <span>No disponible</span>
                                       )}
+                                    </div>
+                                    <div className="detail-item">
+                                      <strong>📱 Redes:</strong>
+                                      <span>
+                                        {(empresa.instagram || empresa.facebook || empresa.twitter || empresa.youtube || empresa.tiktok) ? (
+                                          <span style={{ display: 'inline-flex', gap: '8px', flexWrap: 'wrap' }}>
+                                            {empresa.instagram && (<a href={empresa.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>)}
+                                            {empresa.facebook && (<a href={empresa.facebook} target="_blank" rel="noopener noreferrer">Facebook</a>)}
+                                            {empresa.twitter && (<a href={empresa.twitter} target="_blank" rel="noopener noreferrer">Twitter/X</a>)}
+                                            {empresa.youtube && (<a href={empresa.youtube} target="_blank" rel="noopener noreferrer">YouTube</a>)}
+                                            {empresa.tiktok && (<a href={empresa.tiktok} target="_blank" rel="noopener noreferrer">TikTok</a>)}
+                                          </span>
+                                        ) : (
+                                          'No disponible'
+                                        )}
+                                      </span>
                                     </div>
                                     <div className="detail-item">
                                       <strong>🗺️ Coordenadas:</strong>

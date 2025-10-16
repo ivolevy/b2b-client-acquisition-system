@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import FiltersB2B from './components/FiltersB2B';
 import TableViewB2B from './components/TableViewB2B';
 import MapView from './components/MapView';
+import Dashboard from './components/Dashboard';
 import DatabaseViewer from './components/DatabaseViewer';
 import './App.css';
 
@@ -274,10 +275,20 @@ function AppB2B() {
           </div>
         )}
 
-        {view === 'table' ? (
+        {view === 'table' && (
           <TableViewB2B empresas={filteredEmpresas} />
-        ) : (
+        )}
+        {view === 'map' && (
           <MapView properties={filteredEmpresas} />
+        )}
+        {view === 'dashboard' && (
+          <Dashboard 
+            empresas={filteredEmpresas}
+            onBulkStatusUpdated={(ids, nuevoEstado) => {
+              setEmpresas(prev => prev.map(e => ids.includes(e.id) ? { ...e, estado: nuevoEstado } : e));
+              setFilteredEmpresas(prev => prev.map(e => ids.includes(e.id) ? { ...e, estado: nuevoEstado } : e));
+            }}
+          />
         )}
       </main>
 

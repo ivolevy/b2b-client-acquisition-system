@@ -89,35 +89,49 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
           </div>
 
           <div className="filters-row-compact">
-            <label className="checkbox-inline">
-              <input
-                type="checkbox"
-                checked={scrapearWebsites}
-                onChange={(e) => setScrapearWebsites(e.target.checked)}
-                disabled={loading}
-              />
-              <span>Scrapear redes sociales</span>
-              <span className="status-badge success">Activo</span>
-            </label>
+            <div className="option-card">
+              <div className="option-head">
+                <div className="option-title">Extraer redes sociales</div>
+                <div className={`status-badge ${scrapearWebsites ? 'success' : 'off'}`}>
+                  {scrapearWebsites ? 'Activo' : 'Inactivo'}
+                </div>
+              </div>
+              <div className="option-desc">Si la empresa tiene sitio web, intentaremos obtener Instagram, LinkedIn, etc.</div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={scrapearWebsites}
+                  onChange={(e) => setScrapearWebsites(e.target.checked)}
+                  disabled={loading}
+                />
+                <span className="slider" />
+              </label>
+            </div>
 
-            <label className="checkbox-inline">
-              <input
-                type="checkbox"
-                checked={soloValidadas}
-                onChange={(e) => setSoloValidadas(e.target.checked)}
-                disabled={loading}
-              />
-              <span>
-                {soloValidadas ? 'Solo con contacto válido' : 'Mostrar todas'}
-              </span>
-              <span className={`status-badge ${soloValidadas ? 'warn' : 'info'}`}>
-                {soloValidadas ? 'Menos resultados' : 'Recomendado'}
-              </span>
-            </label>
+            <div className="option-card">
+              <div className="option-head">
+                <div className="option-title">Solo con contacto válido</div>
+                <div className={`status-badge ${soloValidadas ? 'warn' : 'info'}`}>
+                  {soloValidadas ? 'Menos resultados' : 'Más resultados'}
+                </div>
+              </div>
+              <div className="option-desc">Filtra los resultados a empresas con email o teléfono válido.</div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={soloValidadas}
+                  onChange={(e) => setSoloValidadas(e.target.checked)}
+                  disabled={loading}
+                />
+                <span className="slider" />
+              </label>
+            </div>
 
-            <button type="submit" className="btn btn-success btn-compact" disabled={loading || !locationData}>
-              {loading ? 'Buscando...' : '🚀 Buscar en el área'}
-            </button>
+            <div className="option-actions">
+              <button type="submit" className="btn btn-success btn-compact btn-cta" disabled={loading || !locationData}>
+                {loading ? 'Buscando...' : '🚀 Buscar en el área'}
+              </button>
+            </div>
           </div>
 
           <div className="hint-row">
@@ -144,6 +158,13 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
               onClick={() => setView('map')}
             >
               🗺️ Mapa
+            </button>
+            <button 
+              type="button"
+              className={view === 'dashboard' ? 'active' : ''}
+              onClick={() => setView('dashboard')}
+            >
+              📈 Dashboard
             </button>
           </div>
         </div>

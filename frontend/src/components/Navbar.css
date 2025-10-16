@@ -43,7 +43,7 @@
   align-items: center;
 }
 
-.theme-toggle-btn,
+.help-btn,
 .export-btn,
 .db-viewer-btn,
 .clear-btn {
@@ -58,12 +58,35 @@
   transition: all 0.3s ease;
 }
 
-.theme-toggle-btn {
-  font-size: 1.25rem;
-  padding: 0.5rem 0.75rem;
+/* Botón de ayuda flotante */
+.floating-help-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.theme-toggle-btn:hover,
+.floating-help-btn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.floating-help-btn:active {
+  transform: translateY(0);
+}
+
+.help-btn:hover,
 .export-btn:hover,
 .db-viewer-btn:hover,
 .clear-btn:hover {
@@ -94,28 +117,7 @@
   border-color: var(--gray-900);
 }
 
-/* Tema oscuro para navbar */
-[data-theme="dark"] .navbar {
-  background: #27272a;
-  border-color: #3f3f46;
-}
-
-[data-theme="dark"] .navbar-brand h1 {
-  color: #fafafa;
-}
-
-[data-theme="dark"] .navbar-stats {
-  background: #18181b;
-  color: #d4d4d8;
-}
-
-[data-theme="dark"] .theme-toggle-btn,
-[data-theme="dark"] .export-btn,
-[data-theme="dark"] .clear-btn {
-  background: #18181b;
-  border-color: #3f3f46;
-  color: #fafafa;
-}
+/* eliminado soporte de tema oscuro */
 
 @media (max-width: 768px) {
   .navbar-container {
