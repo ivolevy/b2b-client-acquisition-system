@@ -32,11 +32,8 @@ def init_db_b2b():
                 
                 -- Datos de contacto
                 email TEXT,
-                email_valido BOOLEAN DEFAULT 0,
                 telefono TEXT,
-                telefono_valido BOOLEAN DEFAULT 0,
                 website TEXT,
-                website_valido BOOLEAN DEFAULT 0,
                 
                 -- Ubicación
                 direccion TEXT,
@@ -59,8 +56,6 @@ def init_db_b2b():
                 horario TEXT,
                 osm_id TEXT,
                 osm_type TEXT,
-                validada BOOLEAN DEFAULT 0,
-                scrapeada BOOLEAN DEFAULT 0,
                 
                 -- Control
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -73,7 +68,6 @@ def init_db_b2b():
         # Índices para búsquedas rápidas
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_rubro ON empresas(rubro_key)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_ciudad ON empresas(ciudad)')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_validada ON empresas(validada)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_email ON empresas(email)')
         
         conn.commit()
@@ -94,21 +88,17 @@ def insertar_empresa(empresa: Dict) -> bool:
         
         cursor.execute('''
             INSERT OR REPLACE INTO empresas 
-            (nombre, rubro, rubro_key, email, email_valido, telefono, telefono_valido,
-             website, website_valido, direccion, ciudad, pais, codigo_postal,
-             latitud, longitud, linkedin, facebook, twitter, instagram, youtube, tiktok,
-             descripcion, horario, osm_id, osm_type, validada, scrapeada, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (nombre, rubro, rubro_key, email, telefono, website, direccion, ciudad, pais, 
+             codigo_postal, latitud, longitud, linkedin, facebook, twitter, instagram, 
+             youtube, tiktok, descripcion, horario, osm_id, osm_type, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             empresa.get('nombre'),
             empresa.get('rubro'),
             empresa.get('rubro_key'),
             empresa.get('email', ''),
-            empresa.get('email_valido', False),
             empresa.get('telefono', ''),
-            empresa.get('telefono_valido', False),
             empresa.get('website', ''),
-            empresa.get('website_valido', False),
             empresa.get('direccion', ''),
             empresa.get('ciudad', ''),
             empresa.get('pais', ''),
@@ -125,8 +115,6 @@ def insertar_empresa(empresa: Dict) -> bool:
             empresa.get('horario', ''),
             empresa.get('osm_id'),
             empresa.get('osm_type'),
-            empresa.get('validada', False),
-            empresa.get('scrapeada', False),
             datetime.now()
         ))
         
@@ -218,18 +206,14 @@ def obtener_estadisticas() -> Dict:
         cursor.execute('SELECT COUNT(*) FROM empresas')
         total = cursor.fetchone()[0]
         
-        # Validadas
-        cursor.execute('SELECT COUNT(*) FROM empresas WHERE validada = 1')
-        validadas = cursor.fetchone()[0]
-        
         # Con contacto
-        cursor.execute('SELECT COUNT(*) FROM empresas WHERE email_valido = 1')
+        cursor.execute('SELECT COUNT(*) FROM empresas WHERE email != ""')
         con_email = cursor.fetchone()[0]
         
-        cursor.execute('SELECT COUNT(*) FROM empresas WHERE telefono_valido = 1')
+        cursor.execute('SELECT COUNT(*) FROM empresas WHERE telefono != ""')
         con_telefono = cursor.fetchone()[0]
         
-        cursor.execute('SELECT COUNT(*) FROM empresas WHERE website_valido = 1')
+        cursor.execute('SELECT COUNT(*) FROM empresas WHERE website != ""')
         con_website = cursor.fetchone()[0]
         
         # Por rubro
@@ -256,11 +240,9 @@ def obtener_estadisticas() -> Dict:
         
         return {
             'total': total,
-            'validadas': validadas,
             'con_email': con_email,
             'con_telefono': con_telefono,
             'con_website': con_website,
-            'tasa_validacion': round(validadas/total*100, 2) if total > 0 else 0,
             'por_rubro': por_rubro,
             'por_ciudad': por_ciudad
         }

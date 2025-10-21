@@ -18,9 +18,7 @@ from overpass_client import (
     query_by_bbox
 )
 from scraper import enriquecer_empresa_b2b
-from validators import filtrar_empresas_validas
 from social_scraper import enriquecer_con_redes_sociales
-from lead_utils import procesar_lead_nuevo, detectar_duplicado, fusionar_empresas
 from db import (
     init_db_b2b, 
     insertar_empresa, 
@@ -70,7 +68,6 @@ class BusquedaRubroRequest(BaseModel):
     pais: Optional[str] = None
     ciudad: Optional[str] = None
     scrapear_websites: bool = True
-    solo_validadas: bool = True
 
 class BusquedaMultipleRequest(BaseModel):
     rubros: List[str]
@@ -196,62 +193,35 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 empresas_enriquecidas.append(empresa)
             empresas = empresas_enriquecidas
         
-        # Validar TODAS las empresas para establecer el campo 'validada' correctamente
-        from validators import validar_empresa
-        empresas_validadas_completas = []
-        empresas_validas = []
-        
-        # Obtener empresas existentes para detectar duplicados
-        empresas_existentes = obtener_todas_empresas()
-        
+        # Guardar todas las empresas encontradas
         for empresa in empresas:
-            # Validar empresa
-            es_valida, empresa_validada, mensaje = validar_empresa(empresa)
-            
-            # Procesar lead: calcular score, detectar duplicados
-            empresa_procesada = procesar_lead_nuevo(empresa_validada, empresas_existentes)
-            
-            empresas_validadas_completas.append(empresa_procesada)  # TODAS con campo validada
-            if es_valida:
-                empresas_validas.append(empresa_procesada)
-                logger.info(f"✓ {empresa['nombre']}: {mensaje} | Score: {empresa_procesada.get('lead_score', 0)}/100")
-            else:
-                logger.warning(f"✗ {empresa.get('nombre', 'Sin nombre')}: {mensaje}")
+            insertar_empresa(empresa)
+            logger.info(f"✓ {empresa.get('nombre', 'Sin nombre')}: Guardada")
         
-        # Estadísticas
+        # Estadísticas simples
         stats = {
             'total': len(empresas),
-            'validas': len(empresas_validas),
-            'invalidas': len(empresas_validadas_completas) - len(empresas_validas),
-            'con_email': sum(1 for e in empresas_validas if e.get('email_valido')),
-            'con_telefono': sum(1 for e in empresas_validas if e.get('telefono_valido')),
-            'con_website': sum(1 for e in empresas_validas if e.get('website_valido'))
+            'con_email': sum(1 for e in empresas if e.get('email')),
+            'con_telefono': sum(1 for e in empresas if e.get('telefono')),
+            'con_website': sum(1 for e in empresas if e.get('website'))
         }
         
         logger.info(f"""
-    === VALIDACIÓN COMPLETADA ===
+    === PROCESO COMPLETADO ===
     Total empresas: {stats['total']}
-    Válidas: {stats['validas']} ({round(stats['validas'] / stats['total'] * 100, 2) if stats['total'] else 0}%)
     Con email: {stats['con_email']}
     Con teléfono: {stats['con_telefono']}
     Con website: {stats['con_website']}
     """)
         
-        # Guardar solo las válidas si se solicita, o todas si no
-        empresas_a_guardar = empresas_validas if request.solo_validadas else empresas_validadas_completas
-        
-        for empresa in empresas_a_guardar:
-            insertar_empresa(empresa)
-        
-        logger.info(f"✅ Proceso completado: {len(empresas_a_guardar)} empresas guardadas ({len(empresas_validas)} válidas)")
+        logger.info(f"✅ Proceso completado: {len(empresas)} empresas guardadas")
         
         return {
             "success": True,
             "total_encontradas": len(empresas),
-            "validas": len(empresas_validas),
-            "guardadas": len(empresas_a_guardar),
-            "estadisticas_validacion": stats,
-            "data": empresas_validas if request.solo_validadas else empresas_validadas_completas
+            "guardadas": len(empresas),
+            "estadisticas": stats,
+            "data": empresas
         }
         
     except Exception as e:

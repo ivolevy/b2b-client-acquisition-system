@@ -10,7 +10,6 @@ function DatabaseViewer({ empresas, stats, onClose }) {
   }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRubro, setFilterRubro] = useState('');
-  const [filterEstado, setFilterEstado] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState('id');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -41,16 +40,6 @@ function DatabaseViewer({ empresas, stats, onClose }) {
       filtered = filtered.filter(emp => emp.rubro === filterRubro);
     }
 
-    // Filtro por estado
-    if (filterEstado === 'validadas') {
-      filtered = filtered.filter(emp => emp.validada);
-    } else if (filterEstado === 'pendientes') {
-      filtered = filtered.filter(emp => !emp.validada);
-    } else if (filterEstado === 'con_email') {
-      filtered = filtered.filter(emp => emp.email && emp.email_valido);
-    } else if (filterEstado === 'con_telefono') {
-      filtered = filtered.filter(emp => emp.telefono && emp.telefono_valido);
-    }
 
     // Ordenar
     filtered.sort((a, b) => {
@@ -70,7 +59,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
     });
 
     return filtered;
-  }, [empresas, searchTerm, filterRubro, filterEstado, sortColumn, sortDirection]);
+  }, [empresas, searchTerm, filterRubro, sortColumn, sortDirection]);
 
   // Paginación
   const totalPages = Math.ceil(empresasFiltradas.length / itemsPerPage);
@@ -94,7 +83,6 @@ function DatabaseViewer({ empresas, stats, onClose }) {
   const clearFilters = () => {
     setSearchTerm('');
     setFilterRubro('');
-    setFilterEstado('');
     setCurrentPage(1);
   };
 
@@ -117,21 +105,6 @@ function DatabaseViewer({ empresas, stats, onClose }) {
               </div>
             </div>
             
-            <div className="stat-card green">
-              <div className="stat-icon">✓</div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.validadas || 0}</div>
-                <div className="stat-label">Válidas</div>
-              </div>
-            </div>
-            
-            <div className="stat-card orange">
-              <div className="stat-icon">⚠️</div>
-              <div className="stat-info">
-                <div className="stat-value">{(stats.total || 0) - (stats.validadas || 0)}</div>
-                <div className="stat-label">Pendientes</div>
-              </div>
-            </div>
             
             <div className="stat-card blue">
               <div className="stat-icon">📧</div>
@@ -146,6 +119,14 @@ function DatabaseViewer({ empresas, stats, onClose }) {
               <div className="stat-info">
                 <div className="stat-value">{stats.con_telefono || 0}</div>
                 <div className="stat-label">Con Teléfono</div>
+              </div>
+            </div>
+            
+            <div className="stat-card green">
+              <div className="stat-icon">🌐</div>
+              <div className="stat-info">
+                <div className="stat-value">{stats.con_website || 0}</div>
+                <div className="stat-label">Con Website</div>
               </div>
             </div>
           </div>
@@ -202,20 +183,6 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                 ))}
               </select>
 
-              <select 
-                value={filterEstado} 
-                onChange={(e) => {
-                  setFilterEstado(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="filter-select"
-              >
-                <option value="">📊 Todos los estados</option>
-                <option value="validadas">✓ Solo Válidas</option>
-                <option value="pendientes">⚠️ Solo Pendientes</option>
-                <option value="con_email">📧 Con Email Válido</option>
-                <option value="con_telefono">📞 Con Teléfono Válido</option>
-              </select>
 
               <button className="btn-clear-filters" onClick={clearFilters}>
                 🔄 Limpiar Filtros
@@ -232,7 +199,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
           <div className="db-preview">
             {empresasFiltradas.length === 0 ? (
               <p className="empty-message">
-                {searchTerm || filterRubro || filterEstado ? 
+                {searchTerm || filterRubro ? 
                   '🔍 No se encontraron empresas con los filtros aplicados' : 
                   '📭 No hay registros en la base de datos'
                 }
@@ -254,7 +221,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                         </th>
                         <th>Email</th>
                         <th>Teléfono</th>
-                        <th>Estado</th>
+                        <th>Website</th>
                         <th>Acciones</th>
                       </tr>
                     </thead>
@@ -274,7 +241,6 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                               {empresa.email ? (
                                 <div className="contact-field">
                                   <span>{empresa.email}</span>
-                                  {empresa.email_valido && <span className="check-icon">✓</span>}
                                 </div>
                               ) : (
                                 <span className="empty-field">Sin email</span>
@@ -284,17 +250,19 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                               {empresa.telefono ? (
                                 <div className="contact-field">
                                   <span>{empresa.telefono}</span>
-                                  {empresa.telefono_valido && <span className="check-icon">✓</span>}
                                 </div>
                               ) : (
                                 <span className="empty-field">Sin teléfono</span>
                               )}
                             </td>
                             <td>
-                              {empresa.validada ? 
-                                <span className="status-valid">✓ Válida</span> : 
-                                <span className="status-pending">⚠️ Pendiente</span>
-                              }
+                              {empresa.website ? (
+                                <a href={empresa.website} target="_blank" rel="noopener noreferrer" className="website-link">
+                                  🌐 Ver sitio
+                                </a>
+                              ) : (
+                                <span className="empty-field">Sin website</span>
+                              )}
                             </td>
                             <td>
                               <div className="action-buttons">
@@ -413,7 +381,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
 
         <div className="db-viewer-footer">
           <div className="footer-stats">
-            {empresasFiltradas.length} registro{empresasFiltradas.length !== 1 ? 's' : ''} {filterRubro || filterEstado || searchTerm ? 'filtrado' + (empresasFiltradas.length !== 1 ? 's' : '') : ''}
+            {empresasFiltradas.length} registro{empresasFiltradas.length !== 1 ? 's' : ''} {filterRubro || searchTerm ? 'filtrado' + (empresasFiltradas.length !== 1 ? 's' : '') : ''}
           </div>
           <button className="btn-close" onClick={onClose}>Cerrar</button>
         </div>

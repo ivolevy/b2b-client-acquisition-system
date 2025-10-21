@@ -34,8 +34,7 @@ function TableViewB2B({ empresas }) {
       <div className="table-header">
         <h2>Empresas B2B: {empresas.length} resultados</h2>
         <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '6px', fontWeight: 'normal' }}>
-          ✓ <strong style={{color: '#059669'}}>Válida</strong> = tiene email o teléfono · 
-          ⚠️ <strong style={{color: '#d97706'}}>Pendiente</strong> = sin contacto (solo ubicación/web)
+          📊 Empresas encontradas en OpenStreetMap
         </div>
       </div>
 
@@ -50,9 +49,7 @@ function TableViewB2B({ empresas }) {
               <th>Teléfono</th>
               <th>Website</th>
               <th>Redes</th>
-              <th>Score</th>
               <th>Ciudad/País</th>
-              <th>Estado</th>
             </tr>
           </thead>
           <tbody>
@@ -72,28 +69,18 @@ function TableViewB2B({ empresas }) {
                 </td>
                 <td>
                   {empresa.email ? (
-                    <div>
-                      <a href={`mailto:${empresa.email}`} className="link">
-                        {empresa.email}
-                      </a>
-                      {empresa.email_valido && (
-                        <span style={{ color: 'green', marginLeft: '5px' }}>✓</span>
-                      )}
-                    </div>
+                    <a href={`mailto:${empresa.email}`} className="link">
+                      {empresa.email}
+                    </a>
                   ) : (
                     <span className="no-data">Sin email</span>
                   )}
                 </td>
                 <td>
                   {empresa.telefono ? (
-                    <div>
-                      <a href={`tel:${empresa.telefono}`} className="link">
-                        {empresa.telefono}
-                      </a>
-                      {empresa.telefono_valido && (
-                        <span style={{ color: 'green', marginLeft: '5px' }}>✓</span>
-                      )}
-                    </div>
+                    <a href={`tel:${empresa.telefono}`} className="link">
+                      {empresa.telefono}
+                    </a>
                   ) : (
                     <span className="no-data">Sin teléfono</span>
                   )}
@@ -271,54 +258,9 @@ function TableViewB2B({ empresas }) {
                   </div>
                 </td>
                 <td>
-                  {empresa.lead_score !== undefined && empresa.lead_score !== null && empresa.lead_score > 0 ? (
-                    <div style={{ 
-                      display: 'inline-block',
-                      background: empresa.lead_score >= 80 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 
-                                 empresa.lead_score >= 60 ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 
-                                 empresa.lead_score >= 30 ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' :
-                                 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
-                      color: 'white',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      fontWeight: 'bold',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                      textAlign: 'center',
-                      minWidth: '50px'
-                    }}>
-                      <div style={{ fontSize: '16px', lineHeight: '1' }}>
-                        {empresa.lead_score}
-                      </div>
-                      <div style={{ fontSize: '9px', opacity: '0.9', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        {empresa.lead_score >= 80 ? 'HOT' : 
-                         empresa.lead_score >= 60 ? 'WARM' : 
-                         empresa.lead_score >= 30 ? 'COLD' : 'LOW'}
-                      </div>
-                    </div>
-                  ) : (
-                    <span className="no-data" style={{ fontSize: '11px' }}>Sin score</span>
-                  )}
-                </td>
-                <td>
                   {empresa.ciudad && <div>{empresa.ciudad}</div>}
                   {empresa.pais && (
                     <div style={{ fontSize: '12px', color: '#666' }}>{empresa.pais}</div>
-                  )}
-                </td>
-                <td>
-                  {empresa.estado ? (
-                    <span className={`estado-badge estado-${empresa.estado}`}>
-                      {empresa.estado === 'por_contactar' && '📝 Por contactar'}
-                      {empresa.estado === 'contactada' && '📞 Contactada'}
-                      {empresa.estado === 'interesada' && '⭐ Interesada'}
-                      {empresa.estado === 'no_interesa' && '❌ No interesa'}
-                      {empresa.estado === 'convertida' && '🎯 Convertida'}
-                    </span>
-                  ) : empresa.validada ? (
-                    <span style={{ color: 'green', fontWeight: 'bold' }}>✓ Válida</span>
-                  ) : (
-                    <span style={{ color: 'orange' }}>⚠️ Pendiente</span>
                   )}
                 </td>
               </tr>

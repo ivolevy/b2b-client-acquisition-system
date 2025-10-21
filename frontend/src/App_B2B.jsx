@@ -282,20 +282,14 @@ function AppB2B() {
           <MapView properties={filteredEmpresas} />
         )}
         {view === 'dashboard' && (
-          <Dashboard 
-            empresas={filteredEmpresas}
-            onBulkStatusUpdated={(ids, nuevoEstado) => {
-              setEmpresas(prev => prev.map(e => ids.includes(e.id) ? { ...e, estado: nuevoEstado } : e));
-              setFilteredEmpresas(prev => prev.map(e => ids.includes(e.id) ? { ...e, estado: nuevoEstado } : e));
-            }}
-          />
+          <Dashboard empresas={filteredEmpresas} />
         )}
       </main>
 
       {showDatabaseViewer && (
         <DatabaseViewer 
           empresas={empresas}
-          stats={stats || { total: 0, validadas: 0, con_email: 0, con_telefono: 0 }}
+          stats={stats || { total: 0, con_email: 0, con_telefono: 0, con_website: 0 }}
           onClose={() => setShowDatabaseViewer(false)}
         />
       )}
