@@ -262,8 +262,8 @@ def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limi
     """
     
     try:
-        logger.info(f"🔍 Búsqueda por bbox: {bbox}")
-        logger.info(f"📋 Rubro: {rubro_info['nombre']}")
+        logger.info(f" Búsqueda por bbox: {bbox}")
+        logger.info(f" Rubro: {rubro_info['nombre']}")
         
         response = requests.post(
             OVERPASS_URL,
@@ -279,7 +279,7 @@ def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limi
         data = response.json()
         elements = data.get('elements', [])
         
-        logger.info(f"✓ Se encontraron {len(elements)} empresas en el área")
+        logger.info(f" Se encontraron {len(elements)} empresas en el área")
         
         empresas = []
         for element in elements:

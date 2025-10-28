@@ -37,7 +37,7 @@ def ver_rubros():
     """Muestra rubros disponibles"""
     rubros = listar_rubros_disponibles()
     
-    print("\n📋 RUBROS DISPONIBLES:")
+    print("\n RUBROS DISPONIBLES:")
     print("=" * 60)
     for key, nombre in rubros.items():
         print(f"  • {key:30} → {nombre}")
@@ -45,7 +45,7 @@ def ver_rubros():
 
 def buscar_empresas():
     """Búsqueda interactiva de empresas"""
-    print("\n🔍 BÚSQUEDA DE EMPRESAS")
+    print("\n BÚSQUEDA DE EMPRESAS")
     print("=" * 60)
     
     # Seleccionar rubro
@@ -58,14 +58,14 @@ def buscar_empresas():
         opcion = int(input("\nSelecciona número de rubro: "))
         rubro_key = list(rubros.keys())[opcion - 1]
     except:
-        print("❌ Opción inválida")
+        print(" Opción inválida")
         return
     
     # Ciudad (opcional)
     ciudad = input("Ciudad (Enter para omitir): ").strip() or None
     pais = input("País (Enter para omitir): ").strip() or None
     
-    print(f"\n🚀 Buscando empresas...")
+    print(f"\n Buscando empresas...")
     print(f"   Rubro: {rubros[rubro_key]}")
     if ciudad:
         print(f"   Ciudad: {ciudad}")
@@ -76,17 +76,17 @@ def buscar_empresas():
     empresas = buscar_empresas_por_rubro(rubro_key, pais, ciudad)
     
     if not empresas:
-        print("\n❌ No se encontraron empresas")
+        print("\n No se encontraron empresas")
         return
     
-    print(f"\n✓ Encontradas {len(empresas)} empresas en OpenStreetMap")
+    print(f"\n Encontradas {len(empresas)} empresas en OpenStreetMap")
     
     # Validar
-    print("\n🔍 Validando datos de contacto...")
+    print("\n Validando datos de contacto...")
     empresas_validas, stats = filtrar_empresas_validas(empresas)
     
     print(f"""
-📊 RESULTADOS DE VALIDACIÓN:
+ RESULTADOS DE VALIDACIÓN:
    Total encontradas: {stats['total']}
    Válidas: {stats['validas']} ({stats['tasa_exito']}%)
    Con email: {stats['con_email']}
@@ -99,28 +99,28 @@ def buscar_empresas():
     for empresa in empresas_validas:
         insertar_empresa(empresa)
     
-    print(f"✅ {len(empresas_validas)} empresas guardadas en base de datos")
+    print(f" {len(empresas_validas)} empresas guardadas en base de datos")
     
     # Mostrar algunas
-    print("\n📋 PRIMERAS 5 EMPRESAS VÁLIDAS:")
+    print("\n PRIMERAS 5 EMPRESAS VÁLIDAS:")
     print("=" * 60)
     for empresa in empresas_validas[:5]:
-        print(f"\n🏢 {empresa['nombre']}")
+        print(f"\n {empresa['nombre']}")
         print(f"   Rubro: {empresa['rubro']}")
         if empresa.get('email'):
-            print(f"   📧 Email: {empresa['email']}")
+            print(f"    Email: {empresa['email']}")
         if empresa.get('telefono'):
-            print(f"   📞 Teléfono: {empresa['telefono']}")
+            print(f"    Teléfono: {empresa['telefono']}")
         if empresa.get('website'):
-            print(f"   🌐 Web: {empresa['website']}")
+            print(f"    Web: {empresa['website']}")
         if empresa.get('ciudad'):
-            print(f"   📍 {empresa['ciudad']}, {empresa.get('pais', '')}")
+            print(f"    {empresa['ciudad']}, {empresa.get('pais', '')}")
 
 def buscar_con_scraping():
     """Búsqueda con web scraping"""
-    print("\n🔍 BÚSQUEDA CON WEB SCRAPING")
+    print("\n BÚSQUEDA CON WEB SCRAPING")
     print("=" * 60)
-    print("⚠️  Esto puede tomar varios minutos...")
+    print("  Esto puede tomar varios minutos...")
     
     # Seleccionar rubro
     rubros = listar_rubros_disponibles()
@@ -131,25 +131,25 @@ def buscar_con_scraping():
         opcion = int(input("\nSelecciona número de rubro: "))
         rubro_key = list(rubros.keys())[opcion - 1]
     except:
-        print("❌ Opción inválida")
+        print(" Opción inválida")
         return
     
     ciudad = input("Ciudad (Enter para omitir): ").strip() or None
     pais = input("País (Enter para omitir): ").strip() or None
     
-    print(f"\n🚀 Buscando y scrapeando...")
+    print(f"\n Buscando y scrapeando...")
     
     # Buscar
     empresas = buscar_empresas_por_rubro(rubro_key, pais, ciudad)
     
     if not empresas:
-        print("\n❌ No se encontraron empresas")
+        print("\n No se encontraron empresas")
         return
     
-    print(f"✓ Encontradas {len(empresas)} empresas")
+    print(f" Encontradas {len(empresas)} empresas")
     
     # Enriquecer con scraping
-    print("\n🔄 Scrapeando sitios web...")
+    print("\n Scrapeando sitios web...")
     empresas_enriquecidas = []
     for i, empresa in enumerate(empresas, 1):
         if empresa.get('website'):
@@ -161,7 +161,7 @@ def buscar_con_scraping():
     empresas_validas, stats = filtrar_empresas_validas(empresas_enriquecidas)
     
     print(f"""
-📊 RESULTADOS:
+ RESULTADOS:
    Total: {stats['total']}
    Válidas: {stats['validas']} ({stats['tasa_exito']}%)
    Con email: {stats['con_email']}
@@ -173,11 +173,11 @@ def buscar_con_scraping():
     for empresa in empresas_validas:
         insertar_empresa(empresa)
     
-    print(f"✅ {len(empresas_validas)} empresas guardadas")
+    print(f" {len(empresas_validas)} empresas guardadas")
 
 def exportar_csv():
     """Exporta a CSV"""
-    print("\n📥 EXPORTAR A CSV")
+    print("\n EXPORTAR A CSV")
     print("=" * 60)
     
     rubro = input("Rubro (Enter para todas): ").strip() or None
@@ -186,14 +186,14 @@ def exportar_csv():
     archivo = exportar_a_csv(rubro, solo_validas)
     
     if archivo:
-        print(f"\n✅ Exportado exitosamente:")
-        print(f"   📄 {archivo}")
+        print(f"\n Exportado exitosamente:")
+        print(f"    {archivo}")
     else:
-        print("\n❌ No hay datos para exportar")
+        print("\n No hay datos para exportar")
 
 def exportar_json_menu():
     """Exporta a JSON"""
-    print("\n📥 EXPORTAR A JSON")
+    print("\n EXPORTAR A JSON")
     print("=" * 60)
     
     rubro = input("Rubro (Enter para todas): ").strip() or None
@@ -202,10 +202,10 @@ def exportar_json_menu():
     archivo = exportar_a_json(rubro, solo_validas)
     
     if archivo:
-        print(f"\n✅ Exportado exitosamente:")
-        print(f"   📄 {archivo}")
+        print(f"\n Exportado exitosamente:")
+        print(f"    {archivo}")
     else:
-        print("\n❌ No hay datos para exportar")
+        print("\n No hay datos para exportar")
 
 def main():
     """Función principal"""
@@ -227,10 +227,10 @@ def main():
         elif opcion == '5':
             exportar_json_menu()
         elif opcion == '6':
-            print("\n👋 ¡Hasta luego!")
+            print("\n ¡Hasta luego!")
             break
         else:
-            print("\n❌ Opción inválida")
+            print("\n Opción inválida")
         
         input("\nPresiona Enter para continuar...")
 

@@ -1,21 +1,21 @@
-# ✅ TRANSFORMACIÓN B2B COMPLETADA
+#  TRANSFORMACIÓN B2B COMPLETADA
 
-## 🎯 Objetivo Alcanzado
+##  Objetivo Alcanzado
 
 El sistema ha sido **completamente transformado** de un buscador de propiedades por zona a un **sistema B2B de captación de clientes por rubro empresarial** con validación automática de datos de contacto.
 
 ---
 
-## 📊 Resumen de Cambios
+##  Resumen de Cambios
 
-### ❌ Sistema Anterior
+###  Sistema Anterior
 - Búsqueda de **propiedades inmobiliarias** por zona geográfica
 - Enfoque en ubicaciones y direcciones
 - Sin validación de datos de contacto
 - Datos incompletos sin verificar
 - Exportación básica
 
-### ✅ Sistema Nuevo (B2B)
+###  Sistema Nuevo (B2B)
 - Búsqueda de **empresas** por **rubro empresarial**
 - Enfoque en datos de contacto verificados
 - **Validación automática** de emails y teléfonos
@@ -30,34 +30,34 @@ El sistema ha sido **completamente transformado** de un buscador de propiedades 
 
 ### Módulos Principales
 
-1. **`backend/b2b_client.py`** ✅
+1. **`backend/b2b_client.py`** 
    - Cliente Overpass API para búsqueda por rubro
    - 10 rubros predefinidos
    - Búsqueda por país/ciudad opcional
    - Búsqueda múltiple de rubros
 
-2. **`backend/validators.py`** ✅
+2. **`backend/validators.py`** 
    - Validación de emails (RFC 5322)
    - Validación de teléfonos (7-15 dígitos)
    - Validación de websites
    - Filtrado automático de datos falsos
    - Estadísticas de validación
 
-3. **`backend/scraper_b2b.py`** ✅
+3. **`backend/scraper_b2b.py`** 
    - Web scraper enfocado en datos B2B
    - Búsqueda en página de contacto
    - Priorización de emails corporativos
    - Extracción de redes sociales
    - Respeta robots.txt con delay
 
-4. **`backend/db_b2b.py`** ✅
+4. **`backend/db_b2b.py`** 
    - Base de datos SQLite optimizada B2B
    - Campos de validación (email_valido, telefono_valido)
    - Índices para búsquedas rápidas
    - Exportación a CSV y JSON
    - Estadísticas avanzadas
 
-5. **`backend/main_b2b.py`** ✅
+5. **`backend/main_b2b.py`** 
    - API REST FastAPI completa
    - 8 endpoints especializados B2B
    - Documentación Swagger automática
@@ -65,13 +65,13 @@ El sistema ha sido **completamente transformado** de un buscador de propiedades 
 
 ### Scripts de Uso
 
-6. **`buscar_clientes_b2b.py`** ✅
+6. **`buscar_clientes_b2b.py`** 
    - Script interactivo con menú
    - Búsqueda paso a paso
    - Exportación integrada
    - Fácil de usar sin programar
 
-7. **`ejemplo_rapido.py`** ✅
+7. **`ejemplo_rapido.py`** 
    - Ejemplo completo funcional
    - Muestra todo el flujo
    - Código comentado
@@ -79,20 +79,20 @@ El sistema ha sido **completamente transformado** de un buscador de propiedades 
 
 ### Documentación
 
-8. **`README_B2B.md`** ✅
+8. **`README_B2B.md`** 
    - Documentación completa
    - Ejemplos de código
    - Guía de API
    - Casos de uso
 
-9. **`TRANSFORMACION_B2B_COMPLETADA.md`** ✅
+9. **`TRANSFORMACION_B2B_COMPLETADA.md`** 
    - Este documento
    - Resumen de cambios
    - Guía de uso rápido
 
 ---
 
-## 🚀 Cómo Usar el Sistema Nuevo
+##  Cómo Usar el Sistema Nuevo
 
 ### Opción 1: Script Interactivo (Recomendado)
 
@@ -159,7 +159,7 @@ archivo = exportar_a_csv("tecnologia", solo_validas=True)
 
 ---
 
-## 🎯 Rubros Disponibles
+##  Rubros Disponibles
 
 El sistema incluye **10 rubros empresariales**:
 
@@ -178,35 +178,35 @@ El sistema incluye **10 rubros empresariales**:
 
 ---
 
-## ✅ Sistema de Validación
+##  Sistema de Validación
 
 ### Criterios de Validación
 
 Una empresa es **VÁLIDA** si cumple:
 
-✅ **Tiene nombre** (no "Sin nombre")  
-✅ **Tiene email válido O teléfono válido** (al menos uno)
+ **Tiene nombre** (no "Sin nombre")  
+ **Tiene email válido O teléfono válido** (al menos uno)
 
 ### Validación de Email
 
-- ✅ Formato RFC 5322
-- ✅ Filtra: example.com, test.com, noreply@, spam@
-- ✅ Prioriza: contacto@, info@, ventas@, comercial@
+-  Formato RFC 5322
+-  Filtra: example.com, test.com, noreply@, spam@
+-  Prioriza: contacto@, info@, ventas@, comercial@
 
 ### Validación de Teléfono
 
-- ✅ Entre 7 y 15 dígitos
-- ✅ Formatos internacionales (+34, +52, etc.)
-- ✅ Filtra: 000000, 111111, 123456, 999999
+-  Entre 7 y 15 dígitos
+-  Formatos internacionales (+34, +52, etc.)
+-  Filtra: 000000, 111111, 123456, 999999
 
 ### Validación de Website
 
-- ✅ Formato URL válido
-- ✅ Normalización automática (agrega https://)
+-  Formato URL válido
+-  Normalización automática (agrega https://)
 
 ---
 
-## 📊 API REST Endpoints
+##  API REST Endpoints
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
@@ -223,7 +223,7 @@ Una empresa es **VÁLIDA** si cumple:
 
 ---
 
-## 📁 Estructura de Datos
+##  Estructura de Datos
 
 ### Empresa B2B (Ejemplo)
 
@@ -254,10 +254,10 @@ Una empresa es **VÁLIDA** si cumple:
 
 ---
 
-## 📈 Estadísticas de Ejemplo
+##  Estadísticas de Ejemplo
 
 ```
-📊 RESULTADOS DE VALIDACIÓN:
+ RESULTADOS DE VALIDACIÓN:
    Total encontradas: 45
    Válidas: 32 (71.11%)
    Con email: 28
@@ -267,7 +267,7 @@ Una empresa es **VÁLIDA** si cumple:
 
 ---
 
-## 🔄 Flujo de Trabajo
+##  Flujo de Trabajo
 
 ```
 1. Usuario selecciona RUBRO
@@ -289,36 +289,36 @@ Una empresa es **VÁLIDA** si cumple:
 
 ---
 
-## 🎁 Extras Incluidos
+##  Extras Incluidos
 
 ### Web Scraping Ético B2B
 
-- ✅ Respeta robots.txt
-- ✅ Delay de 1.5 segundos
-- ✅ User-Agent identificable: "B2BDataCollectorBot/1.0"
-- ✅ Busca en página de contacto
-- ✅ Prioriza emails corporativos
-- ✅ Extrae redes sociales (LinkedIn, Facebook, Twitter)
+-  Respeta robots.txt
+-  Delay de 1.5 segundos
+-  User-Agent identificable: "B2BDataCollectorBot/1.0"
+-  Busca en página de contacto
+-  Prioriza emails corporativos
+-  Extrae redes sociales (LinkedIn, Facebook, Twitter)
 
 ### Base de Datos Optimizada
 
-- ✅ Índices en rubro, ciudad, validación
-- ✅ Prevención de duplicados por OSM ID
-- ✅ Campos boolean para validación
-- ✅ Timestamps automáticos
-- ✅ Búsquedas rápidas con filtros
+-  Índices en rubro, ciudad, validación
+-  Prevención de duplicados por OSM ID
+-  Campos boolean para validación
+-  Timestamps automáticos
+-  Búsquedas rápidas con filtros
 
 ### Exportación Estructurada
 
-- ✅ CSV con columnas estándar
-- ✅ JSON con estructura completa
-- ✅ Nombres de archivo con timestamp
-- ✅ Filtro por rubro
-- ✅ Solo datos validados
+-  CSV con columnas estándar
+-  JSON con estructura completa
+-  Nombres de archivo con timestamp
+-  Filtro por rubro
+-  Solo datos validados
 
 ---
 
-## 🚦 Guía de Inicio Rápido
+##  Guía de Inicio Rápido
 
 ### Paso 1: Ejecutar Ejemplo
 
@@ -351,7 +351,7 @@ python main_b2b.py
 
 ---
 
-## 📚 Archivos de Referencia
+##  Archivos de Referencia
 
 ### Documentación
 - `README_B2B.md` - Documentación completa
@@ -370,7 +370,7 @@ python main_b2b.py
 
 ---
 
-## 🎯 Casos de Uso Reales
+##  Casos de Uso Reales
 
 ### 1. Generar Base de Clientes B2B
 
@@ -406,7 +406,7 @@ empresas = buscar_empresas(
 
 ---
 
-## ✅ Checklist de Funcionalidades
+##  Checklist de Funcionalidades
 
 - [x] Búsqueda por rubro empresarial
 - [x] 10 rubros predefinidos
@@ -428,14 +428,14 @@ empresas = buscar_empresas(
 
 ---
 
-## 🏆 Transformación Completada
+##  Transformación Completada
 
-### Antes ❌
+### Antes 
 ```
 Sistema de búsqueda de propiedades por zona geográfica
 ```
 
-### Ahora ✅
+### Ahora 
 ```
 Sistema B2B de captación de clientes por rubro empresarial
 con validación automática de datos de contacto
@@ -443,7 +443,7 @@ con validación automática de datos de contacto
 
 ---
 
-## 🎉 ¡Sistema Listo Para Usar!
+##  ¡Sistema Listo Para Usar!
 
 ```bash
 # Ejecuta esto ahora:
@@ -454,5 +454,5 @@ python3 ejemplo_rapido.py
 
 ---
 
-📞 Para más información, consulta `README_B2B.md`
+ Para más información, consulta `README_B2B.md`
 

@@ -68,11 +68,11 @@ function AppB2B() {
         const guardadas = response.data.guardadas || 0;
         
         if (total === 0) {
-          alert('❌ No se encontraron empresas en esa área.\n\nIntenta:\n• Aumentar el radio de búsqueda\n• Elegir otra ubicación\n• Probar otro rubro');
+          alert(' No se encontraron empresas en esa área.\n\nIntenta:\n• Aumentar el radio de búsqueda\n• Elegir otra ubicación\n• Probar otro rubro');
         } else if (validas === 0) {
-          alert(`⚠️ Se encontraron ${total} empresas pero NINGUNA tiene datos de contacto válidos.\n\n💡 Desmarca la opción "Solo empresas con email O teléfono válido" para verlas todas.`);
+          alert(` Se encontraron ${total} empresas pero NINGUNA tiene datos de contacto válidos.\n\n Desmarca la opción "Solo empresas con email O teléfono válido" para verlas todas.`);
         } else {
-          alert(`✓ ${guardadas} empresas guardadas (${validas} con contacto válido de ${total} encontradas)`);
+          alert(` ${guardadas} empresas guardadas (${validas} con contacto válido de ${total} encontradas)`);
         }
         
         await loadEmpresas();
@@ -81,7 +81,7 @@ function AppB2B() {
     } catch (error) {
       console.error('Error al buscar empresas:', error);
       const errorMsg = error.response?.data?.detail || error.message;
-      alert('❌ Error al buscar empresas:\n\n' + errorMsg);
+      alert(' Error al buscar empresas:\n\n' + errorMsg);
     } finally {
       setLoading(false);
     }
@@ -135,7 +135,7 @@ function AppB2B() {
       });
       
       if (response.data.success) {
-        alert(`✓ Datos exportados a: ${response.data.archivo}`);
+        alert(` Datos exportados a: ${response.data.archivo}`);
       }
     } catch (error) {
       console.error('Error al exportar:', error);
@@ -210,22 +210,22 @@ function AppB2B() {
     // Limpiar la URL después de la descarga
     setTimeout(() => URL.revokeObjectURL(url), 100);
     
-    alert(`✓ Se exportaron ${filteredEmpresas.length} empresas a CSV`);
+    alert(` Se exportaron ${filteredEmpresas.length} empresas a CSV`);
   };
 
   const handleClearResults = () => {
-    if (!window.confirm('🧹 ¿Limpiar los resultados mostrados?\n\nEsto solo limpia la vista. Los datos permanecen en la base de datos.')) {
+    if (!window.confirm(' ¿Limpiar los resultados mostrados?\n\nEsto solo limpia la vista. Los datos permanecen en la base de datos.')) {
       return;
     }
     
     setEmpresas([]);
     setFilteredEmpresas([]);
     setStats({ total: 0, validadas: 0 });
-    alert('✓ Resultados limpiados de la vista');
+    alert(' Resultados limpiados de la vista');
   };
 
   const handleClearDatabase = async () => {
-    if (!window.confirm('⚠️ ¿ELIMINAR TODAS las empresas de la base de datos?\n\n🚨 Esta acción es PERMANENTE y no se puede deshacer.\n\nSe perderán todos los datos guardados.')) {
+    if (!window.confirm(' ¿ELIMINAR TODAS las empresas de la base de datos?\n\n Esta acción es PERMANENTE y no se puede deshacer.\n\nSe perderán todos los datos guardados.')) {
       return;
     }
 
@@ -234,14 +234,14 @@ function AppB2B() {
       const response = await axios.delete(`${API_URL}/clear`);
       
       if (response.data.success) {
-        alert('✓ Base de datos eliminada correctamente');
+        alert(' Base de datos eliminada correctamente');
         setEmpresas([]);
         setFilteredEmpresas([]);
         await loadStats();
       }
     } catch (error) {
       console.error('Error al limpiar base de datos:', error);
-      alert('❌ Error al limpiar la base de datos');
+      alert(' Error al limpiar la base de datos');
     } finally {
       setLoading(false);
     }

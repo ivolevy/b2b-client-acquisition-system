@@ -205,7 +205,7 @@ def scrapear_empresa_b2b(url: str) -> Dict:
             
             resultado['exito'] = True
             
-            logger.info(f"✓ Scraped: {len(resultado['emails'])} emails, {len(resultado['telefonos'])} teléfonos")
+            logger.info(f" Scraped: {len(resultado['emails'])} emails, {len(resultado['telefonos'])} teléfonos")
         else:
             logger.warning(f"HTTP {response.status_code}: {url}")
             
@@ -225,7 +225,7 @@ def enriquecer_empresa_b2b(empresa: Dict) -> Dict:
     
     # Si ya tiene email y teléfono, podemos saltarlo para ser más rápidos
     if empresa.get('email') and empresa.get('telefono'):
-        logger.info(f"✓ {empresa.get('nombre')} ya tiene contacto completo")
+        logger.info(f" {empresa.get('nombre')} ya tiene contacto completo")
         return empresa
     
     # Scrapear sitio web

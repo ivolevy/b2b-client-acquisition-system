@@ -9,11 +9,11 @@ function KanbanView({ empresas, onStatusUpdated }) {
   const [updatingId, setUpdatingId] = useState(null);
 
   const columns = useMemo(() => ([
-    { key: 'por_contactar', title: '📝 Por contactar' },
-    { key: 'contactada', title: '📞 Contactada' },
+    { key: 'por_contactar', title: ' Por contactar' },
+    { key: 'contactada', title: ' Contactada' },
     { key: 'interesada', title: '⭐ Interesada' },
-    { key: 'convertida', title: '🎯 Convertida' },
-    { key: 'no_interesa', title: '❌ No interesa' },
+    { key: 'convertida', title: ' Convertida' },
+    { key: 'no_interesa', title: ' No interesa' },
   ]), []);
 
   const grouped = useMemo(() => {
@@ -101,7 +101,7 @@ function KanbanView({ empresas, onStatusUpdated }) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    🔗 Sitio
+                     Sitio
                   </a>
                 )}
               </div>

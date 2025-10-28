@@ -98,9 +98,9 @@ class ActualizarNotasRequest(BaseModel):
 # Inicializar BD
 @app.on_event("startup")
 async def startup():
-    logger.info("🚀 Iniciando API B2B...")
+    logger.info(" Iniciando API B2B...")
     init_db_b2b()
-    logger.info("✓ Sistema B2B listo")
+    logger.info(" Sistema B2B listo")
 
 @app.get("/")
 async def root():
@@ -147,12 +147,12 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
     Puede buscar por bbox (bounding box) o por ciudad/país
     """
     try:
-        logger.info(f"🔍 Búsqueda B2B - Rubro: {request.rubro}")
+        logger.info(f" Búsqueda B2B - Rubro: {request.rubro}")
         
         # Buscar en OpenStreetMap
         if request.bbox:
             # Búsqueda por bounding box (ubicación en mapa)
-            logger.info(f"📍 Búsqueda por bbox: {request.bbox}")
+            logger.info(f" Búsqueda por bbox: {request.bbox}")
             empresas = query_by_bbox(
                 bbox=request.bbox,
                 rubro=request.rubro
@@ -173,14 +173,14 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 "data": []
             }
         
-        logger.info(f"📊 Encontradas {len(empresas)} empresas en OSM")
+        logger.info(f" Encontradas {len(empresas)} empresas en OSM")
         
         # Enriquecer con scraping si está habilitado
         if request.scrapear_websites:
             empresas_enriquecidas = []
             for empresa in empresas:
                 if empresa.get('website'):
-                    logger.info(f"🔄 Enriqueciendo: {empresa.get('nombre')}")
+                    logger.info(f" Enriqueciendo: {empresa.get('nombre')}")
                     # Enriquecer con datos de scraping
                     empresa = enriquecer_empresa_b2b(empresa)
                     
@@ -196,7 +196,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         # Guardar todas las empresas encontradas
         for empresa in empresas:
             insertar_empresa(empresa)
-            logger.info(f"✓ {empresa.get('nombre', 'Sin nombre')}: Guardada")
+            logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada")
         
         # Estadísticas simples
         stats = {
@@ -214,7 +214,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
     Con website: {stats['con_website']}
     """)
         
-        logger.info(f"✅ Proceso completado: {len(empresas)} empresas guardadas")
+        logger.info(f" Proceso completado: {len(empresas)} empresas guardadas")
         
         return {
             "success": True,
@@ -225,7 +225,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         }
         
     except Exception as e:
-        logger.error(f"❌ Error en búsqueda: {e}")
+        logger.error(f" Error en búsqueda: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/buscar-multiple")
@@ -394,7 +394,7 @@ async def actualizar_estado(request: ActualizarEstadoRequest):
         conn.commit()
         conn.close()
         
-        logger.info(f"✅ Estado actualizado - ID: {request.id} → {request.estado}")
+        logger.info(f" Estado actualizado - ID: {request.id} → {request.estado}")
         
         return {
             "success": True,
@@ -428,7 +428,7 @@ async def actualizar_notas(request: ActualizarNotasRequest):
         conn.commit()
         conn.close()
         
-        logger.info(f"✅ Notas actualizadas - ID: {request.id}")
+        logger.info(f" Notas actualizadas - ID: {request.id}")
         
         return {
             "success": True,

@@ -202,20 +202,20 @@ def enriquecer_con_redes_sociales(sitio_web: str, timeout: int = 10) -> Dict[str
         redes_final = {k: v for k, v in redes_final.items() if v}
         
         if redes_final:
-            logger.info(f"✅ Redes sociales encontradas en {sitio_web}: {list(redes_final.keys())}")
+            logger.info(f" Redes sociales encontradas en {sitio_web}: {list(redes_final.keys())}")
         else:
-            logger.info(f"ℹ️  No se encontraron redes sociales en {sitio_web}")
+            logger.info(f"ℹ  No se encontraron redes sociales en {sitio_web}")
         
         return redes_final
         
     except requests.Timeout:
-        logger.warning(f"⏱️  Timeout al intentar acceder a {sitio_web}")
+        logger.warning(f"⏱  Timeout al intentar acceder a {sitio_web}")
         return {}
     except requests.RequestException as e:
-        logger.error(f"❌ Error scrapeando {sitio_web}: {e}")
+        logger.error(f" Error scrapeando {sitio_web}: {e}")
         return {}
     except Exception as e:
-        logger.error(f"❌ Error inesperado en {sitio_web}: {e}")
+        logger.error(f" Error inesperado en {sitio_web}: {e}")
         return {}
 
 # Test rápido
@@ -228,10 +228,10 @@ if __name__ == "__main__":
         "https://www.starbucks.es",
     ]
     
-    print("🧪 Probando extractor de redes sociales...\n")
+    print(" Probando extractor de redes sociales...\n")
     
     for url in test_urls:
-        print(f"📍 Testeando: {url}")
+        print(f" Testeando: {url}")
         redes = enriquecer_con_redes_sociales(url)
         for red, link in redes.items():
             print(f"  {red}: {link}")

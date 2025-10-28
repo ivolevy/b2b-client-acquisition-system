@@ -94,7 +94,7 @@ function LocationPicker({ onLocationChange }) {
     <div className="location-picker">
       <div className="location-controls">
         <div className="control-group">
-          <label>📍 Radio de búsqueda:</label>
+          <label> Radio de búsqueda:</label>
           <select value={radius} onChange={(e) => handleRadiusChange(parseInt(e.target.value))}>
             <option value="1000">1 km</option>
             <option value="2000">2 km</option>
@@ -106,12 +106,12 @@ function LocationPicker({ onLocationChange }) {
         </div>
 
         <button type="button" className="btn-location" onClick={handleUseCurrentLocation}>
-          📍 Usar mi ubicación actual
+           Usar mi ubicación actual
         </button>
 
         {selectedLocation && (
           <div className="selected-info">
-            ✓ Ubicación seleccionada: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)}
+             Ubicación seleccionada: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)}
             <br />
             Radio: {(radius / 1000).toFixed(1)} km
           </div>
@@ -119,7 +119,7 @@ function LocationPicker({ onLocationChange }) {
       </div>
 
       <div className="map-instruction">
-        💡 Haz clic en el mapa para seleccionar una ubicación
+         Haz clic en el mapa para seleccionar una ubicación
       </div>
 
       <MapContainer

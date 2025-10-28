@@ -1,10 +1,10 @@
-# 🎯 Sistema B2B de Captación de Clientes por Rubro
+#  Sistema B2B de Captación de Clientes por Rubro
 
-## ✨ Transformación Completada
+##  Transformación Completada
 
 Este sistema ha sido **transformado de búsqueda de propiedades por zona a un sistema B2B de captación de clientes por rubro empresarial**.
 
-### 🔄 Cambios Principales
+###  Cambios Principales
 
 | Antes (Propiedades) | Ahora (B2B Empresas) |
 |---------------------|----------------------|
@@ -16,7 +16,7 @@ Este sistema ha sido **transformado de búsqueda de propiedades por zona a un si
 
 ---
 
-## 🚀 Inicio Rápido
+##  Inicio Rápido
 
 ### Opción 1: Script Interactivo (Más Fácil)
 
@@ -37,7 +37,7 @@ Accede a: **http://localhost:8000/docs** para ver la documentación interactiva
 
 ---
 
-## 📋 Rubros Disponibles
+##  Rubros Disponibles
 
 El sistema soporta búsqueda en los siguientes rubros:
 
@@ -54,7 +54,7 @@ El sistema soporta búsqueda en los siguientes rubros:
 
 ---
 
-## 💡 Ejemplo de Uso Rápido
+##  Ejemplo de Uso Rápido
 
 ```python
 from backend.b2b_client import buscar_empresas_por_rubro
@@ -90,32 +90,32 @@ print(f"Exportado a: {archivo_csv}")
 
 ---
 
-## 🔍 Validación de Datos
+##  Validación de Datos
 
 El sistema incluye **validación automática** de datos de contacto:
 
-### ✅ Validación de Emails
+###  Validación de Emails
 - Formato RFC 5322
 - Filtra emails falsos (example.com, test.com, noreply@)
 - Prioriza emails corporativos (contacto@, info@, ventas@)
 
-### ✅ Validación de Teléfonos
+###  Validación de Teléfonos
 - Entre 7 y 15 dígitos
 - Formatos internacionales
 - Filtra números falsos (000000, 111111, 123456)
 
-### ✅ Validación de Websites
+###  Validación de Websites
 - Formato URL válido
 - Normalización automática (agrega https://)
 
-### 📊 Criterios de Validación
+###  Criterios de Validación
 Una empresa es considerada **válida** si cumple:
-- ✅ Tiene nombre
-- ✅ Tiene email válido **O** teléfono válido (al menos uno)
+-  Tiene nombre
+-  Tiene email válido **O** teléfono válido (al menos uno)
 
 ---
 
-## 🌐 API REST Endpoints
+##  API REST Endpoints
 
 ### `GET /rubros`
 Lista todos los rubros disponibles
@@ -196,7 +196,7 @@ Exporta a CSV o JSON
 
 ---
 
-## 📁 Estructura de Datos
+##  Estructura de Datos
 
 ### Empresa B2B
 
@@ -232,7 +232,7 @@ Exporta a CSV o JSON
 
 ---
 
-## 📊 Formato de Exportación
+##  Formato de Exportación
 
 ### CSV
 ```csv
@@ -255,7 +255,7 @@ id,nombre,rubro,email,telefono,website,direccion,ciudad,pais,linkedin,descripcio
 
 ---
 
-## 🛠️ Características Técnicas
+##  Características Técnicas
 
 ### Módulos Principales
 
@@ -275,15 +275,15 @@ id,nombre,rubro,email,telefono,website,direccion,ciudad,pais,linkedin,descripcio
 
 ### Web Scraping Ético
 
-- ✅ Respeta robots.txt
-- ✅ Delay de 1.5 segundos entre requests
-- ✅ User-Agent identificable
-- ✅ Busca en página de contacto si es necesario
-- ✅ Prioriza emails corporativos
+-  Respeta robots.txt
+-  Delay de 1.5 segundos entre requests
+-  User-Agent identificable
+-  Busca en página de contacto si es necesario
+-  Prioriza emails corporativos
 
 ---
 
-## 🎯 Casos de Uso
+##  Casos de Uso
 
 ### 1. Generar Base de Clientes Potenciales
 ```python
@@ -320,7 +320,7 @@ empresas_completas = buscar_empresas(
 
 ---
 
-## 📈 Ejemplo Completo
+##  Ejemplo Completo
 
 ### Búsqueda y Exportación
 
@@ -343,13 +343,13 @@ SCRAPEAR = True
 init_db_b2b()
 
 # 2. Buscar
-print(f"🔍 Buscando {RUBRO} en {CIUDAD}...")
+print(f" Buscando {RUBRO} en {CIUDAD}...")
 empresas = buscar_empresas_por_rubro(RUBRO, ciudad=CIUDAD)
-print(f"✓ Encontradas: {len(empresas)}")
+print(f" Encontradas: {len(empresas)}")
 
 # 3. Enriquecer con scraping (opcional)
 if SCRAPEAR:
-    print("🔄 Enriqueciendo con web scraping...")
+    print(" Enriqueciendo con web scraping...")
     empresas_enriquecidas = []
     for empresa in empresas:
         if empresa.get('website'):
@@ -358,11 +358,11 @@ if SCRAPEAR:
     empresas = empresas_enriquecidas
 
 # 4. Validar
-print("✅ Validando contactos...")
+print(" Validando contactos...")
 empresas_validas, stats = filtrar_empresas_validas(empresas)
 
 print(f"""
-📊 RESULTADOS:
+ RESULTADOS:
    Total: {stats['total']}
    Válidas: {stats['validas']} ({stats['tasa_exito']}%)
    Con email: {stats['con_email']}
@@ -375,12 +375,12 @@ for empresa in empresas_validas:
 
 # 6. Exportar
 archivo = exportar_a_csv(RUBRO, solo_validas=True)
-print(f"📥 Exportado a: {archivo}")
+print(f" Exportado a: {archivo}")
 ```
 
 ---
 
-## 🚦 Ejecución
+##  Ejecución
 
 ### 1. Script Interactivo
 ```bash
@@ -401,7 +401,7 @@ python3 tu_script.py
 
 ---
 
-## 📚 Documentación API
+##  Documentación API
 
 Accede a la documentación interactiva Swagger:
 
@@ -411,7 +411,7 @@ http://localhost:8000/docs
 
 ---
 
-## ✅ Checklist de Validación
+##  Checklist de Validación
 
 El sistema garantiza que todas las empresas guardadas cumplan:
 
@@ -425,15 +425,15 @@ El sistema garantiza que todas las empresas guardadas cumplan:
 
 ---
 
-## 🎯 Diferencias Clave vs Sistema Anterior
+##  Diferencias Clave vs Sistema Anterior
 
-### ❌ Sistema Anterior (Propiedades)
+###  Sistema Anterior (Propiedades)
 - Buscaba propiedades por zona
 - Sin validación de contactos
 - Enfoque geográfico
 - Datos incompletos
 
-### ✅ Sistema Nuevo (B2B)
+###  Sistema Nuevo (B2B)
 - Busca empresas por rubro
 - Validación automática de contactos
 - Enfoque empresarial
@@ -444,7 +444,7 @@ El sistema garantiza que todas las empresas guardadas cumplan:
 
 ---
 
-## 📞 Soporte
+##  Soporte
 
 Para más información, consulta:
 - `buscar_clientes_b2b.py` - Script interactivo
@@ -453,5 +453,5 @@ Para más información, consulta:
 
 ---
 
-**🎉 Sistema B2B listo para captar clientes empresariales con datos validados!**
+** Sistema B2B listo para captar clientes empresariales con datos validados!**
 

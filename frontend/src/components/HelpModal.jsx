@@ -13,28 +13,28 @@ function HelpModal({ onClose }) {
     <div className="db-viewer-overlay" onClick={onClose}>
       <div className="db-viewer-modal" onClick={(e) => e.stopPropagation()}>
         <div className="db-viewer-header">
-          <h2>❓ Ayuda rápida</h2>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <h2> Ayuda rápida</h2>
+          <button className="close-btn" onClick={onClose}></button>
         </div>
 
         <div className="db-viewer-content" style={{ lineHeight: 1.6 }}>
           <div className="db-stats" style={{marginBottom: 12}}>
             <div className="stat-card blue">
-              <div className="stat-icon">🔎</div>
+              <div className="stat-icon"></div>
               <div>
                 <div className="stat-value" style={{fontSize: 18}}>Inicio rápido</div>
                 <div className="stat-label">Elegí rubro, ciudad y presioná Buscar</div>
               </div>
             </div>
             <div className="stat-card purple">
-              <div className="stat-icon">🗺️</div>
+              <div className="stat-icon"></div>
               <div>
                 <div className="stat-value" style={{fontSize: 18}}>Vistas</div>
                 <div className="stat-label">Alterná entre Tabla y Mapa desde los filtros</div>
               </div>
             </div>
             <div className="stat-card green">
-              <div className="stat-icon">📥</div>
+              <div className="stat-icon"></div>
               <div>
                 <div className="stat-value" style={{fontSize: 18}}>Exportar</div>
                 <div className="stat-label">Descargá CSV de los resultados actuales</div>

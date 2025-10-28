@@ -34,7 +34,7 @@ function MapView({ properties }) {
   if (properties.length === 0) {
     return (
       <div className="empty-state">
-        <div className="empty-icon">🗺️</div>
+        <div className="empty-icon"></div>
         <h3>No hay empresas para mostrar en el mapa</h3>
         <p>Utiliza el formulario de búsqueda para obtener empresas de OpenStreetMap</p>
       </div>
@@ -44,7 +44,7 @@ function MapView({ properties }) {
   if (validProperties.length === 0) {
     return (
       <div className="empty-state">
-        <div className="empty-icon">📍</div>
+        <div className="empty-icon"></div>
         <h3>No hay ubicaciones disponibles</h3>
         <p>Las empresas encontradas no tienen coordenadas geográficas</p>
       </div>
@@ -54,7 +54,7 @@ function MapView({ properties }) {
   return (
     <div className="map-container">
       <div className="map-header">
-        <h2>🗺️ Mapa de Empresas: {validProperties.length} {validProperties.length === 1 ? 'ubicación' : 'ubicaciones'}</h2>
+        <h2> Mapa de Empresas: {validProperties.length} {validProperties.length === 1 ? 'ubicación' : 'ubicaciones'}</h2>
       </div>
       
       <MapContainer 

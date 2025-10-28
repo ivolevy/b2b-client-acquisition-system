@@ -6,7 +6,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
   // Estados para búsqueda
   const [rubro, setRubro] = useState('');
   const [locationData, setLocationData] = useState(null);
-  const [scrapearWebsites, setScrapearWebsites] = useState(true); // ✅ ACTIVADO - Scraping de redes sociales
+  const [scrapearWebsites, setScrapearWebsites] = useState(true); //  ACTIVADO - Scraping de redes sociales
   const [soloValidadas, setSoloValidadas] = useState(false); // Desmarcado por defecto para ver todas
   
   // Estados para filtros
@@ -64,7 +64,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
     <div className="filters-container">
       {/* Sección de Búsqueda B2B */}
       <div className="filter-section fetch-section">
-        <h3>🔍 Buscar Empresas por Rubro y Ubicación</h3>
+        <h3> Buscar Empresas por Rubro y Ubicación</h3>
         <form onSubmit={handleBuscarSubmit}>
           <div className="form-row">
             <div className="form-group">
@@ -129,13 +129,13 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
 
             <div className="option-actions">
               <button type="submit" className="btn btn-success btn-compact btn-cta" disabled={loading || !locationData}>
-                {loading ? 'Buscando...' : '🚀 Buscar en el área'}
+                {loading ? 'Buscando...' : ' Buscar en el área'}
               </button>
             </div>
           </div>
 
           <div className="hint-row">
-            <span>💡 Busca empresas, valida email/teléfono y extrae redes (Instagram, Facebook, LinkedIn, etc.).</span>
+            <span> Busca empresas, valida email/teléfono y extrae redes (Instagram, Facebook, LinkedIn, etc.).</span>
           </div>
         </form>
       </div>
@@ -143,28 +143,28 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
       {/* Sección de Filtros Compacta */}
       <div className="filter-section compact-filters">
         <div className="filter-header">
-          <h3>🎯 Filtrar Resultados</h3>
+          <h3> Filtrar Resultados</h3>
           <div className="view-toggle">
             <button 
               type="button"
               className={view === 'table' ? 'active' : ''}
               onClick={() => setView('table')}
             >
-              📊 Tabla
+               Tabla
             </button>
             <button 
               type="button"
               className={view === 'map' ? 'active' : ''}
               onClick={() => setView('map')}
             >
-              🗺️ Mapa
+               Mapa
             </button>
             <button 
               type="button"
               className={view === 'dashboard' ? 'active' : ''}
               onClick={() => setView('dashboard')}
             >
-              📈 Dashboard
+               Dashboard
             </button>
           </div>
         </div>
@@ -176,7 +176,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
               onChange={(e) => setFiltroRubro(e.target.value)}
               className="filter-input"
             >
-              <option value="">🏢 Todos los rubros</option>
+              <option value=""> Todos los rubros</option>
               {Object.entries(rubros).map(([key, nombre]) => (
                 <option key={key} value={key}>{nombre}</option>
               ))}
@@ -184,7 +184,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
             
             <input
               type="text"
-              placeholder="🏙️ Filtrar por ciudad..."
+              placeholder=" Filtrar por ciudad..."
               value={filtroCiudad}
               onChange={(e) => setFiltroCiudad(e.target.value)}
               className="filter-input"
@@ -195,9 +195,9 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
               onChange={(e) => setFiltroValidacion(e.target.value)}
               className="filter-input"
             >
-              <option value="todas">📊 Todas</option>
-              <option value="validadas">✓ Válidas</option>
-              <option value="pendientes">⚠️ Pendientes</option>
+              <option value="todas"> Todas</option>
+              <option value="validadas"> Válidas</option>
+              <option value="pendientes"> Pendientes</option>
             </select>
 
             <label className="checkbox-inline">
@@ -206,7 +206,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
                 checked={filtroConEmail}
                 onChange={(e) => setFiltroConEmail(e.target.checked)}
               />
-              <span>📧 Email</span>
+              <span> Email</span>
             </label>
 
             <label className="checkbox-inline">
@@ -215,7 +215,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
                 checked={filtroConTelefono}
                 onChange={(e) => setFiltroConTelefono(e.target.checked)}
               />
-              <span>📞 Teléfono</span>
+              <span> Teléfono</span>
             </label>
           </div>
 
@@ -236,14 +236,14 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
               className="btn btn-success btn-compact" 
               onClick={onExportCSV}
             >
-              📥 Exportar CSV
+               Exportar CSV
             </button>
             <button 
               type="button" 
               className="btn btn-warning btn-compact" 
               onClick={onClearResults}
             >
-              🧹 Limpiar Vista
+               Limpiar Vista
             </button>
           </div>
         </form>

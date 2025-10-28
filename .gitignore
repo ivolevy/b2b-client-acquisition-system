@@ -43,3 +43,4 @@ build/
 
 # Vite
 .vite/
+backend/.venv/

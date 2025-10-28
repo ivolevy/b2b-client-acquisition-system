@@ -1,10 +1,10 @@
 ╔══════════════════════════════════════════════════════════════════════╗
 ║                                                                      ║
-║   ✅  TRANSFORMACIÓN B2B COMPLETADA CON ÉXITO                        ║
+║     TRANSFORMACIÓN B2B COMPLETADA CON ÉXITO                        ║
 ║                                                                      ║
 ╚══════════════════════════════════════════════════════════════════════╝
 
-🎯 OBJETIVO ALCANZADO:
+ OBJETIVO ALCANZADO:
 
    Sistema transformado de búsqueda de propiedades por zona a
    SISTEMA B2B DE CAPTACIÓN DE CLIENTES POR RUBRO EMPRESARIAL
@@ -12,37 +12,37 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📦 ARCHIVOS CREADOS (9 NUEVOS):
+ ARCHIVOS CREADOS (9 NUEVOS):
 
    BACKEND (5 módulos):
-   ✅ backend/b2b_client.py         - Cliente de búsqueda por rubro
-   ✅ backend/validators.py         - Validación de emails/teléfonos
-   ✅ backend/scraper_b2b.py        - Web scraper B2B mejorado
-   ✅ backend/db_b2b.py             - Base de datos SQLite B2B
-   ✅ backend/main_b2b.py           - API REST FastAPI completa
+    backend/b2b_client.py         - Cliente de búsqueda por rubro
+    backend/validators.py         - Validación de emails/teléfonos
+    backend/scraper_b2b.py        - Web scraper B2B mejorado
+    backend/db_b2b.py             - Base de datos SQLite B2B
+    backend/main_b2b.py           - API REST FastAPI completa
 
    SCRIPTS DE USO (2):
-   ✅ buscar_clientes_b2b.py        - Script interactivo con menú
-   ✅ ejemplo_rapido.py             - Ejemplo funcional completo
+    buscar_clientes_b2b.py        - Script interactivo con menú
+    ejemplo_rapido.py             - Ejemplo funcional completo
 
    DOCUMENTACIÓN (3):
-   ✅ README_B2B.md                 - Documentación técnica completa
-   ✅ TRANSFORMACION_B2B_COMPLETADA.md - Resumen de cambios
-   ✅ INSTRUCCIONES_USO.md          - Guía de uso rápido
+    README_B2B.md                 - Documentación técnica completa
+    TRANSFORMACION_B2B_COMPLETADA.md - Resumen de cambios
+    INSTRUCCIONES_USO.md          - Guía de uso rápido
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🚀 CÓMO USAR (ELIGE UNA OPCIÓN):
+ CÓMO USAR (ELIGE UNA OPCIÓN):
 
    ┌─────────────────────────────────────────────────────────────────┐
    │  OPCIÓN 1: EJEMPLO RÁPIDO (Recomendado para empezar)          │
    │                                                                 │
    │    python3 ejemplo_rapido.py                                   │
    │                                                                 │
-   │    ✓ Ejecuta ejemplo completo                                  │
-   │    ✓ Busca desarrolladoras en Madrid                           │
-   │    ✓ Valida datos automáticamente                              │
-   │    ✓ Exporta a CSV y JSON                                      │
+   │     Ejecuta ejemplo completo                                  │
+   │     Busca desarrolladoras en Madrid                           │
+   │     Valida datos automáticamente                              │
+   │     Exporta a CSV y JSON                                      │
    └─────────────────────────────────────────────────────────────────┘
 
    ┌─────────────────────────────────────────────────────────────────┐
@@ -50,9 +50,9 @@
    │                                                                 │
    │    python3 buscar_clientes_b2b.py                              │
    │                                                                 │
-   │    ✓ Menú interactivo                                          │
-   │    ✓ No necesitas programar                                    │
-   │    ✓ Guía paso a paso                                          │
+   │     Menú interactivo                                          │
+   │     No necesitas programar                                    │
+   │     Guía paso a paso                                          │
    └─────────────────────────────────────────────────────────────────┘
 
    ┌─────────────────────────────────────────────────────────────────┐
@@ -67,7 +67,7 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🎯 10 RUBROS DISPONIBLES:
+ 10 RUBROS DISPONIBLES:
 
    1. desarrolladoras_inmobiliarias  → Desarrolladoras Inmobiliarias
    2. constructoras                  → Empresas Constructoras
@@ -82,48 +82,48 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ SISTEMA DE VALIDACIÓN AUTOMÁTICA:
+ SISTEMA DE VALIDACIÓN AUTOMÁTICA:
 
    EMAILS:
-   ✓ Formato válido (RFC 5322)
-   ✓ Filtra falsos (example.com, test.com, noreply@)
-   ✓ Prioriza corporativos (contacto@, info@, ventas@)
+    Formato válido (RFC 5322)
+    Filtra falsos (example.com, test.com, noreply@)
+    Prioriza corporativos (contacto@, info@, ventas@)
 
    TELÉFONOS:
-   ✓ Entre 7-15 dígitos
-   ✓ Formatos internacionales (+34, +52, etc.)
-   ✓ Filtra falsos (000000, 111111, 123456)
+    Entre 7-15 dígitos
+    Formatos internacionales (+34, +52, etc.)
+    Filtra falsos (000000, 111111, 123456)
 
    CRITERIO DE VALIDACIÓN:
-   ✓ Empresa válida = Nombre + (Email válido O Teléfono válido)
+    Empresa válida = Nombre + (Email válido O Teléfono válido)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📊 EJEMPLO DE RESULTADO:
+ EJEMPLO DE RESULTADO:
 
    Búsqueda: Desarrolladoras Inmobiliarias en Madrid
 
-   📊 RESULTADOS DE VALIDACIÓN:
+    RESULTADOS DE VALIDACIÓN:
       Total encontradas:  45
       Válidas:            32 (71.11%)
       Con email válido:   28
       Con teléfono válido: 30
       Con website:        25
 
-   [1] 🏢 Constructora ABC S.A.
+   [1]  Constructora ABC S.A.
        Rubro: Empresas Constructoras
-       📧 contacto@constructoraabc.com
-       📞 +34 91 123 4567
-       🌐 https://www.constructoraabc.com
-       📍 Madrid, España
+        contacto@constructoraabc.com
+        +34 91 123 4567
+        https://www.constructoraabc.com
+        Madrid, España
 
    Archivos generados:
-   ✓ data/empresas_b2b_desarrolladoras_20241014.csv
-   ✓ data/empresas_b2b_desarrolladoras_20241014.json
+    data/empresas_b2b_desarrolladoras_20241014.csv
+    data/empresas_b2b_desarrolladoras_20241014.json
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📁 EXPORTACIÓN:
+ EXPORTACIÓN:
 
    CSV (Para Excel/CRM):
    ├─ Campos: id, nombre, rubro, email, telefono, website,
@@ -136,7 +136,7 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🔄 FLUJO DE TRABAJO:
+ FLUJO DE TRABAJO:
 
    1. Usuario selecciona RUBRO (ej: tecnologia)
              ↓
@@ -156,7 +156,7 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📚 DOCUMENTACIÓN:
+ DOCUMENTACIÓN:
 
    INICIO RÁPIDO:
    └─ INSTRUCCIONES_USO.md          - Guía de uso (este archivo)
@@ -172,7 +172,7 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🎯 COMENZAR AHORA:
+ COMENZAR AHORA:
 
    # OPCIÓN 1: Ejemplo rápido (30 segundos)
    python3 ejemplo_rapido.py
@@ -185,26 +185,26 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✨ CARACTERÍSTICAS PRINCIPALES:
+ CARACTERÍSTICAS PRINCIPALES:
 
-   ✅ Búsqueda por rubro empresarial (no por zona geográfica)
-   ✅ 10 rubros predefinidos + fácil de expandir
-   ✅ Validación automática de emails y teléfonos
-   ✅ Web scraping ético B2B (respeta robots.txt)
-   ✅ Solo datos con contacto válido (email O teléfono)
-   ✅ Base de datos SQLite optimizada
-   ✅ Exportación estructurada CSV + JSON
-   ✅ API REST completa con Swagger
-   ✅ Scripts interactivos sin programar
-   ✅ Estadísticas en tiempo real
-   ✅ Prevención de duplicados
-   ✅ 100% gratuito (OpenStreetMap)
+    Búsqueda por rubro empresarial (no por zona geográfica)
+    10 rubros predefinidos + fácil de expandir
+    Validación automática de emails y teléfonos
+    Web scraping ético B2B (respeta robots.txt)
+    Solo datos con contacto válido (email O teléfono)
+    Base de datos SQLite optimizada
+    Exportación estructurada CSV + JSON
+    API REST completa con Swagger
+    Scripts interactivos sin programar
+    Estadísticas en tiempo real
+    Prevención de duplicados
+    100% gratuito (OpenStreetMap)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🏆 DIFERENCIAS vs SISTEMA ANTERIOR:
+ DIFERENCIAS vs SISTEMA ANTERIOR:
 
-   ANTES ❌                          AHORA ✅
+   ANTES                           AHORA 
    ─────────────────────────────────────────────────────────────────
    Propiedades por zona          →  Empresas por rubro
    Búsqueda geográfica           →  Búsqueda empresarial B2B
@@ -217,7 +217,7 @@
 
 ╔══════════════════════════════════════════════════════════════════════╗
 ║                                                                      ║
-║   🎉  SISTEMA B2B LISTO PARA CAPTAR CLIENTES EMPRESARIALES          ║
+║     SISTEMA B2B LISTO PARA CAPTAR CLIENTES EMPRESARIALES          ║
 ║      CON DATOS DE CONTACTO VALIDADOS                                ║
 ║                                                                      ║
 ╚══════════════════════════════════════════════════════════════════════╝

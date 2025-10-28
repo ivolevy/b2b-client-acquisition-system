@@ -21,7 +21,7 @@ def revalidar_todas_las_empresas():
     cursor.execute('SELECT * FROM empresas')
     empresas = cursor.fetchall()
     
-    print(f"🔄 RE-VALIDANDO {len(empresas)} EMPRESAS...\n")
+    print(f" RE-VALIDANDO {len(empresas)} EMPRESAS...\n")
     
     actualizadas = 0
     validas_antes = 0
@@ -62,21 +62,21 @@ def revalidar_todas_las_empresas():
             actualizadas += 1
             
             if empresa['validada'] != empresa_validada['validada']:
-                estado_ant = "✓ Válida" if empresa['validada'] else "⚠️ Pendiente"
-                estado_new = "✓ Válida" if empresa_validada['validada'] else "⚠️ Pendiente"
-                print(f"  📝 {empresa['nombre']}: {estado_ant} → {estado_new}")
+                estado_ant = " Válida" if empresa['validada'] else " Pendiente"
+                estado_new = " Válida" if empresa_validada['validada'] else " Pendiente"
+                print(f"   {empresa['nombre']}: {estado_ant} → {estado_new}")
     
     conn.commit()
     conn.close()
     
     print(f"\n{'='*70}")
-    print(f"✅ RE-VALIDACIÓN COMPLETADA")
+    print(f" RE-VALIDACIÓN COMPLETADA")
     print(f"{'='*70}")
-    print(f"📊 Total empresas: {len(empresas)}")
-    print(f"🔄 Actualizadas: {actualizadas}")
-    print(f"📈 Válidas antes: {validas_antes} ({round(validas_antes/len(empresas)*100, 1)}%)")
-    print(f"📈 Válidas ahora: {validas_despues} ({round(validas_despues/len(empresas)*100, 1)}%)")
-    print(f"✨ Mejora: +{validas_despues - validas_antes} empresas contactables")
+    print(f" Total empresas: {len(empresas)}")
+    print(f" Actualizadas: {actualizadas}")
+    print(f" Válidas antes: {validas_antes} ({round(validas_antes/len(empresas)*100, 1)}%)")
+    print(f" Válidas ahora: {validas_despues} ({round(validas_despues/len(empresas)*100, 1)}%)")
+    print(f" Mejora: +{validas_despues - validas_antes} empresas contactables")
     print(f"{'='*70}\n")
 
 if __name__ == "__main__":

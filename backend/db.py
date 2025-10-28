@@ -73,7 +73,7 @@ def init_db_b2b():
         conn.commit()
         conn.close()
         
-        logger.info(f"✓ Base de datos B2B inicializada: {DATABASE_PATH}")
+        logger.info(f" Base de datos B2B inicializada: {DATABASE_PATH}")
         return True
         
     except Exception as e:
@@ -121,7 +121,7 @@ def insertar_empresa(empresa: Dict) -> bool:
         conn.commit()
         conn.close()
         
-        logger.debug(f"✓ Empresa guardada: {empresa.get('nombre')}")
+        logger.debug(f" Empresa guardada: {empresa.get('nombre')}")
         return True
         
     except Exception as e:
@@ -141,7 +141,7 @@ def obtener_todas_empresas() -> List[Dict]:
         empresas = [dict(row) for row in rows]
         conn.close()
         
-        logger.info(f"✓ Recuperadas {len(empresas)} empresas")
+        logger.info(f" Recuperadas {len(empresas)} empresas")
         return empresas
         
     except Exception as e:
@@ -189,7 +189,7 @@ def buscar_empresas(
         empresas = [dict(row) for row in rows]
         conn.close()
         
-        logger.info(f"✓ Búsqueda: {len(empresas)} resultados")
+        logger.info(f" Búsqueda: {len(empresas)} resultados")
         return empresas
         
     except Exception as e:
@@ -319,7 +319,7 @@ def exportar_a_csv(rubro: Optional[str] = None, solo_validas: bool = True) -> st
                 
                 writer.writerow(empresa_formatted)
         
-        logger.info(f"✓ CSV exportado: {output_path} ({len(empresas)} registros)")
+        logger.info(f" CSV exportado: {output_path} ({len(empresas)} registros)")
         return output_path
         
     except Exception as e:
@@ -350,7 +350,7 @@ def exportar_a_json(rubro: Optional[str] = None, solo_validas: bool = True) -> s
         with open(output_path, 'w', encoding='utf-8') as jsonfile:
             json.dump(empresas_formatted, jsonfile, indent=2, ensure_ascii=False, default=str)
         
-        logger.info(f"✓ JSON exportado: {output_path} ({len(empresas)} registros)")
+        logger.info(f" JSON exportado: {output_path} ({len(empresas)} registros)")
         return output_path
         
     except Exception as e:
@@ -369,7 +369,7 @@ def limpiar_base_datos() -> bool:
         conn.commit()
         conn.close()
         
-        logger.info(f"✓ Base de datos limpiada: {deleted_count} empresas eliminadas")
+        logger.info(f" Base de datos limpiada: {deleted_count} empresas eliminadas")
         return True
         
     except Exception as e:

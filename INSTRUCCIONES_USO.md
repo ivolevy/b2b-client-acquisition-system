@@ -1,6 +1,6 @@
-# 🚀 INSTRUCCIONES DE USO - Sistema B2B
+#  INSTRUCCIONES DE USO - Sistema B2B
 
-## ⚡ Inicio Rápido (30 segundos)
+##  Inicio Rápido (30 segundos)
 
 ```bash
 cd "/Users/ivanlevy/Desktop/untitled folder 3"
@@ -8,16 +8,16 @@ python3 ejemplo_rapido.py
 ```
 
 Este comando:
-1. ✅ Busca empresas de un rubro
-2. ✅ Valida emails y teléfonos
-3. ✅ Guarda en base de datos
-4. ✅ Exporta a CSV y JSON
+1.  Busca empresas de un rubro
+2.  Valida emails y teléfonos
+3.  Guarda en base de datos
+4.  Exporta a CSV y JSON
 
 ---
 
-## 📋 3 Formas de Usar el Sistema
+##  3 Formas de Usar el Sistema
 
-### 1️⃣ Script Interactivo (Más Fácil)
+### 1⃣ Script Interactivo (Más Fácil)
 
 ```bash
 python3 buscar_clientes_b2b.py
@@ -38,7 +38,7 @@ python3 buscar_clientes_b2b.py
 
 ---
 
-### 2️⃣ Ejemplo Rápido (Recomendado para Empezar)
+### 2⃣ Ejemplo Rápido (Recomendado para Empezar)
 
 ```bash
 python3 ejemplo_rapido.py
@@ -61,7 +61,7 @@ CIUDAD = "Barcelona"      # Cambiar ciudad
 
 ---
 
-### 3️⃣ API REST (Para Integración)
+### 3⃣ API REST (Para Integración)
 
 ```bash
 cd backend
@@ -96,7 +96,7 @@ POST http://localhost:8000/exportar
 
 ---
 
-## 🎯 Rubros Disponibles
+##  Rubros Disponibles
 
 Puedes buscar empresas en estos rubros:
 
@@ -115,7 +115,7 @@ Puedes buscar empresas en estos rubros:
 
 ---
 
-## 💡 Ejemplos de Búsqueda
+##  Ejemplos de Búsqueda
 
 ### Ejemplo 1: Desarrolladoras en Madrid
 
@@ -149,47 +149,47 @@ empresas = buscar_empresas(
 
 ---
 
-## ✅ Sistema de Validación
+##  Sistema de Validación
 
 ### ¿Qué se Valida?
 
 **Email:**
-- ✅ Formato válido (RFC 5322)
-- ✅ No falsos (example.com, test.com)
-- ✅ No spam (noreply@, no-reply@)
+-  Formato válido (RFC 5322)
+-  No falsos (example.com, test.com)
+-  No spam (noreply@, no-reply@)
 
 **Teléfono:**
-- ✅ Entre 7-15 dígitos
-- ✅ Formatos internacionales
-- ✅ No falsos (000000, 111111)
+-  Entre 7-15 dígitos
+-  Formatos internacionales
+-  No falsos (000000, 111111)
 
 **Empresa Válida:**
-- ✅ Tiene nombre
-- ✅ Tiene email válido **O** teléfono válido
+-  Tiene nombre
+-  Tiene email válido **O** teléfono válido
 
 ---
 
-## 📊 Ejemplo de Resultado
+##  Ejemplo de Resultado
 
 ```
-📊 RESULTADOS DE VALIDACIÓN:
+ RESULTADOS DE VALIDACIÓN:
    Total encontradas:  45
    Válidas:            32 (71.11%)
    Con email válido:   28
    Con teléfono válido: 30
    Con website:        25
 
-[1] 🏢 Constructora ABC S.A.
+[1]  Constructora ABC S.A.
     Rubro: Empresas Constructoras
-    📧 contacto@constructoraabc.com
-    📞 +34 91 123 4567
-    🌐 https://www.constructoraabc.com
-    📍 Madrid, España
+     contacto@constructoraabc.com
+     +34 91 123 4567
+     https://www.constructoraabc.com
+     Madrid, España
 ```
 
 ---
 
-## 📥 Exportación
+##  Exportación
 
 ### CSV (Para Excel/CRM)
 
@@ -223,7 +223,7 @@ data/empresas_b2b_tecnologia_20241014_153045.json
 
 ---
 
-## 🔧 Personalización
+##  Personalización
 
 ### Cambiar Rubro y Ciudad
 
@@ -252,7 +252,7 @@ resultados = buscar_empresas_multiples_rubros(
 
 ---
 
-## 🚨 Solución de Problemas
+##  Solución de Problemas
 
 ### Error: No se encontraron empresas
 
@@ -279,7 +279,7 @@ pip install -r requirements.txt
 
 ---
 
-## 📚 Documentación Completa
+##  Documentación Completa
 
 - `README_B2B.md` - Documentación técnica completa
 - `TRANSFORMACION_B2B_COMPLETADA.md` - Resumen de cambios
@@ -287,7 +287,7 @@ pip install -r requirements.txt
 
 ---
 
-## 🎯 Flujo Recomendado
+##  Flujo Recomendado
 
 ```
 1. Ejecuta ejemplo_rapido.py
@@ -307,7 +307,7 @@ pip install -r requirements.txt
 
 ---
 
-## ✨ Tips Avanzados
+##  Tips Avanzados
 
 ### 1. Solo Empresas con Email
 
@@ -343,7 +343,7 @@ stats = obtener_estadisticas()
 
 ---
 
-## 🏁 Comenzar Ahora
+##  Comenzar Ahora
 
 ```bash
 # 1. Ejecuta el ejemplo
@@ -358,5 +358,5 @@ cd backend && source venv/bin/activate && python main_b2b.py
 
 ---
 
-**🎉 ¡Sistema listo para captar clientes B2B con datos validados!**
+** ¡Sistema listo para captar clientes B2B con datos validados!**
 

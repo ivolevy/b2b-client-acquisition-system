@@ -1,34 +1,34 @@
-# 🏢 B2B Client Acquisition System
+#  B2B Client Acquisition System
 
 Sistema profesional de adquisición de clientes B2B con integración de OpenStreetMap para búsqueda geolocalizada de empresas, validación automática de contactos y gestión de leads.
 
-## 🌟 Características Principales
+##  Características Principales
 
-### 🔍 Búsqueda Inteligente
+###  Búsqueda Inteligente
 - **Búsqueda Geolocalizada**: Encuentra empresas por ubicación en mapa interactivo
 - **Filtros Avanzados**: Por rubro, ciudad, estado de validación
 - **Radio Personalizable**: Define el área de búsqueda
 - **OpenStreetMap Integration**: Datos en tiempo real de negocios locales
 
-### ✅ Validación Automática
+###  Validación Automática
 - **Validación de Emails**: Verificación de formato automática
 - **Validación de Teléfonos**: Comprobación de números válidos
 - **Scoring de Leads**: Puntuación automática según completitud de datos
 - **Estados de Contacto**: Sistema de seguimiento de interacciones
 
-### 📊 Visualización
+###  Visualización
 - **Vista de Tabla**: Lista completa con filtros y ordenamiento
 - **Vista de Mapa**: Visualización geográfica con Leaflet
 - **Dashboard**: Estadísticas y métricas clave
 - **Modo Oscuro**: Tema claro/oscuro
 
-### 📥 Exportación
+###  Exportación
 - **CSV Excel-Compatible**: Exportación con UTF-8 BOM
 - **Campos Personalizables**: Selecciona qué datos exportar
 - **Templates Email Marketing**: Listo para Mailchimp/Sendinblue
 - **Exportación a WhatsApp**: Compartir contactos directo
 
-## 🚀 Inicio Rápido
+##  Inicio Rápido
 
 ### Requisitos Previos
 - Python 3.8+
@@ -83,7 +83,7 @@ npm run dev
 
 Abre tu navegador en `http://localhost:5173`
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 b2b-client-acquisition-system/
@@ -113,7 +113,7 @@ b2b-client-acquisition-system/
 └── README.md
 ```
 
-## 🛠️ Tecnologías
+##  Tecnologías
 
 ### Backend
 - **FastAPI**: Framework web moderno y rápido
@@ -128,7 +128,7 @@ b2b-client-acquisition-system/
 - **Leaflet**: Mapas interactivos
 - **CSS Variables**: Theming system
 
-## 📋 Uso
+##  Uso
 
 ### 1. Buscar Empresas
 1. Selecciona un rubro del dropdown
@@ -143,16 +143,16 @@ b2b-client-acquisition-system/
 - **Por Contacto**: Con email, teléfono o ambos
 
 ### 3. Exportar Datos
-- Click en "📥 Exportar CSV"
+- Click en " Exportar CSV"
 - Los datos se descargan con formato Excel-compatible
 - Headers en español, valores legibles
 
 ### 4. Ver en Mapa
-- Toggle "🗺️ Mapa" para vista geográfica
+- Toggle " Mapa" para vista geográfica
 - Markers clickeables con info completa
 - Zoom y navegación interactiva
 
-## 🔧 Configuración
+##  Configuración
 
 ### Rubros Disponibles
 El sistema soporta múltiples rubros de negocio:
@@ -174,7 +174,7 @@ La base de datos SQLite almacena:
 - Coordenadas geográficas
 - Redes sociales
 
-## 🤝 Contribuir
+##  Contribuir
 
 Las contribuciones son bienvenidas! Por favor:
 
@@ -184,7 +184,7 @@ Las contribuciones son bienvenidas! Por favor:
 4. Push a la branch (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
-## 📝 Roadmap
+##  Roadmap
 
 ### Próximas Funcionalidades
 - [ ] Extracción automática de redes sociales
@@ -198,17 +198,17 @@ Las contribuciones son bienvenidas! Por favor:
 - [ ] Templates de email marketing
 - [ ] Modo oscuro completo
 
-## 📄 Licencia
+##  Licencia
 
 Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 
-## 👨‍💻 Autor
+## ‍ Autor
 
 **Ivan Levy**
 - GitHub: [@ivolevy](https://github.com/ivolevy)
 - Repo: [b2b-client-acquisition-system](https://github.com/ivolevy/b2b-client-acquisition-system)
 
-## 🙏 Agradecimientos
+##  Agradecimientos
 
 - [OpenStreetMap](https://www.openstreetmap.org/) por los datos geográficos
 - [Overpass API](https://overpass-api.de/) por la consulta de datos

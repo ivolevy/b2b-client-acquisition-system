@@ -19,11 +19,11 @@ function TableViewB2B({ empresas }) {
   if (empresas.length === 0) {
     return (
       <div className="empty-state">
-        <div className="empty-icon">🏢</div>
+        <div className="empty-icon"></div>
         <h3>No hay empresas para mostrar</h3>
         <p>Selecciona un rubro empresarial y busca en OpenStreetMap</p>
         <p style={{ fontSize: '14px', marginTop: '10px', color: '#666' }}>
-          💡 El sistema valida automáticamente emails y teléfonos
+           El sistema valida automáticamente emails y teléfonos
         </p>
       </div>
     );
@@ -34,7 +34,7 @@ function TableViewB2B({ empresas }) {
       <div className="table-header">
         <h2>Empresas B2B: {empresas.length} resultados</h2>
         <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '6px', fontWeight: 'normal' }}>
-          📊 Empresas encontradas en OpenStreetMap
+           Empresas encontradas en OpenStreetMap
         </div>
       </div>
 
@@ -60,7 +60,7 @@ function TableViewB2B({ empresas }) {
                   {empresa.nombre || 'Sin nombre'}
                   {empresa.direccion && (
                     <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                      📍 {empresa.direccion}
+                       {empresa.direccion}
                     </div>
                   )}
                 </td>
@@ -93,7 +93,7 @@ function TableViewB2B({ empresas }) {
                       rel="noopener noreferrer"
                       className="link"
                     >
-                      🔗 Ver sitio
+                       Ver sitio
                     </a>
                   ) : (
                     <span className="no-data">Sin web</span>

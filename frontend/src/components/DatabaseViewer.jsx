@@ -90,15 +90,15 @@ function DatabaseViewer({ empresas, stats, onClose }) {
     <div className="db-viewer-overlay" onClick={onClose}>
       <div className="db-viewer-modal" onClick={(e) => e.stopPropagation()}>
         <div className="db-viewer-header">
-          <h2>💾 Vista de Base de Datos SQLite</h2>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <h2> Vista de Base de Datos SQLite</h2>
+          <button className="close-btn" onClick={onClose}></button>
         </div>
 
         <div className="db-viewer-content">
           {/* Estadísticas */}
           <div className="db-stats">
             <div className="stat-card">
-              <div className="stat-icon">📊</div>
+              <div className="stat-icon"></div>
               <div className="stat-info">
                 <div className="stat-value">{stats.total || 0}</div>
                 <div className="stat-label">Total Empresas</div>
@@ -107,7 +107,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
             
             
             <div className="stat-card blue">
-              <div className="stat-icon">📧</div>
+              <div className="stat-icon"></div>
               <div className="stat-info">
                 <div className="stat-value">{stats.con_email || 0}</div>
                 <div className="stat-label">Con Email</div>
@@ -115,7 +115,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
             </div>
             
             <div className="stat-card purple">
-              <div className="stat-icon">📞</div>
+              <div className="stat-icon"></div>
               <div className="stat-info">
                 <div className="stat-value">{stats.con_telefono || 0}</div>
                 <div className="stat-label">Con Teléfono</div>
@@ -123,7 +123,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
             </div>
             
             <div className="stat-card green">
-              <div className="stat-icon">🌐</div>
+              <div className="stat-icon"></div>
               <div className="stat-info">
                 <div className="stat-value">{stats.con_website || 0}</div>
                 <div className="stat-label">Con Website</div>
@@ -133,7 +133,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
 
           {/* Info de la DB */}
           <div className="db-info">
-            <h3>📂 Información de la Base de Datos</h3>
+            <h3> Información de la Base de Datos</h3>
             <div className="info-grid">
               <div className="info-item">
                 <strong>Tipo:</strong> SQLite
@@ -153,7 +153,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
           {/* Controles de Filtrado y Búsqueda */}
           <div className="db-controls">
             <div className="search-bar">
-              <span className="search-icon">🔍</span>
+              <span className="search-icon"></span>
               <input
                 type="text"
                 placeholder="Buscar por nombre, email, teléfono o dirección..."
@@ -164,7 +164,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                 }}
               />
               {searchTerm && (
-                <button className="clear-search" onClick={() => setSearchTerm('')}>✕</button>
+                <button className="clear-search" onClick={() => setSearchTerm('')}></button>
               )}
             </div>
 
@@ -177,7 +177,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                 }}
                 className="filter-select"
               >
-                <option value="">🏢 Todos los rubros</option>
+                <option value=""> Todos los rubros</option>
                 {rubrosUnicos.map(rubro => (
                   <option key={rubro} value={rubro}>{rubro}</option>
                 ))}
@@ -185,7 +185,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
 
 
               <button className="btn-clear-filters" onClick={clearFilters}>
-                🔄 Limpiar Filtros
+                 Limpiar Filtros
               </button>
             </div>
 
@@ -200,8 +200,8 @@ function DatabaseViewer({ empresas, stats, onClose }) {
             {empresasFiltradas.length === 0 ? (
               <p className="empty-message">
                 {searchTerm || filterRubro ? 
-                  '🔍 No se encontraron empresas con los filtros aplicados' : 
-                  '📭 No hay registros en la base de datos'
+                  ' No se encontraron empresas con los filtros aplicados' : 
+                  ' No hay registros en la base de datos'
                 }
               </p>
             ) : (
@@ -233,7 +233,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                             <td className="empresa-nombre">
                               <div>{empresa.nombre}</div>
                               {empresa.direccion && (
-                                <div className="direccion-small">📍 {empresa.direccion}</div>
+                                <div className="direccion-small"> {empresa.direccion}</div>
                               )}
                             </td>
                             <td><span className="rubro-badge">{empresa.rubro}</span></td>
@@ -258,7 +258,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                             <td>
                               {empresa.website ? (
                                 <a href={empresa.website} target="_blank" rel="noopener noreferrer" className="website-link">
-                                  🌐 Ver sitio
+                                   Ver sitio
                                 </a>
                               ) : (
                                 <span className="empty-field">Sin website</span>
@@ -272,7 +272,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                                     onClick={() => copyToClipboard(empresa.email)}
                                     title="Copiar email"
                                   >
-                                    📋
+                                    
                                   </button>
                                 )}
                                 <button 
@@ -291,11 +291,11 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                                 <div className="detail-content">
                                   <div className="detail-grid">
                                     <div className="detail-item">
-                                      <strong>📍 Dirección:</strong>
+                                      <strong> Dirección:</strong>
                                       <span>{empresa.direccion || 'No disponible'}</span>
                                     </div>
                                     <div className="detail-item">
-                                      <strong>🌐 Sitio Web:</strong>
+                                      <strong> Sitio Web:</strong>
                                       {empresa.sitio_web ? (
                                         <a href={empresa.sitio_web} target="_blank" rel="noopener noreferrer">
                                           {empresa.sitio_web}
@@ -305,7 +305,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                                       )}
                                     </div>
                                     <div className="detail-item">
-                                      <strong>💼 LinkedIn:</strong>
+                                      <strong> LinkedIn:</strong>
                                       {empresa.linkedin ? (
                                         <a href={empresa.linkedin} target="_blank" rel="noopener noreferrer">
                                           Ver perfil
@@ -315,7 +315,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                                       )}
                                     </div>
                                     <div className="detail-item">
-                                      <strong>📱 Redes:</strong>
+                                      <strong> Redes:</strong>
                                       <span>
                                         {(empresa.instagram || empresa.facebook || empresa.twitter || empresa.youtube || empresa.tiktok) ? (
                                           <span style={{ display: 'inline-flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -331,7 +331,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
                                       </span>
                                     </div>
                                     <div className="detail-item">
-                                      <strong>🗺️ Coordenadas:</strong>
+                                      <strong> Coordenadas:</strong>
                                       <span>
                                         {empresa.latitud && empresa.longitud ? 
                                           `${empresa.latitud}, ${empresa.longitud}` : 

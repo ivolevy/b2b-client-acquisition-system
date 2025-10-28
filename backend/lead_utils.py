@@ -104,13 +104,13 @@ def detectar_duplicado(empresa_nueva: Dict, empresas_existentes: List[Dict]) -> 
         # Criterio 1: Mismo nombre + misma ciudad
         if nombre_nuevo and ciudad_nueva:
             if nombre_nuevo == nombre_existente and ciudad_nueva == ciudad_existente:
-                logger.warning(f"🔄 Duplicado detectado: {nombre_nuevo} en {ciudad_nueva}")
+                logger.warning(f" Duplicado detectado: {nombre_nuevo} en {ciudad_nueva}")
                 return (True, empresa_existente)
         
         # Criterio 2: Mismo email (si no está vacío)
         if email_nuevo and email_existente:
             if email_nuevo == email_existente:
-                logger.warning(f"🔄 Duplicado detectado por email: {email_nuevo}")
+                logger.warning(f" Duplicado detectado por email: {email_nuevo}")
                 return (True, empresa_existente)
         
         # Criterio 3: Mismo teléfono (si no está vacío)
@@ -121,13 +121,13 @@ def detectar_duplicado(empresa_nueva: Dict, empresas_existentes: List[Dict]) -> 
             
             if tel_nuevo_limpio and tel_existente_limpio:
                 if tel_nuevo_limpio == tel_existente_limpio:
-                    logger.warning(f"🔄 Duplicado detectado por teléfono: {telefono_nuevo}")
+                    logger.warning(f" Duplicado detectado por teléfono: {telefono_nuevo}")
                     return (True, empresa_existente)
         
         # Criterio 4: Mismo website
         if website_nuevo and website_existente:
             if website_nuevo == website_existente:
-                logger.warning(f"🔄 Duplicado detectado por website: {website_nuevo}")
+                logger.warning(f" Duplicado detectado por website: {website_nuevo}")
                 return (True, empresa_existente)
     
     return (False, None)
@@ -159,13 +159,13 @@ def fusionar_empresas(empresa_existente: Dict, empresa_nueva: Dict) -> Dict:
         # Si existente está vacío y nuevo tiene valor, actualizar
         if not valor_existente and valor_nuevo:
             fusionada[campo] = valor_nuevo
-            logger.info(f"  ✏️  Actualizado campo '{campo}': {valor_nuevo}")
+            logger.info(f"    Actualizado campo '{campo}': {valor_nuevo}")
     
     # Recalcular score
     nuevo_score = calcular_lead_score(fusionada)
     fusionada['lead_score'] = nuevo_score
     
-    logger.info(f"✅ Empresa fusionada. Nuevo score: {nuevo_score}")
+    logger.info(f" Empresa fusionada. Nuevo score: {nuevo_score}")
     
     return fusionada
 
@@ -198,13 +198,13 @@ def procesar_lead_nuevo(empresa: Dict, empresas_existentes: List[Dict] = None) -
     
     # Log del score
     clasificacion = clasificar_por_score(score)
-    logger.info(f"📊 Lead '{empresa.get('nombre')}': Score {score}/100 ({clasificacion})")
+    logger.info(f" Lead '{empresa.get('nombre')}': Score {score}/100 ({clasificacion})")
     
     # Detectar duplicados si se pasan empresas existentes
     if empresas_existentes:
         es_duplicado, empresa_duplicada = detectar_duplicado(empresa, empresas_existentes)
         if es_duplicado:
-            logger.warning(f"⚠️  Lead duplicado detectado: {empresa.get('nombre')}")
+            logger.warning(f"  Lead duplicado detectado: {empresa.get('nombre')}")
             empresa['_es_duplicado'] = True
             empresa['_duplicado_de_id'] = empresa_duplicada.get('id')
     
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     }
     
     empresa_procesada = procesar_lead_nuevo(empresa_test)
-    print(f"\n✅ Empresa procesada:")
+    print(f"\n Empresa procesada:")
     print(f"   Score: {empresa_procesada['lead_score']}/100")
     print(f"   Estado: {empresa_procesada['estado']}")
     print(f"   Clasificación: {clasificar_por_score(empresa_procesada['lead_score'])}")

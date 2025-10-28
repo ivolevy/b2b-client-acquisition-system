@@ -150,11 +150,11 @@ def validar_empresa(empresa: Dict) -> Tuple[bool, Dict, str]:
     empresa_validada['validada'] = True
     
     if email_valido and tel_valido:
-        mensaje = "✓ Email y teléfono válidos"
+        mensaje = " Email y teléfono válidos"
     elif email_valido:
-        mensaje = "✓ Email válido"
+        mensaje = " Email válido"
     elif tel_valido:
-        mensaje = "✓ Teléfono válido"
+        mensaje = " Teléfono válido"
     
     return True, empresa_validada, mensaje
 
@@ -173,10 +173,10 @@ def filtrar_empresas_validas(empresas: list) -> Tuple[list, Dict]:
         
         if es_valida:
             validas.append(empresa_validada)
-            logger.info(f"✓ {empresa['nombre']}: {mensaje}")
+            logger.info(f" {empresa['nombre']}: {mensaje}")
         else:
             invalidas.append(empresa)
-            logger.warning(f"✗ {empresa.get('nombre', 'Sin nombre')}: {mensaje}")
+            logger.warning(f" {empresa.get('nombre', 'Sin nombre')}: {mensaje}")
     
     estadisticas = {
         'total': len(empresas),

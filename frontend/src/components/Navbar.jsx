@@ -10,7 +10,7 @@ function Navbar({ onExport, onViewDatabase, onClearDatabase, stats }) {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-brand">
-          <h1>🏢 B2B Client Acquisition System</h1>
+          <h1> B2B Client Acquisition System</h1>
           {stats && (
             <span className="navbar-stats">
               {stats.total || stats.total_properties || 0} empresas · {stats.validadas || 0} validadas
@@ -20,15 +20,15 @@ function Navbar({ onExport, onViewDatabase, onClearDatabase, stats }) {
         
         <div className="navbar-actions">
           <button className="export-btn" onClick={onExport}>
-            📥 Exportar
+             Exportar
           </button>
           
           <button className="db-viewer-btn" onClick={onViewDatabase}>
-            💾 Ver BD
+             Ver BD
           </button>
           
           <button className="clear-btn" onClick={onClearDatabase}>
-            🗑️ Borrar BD
+             Borrar BD
           </button>
         </div>
       </div>
