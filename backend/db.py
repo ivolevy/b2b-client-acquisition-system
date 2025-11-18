@@ -65,10 +65,103 @@ def init_db_b2b():
             )
         ''')
         
+        # Tabla de templates de email
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS email_templates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT NOT NULL UNIQUE,
+                subject TEXT NOT NULL,
+                body_html TEXT NOT NULL,
+                body_text TEXT,
+                es_default INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        # Tabla de historial de emails enviados
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS email_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                empresa_id INTEGER,
+                empresa_nombre TEXT,
+                empresa_email TEXT,
+                template_id INTEGER,
+                template_nombre TEXT,
+                subject TEXT,
+                status TEXT,
+                error_message TEXT,
+                sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (empresa_id) REFERENCES empresas(id),
+                FOREIGN KEY (template_id) REFERENCES email_templates(id)
+            )
+        ''')
+        
         # Índices para búsquedas rápidas
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_rubro ON empresas(rubro_key)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_ciudad ON empresas(ciudad)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_email ON empresas(email)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_email_history_empresa ON email_history(empresa_id)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_email_history_template ON email_history(template_id)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_email_history_sent ON email_history(sent_at)')
+        
+        # Crear templates por defecto si no existen
+        cursor.execute('SELECT COUNT(*) FROM email_templates')
+        if cursor.fetchone()[0] == 0:
+            templates_default = [
+                (
+                    'Presentación Dota Solutions',
+                    'Hola equipo de {nombre_empresa} - Oportunidad de colaboración',
+                    '''<html>
+<body style="font-family: Arial, sans-serif; line-height: 1.8; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 8px; padding: 30px;">
+        <p style="font-size: 16px; margin-bottom: 20px;">Hola equipo de <strong>{nombre_empresa}</strong>, ¿cómo están?</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">Mi nombre es <strong>Ivan Levy</strong>, CTO de <strong>Dota Solutions</strong>, somos una agencia que desarrolla soluciones de software a medida.</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">Estuvimos analizando <strong>{rubro}</strong> y realmente nos pareció muy innovador — creemos que están ofreciendo una propuesta con gran potencial en el sector.</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">Queremos ofrecerles nuestros servicios, nos dedicamos a resolver soluciones digitales, sean sitios webs, sistemas de gestión, análisis de datos, automatizaciones y demás.</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">Nos encantaría coordinar una breve charla para mostrarles el enfoque y ver cómo podríamos trabajar codo a codo en este proyecto.</p>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <p style="font-size: 16px; margin-bottom: 5px;">Un saludo,</p>
+            <p style="font-size: 16px; margin-bottom: 5px;"><strong>Ivan Levy</strong></p>
+            <p style="font-size: 14px; color: #6b7280; margin-bottom: 5px;">CTO – Dota Solutions</p>
+            <p style="font-size: 14px; margin-bottom: 5px;">
+                <a href="https://www.linkedin.com/in/ivan-levy/" style="color: #2563eb; text-decoration: none;">LinkedIn: https://www.linkedin.com/in/ivan-levy/</a>
+            </p>
+            <p style="font-size: 14px; margin-bottom: 0;">
+                <a href="https://www.dotasolutions.agency/" style="color: #2563eb; text-decoration: none;">Sitio web: https://www.dotasolutions.agency/</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>''',
+                    '''Hola equipo de {nombre_empresa}, ¿cómo están?
+
+Mi nombre es Ivan Levy, CTO de Dota Solutions, somos una agencia que desarrolla soluciones de software a medida.
+
+Estuvimos analizando {rubro} y realmente nos pareció muy innovador — creemos que están ofreciendo una propuesta con gran potencial en el sector.
+
+Queremos ofrecerles nuestros servicios, nos dedicamos a resolver soluciones digitales, sean sitios webs, sistemas de gestión, análisis de datos, automatizaciones y demás.
+
+Nos encantaría coordinar una breve charla para mostrarles el enfoque y ver cómo podríamos trabajar codo a codo en este proyecto.
+
+Un saludo,
+Ivan Levy
+CTO – Dota Solutions
+
+LinkedIn: https://www.linkedin.com/in/ivan-levy/
+Sitio web: https://www.dotasolutions.agency/'''
+                )
+            ]
+            for nombre, subject, body_html, body_text in templates_default:
+                cursor.execute('''
+                    INSERT INTO email_templates (nombre, subject, body_html, body_text, es_default)
+                    VALUES (?, ?, ?, ?, 1)
+                ''', (nombre, subject, body_html, body_text))
         
         conn.commit()
         conn.close()
@@ -375,4 +468,193 @@ def limpiar_base_datos() -> bool:
     except Exception as e:
         logger.error(f"Error limpiando base de datos: {e}")
         return False
+
+# ========== FUNCIONES PARA EMAIL TEMPLATES ==========
+
+def obtener_templates() -> List[Dict]:
+    """Obtiene todos los templates de email"""
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT * FROM email_templates ORDER BY nombre')
+        rows = cursor.fetchall()
+        
+        templates = [dict(row) for row in rows]
+        conn.close()
+        
+        return templates
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo templates: {e}")
+        return []
+
+def obtener_template(template_id: int) -> Optional[Dict]:
+    """Obtiene un template por ID"""
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT * FROM email_templates WHERE id = ?', (template_id,))
+        row = cursor.fetchone()
+        
+        conn.close()
+        
+        return dict(row) if row else None
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo template: {e}")
+        return None
+
+def crear_template(nombre: str, subject: str, body_html: str, body_text: Optional[str] = None) -> Optional[int]:
+    """Crea un nuevo template"""
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT INTO email_templates (nombre, subject, body_html, body_text, updated_at)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (nombre, subject, body_html, body_text, datetime.now()))
+        
+        template_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        logger.info(f" Template creado: {nombre} (ID: {template_id})")
+        return template_id
+        
+    except sqlite3.IntegrityError:
+        logger.error(f"Template '{nombre}' ya existe")
+        return None
+    except Exception as e:
+        logger.error(f"Error creando template: {e}")
+        return None
+
+def actualizar_template(template_id: int, nombre: Optional[str] = None, subject: Optional[str] = None, 
+                       body_html: Optional[str] = None, body_text: Optional[str] = None) -> bool:
+    """Actualiza un template"""
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        updates = []
+        params = []
+        
+        if nombre:
+            updates.append('nombre = ?')
+            params.append(nombre)
+        if subject:
+            updates.append('subject = ?')
+            params.append(subject)
+        if body_html:
+            updates.append('body_html = ?')
+            params.append(body_html)
+        if body_text is not None:
+            updates.append('body_text = ?')
+            params.append(body_text)
+        
+        if not updates:
+            conn.close()
+            return False
+        
+        updates.append('updated_at = ?')
+        params.append(datetime.now())
+        params.append(template_id)
+        
+        query = f'UPDATE email_templates SET {", ".join(updates)} WHERE id = ?'
+        cursor.execute(query, params)
+        
+        conn.commit()
+        conn.close()
+        
+        logger.info(f" Template actualizado: ID {template_id}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error actualizando template: {e}")
+        return False
+
+def eliminar_template(template_id: int) -> bool:
+    """Elimina un template"""
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute('DELETE FROM email_templates WHERE id = ?', (template_id,))
+        deleted = cursor.rowcount > 0
+        
+        conn.commit()
+        conn.close()
+        
+        if deleted:
+            logger.info(f" Template eliminado: ID {template_id}")
+        return deleted
+        
+    except Exception as e:
+        logger.error(f"Error eliminando template: {e}")
+        return False
+
+# ========== FUNCIONES PARA EMAIL HISTORY ==========
+
+def guardar_email_history(empresa_id: int, empresa_nombre: str, empresa_email: str,
+                         template_id: int, template_nombre: str, subject: str,
+                         status: str, error_message: Optional[str] = None) -> bool:
+    """Guarda un registro en el historial de emails"""
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT INTO email_history 
+            (empresa_id, empresa_nombre, empresa_email, template_id, template_nombre, 
+             subject, status, error_message)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (empresa_id, empresa_nombre, empresa_email, template_id, template_nombre,
+              subject, status, error_message))
+        
+        conn.commit()
+        conn.close()
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error guardando historial: {e}")
+        return False
+
+def obtener_email_history(empresa_id: Optional[int] = None, template_id: Optional[int] = None,
+                         limit: int = 100) -> List[Dict]:
+    """Obtiene el historial de emails enviados"""
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        query = 'SELECT * FROM email_history WHERE 1=1'
+        params = []
+        
+        if empresa_id:
+            query += ' AND empresa_id = ?'
+            params.append(empresa_id)
+        
+        if template_id:
+            query += ' AND template_id = ?'
+            params.append(template_id)
+        
+        query += ' ORDER BY sent_at DESC LIMIT ?'
+        params.append(limit)
+        
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        
+        history = [dict(row) for row in rows]
+        conn.close()
+        
+        return history
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo historial: {e}")
+        return []
 

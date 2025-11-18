@@ -27,8 +27,16 @@ from db import (
     obtener_estadisticas,
     exportar_a_csv,
     exportar_a_json,
-    limpiar_base_datos
+    limpiar_base_datos,
+    obtener_templates,
+    obtener_template,
+    crear_template,
+    actualizar_template,
+    eliminar_template,
+    guardar_email_history,
+    obtener_email_history
 )
+from email_service import enviar_email_empresa, enviar_emails_masivo
 
 # Configurar logging
 log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
@@ -94,6 +102,29 @@ class ActualizarEstadoRequest(BaseModel):
 class ActualizarNotasRequest(BaseModel):
     id: int
     notas: str
+
+class TemplateRequest(BaseModel):
+    nombre: str
+    subject: str
+    body_html: str
+    body_text: Optional[str] = None
+
+class TemplateUpdateRequest(BaseModel):
+    nombre: Optional[str] = None
+    subject: Optional[str] = None
+    body_html: Optional[str] = None
+    body_text: Optional[str] = None
+
+class EnviarEmailRequest(BaseModel):
+    empresa_id: int
+    template_id: int
+    asunto_personalizado: Optional[str] = None
+
+class EnviarEmailMasivoRequest(BaseModel):
+    empresa_ids: List[int]
+    template_id: int
+    asunto_personalizado: Optional[str] = None
+    delay_segundos: float = 1.0
 
 # Inicializar BD
 @app.on_event("startup")
@@ -438,6 +469,240 @@ async def actualizar_notas(request: ActualizarNotasRequest):
         
     except Exception as e:
         logger.error(f"Error actualizando notas: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ========== ENDPOINTS DE EMAIL TEMPLATES ==========
+
+@app.get("/templates")
+async def listar_templates():
+    """Lista todos los templates de email"""
+    try:
+        templates = obtener_templates()
+        return {
+            "success": True,
+            "total": len(templates),
+            "data": templates
+        }
+    except Exception as e:
+        logger.error(f"Error listando templates: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/templates/{template_id}")
+async def obtener_template_endpoint(template_id: int):
+    """Obtiene un template por ID"""
+    try:
+        template = obtener_template(template_id)
+        if not template:
+            raise HTTPException(status_code=404, detail="Template no encontrado")
+        return {
+            "success": True,
+            "data": template
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error obteniendo template: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/templates")
+async def crear_template_endpoint(request: TemplateRequest):
+    """Crea un nuevo template"""
+    try:
+        template_id = crear_template(
+            nombre=request.nombre,
+            subject=request.subject,
+            body_html=request.body_html,
+            body_text=request.body_text
+        )
+        if not template_id:
+            raise HTTPException(status_code=400, detail="Error creando template. Verifica que el nombre no exista.")
+        return {
+            "success": True,
+            "message": "Template creado exitosamente",
+            "template_id": template_id
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creando template: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/templates/{template_id}")
+async def actualizar_template_endpoint(template_id: int, request: TemplateUpdateRequest):
+    """Actualiza un template"""
+    try:
+        success = actualizar_template(
+            template_id=template_id,
+            nombre=request.nombre,
+            subject=request.subject,
+            body_html=request.body_html,
+            body_text=request.body_text
+        )
+        if not success:
+            raise HTTPException(status_code=404, detail="Template no encontrado")
+        return {
+            "success": True,
+            "message": "Template actualizado exitosamente"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error actualizando template: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/templates/{template_id}")
+async def eliminar_template_endpoint(template_id: int):
+    """Elimina un template"""
+    try:
+        success = eliminar_template(template_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Template no encontrado")
+        return {
+            "success": True,
+            "message": "Template eliminado exitosamente"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error eliminando template: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ========== ENDPOINTS DE ENVÍO DE EMAILS ==========
+
+@app.post("/email/enviar")
+async def enviar_email_individual(request: EnviarEmailRequest):
+    """Envía un email individual a una empresa"""
+    try:
+        import sqlite3
+        
+        # Obtener empresa
+        conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), '..', 'data', 'empresas_b2b.db'))
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM empresas WHERE id = ?', (request.empresa_id,))
+        empresa_row = cursor.fetchone()
+        conn.close()
+        
+        if not empresa_row:
+            raise HTTPException(status_code=404, detail="Empresa no encontrada")
+        
+        empresa = dict(empresa_row)
+        
+        # Obtener template
+        template = obtener_template(request.template_id)
+        if not template:
+            raise HTTPException(status_code=404, detail="Template no encontrado")
+        
+        # Enviar email
+        resultado = enviar_email_empresa(
+            empresa=empresa,
+            template=template,
+            asunto_personalizado=request.asunto_personalizado
+        )
+        
+        # Guardar en historial
+        guardar_email_history(
+            empresa_id=empresa['id'],
+            empresa_nombre=empresa.get('nombre', ''),
+            empresa_email=empresa.get('email', ''),
+            template_id=template['id'],
+            template_nombre=template.get('nombre', ''),
+            subject=resultado.get('message', ''),
+            status='success' if resultado['success'] else 'error',
+            error_message=resultado.get('error')
+        )
+        
+        if not resultado['success']:
+            raise HTTPException(status_code=400, detail=resultado['message'])
+        
+        return {
+            "success": True,
+            "message": resultado['message'],
+            "data": resultado
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error enviando email: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/email/enviar-masivo")
+async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
+    """Envía emails a múltiples empresas"""
+    try:
+        import sqlite3
+        
+        # Obtener empresas
+        conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), '..', 'data', 'empresas_b2b.db'))
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        placeholders = ','.join(['?'] * len(request.empresa_ids))
+        cursor.execute(f'SELECT * FROM empresas WHERE id IN ({placeholders})', request.empresa_ids)
+        empresas_rows = cursor.fetchall()
+        conn.close()
+        
+        empresas = [dict(row) for row in empresas_rows]
+        
+        if len(empresas) != len(request.empresa_ids):
+            raise HTTPException(status_code=404, detail="Algunas empresas no fueron encontradas")
+        
+        # Obtener template
+        template = obtener_template(request.template_id)
+        if not template:
+            raise HTTPException(status_code=404, detail="Template no encontrado")
+        
+        # Enviar emails
+        resultados = enviar_emails_masivo(
+            empresas=empresas,
+            template=template,
+            asunto_personalizado=request.asunto_personalizado,
+            delay_segundos=request.delay_segundos
+        )
+        
+        # Guardar en historial
+        for detalle in resultados['detalles']:
+            if 'empresa_id' in detalle:
+                guardar_email_history(
+                    empresa_id=detalle['empresa_id'],
+                    empresa_nombre=detalle.get('empresa_nombre', ''),
+                    empresa_email=detalle.get('empresa_email', ''),
+                    template_id=template['id'],
+                    template_nombre=template.get('nombre', ''),
+                    subject=template.get('subject', ''),
+                    status='success' if detalle.get('success') else 'error',
+                    error_message=detalle.get('error')
+                )
+        
+        return {
+            "success": True,
+            "message": f"Proceso completado: {resultados['exitosos']} exitosos, {resultados['fallidos']} fallidos",
+            "data": resultados
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error enviando emails masivos: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/email/historial")
+async def obtener_historial_email(empresa_id: Optional[int] = None, template_id: Optional[int] = None, limit: int = 100):
+    """Obtiene el historial de emails enviados"""
+    try:
+        historial = obtener_email_history(
+            empresa_id=empresa_id,
+            template_id=template_id,
+            limit=limit
+        )
+        return {
+            "success": True,
+            "total": len(historial),
+            "data": historial
+        }
+    except Exception as e:
+        logger.error(f"Error obteniendo historial: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

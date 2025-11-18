@@ -5,6 +5,10 @@ import FiltersB2B from './components/FiltersB2B';
 import TableViewB2B from './components/TableViewB2B';
 import MapView from './components/MapView';
 import DatabaseViewer from './components/DatabaseViewer';
+import EmailSender from './components/EmailSender';
+import TemplateEditor from './components/TemplateEditor';
+import TemplateManager from './components/TemplateManager';
+import DatabasePanel from './components/DatabasePanel';
 import './App.css';
 
 const API_URL = 'http://localhost:8000';
@@ -17,6 +21,9 @@ function AppB2B() {
   const [stats, setStats] = useState(null);
   const [rubros, setRubros] = useState({});
   const [showDatabaseViewer, setShowDatabaseViewer] = useState(false);
+  const [showEmailSender, setShowEmailSender] = useState(false);
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [showDatabasePanel, setShowDatabasePanel] = useState(false);
 
   useEffect(() => {
     loadEmpresas();
@@ -142,6 +149,96 @@ function AppB2B() {
     }
   };
 
+  const handleDownloadDatabase = async () => {
+    try {
+      // Obtener todas las empresas de la base de datos
+      const response = await axios.get(`${API_URL}/empresas`);
+      const todasLasEmpresas = response.data.data || [];
+
+      if (todasLasEmpresas.length === 0) {
+        alert('No hay empresas en la base de datos para descargar');
+        return;
+      }
+
+      // Función para escapar valores CSV correctamente
+      const escapeCSV = (value) => {
+        if (value === null || value === undefined) return '';
+        const stringValue = String(value);
+        // Si contiene comillas, comas o saltos de línea, debe ir entre comillas
+        if (stringValue.includes('"') || stringValue.includes(',') || stringValue.includes('\n')) {
+          // Duplicar las comillas dobles y envolver en comillas
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      };
+
+      // Headers completos con todos los campos importantes
+      const headers = [
+        'ID', 'Nombre', 'Rubro', 'Email', 'Email Válido', 
+        'Teléfono', 'Teléfono Válido', 'Dirección', 'Ciudad', 'País', 'Código Postal',
+        'Sitio Web', 'LinkedIn', 'Facebook', 'Twitter', 'Instagram', 'YouTube', 'TikTok',
+        'Estado', 'Descripción', 'Latitud', 'Longitud', 'Fecha Creación', 'Fecha Actualización'
+      ];
+
+      // Mapear los datos de las empresas
+      const rows = todasLasEmpresas.map(e => [
+        e.id || '',
+        e.nombre || '',
+        e.rubro || '',
+        e.email || '',
+        e.email_valido ? 'Sí' : 'No',
+        e.telefono || '',
+        e.telefono_valido ? 'Sí' : 'No',
+        e.direccion || '',
+        e.ciudad || '',
+        e.pais || '',
+        e.codigo_postal || '',
+        e.sitio_web || e.website || '',
+        e.linkedin || '',
+        e.facebook || '',
+        e.twitter || '',
+        e.instagram || '',
+        e.youtube || '',
+        e.tiktok || '',
+        e.validada ? 'Válida' : 'Pendiente',
+        e.descripcion || '',
+        e.latitud || '',
+        e.longitud || '',
+        e.created_at || '',
+        e.updated_at || ''
+      ]);
+
+      // Construir el CSV con valores escapados correctamente
+      const csvContent = [
+        headers.map(escapeCSV).join(','),
+        ...rows.map(row => row.map(escapeCSV).join(','))
+      ].join('\n');
+
+      // Agregar BOM UTF-8 para que Excel reconozca correctamente los caracteres especiales
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+      link.setAttribute('href', url);
+      link.setAttribute('download', `base_datos_completa_${timestamp}.csv`);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Limpiar la URL después de la descarga
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+      
+      alert(`Base de datos descargada exitosamente: ${todasLasEmpresas.length} empresas exportadas`);
+    } catch (error) {
+      console.error('Error descargando base de datos:', error);
+      alert('Error al descargar la base de datos');
+    }
+  };
+
   const exportToCSVFrontend = () => {
     if (filteredEmpresas.length === 0) {
       alert('No hay datos para exportar');
@@ -252,6 +349,7 @@ function AppB2B() {
         onExport={exportToCSVFrontend}
         onViewDatabase={() => setShowDatabaseViewer(true)}
         onClearDatabase={handleClearDatabase}
+        onOpenDatabasePanel={() => setShowDatabasePanel(true)}
         stats={stats}
       />
       
@@ -274,12 +372,19 @@ function AppB2B() {
           </div>
         )}
 
-        {view === 'table' && (
-          <TableViewB2B empresas={filteredEmpresas} />
-        )}
-        {view === 'map' && (
-          <MapView properties={filteredEmpresas} />
-        )}
+      {view === 'table' && (
+        <TableViewB2B empresas={filteredEmpresas} />
+      )}
+      {view === 'map' && (
+        <MapView properties={filteredEmpresas} />
+      )}
+      {view === 'emails' && (
+        <EmailSender
+          empresas={filteredEmpresas}
+          onClose={() => setView('table')}
+          embedded={true}
+        />
+      )}
       </main>
 
       {showDatabaseViewer && (
@@ -287,6 +392,34 @@ function AppB2B() {
           empresas={empresas}
           stats={stats || { total: 0, con_email: 0, con_telefono: 0, con_website: 0 }}
           onClose={() => setShowDatabaseViewer(false)}
+        />
+      )}
+
+      {showEmailSender && (
+        <EmailSender
+          empresas={filteredEmpresas}
+          onClose={() => setShowEmailSender(false)}
+        />
+      )}
+
+      {showTemplateManager && (
+        <TemplateManager
+          onClose={() => setShowTemplateManager(false)}
+        />
+      )}
+
+      {showDatabasePanel && (
+        <DatabasePanel
+          onViewDatabase={() => {
+            setShowDatabasePanel(false);
+            setShowDatabaseViewer(true);
+          }}
+          onDownloadDatabase={() => {
+            handleDownloadDatabase();
+            setShowDatabasePanel(false);
+          }}
+          onClearDatabase={handleClearDatabase}
+          onClose={() => setShowDatabasePanel(false)}
         />
       )}
     </div>

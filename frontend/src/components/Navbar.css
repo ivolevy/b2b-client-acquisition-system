@@ -45,8 +45,7 @@
 
 .help-btn,
 .export-btn,
-.db-viewer-btn,
-.clear-btn {
+.db-btn {
   background: white;
   border: 2px solid var(--gray-200);
   color: var(--gray-700);
@@ -88,33 +87,20 @@
 
 .help-btn:hover,
 .export-btn:hover,
-.db-viewer-btn:hover,
-.clear-btn:hover {
+.db-btn:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
-.db-viewer-btn {
-  background: var(--primary);
-  border-color: var(--primary);
+.db-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
   color: white;
 }
 
-.db-viewer-btn:hover {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
-  box-shadow: var(--shadow-pink);
-}
-
-.clear-btn {
-  background: var(--secondary);
-  border-color: var(--secondary);
-  color: white;
-}
-
-.clear-btn:hover {
-  background: var(--gray-900);
-  border-color: var(--gray-900);
+.db-btn:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 /* eliminado soporte de tema oscuro */
