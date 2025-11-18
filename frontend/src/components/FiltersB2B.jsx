@@ -159,13 +159,6 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
             >
                Mapa
             </button>
-            <button 
-              type="button"
-              className={view === 'dashboard' ? 'active' : ''}
-              onClick={() => setView('dashboard')}
-            >
-               Dashboard
-            </button>
           </div>
         </div>
         <form onSubmit={handleFiltrarSubmit}>

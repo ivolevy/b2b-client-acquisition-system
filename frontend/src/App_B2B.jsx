@@ -4,7 +4,6 @@ import Navbar from './components/Navbar';
 import FiltersB2B from './components/FiltersB2B';
 import TableViewB2B from './components/TableViewB2B';
 import MapView from './components/MapView';
-import Dashboard from './components/Dashboard';
 import DatabaseViewer from './components/DatabaseViewer';
 import './App.css';
 
@@ -280,9 +279,6 @@ function AppB2B() {
         )}
         {view === 'map' && (
           <MapView properties={filteredEmpresas} />
-        )}
-        {view === 'dashboard' && (
-          <Dashboard empresas={filteredEmpresas} />
         )}
       </main>
 

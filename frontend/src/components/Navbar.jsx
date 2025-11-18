@@ -11,11 +11,6 @@ function Navbar({ onExport, onViewDatabase, onClearDatabase, stats }) {
       <div className="navbar-container">
         <div className="navbar-brand">
           <h1> B2B Client Acquisition System</h1>
-          {stats && (
-            <span className="navbar-stats">
-              {stats.total || stats.total_properties || 0} empresas · {stats.validadas || 0} validadas
-            </span>
-          )}
         </div>
         
         <div className="navbar-actions">
