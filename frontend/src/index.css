@@ -106,13 +106,26 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+  background: linear-gradient(180deg, #e5e7eb 0%, #d1d5db 100%);
   color: var(--gray-900);
   line-height: 1.6;
   min-height: 100vh;
   overscroll-behavior: none;
   -webkit-overscroll-behavior: none;
   transition: background-color 0.3s ease, color 0.3s ease;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.15);
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* Controles de formulario globales - estilo consistente en todo el sitio */

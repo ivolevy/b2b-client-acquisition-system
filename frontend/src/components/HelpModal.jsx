@@ -135,7 +135,7 @@ function HelpModal({ onClose }) {
                 <li>El sistema está configurado para usar <code>solutionsdota@gmail.com</code> por defecto</li>
                 <li>Las variables necesarias son: <code>SMTP_PASSWORD</code></li>
               </ol>
-            </div>
+          </div>
           </section>
 
         </div>

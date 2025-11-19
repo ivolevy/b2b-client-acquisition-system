@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './Navbar.css';
 import HelpModal from './HelpModal';
 
-function Navbar({ onExport, onViewDatabase, onClearDatabase, onOpenDatabasePanel, stats }) {
+function Navbar({ onViewDatabase, onClearDatabase, onOpenDatabasePanel, stats }) {
   const [showHelp, setShowHelp] = useState(false);
 
   return (
@@ -14,10 +14,6 @@ function Navbar({ onExport, onViewDatabase, onClearDatabase, onOpenDatabasePanel
         </div>
         
         <div className="navbar-actions">
-          <button className="export-btn" onClick={onExport}>
-             Exportar
-          </button>
-          
           <button className="db-btn" onClick={onOpenDatabasePanel}>
              Base de Datos
           </button>

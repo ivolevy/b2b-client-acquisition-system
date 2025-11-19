@@ -346,7 +346,6 @@ function AppB2B() {
   return (
     <div className="app">
       <Navbar 
-        onExport={exportToCSVFrontend}
         onViewDatabase={() => setShowDatabaseViewer(true)}
         onClearDatabase={handleClearDatabase}
         onOpenDatabasePanel={() => setShowDatabasePanel(true)}

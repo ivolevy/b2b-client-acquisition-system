@@ -19,6 +19,7 @@ from overpass_client import (
 )
 from scraper import enriquecer_empresa_b2b
 from social_scraper import enriquecer_con_redes_sociales
+from scraper_parallel import enriquecer_empresas_paralelo
 from db import (
     init_db_b2b, 
     insertar_empresa, 
@@ -206,23 +207,14 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         logger.info(f" Encontradas {len(empresas)} empresas en OSM")
         
-        # Enriquecer con scraping si está habilitado
+        # Enriquecer con scraping paralelo si está habilitado
         if request.scrapear_websites:
-            empresas_enriquecidas = []
-            for empresa in empresas:
-                if empresa.get('website'):
-                    logger.info(f" Enriqueciendo: {empresa.get('nombre')}")
-                    # Enriquecer con datos de scraping
-                    empresa = enriquecer_empresa_b2b(empresa)
-                    
-                    # Extraer redes sociales
-                    sitio_web = empresa.get('website') or empresa.get('sitio_web')
-                    if sitio_web:
-                        redes = enriquecer_con_redes_sociales(sitio_web)
-                        empresa.update(redes)  # Agregar instagram, facebook, twitter, etc.
-                        
-                empresas_enriquecidas.append(empresa)
-            empresas = empresas_enriquecidas
+            logger.info(" Iniciando enriquecimiento paralelo de empresas...")
+            empresas = enriquecer_empresas_paralelo(
+                empresas=empresas,
+                max_workers=5,  # 5 threads paralelos (ajustable según necesidades)
+                timeout_por_empresa=30
+            )
         
         # Guardar todas las empresas encontradas
         for empresa in empresas:

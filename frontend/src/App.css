@@ -2,7 +2,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--gray-50);
+  background: rgba(244, 244, 245, 0.85);
+  position: relative;
 }
 
 .main-content {
