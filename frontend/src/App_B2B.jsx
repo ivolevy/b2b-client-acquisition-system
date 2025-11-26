@@ -9,6 +9,8 @@ import EmailSender from './components/EmailSender';
 import TemplateEditor from './components/TemplateEditor';
 import TemplateManager from './components/TemplateManager';
 import DatabasePanel from './components/DatabasePanel';
+import ToastContainer from './components/ToastContainer';
+import { useToast } from './hooks/useToast';
 import './App.css';
 
 const API_URL = 'http://localhost:8000';
@@ -24,6 +26,7 @@ function AppB2B() {
   const [showEmailSender, setShowEmailSender] = useState(false);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
   const [showDatabasePanel, setShowDatabasePanel] = useState(false);
+  const { toasts, success, error, warning, removeToast } = useToast();
 
   useEffect(() => {
     loadEmpresas();
@@ -72,22 +75,53 @@ function AppB2B() {
         const validas = response.data.validas || 0;
         const total = response.data.total_encontradas || 0;
         const guardadas = response.data.guardadas || 0;
+        const empresasEncontradas = response.data.data || [];
         
         if (total === 0) {
-          alert(' No se encontraron empresas en esa área.\n\nIntenta:\n• Aumentar el radio de búsqueda\n• Elegir otra ubicación\n• Probar otro rubro');
-        } else if (validas === 0) {
-          alert(` Se encontraron ${total} empresas pero NINGUNA tiene datos de contacto válidos.\n\n Desmarca la opción "Solo empresas con email O teléfono válido" para verlas todas.`);
+          warning(
+            <>
+              <strong>No se encontraron empresas en esa área</strong>
+              <ul>
+                <li>Aumentar el radio de búsqueda</li>
+                <li>Elegir otra ubicación</li>
+                <li>Probar otro rubro</li>
+              </ul>
+            </>
+          );
+        } else if (validas === 0 && params.solo_validadas) {
+          warning(
+            <>
+              <strong>Se encontraron {total} empresas</strong>
+              <p>Pero ninguna tiene datos de contacto válidos.</p>
+              <p>Desmarca la opción "Solo empresas con email O teléfono válido" para verlas todas.</p>
+            </>
+          );
         } else {
-          alert(` ${guardadas} empresas guardadas (${validas} con contacto válido de ${total} encontradas)`);
+          if (params.solo_validadas) {
+            success(
+              <>
+                <strong>{guardadas} empresas guardadas</strong>
+                <p>Todas con contacto válido (de {total} encontradas)</p>
+              </>
+            );
+          } else {
+            success(
+              <>
+                <strong>{guardadas} empresas guardadas</strong>
+                <p>{validas} con contacto válido de {total} encontradas</p>
+              </>
+            );
+          }
         }
         
+        // Cargar todas las empresas de la base de datos para actualizar la vista completa
         await loadEmpresas();
         await loadStats();
       }
     } catch (error) {
       console.error('Error al buscar empresas:', error);
       const errorMsg = error.response?.data?.detail || error.message;
-      alert(' Error al buscar empresas:\n\n' + errorMsg);
+      error(`Error al buscar empresas:\n\n${errorMsg}`);
     } finally {
       setLoading(false);
     }
@@ -95,7 +129,8 @@ function AppB2B() {
 
   const handleFiltrar = async (filters) => {
     // Si no hay filtros, mostrar todas las empresas
-    if (!filters.rubro && !filters.ciudad && !filters.con_email && !filters.con_telefono && !filters.solo_validas && !filters.solo_pendientes) {
+    if (!filters.rubro && !filters.ciudad && !filters.con_email && !filters.con_telefono && 
+        !filters.distancia && !filters.con_redes) {
       setFilteredEmpresas(empresas);
       return;
     }
@@ -121,13 +156,31 @@ function AppB2B() {
       filtered = filtered.filter(e => e.telefono && e.telefono.trim() !== '');
     }
 
-    // Filtro por estado de validación
-    if (filters.solo_validas) {
-      filtered = filtered.filter(e => e.validada === true || e.validada === 1);
+    // Filtro por distancia
+    if (filters.distancia !== null && filters.distancia !== undefined) {
+      const distanciaValue = parseFloat(filters.distancia);
+      if (!isNaN(distanciaValue)) {
+        if (filters.distancia_operador === 'mayor') {
+          filtered = filtered.filter(e => 
+            e.distancia_km !== null && e.distancia_km !== undefined && e.distancia_km > distanciaValue
+          );
+        } else if (filters.distancia_operador === 'menor') {
+          filtered = filtered.filter(e => 
+            e.distancia_km !== null && e.distancia_km !== undefined && e.distancia_km < distanciaValue
+          );
+        }
+      }
     }
 
-    if (filters.solo_pendientes) {
-      filtered = filtered.filter(e => !e.validada || e.validada === false || e.validada === 0);
+    // Filtro por redes sociales
+    if (filters.con_redes === 'con') {
+      filtered = filtered.filter(e => 
+        e.instagram || e.facebook || e.twitter || e.linkedin || e.youtube || e.tiktok
+      );
+    } else if (filters.con_redes === 'sin') {
+      filtered = filtered.filter(e => 
+        !e.instagram && !e.facebook && !e.twitter && !e.linkedin && !e.youtube && !e.tiktok
+      );
     }
 
     setFilteredEmpresas(filtered);
@@ -177,7 +230,10 @@ function AppB2B() {
         'ID', 'Nombre', 'Rubro', 'Email', 'Email Válido', 
         'Teléfono', 'Teléfono Válido', 'Dirección', 'Ciudad', 'País', 'Código Postal',
         'Sitio Web', 'LinkedIn', 'Facebook', 'Twitter', 'Instagram', 'YouTube', 'TikTok',
-        'Estado', 'Descripción', 'Latitud', 'Longitud', 'Fecha Creación', 'Fecha Actualización'
+        'Estado', 'Descripción', 'Latitud', 'Longitud',
+        'Ubicación de Búsqueda', 'Centro Búsqueda (Lat)', 'Centro Búsqueda (Lng)', 
+        'Radio Búsqueda (km)', 'Distancia (km)',
+        'Fecha Creación', 'Fecha Actualización'
       ];
 
       // Mapear los datos de las empresas
@@ -204,6 +260,11 @@ function AppB2B() {
         e.descripcion || '',
         e.latitud || '',
         e.longitud || '',
+        e.busqueda_ubicacion_nombre || '',
+        e.busqueda_centro_lat || '',
+        e.busqueda_centro_lng || '',
+        e.busqueda_radio_km || '',
+        e.distancia_km !== null && e.distancia_km !== undefined ? e.distancia_km.toFixed(2) : '',
         e.created_at || '',
         e.updated_at || ''
       ]);
@@ -260,8 +321,10 @@ function AppB2B() {
     // Headers completos con todos los campos importantes
     const headers = [
       'ID', 'Nombre', 'Rubro', 'Email', 'Email Válido', 
-      'Teléfono', 'Teléfono Válido', 'Dirección', 'Ciudad', 'País',
-      'Sitio Web', 'LinkedIn', 'Estado', 'Fecha Creación'
+      'Teléfono', 'Teléfono Válido', 'Dirección', 'Ciudad', 'País', 'Código Postal',
+      'Sitio Web', 'LinkedIn', 'Estado',
+      'Ubicación de Búsqueda', 'Distancia (km)',
+      'Fecha Creación'
     ];
 
     // Mapear los datos de las empresas
@@ -276,9 +339,12 @@ function AppB2B() {
       e.direccion || '',
       e.ciudad || '',
       e.pais || '',
+      e.codigo_postal || '',
       e.sitio_web || e.website || '',
       e.linkedin || '',
       e.validada ? 'Válida' : 'Pendiente',
+      e.busqueda_ubicacion_nombre || '',
+      e.distancia_km !== null && e.distancia_km !== undefined ? e.distancia_km.toFixed(2) : '',
       e.created_at || e.fecha_creacion || ''
     ]);
 
@@ -306,38 +372,51 @@ function AppB2B() {
     // Limpiar la URL después de la descarga
     setTimeout(() => URL.revokeObjectURL(url), 100);
     
-    alert(` Se exportaron ${filteredEmpresas.length} empresas a CSV`);
+    success(
+      <>
+        <strong>Exportación completada</strong>
+        <p>Se exportaron {filteredEmpresas.length} empresas a CSV</p>
+      </>
+    );
   };
 
   const handleClearResults = () => {
-    if (!window.confirm(' ¿Limpiar los resultados mostrados?\n\nEsto solo limpia la vista. Los datos permanecen en la base de datos.')) {
-      return;
-    }
-    
     setEmpresas([]);
     setFilteredEmpresas([]);
     setStats({ total: 0, validadas: 0 });
-    alert(' Resultados limpiados de la vista');
+    info(
+      <>
+        <strong>Resultados limpiados</strong>
+        <p>La vista ha sido limpiada. Los datos permanecen en la base de datos.</p>
+      </>
+    );
   };
 
   const handleClearDatabase = async () => {
-    if (!window.confirm(' ¿ELIMINAR TODAS las empresas de la base de datos?\n\n Esta acción es PERMANENTE y no se puede deshacer.\n\nSe perderán todos los datos guardados.')) {
-      return;
-    }
-
     try {
       setLoading(true);
       const response = await axios.delete(`${API_URL}/clear`);
       
       if (response.data.success) {
-        alert(' Base de datos eliminada correctamente');
+        success(
+          <>
+            <strong>Base de datos eliminada correctamente</strong>
+            <p>Todas las empresas han sido eliminadas de la base de datos.</p>
+          </>
+        );
         setEmpresas([]);
         setFilteredEmpresas([]);
         await loadStats();
       }
     } catch (error) {
       console.error('Error al limpiar base de datos:', error);
-      alert(' Error al limpiar la base de datos');
+      const errorMsg = error.response?.data?.detail || error.message;
+      error(
+        <>
+          <strong>Error al limpiar la base de datos</strong>
+          <p>{errorMsg}</p>
+        </>
+      );
     } finally {
       setLoading(false);
     }
@@ -371,19 +450,19 @@ function AppB2B() {
           </div>
         )}
 
-      {view === 'table' && (
-        <TableViewB2B empresas={filteredEmpresas} />
-      )}
-      {view === 'map' && (
-        <MapView properties={filteredEmpresas} />
-      )}
+        {view === 'table' && (
+          <TableViewB2B empresas={filteredEmpresas} />
+        )}
+        {view === 'map' && (
+          <MapView properties={filteredEmpresas} />
+        )}
       {view === 'emails' && (
         <EmailSender
           empresas={filteredEmpresas}
           onClose={() => setView('table')}
           embedded={true}
         />
-      )}
+        )}
       </main>
 
       {showDatabaseViewer && (
@@ -421,6 +500,8 @@ function AppB2B() {
           onClose={() => setShowDatabasePanel(false)}
         />
       )}
+
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

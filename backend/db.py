@@ -9,6 +9,7 @@ import json
 from typing import List, Dict, Optional
 from datetime import datetime
 import os
+import math
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,6 +43,13 @@ def init_db_b2b():
                 codigo_postal TEXT,
                 latitud REAL,
                 longitud REAL,
+                
+                -- Información de búsqueda
+                busqueda_ubicacion_nombre TEXT,
+                busqueda_centro_lat REAL,
+                busqueda_centro_lng REAL,
+                busqueda_radio_km REAL,
+                distancia_km REAL,
                 
                 -- Redes sociales
                 linkedin TEXT,
@@ -96,6 +104,32 @@ def init_db_b2b():
                 FOREIGN KEY (template_id) REFERENCES email_templates(id)
             )
         ''')
+        
+        # Cache de scraping para evitar requests repetidos
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS scraping_cache (
+                website TEXT PRIMARY KEY,
+                data_json TEXT,
+                status TEXT,
+                http_status INTEGER,
+                last_scraped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_scraping_cache_last ON scraping_cache(last_scraped_at)')
+        
+        # Migración: agregar campos de búsqueda si no existen (para bases de datos existentes)
+        try:
+            cursor.execute('SELECT busqueda_ubicacion_nombre FROM empresas LIMIT 1')
+        except sqlite3.OperationalError:
+            # Los campos no existen, agregarlos
+            logger.info(" Migrando base de datos: agregando campos de búsqueda...")
+            cursor.execute('ALTER TABLE empresas ADD COLUMN busqueda_ubicacion_nombre TEXT')
+            cursor.execute('ALTER TABLE empresas ADD COLUMN busqueda_centro_lat REAL')
+            cursor.execute('ALTER TABLE empresas ADD COLUMN busqueda_centro_lng REAL')
+            cursor.execute('ALTER TABLE empresas ADD COLUMN busqueda_radio_km REAL')
+            cursor.execute('ALTER TABLE empresas ADD COLUMN distancia_km REAL')
+            logger.info(" Migración completada: campos de búsqueda agregados")
         
         # Índices para búsquedas rápidas
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_rubro ON empresas(rubro_key)')
@@ -173,6 +207,41 @@ Sitio web: https://www.dotasolutions.agency/'''
         logger.error(f"Error inicializando BD: {e}")
         return False
 
+def calcular_distancia_km(lat1: float, lon1: float, lat2: float, lon2: float) -> Optional[float]:
+    """
+    Calcula la distancia en kilómetros entre dos puntos geográficos usando la fórmula de Haversine
+    
+    Args:
+        lat1, lon1: Coordenadas del primer punto (centro de búsqueda)
+        lat2, lon2: Coordenadas del segundo punto (empresa)
+    
+    Returns:
+        Distancia en kilómetros, o None si alguna coordenada es inválida
+    """
+    if not all(isinstance(coord, (int, float)) and not math.isnan(coord) 
+               for coord in [lat1, lon1, lat2, lon2]):
+        return None
+    
+    # Radio de la Tierra en kilómetros
+    R = 6371.0
+    
+    # Convertir grados a radianes
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+    
+    # Diferencia de latitud y longitud
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+    
+    # Fórmula de Haversine
+    a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    
+    distancia = R * c
+    return round(distancia, 2)  # Redondear a 2 decimales
+
 def insertar_empresa(empresa: Dict) -> bool:
     """Inserta empresa en base de datos"""
     try:
@@ -183,8 +252,10 @@ def insertar_empresa(empresa: Dict) -> bool:
             INSERT OR REPLACE INTO empresas 
             (nombre, rubro, rubro_key, email, telefono, website, direccion, ciudad, pais, 
              codigo_postal, latitud, longitud, linkedin, facebook, twitter, instagram, 
-             youtube, tiktok, descripcion, horario, osm_id, osm_type, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             youtube, tiktok, descripcion, horario, osm_id, osm_type, 
+             busqueda_ubicacion_nombre, busqueda_centro_lat, busqueda_centro_lng, 
+             busqueda_radio_km, distancia_km, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             empresa.get('nombre'),
             empresa.get('rubro'),
@@ -208,6 +279,11 @@ def insertar_empresa(empresa: Dict) -> bool:
             empresa.get('horario', ''),
             empresa.get('osm_id'),
             empresa.get('osm_type'),
+            empresa.get('busqueda_ubicacion_nombre'),
+            empresa.get('busqueda_centro_lat'),
+            empresa.get('busqueda_centro_lng'),
+            empresa.get('busqueda_radio_km'),
+            empresa.get('distancia_km'),
             datetime.now()
         ))
         
@@ -220,6 +296,80 @@ def insertar_empresa(empresa: Dict) -> bool:
     except Exception as e:
         logger.error(f"Error insertando empresa: {e}")
         return False
+
+
+def guardar_cache_scraping(
+    website: Optional[str],
+    data: Dict,
+    status: str = "success",
+    http_status: Optional[int] = None
+) -> bool:
+    """Guarda/actualiza cache de scraping por website"""
+    if not website:
+        return False
+    
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT INTO scraping_cache (website, data_json, status, http_status, last_scraped_at)
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(website) DO UPDATE SET
+                data_json=excluded.data_json,
+                status=excluded.status,
+                http_status=excluded.http_status,
+                last_scraped_at=CURRENT_TIMESTAMP
+        ''', (
+            website.strip(),
+            json.dumps(data or {}, ensure_ascii=False),
+            status,
+            http_status
+        ))
+        
+        conn.commit()
+        conn.close()
+        return True
+    
+    except Exception as e:
+        logger.error(f"Error guardando cache de scraping ({website}): {e}")
+        return False
+
+
+def obtener_cache_scraping(website: Optional[str]) -> Optional[Dict]:
+    """Obtiene cache de scraping para un website si existe"""
+    if not website:
+        return None
+    
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT * FROM scraping_cache WHERE website = ?', (website.strip(),))
+        row = cursor.fetchone()
+        conn.close()
+        
+        if not row:
+            return None
+        
+        data_json = row['data_json'] or '{}'
+        try:
+            cached_data = json.loads(data_json)
+        except json.JSONDecodeError:
+            cached_data = {}
+        
+        return {
+            'website': row['website'],
+            'status': row['status'],
+            'http_status': row['http_status'],
+            'last_scraped_at': row['last_scraped_at'],
+            'data': cached_data
+        }
+    
+    except Exception as e:
+        logger.error(f"Error obteniendo cache de scraping ({website}): {e}")
+        return None
 
 def obtener_todas_empresas() -> List[Dict]:
     """Obtiene todas las empresas"""
@@ -365,10 +515,12 @@ def exportar_a_csv(rubro: Optional[str] = None, solo_validas: bool = True) -> st
                 'id', 'nombre', 'rubro', 
                 'email', 'email_valido', 
                 'telefono', 'telefono_valido',
-                'direccion', 'ciudad', 'pais', 
+                'direccion', 'ciudad', 'pais', 'codigo_postal',
                 'sitio_web', 'linkedin', 'facebook', 'instagram', 'twitter', 'youtube', 'tiktok',
                 'validada', 'descripcion', 
                 'latitud', 'longitud',
+                'busqueda_ubicacion_nombre', 'busqueda_centro_lat', 'busqueda_centro_lng', 
+                'busqueda_radio_km', 'distancia_km',
                 'created_at'
             ]
             
@@ -386,6 +538,7 @@ def exportar_a_csv(rubro: Optional[str] = None, solo_validas: bool = True) -> st
                 'direccion': 'Dirección',
                 'ciudad': 'Ciudad',
                 'pais': 'País',
+                'codigo_postal': 'Código Postal',
                 'sitio_web': 'Sitio Web',
                 'linkedin': 'LinkedIn',
                 'facebook': 'Facebook',
@@ -397,6 +550,11 @@ def exportar_a_csv(rubro: Optional[str] = None, solo_validas: bool = True) -> st
                 'descripcion': 'Descripción',
                 'latitud': 'Latitud',
                 'longitud': 'Longitud',
+                'busqueda_ubicacion_nombre': 'Ubicación de Búsqueda',
+                'busqueda_centro_lat': 'Centro Búsqueda (Lat)',
+                'busqueda_centro_lng': 'Centro Búsqueda (Lng)',
+                'busqueda_radio_km': 'Radio Búsqueda (km)',
+                'distancia_km': 'Distancia (km)',
                 'created_at': 'Fecha Creación'
             }
             

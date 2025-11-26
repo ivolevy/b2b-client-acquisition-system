@@ -108,9 +108,13 @@ def validar_empresa(empresa: Dict) -> Tuple[bool, Dict, str]:
     mensaje = ""
     
     # Validar nombre (obligatorio)
-    if not empresa.get('nombre') or empresa['nombre'] == 'Sin nombre':
+    nombre = empresa.get('nombre', '').strip() if empresa.get('nombre') else ''
+    if not nombre or nombre == '' or nombre == 'Sin nombre' or len(nombre) < 2:
         empresa_validada['validada'] = False
         return False, empresa_validada, "Empresa sin nombre válido"
+    
+    # Guardar el nombre limpio
+    empresa_validada['nombre'] = nombre
     
     # Validar email
     email_valido, email_limpio = validar_email(empresa.get('email', ''))

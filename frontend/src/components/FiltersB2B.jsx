@@ -14,7 +14,9 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
   const [filtroCiudad, setFiltroCiudad] = useState('');
   const [filtroConEmail, setFiltroConEmail] = useState(false);
   const [filtroConTelefono, setFiltroConTelefono] = useState(false);
-  const [filtroValidacion, setFiltroValidacion] = useState('todas'); // 'todas', 'validadas', 'pendientes'
+  const [filtroDistancia, setFiltroDistancia] = useState('');
+  const [filtroDistanciaOperador, setFiltroDistanciaOperador] = useState('mayor'); // 'mayor', 'menor'
+  const [filtroConRedes, setFiltroConRedes] = useState('todas'); // 'todas', 'con', 'sin'
 
   const handleBuscarSubmit = (e) => {
     e.preventDefault();
@@ -33,7 +35,12 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
       rubro: rubro,
       bbox: locationData.bbox.bbox_string,
       scrapear_websites: scrapearWebsites,
-      solo_validadas: soloValidadas
+      solo_validadas: soloValidadas,
+      // Información de ubicación de búsqueda
+      busqueda_ubicacion_nombre: locationData.ubicacion_nombre || null,
+      busqueda_centro_lat: locationData.center?.lat || null,
+      busqueda_centro_lng: locationData.center?.lng || null,
+      busqueda_radio_km: locationData.radius ? (locationData.radius / 1000) : null // Convertir metros a km
     };
 
     onBuscar(params);
@@ -44,10 +51,11 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
     onFiltrar({
       rubro: filtroRubro || null,
       ciudad: filtroCiudad || null,
-      solo_validas: filtroValidacion === 'validadas',
-      solo_pendientes: filtroValidacion === 'pendientes',
       con_email: filtroConEmail,
-      con_telefono: filtroConTelefono
+      con_telefono: filtroConTelefono,
+      distancia: filtroDistancia ? parseFloat(filtroDistancia) : null,
+      distancia_operador: filtroDistancia ? filtroDistanciaOperador : null,
+      con_redes: filtroConRedes
     });
   };
 
@@ -56,7 +64,9 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
     setFiltroCiudad('');
     setFiltroConEmail(false);
     setFiltroConTelefono(false);
-    setFiltroValidacion('todas');
+    setFiltroDistancia('');
+    setFiltroDistanciaOperador('mayor');
+    setFiltroConRedes('todas');
     onFiltrar({});
   };
 
@@ -190,14 +200,36 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
               className="filter-input"
             />
 
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <select 
+                value={filtroDistanciaOperador} 
+                onChange={(e) => setFiltroDistanciaOperador(e.target.value)}
+                className="filter-input"
+                style={{ width: '90px', flexShrink: 0 }}
+              >
+                <option value="mayor">Mayor que</option>
+                <option value="menor">Menor que</option>
+              </select>
+              <input
+                type="number"
+                placeholder="Distancia (km)"
+                value={filtroDistancia}
+                onChange={(e) => setFiltroDistancia(e.target.value)}
+                min="0"
+                step="0.1"
+                className="filter-input"
+                style={{ width: '130px', flexShrink: 0 }}
+              />
+            </div>
+
             <select 
-              value={filtroValidacion} 
-              onChange={(e) => setFiltroValidacion(e.target.value)}
+              value={filtroConRedes} 
+              onChange={(e) => setFiltroConRedes(e.target.value)}
               className="filter-input"
             >
-              <option value="todas"> Todas</option>
-              <option value="validadas"> Válidas</option>
-              <option value="pendientes"> Pendientes</option>
+              <option value="todas">Todas las redes</option>
+              <option value="con">Con redes sociales</option>
+              <option value="sin">Sin redes sociales</option>
             </select>
 
             <label className="checkbox-inline">

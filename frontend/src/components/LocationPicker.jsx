@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Circle, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+import ToastContainer from './ToastContainer';
+import { useToast } from '../hooks/useToast';
 import './LocationPicker.css';
 
 // Arreglar iconos de Leaflet
@@ -46,6 +48,7 @@ function LocationPicker({ onLocationChange }) {
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [useGooglePlaces, setUseGooglePlaces] = useState(false);
+  const { toasts, success, error, warning, info, removeToast } = useToast();
 
   const suggestionsRef = useRef(null);
   const autocompleteRef = useRef(null);
@@ -97,7 +100,7 @@ function LocationPicker({ onLocationChange }) {
 
     const script = document.createElement('script');
     script.id = scriptId;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&language=es`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&language=es&loading=async`;
     script.async = true;
     script.defer = true;
     script.onload = initPlaces;
@@ -189,7 +192,7 @@ function LocationPicker({ onLocationChange }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLocationSelect = (latlng) => {
+  const handleLocationSelect = (latlng, ubicacionNombre = null) => {
     setSelectedLocation(latlng);
     
     const bbox = calculateBoundingBox(latlng.lat, latlng.lng, radius);
@@ -197,7 +200,8 @@ function LocationPicker({ onLocationChange }) {
     onLocationChange({
       center: latlng,
       radius: radius,
-      bbox: bbox
+      bbox: bbox,
+      ubicacion_nombre: ubicacionNombre || searchQuery || `Ubicación (${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)})`
     });
   };
 
@@ -240,9 +244,16 @@ function LocationPicker({ onLocationChange }) {
               sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
             }
             setMapCenter([lat, lng]);
-            handleLocationSelect({ lat, lng });
+            const nombreUbicacion = suggestion.full_label || suggestion.display_name || place?.formatted_address;
+            setSearchQuery(nombreUbicacion);
+            handleLocationSelect({ lat, lng }, nombreUbicacion);
           } else {
-            alert('No se pudo obtener esa dirección. Intenta nuevamente.');
+            error(
+              <>
+                <strong>Error al obtener dirección</strong>
+                <p>No se pudo obtener esa dirección. Intenta nuevamente.</p>
+              </>
+            );
           }
         }
       );
@@ -252,16 +263,24 @@ function LocationPicker({ onLocationChange }) {
     if (suggestion.lat != null && suggestion.lon != null) {
       const lat = parseFloat(suggestion.lat);
       const lng = parseFloat(suggestion.lon);
-      setSearchQuery(suggestion.full_label || suggestion.display_name);
+      const nombreUbicacion = suggestion.full_label || suggestion.display_name;
+      setSearchQuery(nombreUbicacion);
       setMapCenter([lat, lng]);
-      handleLocationSelect({ lat, lng });
+      handleLocationSelect({ lat, lng }, nombreUbicacion);
     }
   };
 
-  const handleAddressSubmit = async (e) => {
-    e.preventDefault();
+  const handleAddressSubmit = async (e = null) => {
+    if (e) {
+      e.preventDefault();
+    }
     if (!searchQuery || searchQuery.trim().length < 3) {
-      alert('Escribe al menos 3 caracteres para buscar una dirección.');
+      warning(
+        <>
+          <strong>Búsqueda muy corta</strong>
+          <p>Escribe al menos 3 caracteres para buscar una dirección.</p>
+        </>
+      );
       return;
     }
 
@@ -281,14 +300,20 @@ function LocationPicker({ onLocationChange }) {
           const result = data.results[0];
           setSearchQuery(result.formatted_address);
           const { lat, lng } = result.geometry.location;
+          const nombreUbicacion = result.formatted_address;
           setMapCenter([lat, lng]);
-          handleLocationSelect({ lat, lng });
+          handleLocationSelect({ lat, lng }, nombreUbicacion);
           if (window.google?.maps?.places) {
             sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
           }
           setSuggestions([]);
         } else {
-          alert('No se encontraron coincidencias para esa dirección.');
+          warning(
+            <>
+              <strong>No se encontraron resultados</strong>
+              <p>No se encontraron coincidencias para esa dirección. Intenta con otra búsqueda.</p>
+            </>
+          );
         }
         return;
       }
@@ -303,34 +328,119 @@ function LocationPicker({ onLocationChange }) {
           handleSuggestionSelect(formatted);
         }
       } else {
-        alert('No se encontraron coincidencias para esa dirección.');
+        warning(
+          <>
+            <strong>No se encontraron resultados</strong>
+            <p>No se encontraron coincidencias para esa dirección. Intenta con otra búsqueda.</p>
+          </>,
+          4000
+        );
       }
     } catch (error) {
       console.error('Error buscando dirección manual:', error);
-      alert('No se pudo buscar la dirección. Intenta nuevamente.');
+      error(
+        <>
+          <strong>Error en la búsqueda</strong>
+          <p>No se pudo buscar la dirección. Intenta nuevamente.</p>
+        </>
+      );
     } finally {
       setIsSearching(false);
     }
   };
 
+  const handleAddressKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleAddressSubmit();
+    }
+  };
+
   const handleUseCurrentLocation = () => {
-    if (navigator.geolocation) {
+    if (!navigator.geolocation) {
+      error(
+        <>
+          <strong>Geolocalización no disponible</strong>
+          <p>Tu navegador no soporta la geolocalización. Por favor, busca una dirección manualmente.</p>
+        </>
+      );
+      return;
+    }
+
+    // Mostrar mensaje de carga
+    const loadingToast = info('Obteniendo tu ubicación...');
+
+    // Primero intentar con opciones más permisivas (permite usar caché)
+    const tryGetLocation = (options, attempt = 1) => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          removeToast(loadingToast);
           const latlng = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
           setMapCenter([latlng.lat, latlng.lng]);
-          handleLocationSelect(latlng);
+          handleLocationSelect(latlng, 'Mi ubicación actual');
+          success(
+            <>
+              <strong>Ubicación obtenida</strong>
+              <p>Se ha establecido tu ubicación actual en el mapa.</p>
+            </>
+          );
         },
-        (error) => {
-          alert('No se pudo obtener tu ubicación: ' + error.message);
-        }
+        (err) => {
+          // Si falla con opciones permisivas y es el primer intento, intentar con high accuracy
+          if (attempt === 1 && !options.enableHighAccuracy) {
+            removeToast(loadingToast);
+            const retryToast = info('Intentando con mayor precisión...');
+            tryGetLocation({
+              enableHighAccuracy: true,
+              timeout: 15000,
+              maximumAge: 60000 // Permitir caché de hasta 1 minuto
+            }, 2);
+            setTimeout(() => removeToast(retryToast), 2000);
+            return;
+          }
+
+          removeToast(loadingToast);
+          let errorMessage = 'No se pudo obtener tu ubicación.';
+          let errorDetails = '';
+
+          switch (err.code) {
+            case err.PERMISSION_DENIED:
+              errorMessage = 'Permiso de ubicación denegado';
+              errorDetails = 'Por favor, permite el acceso a tu ubicación en la configuración del navegador. En Chrome/Edge: Configuración > Privacidad y seguridad > Ubicación. En Firefox: Configuración > Privacidad y seguridad > Permisos > Ubicación.';
+              break;
+            case err.POSITION_UNAVAILABLE:
+              errorMessage = 'Ubicación no disponible';
+              errorDetails = 'Tu ubicación no está disponible. Verifica que el GPS esté activado y que tengas señal. También puedes buscar una dirección manualmente.';
+              break;
+            case err.TIMEOUT:
+              errorMessage = 'Tiempo de espera agotado';
+              errorDetails = 'La solicitud de ubicación tardó demasiado. Verifica tu conexión y que el GPS esté activado, o busca una dirección manualmente.';
+              break;
+            default:
+              errorDetails = err.message || 'Error desconocido. Intenta buscar una dirección manualmente.';
+              break;
+          }
+
+          error(
+            <>
+              <strong>{errorMessage}</strong>
+              {errorDetails && <p>{errorDetails}</p>}
+            </>
+          );
+        },
+        options
       );
-    } else {
-      alert('Tu navegador no soporta geolocalización');
-    }
+    };
+
+    // Intentar primero con opciones más permisivas
+    tryGetLocation({
+      enableHighAccuracy: false,
+      timeout: 15000,
+      maximumAge: 300000 // Permitir caché de hasta 5 minutos
+    });
   };
 
   return (
@@ -348,7 +458,7 @@ function LocationPicker({ onLocationChange }) {
           </select>
         </div>
 
-        <form className="address-search" onSubmit={handleAddressSubmit}>
+        <div className="address-search" onKeyDown={handleAddressKeyDown}>
           <label htmlFor="address-input" className="visually-hidden"> Dirección para buscar</label>
           <div className="address-input-wrapper">
             <input
@@ -383,7 +493,7 @@ function LocationPicker({ onLocationChange }) {
               ))}
             </ul>
           )}
-        </form>
+        </div>
 
         <button type="button" className="btn-location" onClick={handleUseCurrentLocation}>
            Usar mi ubicación actual
@@ -422,6 +532,7 @@ function LocationPicker({ onLocationChange }) {
           </>
         )}
       </MapContainer>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

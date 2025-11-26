@@ -5,40 +5,135 @@ con rate limiting y manejo robusto de errores
 """
 
 import logging
-from typing import Dict, List
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import os
 import time
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta
 from threading import Lock
+from typing import Dict, List, Optional
+from urllib.parse import urlparse
 
 from scraper import enriquecer_empresa_b2b
 from social_scraper import enriquecer_con_redes_sociales
+from db import guardar_cache_scraping, obtener_cache_scraping, insertar_empresa
 
 logger = logging.getLogger(__name__)
 
-# Rate limiting: delay mínimo entre requests (segundos)
-MIN_DELAY_BETWEEN_REQUESTS = 0.5
+# Configuración ajustable mediante variables de entorno
+MIN_DELAY_PER_DOMAIN = float(os.getenv('SCRAPER_MIN_DELAY_SECONDS', '0.25'))
+CACHE_TTL_HOURS = int(os.getenv('SCRAPER_CACHE_TTL_HOURS', '168'))  # 7 días por defecto
+SYNC_BATCH_LIMIT = int(os.getenv('SCRAPER_SYNC_LIMIT', '25'))
+ENV_MAX_WORKERS = int(os.getenv('SCRAPER_MAX_WORKERS', '0'))
+DEFERRED_ENABLED = os.getenv('SCRAPER_ENABLE_DEFERRED', '1') == '1'
+DEFERRED_WORKERS = max(1, int(os.getenv('SCRAPER_DEFERRED_WORKERS', '3')))
 
-# Lock para sincronizar rate limiting
+CACHEABLE_FIELDS = [
+    'email', 'telefono', 'linkedin', 'facebook', 'twitter', 'instagram',
+    'youtube', 'tiktok', 'descripcion', 'horario'
+]
+
+# Locks y estado para rate limiting y cache
 rate_limit_lock = Lock()
-last_request_time = 0
+last_request_by_domain: Dict[str, float] = defaultdict(float)
+
+# Executor global para enriquecimiento diferido
+BACKGROUND_EXECUTOR = ThreadPoolExecutor(max_workers=DEFERRED_WORKERS) if DEFERRED_ENABLED else None
 
 
-def _rate_limited_request():
-    """Aplica rate limiting entre requests"""
-    global last_request_time
+def _resolver_max_workers(candidatos: int, max_workers: Optional[int]) -> int:
+    """Determina el número óptimo de workers"""
+    if max_workers:
+        return max(1, max_workers)
+    
+    if ENV_MAX_WORKERS > 0:
+        return ENV_MAX_WORKERS
+    
+    cpu_count = os.cpu_count() or 4
+    calculado = min(12, max(4, cpu_count * 2))
+    return min(calculado, max(1, candidatos))
+
+
+def _rate_limited_request(url: Optional[str]):
+    """Aplica rate limiting por dominio"""
+    if not url or MIN_DELAY_PER_DOMAIN <= 0:
+        return
+    
+    domain = urlparse(url).netloc or "default"
     
     with rate_limit_lock:
         current_time = time.time()
-        time_since_last = current_time - last_request_time
+        last_time = last_request_by_domain[domain]
+        elapsed = current_time - last_time
         
-        if time_since_last < MIN_DELAY_BETWEEN_REQUESTS:
-            sleep_time = MIN_DELAY_BETWEEN_REQUESTS - time_since_last
-            time.sleep(sleep_time)
+        if elapsed < MIN_DELAY_PER_DOMAIN:
+            time.sleep(MIN_DELAY_PER_DOMAIN - elapsed)
         
-        last_request_time = time.time()
+        last_request_by_domain[domain] = time.time()
 
 
-def _enriquecer_empresa_individual(empresa: Dict) -> Dict:
+def _cache_es_valida(cache_entry: Dict) -> bool:
+    """Determina si una entrada de cache está vigente"""
+    if not cache_entry or not cache_entry.get('last_scraped_at'):
+        return False
+    
+    try:
+        last_time = datetime.fromisoformat(cache_entry['last_scraped_at'])
+    except ValueError:
+        return False
+    
+    return datetime.utcnow() - last_time <= timedelta(hours=CACHE_TTL_HOURS)
+
+
+def _aplicar_cache_a_empresa(empresa: Dict, cache_entry: Dict) -> Dict:
+    """Fusiona datos cacheados en la empresa"""
+    empresa_actualizada = empresa.copy()
+    datos_cache = cache_entry.get('data') or {}
+    
+    for campo, valor in datos_cache.items():
+        if valor:
+            empresa_actualizada[campo] = valor
+    
+    return empresa_actualizada
+
+
+def _guardar_cache_para_empresa(empresa: Dict):
+    """Persiste en cache los campos relevantes"""
+    website = empresa.get('website')
+    if not website:
+        return
+    
+    cache_payload = {
+        campo: empresa.get(campo)
+        for campo in CACHEABLE_FIELDS
+        if empresa.get(campo)
+    }
+    
+    if cache_payload:
+        guardar_cache_scraping(website, cache_payload)
+
+
+def _programar_enriquecimiento_diferido(empresas: List[Dict]):
+    """Encola empresas para enriquecimiento en background"""
+    if not DEFERRED_ENABLED or not BACKGROUND_EXECUTOR or not empresas:
+        return
+    
+    for empresa in empresas:
+        BACKGROUND_EXECUTOR.submit(
+            _enriquecer_empresa_individual,
+            empresa,
+            usar_cache=True,
+            guardar_en_cache=True,
+            guardar_en_db=True
+        )
+
+
+def _enriquecer_empresa_individual(
+    empresa: Dict,
+    usar_cache: bool = True,
+    guardar_en_cache: bool = True,
+    guardar_en_db: bool = False
+) -> Dict:
     """
     Enriquece una empresa individual con scraping de sitio web y redes sociales
     
@@ -51,146 +146,146 @@ def _enriquecer_empresa_individual(empresa: Dict) -> Dict:
     nombre_empresa = empresa.get('nombre', 'Sin nombre')
     
     try:
-        # Si ya tiene email y teléfono, podemos saltarlo para ser más rápidos
+        website = empresa.get('website')
+        
+        # Si ya tiene contacto completo, opcionalmente solo actualizar cache/db
         if empresa.get('email') and empresa.get('telefono'):
-            logger.debug(f" {nombre_empresa} ya tiene contacto completo, saltando scraping")
+            if guardar_en_db:
+                insertar_empresa(empresa)
             return empresa
         
-        # Aplicar rate limiting para evitar bloqueos
-        _rate_limited_request()
+        empresa_enriquecida = empresa.copy()
         
-        # Scrapear sitio web para emails y teléfonos
-        if empresa.get('website'):
-            logger.info(f" Enriqueciendo: {nombre_empresa}")
-            
-            # Crear copia para no modificar el original en caso de error
-            empresa_enriquecida = empresa.copy()
-            
-            try:
-                # Enriquecer con datos de scraping (emails, teléfonos)
-                empresa_enriquecida = enriquecer_empresa_b2b(empresa_enriquecida)
-            except Exception as e:
-                logger.warning(f" Error en scraping principal para {nombre_empresa}: {e}")
-                # Continuar con la empresa original si falla el scraping principal
-            
-            # Extraer redes sociales (separado para que un error no afecte al otro)
-            sitio_web = empresa_enriquecida.get('website') or empresa_enriquecida.get('sitio_web')
-            if sitio_web:
-                try:
-                    redes = enriquecer_con_redes_sociales(sitio_web, timeout=10)
-                    if redes:
-                        empresa_enriquecida.update(redes)  # Agregar instagram, facebook, twitter, etc.
-                except Exception as e:
-                    logger.warning(f" Error extrayendo redes sociales para {nombre_empresa}: {e}")
-                    # No es crítico, continuar sin redes sociales
-            
+        # Intentar reutilizar cache reciente
+        if usar_cache and website:
+            cache_entry = obtener_cache_scraping(website)
+            if cache_entry and _cache_es_valida(cache_entry):
+                empresa_enriquecida = _aplicar_cache_a_empresa(empresa_enriquecida, cache_entry)
+                if empresa_enriquecida.get('email') and empresa_enriquecida.get('telefono'):
+                    logger.debug(f" {nombre_empresa}: datos recuperados desde cache")
+                    if guardar_en_db:
+                        insertar_empresa(empresa_enriquecida)
+                    return empresa_enriquecida
+        
+        if not website:
             return empresa_enriquecida
-        else:
-            # Sin website, retornar sin modificar
-            return empresa
         
+        logger.info(f" Enriqueciendo: {nombre_empresa}")
+        
+        # Rate limit por dominio antes de golpear el sitio
+        _rate_limited_request(website)
+        
+        inicio = time.time()
+        try:
+            empresa_enriquecida = enriquecer_empresa_b2b(empresa_enriquecida)
+        except Exception as e:
+            logger.warning(f" Error en scraping principal para {nombre_empresa}: {e}")
+        
+        duracion = time.time() - inicio
+        if duracion > 15:
+            logger.debug(f" {nombre_empresa}: scraping tomó {duracion:.1f}s")
+        
+        # Redes sociales (no crítico)
+        sitio_web = empresa_enriquecida.get('website') or empresa_enriquecida.get('sitio_web')
+        if sitio_web:
+            try:
+                _rate_limited_request(sitio_web)
+                redes = enriquecer_con_redes_sociales(sitio_web, timeout=10)
+                if redes:
+                    empresa_enriquecida.update(redes)
+            except Exception as e:
+                logger.warning(f" Error extrayendo redes sociales para {nombre_empresa}: {e}")
+        
+        if guardar_en_cache:
+            _guardar_cache_para_empresa(empresa_enriquecida)
+        
+        if guardar_en_db:
+            insertar_empresa(empresa_enriquecida)
+        
+        return empresa_enriquecida
+    
     except Exception as e:
         logger.error(f" Error crítico enriqueciendo empresa {nombre_empresa}: {e}")
-        # Retornar empresa original sin modificar en caso de error crítico
         return empresa
 
 
 def enriquecer_empresas_paralelo(
     empresas: List[Dict],
-    max_workers: int = 5,
-    timeout_por_empresa: int = 30
+    max_workers: Optional[int] = None,
+    timeout_por_empresa: int = 20
 ) -> List[Dict]:
     """
-    Enriquece múltiples empresas en paralelo usando ThreadPoolExecutor
-    
-    Args:
-        empresas: Lista de dicts con datos de empresas
-        max_workers: Número máximo de threads paralelos (default: 5)
-        timeout_por_empresa: Timeout máximo por empresa en segundos (default: 30)
-        
-    Returns:
-        Lista de empresas enriquecidas (mismo orden que la entrada)
+    Enriquece múltiples empresas con paralelismo optimizado y enriquecimiento diferido.
     """
     if not empresas:
         return []
     
-    # Filtrar empresas que necesitan scraping
-    empresas_a_enriquecer = []
-    empresas_indices = []
+    pendientes = [
+        (idx, empresa)
+        for idx, empresa in enumerate(empresas)
+        if empresa.get('website') and (not empresa.get('email') or not empresa.get('telefono'))
+    ]
     
-    for idx, empresa in enumerate(empresas):
-        # Solo scrapear si tiene website y le faltan datos
-        if empresa.get('website'):
-            if not empresa.get('email') or not empresa.get('telefono'):
-                empresas_a_enriquecer.append(empresa)
-                empresas_indices.append(idx)
-        else:
-            # Sin website, no necesita scraping
-            empresas_indices.append(None)
-    
-    if not empresas_a_enriquecer:
+    if not pendientes:
         logger.info(" No hay empresas que necesiten scraping")
         return empresas
     
-    logger.info(f" Enriqueciendo {len(empresas_a_enriquecer)} empresas en paralelo (max {max_workers} workers)")
+    logger.debug(f" Timeout objetivo por empresa: {timeout_por_empresa}s")
+    max_workers = _resolver_max_workers(len(pendientes), max_workers)
+    sincronas_limit = SYNC_BATCH_LIMIT if SYNC_BATCH_LIMIT > 0 else len(pendientes)
+    sincronas = pendientes[:sincronas_limit]
+    diferidas = pendientes[sincronas_limit:]
     
-    # Crear copia de la lista original para mantener el orden
-    empresas_enriquecidas = empresas.copy()
+    if diferidas:
+        logger.info(f" {len(diferidas)} empresas se encolarán para enriquecimiento diferido")
+        _programar_enriquecimiento_diferido([empresa for _, empresa in diferidas])
     
-    # Procesar en paralelo
-    resultados = {}
+    if not sincronas:
+        return empresas
+    
+    empresas_enriquecidas = list(empresas)
     start_time = time.time()
     errores = 0
     
+    logger.info(
+        f" Enriqueciendo {len(sincronas)} empresas en paralelo inmediato (max {max_workers} workers)"
+    )
+    
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        # Enviar todas las tareas
-        future_to_empresa = {
+        future_to_idx = {
             executor.submit(_enriquecer_empresa_individual, empresa): idx
-            for idx, empresa in enumerate(empresas_a_enriquecer)
+            for idx, empresa in sincronas
         }
         
-        # Procesar resultados conforme se completan
         completadas = 0
-        for future in as_completed(future_to_empresa):
-            idx_original = future_to_empresa[future]
+        for future in as_completed(future_to_idx):
+            idx_original = future_to_idx[future]
             completadas += 1
             
             try:
-                empresa_enriquecida = future.result(timeout=timeout_por_empresa)
-                resultados[idx_original] = empresa_enriquecida
-                
-                # Log de progreso cada 10 empresas o al inicio
-                if completadas % 10 == 0 or completadas == 1:
-                    porcentaje = (completadas / len(empresas_a_enriquecer)) * 100
-                    logger.info(f" Progreso: {completadas}/{len(empresas_a_enriquecer)} empresas procesadas ({porcentaje:.1f}%)")
-                    
-            except TimeoutError:
-                nombre_empresa = empresas_a_enriquecer[idx_original].get('nombre', 'Sin nombre')
-                logger.warning(f" Timeout procesando {nombre_empresa} (>{timeout_por_empresa}s)")
-                errores += 1
-                # Mantener empresa original en caso de timeout
-                resultados[idx_original] = empresas_a_enriquecer[idx_original]
+                empresa_enriquecida = future.result()
+                if empresa_enriquecida:
+                    empresas_enriquecidas[idx_original] = empresa_enriquecida
             except Exception as e:
-                nombre_empresa = empresas_a_enriquecer[idx_original].get('nombre', 'Sin nombre')
+                nombre_empresa = empresas[idx_original].get('nombre', 'Sin nombre')
                 logger.error(f" Error procesando {nombre_empresa}: {e}")
                 errores += 1
-                # Mantener empresa original en caso de error
-                resultados[idx_original] = empresas_a_enriquecer[idx_original]
-    
-    # Actualizar empresas enriquecidas en el orden correcto
-    for idx_original, empresa_enriquecida in resultados.items():
-        idx_lista = empresas_indices[idx_original]
-        if idx_lista is not None:
-            empresas_enriquecidas[idx_lista] = empresa_enriquecida
+            
+            if completadas % 10 == 0 or completadas == 1:
+                porcentaje = (completadas / len(sincronas)) * 100
+                logger.info(f" Progreso: {completadas}/{len(sincronas)} ({porcentaje:.1f}%) empresas sincronas")
     
     elapsed_time = time.time() - start_time
-    exitosas = len(empresas_a_enriquecer) - errores
+    exitosas = len(sincronas) - errores
     
-    logger.info(f" Scraping paralelo completado: {len(empresas_a_enriquecer)} empresas en {elapsed_time:.2f}s "
-                f"({len(empresas_a_enriquecer)/elapsed_time:.2f} empresas/seg)")
+    logger.info(
+        f" Scraping sincrono completado: {len(sincronas)} empresas en {elapsed_time:.2f}s "
+        f"({len(sincronas)/elapsed_time:.2f} empresas/seg)"
+    )
     if errores > 0:
-        logger.warning(f" {errores} empresas tuvieron errores durante el scraping")
-    logger.info(f" {exitosas} empresas enriquecidas exitosamente")
+        logger.warning(f" {errores} empresas tuvieron errores durante el scraping inmediato")
+    if diferidas:
+        logger.info(" Enriquecimiento diferido ejecutándose en background")
     
     return empresas_enriquecidas
 

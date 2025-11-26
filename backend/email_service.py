@@ -11,6 +11,8 @@ from typing import Dict, List, Optional
 import os
 from datetime import datetime
 from dotenv import load_dotenv
+import socket
+import re
 
 # Cargar variables de entorno desde .env (busca en el directorio del backend)
 env_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -26,6 +28,8 @@ SMTP_USER = os.getenv('SMTP_USER', 'solutionsdota@gmail.com')
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')  # Debe configurarse en .env o usar App Password
 SMTP_FROM_EMAIL = os.getenv('SMTP_FROM_EMAIL', 'solutionsdota@gmail.com')
 SMTP_FROM_NAME = os.getenv('SMTP_FROM_NAME', 'Ivan Levy - Dota Solutions')
+SMTP_TIMEOUT = int(os.getenv('SMTP_TIMEOUT_SECONDS', '20'))
+PLACEHOLDER_PATTERN = re.compile(r'\{([a-zA-Z0-9_]+)\}')
 
 def renderizar_template(template: str, variables: Dict) -> str:
     """
@@ -39,17 +43,15 @@ def renderizar_template(template: str, variables: Dict) -> str:
     - {website}: Sitio web de la empresa
     - {fecha}: Fecha actual
     """
-    resultado = template
-    
-    # Reemplazar variables
-    resultado = resultado.replace('{nombre_empresa}', variables.get('nombre_empresa', ''))
-    resultado = resultado.replace('{rubro}', variables.get('rubro', ''))
-    resultado = resultado.replace('{ciudad}', variables.get('ciudad', ''))
-    resultado = resultado.replace('{direccion}', variables.get('direccion', ''))
-    resultado = resultado.replace('{website}', variables.get('website', ''))
-    resultado = resultado.replace('{fecha}', datetime.now().strftime('%d/%m/%Y'))
-    
-    return resultado
+    texto = template or ''
+    variables = {k: ('' if v is None else str(v)) for k, v in (variables or {}).items()}
+    variables.setdefault('fecha', datetime.now().strftime('%d/%m/%Y'))
+
+    def _reemplazar(match: re.Match) -> str:
+        key = match.group(1)
+        return variables.get(key, '')
+
+    return PLACEHOLDER_PATTERN.sub(_reemplazar, texto)
 
 def enviar_email(
     destinatario: str,
@@ -88,7 +90,7 @@ def enviar_email(
         msg.attach(part2)
         
         # Enviar
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=SMTP_TIMEOUT) as server:
             server.starttls()
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.send_message(msg)
@@ -100,6 +102,14 @@ def enviar_email(
             'error': None
         }
         
+    except socket.timeout:
+        error_msg = f'Conexión SMTP excedió el tiempo límite ({SMTP_TIMEOUT}s).'
+        logger.error(error_msg)
+        return {
+            'success': False,
+            'message': error_msg,
+            'error': 'SMTP_TIMEOUT'
+        }
     except smtplib.SMTPAuthenticationError:
         error_msg = 'Error de autenticación SMTP. Verifica usuario y contraseña.'
         logger.error(error_msg)
@@ -147,11 +157,17 @@ def enviar_email_empresa(
     
     # Preparar variables para el template
     variables = {
-        'nombre_empresa': empresa.get('nombre', ''),
-        'rubro': empresa.get('rubro', ''),
-        'ciudad': empresa.get('ciudad', ''),
-        'direccion': empresa.get('direccion', ''),
-        'website': empresa.get('website', '')
+        'nombre_empresa': empresa.get('nombre'),
+        'rubro': empresa.get('rubro'),
+        'ciudad': empresa.get('ciudad'),
+        'direccion': empresa.get('direccion'),
+        'website': empresa.get('website'),
+        'telefono': empresa.get('telefono'),
+        'email_empresa': empresa.get('email'),
+        'pais': empresa.get('pais'),
+        'distancia_km': empresa.get('distancia_km'),
+        'busqueda_ubicacion_nombre': empresa.get('busqueda_ubicacion_nombre'),
+        'descripcion': empresa.get('descripcion')
     }
     
     # Renderizar template

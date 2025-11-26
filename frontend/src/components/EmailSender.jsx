@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import ToastContainer from './ToastContainer';
+import { useToast } from '../hooks/useToast';
 import './EmailSender.css';
 
 const API_URL = 'http://localhost:8000';
@@ -14,6 +16,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [delaySegundos, setDelaySegundos] = useState(1.0);
   const [activeTab, setActiveTab] = useState('enviar'); // 'enviar' o 'templates'
   const [editingTemplate, setEditingTemplate] = useState(null);
+  const { toasts, success, error, warning, removeToast } = useToast();
 
   useEffect(() => {
     loadTemplates();
@@ -150,7 +153,12 @@ function EmailSender({ empresas, onClose, embedded = false }) {
         });
 
         if (response.data.success) {
-          alert(`Email enviado exitosamente a ${selectedEmpresas[0].nombre}`);
+          success(
+            <>
+              <strong>Email enviado exitosamente</strong>
+              <p>a {selectedEmpresas[0].nombre}</p>
+            </>
+          );
           onClose();
         }
       } else {
@@ -163,20 +171,42 @@ function EmailSender({ empresas, onClose, embedded = false }) {
 
         if (response.data.success) {
           const { exitosos, fallidos, sin_email } = response.data.data;
-          alert(`Envío completado:\n${exitosos} exitosos\n${fallidos} fallidos\n${sin_email} sin email`);
+          success(
+            <>
+              <strong>Envío completado</strong>
+              <ul>
+                <li><strong>{exitosos}</strong> exitosos</li>
+                <li><strong>{fallidos}</strong> fallidos</li>
+                <li><strong>{sin_email}</strong> sin email</li>
+              </ul>
+            </>
+          );
           onClose();
         }
       }
     } catch (error) {
       console.error('Error enviando email:', error);
       const errorMsg = error.response?.data?.detail || error.message;
-      alert(`Error al enviar: ${errorMsg}`);
+      error(`Error al enviar: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
   };
 
   const empresasConEmail = empresas.filter(e => e.email);
+  const todasSeleccionadas =
+    modo === 'masivo' &&
+    empresasConEmail.length > 0 &&
+    selectedEmpresas.length === empresasConEmail.length;
+
+  const handleToggleSeleccionMasiva = () => {
+    if (modo !== 'masivo' || empresasConEmail.length === 0) return;
+    if (todasSeleccionadas) {
+      setSelectedEmpresas([]);
+    } else {
+      setSelectedEmpresas(empresasConEmail);
+    }
+  };
 
   // Si estamos editando un template, mostrar el editor
   if (editingTemplate) {
@@ -321,12 +351,24 @@ function EmailSender({ empresas, onClose, embedded = false }) {
             {/* Columna derecha: Lista de empresas con preview */}
             <div className="email-empresas-column">
               <div className="empresas-section">
-                <h3>
-                  Empresas
-                  {selectedEmpresas.length > 0 && (
-                    <span className="selected-badge">{selectedEmpresas.length} seleccionada{selectedEmpresas.length !== 1 ? 's' : ''}</span>
+                <div className="empresas-header">
+                  <h3>
+                    Empresas
+                    {selectedEmpresas.length > 0 && (
+                      <span className="selected-badge">{selectedEmpresas.length} seleccionada{selectedEmpresas.length !== 1 ? 's' : ''}</span>
+                    )}
+                  </h3>
+                  {modo === 'masivo' && empresasConEmail.length > 0 && (
+                    <button
+                      type="button"
+                      className="btn-select-all"
+                      onClick={handleToggleSeleccionMasiva}
+                      disabled={loading}
+                    >
+                      {todasSeleccionadas ? 'Deseleccionar todas' : 'Seleccionar todas'}
+                    </button>
                   )}
-                </h3>
+                </div>
                 
                 <div className="empresas-list-with-preview">
                   {empresasConEmail.length === 0 ? (
@@ -445,18 +487,24 @@ function EmailSender({ empresas, onClose, embedded = false }) {
 
   if (embedded) {
     return (
-      <div className="email-sender-embedded">
-        {content}
-      </div>
+      <>
+        <div className="email-sender-embedded">
+          {content}
+        </div>
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
+      </>
     );
   }
 
   return (
-    <div className="email-sender-overlay" onClick={onClose}>
-      <div className="email-sender-modal" onClick={(e) => e.stopPropagation()}>
-        {content}
+    <>
+      <div className="email-sender-overlay" onClick={onClose}>
+        <div className="email-sender-modal" onClick={(e) => e.stopPropagation()}>
+          {content}
+        </div>
       </div>
-    </div>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+    </>
   );
 }
 

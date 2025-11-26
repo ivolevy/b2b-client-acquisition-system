@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './TableView.css';
 import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok } from 'react-icons/fa6';
 
@@ -10,6 +10,10 @@ function TableViewB2B({ empresas }) {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = empresas.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(empresas.length / itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [empresas]);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -42,9 +46,9 @@ function TableViewB2B({ empresas }) {
         <table className="properties-table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Empresa</th>
               <th>Rubro</th>
+              <th>Distancia</th>
               <th>Email</th>
               <th>Teléfono</th>
               <th>Website</th>
@@ -55,7 +59,6 @@ function TableViewB2B({ empresas }) {
           <tbody>
             {currentItems.map((empresa) => (
               <tr key={empresa.id}>
-                <td>{empresa.id}</td>
                 <td className="name-cell">
                   {empresa.nombre || 'Sin nombre'}
                   {empresa.direccion && (
@@ -66,6 +69,31 @@ function TableViewB2B({ empresas }) {
                 </td>
                 <td>
                   <span className="category-badge">{empresa.rubro || 'N/A'}</span>
+                </td>
+                <td>
+                  {empresa.distancia_km !== null && empresa.distancia_km !== undefined ? (
+                    <div style={{ 
+                      fontSize: '13px', 
+                      fontWeight: '500',
+                      color: '#667eea'
+                    }}>
+                      {empresa.distancia_km.toFixed(2)} km
+                      {empresa.busqueda_ubicacion_nombre && (
+                        <div style={{ 
+                          fontSize: '11px', 
+                          color: '#6b7280', 
+                          marginTop: '2px',
+                          fontStyle: 'italic'
+                        }}>
+                          desde {empresa.busqueda_ubicacion_nombre.length > 30 
+                            ? empresa.busqueda_ubicacion_nombre.substring(0, 30) + '...' 
+                            : empresa.busqueda_ubicacion_nombre}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="no-data">-</span>
+                  )}
                 </td>
                 <td>
                   {empresa.email ? (
