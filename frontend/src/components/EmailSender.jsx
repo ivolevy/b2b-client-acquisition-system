@@ -133,6 +133,17 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   };
 
   const handleEnviar = async () => {
+    // EN MANTENIMIENTO: Deshabilitado temporalmente
+    warning(
+      <>
+        <strong>En Mantenimiento</strong>
+        <p>El envío de emails está temporalmente deshabilitado. Puedes ver y configurar todo, pero no se enviarán emails.</p>
+      </>
+    );
+    return;
+
+    // Código original comentado (deshabilitado)
+    /*
     if (!selectedTemplate || selectedEmpresas.length === 0) {
       alert('Selecciona un template y al menos una empresa');
       return;
@@ -191,6 +202,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     } finally {
       setLoading(false);
     }
+    */
   };
 
   const empresasConEmail = empresas.filter(e => e.email);
@@ -337,13 +349,29 @@ function EmailSender({ empresas, onClose, embedded = false }) {
                   </div>
                 </div>
 
-                {/* Botón de envío */}
+                {/* Botón de envío - DESHABILITADO EN MANTENIMIENTO */}
+                <div className="maintenance-notice">
+                  <div className="maintenance-icon">🔧</div>
+                  <div className="maintenance-text">
+                    <strong>En Mantenimiento</strong>
+                    <p>El envío de emails está temporalmente deshabilitado. Puedes ver y configurar todo, pero no se enviarán emails.</p>
+                  </div>
+                </div>
                 <button
                   className="btn-send-main"
-                  onClick={handleEnviar}
-                  disabled={loading || !selectedTemplate || selectedEmpresas.length === 0}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    warning(
+                      <>
+                        <strong>En Mantenimiento</strong>
+                        <p>El envío de emails está temporalmente deshabilitado.</p>
+                      </>
+                    );
+                  }}
+                  disabled={true}
+                  style={{ opacity: 0.6, cursor: 'not-allowed' }}
                 >
-                  {loading ? 'Enviando...' : `Enviar${selectedEmpresas.length > 1 ? ` (${selectedEmpresas.length})` : ''}`}
+                  En Mantenimiento
                 </button>
               </div>
             </div>
