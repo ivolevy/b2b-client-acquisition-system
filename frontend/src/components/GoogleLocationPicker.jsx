@@ -7,12 +7,6 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const libraries = ['places'];
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '400px',
-  borderRadius: '12px',
-};
-
 function GoogleLocationPicker({ onLocationChange }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radius, setRadius] = useState(5000); // 5km por defecto
@@ -158,61 +152,65 @@ function GoogleLocationPicker({ onLocationChange }) {
 
   if (!GOOGLE_API_KEY) {
     return (
-      <div className="location-picker-error">
-        <p>Falta la clave de Google Maps. Configura VITE_GOOGLE_MAPS_API_KEY.</p>
+      <div className="location-picker">
+        <div className="map-instruction" style={{ background: '#fee2e2', color: '#991b1b', borderColor: '#fecaca' }}>
+          <p>Falta la clave de Google Maps. Configura VITE_GOOGLE_MAPS_API_KEY.</p>
+        </div>
       </div>
     );
   }
 
   if (loadError) {
     return (
-      <div className="location-picker-error">
-        <p>Error al cargar Google Maps: {loadError.message}</p>
+      <div className="location-picker">
+        <div className="map-instruction" style={{ background: '#fee2e2', color: '#991b1b', borderColor: '#fecaca' }}>
+          <p>Error al cargar Google Maps: {loadError.message}</p>
+        </div>
       </div>
     );
   }
 
   if (!isLoaded) {
     return (
-      <div className="location-picker-loading">
-        <p>Cargando mapa de Google Maps...</p>
+      <div className="location-picker">
+        <div className="map-instruction">
+          <p>Cargando mapa de Google Maps...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="location-picker-container">
-      <div className="location-picker-controls">
-        <div className="location-search-row">
-          <div className="search-input-wrapper">
-            <Autocomplete
-              onLoad={(autocomplete) => setAutocomplete(autocomplete)}
-              onPlaceChanged={handlePlaceSelect}
-            >
-              <input
-                type="text"
-                placeholder="Ej: Paseo de la Castellana 100, Madrid"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="location-search-input"
-              />
-            </Autocomplete>
-          </div>
-          <button
-            type="button"
-            onClick={handleUseCurrentLocation}
-            className="btn-use-location"
+    <div className="location-picker">
+      <div className="search-row">
+        <div className="address-search">
+          <Autocomplete
+            onLoad={(autocomplete) => setAutocomplete(autocomplete)}
+            onPlaceChanged={handlePlaceSelect}
           >
-            Usar mi ubicación actual
-          </button>
+            <input
+              type="text"
+              placeholder="Ej: Paseo de la Castellana 100, Madrid"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="address-input"
+            />
+          </Autocomplete>
         </div>
 
+        <button
+          type="button"
+          onClick={handleUseCurrentLocation}
+          className="btn-location"
+        >
+          Usar mi ubicación actual
+        </button>
+
         <div className="radius-control">
-          <label>Radio de búsqueda:</label>
+          <span className="radius-label">Radio de búsqueda:</span>
           <select
             value={radius}
             onChange={(e) => handleRadiusChange(Number(e.target.value))}
-            className="radius-select"
           >
             <option value={1000}>1 km</option>
             <option value={2000}>2 km</option>
@@ -224,40 +222,43 @@ function GoogleLocationPicker({ onLocationChange }) {
         </div>
       </div>
 
-      <div className="location-hint">
+      <div className="map-instruction">
         También puedes hacer clic en el mapa.
       </div>
 
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={mapCenter}
-        zoom={selectedLocation ? 13 : 10}
-        onClick={handleMapClick}
-        onLoad={(mapInstance) => setMap(mapInstance)}
-        options={{
-          disableDefaultUI: false,
-          zoomControl: true,
-          streetViewControl: false,
-          mapTypeControl: true,
-        }}
-      >
-        {selectedLocation && (
-          <>
-            <Marker position={selectedLocation} />
-            <Circle
-              center={selectedLocation}
-              radius={radius}
-              options={{
-                fillColor: '#3b82f6',
-                fillOpacity: 0.2,
-                strokeColor: '#3b82f6',
-                strokeOpacity: 0.8,
-                strokeWeight: 2,
-              }}
-            />
-          </>
-        )}
-      </GoogleMap>
+      <div className="location-map">
+        <GoogleMap
+          mapContainerStyle={{ width: '100%', height: '100%', borderRadius: '12px' }}
+          center={mapCenter}
+          zoom={selectedLocation ? 13 : 10}
+          onClick={handleMapClick}
+          onLoad={(mapInstance) => setMap(mapInstance)}
+          options={{
+            disableDefaultUI: false,
+            zoomControl: true,
+            streetViewControl: false,
+            mapTypeControl: true,
+            fullscreenControl: true,
+          }}
+        >
+          {selectedLocation && (
+            <>
+              <Marker position={selectedLocation} />
+              <Circle
+                center={selectedLocation}
+                radius={radius}
+                options={{
+                  fillColor: '#3b82f6',
+                  fillOpacity: 0.2,
+                  strokeColor: '#3b82f6',
+                  strokeOpacity: 0.8,
+                  strokeWeight: 2,
+                }}
+              />
+            </>
+          )}
+        </GoogleMap>
+      </div>
     </div>
   );
 }
