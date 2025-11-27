@@ -183,29 +183,6 @@ function GoogleLocationPicker({ onLocationChange }) {
   return (
     <div className="location-picker">
       <div className="search-row">
-        <div className="address-search">
-          <Autocomplete
-            onLoad={(autocomplete) => setAutocomplete(autocomplete)}
-            onPlaceChanged={handlePlaceSelect}
-          >
-            <input
-              type="text"
-              placeholder="Ej: Paseo de la Castellana 100, Madrid"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="address-input"
-            />
-          </Autocomplete>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleUseCurrentLocation}
-          className="btn-location"
-        >
-          Usar mi ubicación actual
-        </button>
-
         <div className="radius-control">
           <span className="radius-label">Radio de búsqueda:</span>
           <select
@@ -216,14 +193,42 @@ function GoogleLocationPicker({ onLocationChange }) {
             <option value={2000}>2 km</option>
             <option value={5000}>5 km</option>
             <option value={10000}>10 km</option>
-            <option value={15000}>15 km</option>
             <option value={20000}>20 km</option>
+            <option value={50000}>50 km</option>
           </select>
         </div>
+
+        <div className="address-search">
+          <label htmlFor="address-input" className="visually-hidden">Dirección para buscar</label>
+          <div className="address-input-wrapper">
+            <Autocomplete
+              onLoad={(autocomplete) => setAutocomplete(autocomplete)}
+              onPlaceChanged={handlePlaceSelect}
+            >
+              <input
+                id="address-input"
+                type="text"
+                className="address-input"
+                placeholder="Ej: Paseo de la Castellana 100, Madrid"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoComplete="off"
+              />
+            </Autocomplete>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleUseCurrentLocation}
+          className="btn-location"
+        >
+           Usar mi ubicación actual
+        </button>
       </div>
 
       <div className="map-instruction">
-        También puedes hacer clic en el mapa.
+         También puedes hacer clic en el mapa.
       </div>
 
       <div className="location-map">
@@ -248,9 +253,9 @@ function GoogleLocationPicker({ onLocationChange }) {
                 center={selectedLocation}
                 radius={radius}
                 options={{
-                  fillColor: '#3b82f6',
+                  fillColor: '#667eea',
                   fillOpacity: 0.2,
-                  strokeColor: '#3b82f6',
+                  strokeColor: '#667eea',
                   strokeOpacity: 0.8,
                   strokeWeight: 2,
                 }}
