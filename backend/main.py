@@ -314,16 +314,31 @@ Sitio web: https://www.dotasolutions.agency/'''
 from email_service import enviar_email_empresa, enviar_emails_masivo
 
 # Configurar logging
-log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
-os.makedirs(log_dir, exist_ok=True)
+_default_log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
+log_dir = os.getenv('LOG_DIR', _default_log_dir)
+
+file_handler = None
+try:
+    os.makedirs(log_dir, exist_ok=True)
+    file_path = os.path.join(log_dir, f'b2b_{datetime.now().strftime("%Y%m%d")}.log')
+    file_handler = logging.FileHandler(file_path)
+except OSError:
+    fallback_dir = '/tmp/b2b_logs'
+    try:
+        os.makedirs(fallback_dir, exist_ok=True)
+        file_path = os.path.join(fallback_dir, f'b2b_{datetime.now().strftime("%Y%m%d")}.log')
+        file_handler = logging.FileHandler(file_path)
+    except OSError:
+        file_handler = None
+
+handlers = [logging.StreamHandler()]
+if file_handler:
+    handlers.insert(0, file_handler)
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(os.path.join(log_dir, f'b2b_{datetime.now().strftime("%Y%m%d")}.log')),
-        logging.StreamHandler()
-    ]
+    handlers=handlers
 )
 
 logger = logging.getLogger(__name__)
