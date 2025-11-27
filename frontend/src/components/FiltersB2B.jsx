@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import LocationPicker from './LocationPicker';
 import './Filters.css';
 
-function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading, rubros, view, setView, toastWarning }) {
+function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onDeleteResults, onExportCSV, loading, rubros, view, setView, toastWarning }) {
   // Estados para búsqueda
   const [rubro, setRubro] = useState('');
   const [locationData, setLocationData] = useState(null);
@@ -286,6 +286,14 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
               onClick={onClearResults}
             >
                Limpiar Vista
+            </button>
+            <button 
+              type="button" 
+              className="btn btn-danger btn-compact" 
+              onClick={onDeleteResults}
+              disabled={loading}
+            >
+               Borrar Resultados
             </button>
           </div>
         </form>

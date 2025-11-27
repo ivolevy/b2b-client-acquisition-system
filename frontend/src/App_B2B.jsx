@@ -316,6 +316,36 @@ function AppB2B() {
     );
   };
 
+  const handleDeleteResults = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.delete(`${API_URL}/clear`);
+
+      if (response.data.success) {
+        success(
+          <>
+            <strong>Resultados eliminados</strong>
+            <p>Se borraron todas las empresas almacenadas.</p>
+          </>
+        );
+        setEmpresas([]);
+        setFilteredEmpresas([]);
+        setStats({ total: 0, validadas: 0 });
+      }
+    } catch (err) {
+      console.error('Error al borrar resultados:', err);
+      const errorMsg = err.response?.data?.detail || err.message;
+      toastError(
+        <>
+          <strong>No se pudieron borrar</strong>
+          <p>{errorMsg}</p>
+        </>
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="app">
       <Navbar />
@@ -325,6 +355,7 @@ function AppB2B() {
           onBuscar={handleBuscar}
           onFiltrar={handleFiltrar}
           onClearResults={handleClearResults}
+          onDeleteResults={handleDeleteResults}
           onExportCSV={exportToCSVFrontend}
           loading={loading}
           rubros={rubros}
