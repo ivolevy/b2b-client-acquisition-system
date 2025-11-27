@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import LocationPicker from './LocationPicker';
+import GoogleLocationPicker from './GoogleLocationPicker';
 import './Filters.css';
 
 function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading, rubros, view, setView, toastWarning }) {
@@ -105,7 +105,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
 
           {/* Selector de ubicación en mapa */}
           <div className="location-section">
-            <LocationPicker onLocationChange={setLocationData} />
+            <GoogleLocationPicker onLocationChange={setLocationData} />
           </div>
 
           <div className="filters-row-compact">
