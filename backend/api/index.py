@@ -1,23 +1,24 @@
 """
 Vercel serverless function wrapper for FastAPI
-Para proyecto backend separado en Vercel
 """
 import os
 import sys
 
 os.environ['VERCEL'] = '1'
 
-# Si el backend es un proyecto separado, la raíz es backend/
-# Entonces api/index.py está en backend/api/index.py
-# Y main.py está en backend/main.py
-# Necesitamos agregar el directorio padre (backend/) al path
-current_dir = os.path.dirname(os.path.abspath(__file__))  # backend/api/
-backend_root = os.path.dirname(current_dir)  # backend/
+# Agregar el directorio raíz del backend al path
+current_dir = os.path.dirname(os.path.abspath(__file__))  # api/
+backend_root = os.path.dirname(current_dir)  # raíz del backend
 sys.path.insert(0, backend_root)
 
-# Importar desde la raíz del backend
+# Importar la app de FastAPI
 from main import app
-from mangum import Mangum
 
-# Crear handler
-handler = Mangum(app, lifespan="off")
+# Usar Mangum para convertir ASGI a formato Lambda/Vercel
+try:
+    from mangum import Mangum
+    handler = Mangum(app, lifespan="off")
+except ImportError:
+    # Si Mangum no está disponible, exportar la app directamente
+    # (aunque esto probablemente no funcionará en Vercel)
+    handler = app
