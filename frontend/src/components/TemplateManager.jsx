@@ -3,7 +3,7 @@ import axios from 'axios';
 import TemplateEditor from './TemplateEditor';
 import './TemplateManager.css';
 
-const API_URL = 'http://localhost:8000';
+import { API_URL } from '../config';
 
 function TemplateManager({ onClose }) {
   const [templates, setTemplates] = useState([]);

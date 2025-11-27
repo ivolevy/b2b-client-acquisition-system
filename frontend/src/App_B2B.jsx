@@ -11,9 +11,8 @@ import TemplateManager from './components/TemplateManager';
 import DatabasePanel from './components/DatabasePanel';
 import ToastContainer from './components/ToastContainer';
 import { useToast } from './hooks/useToast';
+import { API_URL } from './config';
 import './App.css';
-
-const API_URL = 'http://localhost:8000';
 
 function AppB2B() {
   const [empresas, setEmpresas] = useState([]);

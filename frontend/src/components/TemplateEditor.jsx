@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config';
 import './TemplateEditor.css';
-
-const API_URL = 'http://localhost:8000';
 
 function TemplateEditor({ templateId, onClose, onSave }) {
   const [nombre, setNombre] = useState('');

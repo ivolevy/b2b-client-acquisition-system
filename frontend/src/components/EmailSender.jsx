@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ToastContainer from './ToastContainer';
 import { useToast } from '../hooks/useToast';
+import { API_URL } from '../config';
 import './EmailSender.css';
-
-const API_URL = 'http://localhost:8000';
 
 function EmailSender({ empresas, onClose, embedded = false }) {
   const [templates, setTemplates] = useState([]);

@@ -14,7 +14,11 @@ import math
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-DATABASE_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'empresas_b2b.db')
+# En Vercel, usar /tmp que es escribible. En local, usar data/
+if os.environ.get('VERCEL'):
+    DATABASE_PATH = os.environ.get('DATABASE_PATH', '/tmp/empresas_b2b.db')
+else:
+    DATABASE_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'empresas_b2b.db')
 
 def init_db_b2b():
     """Inicializa base de datos para empresas B2B"""
