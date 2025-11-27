@@ -148,10 +148,10 @@ def _enriquecer_empresa_individual(
     try:
         website = empresa.get('website')
         
-        # Si ya tiene contacto completo, opcionalmente solo actualizar cache/db
+        # Si ya tiene contacto completo - SQLite deshabilitado, no se guarda
         if empresa.get('email') and empresa.get('telefono'):
-            if guardar_en_db:
-                insertar_empresa(empresa)
+            # if guardar_en_db:
+            #     insertar_empresa(empresa)  # Deshabilitado - preparado para Supabase
             return empresa
         
         empresa_enriquecida = empresa.copy()
@@ -163,8 +163,8 @@ def _enriquecer_empresa_individual(
                 empresa_enriquecida = _aplicar_cache_a_empresa(empresa_enriquecida, cache_entry)
                 if empresa_enriquecida.get('email') and empresa_enriquecida.get('telefono'):
                     logger.debug(f" {nombre_empresa}: datos recuperados desde cache")
-                    if guardar_en_db:
-                        insertar_empresa(empresa_enriquecida)
+                    # if guardar_en_db:
+                    #     insertar_empresa(empresa_enriquecida)  # Deshabilitado - preparado para Supabase
                     return empresa_enriquecida
         
         if not website:
@@ -199,8 +199,8 @@ def _enriquecer_empresa_individual(
         if guardar_en_cache:
             _guardar_cache_para_empresa(empresa_enriquecida)
         
-        if guardar_en_db:
-            insertar_empresa(empresa_enriquecida)
+        # if guardar_en_db:
+        #     insertar_empresa(empresa_enriquecida)  # Deshabilitado - preparado para Supabase
         
         return empresa_enriquecida
     

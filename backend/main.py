@@ -142,12 +142,13 @@ class EnviarEmailMasivoRequest(BaseModel):
     asunto_personalizado: Optional[str] = None
     delay_segundos: float = 1.0
 
-# Inicializar BD
+# Inicializar BD - SQLite deshabilitado
 @app.on_event("startup")
 async def startup():
     logger.info(" Iniciando API B2B...")
-    init_db_b2b()
-    logger.info(" Sistema B2B listo")
+    logger.info(" SQLite deshabilitado - Modo sin persistencia")
+    # init_db_b2b()  # Deshabilitado - preparado para Supabase
+    logger.info(" Sistema B2B listo (sin persistencia)")
 
 @app.get("/")
 async def root():
@@ -307,18 +308,18 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             logger.debug(f" Empresa: {nombre}, Email válido: {email_valido}, Teléfono válido: {tel_valido}, Tiene contacto: {tiene_contacto_valido}, Solo válidas: {request.solo_validadas}")
             
             if tiene_contacto_valido:
-                # Empresa con contacto válido - siempre se guarda
+                # Empresa con contacto válido - SQLite deshabilitado, no se guarda
                 empresa_validada['validada'] = True
                 empresas_validadas.append(empresa_validada)
-                insertar_empresa(empresa_validada)
+                # insertar_empresa(empresa_validada)  # Deshabilitado - preparado para Supabase
                 mensaje = "Email y teléfono válidos" if (email_valido and tel_valido) else ("Email válido" if email_valido else "Teléfono válido")
-                logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - {mensaje}")
+                logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Procesada - {mensaje} (no guardada - SQLite deshabilitado)")
             elif not solo_validadas:
-                # Empresa sin contacto válido pero con nombre válido - solo se guarda si no se requiere solo válidas
+                # Empresa sin contacto válido pero con nombre válido - SQLite deshabilitado, no se guarda
                 empresa_validada['validada'] = False
                 empresas_sin_contacto.append(empresa_validada)
-                insertar_empresa(empresa_validada)
-                logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - Sin contacto válido (solo_validadas=False)")
+                # insertar_empresa(empresa_validada)  # Deshabilitado - preparado para Supabase
+                logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Procesada - Sin contacto válido (no guardada - SQLite deshabilitado)")
             else:
                 # Empresa sin contacto válido y se requiere solo válidas - NO se guarda
                 empresas_rechazadas.append(empresa)
@@ -510,79 +511,21 @@ async def clear_database():
 
 @app.put("/empresa/estado")
 async def actualizar_estado(request: ActualizarEstadoRequest):
-    """Actualiza el estado Kanban de una empresa"""
-    try:
-        from lead_utils import validar_estado
-        import sqlite3
-        from datetime import datetime
-        
-        if not validar_estado(request.estado):
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Estado inválido. Estados válidos: por_contactar, contactada, interesada, no_interesa, convertida"
-            )
-        
-        # Actualizar en BD
-        conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), '..', 'data', 'empresas_b2b.db'))
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            UPDATE empresas 
-            SET estado = ?, 
-                notas = COALESCE(?, notas),
-                fecha_ultimo_contacto = ?,
-                updated_at = ?
-            WHERE id = ?
-        ''', (request.estado, request.notas, datetime.now(), datetime.now(), request.id))
-        
-        conn.commit()
-        conn.close()
-        
-        logger.info(f" Estado actualizado - ID: {request.id} → {request.estado}")
-        
-        return {
-            "success": True,
-            "message": f"Estado actualizado a '{request.estado}'",
-            "id": request.id,
-            "estado": request.estado
-        }
-        
-    except Exception as e:
-        logger.error(f"Error actualizando estado: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    """Actualiza el estado Kanban de una empresa - SQLite deshabilitado"""
+    logger.warning(" actualizar_estado() llamado - SQLite deshabilitado, no se puede actualizar")
+    raise HTTPException(
+        status_code=503, 
+        detail="SQLite deshabilitado. Esta funcionalidad estará disponible cuando se implemente Supabase."
+    )
 
 @app.put("/empresa/notas")
 async def actualizar_notas(request: ActualizarNotasRequest):
-    """Actualiza las notas de una empresa"""
-    try:
-        import sqlite3
-        from datetime import datetime
-        
-        # Actualizar en BD
-        conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), '..', 'data', 'empresas_b2b.db'))
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            UPDATE empresas 
-            SET notas = ?,
-                updated_at = ?
-            WHERE id = ?
-        ''', (request.notas, datetime.now(), request.id))
-        
-        conn.commit()
-        conn.close()
-        
-        logger.info(f" Notas actualizadas - ID: {request.id}")
-        
-        return {
-            "success": True,
-            "message": "Notas actualizadas correctamente",
-            "id": request.id
-        }
-        
-    except Exception as e:
-        logger.error(f"Error actualizando notas: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    """Actualiza las notas de una empresa - SQLite deshabilitado"""
+    logger.warning(" actualizar_notas() llamado - SQLite deshabilitado, no se puede actualizar")
+    raise HTTPException(
+        status_code=503, 
+        detail="SQLite deshabilitado. Esta funcionalidad estará disponible cuando se implemente Supabase."
+    )
 
 # ========== ENDPOINTS DE EMAIL TEMPLATES ==========
 
@@ -684,121 +627,21 @@ async def eliminar_template_endpoint(template_id: int):
 
 @app.post("/email/enviar")
 async def enviar_email_individual(request: EnviarEmailRequest):
-    """Envía un email individual a una empresa"""
-    try:
-        import sqlite3
-        
-        # Obtener empresa
-        conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), '..', 'data', 'empresas_b2b.db'))
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM empresas WHERE id = ?', (request.empresa_id,))
-        empresa_row = cursor.fetchone()
-        conn.close()
-        
-        if not empresa_row:
-            raise HTTPException(status_code=404, detail="Empresa no encontrada")
-        
-        empresa = dict(empresa_row)
-        
-        # Obtener template
-        template = obtener_template(request.template_id)
-        if not template:
-            raise HTTPException(status_code=404, detail="Template no encontrado")
-        
-        # Enviar email
-        resultado = enviar_email_empresa(
-            empresa=empresa,
-            template=template,
-            asunto_personalizado=request.asunto_personalizado
-        )
-        
-        # Guardar en historial
-        guardar_email_history(
-            empresa_id=empresa['id'],
-            empresa_nombre=empresa.get('nombre', ''),
-            empresa_email=empresa.get('email', ''),
-            template_id=template['id'],
-            template_nombre=template.get('nombre', ''),
-            subject=resultado.get('message', ''),
-            status='success' if resultado['success'] else 'error',
-            error_message=resultado.get('error')
-        )
-        
-        if not resultado['success']:
-            raise HTTPException(status_code=400, detail=resultado['message'])
-        
-        return {
-            "success": True,
-            "message": resultado['message'],
-            "data": resultado
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error enviando email: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    """Envía un email individual a una empresa - SQLite deshabilitado"""
+    logger.warning(" enviar_email_individual() llamado - SQLite deshabilitado, no se puede enviar")
+    raise HTTPException(
+        status_code=503, 
+        detail="SQLite deshabilitado. Esta funcionalidad estará disponible cuando se implemente Supabase."
+    )
 
 @app.post("/email/enviar-masivo")
 async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
-    """Envía emails a múltiples empresas"""
-    try:
-        import sqlite3
-        
-        # Obtener empresas
-        conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), '..', 'data', 'empresas_b2b.db'))
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        placeholders = ','.join(['?'] * len(request.empresa_ids))
-        cursor.execute(f'SELECT * FROM empresas WHERE id IN ({placeholders})', request.empresa_ids)
-        empresas_rows = cursor.fetchall()
-        conn.close()
-        
-        empresas = [dict(row) for row in empresas_rows]
-        
-        if len(empresas) != len(request.empresa_ids):
-            raise HTTPException(status_code=404, detail="Algunas empresas no fueron encontradas")
-        
-        # Obtener template
-        template = obtener_template(request.template_id)
-        if not template:
-            raise HTTPException(status_code=404, detail="Template no encontrado")
-        
-        # Enviar emails
-        resultados = enviar_emails_masivo(
-            empresas=empresas,
-            template=template,
-            asunto_personalizado=request.asunto_personalizado,
-            delay_segundos=request.delay_segundos
-        )
-        
-        # Guardar en historial
-        for detalle in resultados['detalles']:
-            if 'empresa_id' in detalle:
-                guardar_email_history(
-                    empresa_id=detalle['empresa_id'],
-                    empresa_nombre=detalle.get('empresa_nombre', ''),
-                    empresa_email=detalle.get('empresa_email', ''),
-                    template_id=template['id'],
-                    template_nombre=template.get('nombre', ''),
-                    subject=template.get('subject', ''),
-                    status='success' if detalle.get('success') else 'error',
-                    error_message=detalle.get('error')
-                )
-        
-        return {
-            "success": True,
-            "message": f"Proceso completado: {resultados['exitosos']} exitosos, {resultados['fallidos']} fallidos",
-            "data": resultados
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error enviando emails masivos: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    """Envía emails a múltiples empresas - SQLite deshabilitado"""
+    logger.warning(" enviar_email_masivo_endpoint() llamado - SQLite deshabilitado, no se puede enviar")
+    raise HTTPException(
+        status_code=503, 
+        detail="SQLite deshabilitado. Esta funcionalidad estará disponible cuando se implemente Supabase."
+    )
 
 @app.get("/email/historial")
 async def obtener_historial_email(empresa_id: Optional[int] = None, template_id: Optional[int] = None, limit: int = 100):

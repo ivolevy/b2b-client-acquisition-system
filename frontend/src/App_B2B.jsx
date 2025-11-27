@@ -110,7 +110,7 @@ function AppB2B() {
                 <p>{validas} con contacto válido de {total} encontradas</p>
               </>
             );
-          }
+        }
         }
         
         // Cargar todas las empresas de la base de datos para actualizar la vista completa
@@ -167,7 +167,7 @@ function AppB2B() {
           filtered = filtered.filter(e => 
             e.distancia_km !== null && e.distancia_km !== undefined && e.distancia_km < distanciaValue
           );
-        }
+    }
       }
     }
 
