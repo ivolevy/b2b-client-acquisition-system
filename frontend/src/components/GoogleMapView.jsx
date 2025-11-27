@@ -9,9 +9,11 @@ const containerStyle = {
 };
 
 function GoogleMapView({ empresas }) {
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: apiKey || '',
   });
 
   const validEmpresas = useMemo(
@@ -32,11 +34,23 @@ function GoogleMapView({ empresas }) {
     return { lat: avgLat, lng: avgLng };
   }, [validEmpresas]);
 
+  if (!apiKey) {
+    return (
+      <div className="empty-state">
+        <h3>Falta la clave de Google Maps</h3>
+        <p>Configura VITE_GOOGLE_MAPS_API_KEY en las variables de entorno de Vercel.</p>
+      </div>
+    );
+  }
+
   if (loadError) {
     return (
       <div className="empty-state">
-        <h3>No se pudo cargar Google Maps</h3>
-        <p>Revisa tu VITE_GOOGLE_MAPS_API_KEY y la consola del navegador.</p>
+        <h3>Error al cargar Google Maps</h3>
+        <p>Revisa tu VITE_GOOGLE_MAPS_API_KEY y la consola del navegador para más detalles.</p>
+        <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '8px' }}>
+          Error: {loadError.message || 'Desconocido'}
+        </p>
       </div>
     );
   }
