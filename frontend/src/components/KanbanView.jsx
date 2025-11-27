@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import axios from 'axios';
-import { API_URL } from '../config';
 import './KanbanView.css';
+
+const API_URL = 'http://localhost:8000';
 
 function KanbanView({ empresas, onStatusUpdated }) {
   const [draggedCard, setDraggedCard] = useState(null);

@@ -13,12 +13,11 @@ function Navbar({ onViewDatabase, onClearDatabase, onOpenDatabasePanel, stats })
           <h1> B2B Client Acquisition System</h1>
         </div>
         
-        {/* Base de Datos deshabilitado - SQLite removido, preparado para Supabase */}
-        {/* <div className="navbar-actions">
+        <div className="navbar-actions">
           <button className="db-btn" onClick={onOpenDatabasePanel}>
              Base de Datos
           </button>
-        </div> */}
+        </div>
       </div>
     </nav>
     {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}

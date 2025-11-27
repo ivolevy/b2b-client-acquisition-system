@@ -10,8 +10,6 @@ ENV/
 *.egg-info/
 .eggs/
 *.log
-logs/
-backend/venv/
 
 # Node
 node_modules/
@@ -32,11 +30,7 @@ dist-ssr/
 .DS_Store
 
 # Database
-*.db
 *.db-journal
-*.sqlite
-*.sqlite3
-data/*.db
 
 # Environment
 .env

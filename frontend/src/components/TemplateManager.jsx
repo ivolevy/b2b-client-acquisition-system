@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TemplateEditor from './TemplateEditor';
-import './TemplateManager.css';
-
 import { API_URL } from '../config';
+import './TemplateManager.css';
 
 function TemplateManager({ onClose }) {
   const [templates, setTemplates] = useState([]);

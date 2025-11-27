@@ -90,7 +90,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
     <div className="db-viewer-overlay" onClick={onClose}>
       <div className="db-viewer-modal" onClick={(e) => e.stopPropagation()}>
         <div className="db-viewer-header">
-          <h2> Vista de Base de Datos SQLite</h2>
+          <h2> Vista de Base de Datos</h2>
           <button className="close-btn" onClick={onClose}></button>
         </div>
 
@@ -136,10 +136,10 @@ function DatabaseViewer({ empresas, stats, onClose }) {
             <h3> Información de la Base de Datos</h3>
             <div className="info-grid">
               <div className="info-item">
-                <strong>Tipo:</strong> SQLite
+                <strong>Tipo:</strong> Base de datos (SQLite removido - pendiente migración)
               </div>
               <div className="info-item">
-                <strong>Ubicación:</strong> data/empresas_b2b.db
+                <strong>Ubicación:</strong> N/A (pendiente migración)
               </div>
               <div className="info-item">
                 <strong>Registros:</strong> {stats.total || 0} empresas

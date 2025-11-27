@@ -1,2 +1,5 @@
-# Vercel API package
+"""
+API package for Vercel serverless handler.
+"""
+
 

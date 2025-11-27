@@ -16,7 +16,21 @@ from urllib.parse import urlparse
 
 from scraper import enriquecer_empresa_b2b
 from social_scraper import enriquecer_con_redes_sociales
-from db import guardar_cache_scraping, obtener_cache_scraping, insertar_empresa
+# SQLite removido - preparando para migración a base de datos compatible con Vercel
+# from db import guardar_cache_scraping, obtener_cache_scraping, insertar_empresa
+
+# Stubs temporales
+def guardar_cache_scraping(website, data, status="success", http_status=None):
+    """Stub temporal - no guarda cache"""
+    return True
+
+def obtener_cache_scraping(website):
+    """Stub temporal - no retorna cache"""
+    return None
+
+def insertar_empresa(empresa):
+    """Stub temporal - no guarda empresa"""
+    return True
 
 logger = logging.getLogger(__name__)
 
@@ -148,10 +162,10 @@ def _enriquecer_empresa_individual(
     try:
         website = empresa.get('website')
         
-        # Si ya tiene contacto completo - SQLite deshabilitado, no se guarda
+        # Si ya tiene contacto completo, opcionalmente solo actualizar cache/db
         if empresa.get('email') and empresa.get('telefono'):
-            # if guardar_en_db:
-            #     insertar_empresa(empresa)  # Deshabilitado - preparado para Supabase
+            if guardar_en_db:
+                insertar_empresa(empresa)
             return empresa
         
         empresa_enriquecida = empresa.copy()
@@ -163,8 +177,8 @@ def _enriquecer_empresa_individual(
                 empresa_enriquecida = _aplicar_cache_a_empresa(empresa_enriquecida, cache_entry)
                 if empresa_enriquecida.get('email') and empresa_enriquecida.get('telefono'):
                     logger.debug(f" {nombre_empresa}: datos recuperados desde cache")
-                    # if guardar_en_db:
-                    #     insertar_empresa(empresa_enriquecida)  # Deshabilitado - preparado para Supabase
+                    if guardar_en_db:
+                        insertar_empresa(empresa_enriquecida)
                     return empresa_enriquecida
         
         if not website:
@@ -199,8 +213,8 @@ def _enriquecer_empresa_individual(
         if guardar_en_cache:
             _guardar_cache_para_empresa(empresa_enriquecida)
         
-        # if guardar_en_db:
-        #     insertar_empresa(empresa_enriquecida)  # Deshabilitado - preparado para Supabase
+        if guardar_en_db:
+            insertar_empresa(empresa_enriquecida)
         
         return empresa_enriquecida
     

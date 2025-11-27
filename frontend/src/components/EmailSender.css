@@ -274,43 +274,6 @@
   transform: none;
 }
 
-.maintenance-notice {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 2px solid #f59e0b;
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.15);
-}
-
-.maintenance-icon {
-  font-size: 2rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.maintenance-text {
-  flex: 1;
-}
-
-.maintenance-text strong {
-  display: block;
-  color: #92400e;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.maintenance-text p {
-  margin: 0;
-  color: #78350f;
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
 /* Columna derecha: Empresas con preview */
 .email-empresas-column {
   background: var(--gray-50);
