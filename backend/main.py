@@ -3,8 +3,9 @@ API FastAPI para sistema B2B de captación de clientes por rubro
 Enfocado en empresas, no en propiedades por zona
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional, List
 import logging
