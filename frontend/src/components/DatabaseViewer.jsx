@@ -77,7 +77,7 @@ function DatabaseViewer({ empresas, stats, onClose }) {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    alert('Copiado al portapapeles!');
+    console.info('Copiado al portapapeles');
   };
 
   const clearFilters = () => {

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TemplateEditor from './TemplateEditor';
+import ToastContainer from './ToastContainer';
+import { useToast } from '../hooks/useToast';
 import { API_URL } from '../config';
 import './TemplateManager.css';
 
@@ -9,6 +11,7 @@ function TemplateManager({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [editingTemplateId, setEditingTemplateId] = useState(null);
+  const { toasts, success, error: toastError, removeToast } = useToast();
 
   useEffect(() => {
     loadTemplates();
@@ -21,7 +24,12 @@ function TemplateManager({ onClose }) {
       setTemplates(response.data.data || []);
     } catch (error) {
       console.error('Error cargando templates:', error);
-      alert('Error al cargar templates');
+      toastError(
+        <>
+          <strong>No se pudieron cargar los templates</strong>
+          <p>{error.response?.data?.detail || error.message}</p>
+        </>
+      );
     } finally {
       setLoading(false);
     }
@@ -45,12 +53,22 @@ function TemplateManager({ onClose }) {
     try {
       const response = await axios.delete(`${API_URL}/templates/${templateId}`);
       if (response.data.success) {
-        alert('Template eliminado');
+        success(
+          <>
+            <strong>Template eliminado</strong>
+            <p>El template fue borrado correctamente.</p>
+          </>
+        );
         loadTemplates();
       }
     } catch (error) {
       console.error('Error eliminando template:', error);
-      alert('Error al eliminar template');
+      toastError(
+        <>
+          <strong>No se pudo eliminar</strong>
+          <p>{error.response?.data?.detail || error.message}</p>
+        </>
+      );
     }
   };
 
@@ -72,8 +90,9 @@ function TemplateManager({ onClose }) {
   }
 
   return (
-    <div className="template-manager-overlay" onClick={onClose}>
-      <div className="template-manager-modal" onClick={(e) => e.stopPropagation()}>
+    <>
+      <div className="template-manager-overlay" onClick={onClose}>
+        <div className="template-manager-modal" onClick={(e) => e.stopPropagation()}>
         <div className="template-manager-header">
           <h2>Gestionar Templates</h2>
           <button className="close-btn" onClick={onClose}>×</button>
@@ -125,8 +144,10 @@ function TemplateManager({ onClose }) {
             </div>
           )}
         </div>
+        </div>
       </div>
-    </div>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+    </>
   );
 }
 

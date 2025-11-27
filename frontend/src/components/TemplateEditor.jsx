@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import ToastContainer from './ToastContainer';
+import { useToast } from '../hooks/useToast';
 import { API_URL } from '../config';
 import './TemplateEditor.css';
 
@@ -10,6 +12,7 @@ function TemplateEditor({ templateId, onClose, onSave }) {
   const [bodyText, setBodyText] = useState('');
   const [loading, setLoading] = useState(false);
   const [isNew, setIsNew] = useState(!templateId);
+  const { toasts, success, error: toastError, warning, removeToast } = useToast();
 
   useEffect(() => {
     if (templateId) {
@@ -28,7 +31,12 @@ function TemplateEditor({ templateId, onClose, onSave }) {
       setBodyText(template.body_text || '');
     } catch (error) {
       console.error('Error cargando template:', error);
-      alert('Error al cargar template');
+      toastError(
+        <>
+          <strong>No se pudo cargar el template</strong>
+          <p>{error.response?.data?.detail || error.message}</p>
+        </>
+      );
     } finally {
       setLoading(false);
     }
@@ -36,7 +44,12 @@ function TemplateEditor({ templateId, onClose, onSave }) {
 
   const handleSave = async () => {
     if (!nombre || !subject || !bodyHtml) {
-      alert('Completa todos los campos requeridos');
+      warning(
+        <>
+          <strong>Campos obligatorios</strong>
+          <p>Nombre, asunto y cuerpo HTML son requeridos.</p>
+        </>
+      );
       return;
     }
 
@@ -51,7 +64,12 @@ function TemplateEditor({ templateId, onClose, onSave }) {
           body_text: bodyText || null
         });
         if (response.data.success) {
-          alert('Template creado exitosamente');
+          success(
+            <>
+              <strong>Template creado</strong>
+              <p>Se guardó "{nombre}" correctamente.</p>
+            </>
+          );
           onSave && onSave();
           onClose();
         }
@@ -63,7 +81,12 @@ function TemplateEditor({ templateId, onClose, onSave }) {
           body_text: bodyText || null
         });
         if (response.data.success) {
-          alert('Template actualizado exitosamente');
+          success(
+            <>
+              <strong>Template actualizado</strong>
+              <p>Los cambios fueron guardados.</p>
+            </>
+          );
           onSave && onSave();
           onClose();
         }
@@ -71,15 +94,21 @@ function TemplateEditor({ templateId, onClose, onSave }) {
     } catch (error) {
       console.error('Error guardando template:', error);
       const errorMsg = error.response?.data?.detail || error.message;
-      alert(`Error: ${errorMsg}`);
+      toastError(
+        <>
+          <strong>No se pudo guardar</strong>
+          <p>{errorMsg}</p>
+        </>
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="template-editor-overlay" onClick={onClose}>
-      <div className="template-editor-modal" onClick={(e) => e.stopPropagation()}>
+    <>
+      <div className="template-editor-overlay" onClick={onClose}>
+        <div className="template-editor-modal" onClick={(e) => e.stopPropagation()}>
         <div className="template-editor-header">
           <h2>{isNew ? 'Nuevo Template' : 'Editar Template'}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
@@ -149,8 +178,10 @@ function TemplateEditor({ templateId, onClose, onSave }) {
             </button>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+    </>
   );
 }
 

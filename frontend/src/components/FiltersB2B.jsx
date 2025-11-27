@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import LocationPicker from './LocationPicker';
 import './Filters.css';
 
-function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading, rubros, view, setView }) {
+function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading, rubros, view, setView, toastWarning }) {
   // Estados para búsqueda
   const [rubro, setRubro] = useState('');
   const [locationData, setLocationData] = useState(null);
@@ -22,12 +22,22 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
     e.preventDefault();
     
     if (!rubro) {
-      alert('Por favor selecciona un rubro');
+      toastWarning?.(
+        <>
+          <strong>Selecciona un rubro</strong>
+          <p>Necesitas elegir un rubro antes de lanzar la búsqueda.</p>
+        </>
+      );
       return;
     }
 
     if (!locationData) {
-      alert('Por favor selecciona una ubicación en el mapa');
+      toastWarning?.(
+        <>
+          <strong>Ubicación requerida</strong>
+          <p>Marca un punto en el mapa para definir el área a analizar.</p>
+        </>
+      );
       return;
     }
 

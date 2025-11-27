@@ -56,8 +56,7 @@ function KanbanView({ empresas, onStatusUpdated }) {
       });
       if (onStatusUpdated) onStatusUpdated(draggedCard.id, newEstado);
     } catch (err) {
-      alert('Error al actualizar estado');
-      // no-op
+      console.error('Error al actualizar estado', err);
     } finally {
       setUpdatingId(null);
       setDraggedCard(null);

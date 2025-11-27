@@ -21,7 +21,7 @@ function AppB2B() {
   const [rubros, setRubros] = useState({});
   const [showEmailSender, setShowEmailSender] = useState(false);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
-  const { toasts, success, error, warning, removeToast } = useToast();
+  const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
 
   useEffect(() => {
     loadEmpresas();
@@ -44,9 +44,15 @@ function AppB2B() {
       const response = await axios.get(`${API_URL}/empresas`);
       setEmpresas(response.data.data || []);
       setFilteredEmpresas(response.data.data || []);
-    } catch (error) {
-      console.error('Error al cargar empresas:', error);
-      alert('Error al cargar las empresas');
+    } catch (err) {
+      console.error('Error al cargar empresas:', err);
+      const errorMsg = err.response?.data?.detail || err.message;
+      toastError(
+        <>
+          <strong>No se pudieron cargar las empresas</strong>
+          <p>{errorMsg}</p>
+        </>
+      );
     } finally {
       setLoading(false);
     }
@@ -113,10 +119,15 @@ function AppB2B() {
         await loadEmpresas();
         await loadStats();
       }
-    } catch (error) {
-      console.error('Error al buscar empresas:', error);
-      const errorMsg = error.response?.data?.detail || error.message;
-      error(`Error al buscar empresas:\n\n${errorMsg}`);
+    } catch (err) {
+      console.error('Error al buscar empresas:', err);
+      const errorMsg = err.response?.data?.detail || err.message;
+      toastError(
+        <>
+          <strong>Error al buscar empresas</strong>
+          <p>{errorMsg}</p>
+        </>
+      );
     } finally {
       setLoading(false);
     }
@@ -189,17 +200,33 @@ function AppB2B() {
       });
       
       if (response.data.success) {
-        alert(` Datos exportados a: ${response.data.archivo}`);
+        success(
+          <>
+            <strong>Exportación backend lista</strong>
+            <p>Archivo generado: {response.data.archivo}</p>
+          </>
+        );
       }
-    } catch (error) {
-      console.error('Error al exportar:', error);
-      alert('Error al exportar datos');
+    } catch (err) {
+      console.error('Error al exportar:', err);
+      const errorMsg = err.response?.data?.detail || err.message;
+      toastError(
+        <>
+          <strong>Error al exportar datos</strong>
+          <p>{errorMsg}</p>
+        </>
+      );
     }
   };
 
   const exportToCSVFrontend = () => {
     if (filteredEmpresas.length === 0) {
-      alert('No hay datos para exportar');
+      warning(
+        <>
+          <strong>No hay datos filtrados</strong>
+          <p>Realiza una búsqueda o quita filtros antes de exportar.</p>
+        </>
+      );
       return;
     }
 
@@ -303,6 +330,7 @@ function AppB2B() {
           rubros={rubros}
           view={view}
           setView={setView}
+          toastWarning={warning}
         />
         
         {loading && (

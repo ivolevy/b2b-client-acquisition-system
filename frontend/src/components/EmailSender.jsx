@@ -15,7 +15,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [delaySegundos, setDelaySegundos] = useState(1.0);
   const [activeTab, setActiveTab] = useState('enviar'); // 'enviar' o 'templates'
   const [editingTemplate, setEditingTemplate] = useState(null);
-  const { toasts, success, error, warning, removeToast } = useToast();
+  const { toasts, success, error: toastError, warning, removeToast } = useToast();
 
   useEffect(() => {
     loadTemplates();
@@ -28,9 +28,14 @@ function EmailSender({ empresas, onClose, embedded = false }) {
       if (response.data.data && response.data.data.length > 0 && !selectedTemplate) {
         setSelectedTemplate(response.data.data[0].id);
       }
-    } catch (error) {
-      console.error('Error cargando templates:', error);
-      alert('Error al cargar templates');
+    } catch (err) {
+      console.error('Error cargando templates:', err);
+      toastError(
+        <>
+          <strong>No se pudieron cargar los templates</strong>
+          <p>{err.response?.data?.detail || err.message}</p>
+        </>
+      );
     }
   };
 
@@ -62,7 +67,12 @@ function EmailSender({ empresas, onClose, embedded = false }) {
 
   const handleToggleEmpresa = (empresa) => {
     if (!empresa.email) {
-      alert('Esta empresa no tiene email');
+      warning(
+        <>
+          <strong>Esta empresa no tiene email</strong>
+          <p>Solo puedes elegir empresas con email válido.</p>
+        </>
+      );
       return;
     }
 
@@ -96,11 +106,21 @@ function EmailSender({ empresas, onClose, embedded = false }) {
             }
           }
         }
-        alert('Template eliminado exitosamente');
+        success(
+          <>
+            <strong>Template eliminado</strong>
+            <p>Se borró correctamente.</p>
+          </>
+        );
       }
-    } catch (error) {
-      console.error('Error eliminando template:', error);
-      alert('Error al eliminar template');
+    } catch (err) {
+      console.error('Error eliminando template:', err);
+      toastError(
+        <>
+          <strong>No se pudo eliminar</strong>
+          <p>{err.response?.data?.detail || err.message}</p>
+        </>
+      );
     }
   };
 
@@ -112,7 +132,12 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           await loadTemplates();
           setEditingTemplate(null);
           setActiveTab('enviar');
-          alert('Template actualizado exitosamente');
+          success(
+            <>
+              <strong>Template actualizado</strong>
+              <p>Los cambios fueron guardados.</p>
+            </>
+          );
         }
       } else {
         const response = await axios.post(`${API_URL}/templates`, templateData);
@@ -121,19 +146,34 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           setSelectedTemplate(response.data.template_id);
           setEditingTemplate(null);
           setActiveTab('enviar');
-          alert('Template creado exitosamente');
+          success(
+            <>
+              <strong>Template creado</strong>
+              <p>Disponible para usar en tus envíos.</p>
+            </>
+          );
         }
       }
-    } catch (error) {
-      console.error('Error guardando template:', error);
-      const errorMsg = error.response?.data?.detail || error.message;
-      alert(`Error: ${errorMsg}`);
+    } catch (err) {
+      console.error('Error guardando template:', err);
+      const errorMsg = err.response?.data?.detail || err.message;
+      toastError(
+        <>
+          <strong>No se pudo guardar</strong>
+          <p>{errorMsg}</p>
+        </>
+      );
     }
   };
 
   const handleEnviar = async () => {
     if (!selectedTemplate || selectedEmpresas.length === 0) {
-      alert('Selecciona un template y al menos una empresa');
+      warning(
+        <>
+          <strong>Selecciona template y empresas</strong>
+          <p>Necesitas elegir un template y al menos una empresa con email.</p>
+        </>
+      );
       return;
     }
 
@@ -183,10 +223,15 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           onClose();
         }
       }
-    } catch (error) {
-      console.error('Error enviando email:', error);
-      const errorMsg = error.response?.data?.detail || error.message;
-      error(`Error al enviar: ${errorMsg}`);
+    } catch (err) {
+      console.error('Error enviando email:', err);
+      const errorMsg = err.response?.data?.detail || err.message;
+      toastError(
+        <>
+          <strong>Error al enviar</strong>
+          <p>{errorMsg}</p>
+        </>
+      );
     } finally {
       setLoading(false);
     }
@@ -218,6 +263,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           setActiveTab('templates');
         }}
         embedded={embedded}
+        toastWarning={warning}
       />
     );
   }
@@ -508,7 +554,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
 }
 
 // Componente inline para editar templates
-function TemplateEditorInline({ template, onSave, onCancel, embedded = false }) {
+function TemplateEditorInline({ template, onSave, onCancel, embedded = false, toastWarning }) {
   const [nombre, setNombre] = useState(template.nombre || '');
   const [subject, setSubject] = useState(template.subject || '');
   const [bodyHtml, setBodyHtml] = useState(template.body_html || '');
@@ -517,7 +563,12 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false }) 
 
   const handleSave = async () => {
     if (!nombre || !subject || !bodyHtml) {
-      alert('Completa todos los campos requeridos');
+      toastWarning?.(
+        <>
+          <strong>Campos obligatorios</strong>
+          <p>Completa nombre, asunto y cuerpo HTML antes de guardar.</p>
+        </>
+      );
       return;
     }
 
