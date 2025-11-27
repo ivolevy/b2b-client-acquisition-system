@@ -30,7 +30,8 @@ function HelpModal({ onClose }) {
                 <li><strong>Scrapear websites:</strong> Activa esta opción para que el sistema visite los sitios web de las empresas y extraiga automáticamente emails, teléfonos y redes sociales.</li>
                 <li><strong>Solo validadas:</strong> Muestra únicamente empresas con datos de contacto validados.</li>
               </ul>
-              <p style={{ marginTop: '12px' }}><strong>Botón "Buscar":</strong> Inicia la búsqueda en OpenStreetMap y enriquece los datos encontrados.</p>
+              <p style={{ marginTop: '12px' }}><strong>Botón "Buscar":</strong> Inicia la búsqueda de empresas en OpenStreetMap y enriquece los datos encontrados con scraping de sitios web y validación de contactos.</p>
+              <p style={{ marginTop: '8px' }}><strong>Nota:</strong> El mapa de selección de ubicación usa Google Maps para mejor visualización, pero los datos de empresas provienen de OpenStreetMap.</p>
             </div>
           </section>
 
@@ -41,16 +42,23 @@ function HelpModal({ onClose }) {
               <p><strong>Filtros disponibles:</strong></p>
               <ul style={{ marginLeft: '1.5rem', marginTop: '8px' }}>
                 <li><strong>Rubro:</strong> Filtra por categoría de negocio</li>
-                <li><strong>Ciudad:</strong> Filtra por ciudad específica</li>
-                <li><strong>Validación:</strong> Todas / Válidas / Pendientes</li>
-                <li><strong>Con Email:</strong> Solo empresas que tienen email</li>
-                <li><strong>Con Teléfono:</strong> Solo empresas que tienen teléfono</li>
+                <li><strong>Ciudad:</strong> Filtra por ciudad específica (búsqueda parcial)</li>
+                <li><strong>Distancia:</strong> Filtra por distancia al centro de búsqueda (mayor que / menor que un valor en km)</li>
+                <li><strong>Redes Sociales:</strong> Filtra empresas con o sin redes sociales (Instagram, Facebook, LinkedIn, Twitter, YouTube, TikTok)</li>
+                <li><strong>Con Email:</strong> Solo empresas que tienen email válido</li>
+                <li><strong>Con Teléfono:</strong> Solo empresas que tienen teléfono válido</li>
               </ul>
               <p style={{ marginTop: '12px' }}><strong>Vistas:</strong></p>
               <ul style={{ marginLeft: '1.5rem', marginTop: '8px' }}>
-                <li><strong>Tabla:</strong> Vista en formato tabla con todos los datos de las empresas</li>
-                <li><strong>Mapa:</strong> Vista geográfica mostrando la ubicación de las empresas</li>
+                <li><strong>Tabla:</strong> Vista en formato tabla con todos los datos de las empresas. Incluye botón "Borrar resultados" para eliminar todas las empresas almacenadas.</li>
+                <li><strong>Mapa:</strong> Vista geográfica en Google Maps mostrando la ubicación de las empresas con marcadores</li>
                 <li><strong>Emails:</strong> Módulo para enviar emails a las empresas encontradas</li>
+              </ul>
+              <p style={{ marginTop: '12px' }}><strong>Acciones:</strong></p>
+              <ul style={{ marginLeft: '1.5rem', marginTop: '8px' }}>
+                <li><strong>Limpiar Vista:</strong> Limpia la vista actual sin eliminar los datos</li>
+                <li><strong>Exportar CSV:</strong> Descarga los resultados filtrados en formato CSV</li>
+                <li><strong>Borrar Resultados:</strong> Elimina todas las empresas almacenadas (acción permanente)</li>
               </ul>
             </div>
           </section>
@@ -95,16 +103,33 @@ function HelpModal({ onClose }) {
             <h3 style={{ color: '#667eea', marginBottom: '12px', fontSize: '1.25rem' }}>4. Exportación de Datos</h3>
             <div style={{ paddingLeft: '16px' }}>
               <p><strong>Exportar CSV:</strong> Descarga un archivo CSV con todos los datos de las empresas filtradas, listo para usar en Excel o Google Sheets.</p>
-              <p style={{ marginTop: '8px' }}>El archivo incluye: nombre, rubro, email, teléfono, dirección, redes sociales, y más.</p>
+              <p style={{ marginTop: '8px' }}>El archivo incluye: nombre, rubro, email, teléfono, dirección, redes sociales, distancia, y más.</p>
+              <p style={{ marginTop: '8px' }}><strong>Nota:</strong> Exporta tus resultados regularmente, ya que los datos se almacenan solo en memoria durante la sesión.</p>
             </div>
           </section>
 
-          {/* Base de Datos */}
+          {/* Notificaciones */}
           <section style={{ marginBottom: '24px' }}>
-            <h3 style={{ color: '#667eea', marginBottom: '12px', fontSize: '1.25rem' }}>5. Base de Datos</h3>
+            <h3 style={{ color: '#667eea', marginBottom: '12px', fontSize: '1.25rem' }}>6. Notificaciones</h3>
             <div style={{ paddingLeft: '16px' }}>
-              <p><strong>Ver BD:</strong> Visualiza todas las empresas almacenadas en la base de datos con estadísticas completas.</p>
-              <p style={{ marginTop: '8px' }}><strong>Borrar BD:</strong> Elimina todas las empresas de la base de datos. Esta acción no se puede deshacer.</p>
+              <p>El sistema usa notificaciones personalizadas (toasts) en lugar de alertas del navegador:</p>
+              <ul style={{ marginLeft: '1.5rem', marginTop: '8px' }}>
+                <li><strong>Verde (Éxito):</strong> Operaciones completadas correctamente</li>
+                <li><strong>Rojo (Error):</strong> Errores que requieren atención</li>
+                <li><strong>Amarillo (Advertencia):</strong> Información importante o advertencias</li>
+                <li><strong>Azul (Info):</strong> Información general</li>
+              </ul>
+              <p style={{ marginTop: '8px' }}><strong>Importante:</strong> Las notificaciones no desaparecen automáticamente. Debes cerrarlas manualmente haciendo clic en la "X" cuando las hayas leído.</p>
+            </div>
+          </section>
+
+          {/* Gestión de Resultados */}
+          <section style={{ marginBottom: '24px' }}>
+            <h3 style={{ color: '#667eea', marginBottom: '12px', fontSize: '1.25rem' }}>5. Gestión de Resultados</h3>
+            <div style={{ paddingLeft: '16px' }}>
+              <p><strong>Almacenamiento:</strong> El sistema guarda las empresas en memoria durante la sesión. Los datos se mantienen hasta que cierres la aplicación o uses "Borrar resultados".</p>
+              <p style={{ marginTop: '8px' }}><strong>Borrar Resultados:</strong> El botón rojo en el módulo de resultados elimina todas las empresas almacenadas. Esta acción no se puede deshacer.</p>
+              <p style={{ marginTop: '8px' }}><strong>Exportar:</strong> Usa el botón "Exportar CSV" para descargar los resultados y guardarlos permanentemente en tu computadora.</p>
             </div>
           </section>
 
@@ -114,12 +139,16 @@ function HelpModal({ onClose }) {
             <div style={{ paddingLeft: '16px' }}>
               <ul style={{ marginLeft: '1.5rem', marginTop: '8px' }}>
                 <li>Usa radios de búsqueda más pequeños (1-5km) para resultados más precisos en áreas urbanas</li>
-                <li>Activa "Scrapear websites" para obtener más datos de contacto, pero ten en cuenta que toma más tiempo</li>
+                <li>Activa "Extraer redes sociales" para obtener más datos de contacto, pero ten en cuenta que toma más tiempo</li>
+                <li>Usa "Solo con contacto válido" durante la búsqueda para filtrar empresas sin email ni teléfono desde el inicio</li>
                 <li>Filtra por "Con Email" antes de usar el módulo de emails para ver solo empresas contactables</li>
+                <li>Usa el filtro de distancia para encontrar empresas cercanas o lejanas al punto de búsqueda</li>
+                <li>El filtro de redes sociales te ayuda a identificar empresas con presencia digital activa</li>
                 <li>Personaliza los templates de email para que reflejen tu propuesta de valor</li>
                 <li>En modo masivo, usa un delay de 1-2 segundos entre envíos para evitar problemas con el servidor de email</li>
                 <li>Revisa la vista previa antes de enviar para asegurarte de que el email se ve correctamente</li>
-                <li>Exporta regularmente tus resultados para tener backups de los datos</li>
+                <li><strong>Importante:</strong> Exporta regularmente tus resultados a CSV, ya que los datos se pierden al cerrar la aplicación o reiniciar el servidor</li>
+                <li>Las notificaciones (toasts) no desaparecen automáticamente - ciérralas manualmente cuando las hayas leído</li>
               </ul>
             </div>
           </section>
@@ -130,10 +159,16 @@ function HelpModal({ onClose }) {
             <div style={{ paddingLeft: '16px' }}>
               <p><strong>Para que el envío de emails funcione:</strong></p>
               <ol style={{ marginLeft: '1.5rem', marginTop: '8px' }}>
-                <li>Configura las credenciales SMTP en el archivo <code>.env</code> del backend</li>
-                <li>Para Gmail, necesitas crear una "App Password" en lugar de usar tu contraseña normal</li>
-                <li>El sistema está configurado para usar <code>solutionsdota@gmail.com</code> por defecto</li>
-                <li>Las variables necesarias son: <code>SMTP_PASSWORD</code></li>
+                <li>Configura las credenciales SMTP en las variables de entorno del backend (Vercel o servidor)</li>
+                <li>Para Gmail, necesitas crear una "App Password" en lugar de usar tu contraseña normal:
+                  <ul style={{ marginLeft: '1.5rem', marginTop: '4px' }}>
+                    <li>Ve a tu cuenta de Google → Seguridad → Verificación en 2 pasos</li>
+                    <li>Genera una "Contraseña de aplicación" para este sistema</li>
+                    <li>Usa esa contraseña en <code>SMTP_PASSWORD</code></li>
+                  </ul>
+                </li>
+                <li>Variables necesarias: <code>SMTP_HOST</code>, <code>SMTP_PORT</code>, <code>SMTP_USER</code>, <code>SMTP_PASSWORD</code>, <code>SMTP_FROM_EMAIL</code></li>
+                <li>El sistema tiene un timeout de 20 segundos por email para evitar cuelgues</li>
               </ol>
           </div>
           </section>
@@ -142,7 +177,7 @@ function HelpModal({ onClose }) {
 
         <div className="db-viewer-footer">
           <div className="footer-stats" style={{ fontSize: '0.875rem', color: '#64748b' }}>
-            Sistema B2B Client Acquisition - Versión 2.0
+            Sistema B2B Client Acquisition - Versión 2.0 | Google Maps Integration | Almacenamiento en Memoria
           </div>
           <button className="btn-close" onClick={onClose}>Cerrar</button>
         </div>

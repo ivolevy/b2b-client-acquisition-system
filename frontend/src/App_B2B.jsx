@@ -101,19 +101,38 @@ function AppB2B() {
           );
         } else {
           if (params.solo_validadas) {
-            success(
-              <>
-                <strong>{guardadas} empresas guardadas</strong>
-                <p>Todas con contacto válido (de {total} encontradas)</p>
-              </>
-            );
+            if (guardadas === total) {
+              success(
+                <>
+                  <strong>{guardadas} empresas guardadas</strong>
+                  <p>Todas con contacto válido</p>
+                </>
+              );
+            } else {
+              success(
+                <>
+                  <strong>{guardadas} empresas guardadas de {total} encontradas</strong>
+                  <p>Todas las guardadas tienen contacto válido</p>
+                </>
+              );
+            }
           } else {
-            success(
-              <>
-                <strong>{guardadas} empresas guardadas</strong>
-                <p>{validas} con contacto válido de {total} encontradas</p>
-              </>
-            );
+            if (guardadas === total) {
+              success(
+                <>
+                  <strong>{guardadas} empresas guardadas</strong>
+                  <p>{validas} con contacto válido</p>
+                </>
+              );
+            } else {
+              const noGuardadas = total - guardadas;
+              success(
+                <>
+                  <strong>{guardadas} empresas guardadas de {total} encontradas</strong>
+                  <p>{validas} con contacto válido ({noGuardadas} no se guardaron por falta de datos válidos)</p>
+                </>
+              );
+            }
         }
         }
         
