@@ -16,6 +16,7 @@ function AppB2B() {
   const [empresas, setEmpresas] = useState([]);
   const [filteredEmpresas, setFilteredEmpresas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [blockingLoading, setBlockingLoading] = useState(false);
   const [view, setView] = useState('table');
   const [stats, setStats] = useState(null);
   const [rubros, setRubros] = useState({});
@@ -70,6 +71,7 @@ function AppB2B() {
   const handleBuscar = async (params) => {
     try {
       setLoading(true);
+      setBlockingLoading(true);
       const response = await axios.post(`${API_URL}/buscar`, params);
       
       if (response.data.success) {
@@ -130,6 +132,7 @@ function AppB2B() {
       );
     } finally {
       setLoading(false);
+      setBlockingLoading(false);
     }
   };
 
@@ -319,6 +322,7 @@ function AppB2B() {
   const handleDeleteResults = async () => {
     try {
       setLoading(true);
+      setBlockingLoading(true);
       const response = await axios.delete(`${API_URL}/clear`);
 
       if (response.data.success) {
@@ -343,6 +347,7 @@ function AppB2B() {
       );
     } finally {
       setLoading(false);
+      setBlockingLoading(false);
     }
   };
 
@@ -355,7 +360,6 @@ function AppB2B() {
           onBuscar={handleBuscar}
           onFiltrar={handleFiltrar}
           onClearResults={handleClearResults}
-          onDeleteResults={handleDeleteResults}
           onExportCSV={exportToCSVFrontend}
           loading={loading}
           rubros={rubros}
@@ -363,8 +367,29 @@ function AppB2B() {
           setView={setView}
           toastWarning={warning}
         />
+
+        {view === 'table' && (
+          <section className="results-module">
+            <div className="results-module__header">
+              <div>
+                <h2>Resultados obtenidos</h2>
+                <p>
+                  {filteredEmpresas.length} en pantalla · {empresas.length} totales
+                </p>
+              </div>
+              <button
+                type="button"
+                className="results-delete-btn"
+                onClick={handleDeleteResults}
+                disabled={loading || empresas.length === 0}
+              >
+                Borrar resultados
+              </button>
+            </div>
+          </section>
+        )}
         
-        {loading && (
+        {blockingLoading && (
           <div className="loading-overlay">
             <div className="spinner"></div>
             <p>Buscando y validando empresas...</p>
