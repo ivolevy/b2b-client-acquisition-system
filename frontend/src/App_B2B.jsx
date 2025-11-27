@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import FiltersB2B from './components/FiltersB2B';
 import TableViewB2B from './components/TableViewB2B';
 import MapView from './components/MapView';
+import GoogleMapView from './components/GoogleMapView';
 import EmailSender from './components/EmailSender';
 import TemplateEditor from './components/TemplateEditor';
 import TemplateManager from './components/TemplateManager';
@@ -400,7 +401,7 @@ function AppB2B() {
           <TableViewB2B empresas={filteredEmpresas} />
         )}
         {view === 'map' && (
-          <MapView properties={filteredEmpresas} />
+          <GoogleMapView empresas={filteredEmpresas} />
         )}
       {view === 'emails' && (
         <EmailSender
