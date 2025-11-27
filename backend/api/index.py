@@ -1,5 +1,6 @@
 """
 Vercel serverless function wrapper for FastAPI
+Usa Mangum para convertir la app ASGI a formato compatible con Vercel
 """
 import os
 import sys
@@ -36,6 +37,8 @@ except ImportError as e:
     spec.loader.exec_module(main_module)
     app = main_module.app
 
-# Vercel espera el handler como la app directamente para FastAPI
-# El runtime de Vercel detecta automáticamente que es una app ASGI
-handler = app
+# Usar Mangum para convertir la app ASGI a formato compatible con Vercel
+from mangum import Mangum
+
+# Crear el handler usando Mangum
+handler = Mangum(app, lifespan="off")
