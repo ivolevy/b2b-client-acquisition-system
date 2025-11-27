@@ -70,13 +70,14 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
-# CORS
+# CORS - Configurado para permitir todas las solicitudes
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Permitir todos los orígenes
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Permitir todos los métodos (GET, POST, etc.)
+    allow_headers=["*"],  # Permitir todos los headers
+    expose_headers=["*"],  # Exponer todos los headers
 )
 
 # Modelos
@@ -158,6 +159,8 @@ async def root():
         "version": "2.0.0",
         "descripcion": "Sistema de captación de clientes por rubro empresarial",
         "enfoque": "Búsqueda B2B de empresas con datos de contacto validados",
+        "status": "online",
+        "cors": "enabled",
         "endpoints": {
             "/rubros": "GET - Lista de rubros disponibles",
             "/buscar": "POST - Buscar empresas por rubro",
@@ -166,6 +169,15 @@ async def root():
             "/estadisticas": "GET - Estadísticas del sistema",
             "/exportar": "POST - Exportar a CSV/JSON"
         }
+    }
+
+@app.get("/health")
+async def health_check():
+    """Endpoint de salud para verificar que el backend está funcionando"""
+    return {
+        "status": "ok",
+        "message": "Backend funcionando correctamente",
+        "cors": "enabled"
     }
 
 @app.get("/rubros")
