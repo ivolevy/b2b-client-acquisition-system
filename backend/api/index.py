@@ -1,27 +1,23 @@
 """
 Vercel serverless function wrapper for FastAPI
-Usa Mangum para convertir ASGI a formato compatible con AWS Lambda/Vercel
+Para proyecto backend separado en Vercel
 """
 import os
 import sys
 
-# Marcar que estamos en Vercel ANTES de cualquier importación
 os.environ['VERCEL'] = '1'
 
-# Agregar el directorio backend al path
-backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if backend_dir not in sys.path:
-    sys.path.insert(0, backend_dir)
+# Si el backend es un proyecto separado, la raíz es backend/
+# Entonces api/index.py está en backend/api/index.py
+# Y main.py está en backend/main.py
+# Necesitamos agregar el directorio padre (backend/) al path
+current_dir = os.path.dirname(os.path.abspath(__file__))  # backend/api/
+backend_root = os.path.dirname(current_dir)  # backend/
+sys.path.insert(0, backend_root)
 
-# SQLite deshabilitado - Preparado para Supabase
-# No configuramos DATABASE_PATH ya que no usamos SQLite
-
-# Importar la app de FastAPI
+# Importar desde la raíz del backend
 from main import app
-
-# Usar Mangum para convertir la app ASGI a formato Lambda/Vercel
 from mangum import Mangum
 
-# Crear el handler usando Mangum
-# lifespan="off" porque Vercel maneja el ciclo de vida
+# Crear handler
 handler = Mangum(app, lifespan="off")
