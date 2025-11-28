@@ -80,7 +80,7 @@
 }
 
 .results-delete-btn {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: var(--danger);
   color: #fff;
   border: none;
   border-radius: var(--radius-pill);
@@ -88,12 +88,13 @@
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.25);
+  box-shadow: var(--shadow-md);
 }
 
 .results-delete-btn:hover:not(:disabled) {
+  background: #b91c1c;
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(220, 38, 38, 0.35);
+  box-shadow: var(--shadow-lg);
 }
 
 .results-delete-btn:disabled {

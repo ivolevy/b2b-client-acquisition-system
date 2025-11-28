@@ -164,7 +164,7 @@
 .btn-primary:hover:not(:disabled) {
   background: var(--primary-dark);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-pink);
+  box-shadow: var(--shadow-primary);
 }
 
 .btn-secondary {
@@ -196,7 +196,7 @@
 }
 
 .btn-warning:hover:not(:disabled) {
-  background: #d97706;
+  background: #b45309;
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
@@ -208,9 +208,9 @@
 }
 
 .btn-success:hover:not(:disabled) {
-  background: #059669;
+  background: #047857;
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 /* Sección de ubicación */
@@ -281,12 +281,13 @@
 .btn-cta {
   padding: 1rem 1.8rem;
   font-size: 1.1rem;
-  background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.35);
+  background: var(--primary);
+  box-shadow: var(--shadow-md);
 }
 .btn-cta:hover {
+  background: var(--primary-dark);
   transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--shadow-lg);
 }
 
 .status-badge {

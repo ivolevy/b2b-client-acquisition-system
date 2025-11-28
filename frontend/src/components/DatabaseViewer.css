@@ -82,7 +82,7 @@
   border: 1px solid var(--gray-200);
 }
 
-.stat-card.green { border-color: #10b981; background: #f0fdf4; }
+.stat-card.green { border-color: var(--success); background: #f0fdf4; }
 .stat-card.orange { border-color: #f59e0b; background: #fffbeb; }
 .stat-card.blue { border-color: #3b82f6; background: #eff6ff; }
 .stat-card.purple { border-color: #8b5cf6; background: #f5f3ff; }
@@ -131,7 +131,7 @@
 }
 
 .status-active {
-  color: #10b981;
+  color: var(--success);
   font-weight: 600;
 }
 
@@ -186,7 +186,7 @@
 }
 
 .status-valid {
-  color: #10b981;
+  color: var(--success);
   font-weight: 600;
 }
 
@@ -346,7 +346,7 @@
 }
 
 .check-icon {
-  color: #10b981;
+  color: var(--success);
   font-weight: bold;
   font-size: 16px;
 }
@@ -487,7 +487,7 @@ tr.expanded {
   font-size: 14px;
   font-weight: 700;
   transition: background-color 0.2s ease;
-  box-shadow: var(--shadow-pink);
+  box-shadow: var(--shadow-primary);
 }
 
 .btn-close:hover {

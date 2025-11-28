@@ -210,5 +210,5 @@
 }
 
 .btn-confirm:hover {
-  background: #dc2626;
+  background: var(--danger);
 }
