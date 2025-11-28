@@ -39,18 +39,88 @@ Accede a: **http://localhost:8000/docs** para ver la documentación interactiva
 
 ##  Rubros Disponibles
 
-El sistema soporta búsqueda en los siguientes rubros:
+El sistema soporta búsqueda en **más de 50 rubros** organizados en las siguientes categorías:
 
-1. **desarrolladoras_inmobiliarias** - Desarrolladoras Inmobiliarias
-2. **constructoras** - Empresas Constructoras
-3. **arquitectura** - Estudios de Arquitectura
-4. **ingenieria** - Empresas de Ingeniería
-5. **consultoria** - Consultorías
-6. **tecnologia** - Empresas de Tecnología
-7. **legal** - Despachos Legales
-8. **marketing** - Agencias de Marketing
-9. **financiero** - Servicios Financieros
-10. **salud** - Servicios de Salud
+### Construcción e Inmobiliaria
+- Desarrolladoras Inmobiliarias
+- Empresas Constructoras
+- Estudios de Arquitectura
+- Diseño de Interiores
+- Empresas de Reformas
+
+### Servicios Profesionales
+- Empresas de Ingeniería
+- Consultorías
+- Despachos Legales
+- Servicios Contables
+- Servicios de Auditoría
+- Recursos Humanos
+
+### Tecnología y Marketing
+- Empresas de Tecnología
+- Agencias de Marketing
+- Diseño Gráfico
+- Agencias de Comunicación
+- Desarrollo Web
+
+### Finanzas y Seguros
+- Servicios Financieros
+- Compañías de Seguros
+- Gestión de Inversiones
+
+### Salud y Bienestar
+- Servicios de Salud
+- Fisioterapia
+- Clínicas Dentales
+- Centros de Bienestar
+
+### Educación
+- Centros Educativos
+- Centros de Formación
+- Academias de Idiomas
+
+### Hostelería y Turismo
+- Restaurantes
+- Hoteles
+- Bares y Cafeterías
+- Agencias de Viajes
+- Organización de Eventos
+
+### Retail y Comercio
+- Tiendas Retail
+- Tiendas de Moda
+- Tiendas de Decoración
+- Concesionarios y Talleres
+- Tiendas de Electrodomésticos
+
+### Transporte y Logística
+- Empresas de Transporte
+- Servicios de Mensajería
+- Almacenes y Depósitos
+
+### Manufactura e Industria
+- Manufactura
+- Industria Alimentaria
+- Industria Textil
+
+### Servicios Personales
+- Peluquerías
+- Fotografía
+- Clínicas Veterinarias
+
+### Entretenimiento y Ocio
+- Gimnasios
+- Entretenimiento
+- Centros Deportivos
+
+### Servicios Especializados
+- Empresas de Seguridad
+- Servicios de Limpieza
+- Jardinería y Paisajismo
+- Energía y Servicios Públicos
+- Medio Ambiente
+
+**Nota:** Los rubros se cargan dinámicamente desde el backend. Para ver la lista completa actualizada, consulta el endpoint `/rubros` de la API o el selector de rubros en la interfaz web.
 
 ---
 
