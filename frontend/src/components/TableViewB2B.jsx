@@ -4,17 +4,40 @@ import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok } 
 
 function TableViewB2B({ empresas }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState(null); // null, 'asc', 'desc'
   const itemsPerPage = 10;
   const tableContainerRef = useRef(null);
 
+  // Ordenar empresas por distancia
+  const empresasOrdenadas = React.useMemo(() => {
+    if (!sortBy) return empresas;
+    
+    const sorted = [...empresas].sort((a, b) => {
+      const distA = a.distancia_km;
+      const distB = b.distancia_km;
+      
+      // Empresas sin distancia van al final
+      if (distA === null || distA === undefined) return 1;
+      if (distB === null || distB === undefined) return -1;
+      
+      if (sortBy === 'asc') {
+        return distA - distB; // Menor a mayor
+      } else {
+        return distB - distA; // Mayor a menor
+      }
+    });
+    
+    return sorted;
+  }, [empresas, sortBy]);
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = empresas.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(empresas.length / itemsPerPage);
+  const currentItems = empresasOrdenadas.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(empresasOrdenadas.length / itemsPerPage);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [empresas]);
+  }, [empresas, sortBy]);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -57,7 +80,6 @@ function TableViewB2B({ empresas }) {
               <th>Teléfono</th>
               <th>Website</th>
               <th>Redes</th>
-              <th>Ciudad/País</th>
             </tr>
           </thead>
           <tbody>
@@ -288,12 +310,6 @@ function TableViewB2B({ empresas }) {
                       <span className="no-data">-</span>
                     )}
                   </div>
-                </td>
-                <td>
-                  {empresa.ciudad && <div>{empresa.ciudad}</div>}
-                  {empresa.pais && (
-                    <div style={{ fontSize: '12px', color: '#666' }}>{empresa.pais}</div>
-                  )}
                 </td>
               </tr>
             ))}

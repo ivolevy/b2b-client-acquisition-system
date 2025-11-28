@@ -504,6 +504,9 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         logger.info(f" Encontradas {len(empresas)} empresas en OSM")
         
+        # Guardar el número total encontrado ANTES de cualquier filtro
+        total_encontradas_original = len(empresas)
+        
         # Enriquecer con scraping paralelo si está habilitado
         if request.scrapear_websites:
             logger.info(" Iniciando enriquecimiento paralelo de empresas...")
@@ -632,7 +635,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         # Estadísticas simples
         stats = {
-            'total': len(empresas),
+            'total': total_encontradas_original,  # Total original antes de filtros
             'validas': validas,
             'sin_contacto': len(empresas_sin_contacto),
             'rechazadas': len(empresas_rechazadas),
@@ -644,7 +647,8 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         logger.info(f"""
     === PROCESO COMPLETADO ===
-    Total empresas encontradas: {stats['total']}
+    Total empresas encontradas en OSM: {total_encontradas_original}
+    Empresas después de filtro por radio: {len(empresas)}
     Empresas con contacto válido: {stats['validas']}
     Empresas sin contacto válido: {stats['sin_contacto']}
     Empresas rechazadas: {stats['rechazadas']}
@@ -655,11 +659,11 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
     Solo válidas: {solo_validadas}
     """)
         
-        logger.info(f" Proceso completado: {total_guardadas} empresas guardadas de {len(empresas)} encontradas ({validas} con contacto válido)")
+        logger.info(f" Proceso completado: {total_guardadas} empresas guardadas de {total_encontradas_original} encontradas ({validas} con contacto válido)")
         
         return {
             "success": True,
-            "total_encontradas": len(empresas),
+            "total_encontradas": total_encontradas_original,
             "guardadas": total_guardadas,
             "validas": validas,
             "rechazadas": len(empresas_rechazadas),
