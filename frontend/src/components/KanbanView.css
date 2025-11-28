@@ -92,8 +92,8 @@
   font-size: 11px;
 }
 
-.score.hot { background: var(--success); }
-.score.warm { background: var(--warning); }
+.score.hot { background: linear-gradient(135deg, #10b981, #059669); }
+.score.warm { background: linear-gradient(135deg, #f59e0b, #d97706); }
 .score.cold { background: linear-gradient(135deg, #3b82f6, #2563eb); }
 .score.low { background: linear-gradient(135deg, #6b7280, #4b5563); }
 

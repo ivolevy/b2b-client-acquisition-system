@@ -56,7 +56,6 @@ function HelpModal({ onClose }) {
               </ul>
               <p style={{ marginTop: '12px' }}><strong>Acciones:</strong></p>
               <ul style={{ marginLeft: '1.5rem', marginTop: '8px' }}>
-                <li><strong>Limpiar Vista:</strong> Limpia la vista actual sin eliminar los datos</li>
                 <li><strong>Exportar CSV:</strong> Descarga los resultados filtrados en formato CSV</li>
                 <li><strong>Borrar Resultados:</strong> Elimina todas las empresas almacenadas (acción permanente)</li>
               </ul>

@@ -326,18 +326,6 @@ function AppB2B() {
     );
   };
 
-  const handleClearResults = () => {
-    setEmpresas([]);
-    setFilteredEmpresas([]);
-    setStats({ total: 0, validadas: 0 });
-    info(
-      <>
-        <strong>Resultados limpiados</strong>
-        <p>La vista ha sido limpiada. Los datos permanecen en la base de datos.</p>
-      </>
-    );
-  };
-
   const handleDeleteResults = async () => {
     try {
       setLoading(true);
@@ -378,7 +366,6 @@ function AppB2B() {
         <FiltersB2B 
           onBuscar={handleBuscar}
           onFiltrar={handleFiltrar}
-          onClearResults={handleClearResults}
           onExportCSV={exportToCSVFrontend}
           loading={loading}
           rubros={rubros}

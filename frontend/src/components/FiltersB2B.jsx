@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import GoogleLocationPicker from './GoogleLocationPicker';
 import './Filters.css';
 
-function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading, rubros, view, setView, toastWarning }) {
+function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, setView, toastWarning }) {
   // Estados para búsqueda
   const [rubro, setRubro] = useState('');
   const [locationData, setLocationData] = useState(null);
@@ -279,13 +279,6 @@ function FiltersB2B({ onBuscar, onFiltrar, onClearResults, onExportCSV, loading,
               onClick={onExportCSV}
             >
                Exportar CSV
-            </button>
-            <button 
-              type="button" 
-              className="btn btn-warning btn-compact" 
-              onClick={onClearResults}
-            >
-               Limpiar Vista
             </button>
           </div>
         </form>

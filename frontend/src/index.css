@@ -10,14 +10,14 @@ html {
 }
 
 :root {
-  /* Paleta profesional - Azules corporativos */
-  --primary: #2563eb;
-  --primary-dark: #1e40af;
-  --primary-light: #3b82f6;
-  --secondary: #475569;
-  --success: #059669;
-  --warning: #d97706;
-  --danger: #dc2626;
+  /* Paleta estilo Dota Solutions */
+  --primary: #FF69B4;
+  --primary-dark: #FF1493;
+  --primary-light: #FFB6D9;
+  --secondary: #1a1a1a;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
   
   /* Grises suaves */
   --gray-50: #fafafa;
@@ -51,7 +51,7 @@ html {
   --shadow-md: 0 4px 16px 0 rgb(0 0 0 / 0.12);
   --shadow-lg: 0 8px 24px 0 rgb(0 0 0 / 0.15);
   --shadow-xl: 0 16px 40px 0 rgb(0 0 0 / 0.18);
-  --shadow-primary: 0 8px 24px 0 rgb(37 99 235 / 0.25);
+  --shadow-pink: 0 8px 24px 0 rgb(255 105 180 / 0.25);
 }
 
 /* Tema Oscuro */

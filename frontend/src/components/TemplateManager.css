@@ -28,7 +28,7 @@
   align-items: center;
   padding: 24px 28px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.35);
-  background: var(--primary);
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #4338ca 100%);
   color: white;
 }
 
@@ -49,7 +49,7 @@
 
 .btn-new {
   padding: 12px 22px;
-  background: var(--primary);
+  background: linear-gradient(135deg, #1e3a8a 0%, #4338ca 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -82,7 +82,7 @@
 }
 
 .template-item:hover {
-  border-color: var(--primary);
+  border-color: #1e3a8a;
   box-shadow: 0 12px 20px rgba(15, 23, 42, 0.12);
 }
 
@@ -115,7 +115,7 @@
 }
 
 .badge-default {
-  background: var(--primary);
+  background: linear-gradient(135deg, #0ea5ea 0%, #1e3a8a 100%);
   color: white;
   padding: 4px 10px;
   border-radius: 999px;
@@ -142,13 +142,13 @@
 }
 
 .btn-edit:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+  border-color: #0ea5ea;
+  color: #0ea5ea;
   background: rgba(14, 165, 233, 0.1);
 }
 
 .btn-delete {
-  color: var(--danger);
+  color: #b91c1c;
 }
 
 .btn-delete:hover {
