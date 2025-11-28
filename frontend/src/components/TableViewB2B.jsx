@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './TableView.css';
 import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok } from 'react-icons/fa6';
 
 function TableViewB2B({ empresas }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const tableContainerRef = useRef(null);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -17,7 +18,10 @@ function TableViewB2B({ empresas }) {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Hacer scroll solo hasta el inicio de la tabla, no hasta el top de la página
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   if (empresas.length === 0) {
@@ -34,7 +38,7 @@ function TableViewB2B({ empresas }) {
   }
 
   return (
-    <div className="table-container">
+    <div className="table-container" ref={tableContainerRef}>
       <div className="table-header">
         <h2>Empresas B2B: {empresas.length} resultados</h2>
         <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '6px', fontWeight: 'normal' }}>

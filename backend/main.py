@@ -515,6 +515,10 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         # Agregar información de búsqueda y calcular distancias
         if request.busqueda_centro_lat and request.busqueda_centro_lng:
             logger.info(f" Calculando distancias desde ubicación: {request.busqueda_ubicacion_nombre or 'Sin nombre'}")
+            # El radio ya viene en kilómetros desde el frontend
+            radio_km = request.busqueda_radio_km if request.busqueda_radio_km else None
+            
+            empresas_con_distancia = []
             for empresa in empresas:
                 # Agregar información de búsqueda
                 empresa['busqueda_ubicacion_nombre'] = request.busqueda_ubicacion_nombre
@@ -531,8 +535,23 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                         empresa.get('longitud')
                     )
                     empresa['distancia_km'] = distancia
+                    
+                    # Filtrar por radio: solo incluir empresas dentro del radio
+                    if radio_km is not None and distancia is not None:
+                        if distancia > radio_km:
+                            logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio: {distancia:.2f}km > {radio_km:.2f}km")
+                            continue  # Saltar esta empresa, está fuera del radio
                 else:
                     empresa['distancia_km'] = None
+                    # Si no tiene coordenadas y hay un radio definido, excluir la empresa
+                    if radio_km is not None:
+                        logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} sin coordenadas, excluida del radio")
+                        continue
+                
+                empresas_con_distancia.append(empresa)
+            
+            empresas = empresas_con_distancia
+            logger.info(f" Después del filtro por radio: {len(empresas)} empresas dentro del radio de {radio_km:.2f}km")
         
         # Validar empresas
         from validators import validar_email, validar_telefono, validar_website
