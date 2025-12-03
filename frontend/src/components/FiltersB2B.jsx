@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import GoogleLocationPicker from './GoogleLocationPicker';
 import './Filters.css';
 
-function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, setView, toastWarning }) {
+function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, setView, toastWarning, hayResultados }) {
   // Estados para búsqueda
   const [rubro, setRubro] = useState('');
   const [locationData, setLocationData] = useState(null);
   const [scrapearWebsites, setScrapearWebsites] = useState(true); //  ACTIVADO - Scraping de redes sociales
   const [soloValidadas, setSoloValidadas] = useState(false); // Desmarcado por defecto para ver todas
+  const [modoBusqueda, setModoBusqueda] = useState('nueva'); // 'nueva' o 'agregar'
   
   // Estados para filtros
   const [filtroRubro, setFiltroRubro] = useState('');
@@ -46,6 +47,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
       bbox: locationData.bbox.bbox_string,
       scrapear_websites: scrapearWebsites,
       solo_validadas: soloValidadas,
+      limpiar_anterior: modoBusqueda === 'nueva', // true = nueva búsqueda, false = agregar
       // Información de ubicación de búsqueda
       busqueda_ubicacion_nombre: locationData.ubicacion_nombre || null,
       busqueda_centro_lat: locationData.center?.lat || null,
@@ -145,6 +147,39 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
                 />
                 <span className="slider" />
               </label>
+            </div>
+
+            {/* Selector de modo de búsqueda */}
+            <div className="option-card">
+              <div className="option-head">
+                <div className="option-title">Modo de búsqueda</div>
+                <div className={`status-badge ${modoBusqueda === 'nueva' ? 'info' : 'success'}`}>
+                  {modoBusqueda === 'nueva' ? 'Reemplazar' : 'Acumular'}
+                </div>
+              </div>
+              <div className="option-desc">
+                {modoBusqueda === 'nueva' 
+                  ? 'Limpia resultados anteriores antes de buscar.' 
+                  : 'Agrega los nuevos resultados a los existentes.'}
+              </div>
+              <div className="mode-toggle">
+                <button 
+                  type="button"
+                  className={`mode-btn ${modoBusqueda === 'nueva' ? 'active' : ''}`}
+                  onClick={() => setModoBusqueda('nueva')}
+                  disabled={loading}
+                >
+                  Nueva búsqueda
+                </button>
+                <button 
+                  type="button"
+                  className={`mode-btn ${modoBusqueda === 'agregar' ? 'active' : ''}`}
+                  onClick={() => setModoBusqueda('agregar')}
+                  disabled={loading}
+                >
+                  Agregar resultados
+                </button>
+              </div>
             </div>
 
             <div className="option-actions">

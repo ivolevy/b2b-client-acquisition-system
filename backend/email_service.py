@@ -14,9 +14,14 @@ from dotenv import load_dotenv
 import socket
 import re
 
-# Cargar variables de entorno desde .env (busca en el directorio del backend)
+# Cargar variables de entorno desde .env.local o .env (busca en el directorio del backend)
+env_local_path = os.path.join(os.path.dirname(__file__), '.env.local')
 env_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(env_path)
+# Prioriza .env.local si existe
+if os.path.exists(env_local_path):
+    load_dotenv(env_local_path)
+else:
+    load_dotenv(env_path)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,10 +71,10 @@ def enviar_email(
         Dict con success, message, error
     """
     if not SMTP_PASSWORD or SMTP_PASSWORD.strip() == '':
-        env_file_path = os.path.join(os.path.dirname(__file__), '.env')
+        env_file_path = os.path.join(os.path.dirname(__file__), '.env.local')
         return {
             'success': False,
-            'message': f'SMTP no configurado. Por favor, agrega SMTP_PASSWORD en el archivo .env del backend.\n\nUbicación del archivo: {env_file_path}\n\nEjemplo de contenido:\nSMTP_PASSWORD=tu_app_password_de_gmail',
+            'message': f'SMTP no configurado. Por favor, agrega SMTP_PASSWORD en el archivo .env.local del backend.\n\nUbicación del archivo: {env_file_path}\n\nEjemplo de contenido:\nSMTP_PASSWORD=tu_app_password_de_gmail',
             'error': 'SMTP_NOT_CONFIGURED'
         }
     

@@ -367,6 +367,7 @@ class BusquedaRubroRequest(BaseModel):
     ciudad: Optional[str] = None
     scrapear_websites: bool = True
     solo_validadas: bool = False  # Solo empresas con email o teléfono válido
+    limpiar_anterior: bool = True  # True = nueva búsqueda (limpia), False = agregar a resultados
     # Información de ubicación de búsqueda
     busqueda_ubicacion_nombre: Optional[str] = None
     busqueda_centro_lat: Optional[float] = None
@@ -476,7 +477,20 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
     try:
         # Verificar que el parámetro se recibe correctamente
         solo_validadas = getattr(request, 'solo_validadas', False)
-        logger.info(f" Búsqueda B2B - Rubro: {request.rubro}, Solo válidas: {solo_validadas} (tipo: {type(solo_validadas)})")
+        limpiar_anterior = getattr(request, 'limpiar_anterior', True)
+        
+        # Si es nueva búsqueda, limpiar resultados anteriores
+        if limpiar_anterior:
+            global _memoria_empresas, _empresa_counter
+            count_anterior = len(_memoria_empresas)
+            _memoria_empresas = []
+            _empresa_counter = 0
+            if count_anterior > 0:
+                logger.info(f" Nueva búsqueda: limpiando {count_anterior} empresas anteriores")
+        else:
+            logger.info(f" Agregando a resultados existentes ({len(_memoria_empresas)} empresas)")
+        
+        logger.info(f" Búsqueda B2B - Rubro: {request.rubro}, Solo válidas: {solo_validadas}, Limpiar anterior: {limpiar_anterior}")
         
         # Buscar en OpenStreetMap
         if request.bbox:
