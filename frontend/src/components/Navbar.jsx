@@ -30,7 +30,12 @@ function Navbar() {
                     {user.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                   <div className="user-details">
-                    <span className="user-name">{user.name || 'Usuario'}</span>
+                    <div className="user-name-row">
+                      <span className="user-name">{user.name || 'Usuario'}</span>
+                      {user.plan === 'pro' && (
+                        <span className="pro-badge-small">PRO</span>
+                      )}
+                    </div>
                     <span className="user-email">{user.email}</span>
                   </div>
                 </div>

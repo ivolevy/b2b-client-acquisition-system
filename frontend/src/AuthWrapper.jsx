@@ -1,6 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import Login from './components/Login';
 import AppB2B from './App_B2B';
+import ProWelcome from './components/ProWelcome';
 
 // Contexto de autenticación
 const AuthContext = createContext(null);
@@ -45,6 +46,7 @@ const checkAuth = () => {
 function AuthWrapper() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showProWelcome, setShowProWelcome] = useState(false);
 
   useEffect(() => {
     // Verificar autenticación al cargar
@@ -54,7 +56,15 @@ function AuthWrapper() {
   }, []);
 
   const handleLogin = (userData) => {
+    // Si es usuario PRO, mostrar animación de bienvenida
+    if (userData.plan === 'pro') {
+      setShowProWelcome(true);
+    }
     setUser(userData);
+  };
+
+  const handleProWelcomeComplete = () => {
+    setShowProWelcome(false);
   };
 
   const handleLogout = () => {
@@ -106,6 +116,7 @@ function AuthWrapper() {
 
   return (
     <AuthContext.Provider value={authValue}>
+      {showProWelcome && <ProWelcome onComplete={handleProWelcomeComplete} />}
       {user ? <AppB2B /> : <Login onLogin={handleLogin} />}
     </AuthContext.Provider>
   );

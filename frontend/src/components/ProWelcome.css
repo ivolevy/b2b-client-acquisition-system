@@ -1,0 +1,343 @@
+/* ============================================
+   PRO WELCOME - Animación Épica de Desintegración
+   ============================================ */
+
+.pro-welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #1a0a1a 0%, #0a0a0f 100%);
+  overflow: hidden;
+}
+
+.pro-welcome-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* === PARTÍCULAS DE FONDO === */
+.particles-container {
+  position: absolute;
+  inset: -100px;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  background: linear-gradient(135deg, #FF69B4, #FF1493);
+  border-radius: 50%;
+  opacity: 0;
+  filter: blur(1px);
+}
+
+.entering .particle,
+.showing .particle {
+  animation: particleFloat 3s ease-in-out infinite;
+  animation-delay: var(--delay);
+  opacity: 0.6;
+}
+
+.disintegrating .particle {
+  animation: particleExplode var(--duration) ease-out forwards;
+  animation-delay: var(--delay);
+}
+
+@keyframes particleFloat {
+  0%, 100% { 
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  50% { 
+    transform: translate(var(--x), var(--y)) scale(1.5);
+    opacity: 0.8;
+  }
+}
+
+@keyframes particleExplode {
+  0% { 
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: translate(var(--x), var(--y)) scale(0);
+    opacity: 0;
+  }
+}
+
+/* === BADGE PRO PRINCIPAL === */
+.pro-badge-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+.pro-glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 105, 180, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(40px);
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+.pro-badge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 48px;
+  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 50%, #C71585 100%);
+  border-radius: 20px;
+  box-shadow: 
+    0 0 60px rgba(255, 105, 180, 0.6),
+    0 0 120px rgba(255, 20, 147, 0.4),
+    inset 0 0 30px rgba(255, 255, 255, 0.2);
+  transform: scale(0);
+  opacity: 0;
+}
+
+.entering .pro-badge {
+  animation: badgeEnter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.showing .pro-badge {
+  transform: scale(1);
+  opacity: 1;
+  animation: badgePulse 0.5s ease-in-out infinite alternate;
+}
+
+.disintegrating .pro-badge {
+  animation: badgeDisintegrate 0.5s ease-in forwards;
+}
+
+@keyframes badgeEnter {
+  0% { 
+    transform: scale(0) rotate(-10deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% { 
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes badgePulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.02); }
+}
+
+@keyframes badgeDisintegrate {
+  0% { 
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% { 
+    transform: scale(1.5);
+    opacity: 0;
+    filter: blur(20px);
+  }
+}
+
+.pro-icon {
+  font-size: 3.5rem;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+  animation: iconSpark 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes iconSpark {
+  0% { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)); }
+  100% { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 1)); }
+}
+
+.pro-text {
+  font-size: 5rem;
+  font-weight: 900;
+  color: white;
+  text-shadow: 
+    0 0 20px rgba(255, 255, 255, 0.8),
+    0 0 40px rgba(255, 105, 180, 0.6),
+    0 0 60px rgba(255, 20, 147, 0.4);
+  letter-spacing: 0.1em;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.pro-subtitle {
+  margin-top: 24px;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.entering .pro-subtitle {
+  animation: subtitleEnter 0.5s ease-out 0.3s forwards;
+}
+
+.showing .pro-subtitle {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.disintegrating .pro-subtitle {
+  animation: subtitleExit 0.3s ease-in forwards;
+}
+
+@keyframes subtitleEnter {
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes subtitleExit {
+  to { 
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* === FRAGMENTOS DE DESINTEGRACIÓN === */
+.disintegration-fragments {
+  position: absolute;
+  inset: -50px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.disintegrating .disintegration-fragments {
+  opacity: 1;
+}
+
+.fragment {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, #FF69B4, #ffffff);
+  border-radius: 2px;
+  opacity: 0;
+}
+
+.disintegrating .fragment {
+  animation: fragmentFly var(--duration) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: var(--delay);
+}
+
+@keyframes fragmentFly {
+  0% { 
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  100% { 
+    transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(0);
+    opacity: 0;
+  }
+}
+
+/* === ONDAS DE ENERGÍA === */
+.energy-waves {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.wave {
+  position: absolute;
+  border: 3px solid rgba(255, 105, 180, 0.6);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.wave-1 { width: 100px; height: 100px; }
+.wave-2 { width: 200px; height: 200px; }
+.wave-3 { width: 300px; height: 300px; }
+
+.entering .wave,
+.showing .wave {
+  animation: waveExpand 2s ease-out infinite;
+}
+
+.wave-1 { animation-delay: 0s; }
+.wave-2 { animation-delay: 0.3s; }
+.wave-3 { animation-delay: 0.6s; }
+
+.disintegrating .wave {
+  animation: waveFinal 0.5s ease-out forwards;
+}
+
+@keyframes waveExpand {
+  0% { 
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes waveFinal {
+  0% { 
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* === TRANSICIÓN DE SALIDA DEL OVERLAY === */
+.pro-welcome-overlay {
+  transition: opacity 0.5s ease-out, backdrop-filter 0.5s ease-out;
+}
+
+.disintegrating.pro-welcome-overlay {
+  opacity: 0;
+  backdrop-filter: blur(0);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .pro-badge {
+    padding: 16px 32px;
+    gap: 12px;
+  }
+  
+  .pro-icon {
+    font-size: 2.5rem;
+  }
+  
+  .pro-text {
+    font-size: 3rem;
+  }
+  
+  .pro-subtitle {
+    font-size: 1rem;
+  }
+}
+

@@ -8,7 +8,9 @@ import EmailSender from './components/EmailSender';
 import TemplateEditor from './components/TemplateEditor';
 import TemplateManager from './components/TemplateManager';
 import ToastContainer from './components/ToastContainer';
+import ProBackground from './components/ProBackground';
 import { useToast } from './hooks/useToast';
+import { useAuth } from './AuthWrapper';
 import { API_URL } from './config';
 import './App.css';
 
@@ -23,6 +25,10 @@ function AppB2B() {
   const [showEmailSender, setShowEmailSender] = useState(false);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
   const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
+  const { user } = useAuth();
+  
+  // Verificar si el usuario es PRO
+  const isPro = user?.plan === 'pro';
 
   useEffect(() => {
     loadEmpresas();
@@ -359,7 +365,10 @@ function AppB2B() {
   };
 
   return (
-    <div className="app">
+    <div className={`app ${isPro ? 'pro-theme' : ''}`}>
+      {/* Fondo animado PRO */}
+      {isPro && <ProBackground />}
+      
       <Navbar />
       
       <main className="main-content">
@@ -431,6 +440,14 @@ function AppB2B() {
       )}
 
       <ToastContainer toasts={toasts} onRemove={removeToast} />
+      
+      {/* Badge PRO flotante */}
+      {isPro && (
+        <div className="pro-floating-badge">
+          <span className="pro-icon">⚡</span>
+          <span>Plan PRO</span>
+        </div>
+      )}
     </div>
   );
 }

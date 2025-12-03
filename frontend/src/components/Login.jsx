@@ -2,10 +2,22 @@ import React, { useState } from 'react';
 import './Login.css';
 
 // Credenciales de prueba (luego conectar a base de datos)
-const DEMO_CREDENTIALS = {
-  email: 'admin@dotasolutions.com',
-  password: 'Dota2024!'
-};
+const DEMO_USERS = [
+  {
+    email: 'admin@dotasolutions.com',
+    password: 'Dota2024!',
+    name: 'Administrador',
+    role: 'admin',
+    plan: 'pro'
+  },
+  {
+    email: 'user@dotasolutions.com',
+    password: 'User2024!',
+    name: 'Usuario',
+    role: 'user',
+    plan: 'free'
+  }
+];
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -26,21 +38,18 @@ function Login({ onLogin }) {
     const emailLimpio = email.trim().toLowerCase();
     const passwordLimpio = password.trim();
     
-    // Debug: mostrar en consola lo que se está comparando
-    console.log('Email ingresado:', emailLimpio);
-    console.log('Email esperado:', DEMO_CREDENTIALS.email);
-    console.log('Password ingresado:', passwordLimpio);
-    console.log('Password esperado:', DEMO_CREDENTIALS.password);
-    console.log('Email match:', emailLimpio === DEMO_CREDENTIALS.email);
-    console.log('Password match:', passwordLimpio === DEMO_CREDENTIALS.password);
+    // Buscar usuario en la lista de demo
+    const user = DEMO_USERS.find(
+      u => u.email.toLowerCase() === emailLimpio && u.password === passwordLimpio
+    );
 
-    // Validación de credenciales (temporal - luego conectar a BD)
-    if (emailLimpio === DEMO_CREDENTIALS.email && passwordLimpio === DEMO_CREDENTIALS.password) {
+    if (user) {
       // Guardar sesión en localStorage
       const userData = {
-        email: emailLimpio,
-        name: 'Administrador',
-        role: 'admin',
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        plan: user.plan,
         loginTime: new Date().toISOString()
       };
       localStorage.setItem('b2b_auth', JSON.stringify(userData));

@@ -1,0 +1,183 @@
+/* ============================================
+   PRO BACKGROUND - Fondo Animado Premium
+   ============================================ */
+
+.pro-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a0a1a 50%, #0a0a0f 100%);
+}
+
+.pro-gradient-sphere {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.5;
+  animation: proFloat 25s ease-in-out infinite;
+}
+
+.pro-sphere-1 {
+  width: 700px;
+  height: 700px;
+  background: linear-gradient(135deg, #FF1493 0%, #FF69B4 100%);
+  top: -250px;
+  left: -150px;
+  animation-delay: 0s;
+}
+
+.pro-sphere-2 {
+  width: 600px;
+  height: 600px;
+  background: linear-gradient(135deg, #FF69B4 0%, #FFB6D9 100%);
+  bottom: -200px;
+  right: -150px;
+  animation-delay: -8s;
+}
+
+.pro-sphere-3 {
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(135deg, #C71585 0%, #FF1493 100%);
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: -16s;
+  opacity: 0.3;
+}
+
+@keyframes proFloat {
+  0%, 100% { 
+    transform: translate(0, 0) scale(1);
+  }
+  25% { 
+    transform: translate(40px, -40px) scale(1.05);
+  }
+  50% { 
+    transform: translate(-30px, 30px) scale(0.95);
+  }
+  75% { 
+    transform: translate(30px, 40px) scale(1.02);
+  }
+}
+
+.pro-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 105, 180, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 105, 180, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridShift 20s linear infinite;
+}
+
+@keyframes gridShift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(60px, 60px); }
+}
+
+/* Ajustes para que el contenido sea legible */
+.app.pro-theme {
+  background: transparent;
+}
+
+.app.pro-theme .main-content {
+  position: relative;
+  z-index: 1;
+}
+
+.app.pro-theme .navbar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 30px rgba(255, 105, 180, 0.1);
+}
+
+.app.pro-theme .filter-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.1);
+}
+
+.app.pro-theme .results-module {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.1);
+}
+
+.app.pro-theme .table-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.1);
+}
+
+/* Badge PRO flotante */
+.pro-floating-badge {
+  position: fixed;
+  bottom: 80px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  border-radius: 50px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 
+    0 4px 20px rgba(255, 105, 180, 0.4),
+    0 0 40px rgba(255, 20, 147, 0.2);
+  z-index: 1000;
+  animation: badgeGlow 2s ease-in-out infinite;
+}
+
+.pro-floating-badge .pro-icon {
+  font-size: 1.1rem;
+}
+
+@keyframes badgeGlow {
+  0%, 100% { 
+    box-shadow: 
+      0 4px 20px rgba(255, 105, 180, 0.4),
+      0 0 40px rgba(255, 20, 147, 0.2);
+  }
+  50% { 
+    box-shadow: 
+      0 4px 30px rgba(255, 105, 180, 0.6),
+      0 0 60px rgba(255, 20, 147, 0.3);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pro-sphere-1 {
+    width: 400px;
+    height: 400px;
+  }
+  
+  .pro-sphere-2 {
+    width: 350px;
+    height: 350px;
+  }
+  
+  .pro-sphere-3 {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .pro-floating-badge {
+    bottom: 70px;
+    left: 16px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+}
+
