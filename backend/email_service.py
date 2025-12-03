@@ -250,4 +250,3 @@ def enviar_emails_masivo(
     
     logger.info(f" Envío masivo completado: {resultados['exitosos']}/{resultados['total']} exitosos")
     return resultados
-

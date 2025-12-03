@@ -526,3 +526,62 @@ select.filter-input {
     justify-content: center;
   }
 }
+
+/* ========================================
+   SECTION HEADER WITH ACTION BUTTON
+   ======================================== */
+
+.section-header-with-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.section-header-with-action h3 {
+  margin: 0;
+}
+
+.btn-history {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+}
+
+.btn-history:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 105, 180, 0.4);
+}
+
+.btn-history:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-history svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .section-header-with-action {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .btn-history {
+    width: 100%;
+    justify-content: center;
+  }
+}

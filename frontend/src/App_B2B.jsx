@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Navbar from './components/Navbar';
 import FiltersB2B from './components/FiltersB2B';
@@ -11,6 +11,7 @@ import ToastContainer from './components/ToastContainer';
 import ProBackground from './components/ProBackground';
 import { useToast } from './hooks/useToast';
 import { useAuth } from './AuthWrapper';
+import { searchHistoryService } from './lib/supabase';
 import { API_URL } from './config';
 import './App.css';
 
@@ -29,12 +30,26 @@ function AppB2B() {
   
   // Verificar si el usuario es PRO
   const isPro = user?.plan === 'pro';
+  
+  // Estado para pasar datos desde historial a los filtros
+  const [historySearchData, setHistorySearchData] = useState(null);
 
   useEffect(() => {
     loadEmpresas();
     loadStats();
     loadRubros();
   }, []);
+  
+  // Manejar selección desde historial de búsquedas
+  const handleSelectFromHistory = (searchData) => {
+    setHistorySearchData(searchData);
+    info(
+      <>
+        <strong>Búsqueda cargada</strong>
+        <p>Se cargó "{searchData.rubro}" - {searchData.ubicacion_nombre || 'ubicación personalizada'}</p>
+      </>
+    );
+  };
 
   const loadRubros = async () => {
     try {
@@ -85,6 +100,24 @@ function AppB2B() {
         const total = response.data.total_encontradas || 0;
         const guardadas = response.data.guardadas || 0;
         const empresasEncontradas = response.data.data || [];
+
+        // Guardar búsqueda en historial si es PRO
+        if (isPro && user?.id && total > 0) {
+          try {
+            await searchHistoryService.saveSearch(user.id, {
+              rubro: params.rubro,
+              ubicacion_nombre: params.busqueda_ubicacion_nombre,
+              centro_lat: params.busqueda_centro_lat,
+              centro_lng: params.busqueda_centro_lng,
+              radio_km: params.busqueda_radio_km,
+              bbox: params.bbox,
+              empresas_encontradas: total,
+              empresas_validas: validas
+            });
+          } catch (historyError) {
+            console.warn('No se pudo guardar en historial:', historyError);
+          }
+        }
         
         if (total === 0) {
           warning(
@@ -381,6 +414,8 @@ function AppB2B() {
           view={view}
           setView={setView}
           toastWarning={warning}
+          onSelectFromHistory={handleSelectFromHistory}
+          historySearchData={historySearchData}
         />
 
         {view === 'table' && (

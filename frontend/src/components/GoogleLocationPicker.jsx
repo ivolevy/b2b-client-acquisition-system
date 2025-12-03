@@ -7,13 +7,29 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const libraries = ['places'];
 
-function GoogleLocationPicker({ onLocationChange }) {
+// Helper para calcular bounding box (debe estar fuera del componente)
+const calculateBoundingBox = (lat, lng, radiusMeters) => {
+  const R = 6371000; // Radio de la Tierra en metros
+  const latDelta = (radiusMeters / R) * (180 / Math.PI);
+  const lngDelta = (radiusMeters / (R * Math.cos(lat * Math.PI / 180))) * (180 / Math.PI);
+  
+  return {
+    bbox_string: `${lat - latDelta},${lng - lngDelta},${lat + latDelta},${lng + lngDelta}`,
+    south: lat - latDelta,
+    west: lng - lngDelta,
+    north: lat + latDelta,
+    east: lng + lngDelta
+  };
+};
+
+function GoogleLocationPicker({ onLocationChange, initialLocation }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radius, setRadius] = useState(5000); // 5km por defecto
   const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 }); // Madrid por defecto
   const [searchQuery, setSearchQuery] = useState('');
   const [autocomplete, setAutocomplete] = useState(null);
   const [map, setMap] = useState(null);
+  const [initialLocationApplied, setInitialLocationApplied] = useState(false);
   const { success, error, warning, info, removeToast } = useToast();
 
   const { isLoaded, loadError } = useJsApiLoader({
@@ -21,20 +37,43 @@ function GoogleLocationPicker({ onLocationChange }) {
     googleMapsApiKey: GOOGLE_API_KEY || '',
     libraries,
   });
-
-  const calculateBoundingBox = (lat, lng, radiusMeters) => {
-    const R = 6371000; // Radio de la Tierra en metros
-    const latDelta = (radiusMeters / R) * (180 / Math.PI);
-    const lngDelta = (radiusMeters / (R * Math.cos(lat * Math.PI / 180))) * (180 / Math.PI);
-    
-    return {
-      bbox_string: `${lat - latDelta},${lng - lngDelta},${lat + latDelta},${lng + lngDelta}`,
-      south: lat - latDelta,
-      west: lng - lngDelta,
-      north: lat + latDelta,
-      east: lng + lngDelta
-    };
-  };
+  
+  // Efecto para aplicar ubicación inicial desde historial
+  useEffect(() => {
+    if (initialLocation && !initialLocationApplied && map && isLoaded) {
+      const { lat, lng, name, radius: initialRadius } = initialLocation;
+      const location = { lat, lng };
+      
+      // Configurar radio si viene
+      if (initialRadius) {
+        setRadius(initialRadius);
+      }
+      
+      // Configurar ubicación
+      setSelectedLocation(location);
+      setMapCenter(location);
+      setSearchQuery(name || '');
+      map.panTo(location);
+      
+      // Notificar al padre
+      const bbox = calculateBoundingBox(lat, lng, initialRadius || radius);
+      onLocationChange({
+        center: location,
+        radius: initialRadius || radius,
+        bbox: bbox,
+        ubicacion_nombre: name || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
+      });
+      
+      setInitialLocationApplied(true);
+    }
+  }, [initialLocation, initialLocationApplied, map, isLoaded, radius, onLocationChange]);
+  
+  // Resetear flag cuando cambia initialLocation
+  useEffect(() => {
+    if (initialLocation) {
+      setInitialLocationApplied(false);
+    }
+  }, [initialLocation]);
 
   const handleLocationSelect = useCallback((lat, lng, ubicacionNombre = null) => {
     const location = { lat, lng };
