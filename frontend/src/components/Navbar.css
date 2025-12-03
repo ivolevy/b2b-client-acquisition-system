@@ -159,6 +159,473 @@
   height: 18px;
 }
 
+/* ============================================
+   DROPDOWN MENU
+   ============================================ */
+
+.navbar-user {
+  position: relative;
+}
+
+.dropdown-arrow {
+  width: 16px;
+  height: 16px;
+  stroke: var(--gray-500);
+  transition: transform 0.2s ease;
+}
+
+.user-info:hover .dropdown-arrow {
+  stroke: var(--gray-700);
+}
+
+.dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  min-width: 220px;
+  z-index: 1001;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-header {
+  padding: 16px;
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.dropdown-email {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  margin-bottom: 4px;
+}
+
+.dropdown-plan {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dropdown-plan.pro {
+  color: #FF1493;
+}
+
+.dropdown-plan.free {
+  color: var(--gray-500);
+}
+
+.dropdown-plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.upgrade-btn-small {
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #FF69B4, #FF1493);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.upgrade-btn-small:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--gray-100);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: var(--gray-50);
+}
+
+.dropdown-item svg {
+  width: 18px;
+  height: 18px;
+}
+
+.dropdown-item.danger {
+  color: #dc2626;
+}
+
+.dropdown-item.danger:hover {
+  background: #fef2f2;
+}
+
+/* ============================================
+   DELETE ACCOUNT MODAL
+   ============================================ */
+
+.delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.delete-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.delete-modal-header {
+  padding: 24px 24px 16px;
+  text-align: center;
+}
+
+.delete-icon {
+  width: 56px;
+  height: 56px;
+  background: #fef2f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.delete-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke: #dc2626;
+}
+
+.delete-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--gray-900);
+}
+
+.delete-modal-body {
+  padding: 0 24px 24px;
+}
+
+.delete-warning {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  color: #dc2626;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.delete-modal-body > p {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.delete-modal-body ul {
+  margin: 0 0 20px 0;
+  padding-left: 20px;
+  color: var(--gray-600);
+  font-size: 0.85rem;
+}
+
+.delete-modal-body li {
+  margin-bottom: 4px;
+}
+
+.confirm-input {
+  margin-top: 16px;
+}
+
+.confirm-input label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  margin-bottom: 8px;
+}
+
+.confirm-input input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: center;
+  letter-spacing: 0.1em;
+  transition: border-color 0.2s ease;
+}
+
+.confirm-input input:focus {
+  outline: none;
+  border-color: #dc2626;
+}
+
+.delete-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.delete-modal-footer button {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn {
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-700);
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: var(--gray-200);
+}
+
+.delete-btn {
+  background: #dc2626;
+  border: none;
+  color: white;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.delete-btn:disabled {
+  background: var(--gray-300);
+  cursor: not-allowed;
+}
+
+/* ============================================
+   UPGRADE TO PRO MODAL
+   ============================================ */
+
+.upgrade-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.upgrade-modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease;
+  overflow: hidden;
+}
+
+.upgrade-modal-header {
+  padding: 32px 24px 24px;
+  text-align: center;
+  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  color: white;
+}
+
+.upgrade-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.upgrade-modal-header h3 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.upgrade-modal-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.upgrade-modal-body {
+  padding: 24px;
+}
+
+.pro-features {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pro-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+.feature-check {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #FF69B4, #FF1493);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.upgrade-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.token-input-group {
+  margin-top: 8px;
+}
+
+.token-input-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.token-input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  font-size: 1.1rem;
+  text-align: center;
+  letter-spacing: 0.2em;
+  transition: all 0.2s ease;
+}
+
+.token-input-group input:focus {
+  outline: none;
+  border-color: #FF69B4;
+  box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+}
+
+.upgrade-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 24px;
+}
+
+.upgrade-btn {
+  flex: 1;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #FF69B4, #FF1493);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upgrade-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
+}
+
+.upgrade-btn:disabled {
+  background: var(--gray-300);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
 @media (max-width: 768px) {
   .navbar-container {
     flex-direction: column;
@@ -179,6 +646,15 @@
   
   .logout-btn span {
     display: none;
+  }
+  
+  .user-dropdown {
+    right: auto;
+    left: 0;
+  }
+  
+  .delete-modal {
+    margin: 10px;
   }
 }
 

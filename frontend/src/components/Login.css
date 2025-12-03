@@ -611,13 +611,234 @@
   animation: fadeInUp 0.6s ease-out;
 }
 
-.form-group {
-  animation: fadeInUp 0.5s ease-out;
-  animation-fill-mode: both;
+/* ============================================
+   AUTH TABS - Cambiar entre Login y Registro
+   ============================================ */
+
+.auth-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
 }
 
-.form-group:nth-child(1) { animation-delay: 0.1s; }
-.form-group:nth-child(2) { animation-delay: 0.2s; }
-.form-options { animation: fadeInUp 0.5s ease-out 0.3s both; }
-.login-button { animation: fadeInUp 0.5s ease-out 0.4s both; }
+.auth-tab {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: var(--login-gray);
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-tab:hover {
+  color: var(--login-dark);
+}
+
+.auth-tab.active {
+  background: white;
+  color: var(--login-secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================
+   SUCCESS MESSAGE
+   ============================================ */
+
+.success-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.success-message svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--login-success);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.success-message span {
+  color: #065f46;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ============================================
+   DEMO INFO - Credenciales de prueba
+   ============================================ */
+
+.demo-info {
+  margin-top: 32px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.demo-info h4 {
+  color: white;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.demo-credentials {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.demo-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.demo-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.demo-badge.pro {
+  background: linear-gradient(135deg, var(--login-primary), var(--login-secondary));
+  color: white;
+}
+
+.demo-badge.free {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.demo-user code {
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* ============================================
+   LINK BUTTON (para alternar entre modos)
+   ============================================ */
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--login-secondary);
+  font-size: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.link-button:hover {
+  color: var(--login-primary);
+}
+
+/* ============================================
+   PRO TOKEN INPUT
+   ============================================ */
+
+.pro-token-group {
+  position: relative;
+}
+
+.pro-token-group .input-wrapper {
+  position: relative;
+}
+
+.pro-token-group input {
+  padding-right: 50px;
+}
+
+.pro-icon-input {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.pro-token-group input:focus + .pro-icon-input,
+.pro-token-group input:not(:placeholder-shown) + .pro-icon-input {
+  opacity: 1;
+}
+
+.optional-badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--login-gray);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.token-hint {
+  font-size: 0.8rem;
+  color: var(--login-gray);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS FOR NEW ELEMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .demo-info {
+    margin-top: 24px;
+  }
+
+  .demo-user {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .demo-user code {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-tabs {
+    flex-direction: column;
+  }
+
+  .auth-tab {
+    text-align: center;
+  }
+}
 

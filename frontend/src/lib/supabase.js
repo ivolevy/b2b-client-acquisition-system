@@ -1,0 +1,360 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('⚠️ Supabase credentials not found. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env.local file');
+}
+
+export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+
+// ============================================
+// AUTH FUNCTIONS
+// ============================================
+
+export const authService = {
+  // Registro de usuario
+  async signUp(email, password, name) {
+    try {
+      // 1. Crear usuario en Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+            plan: 'free'
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      // 2. Crear perfil en tabla users
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('users')
+          .insert({
+            id: authData.user.id,
+            email: email,
+            name: name,
+            plan: 'free'
+          });
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+        }
+      }
+
+      return { data: authData, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
+
+  // Login
+  async signIn(email, password) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      // Obtener datos del perfil
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+
+        // Actualizar último login
+        await supabase
+          .from('users')
+          .update({ last_login_at: new Date().toISOString() })
+          .eq('id', data.user.id);
+
+        return { 
+          data: { 
+            ...data, 
+            profile 
+          }, 
+          error: null 
+        };
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
+
+  // Logout
+  async signOut() {
+    const { error } = await supabase.auth.signOut();
+    return { error };
+  },
+
+  // Obtener sesión actual
+  async getSession() {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    return { session, error };
+  },
+
+  // Obtener usuario actual con perfil
+  async getCurrentUser() {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (user) {
+      const { data: profile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      return { user: { ...user, profile }, error };
+    }
+    
+    return { user: null, error };
+  },
+
+  // Listener para cambios de autenticación
+  onAuthStateChange(callback) {
+    return supabase.auth.onAuthStateChange(callback);
+  },
+
+  // Eliminar cuenta del usuario
+  async deleteAccount() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('No hay usuario autenticado');
+      }
+
+      // Eliminar datos del usuario de las tablas (el CASCADE debería hacerlo automáticamente)
+      // pero lo hacemos explícitamente por seguridad
+      await supabase.from('search_history').delete().eq('user_id', user.id);
+      await supabase.from('saved_companies').delete().eq('user_id', user.id);
+      await supabase.from('email_templates').delete().eq('user_id', user.id);
+      await supabase.from('email_history').delete().eq('user_id', user.id);
+      await supabase.from('users').delete().eq('id', user.id);
+
+      // Cerrar sesión (esto no elimina el usuario de auth, pero limpia la sesión)
+      await supabase.auth.signOut();
+
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error eliminando cuenta:', error);
+      return { success: false, error };
+    }
+  }
+};
+
+// ============================================
+// USER PROFILE FUNCTIONS
+// ============================================
+
+export const userService = {
+  // Obtener perfil
+  async getProfile(userId) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    return { data, error };
+  },
+
+  // Actualizar perfil
+  async updateProfile(userId, updates) {
+    const { data, error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single();
+    
+    return { data, error };
+  },
+
+  // Obtener características del plan
+  async getPlanFeatures(plan) {
+    const { data, error } = await supabase
+      .from('plan_features')
+      .select('*')
+      .eq('plan', plan);
+    
+    // Convertir a objeto
+    const features = {};
+    data?.forEach(f => {
+      features[f.feature_key] = f.feature_value;
+    });
+    
+    return { data: features, error };
+  },
+
+  // Verificar límite de búsquedas
+  async checkSearchLimit(userId) {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('plan, searches_today, searches_reset_at')
+      .eq('id', userId)
+      .single();
+
+    if (error) return { canSearch: false, error };
+
+    // Resetear si es un nuevo día
+    const today = new Date().toISOString().split('T')[0];
+    if (user.searches_reset_at !== today) {
+      await supabase
+        .from('users')
+        .update({ searches_today: 0, searches_reset_at: today })
+        .eq('id', userId);
+      user.searches_today = 0;
+    }
+
+    // Verificar límite según plan
+    if (user.plan === 'pro') {
+      return { canSearch: true, remaining: 'unlimited' };
+    }
+
+    const limit = 5; // FREE limit
+    const canSearch = user.searches_today < limit;
+    
+    return { 
+      canSearch, 
+      remaining: limit - user.searches_today,
+      limit
+    };
+  },
+
+  // Incrementar contador de búsquedas
+  async incrementSearchCount(userId) {
+    const { data, error } = await supabase.rpc('increment_searches', { user_id: userId });
+    return { data, error };
+  }
+};
+
+// ============================================
+// SEARCH HISTORY FUNCTIONS (PRO ONLY)
+// ============================================
+
+export const searchHistoryService = {
+  // Guardar búsqueda
+  async saveSearch(userId, searchData) {
+    const { data, error } = await supabase
+      .from('search_history')
+      .insert({
+        user_id: userId,
+        rubro: searchData.rubro,
+        ubicacion_nombre: searchData.ubicacion_nombre,
+        centro_lat: searchData.centro_lat,
+        centro_lng: searchData.centro_lng,
+        radio_km: searchData.radio_km,
+        bbox: searchData.bbox,
+        empresas_encontradas: searchData.empresas_encontradas,
+        empresas_validas: searchData.empresas_validas
+      })
+      .select()
+      .single();
+    
+    return { data, error };
+  },
+
+  // Obtener historial
+  async getHistory(userId, limit = 20) {
+    const { data, error } = await supabase
+      .from('search_history')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    
+    return { data, error };
+  },
+
+  // Eliminar búsqueda del historial
+  async deleteSearch(searchId) {
+    const { error } = await supabase
+      .from('search_history')
+      .delete()
+      .eq('id', searchId);
+    
+    return { error };
+  }
+};
+
+// ============================================
+// SAVED COMPANIES FUNCTIONS (PRO ONLY)
+// ============================================
+
+export const savedCompaniesService = {
+  // Guardar empresa
+  async saveCompany(userId, empresa, notas = '') {
+    const { data, error } = await supabase
+      .from('saved_companies')
+      .insert({
+        user_id: userId,
+        empresa_data: empresa,
+        notas: notas,
+        estado: 'por_contactar'
+      })
+      .select()
+      .single();
+    
+    return { data, error };
+  },
+
+  // Obtener empresas guardadas
+  async getSavedCompanies(userId) {
+    const { data, error } = await supabase
+      .from('saved_companies')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    return { data, error };
+  },
+
+  // Actualizar empresa guardada
+  async updateSavedCompany(companyId, updates) {
+    const { data, error } = await supabase
+      .from('saved_companies')
+      .update(updates)
+      .eq('id', companyId)
+      .select()
+      .single();
+    
+    return { data, error };
+  },
+
+  // Eliminar empresa guardada
+  async deleteSavedCompany(companyId) {
+    const { error } = await supabase
+      .from('saved_companies')
+      .delete()
+      .eq('id', companyId);
+    
+    return { error };
+  },
+
+  // Verificar si empresa ya está guardada
+  async isCompanySaved(userId, empresaEmail) {
+    const { data, error } = await supabase
+      .from('saved_companies')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('empresa_data->>email', empresaEmail)
+      .single();
+    
+    return { isSaved: !!data, data, error };
+  }
+};
+
+export default supabase;
+

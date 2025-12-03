@@ -2,6 +2,7 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import Login from './components/Login';
 import AppB2B from './App_B2B';
 import ProWelcome from './components/ProWelcome';
+import { supabase, authService, userService } from './lib/supabase';
 
 // Contexto de autenticación
 const AuthContext = createContext(null);
@@ -15,15 +16,39 @@ export const useAuth = () => {
   return context;
 };
 
-// Verificar si hay una sesión válida
-const checkAuth = () => {
+// Credenciales de demo (fallback cuando Supabase no está configurado)
+const DEMO_USERS = [
+  {
+    email: 'admin@dotasolutions.com',
+    password: 'Dota2024!',
+    name: 'Administrador',
+    role: 'admin',
+    plan: 'pro'
+  },
+  {
+    email: 'user@dotasolutions.com',
+    password: 'User2024!',
+    name: 'Usuario',
+    role: 'user',
+    plan: 'free'
+  }
+];
+
+// Verificar si Supabase está configurado
+const isSupabaseConfigured = () => {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  return url && key && url !== '' && key !== '';
+};
+
+// Verificar sesión local (modo demo)
+const checkLocalAuth = () => {
   try {
     const authData = localStorage.getItem('b2b_auth');
     const token = localStorage.getItem('b2b_token');
     
     if (authData && token) {
       const userData = JSON.parse(authData);
-      // Verificar que la sesión no haya expirado (24 horas)
       const loginTime = new Date(userData.loginTime);
       const now = new Date();
       const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
@@ -31,12 +56,11 @@ const checkAuth = () => {
       if (hoursDiff < 24) {
         return userData;
       }
-      // Sesión expirada, limpiar
       localStorage.removeItem('b2b_auth');
       localStorage.removeItem('b2b_token');
     }
   } catch (error) {
-    console.error('Error verificando autenticación:', error);
+    console.error('Error verificando autenticación local:', error);
     localStorage.removeItem('b2b_auth');
     localStorage.removeItem('b2b_token');
   }
@@ -47,16 +71,110 @@ function AuthWrapper() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showProWelcome, setShowProWelcome] = useState(false);
+  const [useSupabase] = useState(isSupabaseConfigured());
 
   useEffect(() => {
-    // Verificar autenticación al cargar
-    const userData = checkAuth();
-    setUser(userData);
-    setLoading(false);
-  }, []);
+    const initAuth = async () => {
+      if (useSupabase) {
+        // Modo Supabase
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session?.user) {
+            const { data: profile } = await userService.getProfile(session.user.id);
+            setUser({
+              id: session.user.id,
+              email: session.user.email,
+              name: profile?.name || session.user.email.split('@')[0],
+              plan: profile?.plan || 'free',
+              role: profile?.plan === 'pro' ? 'admin' : 'user',
+              ...profile
+            });
+          }
+        } catch (error) {
+          console.error('Error inicializando auth con Supabase:', error);
+        }
 
-  const handleLogin = (userData) => {
-    // Si es usuario PRO, mostrar animación de bienvenida
+        // Listener para cambios de autenticación
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            if (event === 'SIGNED_IN' && session?.user) {
+              const { data: profile } = await userService.getProfile(session.user.id);
+              const userData = {
+                id: session.user.id,
+                email: session.user.email,
+                name: profile?.name || session.user.email.split('@')[0],
+                plan: profile?.plan || 'free',
+                role: profile?.plan === 'pro' ? 'admin' : 'user',
+                ...profile
+              };
+              setUser(userData);
+              
+              if (userData.plan === 'pro') {
+                setShowProWelcome(true);
+              }
+            } else if (event === 'SIGNED_OUT') {
+              setUser(null);
+            }
+          }
+        );
+
+        setLoading(false);
+        return () => subscription.unsubscribe();
+      } else {
+        // Modo demo (sin Supabase)
+        const userData = checkLocalAuth();
+        setUser(userData);
+        setLoading(false);
+      }
+    };
+
+    initAuth();
+  }, [useSupabase]);
+
+  // Login con Supabase
+  const handleSupabaseLogin = async (email, password) => {
+    const { data, error } = await authService.signIn(email, password);
+    
+    if (error) {
+      throw error;
+    }
+
+    const userData = {
+      id: data.user.id,
+      email: data.user.email,
+      name: data.profile?.name || data.user.email.split('@')[0],
+      plan: data.profile?.plan || 'free',
+      role: data.profile?.plan === 'pro' ? 'admin' : 'user',
+      ...data.profile
+    };
+
+    setUser(userData);
+    
+    if (userData.plan === 'pro') {
+      setShowProWelcome(true);
+    }
+
+    return userData;
+  };
+
+  // Registro con Supabase
+  const handleSupabaseSignUp = async (email, password, name) => {
+    const { data, error } = await authService.signUp(email, password, name);
+    
+    if (error) {
+      throw error;
+    }
+
+    return { 
+      success: true, 
+      message: 'Cuenta creada. Revisa tu email para confirmar.',
+      needsConfirmation: true
+    };
+  };
+
+  // Login demo (sin Supabase)
+  const handleDemoLogin = (userData) => {
     if (userData.plan === 'pro') {
       setShowProWelcome(true);
     }
@@ -67,13 +185,25 @@ function AuthWrapper() {
     setShowProWelcome(false);
   };
 
-  const handleLogout = () => {
+  // Logout
+  const handleLogout = async () => {
+    if (useSupabase) {
+      await authService.signOut();
+    }
     localStorage.removeItem('b2b_auth');
     localStorage.removeItem('b2b_token');
     setUser(null);
   };
 
-  // Mostrar pantalla de carga mientras verificamos la autenticación
+  // Actualizar plan del usuario
+  const updateUserPlan = async (plan) => {
+    if (useSupabase && user?.id) {
+      await userService.updateProfile(user.id, { plan });
+      setUser(prev => ({ ...prev, plan }));
+    }
+  };
+
+  // Pantalla de carga
   if (loading) {
     return (
       <div style={{
@@ -81,7 +211,7 @@ function AuthWrapper() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#0f0f1a',
+        background: 'linear-gradient(135deg, #0f0f1a 0%, #1a0a1a 50%, #0a0a0f 100%)',
         color: 'white',
         fontFamily: 'Inter, -apple-system, sans-serif'
       }}>
@@ -89,8 +219,8 @@ function AuthWrapper() {
           <div style={{
             width: '48px',
             height: '48px',
-            border: '3px solid rgba(102, 126, 234, 0.2)',
-            borderTopColor: '#667eea',
+            border: '3px solid rgba(255, 105, 180, 0.2)',
+            borderTopColor: '#FF69B4',
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
             margin: '0 auto 16px'
@@ -110,17 +240,21 @@ function AuthWrapper() {
   const authValue = {
     user,
     isAuthenticated: !!user,
-    login: handleLogin,
-    logout: handleLogout
+    isPro: user?.plan === 'pro',
+    useSupabase,
+    login: useSupabase ? handleSupabaseLogin : handleDemoLogin,
+    signUp: useSupabase ? handleSupabaseSignUp : null,
+    logout: handleLogout,
+    updateUserPlan,
+    demoUsers: !useSupabase ? DEMO_USERS : null
   };
 
   return (
     <AuthContext.Provider value={authValue}>
       {showProWelcome && <ProWelcome onComplete={handleProWelcomeComplete} />}
-      {user ? <AppB2B /> : <Login onLogin={handleLogin} />}
+      {user ? <AppB2B /> : <Login onLogin={handleDemoLogin} />}
     </AuthContext.Provider>
   );
 }
 
 export default AuthWrapper;
-
