@@ -247,21 +247,36 @@ export const userService = {
 export const searchHistoryService = {
   // Guardar búsqueda
   async saveSearch(userId, searchData) {
+    console.log('[SearchHistory] Guardando búsqueda:', { userId, searchData });
+    
+    const insertData = {
+      user_id: userId,
+      rubro: searchData.rubro,
+      ubicacion_nombre: searchData.ubicacion_nombre || null,
+      centro_lat: searchData.centro_lat || null,
+      centro_lng: searchData.centro_lng || null,
+      radio_km: searchData.radio_km || null,
+      bbox: searchData.bbox || null,
+      empresas_encontradas: searchData.empresas_encontradas || 0,
+      empresas_validas: searchData.empresas_validas || 0
+    };
+    
+    console.log('[SearchHistory] Datos a insertar:', insertData);
+    
     const { data, error } = await supabase
       .from('search_history')
-      .insert({
-        user_id: userId,
-        rubro: searchData.rubro,
-        ubicacion_nombre: searchData.ubicacion_nombre,
-        centro_lat: searchData.centro_lat,
-        centro_lng: searchData.centro_lng,
-        radio_km: searchData.radio_km,
-        bbox: searchData.bbox,
-        empresas_encontradas: searchData.empresas_encontradas,
-        empresas_validas: searchData.empresas_validas
-      })
+      .insert(insertData)
       .select()
       .single();
+    
+    if (error) {
+      console.error('[SearchHistory] Error al guardar:', error);
+      console.error('[SearchHistory] Código:', error.code);
+      console.error('[SearchHistory] Mensaje:', error.message);
+      console.error('[SearchHistory] Detalles:', error.details);
+    } else {
+      console.log('[SearchHistory] Guardado exitosamente:', data);
+    }
     
     return { data, error };
   },

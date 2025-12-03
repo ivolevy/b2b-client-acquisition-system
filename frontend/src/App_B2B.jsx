@@ -104,7 +104,13 @@ function AppB2B() {
         // Guardar búsqueda en historial si es PRO
         if (isPro && user?.id && total > 0) {
           try {
-            await searchHistoryService.saveSearch(user.id, {
+            console.log('Intentando guardar búsqueda en historial...', {
+              userId: user.id,
+              rubro: params.rubro,
+              total,
+              validas
+            });
+            const { data: savedSearch, error: saveError } = await searchHistoryService.saveSearch(user.id, {
               rubro: params.rubro,
               ubicacion_nombre: params.busqueda_ubicacion_nombre,
               centro_lat: params.busqueda_centro_lat,
@@ -114,9 +120,16 @@ function AppB2B() {
               empresas_encontradas: total,
               empresas_validas: validas
             });
+            if (saveError) {
+              console.error('Error al guardar en historial:', saveError);
+            } else {
+              console.log('Búsqueda guardada exitosamente:', savedSearch);
+            }
           } catch (historyError) {
-            console.warn('No se pudo guardar en historial:', historyError);
+            console.error('Excepción al guardar en historial:', historyError);
           }
+        } else {
+          console.log('No se guarda en historial:', { isPro, userId: user?.id, total });
         }
         
         if (total === 0) {
