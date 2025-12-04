@@ -104,35 +104,22 @@ function AppB2B() {
         const guardadas = response.data.guardadas || 0;
         const empresasEncontradas = response.data.data || [];
 
-        // Guardar búsqueda en historial si es PRO
+        // Guardar búsqueda en historial si es PRO (en background, sin bloquear)
         if (isPro && user?.id && total > 0) {
-          try {
-            console.log('Intentando guardar búsqueda en historial...', {
-              userId: user.id,
-              rubro: params.rubro,
-              total,
-              validas
-            });
-            const { data: savedSearch, error: saveError } = await searchHistoryService.saveSearch(user.id, {
-              rubro: params.rubro,
-              ubicacion_nombre: params.busqueda_ubicacion_nombre,
-              centro_lat: params.busqueda_centro_lat,
-              centro_lng: params.busqueda_centro_lng,
-              radio_km: params.busqueda_radio_km,
-              bbox: params.bbox,
-              empresas_encontradas: total,
-              empresas_validas: validas
-            });
-            if (saveError) {
-              console.error('Error al guardar en historial:', saveError);
-            } else {
-              console.log('Búsqueda guardada exitosamente:', savedSearch);
-            }
-          } catch (historyError) {
-            console.error('Excepción al guardar en historial:', historyError);
-          }
-        } else {
-          console.log('No se guarda en historial:', { isPro, userId: user?.id, total });
+          // Ejecutar en background sin await para no bloquear la UI
+          searchHistoryService.saveSearch(user.id, {
+            rubro: params.rubro,
+            ubicacion_nombre: params.busqueda_ubicacion_nombre,
+            centro_lat: params.busqueda_centro_lat,
+            centro_lng: params.busqueda_centro_lng,
+            radio_km: params.busqueda_radio_km,
+            bbox: params.bbox,
+            empresas_encontradas: total,
+            empresas_validas: validas
+          }).then(({ data, error }) => {
+            if (error) console.warn('Historial no guardado:', error.message);
+            else console.log('Historial guardado:', data?.id);
+          }).catch(e => console.warn('Error historial:', e));
         }
         
         if (total === 0) {
