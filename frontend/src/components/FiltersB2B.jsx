@@ -4,7 +4,7 @@ import { useAuth } from '../AuthWrapper';
 import SearchHistory from './SearchHistory';
 import './Filters.css';
 
-function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, setView, toastWarning, hayResultados, onSelectFromHistory, historySearchData }) {
+function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, setView, toastWarning, hayResultados, onSelectFromHistory, historySearchData, onShowAllResultsChange }) {
   const { user } = useAuth();
   const [showHistory, setShowHistory] = useState(false);
   
@@ -42,6 +42,7 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
   const [filtroDistancia, setFiltroDistancia] = useState('');
   const [filtroDistanciaOperador, setFiltroDistanciaOperador] = useState('mayor'); // 'mayor', 'menor'
   const [filtroConRedes, setFiltroConRedes] = useState('todas'); // 'todas', 'con', 'sin'
+  const [showAllResults, setShowAllResults] = useState(false); // PRO: Ver todos sin paginación
 
   const handleBuscarSubmit = (e) => {
     e.preventDefault();
@@ -346,6 +347,20 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
               />
               <span> Teléfono</span>
             </label>
+
+            {user?.plan === 'pro' && (
+              <label className="checkbox-inline pro-feature">
+                <input
+                  type="checkbox"
+                  checked={showAllResults}
+                  onChange={(e) => {
+                    setShowAllResults(e.target.checked);
+                    onShowAllResultsChange?.(e.target.checked);
+                  }}
+                />
+                <span>📄 Ver todos</span>
+              </label>
+            )}
           </div>
 
           {/* Fila de acciones */}
@@ -360,13 +375,29 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
             >
               Limpiar
             </button>
-            <button 
-              type="button" 
-              className="btn btn-success btn-compact" 
-              onClick={onExportCSV}
-            >
-               Exportar CSV
-            </button>
+            {user?.plan === 'pro' ? (
+              <button 
+                type="button" 
+                className="btn btn-success btn-compact" 
+                onClick={onExportCSV}
+              >
+                 Exportar CSV
+              </button>
+            ) : (
+              <button 
+                type="button" 
+                className="btn btn-outline btn-compact pro-locked"
+                onClick={() => toastWarning?.(
+                  <>
+                    <strong>Función PRO</strong>
+                    <p>Exportar a CSV es una función exclusiva del plan PRO.</p>
+                  </>
+                )}
+                title="Exportar CSV (solo PRO)"
+              >
+                 Exportar CSV 🔒
+              </button>
+            )}
           </div>
         </form>
       </div>

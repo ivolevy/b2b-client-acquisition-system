@@ -623,6 +623,144 @@
 }
 
 /* ============================================
+   LOGOUT CONFIRMATION MODAL
+   ============================================ */
+
+.logout-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.logout-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease;
+  overflow: hidden;
+}
+
+.logout-modal-header {
+  padding: 24px 24px 16px;
+  text-align: center;
+}
+
+.logout-modal-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.logout-modal-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: #ec4899;
+}
+
+.logout-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--gray-900);
+  font-weight: 600;
+}
+
+.logout-modal-body {
+  padding: 0 24px 24px;
+  text-align: center;
+}
+
+.logout-modal-body p {
+  color: var(--gray-700);
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+
+.logout-hint {
+  color: var(--gray-500) !important;
+  font-size: 0.85rem !important;
+}
+
+.logout-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.logout-modal-footer .cancel-btn {
+  flex: 1;
+  padding: 12px 20px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  color: var(--gray-700);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-modal-footer .cancel-btn:hover:not(:disabled) {
+  background: var(--gray-200);
+}
+
+.logout-confirm-btn {
+  flex: 1;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.logout-confirm-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #FF1493 0%, #db2777 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+}
+
+.logout-confirm-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.logout-confirm-btn .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 

@@ -12,6 +12,7 @@ function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -19,10 +20,14 @@ function Navbar() {
   const [upgradeError, setUpgradeError] = useState('');
   const { user, logout, useSupabase } = useAuth();
 
-  const handleLogout = () => {
-    if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-      logout();
-    }
+  const handleLogoutClick = () => {
+    setShowUserMenu(false);
+    setShowLogoutModal(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    // Cerrar sesión inmediatamente - la función redirige sola
+    logout();
   };
 
   const handleUpgradeToPro = async () => {
@@ -152,7 +157,7 @@ function Navbar() {
                     <div className="dropdown-divider"></div>
                     <button 
                       className="dropdown-item"
-                      onClick={handleLogout}
+                      onClick={handleLogoutClick}
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -331,6 +336,44 @@ function Navbar() {
                 disabled={!proTokenInput.trim() || upgradeLoading}
               >
                 {upgradeLoading ? 'Activando...' : '⚡ Activar PRO'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de logout */}
+      {showLogoutModal && (
+        <div className="logout-modal-overlay">
+          <div className="logout-modal">
+            <div className="logout-modal-header">
+              <div className="logout-modal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16,17 21,12 16,7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+              </div>
+              <h3>Cerrar sesión</h3>
+            </div>
+            
+            <div className="logout-modal-body">
+              <p>¿Estás seguro de que deseas cerrar sesión?</p>
+              <p className="logout-hint">Tendrás que volver a iniciar sesión para acceder a tu cuenta.</p>
+            </div>
+            
+            <div className="logout-modal-footer">
+              <button 
+                className="cancel-btn"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="logout-confirm-btn"
+                onClick={handleLogoutConfirm}
+              >
+                Sí, cerrar sesión
               </button>
             </div>
           </div>

@@ -185,14 +185,21 @@ function AuthWrapper() {
     setShowProWelcome(false);
   };
 
-  // Logout
-  const handleLogout = async () => {
-    if (useSupabase) {
-      await authService.signOut();
-    }
+  // Logout - Instantáneo
+  const handleLogout = () => {
+    // Limpiar todo inmediatamente
     localStorage.removeItem('b2b_auth');
     localStorage.removeItem('b2b_token');
-    setUser(null);
+    localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token');
+    sessionStorage.clear();
+    
+    // Logout de Supabase en background (no esperamos)
+    if (useSupabase) {
+      authService.signOut().catch(() => {});
+    }
+    
+    // Redirigir inmediatamente
+    window.location.replace('/');
   };
 
   // Actualizar plan del usuario

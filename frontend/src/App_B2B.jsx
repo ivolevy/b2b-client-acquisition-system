@@ -33,6 +33,9 @@ function AppB2B() {
   
   // Estado para pasar datos desde historial a los filtros
   const [historySearchData, setHistorySearchData] = useState(null);
+  
+  // Estado para mostrar todos los resultados sin paginación (PRO)
+  const [showAllResults, setShowAllResults] = useState(false);
 
   useEffect(() => {
     loadEmpresas();
@@ -429,6 +432,7 @@ function AppB2B() {
           toastWarning={warning}
           onSelectFromHistory={handleSelectFromHistory}
           historySearchData={historySearchData}
+          onShowAllResultsChange={setShowAllResults}
         />
 
         {view === 'table' && (
@@ -460,7 +464,7 @@ function AppB2B() {
         )}
 
         {view === 'table' && (
-          <TableViewB2B empresas={filteredEmpresas} />
+          <TableViewB2B empresas={filteredEmpresas} showAllResults={showAllResults} />
         )}
         {view === 'map' && (
           <GoogleMapView empresas={filteredEmpresas} />

@@ -585,3 +585,31 @@ select.filter-input {
     justify-content: center;
   }
 }
+
+/* ========================================
+   PRO FEATURES STYLES
+   ======================================== */
+
+.pro-locked {
+  opacity: 0.7;
+  position: relative;
+}
+
+.pro-locked:hover {
+  opacity: 0.9;
+}
+
+.checkbox-inline.pro-feature {
+  background: linear-gradient(135deg, rgba(255, 105, 180, 0.1) 0%, rgba(255, 20, 147, 0.1) 100%);
+  border-color: rgba(255, 105, 180, 0.3);
+}
+
+.checkbox-inline.pro-feature span {
+  color: #FF1493;
+  font-weight: 600;
+}
+
+.checkbox-inline.pro-feature:hover {
+  background: linear-gradient(135deg, rgba(255, 105, 180, 0.2) 0%, rgba(255, 20, 147, 0.2) 100%);
+  border-color: rgba(255, 105, 180, 0.5);
+}

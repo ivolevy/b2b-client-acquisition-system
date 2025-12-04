@@ -199,3 +199,4 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
 
 export default SearchHistory;
 
+

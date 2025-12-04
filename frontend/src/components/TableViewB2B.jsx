@@ -1,34 +1,70 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './TableView.css';
 import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok } from 'react-icons/fa6';
+import { useAuth } from '../AuthWrapper';
 
-function TableViewB2B({ empresas }) {
+function TableViewB2B({ empresas, showAllResults = false }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState(null); // null, 'asc', 'desc'
-  const itemsPerPage = 10;
+  const [sortColumn, setSortColumn] = useState(null); // 'distancia', 'nombre', 'rubro'
+  const { user } = useAuth();
+  const isPro = user?.plan === 'pro';
+  const itemsPerPage = (isPro && showAllResults) ? 9999 : 10;
   const tableContainerRef = useRef(null);
 
-  // Ordenar empresas por distancia
+  // Función para manejar click en columna (ordenar)
+  const handleSort = (column) => {
+    if (!isPro) return; // Solo PRO puede ordenar
+    
+    if (sortColumn === column) {
+      // Ciclar: asc -> desc -> null
+      if (sortBy === 'asc') {
+        setSortBy('desc');
+      } else if (sortBy === 'desc') {
+        setSortBy(null);
+        setSortColumn(null);
+      }
+    } else {
+      setSortColumn(column);
+      setSortBy('asc');
+    }
+  };
+
+  // Ordenar empresas por columna seleccionada
   const empresasOrdenadas = React.useMemo(() => {
-    if (!sortBy) return empresas;
+    if (!sortBy || !sortColumn) return empresas;
     
     const sorted = [...empresas].sort((a, b) => {
-      const distA = a.distancia_km;
-      const distB = b.distancia_km;
+      let valA, valB;
       
-      // Empresas sin distancia van al final
-      if (distA === null || distA === undefined) return 1;
-      if (distB === null || distB === undefined) return -1;
+      switch (sortColumn) {
+        case 'distancia':
+          valA = a.distancia_km;
+          valB = b.distancia_km;
+          if (valA === null || valA === undefined) return 1;
+          if (valB === null || valB === undefined) return -1;
+          break;
+        case 'nombre':
+          valA = (a.nombre || '').toLowerCase();
+          valB = (b.nombre || '').toLowerCase();
+          break;
+        case 'rubro':
+          valA = (a.rubro || '').toLowerCase();
+          valB = (b.rubro || '').toLowerCase();
+          break;
+        default:
+          return 0;
+      }
       
       if (sortBy === 'asc') {
-        return distA - distB; // Menor a mayor
+        return valA > valB ? 1 : valA < valB ? -1 : 0;
       } else {
-        return distB - distA; // Mayor a menor
+        return valA < valB ? 1 : valA > valB ? -1 : 0;
       }
     });
     
     return sorted;
-  }, [empresas, sortBy]);
+  }, [empresas, sortBy, sortColumn]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -73,18 +109,50 @@ function TableViewB2B({ empresas }) {
         <table className="properties-table">
           <thead>
             <tr>
-              <th>Empresa</th>
-              <th>Rubro</th>
-              <th>Distancia</th>
+              <th style={{ width: '50px', textAlign: 'center' }}>#</th>
+              <th 
+                onClick={() => handleSort('nombre')}
+                className={isPro ? 'sortable-header' : ''}
+                title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
+              >
+                Empresa
+                {isPro && sortColumn === 'nombre' && (
+                  <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
+                )}
+              </th>
+              <th 
+                onClick={() => handleSort('rubro')}
+                className={isPro ? 'sortable-header' : ''}
+                title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
+              >
+                Rubro
+                {isPro && sortColumn === 'rubro' && (
+                  <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
+                )}
+              </th>
+              <th 
+                onClick={() => handleSort('distancia')}
+                className={isPro ? 'sortable-header' : ''}
+                title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
+              >
+                Distancia
+                {isPro && sortColumn === 'distancia' && (
+                  <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
+                )}
+              </th>
               <th>Email</th>
               <th>Teléfono</th>
               <th>Website</th>
               <th>Redes</th>
+              {isPro && <th style={{ width: '100px' }}>Acciones</th>}
             </tr>
           </thead>
           <tbody>
-            {currentItems.map((empresa) => (
+            {currentItems.map((empresa, index) => (
               <tr key={empresa.id}>
+                <td style={{ textAlign: 'center', fontWeight: '600', color: '#667eea' }}>
+                  {indexOfFirstItem + index + 1}
+                </td>
                 <td className="name-cell">
                   {empresa.nombre || 'Sin nombre'}
                   {empresa.direccion && (
@@ -311,6 +379,40 @@ function TableViewB2B({ empresas }) {
                     )}
                   </div>
                 </td>
+                {isPro && (
+                  <td>
+                    <div style={{ display: 'flex', gap: '6px', flexDirection: 'column' }}>
+                      {empresa.direccion && (
+                        <>
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(empresa.direccion)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="action-btn go-btn"
+                            title="Ir ahora con Google Maps"
+                          >
+                            🚗 Ir
+                          </a>
+                          <button
+                            onClick={() => {
+                              const text = `${empresa.nombre}\n📍 ${empresa.direccion}${empresa.telefono ? `\n📞 ${empresa.telefono}` : ''}${empresa.email ? `\n✉️ ${empresa.email}` : ''}`;
+                              if (navigator.share) {
+                                navigator.share({ title: empresa.nombre, text });
+                              } else {
+                                navigator.clipboard.writeText(text);
+                                alert('Información copiada al portapapeles');
+                              }
+                            }}
+                            className="action-btn share-btn"
+                            title="Compartir dirección"
+                          >
+                            📤 Compartir
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
