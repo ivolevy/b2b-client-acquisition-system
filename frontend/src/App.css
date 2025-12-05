@@ -102,9 +102,45 @@
   box-shadow: none;
 }
 
+/* ============================================
+   RESPONSIVE MOBILE
+   ============================================ */
+
 @media (max-width: 768px) {
   .main-content {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
+  }
+  
+  .results-module {
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    border-radius: var(--radius-lg);
+  }
+  
+  .results-module__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .results-module__header h2 {
+    font-size: 1.25rem;
+  }
+  
+  .results-delete-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: var(--spacing-sm);
+  }
+  
+  .results-module {
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
   }
 }
 

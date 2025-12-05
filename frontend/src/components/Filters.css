@@ -477,10 +477,22 @@ select.filter-input {
   white-space: nowrap;
 }
 
-/* Responsive */
+/* ============================================
+   RESPONSIVE MOBILE
+   ============================================ */
+
 @media (max-width: 768px) {
+  .filters-container {
+    gap: var(--spacing-md);
+  }
+  
   .filter-section {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+  }
+  
+  .filter-section h3 {
+    font-size: 1rem;
   }
   
   .filter-header {
@@ -495,6 +507,8 @@ select.filter-input {
   
   .filter-header .view-toggle button {
     flex: 1;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
   }
   
   .form-row {
@@ -504,11 +518,12 @@ select.filter-input {
   .filters-row-compact {
     flex-direction: column;
     align-items: stretch;
+    gap: var(--spacing-sm);
   }
   
   .filter-input {
-    width: 100%;
-    min-width: 100%;
+    width: 100% !important;
+    min-width: 100% !important;
   }
   
   .checkbox-inline {
@@ -524,6 +539,56 @@ select.filter-input {
   .btn-compact {
     width: 100%;
     justify-content: center;
+  }
+  
+  .option-card {
+    padding: var(--spacing-md);
+  }
+  
+  .option-title {
+    font-size: 0.9rem;
+  }
+  
+  .option-desc {
+    font-size: 0.75rem;
+  }
+  
+  .mode-toggle {
+    flex-direction: column;
+  }
+  
+  .mode-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .location-section {
+    margin: var(--spacing-md) 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-section {
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+  }
+  
+  .filter-section h3 {
+    font-size: 0.9rem;
+  }
+  
+  .status-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+  }
+  
+  .btn-compact {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .hint-row {
+    font-size: 0.7rem;
   }
 }
 

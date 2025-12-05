@@ -292,23 +292,117 @@
   box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
 }
 
+/* ============================================
+   RESPONSIVE MOBILE
+   ============================================ */
+
 @media (max-width: 768px) {
+  .table-container {
+    border-radius: var(--radius-lg);
+  }
+  
+  .table-header {
+    padding: var(--spacing-md);
+  }
+  
+  .table-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
   .properties-table {
-    font-size: 0.813rem;
+    font-size: 0.75rem;
+    min-width: 600px;
   }
   
   .properties-table th,
   .properties-table td {
-    padding: 0.75rem 0.625rem;
+    padding: 0.5rem 0.4rem;
+    white-space: nowrap;
   }
   
-  .table-header,
+  .properties-table th:first-child,
+  .properties-table td:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 1;
+  }
+  
+  .properties-table tbody tr:hover td:first-child {
+    background: var(--gray-50);
+  }
+  
+  .name-cell {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
   .pagination {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .pagination-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .pagination-info {
+    font-size: 0.8rem;
+    width: 100%;
+    text-align: center;
+    order: -1;
   }
   
   .action-btn {
-    padding: 4px 8px;
-    font-size: 10px;
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+  
+  .category-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+  }
+  
+  .empty-state {
+    padding: var(--spacing-xl);
+  }
+  
+  .empty-state h3 {
+    font-size: 1rem;
+  }
+  
+  .empty-state p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-header {
+    padding: var(--spacing-sm);
+  }
+  
+  .table-header h2 {
+    font-size: 1rem;
+  }
+  
+  .properties-table {
+    font-size: 0.7rem;
+  }
+  
+  .properties-table th,
+  .properties-table td {
+    padding: 0.4rem 0.3rem;
+  }
+  
+  .pagination {
+    padding: var(--spacing-sm);
   }
 }
