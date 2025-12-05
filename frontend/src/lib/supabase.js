@@ -65,11 +65,19 @@ export const authService = {
 
       // Obtener datos del perfil
       if (data.user) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('users')
           .select('*')
           .eq('id', data.user.id)
           .single();
+
+        // Si no existe el perfil, la cuenta fue eliminada
+        if (!profile || profileError) {
+          console.log('[Auth] Usuario sin perfil - cuenta eliminada');
+          // Cerrar sesión inmediatamente
+          await supabase.auth.signOut();
+          throw new Error('Esta cuenta ha sido eliminada. Por favor, regístrate nuevamente.');
+        }
 
         // Actualizar último login
         await supabase
