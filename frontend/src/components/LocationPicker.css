@@ -209,18 +209,78 @@
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
   }
   
-  .location-map {
-    height: 300px;
-  }
-
-  .address-search {
-    flex: 1;
+  .radius-control {
     width: 100%;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .address-search {
+    flex: none;
+    width: 100%;
+  }
+  
+  .address-input {
+    width: 100%;
+    font-size: 16px;
   }
 
   .btn-location {
     width: 100%;
+    flex: none;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .location-map {
+    height: 250px;
+    border-radius: var(--radius-lg);
+  }
+  
+  .map-instruction {
+    padding: var(--spacing-sm);
+    font-size: 0.8rem;
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .search-row {
+    padding: 0.5rem;
+    border-radius: var(--radius-lg);
+  }
+  
+  .radius-control {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .radius-label {
+    font-size: 0.8rem;
+  }
+  
+  .radius-control select {
+    font-size: 0.85rem;
+    padding: 0.4rem 1.8rem 0.4rem 0.6rem;
+  }
+  
+  .btn-location {
+    min-height: 40px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: var(--radius-md);
+  }
+  
+  .location-map {
+    height: 200px;
+  }
+  
+  .map-instruction {
+    font-size: 0.75rem;
+    padding: 0.5rem;
   }
 }
