@@ -555,43 +555,115 @@
 }
 
 @media (max-width: 480px) {
+  .login-page {
+    padding: 0;
+    align-items: flex-start;
+  }
+  
   .login-container {
-    margin: 10px;
-    border-radius: 16px;
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100%;
   }
 
   .login-branding {
-    padding: 24px;
+    padding: 20px;
+    min-height: auto;
   }
 
   .logo-container {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
+  }
+  
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .logo-text {
+    font-size: 1.2rem;
   }
 
   .branding-message {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
   }
 
   .branding-message h2 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    margin-bottom: 8px;
   }
 
   .branding-message p {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  
+  .branding-footer {
+    padding-top: 16px;
+  }
+  
+  .branding-footer p {
+    font-size: 0.8rem;
   }
 
   .login-form-panel {
-    padding: 24px;
+    padding: 24px 20px;
+  }
+  
+  .form-container {
+    max-width: 100%;
+  }
+
+  .form-header {
+    margin-bottom: 24px;
   }
 
   .form-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+  }
+  
+  .form-header p {
+    font-size: 0.85rem;
+  }
+  
+  .login-form {
+    gap: 16px;
+  }
+  
+  .input-wrapper input {
+    padding: 12px 44px 12px 14px;
+    font-size: 16px; /* Previene zoom en iOS */
   }
 
   .form-options {
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
+  }
+  
+  .login-button {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+  }
+  
+  .form-footer {
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+  
+  .security-badge {
+    margin-top: 16px;
+  }
+  
+  .auth-tabs {
+    margin-bottom: 20px;
+  }
+  
+  .auth-tab {
+    padding: 10px 12px;
+    font-size: 0.9rem;
   }
 }
 

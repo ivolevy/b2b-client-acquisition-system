@@ -1,7 +1,9 @@
 .filters-container {
   margin-bottom: var(--spacing-xl);
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-lg);
+  width: 100%;
 }
 
 .filter-section {
@@ -10,6 +12,8 @@
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   border: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .filter-header {
