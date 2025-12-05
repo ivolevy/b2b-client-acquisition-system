@@ -85,15 +85,23 @@ function Navbar() {
         }
       }
       
-      // Limpiar localStorage
+      // Limpiar todo el localStorage
       localStorage.removeItem('b2b_auth');
       localStorage.removeItem('b2b_token');
+      sessionStorage.clear();
       
-      // Cerrar modal y recargar
-      setShowDeleteModal(false);
-      window.location.reload();
+      // Limpiar cookies de Supabase si existen
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      
+      alert('Tu cuenta ha sido eliminada exitosamente.');
+      
+      // Redirigir al login
+      window.location.replace('/');
     } catch (error) {
-      alert('Error al eliminar la cuenta');
+      console.error('Error al eliminar cuenta:', error);
+      alert('Error al eliminar la cuenta. Por favor, intenta de nuevo.');
       setDeleteLoading(false);
     }
   };

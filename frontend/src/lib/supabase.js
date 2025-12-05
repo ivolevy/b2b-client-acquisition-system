@@ -135,20 +135,35 @@ export const authService = {
         throw new Error('No hay usuario autenticado');
       }
 
-      // Eliminar datos del usuario de las tablas (el CASCADE debería hacerlo automáticamente)
-      // pero lo hacemos explícitamente por seguridad
-      await supabase.from('search_history').delete().eq('user_id', user.id);
-      await supabase.from('saved_companies').delete().eq('user_id', user.id);
-      await supabase.from('email_templates').delete().eq('user_id', user.id);
-      await supabase.from('email_history').delete().eq('user_id', user.id);
-      await supabase.from('users').delete().eq('id', user.id);
+      console.log('[DeleteAccount] Eliminando datos del usuario:', user.id);
 
-      // Cerrar sesión (esto no elimina el usuario de auth, pero limpia la sesión)
+      // Eliminar datos del usuario de las tablas
+      const tables = ['search_history', 'saved_companies', 'email_templates', 'email_history'];
+      
+      for (const table of tables) {
+        const { error } = await supabase.from(table).delete().eq('user_id', user.id);
+        if (error) {
+          console.warn(`[DeleteAccount] Error eliminando ${table}:`, error.message);
+        } else {
+          console.log(`[DeleteAccount] ${table} eliminado`);
+        }
+      }
+
+      // Eliminar perfil de usuario
+      const { error: userError } = await supabase.from('users').delete().eq('id', user.id);
+      if (userError) {
+        console.warn('[DeleteAccount] Error eliminando perfil:', userError.message);
+      } else {
+        console.log('[DeleteAccount] Perfil eliminado');
+      }
+
+      // Cerrar sesión
       await supabase.auth.signOut();
-
+      
+      console.log('[DeleteAccount] Cuenta eliminada exitosamente');
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error eliminando cuenta:', error);
+      console.error('[DeleteAccount] Error:', error);
       return { success: false, error };
     }
   }
