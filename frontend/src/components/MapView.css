@@ -3,7 +3,8 @@
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--gray-200);
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 }
 
 .map-header {
@@ -24,6 +25,12 @@
   height: 600px;
   width: 100%;
   position: relative;
+  z-index: 1;
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
   z-index: 1;
 }
 

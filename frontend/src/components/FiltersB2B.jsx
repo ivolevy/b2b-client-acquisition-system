@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import GoogleLocationPicker from './GoogleLocationPicker';
+import LocationPicker from './LocationPicker';
 import { useAuth } from '../AuthWrapper';
 import SearchHistory from './SearchHistory';
 import './Filters.css';
@@ -14,6 +15,10 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
   
   // Estado para inicializar el mapa desde historial
   const [initialMapLocation, setInitialMapLocation] = useState(null);
+  
+  // Estado para elegir entre Google Maps y OpenStreetMap
+  const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const [mapProvider, setMapProvider] = useState(GOOGLE_API_KEY ? 'google' : 'osm'); // 'google' o 'osm'
   
   // Efecto para cargar datos desde historial
   useEffect(() => {
@@ -155,12 +160,46 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
             </div>
           </div>
 
+          {/* Selector de proveedor de mapa (solo si hay API key de Google) */}
+          {GOOGLE_API_KEY && (
+            <div className="map-provider-selector" style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <label style={{ fontSize: '0.875rem', color: 'var(--gray-700)', fontWeight: 500 }}>
+                Proveedor de mapa:
+              </label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setMapProvider('google')}
+                  className={`mode-btn ${mapProvider === 'google' ? 'active' : ''}`}
+                  style={{ fontSize: '0.875rem', padding: '6px 12px' }}
+                >
+                  Google Maps
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMapProvider('osm')}
+                  className={`mode-btn ${mapProvider === 'osm' ? 'active' : ''}`}
+                  style={{ fontSize: '0.875rem', padding: '6px 12px' }}
+                >
+                  OpenStreetMap
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Selector de ubicación en mapa */}
           <div className="location-section">
-            <GoogleLocationPicker 
-              onLocationChange={setLocationData}
-              initialLocation={initialMapLocation}
-            />
+            {mapProvider === 'google' && GOOGLE_API_KEY ? (
+              <GoogleLocationPicker 
+                onLocationChange={setLocationData}
+                initialLocation={initialMapLocation}
+              />
+            ) : (
+              <LocationPicker 
+                onLocationChange={setLocationData}
+                initialLocation={initialMapLocation}
+              />
+            )}
           </div>
 
           <div className="filters-row-compact">

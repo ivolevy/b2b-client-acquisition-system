@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import './MapView.css';
 
@@ -11,14 +11,32 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Componente interno para actualizar el mapa cuando cambia el centro
+function MapUpdater({ center, zoom }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    map.setView(center, zoom);
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+  }, [center, zoom, map]);
+  
+  return null;
+}
+
 function MapView({ properties }) {
   const [center, setCenter] = useState([40.4168, -3.7038]); // Madrid por defecto
   const [zoom, setZoom] = useState(6);
 
   useEffect(() => {
     // Calcular centro basado en propiedades
-    if (properties.length > 0) {
-      const validProperties = properties.filter(p => p.latitud && p.longitud);
+    if (properties && properties.length > 0) {
+      const validProperties = properties.filter(p => {
+        const lat = parseFloat(p.latitud);
+        const lng = parseFloat(p.longitud);
+        return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+      });
       
       if (validProperties.length > 0) {
         const avgLat = validProperties.reduce((sum, p) => sum + parseFloat(p.latitud), 0) / validProperties.length;
@@ -29,9 +47,13 @@ function MapView({ properties }) {
     }
   }, [properties]);
 
-  const validProperties = properties.filter(p => p.latitud && p.longitud);
+  const validProperties = (properties || []).filter(p => {
+    const lat = parseFloat(p.latitud);
+    const lng = parseFloat(p.longitud);
+    return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+  });
 
-  if (properties.length === 0) {
+  if (!properties || properties.length === 0) {
     return (
       <div className="empty-state">
         <div className="empty-icon"></div>
@@ -52,74 +74,79 @@ function MapView({ properties }) {
   }
 
   return (
-    <div className="map-container" style={{ position: 'relative', zIndex: 1 }}>
+    <div className="map-container" style={{ position: 'relative', zIndex: 1, minHeight: '600px' }}>
       <div className="map-header">
         <h2>Mapa de Empresas: {validProperties.length} {validProperties.length === 1 ? 'ubicación' : 'ubicaciones'}</h2>
       </div>
       
-      <MapContainer 
-        center={center} 
-        zoom={zoom} 
-        className="leaflet-map"
-        style={{ height: '600px', width: '100%', zIndex: 1 }}
-        key={`${center[0]}-${center[1]}-${zoom}`}
-        scrollWheelZoom={true}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        
-        {validProperties.map((property) => {
-          const lat = parseFloat(property.latitud);
-          const lng = parseFloat(property.longitud);
+      <div style={{ position: 'relative', width: '100%', height: '600px' }}>
+        <MapContainer 
+          center={center} 
+          zoom={zoom} 
+          className="leaflet-map"
+          style={{ height: '100%', width: '100%', zIndex: 1 }}
+          key={`map-${validProperties.length}`}
+          scrollWheelZoom={true}
+        >
+          <MapUpdater center={center} zoom={zoom} />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maxZoom={19}
+            minZoom={2}
+          />
           
-          // Validar que las coordenadas sean números válidos
-          if (isNaN(lat) || isNaN(lng)) {
-            return null;
-          }
-          
-          return (
-            <Marker 
-              key={property.id || `marker-${lat}-${lng}`} 
-              position={[lat, lng]}
-            >
-              <Popup>
-                <div className="popup-content">
-                  <h3>{property.nombre || 'Sin nombre'}</h3>
-                  <div className="popup-info">
-                    <p><strong>Rubro:</strong> {property.rubro || 'N/A'}</p>
-                    <p><strong>Ciudad:</strong> {property.ciudad || 'N/A'}</p>
-                    {property.direccion && (
-                      <p><strong>Dirección:</strong> {property.direccion}</p>
-                    )}
-                    {(property.sitio_web || property.website) && (
-                      <p>
-                        <strong>Web:</strong>{' '}
-                        <a href={property.sitio_web || property.website} target="_blank" rel="noopener noreferrer">
-                          Ver sitio
-                        </a>
-                      </p>
-                    )}
-                    {property.email && (
-                      <p>
-                        <strong>Email:</strong>{' '}
-                        <a href={`mailto:${property.email}`}>{property.email}</a>
-                      </p>
-                    )}
-                    {property.telefono && (
-                      <p>
-                        <strong>Teléfono:</strong>{' '}
-                        <a href={`tel:${property.telefono}`}>{property.telefono}</a>
-                      </p>
-                    )}
+          {validProperties.map((property) => {
+            const lat = parseFloat(property.latitud);
+            const lng = parseFloat(property.longitud);
+            
+            // Validar que las coordenadas sean números válidos
+            if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
+              return null;
+            }
+            
+            return (
+              <Marker 
+                key={property.id || `marker-${lat}-${lng}`} 
+                position={[lat, lng]}
+              >
+                <Popup>
+                  <div className="popup-content">
+                    <h3>{property.nombre || 'Sin nombre'}</h3>
+                    <div className="popup-info">
+                      <p><strong>Rubro:</strong> {property.rubro || 'N/A'}</p>
+                      <p><strong>Ciudad:</strong> {property.ciudad || 'N/A'}</p>
+                      {property.direccion && (
+                        <p><strong>Dirección:</strong> {property.direccion}</p>
+                      )}
+                      {(property.sitio_web || property.website) && (
+                        <p>
+                          <strong>Web:</strong>{' '}
+                          <a href={property.sitio_web || property.website} target="_blank" rel="noopener noreferrer">
+                            Ver sitio
+                          </a>
+                        </p>
+                      )}
+                      {property.email && (
+                        <p>
+                          <strong>Email:</strong>{' '}
+                          <a href={`mailto:${property.email}`}>{property.email}</a>
+                        </p>
+                      )}
+                      {property.telefono && (
+                        <p>
+                          <strong>Teléfono:</strong>{' '}
+                          <a href={`tel:${property.telefono}`}>{property.telefono}</a>
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
-      </MapContainer>
+                </Popup>
+              </Marker>
+            );
+          })}
+        </MapContainer>
+      </div>
     </div>
   );
 }

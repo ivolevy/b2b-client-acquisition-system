@@ -39,10 +39,11 @@ const formatNominatimResult = (item) => {
   };
 };
 
-function LocationPicker({ onLocationChange }) {
+function LocationPicker({ onLocationChange, initialLocation }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radius, setRadius] = useState(5000); // 5km por defecto
   const [mapCenter, setMapCenter] = useState([40.4168, -3.7038]); // Madrid por defecto
+  const [initialLocationApplied, setInitialLocationApplied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -55,8 +56,47 @@ function LocationPicker({ onLocationChange }) {
   const placesServiceRef = useRef(null);
   const sessionTokenRef = useRef(null);
 
+  // Efecto para aplicar ubicación inicial desde historial
+  useEffect(() => {
+    if (initialLocation && !initialLocationApplied) {
+      const { lat, lng, name, radius: initialRadius } = initialLocation;
+      const location = { lat, lng };
+      
+      // Configurar radio si viene
+      if (initialRadius) {
+        setRadius(initialRadius);
+      }
+      
+      // Configurar ubicación
+      setSelectedLocation(location);
+      setMapCenter([lat, lng]);
+      setSearchQuery(name || '');
+      
+      // Notificar al padre
+      const bbox = calculateBoundingBox(lat, lng, initialRadius || radius);
+      onLocationChange({
+        center: location,
+        radius: initialRadius || radius,
+        bbox: bbox,
+        ubicacion_nombre: name || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
+      });
+      
+      setInitialLocationApplied(true);
+    }
+  }, [initialLocation, initialLocationApplied, radius, onLocationChange]);
+
+  // Resetear flag cuando cambia initialLocation
+  useEffect(() => {
+    if (initialLocation) {
+      setInitialLocationApplied(false);
+    }
+  }, [initialLocation]);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    
+    // Si ya hay una ubicación inicial, no usar geolocalización
+    if (initialLocation && initialLocationApplied) return;
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -72,7 +112,7 @@ function LocationPicker({ onLocationChange }) {
         }
       );
     }
-  }, []);
+  }, [initialLocation, initialLocationApplied]);
 
   useEffect(() => {
     if (!GOOGLE_API_KEY || typeof window === 'undefined') return;
