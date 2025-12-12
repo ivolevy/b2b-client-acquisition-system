@@ -3,7 +3,6 @@ import axios from 'axios';
 import Navbar from './components/Navbar';
 import FiltersB2B from './components/FiltersB2B';
 import TableViewB2B from './components/TableViewB2B';
-import GoogleMapView from './components/GoogleMapView';
 import EmailSender from './components/EmailSender';
 import TemplateEditor from './components/TemplateEditor';
 import TemplateManager from './components/TemplateManager';
@@ -452,9 +451,6 @@ function AppB2B() {
 
         {view === 'table' && (
           <TableViewB2B empresas={filteredEmpresas} showAllResults={showAllResults} />
-        )}
-        {view === 'map' && (
-          <MapView properties={filteredEmpresas} />
         )}
       {view === 'emails' && (
         <EmailSender

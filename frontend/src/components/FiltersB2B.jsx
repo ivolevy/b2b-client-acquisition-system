@@ -301,13 +301,6 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
             </button>
             <button 
               type="button"
-              className={view === 'map' ? 'active' : ''}
-              onClick={() => setView('map')}
-            >
-               Mapa
-            </button>
-            <button 
-              type="button"
               className={view === 'emails' ? 'active' : ''}
               onClick={() => setView('emails')}
             >
