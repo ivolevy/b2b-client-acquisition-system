@@ -15,7 +15,7 @@ function TableViewB2B({ empresas, showAllResults = false }) {
   // Función para manejar click en columna (ordenar)
   const handleSort = (column) => {
     if (!isPro) return; // Solo PRO puede ordenar
-    
+
     if (sortColumn === column) {
       // Ciclar: asc -> desc -> null
       if (sortBy === 'asc') {
@@ -33,10 +33,10 @@ function TableViewB2B({ empresas, showAllResults = false }) {
   // Ordenar empresas por columna seleccionada
   const empresasOrdenadas = React.useMemo(() => {
     if (!sortBy || !sortColumn) return empresas;
-    
+
     const sorted = [...empresas].sort((a, b) => {
       let valA, valB;
-      
+
       switch (sortColumn) {
         case 'distancia':
           valA = a.distancia_km;
@@ -55,14 +55,14 @@ function TableViewB2B({ empresas, showAllResults = false }) {
         default:
           return 0;
       }
-      
+
       if (sortBy === 'asc') {
         return valA > valB ? 1 : valA < valB ? -1 : 0;
       } else {
         return valA < valB ? 1 : valA > valB ? -1 : 0;
       }
     });
-    
+
     return sorted;
   }, [empresas, sortBy, sortColumn]);
 
@@ -90,7 +90,7 @@ function TableViewB2B({ empresas, showAllResults = false }) {
         <h3>No hay empresas para mostrar</h3>
         <p>Selecciona un rubro empresarial y busca en OpenStreetMap</p>
         <p style={{ fontSize: '14px', marginTop: '10px', color: '#666' }}>
-           El sistema valida automáticamente emails y teléfonos
+          El sistema valida automáticamente emails y teléfonos
         </p>
       </div>
     );
@@ -101,7 +101,7 @@ function TableViewB2B({ empresas, showAllResults = false }) {
       <div className="table-header">
         <h2>Empresas B2B: {empresas.length} resultados</h2>
         <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '6px', fontWeight: 'normal' }}>
-           Empresas encontradas en OpenStreetMap
+          Empresas encontradas en OpenStreetMap
         </div>
       </div>
 
@@ -110,7 +110,7 @@ function TableViewB2B({ empresas, showAllResults = false }) {
           <thead>
             <tr>
               <th style={{ width: '50px', textAlign: 'center' }}>#</th>
-              <th 
+              <th
                 onClick={() => handleSort('nombre')}
                 className={isPro ? 'sortable-header' : ''}
                 title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
@@ -120,7 +120,7 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                   <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
                 )}
               </th>
-              <th 
+              <th
                 onClick={() => handleSort('rubro')}
                 className={isPro ? 'sortable-header' : ''}
                 title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
@@ -130,7 +130,7 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                   <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
                 )}
               </th>
-              <th 
+              <th
                 onClick={() => handleSort('distancia')}
                 className={isPro ? 'sortable-header' : ''}
                 title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
@@ -157,7 +157,7 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                   {empresa.nombre || 'Sin nombre'}
                   {empresa.direccion && (
                     <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                       {empresa.direccion}
+                      {empresa.direccion}
                     </div>
                   )}
                 </td>
@@ -166,21 +166,21 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                 </td>
                 <td>
                   {empresa.distancia_km !== null && empresa.distancia_km !== undefined ? (
-                    <div style={{ 
-                      fontSize: '13px', 
+                    <div style={{
+                      fontSize: '13px',
                       fontWeight: '500',
                       color: '#667eea'
                     }}>
                       {empresa.distancia_km.toFixed(2)} km
                       {empresa.busqueda_ubicacion_nombre && (
-                        <div style={{ 
-                          fontSize: '11px', 
-                          color: '#6b7280', 
+                        <div style={{
+                          fontSize: '11px',
+                          color: '#6b7280',
                           marginTop: '2px',
                           fontStyle: 'italic'
                         }}>
-                          desde {empresa.busqueda_ubicacion_nombre.length > 30 
-                            ? empresa.busqueda_ubicacion_nombre.substring(0, 30) + '...' 
+                          desde {empresa.busqueda_ubicacion_nombre.length > 30
+                            ? empresa.busqueda_ubicacion_nombre.substring(0, 30) + '...'
                             : empresa.busqueda_ubicacion_nombre}
                         </div>
                       )}
@@ -209,13 +209,13 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                 </td>
                 <td>
                   {empresa.website || empresa.sitio_web ? (
-                    <a 
-                      href={empresa.website || empresa.sitio_web} 
-                      target="_blank" 
+                    <a
+                      href={empresa.website || empresa.sitio_web}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="link"
                     >
-                       Ver sitio
+                      Ver sitio
                     </a>
                   ) : (
                     <span className="no-data">Sin web</span>
@@ -224,9 +224,9 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                 <td>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {empresa.instagram && (
-                      <a 
-                        href={empresa.instagram} 
-                        target="_blank" 
+                      <a
+                        href={empresa.instagram}
+                        target="_blank"
                         rel="noopener noreferrer"
                         title="Instagram"
                         style={{
@@ -249,9 +249,9 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                       </a>
                     )}
                     {empresa.facebook && (
-                      <a 
-                        href={empresa.facebook} 
-                        target="_blank" 
+                      <a
+                        href={empresa.facebook}
+                        target="_blank"
                         rel="noopener noreferrer"
                         title="Facebook"
                         style={{
@@ -274,9 +274,9 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                       </a>
                     )}
                     {empresa.twitter && (
-                      <a 
-                        href={empresa.twitter} 
-                        target="_blank" 
+                      <a
+                        href={empresa.twitter}
+                        target="_blank"
                         rel="noopener noreferrer"
                         title="Twitter/X"
                         style={{
@@ -297,11 +297,11 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                       >
                         <FaXTwitter />
                       </a>
-                  )}
-                  {empresa.linkedin && (
-                      <a 
-                        href={empresa.linkedin} 
-                        target="_blank" 
+                    )}
+                    {empresa.linkedin && (
+                      <a
+                        href={empresa.linkedin}
+                        target="_blank"
                         rel="noopener noreferrer"
                         title="LinkedIn"
                         style={{
@@ -324,9 +324,9 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                       </a>
                     )}
                     {empresa.youtube && (
-                      <a 
-                        href={empresa.youtube} 
-                        target="_blank" 
+                      <a
+                        href={empresa.youtube}
+                        target="_blank"
                         rel="noopener noreferrer"
                         title="YouTube"
                         style={{
@@ -349,9 +349,9 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                       </a>
                     )}
                     {empresa.tiktok && (
-                      <a 
-                        href={empresa.tiktok} 
-                        target="_blank" 
+                      <a
+                        href={empresa.tiktok}
+                        target="_blank"
                         rel="noopener noreferrer"
                         title="TikTok"
                         style={{
@@ -373,19 +373,19 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                         <FaTiktok />
                       </a>
                     )}
-                    {!empresa.instagram && !empresa.facebook && !empresa.twitter && 
-                     !empresa.linkedin && !empresa.youtube && !empresa.tiktok && (
-                      <span className="no-data">-</span>
-                    )}
+                    {!empresa.instagram && !empresa.facebook && !empresa.twitter &&
+                      !empresa.linkedin && !empresa.youtube && !empresa.tiktok && (
+                        <span className="no-data">-</span>
+                      )}
                   </div>
                 </td>
                 {isPro && (
                   <td>
                     <div style={{ display: 'flex', gap: '6px', flexDirection: 'column' }}>
-                      {empresa.direccion && (
+                      {(empresa.direccion || (empresa.latitud && empresa.longitud)) && (
                         <>
                           <a
-                            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(empresa.direccion)}`}
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${empresa.direccion ? encodeURIComponent(empresa.direccion) : `${empresa.latitud},${empresa.longitud}`}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="action-btn go-btn"
@@ -395,7 +395,8 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                           </a>
                           <button
                             onClick={() => {
-                              const text = `${empresa.nombre}\n📍 ${empresa.direccion}${empresa.telefono ? `\n📞 ${empresa.telefono}` : ''}${empresa.email ? `\n✉️ ${empresa.email}` : ''}`;
+                              const ubicacion = empresa.direccion || `${empresa.latitud}, ${empresa.longitud}`;
+                              const text = `${empresa.nombre}\n📍 ${ubicacion}${empresa.telefono ? `\n📞 ${empresa.telefono}` : ''}${empresa.email ? `\n✉️ ${empresa.email}` : ''}`;
                               if (navigator.share) {
                                 navigator.share({ title: empresa.nombre, text });
                               } else {
@@ -421,19 +422,19 @@ function TableViewB2B({ empresas, showAllResults = false }) {
 
       {totalPages > 1 && (
         <div className="pagination">
-          <button 
+          <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
             className="pagination-btn"
           >
             ← Anterior
           </button>
-          
+
           <div className="pagination-info">
             Página {currentPage} de {totalPages}
           </div>
-          
-          <button 
+
+          <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="pagination-btn"
