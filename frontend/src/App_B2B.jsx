@@ -454,7 +454,7 @@ function AppB2B() {
           <TableViewB2B empresas={filteredEmpresas} showAllResults={showAllResults} />
         )}
         {view === 'map' && (
-          <GoogleMapView empresas={filteredEmpresas} />
+          <MapView properties={filteredEmpresas} />
         )}
       {view === 'emails' && (
         <EmailSender

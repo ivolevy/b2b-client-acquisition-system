@@ -52,61 +52,73 @@ function MapView({ properties }) {
   }
 
   return (
-    <div className="map-container">
+    <div className="map-container" style={{ position: 'relative', zIndex: 1 }}>
       <div className="map-header">
-        <h2> Mapa de Empresas: {validProperties.length} {validProperties.length === 1 ? 'ubicación' : 'ubicaciones'}</h2>
+        <h2>Mapa de Empresas: {validProperties.length} {validProperties.length === 1 ? 'ubicación' : 'ubicaciones'}</h2>
       </div>
       
       <MapContainer 
         center={center} 
         zoom={zoom} 
         className="leaflet-map"
+        style={{ height: '600px', width: '100%', zIndex: 1 }}
         key={`${center[0]}-${center[1]}-${zoom}`}
+        scrollWheelZoom={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {validProperties.map((property) => (
-          <Marker 
-            key={property.id} 
-            position={[parseFloat(property.latitud), parseFloat(property.longitud)]}
-          >
-            <Popup>
-              <div className="popup-content">
-                <h3>{property.nombre || 'Sin nombre'}</h3>
-                <div className="popup-info">
-                  <p><strong>Rubro:</strong> {property.rubro || 'N/A'}</p>
-                  <p><strong>Ciudad:</strong> {property.ciudad || 'N/A'}</p>
-                  {property.direccion && (
-                    <p><strong>Dirección:</strong> {property.direccion}</p>
-                  )}
-                  {(property.sitio_web || property.website) && (
-                    <p>
-                      <strong>Web:</strong>{' '}
-                      <a href={property.sitio_web || property.website} target="_blank" rel="noopener noreferrer">
-                        Ver sitio
-                      </a>
-                    </p>
-                  )}
-                  {property.email && (
-                    <p>
-                      <strong>Email:</strong>{' '}
-                      <a href={`mailto:${property.email}`}>{property.email}</a>
-                    </p>
-                  )}
-                  {property.telefono && (
-                    <p>
-                      <strong>Teléfono:</strong>{' '}
-                      <a href={`tel:${property.telefono}`}>{property.telefono}</a>
-                    </p>
-                  )}
+        {validProperties.map((property) => {
+          const lat = parseFloat(property.latitud);
+          const lng = parseFloat(property.longitud);
+          
+          // Validar que las coordenadas sean números válidos
+          if (isNaN(lat) || isNaN(lng)) {
+            return null;
+          }
+          
+          return (
+            <Marker 
+              key={property.id || `marker-${lat}-${lng}`} 
+              position={[lat, lng]}
+            >
+              <Popup>
+                <div className="popup-content">
+                  <h3>{property.nombre || 'Sin nombre'}</h3>
+                  <div className="popup-info">
+                    <p><strong>Rubro:</strong> {property.rubro || 'N/A'}</p>
+                    <p><strong>Ciudad:</strong> {property.ciudad || 'N/A'}</p>
+                    {property.direccion && (
+                      <p><strong>Dirección:</strong> {property.direccion}</p>
+                    )}
+                    {(property.sitio_web || property.website) && (
+                      <p>
+                        <strong>Web:</strong>{' '}
+                        <a href={property.sitio_web || property.website} target="_blank" rel="noopener noreferrer">
+                          Ver sitio
+                        </a>
+                      </p>
+                    )}
+                    {property.email && (
+                      <p>
+                        <strong>Email:</strong>{' '}
+                        <a href={`mailto:${property.email}`}>{property.email}</a>
+                      </p>
+                    )}
+                    {property.telefono && (
+                      <p>
+                        <strong>Teléfono:</strong>{' '}
+                        <a href={`tel:${property.telefono}`}>{property.telefono}</a>
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );
