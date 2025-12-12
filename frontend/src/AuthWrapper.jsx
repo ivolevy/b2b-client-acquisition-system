@@ -81,7 +81,20 @@ function AuthWrapper() {
           const { data: { session } } = await supabase.auth.getSession();
           
           if (session?.user) {
-            const { data: profile } = await userService.getProfile(session.user.id);
+            const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
+            
+            // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
+            if (profileError || !profile) {
+              console.warn('[AuthWrapper] Usuario sin perfil detectado - cerrando sesión');
+              await supabase.auth.signOut();
+              localStorage.removeItem('b2b_auth');
+              localStorage.removeItem('b2b_token');
+              sessionStorage.clear();
+              setUser(null);
+              setLoading(false);
+              return;
+            }
+            
             setUser({
               id: session.user.id,
               email: session.user.email,
@@ -93,13 +106,30 @@ function AuthWrapper() {
           }
         } catch (error) {
           console.error('Error inicializando auth con Supabase:', error);
+          // En caso de error, cerrar sesión por seguridad
+          await supabase.auth.signOut();
+          localStorage.removeItem('b2b_auth');
+          localStorage.removeItem('b2b_token');
+          sessionStorage.clear();
         }
 
         // Listener para cambios de autenticación
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
-              const { data: profile } = await userService.getProfile(session.user.id);
+              const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
+              
+              // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
+              if (profileError || !profile) {
+                console.warn('[AuthWrapper] Usuario sin perfil detectado en SIGNED_IN - cerrando sesión');
+                await supabase.auth.signOut();
+                localStorage.removeItem('b2b_auth');
+                localStorage.removeItem('b2b_token');
+                sessionStorage.clear();
+                setUser(null);
+                return;
+              }
+              
               const userData = {
                 id: session.user.id,
                 email: session.user.email,

@@ -143,13 +143,35 @@ export const authService = {
         throw new Error('No hay usuario autenticado');
       }
 
-      console.log('[DeleteAccount] Eliminando datos del usuario:', user.id);
+      const userId = user.id;
+      console.log('[DeleteAccount] Eliminando datos del usuario:', userId);
 
-      // Eliminar datos del usuario de las tablas
+      // PASO 1: Intentar eliminar el usuario de auth.users usando función edge PRIMERO
+      // Esto es crítico para evitar que el usuario pueda iniciar sesión después
+      let authUserDeleted = false;
+      try {
+        const { data: edgeData, error: edgeError } = await supabase.functions.invoke('delete-user', {
+          body: { userId: userId }
+        });
+
+        if (edgeError) {
+          console.warn('[DeleteAccount] Función edge no disponible o falló:', edgeError.message);
+          // Si la función edge falla, intentamos eliminar manualmente de auth.users
+          // usando el método admin (requiere service role key en función edge)
+          throw new Error('Función edge no disponible');
+        } else if (edgeData?.success) {
+          authUserDeleted = true;
+          console.log('[DeleteAccount] Usuario eliminado completamente de auth.users mediante función edge');
+        }
+      } catch (edgeErr) {
+        console.warn('[DeleteAccount] No se pudo eliminar de auth.users. El usuario seguirá existiendo pero no podrá iniciar sesión sin perfil.');
+      }
+
+      // PASO 2: Eliminar datos del usuario de las tablas relacionadas
       const tables = ['search_history', 'saved_companies', 'email_templates', 'email_history'];
       
       for (const table of tables) {
-        const { error } = await supabase.from(table).delete().eq('user_id', user.id);
+        const { error } = await supabase.from(table).delete().eq('user_id', userId);
         if (error) {
           console.warn(`[DeleteAccount] Error eliminando ${table}:`, error.message);
         } else {
@@ -157,21 +179,41 @@ export const authService = {
         }
       }
 
-      // Eliminar perfil de usuario
-      const { error: userError } = await supabase.from('users').delete().eq('id', user.id);
+      // PASO 3: Eliminar perfil de usuario (CRÍTICO - esto previene que el usuario inicie sesión)
+      // Incluso si el usuario existe en auth.users, sin perfil en users no podrá iniciar sesión
+      const { error: userError } = await supabase.from('users').delete().eq('id', userId);
       if (userError) {
-        console.warn('[DeleteAccount] Error eliminando perfil:', userError.message);
-      } else {
-        console.log('[DeleteAccount] Perfil eliminado');
+        console.error('[DeleteAccount] Error eliminando perfil:', userError);
+        throw new Error(`Error eliminando perfil: ${userError.message}`);
       }
+      console.log('[DeleteAccount] Perfil eliminado exitosamente');
 
-      // Cerrar sesión
+      // PASO 4: Cerrar sesión inmediatamente
       await supabase.auth.signOut();
       
+      // PASO 5: Limpiar todas las sesiones y tokens locales
+      localStorage.removeItem('b2b_auth');
+      localStorage.removeItem('b2b_token');
+      sessionStorage.clear();
+      
+      // Limpiar cookies de Supabase
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      
       console.log('[DeleteAccount] Cuenta eliminada exitosamente');
-      return { success: true, error: null };
+      return { success: true, error: null, authUserDeleted };
     } catch (error) {
       console.error('[DeleteAccount] Error:', error);
+      // Aún así, intentar cerrar sesión y limpiar datos locales
+      try {
+        await supabase.auth.signOut();
+        localStorage.removeItem('b2b_auth');
+        localStorage.removeItem('b2b_token');
+        sessionStorage.clear();
+      } catch (cleanupError) {
+        console.error('[DeleteAccount] Error en limpieza:', cleanupError);
+      }
       return { success: false, error };
     }
   }

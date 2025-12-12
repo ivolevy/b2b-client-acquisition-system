@@ -1,15 +1,16 @@
 import React, { useMemo } from 'react';
-import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 import './MapView.css';
 
 const containerStyle = {
   width: '100%',
-  height: '480px',
+  height: '600px',
   borderRadius: '16px',
 };
 
 function GoogleMapView({ empresas }) {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const [selectedEmpresa, setSelectedEmpresa] = React.useState(null);
   
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
@@ -17,7 +18,11 @@ function GoogleMapView({ empresas }) {
   });
 
   const validEmpresas = useMemo(
-    () => (empresas || []).filter(e => e.latitud && e.longitud),
+    () => (empresas || []).filter(e => {
+      const lat = parseFloat(e.latitud);
+      const lng = parseFloat(e.longitud);
+      return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+    }),
     [empresas]
   );
 
@@ -87,17 +92,60 @@ function GoogleMapView({ empresas }) {
         mapContainerStyle={containerStyle}
         center={center}
         zoom={validEmpresas.length === 1 ? 15 : 12}
+        onClick={() => setSelectedEmpresa(null)}
       >
         {validEmpresas.map((empresa) => (
           <Marker
-            key={empresa.id}
+            key={empresa.id || `marker-${empresa.latitud}-${empresa.longitud}`}
             position={{
               lat: parseFloat(empresa.latitud),
               lng: parseFloat(empresa.longitud),
             }}
             title={empresa.nombre || 'Sin nombre'}
+            onClick={() => setSelectedEmpresa(empresa)}
           />
         ))}
+        
+        {selectedEmpresa && (
+          <InfoWindow
+            position={{
+              lat: parseFloat(selectedEmpresa.latitud),
+              lng: parseFloat(selectedEmpresa.longitud),
+            }}
+            onCloseClick={() => setSelectedEmpresa(null)}
+          >
+            <div className="popup-content">
+              <h3>{selectedEmpresa.nombre || 'Sin nombre'}</h3>
+              <div className="popup-info">
+                <p><strong>Rubro:</strong> {selectedEmpresa.rubro || 'N/A'}</p>
+                <p><strong>Ciudad:</strong> {selectedEmpresa.ciudad || 'N/A'}</p>
+                {selectedEmpresa.direccion && (
+                  <p><strong>Dirección:</strong> {selectedEmpresa.direccion}</p>
+                )}
+                {(selectedEmpresa.sitio_web || selectedEmpresa.website) && (
+                  <p>
+                    <strong>Web:</strong>{' '}
+                    <a href={selectedEmpresa.sitio_web || selectedEmpresa.website} target="_blank" rel="noopener noreferrer">
+                      Ver sitio
+                    </a>
+                  </p>
+                )}
+                {selectedEmpresa.email && (
+                  <p>
+                    <strong>Email:</strong>{' '}
+                    <a href={`mailto:${selectedEmpresa.email}`}>{selectedEmpresa.email}</a>
+                  </p>
+                )}
+                {selectedEmpresa.telefono && (
+                  <p>
+                    <strong>Teléfono:</strong>{' '}
+                    <a href={`tel:${selectedEmpresa.telefono}`}>{selectedEmpresa.telefono}</a>
+                  </p>
+                )}
+              </div>
+            </div>
+          </InfoWindow>
+        )}
       </GoogleMap>
     </div>
   );

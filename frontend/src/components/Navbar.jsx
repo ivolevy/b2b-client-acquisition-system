@@ -78,8 +78,9 @@ function Navbar() {
     try {
       if (useSupabase) {
         const { success, error } = await authService.deleteAccount();
-        if (error) {
-          alert('Error al eliminar la cuenta: ' + error.message);
+        if (!success || error) {
+          const errorMessage = error?.message || 'No se pudo eliminar la cuenta. Por favor, intenta de nuevo.';
+          alert('Error al eliminar la cuenta: ' + errorMessage);
           setDeleteLoading(false);
           return;
         }
