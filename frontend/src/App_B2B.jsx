@@ -16,7 +16,6 @@ import './App.css';
 
 function AppB2B() {
   const [empresas, setEmpresas] = useState([]);
-  const [filteredEmpresas, setFilteredEmpresas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [blockingLoading, setBlockingLoading] = useState(false);
   const [view, setView] = useState('table');
@@ -27,13 +26,8 @@ function AppB2B() {
   const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
   const { user } = useAuth();
   
-  // Verificar si el usuario es PRO
   const isPro = user?.plan === 'pro';
-  
-  // Estado para pasar datos desde historial a los filtros
   const [historySearchData, setHistorySearchData] = useState(null);
-  
-  // Estado para mostrar todos los resultados sin paginación (PRO)
   const [showAllResults, setShowAllResults] = useState(false);
 
   useEffect(() => {
@@ -67,7 +61,6 @@ function AppB2B() {
       setLoading(true);
       const response = await axios.get(`${API_URL}/empresas`);
       setEmpresas(response.data.data || []);
-      setFilteredEmpresas(response.data.data || []);
     } catch (err) {
       console.error('Error al cargar empresas:', err);
       const errorMsg = err.response?.data?.detail || err.message;
@@ -196,64 +189,6 @@ function AppB2B() {
     }
   };
 
-  const handleFiltrar = async (filters) => {
-    // Si no hay filtros, mostrar todas las empresas
-    if (!filters.rubro && !filters.ciudad && !filters.con_email && !filters.con_telefono && 
-        !filters.distancia && !filters.con_redes) {
-      setFilteredEmpresas(empresas);
-      return;
-    }
-
-    // Filtrar en el frontend
-    let filtered = [...empresas];
-
-    if (filters.rubro) {
-      filtered = filtered.filter(e => e.rubro === filters.rubro);
-    }
-
-    if (filters.ciudad) {
-      filtered = filtered.filter(e => 
-        e.ciudad && e.ciudad.toLowerCase().includes(filters.ciudad.toLowerCase())
-      );
-    }
-
-    if (filters.con_email) {
-      filtered = filtered.filter(e => e.email && e.email.trim() !== '');
-    }
-
-    if (filters.con_telefono) {
-      filtered = filtered.filter(e => e.telefono && e.telefono.trim() !== '');
-    }
-
-    // Filtro por distancia
-    if (filters.distancia !== null && filters.distancia !== undefined) {
-      const distanciaValue = parseFloat(filters.distancia);
-      if (!isNaN(distanciaValue)) {
-        if (filters.distancia_operador === 'mayor') {
-          filtered = filtered.filter(e => 
-            e.distancia_km !== null && e.distancia_km !== undefined && e.distancia_km > distanciaValue
-          );
-        } else if (filters.distancia_operador === 'menor') {
-          filtered = filtered.filter(e => 
-            e.distancia_km !== null && e.distancia_km !== undefined && e.distancia_km < distanciaValue
-          );
-    }
-      }
-    }
-
-    // Filtro por redes sociales
-    if (filters.con_redes === 'con') {
-      filtered = filtered.filter(e => 
-        e.instagram || e.facebook || e.twitter || e.linkedin || e.youtube || e.tiktok
-      );
-    } else if (filters.con_redes === 'sin') {
-      filtered = filtered.filter(e => 
-        !e.instagram && !e.facebook && !e.twitter && !e.linkedin && !e.youtube && !e.tiktok
-      );
-    }
-
-    setFilteredEmpresas(filtered);
-  };
 
   const handleExportCSV = async () => {
     try {
@@ -282,30 +217,26 @@ function AppB2B() {
     }
   };
 
-  const exportToCSVFrontend = () => {
-    if (filteredEmpresas.length === 0) {
+  const exportToCSVFrontend = (empresasToExport = empresas) => {
+    if (empresasToExport.length === 0) {
       warning(
         <>
-          <strong>No hay datos filtrados</strong>
+          <strong>No hay datos para exportar</strong>
           <p>Realiza una búsqueda o quita filtros antes de exportar.</p>
         </>
       );
       return;
     }
 
-    // Función para escapar valores CSV correctamente
     const escapeCSV = (value) => {
       if (value === null || value === undefined) return '';
       const stringValue = String(value);
-      // Si contiene comillas, comas o saltos de línea, debe ir entre comillas
       if (stringValue.includes('"') || stringValue.includes(',') || stringValue.includes('\n')) {
-        // Duplicar las comillas dobles y envolver en comillas
         return `"${stringValue.replace(/"/g, '""')}"`;
       }
       return stringValue;
     };
 
-    // Headers completos con todos los campos importantes
     const headers = [
       'ID', 'Nombre', 'Rubro', 'Email', 'Email Válido', 
       'Teléfono', 'Teléfono Válido', 'Dirección', 'Ciudad', 'País', 'Código Postal',
@@ -314,8 +245,7 @@ function AppB2B() {
       'Fecha Creación'
     ];
 
-    // Mapear los datos de las empresas
-    const rows = filteredEmpresas.map(e => [
+    const rows = empresasToExport.map(e => [
       e.id || '',
       e.nombre || '',
       e.rubro || '',
@@ -335,13 +265,11 @@ function AppB2B() {
       e.created_at || e.fecha_creacion || ''
     ]);
 
-    // Construir el CSV con valores escapados correctamente
     const csvContent = [
       headers.map(escapeCSV).join(','),
       ...rows.map(row => row.map(escapeCSV).join(','))
     ].join('\n');
 
-    // Agregar BOM UTF-8 para que Excel reconozca correctamente los caracteres especiales
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -356,13 +284,12 @@ function AppB2B() {
     link.click();
     document.body.removeChild(link);
     
-    // Limpiar la URL después de la descarga
     setTimeout(() => URL.revokeObjectURL(url), 100);
     
     success(
       <>
         <strong>Exportación completada</strong>
-        <p>Se exportaron {filteredEmpresas.length} empresas a CSV</p>
+        <p>Se exportaron {empresasToExport.length} empresas a CSV</p>
       </>
     );
   };
@@ -381,7 +308,6 @@ function AppB2B() {
           </>
         );
         setEmpresas([]);
-        setFilteredEmpresas([]);
         setStats({ total: 0, validadas: 0 });
       }
     } catch (err) {
@@ -409,38 +335,12 @@ function AppB2B() {
       <main className="main-content">
         <FiltersB2B 
           onBuscar={handleBuscar}
-          onFiltrar={handleFiltrar}
-          onExportCSV={exportToCSVFrontend}
           loading={loading}
           rubros={rubros}
-          view={view}
-          setView={setView}
           toastWarning={warning}
           onSelectFromHistory={handleSelectFromHistory}
           historySearchData={historySearchData}
-          onShowAllResultsChange={setShowAllResults}
         />
-
-        {view === 'table' && (
-          <section className="results-module">
-            <div className="results-module__header">
-              <div>
-                <h2>Resultados obtenidos</h2>
-                <p>
-                  {filteredEmpresas.length} en pantalla · {empresas.length} totales
-                </p>
-              </div>
-              <button
-                type="button"
-                className="results-delete-btn"
-                onClick={handleDeleteResults}
-                disabled={loading || empresas.length === 0}
-              >
-                Borrar resultados
-              </button>
-            </div>
-          </section>
-        )}
         
         {blockingLoading && (
           <div className="loading-overlay">
@@ -450,14 +350,25 @@ function AppB2B() {
         )}
 
         {view === 'table' && (
-          <TableViewB2B empresas={filteredEmpresas} showAllResults={showAllResults} />
+          <TableViewB2B 
+            empresas={empresas}
+            showAllResults={showAllResults}
+            rubros={rubros}
+            view={view}
+            setView={setView}
+            onExportCSV={exportToCSVFrontend}
+            onDeleteResults={handleDeleteResults}
+            loading={loading}
+            toastWarning={warning}
+          />
         )}
-      {view === 'emails' && (
-        <EmailSender
-          empresas={filteredEmpresas}
-          onClose={() => setView('table')}
-          embedded={true}
-        />
+        
+        {view === 'emails' && (
+          <EmailSender
+            empresas={empresas}
+            onClose={() => setView('table')}
+            embedded={true}
+          />
         )}
       </main>
 

@@ -1,40 +1,91 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './TableView.css';
 import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok } from 'react-icons/fa6';
 import { useAuth } from '../AuthWrapper';
 
-function TableViewB2B({ empresas, showAllResults = false }) {
+function TableViewB2B({ 
+  empresas, 
+  showAllResults = false, 
+  rubros = {},
+  view,
+  setView,
+  onExportCSV,
+  onDeleteResults,
+  loading,
+  toastWarning
+}) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState(null); // null, 'asc', 'desc'
-  const [sortColumn, setSortColumn] = useState(null); // 'distancia', 'nombre', 'rubro'
+  const [sortBy, setSortBy] = useState(null);
+  const [sortColumn, setSortColumn] = useState(null);
   const { user } = useAuth();
   const isPro = user?.plan === 'pro';
   const itemsPerPage = (isPro && showAllResults) ? 9999 : 10;
   const tableContainerRef = useRef(null);
 
-  // Función para manejar click en columna (ordenar)
-  const handleSort = (column) => {
-    if (!isPro) return; // Solo PRO puede ordenar
+  // Filtros instantáneos
+  const [filtroRubro, setFiltroRubro] = useState('');
+  const [filtroCiudad, setFiltroCiudad] = useState('');
+  const [filtroConEmail, setFiltroConEmail] = useState(false);
+  const [filtroConTelefono, setFiltroConTelefono] = useState(false);
+  const [filtroDistancia, setFiltroDistancia] = useState('');
+  const [filtroDistanciaOperador, setFiltroDistanciaOperador] = useState('mayor');
+  const [filtroConRedes, setFiltroConRedes] = useState('todas');
 
-    if (sortColumn === column) {
-      // Ciclar: asc -> desc -> null
-      if (sortBy === 'asc') {
-        setSortBy('desc');
-      } else if (sortBy === 'desc') {
-        setSortBy(null);
-        setSortColumn(null);
-      }
-    } else {
-      setSortColumn(column);
-      setSortBy('asc');
+  // Aplicar filtros instantáneamente
+  const empresasFiltradas = useMemo(() => {
+    let filtered = [...empresas];
+
+    if (filtroRubro) {
+      filtered = filtered.filter(e => e.rubro === filtroRubro);
     }
-  };
 
-  // Ordenar empresas por columna seleccionada
-  const empresasOrdenadas = React.useMemo(() => {
-    if (!sortBy || !sortColumn) return empresas;
+    if (filtroCiudad) {
+      filtered = filtered.filter(e => 
+        e.ciudad && e.ciudad.toLowerCase().includes(filtroCiudad.toLowerCase())
+      );
+    }
 
-    const sorted = [...empresas].sort((a, b) => {
+    if (filtroConEmail) {
+      filtered = filtered.filter(e => e.email && e.email.trim() !== '');
+    }
+
+    if (filtroConTelefono) {
+      filtered = filtered.filter(e => e.telefono && e.telefono.trim() !== '');
+    }
+
+    if (filtroDistancia) {
+      const distanciaValue = parseFloat(filtroDistancia);
+      if (!isNaN(distanciaValue)) {
+        if (filtroDistanciaOperador === 'mayor') {
+          filtered = filtered.filter(e => 
+            e.distancia_km !== null && e.distancia_km !== undefined && e.distancia_km > distanciaValue
+          );
+        } else {
+          filtered = filtered.filter(e => 
+            e.distancia_km !== null && e.distancia_km !== undefined && e.distancia_km < distanciaValue
+          );
+        }
+      }
+    }
+
+    if (filtroConRedes === 'con') {
+      filtered = filtered.filter(e => 
+        e.instagram || e.facebook || e.twitter || e.linkedin || e.youtube || e.tiktok
+      );
+    } else if (filtroConRedes === 'sin') {
+      filtered = filtered.filter(e => 
+        !e.instagram && !e.facebook && !e.twitter && !e.linkedin && !e.youtube && !e.tiktok
+      );
+    }
+
+    return filtered;
+  }, [empresas, filtroRubro, filtroCiudad, filtroConEmail, filtroConTelefono, filtroDistancia, filtroDistanciaOperador, filtroConRedes]);
+
+  // Ordenamiento
+  const empresasOrdenadas = useMemo(() => {
+    if (!sortBy || !sortColumn) return empresasFiltradas;
+
+    return [...empresasFiltradas].sort((a, b) => {
       let valA, valB;
 
       switch (sortColumn) {
@@ -55,16 +106,14 @@ function TableViewB2B({ empresas, showAllResults = false }) {
         default:
           return 0;
       }
-
+      
       if (sortBy === 'asc') {
         return valA > valB ? 1 : valA < valB ? -1 : 0;
       } else {
         return valA < valB ? 1 : valA > valB ? -1 : 0;
       }
     });
-
-    return sorted;
-  }, [empresas, sortBy, sortColumn]);
+  }, [empresasFiltradas, sortBy, sortColumn]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -73,91 +122,297 @@ function TableViewB2B({ empresas, showAllResults = false }) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [empresas, sortBy]);
+  }, [empresas, sortBy, filtroRubro, filtroCiudad, filtroConEmail, filtroConTelefono, filtroDistancia, filtroDistanciaOperador, filtroConRedes]);
+
+  const handleSort = (column) => {
+    if (!isPro) return;
+    if (sortColumn === column) {
+      if (sortBy === 'asc') {
+        setSortBy('desc');
+      } else if (sortBy === 'desc') {
+        setSortBy(null);
+        setSortColumn(null);
+      }
+    } else {
+      setSortColumn(column);
+      setSortBy('asc');
+    }
+  };
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    // Hacer scroll solo hasta el inicio de la tabla, no hasta el top de la página
     if (tableContainerRef.current) {
       tableContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
-  if (empresas.length === 0) {
-    return (
-      <div className="empty-state">
-        <div className="empty-icon"></div>
-        <h3>No hay empresas para mostrar</h3>
-        <p>Selecciona un rubro empresarial y busca en OpenStreetMap</p>
-        <p style={{ fontSize: '14px', marginTop: '10px', color: '#666' }}>
-          El sistema valida automáticamente emails y teléfonos
-        </p>
-      </div>
-    );
-  }
+  const handleLimpiarFiltros = () => {
+    setFiltroRubro('');
+    setFiltroCiudad('');
+    setFiltroConEmail(false);
+    setFiltroConTelefono(false);
+    setFiltroDistancia('');
+    setFiltroDistanciaOperador('mayor');
+    setFiltroConRedes('todas');
+  };
 
-  return (
-    <div className="table-container" ref={tableContainerRef}>
-      <div className="table-header">
-        <h2>Empresas B2B: {empresas.length} resultados</h2>
-        <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '6px', fontWeight: 'normal' }}>
-          Empresas encontradas en OpenStreetMap
+  const hayFiltrosActivos = filtroRubro || filtroCiudad || filtroConEmail || filtroConTelefono || filtroDistancia || filtroConRedes !== 'todas';
+
+    return (
+    <div className="unified-results-module" ref={tableContainerRef}>
+      {/* Header unificado */}
+      <div className="results-unified-header">
+        <div className="results-title-section">
+          <h2>Resultados</h2>
+          <div className="results-counts">
+            <span className="count-filtered">{empresasFiltradas.length}</span>
+            {hayFiltrosActivos && <span className="count-separator">de</span>}
+            {hayFiltrosActivos && <span className="count-total">{empresas.length}</span>}
+            <span className="count-label">empresas</span>
+          </div>
+        </div>
+
+        {/* Toggle Tabla/Emails */}
+        <div className="view-toggle-inline">
+          <button 
+            type="button"
+            className={view === 'table' ? 'active' : ''}
+            onClick={() => setView('table')}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="3" y1="15" x2="21" y2="15"/>
+              <line x1="9" y1="3" x2="9" y2="21"/>
+            </svg>
+            Tabla
+          </button>
+          <button 
+            type="button"
+            className={view === 'emails' ? 'active' : ''}
+            onClick={() => setView('emails')}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            Emails
+          </button>
         </div>
       </div>
 
+      {/* Filtros inline instantáneos */}
+      <div className="filters-inline-bar">
+        <select 
+          value={filtroRubro} 
+          onChange={(e) => setFiltroRubro(e.target.value)}
+          className="filter-inline-input"
+        >
+          <option value="">Todos los rubros</option>
+          {Object.entries(rubros).map(([key, nombre]) => (
+            <option key={key} value={key}>{nombre}</option>
+          ))}
+        </select>
+        
+        <input
+          type="text"
+          placeholder="Ciudad..."
+          value={filtroCiudad}
+          onChange={(e) => setFiltroCiudad(e.target.value)}
+          className="filter-inline-input filter-city"
+        />
+
+        <div className="filter-distance-group">
+          <select 
+            value={filtroDistanciaOperador} 
+            onChange={(e) => setFiltroDistanciaOperador(e.target.value)}
+            className="filter-inline-input filter-operator"
+          >
+            <option value="menor">&lt;</option>
+            <option value="mayor">&gt;</option>
+          </select>
+          <input
+            type="number"
+            placeholder="km"
+            value={filtroDistancia}
+            onChange={(e) => setFiltroDistancia(e.target.value)}
+            min="0"
+            step="0.1"
+            className="filter-inline-input filter-km"
+          />
+        </div>
+
+        <select 
+          value={filtroConRedes} 
+          onChange={(e) => setFiltroConRedes(e.target.value)}
+          className="filter-inline-input"
+        >
+          <option value="todas">Redes: todas</option>
+          <option value="con">Con redes</option>
+          <option value="sin">Sin redes</option>
+        </select>
+
+        <label className="filter-checkbox-inline">
+          <input
+            type="checkbox"
+            checked={filtroConEmail}
+            onChange={(e) => setFiltroConEmail(e.target.checked)}
+          />
+          <span>Email</span>
+        </label>
+
+        <label className="filter-checkbox-inline">
+          <input
+            type="checkbox"
+            checked={filtroConTelefono}
+            onChange={(e) => setFiltroConTelefono(e.target.checked)}
+          />
+          <span>Tel</span>
+        </label>
+
+        {hayFiltrosActivos && (
+          <button 
+            type="button" 
+            className="btn-clear-filters"
+            onClick={handleLimpiarFiltros}
+            title="Limpiar filtros"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        )}
+
+        <div className="filter-actions-right">
+          {isPro ? (
+            <button 
+              type="button" 
+              className="btn-action-inline btn-export"
+              onClick={() => onExportCSV(empresasFiltradas)}
+              disabled={empresasFiltradas.length === 0}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              CSV
+            </button>
+          ) : (
+            <button 
+              type="button" 
+              className="btn-action-inline btn-export locked"
+              onClick={() => toastWarning?.(
+                <>
+                  <strong>Función PRO</strong>
+                  <p>Exportar a CSV es exclusivo del plan PRO.</p>
+                </>
+              )}
+              title="Exportar CSV (solo PRO)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              🔒
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="btn-action-inline btn-delete"
+            onClick={onDeleteResults}
+            disabled={loading || empresas.length === 0}
+            title="Borrar todos los resultados"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Contenido: Tabla o Empty State */}
+      {empresas.length === 0 ? (
+        <div className="empty-state-inline">
+          <div className="empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <h3>No hay empresas para mostrar</h3>
+          <p>Realiza una búsqueda para ver resultados aquí</p>
+        </div>
+      ) : empresasFiltradas.length === 0 ? (
+        <div className="empty-state-inline">
+          <div className="empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+          </div>
+          <h3>Sin resultados con estos filtros</h3>
+          <p>Prueba ajustando los filtros o</p>
+          <button onClick={handleLimpiarFiltros} className="btn-link">limpiar todos</button>
+        </div>
+      ) : (
+        <>
       <div className="table-wrapper">
         <table className="properties-table">
           <thead>
             <tr>
-              <th style={{ width: '50px', textAlign: 'center' }}>#</th>
-              <th
-                onClick={() => handleSort('nombre')}
-                className={isPro ? 'sortable-header' : ''}
-                title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
-              >
-                Empresa
-                {isPro && sortColumn === 'nombre' && (
-                  <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
-                )}
-              </th>
-              <th
-                onClick={() => handleSort('rubro')}
-                className={isPro ? 'sortable-header' : ''}
-                title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
-              >
-                Rubro
-                {isPro && sortColumn === 'rubro' && (
-                  <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
-                )}
-              </th>
-              <th
-                onClick={() => handleSort('distancia')}
-                className={isPro ? 'sortable-header' : ''}
-                title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
-              >
-                Distancia
-                {isPro && sortColumn === 'distancia' && (
-                  <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
-                )}
-              </th>
+                  <th style={{ width: '45px', textAlign: 'center' }}>#</th>
+                  <th
+                    onClick={() => handleSort('nombre')}
+                    className={isPro ? 'sortable-header' : ''}
+                    title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
+                  >
+                    Empresa
+                    {isPro && sortColumn === 'nombre' && (
+                      <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
+                    )}
+                  </th>
+                  <th
+                    onClick={() => handleSort('rubro')}
+                    className={isPro ? 'sortable-header' : ''}
+                    title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
+                  >
+                    Rubro
+                    {isPro && sortColumn === 'rubro' && (
+                      <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
+                    )}
+                  </th>
+                  <th
+                    onClick={() => handleSort('distancia')}
+                    className={isPro ? 'sortable-header' : ''}
+                    title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
+                  >
+                    Dist.
+                    {isPro && sortColumn === 'distancia' && (
+                      <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
+                    )}
+                  </th>
               <th>Email</th>
               <th>Teléfono</th>
-              <th>Website</th>
+                  <th>Web</th>
               <th>Redes</th>
-              {isPro && <th style={{ width: '100px' }}>Acciones</th>}
+                  {isPro && <th style={{ width: '90px' }}>Acciones</th>}
             </tr>
           </thead>
           <tbody>
-            {currentItems.map((empresa, index) => (
+                {currentItems.map((empresa, index) => (
               <tr key={empresa.id}>
-                <td style={{ textAlign: 'center', fontWeight: '600', color: '#667eea' }}>
-                  {indexOfFirstItem + index + 1}
-                </td>
+                    <td style={{ textAlign: 'center', fontWeight: '600', color: '#e91e63' }}>
+                      {indexOfFirstItem + index + 1}
+                    </td>
                 <td className="name-cell">
                   {empresa.nombre || 'Sin nombre'}
                   {empresa.direccion && (
-                    <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                      {empresa.direccion}
+                        <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
+                       {empresa.direccion}
                     </div>
                   )}
                 </td>
@@ -166,254 +421,119 @@ function TableViewB2B({ empresas, showAllResults = false }) {
                 </td>
                 <td>
                   {empresa.distancia_km !== null && empresa.distancia_km !== undefined ? (
-                    <div style={{
-                      fontSize: '13px',
-                      fontWeight: '500',
-                      color: '#667eea'
-                    }}>
-                      {empresa.distancia_km.toFixed(2)} km
-                      {empresa.busqueda_ubicacion_nombre && (
-                        <div style={{
-                          fontSize: '11px',
-                          color: '#6b7280',
-                          marginTop: '2px',
-                          fontStyle: 'italic'
-                        }}>
-                          desde {empresa.busqueda_ubicacion_nombre.length > 30
-                            ? empresa.busqueda_ubicacion_nombre.substring(0, 30) + '...'
-                            : empresa.busqueda_ubicacion_nombre}
-                        </div>
-                      )}
-                    </div>
+                        <span style={{ fontSize: '12px', fontWeight: '500', color: '#e91e63' }}>
+                          {empresa.distancia_km.toFixed(1)} km
+                        </span>
                   ) : (
                     <span className="no-data">-</span>
                   )}
                 </td>
                 <td>
                   {empresa.email ? (
-                    <a href={`mailto:${empresa.email}`} className="link">
-                      {empresa.email}
+                        <a href={`mailto:${empresa.email}`} className="link" style={{ fontSize: '12px' }}>
+                          {empresa.email.length > 25 ? empresa.email.substring(0, 25) + '...' : empresa.email}
                     </a>
                   ) : (
-                    <span className="no-data">Sin email</span>
+                        <span className="no-data">-</span>
                   )}
                 </td>
                 <td>
                   {empresa.telefono ? (
-                    <a href={`tel:${empresa.telefono}`} className="link">
+                        <a href={`tel:${empresa.telefono}`} className="link" style={{ fontSize: '12px' }}>
                       {empresa.telefono}
                     </a>
                   ) : (
-                    <span className="no-data">Sin teléfono</span>
+                        <span className="no-data">-</span>
                   )}
                 </td>
                 <td>
                   {empresa.website || empresa.sitio_web ? (
-                    <a
-                      href={empresa.website || empresa.sitio_web}
-                      target="_blank"
+                    <a 
+                      href={empresa.website || empresa.sitio_web} 
+                      target="_blank" 
                       rel="noopener noreferrer"
                       className="link"
+                          style={{ fontSize: '12px' }}
                     >
-                      Ver sitio
+                          Ver
                     </a>
                   ) : (
-                    <span className="no-data">Sin web</span>
+                        <span className="no-data">-</span>
                   )}
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {empresa.instagram && (
-                      <a
-                        href={empresa.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Instagram"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '6px',
-                          background: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
-                          color: 'white',
-                          fontSize: '18px',
-                          transition: 'transform 0.2s',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                      >
+                          <a href={empresa.instagram} target="_blank" rel="noopener noreferrer" className="social-icon instagram" title="Instagram">
                         <FaInstagram />
                       </a>
                     )}
                     {empresa.facebook && (
-                      <a
-                        href={empresa.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Facebook"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '6px',
-                          background: '#1877f2',
-                          color: 'white',
-                          fontSize: '18px',
-                          transition: 'transform 0.2s',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                      >
+                          <a href={empresa.facebook} target="_blank" rel="noopener noreferrer" className="social-icon facebook" title="Facebook">
                         <FaFacebook />
                       </a>
                     )}
                     {empresa.twitter && (
-                      <a
-                        href={empresa.twitter}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Twitter/X"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '6px',
-                          background: '#000000',
-                          color: 'white',
-                          fontSize: '18px',
-                          transition: 'transform 0.2s',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                      >
+                          <a href={empresa.twitter} target="_blank" rel="noopener noreferrer" className="social-icon twitter" title="Twitter/X">
                         <FaXTwitter />
                       </a>
-                    )}
-                    {empresa.linkedin && (
-                      <a
-                        href={empresa.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="LinkedIn"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '6px',
-                          background: '#0077b5',
-                          color: 'white',
-                          fontSize: '18px',
-                          transition: 'transform 0.2s',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                      >
+                  )}
+                  {empresa.linkedin && (
+                          <a href={empresa.linkedin} target="_blank" rel="noopener noreferrer" className="social-icon linkedin" title="LinkedIn">
                         <FaLinkedin />
                       </a>
                     )}
                     {empresa.youtube && (
-                      <a
-                        href={empresa.youtube}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="YouTube"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '6px',
-                          background: '#ff0000',
-                          color: 'white',
-                          fontSize: '18px',
-                          transition: 'transform 0.2s',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                      >
+                          <a href={empresa.youtube} target="_blank" rel="noopener noreferrer" className="social-icon youtube" title="YouTube">
                         <FaYoutube />
                       </a>
                     )}
                     {empresa.tiktok && (
-                      <a
-                        href={empresa.tiktok}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="TikTok"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '6px',
-                          background: '#000000',
-                          color: '#00f2ea',
-                          fontSize: '18px',
-                          transition: 'transform 0.2s',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                      >
+                          <a href={empresa.tiktok} target="_blank" rel="noopener noreferrer" className="social-icon tiktok" title="TikTok">
                         <FaTiktok />
                       </a>
                     )}
-                    {!empresa.instagram && !empresa.facebook && !empresa.twitter &&
-                      !empresa.linkedin && !empresa.youtube && !empresa.tiktok && (
-                        <span className="no-data">-</span>
-                      )}
+                    {!empresa.instagram && !empresa.facebook && !empresa.twitter && 
+                     !empresa.linkedin && !empresa.youtube && !empresa.tiktok && (
+                      <span className="no-data">-</span>
+                    )}
                   </div>
                 </td>
-                {isPro && (
-                  <td>
-                    <div style={{ display: 'flex', gap: '6px', flexDirection: 'column' }}>
-                      {(empresa.direccion || (empresa.latitud && empresa.longitud)) && (
-                        <>
-                          <a
-                            href={`https://www.google.com/maps/dir/?api=1&destination=${empresa.direccion ? encodeURIComponent(empresa.direccion) : `${empresa.latitud},${empresa.longitud}`}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="action-btn go-btn"
-                            title="Ir ahora con Google Maps"
-                          >
-                            🚗 Ir
-                          </a>
-                          <button
-                            onClick={() => {
-                              const ubicacion = empresa.direccion || `${empresa.latitud}, ${empresa.longitud}`;
-                              const text = `${empresa.nombre}\n📍 ${ubicacion}${empresa.telefono ? `\n📞 ${empresa.telefono}` : ''}${empresa.email ? `\n✉️ ${empresa.email}` : ''}`;
-                              if (navigator.share) {
-                                navigator.share({ title: empresa.nombre, text });
-                              } else {
-                                navigator.clipboard.writeText(text);
-                                alert('Información copiada al portapapeles');
-                              }
-                            }}
-                            className="action-btn share-btn"
-                            title="Compartir dirección"
-                          >
-                            📤 Compartir
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                )}
+                    {isPro && (
+                      <td>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                          {(empresa.direccion || (empresa.latitud && empresa.longitud)) && (
+                            <>
+                              <a
+                                href={`https://www.google.com/maps/dir/?api=1&destination=${empresa.direccion ? encodeURIComponent(empresa.direccion) : `${empresa.latitud},${empresa.longitud}`}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="action-btn-mini go-btn"
+                                title="Ir ahora"
+                              >
+                                🚗
+                              </a>
+                              <button
+                                onClick={() => {
+                                  const ubicacion = empresa.direccion || `${empresa.latitud}, ${empresa.longitud}`;
+                                  const text = `${empresa.nombre}\n📍 ${ubicacion}${empresa.telefono ? `\n📞 ${empresa.telefono}` : ''}${empresa.email ? `\n✉️ ${empresa.email}` : ''}`;
+                                  if (navigator.share) {
+                                    navigator.share({ title: empresa.nombre, text });
+                                  } else {
+                                    navigator.clipboard.writeText(text);
+                                    alert('Copiado al portapapeles');
+                                  }
+                                }}
+                                className="action-btn-mini share-btn"
+                                title="Compartir"
+                              >
+                                📤
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    )}
               </tr>
             ))}
           </tbody>
@@ -422,19 +542,19 @@ function TableViewB2B({ empresas, showAllResults = false }) {
 
       {totalPages > 1 && (
         <div className="pagination">
-          <button
+          <button 
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
             className="pagination-btn"
           >
             ← Anterior
           </button>
-
+          
           <div className="pagination-info">
             Página {currentPage} de {totalPages}
           </div>
-
-          <button
+          
+          <button 
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="pagination-btn"
@@ -442,10 +562,11 @@ function TableViewB2B({ empresas, showAllResults = false }) {
             Siguiente →
           </button>
         </div>
+          )}
+        </>
       )}
     </div>
   );
 }
 
 export default TableViewB2B;
-

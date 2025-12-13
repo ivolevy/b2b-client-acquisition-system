@@ -5,7 +5,7 @@ import { useAuth } from '../AuthWrapper';
 import SearchHistory from './SearchHistory';
 import './Filters.css';
 
-function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, setView, toastWarning, hayResultados, onSelectFromHistory, historySearchData, onShowAllResultsChange }) {
+function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHistory, historySearchData }) {
   const { user } = useAuth();
   const [showHistory, setShowHistory] = useState(false);
   
@@ -18,13 +18,12 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
   
   // Estado para elegir entre Google Maps y OpenStreetMap
   const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const [mapProvider, setMapProvider] = useState(GOOGLE_API_KEY ? 'google' : 'osm'); // 'google' o 'osm'
+  const [mapProvider, setMapProvider] = useState(GOOGLE_API_KEY ? 'google' : 'osm');
   
   // Efecto para cargar datos desde historial
   useEffect(() => {
     if (historySearchData) {
       setRubro(historySearchData.rubro);
-      // Si hay datos de ubicación, pasarlos al mapa
       if (historySearchData.centro_lat && historySearchData.centro_lng) {
         setInitialMapLocation({
           lat: historySearchData.centro_lat,
@@ -35,19 +34,10 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
       }
     }
   }, [historySearchData]);
-  const [scrapearWebsites, setScrapearWebsites] = useState(true); //  ACTIVADO - Scraping de redes sociales
-  const [soloValidadas, setSoloValidadas] = useState(false); // Desmarcado por defecto para ver todas
-  const [modoBusqueda, setModoBusqueda] = useState('nueva'); // 'nueva' o 'agregar'
   
-  // Estados para filtros
-  const [filtroRubro, setFiltroRubro] = useState('');
-  const [filtroCiudad, setFiltroCiudad] = useState('');
-  const [filtroConEmail, setFiltroConEmail] = useState(false);
-  const [filtroConTelefono, setFiltroConTelefono] = useState(false);
-  const [filtroDistancia, setFiltroDistancia] = useState('');
-  const [filtroDistanciaOperador, setFiltroDistanciaOperador] = useState('mayor'); // 'mayor', 'menor'
-  const [filtroConRedes, setFiltroConRedes] = useState('todas'); // 'todas', 'con', 'sin'
-  const [showAllResults, setShowAllResults] = useState(false); // PRO: Ver todos sin paginación
+  const [scrapearWebsites, setScrapearWebsites] = useState(true);
+  const [soloValidadas, setSoloValidadas] = useState(false);
+  const [modoBusqueda, setModoBusqueda] = useState('nueva');
 
   const handleBuscarSubmit = (e) => {
     e.preventDefault();
@@ -77,45 +67,18 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
       bbox: locationData.bbox.bbox_string,
       scrapear_websites: scrapearWebsites,
       solo_validadas: soloValidadas,
-      limpiar_anterior: modoBusqueda === 'nueva', // true = nueva búsqueda, false = agregar
-      // Información de ubicación de búsqueda
+      limpiar_anterior: modoBusqueda === 'nueva',
       busqueda_ubicacion_nombre: locationData.ubicacion_nombre || null,
       busqueda_centro_lat: locationData.center?.lat || null,
       busqueda_centro_lng: locationData.center?.lng || null,
-      busqueda_radio_km: locationData.radius ? (locationData.radius / 1000) : null // Convertir metros a km
+      busqueda_radio_km: locationData.radius ? (locationData.radius / 1000) : null
     };
 
     onBuscar(params);
   };
 
-  const handleFiltrarSubmit = (e) => {
-    e.preventDefault();
-    onFiltrar({
-      rubro: filtroRubro || null,
-      ciudad: filtroCiudad || null,
-      con_email: filtroConEmail,
-      con_telefono: filtroConTelefono,
-      distancia: filtroDistancia ? parseFloat(filtroDistancia) : null,
-      distancia_operador: filtroDistancia ? filtroDistanciaOperador : null,
-      con_redes: filtroConRedes
-    });
-  };
-
-  const handleLimpiarFiltros = () => {
-    setFiltroRubro('');
-    setFiltroCiudad('');
-    setFiltroConEmail(false);
-    setFiltroConTelefono(false);
-    setFiltroDistancia('');
-    setFiltroDistanciaOperador('mayor');
-    setFiltroConRedes('todas');
-    onFiltrar({});
-  };
-
-  // Manejar selección desde historial
   const handleSelectFromHistory = (searchData) => {
     setRubro(searchData.rubro);
-    // Notificar al componente padre para configurar la ubicación
     if (onSelectFromHistory) {
       onSelectFromHistory(searchData);
     }
@@ -283,153 +246,6 @@ function FiltersB2B({ onBuscar, onFiltrar, onExportCSV, loading, rubros, view, s
 
           <div className="hint-row">
             <span> Busca empresas, valida email/teléfono y extrae redes (Instagram, Facebook, LinkedIn, etc.).</span>
-          </div>
-        </form>
-      </div>
-
-      {/* Sección de Filtros Compacta */}
-      <div className="filter-section compact-filters">
-        <div className="filter-header">
-          <h3> Filtrar Resultados</h3>
-          <div className="view-toggle">
-            <button 
-              type="button"
-              className={view === 'table' ? 'active' : ''}
-              onClick={() => setView('table')}
-            >
-               Tabla
-            </button>
-            <button 
-              type="button"
-              className={view === 'emails' ? 'active' : ''}
-              onClick={() => setView('emails')}
-            >
-               Emails
-            </button>
-          </div>
-        </div>
-        <form onSubmit={handleFiltrarSubmit}>
-          {/* Fila de filtros */}
-          <div className="filters-row-compact">
-            <select 
-              value={filtroRubro} 
-              onChange={(e) => setFiltroRubro(e.target.value)}
-              className="filter-input"
-            >
-              <option value=""> Todos los rubros</option>
-              {Object.entries(rubros).map(([key, nombre]) => (
-                <option key={key} value={key}>{nombre}</option>
-              ))}
-            </select>
-            
-            <input
-              type="text"
-              placeholder=" Filtrar por ciudad..."
-              value={filtroCiudad}
-              onChange={(e) => setFiltroCiudad(e.target.value)}
-              className="filter-input"
-            />
-
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              <select 
-                value={filtroDistanciaOperador} 
-                onChange={(e) => setFiltroDistanciaOperador(e.target.value)}
-                className="filter-input"
-                style={{ width: '90px', flexShrink: 0 }}
-              >
-                <option value="mayor">Mayor que</option>
-                <option value="menor">Menor que</option>
-              </select>
-              <input
-                type="number"
-                placeholder="Distancia (km)"
-                value={filtroDistancia}
-                onChange={(e) => setFiltroDistancia(e.target.value)}
-                min="0"
-                step="0.1"
-                className="filter-input"
-                style={{ width: '130px', flexShrink: 0 }}
-              />
-            </div>
-
-            <select 
-              value={filtroConRedes} 
-              onChange={(e) => setFiltroConRedes(e.target.value)}
-              className="filter-input"
-            >
-              <option value="todas">Todas las redes</option>
-              <option value="con">Con redes sociales</option>
-              <option value="sin">Sin redes sociales</option>
-            </select>
-
-            <label className="checkbox-inline">
-              <input
-                type="checkbox"
-                checked={filtroConEmail}
-                onChange={(e) => setFiltroConEmail(e.target.checked)}
-              />
-              <span> Email</span>
-            </label>
-
-            <label className="checkbox-inline">
-              <input
-                type="checkbox"
-                checked={filtroConTelefono}
-                onChange={(e) => setFiltroConTelefono(e.target.checked)}
-              />
-              <span> Teléfono</span>
-            </label>
-
-            {user?.plan === 'pro' && (
-              <label className="checkbox-inline pro-feature">
-                <input
-                  type="checkbox"
-                  checked={showAllResults}
-                  onChange={(e) => {
-                    setShowAllResults(e.target.checked);
-                    onShowAllResultsChange?.(e.target.checked);
-                  }}
-                />
-                <span>📄 Ver todos</span>
-              </label>
-            )}
-          </div>
-
-          {/* Fila de acciones */}
-          <div className="actions-row-compact">
-            <button type="submit" className="btn btn-secondary btn-compact">
-              Aplicar Filtros
-            </button>
-            <button 
-              type="button" 
-              className="btn btn-outline btn-compact" 
-              onClick={handleLimpiarFiltros}
-            >
-              Limpiar
-            </button>
-            {user?.plan === 'pro' ? (
-              <button 
-                type="button" 
-                className="btn btn-success btn-compact" 
-                onClick={onExportCSV}
-              >
-                 Exportar CSV
-              </button>
-            ) : (
-              <button 
-                type="button" 
-                className="btn btn-outline btn-compact pro-locked"
-                onClick={() => toastWarning?.(
-                  <>
-                    <strong>Función PRO</strong>
-                    <p>Exportar a CSV es una función exclusiva del plan PRO.</p>
-                  </>
-                )}
-                title="Exportar CSV (solo PRO)"
-              >
-                 Exportar CSV 🔒
-              </button>
-            )}
           </div>
         </form>
       </div>
