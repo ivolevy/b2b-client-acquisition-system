@@ -421,7 +421,7 @@ class EnviarEmailMasivoRequest(BaseModel):
     empresa_ids: List[int]
     template_id: int
     asunto_personalizado: Optional[str] = None
-    delay_segundos: float = 1.0
+    delay_segundos: float = 3.0  # Delay automático: 3 segundos (óptimo para evitar spam y rate limiting)
 
 # Inicializar sistema en memoria
 @app.on_event("startup")

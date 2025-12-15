@@ -199,7 +199,7 @@ def enviar_emails_masivo(
     empresas: List[Dict],
     template: Dict,
     asunto_personalizado: Optional[str] = None,
-    delay_segundos: float = 1.0
+    delay_segundos: float = 3.0  # Delay automático: 3 segundos (óptimo para evitar spam y rate limiting)
 ) -> Dict:
     """
     Envía emails a múltiples empresas

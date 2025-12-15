@@ -144,7 +144,7 @@ function HelpModal({ onClose }) {
                 <li>Usa el filtro de distancia para encontrar empresas cercanas o lejanas al punto de búsqueda</li>
                 <li>El filtro de redes sociales te ayuda a identificar empresas con presencia digital activa</li>
                 <li>Personaliza los templates de email para que reflejen tu propuesta de valor</li>
-                <li>En modo masivo, usa un delay de 1-2 segundos entre envíos para evitar problemas con el servidor de email</li>
+                <li>En modo masivo, el sistema usa automáticamente un delay de 3 segundos entre envíos para evitar problemas con el servidor de email</li>
                 <li>Revisa la vista previa antes de enviar para asegurarte de que el email se ve correctamente</li>
                 <li><strong>Importante:</strong> Exporta regularmente tus resultados a CSV, ya que los datos se pierden al cerrar la aplicación o reiniciar el servidor</li>
                 <li>Las notificaciones (toasts) no desaparecen automáticamente - ciérralas manualmente cuando las hayas leído</li>

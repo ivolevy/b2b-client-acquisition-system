@@ -205,7 +205,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           empresa_ids: selectedEmpresas.map(e => e.id),
           template_id: selectedTemplate,
           asunto_personalizado: asuntoPersonalizado || null,
-          delay_segundos: delaySegundos
+          delay_segundos: DELAY_AUTOMATICO_SEGUNDOS
         });
 
         if (response.data.success) {
@@ -353,22 +353,6 @@ function EmailSender({ empresas, onClose, embedded = false }) {
                     disabled={loading}
                   />
                 </div>
-
-                {/* Delay para envío masivo */}
-                {modo === 'masivo' && (
-                  <div className="form-group">
-                    <label>Delay entre envíos (segundos)</label>
-                    <input
-                      type="number"
-                      min="0.5"
-                      max="5"
-                      step="0.5"
-                      value={delaySegundos}
-                      onChange={(e) => setDelaySegundos(parseFloat(e.target.value))}
-                      disabled={loading}
-                    />
-                  </div>
-                )}
 
                 {/* Resumen */}
                 <div className="summary-box">
