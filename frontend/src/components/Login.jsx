@@ -238,7 +238,37 @@ function Login({ onLogin }) {
             
             <div className="branding-message">
               <h2>Sistema de Captación de Clientes</h2>
-              <p>Encuentra empresas, valida contactos y automatiza tu prospección B2B.</p>
+              <p>Encuentra empresas, valida contactos y automatiza tu prospección B2B de manera inteligente.</p>
+            </div>
+
+            <div className="features-list">
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                </div>
+                <span>Búsqueda geolocalizada</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                  </svg>
+                </div>
+                <span>Validación automática</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                  </svg>
+                </div>
+                <span>Envío masivo de emails</span>
+              </div>
             </div>
 
             {/* Mostrar info de modo demo (siempre disponible) */}
@@ -459,6 +489,57 @@ function Login({ onLogin }) {
                   >
                     {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmación'}
                   </button>
+                </div>
+              )}
+
+              {/* Botones de acceso rápido con credenciales demo */}
+              {mode === 'login' && (
+                <div className="demo-quick-access">
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginBottom: '8px',
+                    fontSize: '13px',
+                    color: 'rgba(255, 255, 255, 0.7)'
+                  }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '16px', height: '16px' }}>
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    <span>Acceso rápido:</span>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    flexWrap: 'wrap'
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmail(DEMO_USERS[0].email);
+                        setPassword(DEMO_USERS[0].password);
+                      }}
+                      disabled={loading}
+                      className="demo-quick-btn pro-btn"
+                      title={`Usuario ${DEMO_USERS[0].name} - Plan ${DEMO_USERS[0].plan.toUpperCase()}`}
+                    >
+                      <span className="demo-badge-small pro">PRO</span>
+                      <span>Admin Demo</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmail(DEMO_USERS[1].email);
+                        setPassword(DEMO_USERS[1].password);
+                      }}
+                      disabled={loading}
+                      className="demo-quick-btn free-btn"
+                      title={`Usuario ${DEMO_USERS[1].name} - Plan ${DEMO_USERS[1].plan.toUpperCase()}`}
+                    >
+                      <span className="demo-badge-small free">FREE</span>
+                      <span>Usuario Demo</span>
+                    </button>
+                  </div>
                 </div>
               )}
 

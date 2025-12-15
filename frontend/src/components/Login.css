@@ -825,6 +825,92 @@
 }
 
 /* ============================================
+   DEMO QUICK ACCESS - Botones de acceso rápido
+   ============================================ */
+
+.demo-quick-access {
+  margin: 16px 0;
+  padding: 12px;
+  background: rgba(255, 105, 180, 0.08);
+  border: 1px solid rgba(255, 105, 180, 0.2);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.demo-quick-btn {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.demo-quick-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.demo-quick-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.demo-quick-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.demo-quick-btn.pro-btn {
+  border-color: rgba(255, 105, 180, 0.4);
+  background: rgba(255, 105, 180, 0.1);
+}
+
+.demo-quick-btn.pro-btn:hover:not(:disabled) {
+  background: rgba(255, 105, 180, 0.2);
+  border-color: rgba(255, 105, 180, 0.5);
+}
+
+.demo-quick-btn.free-btn {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.demo-quick-btn.free-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.demo-badge-small {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.demo-badge-small.pro {
+  background: linear-gradient(135deg, var(--login-primary), var(--login-secondary));
+  color: white;
+}
+
+.demo-badge-small.free {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+/* ============================================
    LINK BUTTON (para alternar entre modos)
    ============================================ */
 

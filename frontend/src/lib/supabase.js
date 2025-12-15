@@ -21,8 +21,6 @@ export const authService = {
       // Supabase redirigirá aquí después de que el usuario confirme su email
       const redirectTo = `${window.location.origin}`;
       
-      console.log('[Auth] Iniciando registro de usuario:', { email, redirectTo });
-      
       // 1. Crear usuario en Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -37,25 +35,12 @@ export const authService = {
       });
 
       if (authError) {
-        console.error('[Auth] Error al crear usuario:', {
-          message: authError.message,
-          status: authError.status,
-          code: authError.code
-        });
-        
         // Mejorar mensajes de error específicos
         if (authError.message.includes('already registered') || authError.message.includes('already exists')) {
           throw new Error('Este email ya está registrado. Intenta iniciar sesión o recuperar tu contraseña.');
         }
         throw authError;
       }
-
-      console.log('[Auth] Usuario creado exitosamente:', {
-        userId: authData.user?.id,
-        email: authData.user?.email,
-        emailConfirmed: !!authData.user?.email_confirmed_at,
-        hasSession: !!authData.session
-      });
 
       // 2. El perfil se crea automáticamente mediante el trigger handle_new_user()
       // No necesitamos crearlo manualmente aquí para evitar duplicados
@@ -64,21 +49,11 @@ export const authService = {
       // Si el usuario no tiene email_confirmed_at, significa que necesita confirmar
       const needsConfirmation = authData.user && !authData.user.email_confirmed_at;
       
-      // Diagnóstico: Verificar si Supabase tiene configurado el servicio de email
-      if (needsConfirmation) {
-        if (!authData.session) {
-          // Esto es normal cuando se requiere confirmación de email
-          console.log('[Auth] ✅ Usuario creado. Email de confirmación debería haberse enviado.');
-          console.log('[Auth] ⚠️ Si no recibes el email, verifica:');
-          console.log('[Auth]   1. Configuración SMTP en Supabase Dashboard');
-          console.log('[Auth]   2. "Enable email confirmations" está activado');
-          console.log('[Auth]   3. La URL de redirección está configurada:', redirectTo);
-          console.log('[Auth]   4. Revisa spam/correo no deseado');
-        } else {
-          console.warn('[Auth] ⚠️ Usuario tiene sesión pero email no confirmado. Esto puede indicar que la confirmación de email está deshabilitada en Supabase.');
-        }
-      } else {
-        console.log('[Auth] ✅ Email ya confirmado o confirmación no requerida.');
+      // Verificar si Supabase tiene configurado el servicio de email
+      // Si session es null después del signUp, puede indicar que el email no se envió
+      if (needsConfirmation && !authData.session) {
+        // El email debería haberse enviado, pero verificamos
+        console.log('[Auth] Usuario creado, email de confirmación debería haberse enviado');
       }
 
       return { 
