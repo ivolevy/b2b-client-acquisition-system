@@ -206,41 +206,25 @@ function Login({ onLogin }) {
   };
 
   // Manejar clic en botón demo
-  const handleDemoClick = async (demoUser) => {
+  const handleDemoClick = (demoUser) => {
     // Cambiar a modo login si está en registro
     if (mode !== 'login') {
       setMode('login');
     }
     
-    // Autocompletar campos
+    // Solo autocompletar campos, sin iniciar sesión automáticamente
     setEmail(demoUser.email);
     setPassword(demoUser.password);
     setError('');
     setSuccess('');
-    setLoading(true);
     
-    // Esperar un momento para que se vea el autocompletado, luego hacer login
-    setTimeout(async () => {
-      try {
-        // Modo demo - siempre permitido, incluso con Supabase configurado
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        const userData = {
-          email: demoUser.email,
-          name: demoUser.name,
-          role: demoUser.role,
-          plan: demoUser.plan,
-          loginTime: new Date().toISOString()
-        };
-        localStorage.setItem('b2b_auth', JSON.stringify(userData));
-        localStorage.setItem('b2b_token', 'demo_token_' + Date.now());
-        onLogin(userData);
-      } catch (err) {
-        setError('Error al iniciar sesión demo. Intenta de nuevo.');
-        console.error('Demo login error:', err);
-        setLoading(false);
+    // Enfocar el campo de contraseña para que el usuario pueda hacer clic en "Iniciar Sesión"
+    setTimeout(() => {
+      const passwordInput = document.getElementById('password');
+      if (passwordInput) {
+        passwordInput.focus();
       }
-    }, 300);
+    }, 100);
   };
 
   return (
@@ -562,7 +546,7 @@ function Login({ onLogin }) {
                 {loading ? (
                   <>
                     <span className="spinner"></span>
-                    <span>{mode === 'login' ? 'Verificando...' : 'Creando cuenta...'}</span>
+                    <span>{mode === 'login' ? 'Iniciando sesión...' : 'Creando cuenta...'}</span>
                   </>
                 ) : (
                   <>
