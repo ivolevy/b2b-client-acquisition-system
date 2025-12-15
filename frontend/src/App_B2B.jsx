@@ -13,6 +13,7 @@ import { useAuth } from './AuthWrapper';
 import { searchHistoryService } from './lib/supabase';
 import { API_URL } from './config';
 import './App.css';
+import './components/TableView.css';
 
 function AppB2B() {
   const [empresas, setEmpresas] = useState([]);
@@ -346,6 +347,38 @@ function AppB2B() {
           <div className="loading-overlay">
             <div className="spinner"></div>
             <p>Buscando y validando empresas...</p>
+          </div>
+        )}
+
+        {/* Toggle de navegación Tabla/Emails - Siempre visible */}
+        {empresas.length > 0 && (
+          <div className="view-toggle-container">
+            <div className="view-toggle-inline">
+              <button 
+                type="button"
+                className={view === 'table' ? 'active' : ''}
+                onClick={() => setView('table')}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <line x1="3" y1="9" x2="21" y2="9"/>
+                  <line x1="3" y1="15" x2="21" y2="15"/>
+                  <line x1="9" y1="3" x2="9" y2="21"/>
+                </svg>
+                Tabla
+              </button>
+              <button 
+                type="button"
+                className={view === 'emails' ? 'active' : ''}
+                onClick={() => setView('emails')}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                Emails
+              </button>
+            </div>
           </div>
         )}
 

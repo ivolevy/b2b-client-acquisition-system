@@ -467,11 +467,17 @@
 }
 
 /* View Toggle Inline */
+.view-toggle-container {
+  margin: 16px 0;
+  padding: 0 16px;
+}
+
 .view-toggle-inline {
   display: flex;
   background: var(--gray-100);
   border-radius: 8px;
   padding: 3px;
+  max-width: fit-content;
 }
 
 .view-toggle-inline button {
@@ -533,20 +539,67 @@
 .filter-distance-group {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
+  background: var(--gray-100);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--gray-300);
 }
 
-.filter-operator {
-  width: 50px;
-  padding: 6px;
-  text-align: center;
-  border-radius: 6px 0 0 6px;
-  border-right: none;
+.filter-distance-toggle {
+  display: flex;
+  gap: 2px;
+  background: white;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--gray-600);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filter-toggle-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.filter-toggle-btn:hover {
+  background: var(--gray-50);
+  color: var(--gray-700);
+}
+
+.filter-toggle-btn.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-toggle-btn.active:hover {
+  background: var(--primary-dark);
+}
+
+.filter-toggle-btn span {
+  font-size: 0.75rem;
 }
 
 .filter-km {
-  width: 60px;
-  border-radius: 0 6px 6px 0;
+  width: 70px;
+  border-radius: 6px;
+  border: 1px solid var(--gray-300);
+  background: white;
 }
 
 .filter-checkbox-inline {

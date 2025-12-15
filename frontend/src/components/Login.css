@@ -420,9 +420,10 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   box-shadow: 0 3px 12px rgba(255, 105, 180, 0.3);
   margin-top: 8px;
+  box-sizing: border-box;
 }
 
 .login-button:hover:not(:disabled) {
@@ -432,6 +433,7 @@
 
 .login-button:active:not(:disabled) {
   transform: translateY(0);
+  box-shadow: 0 3px 12px rgba(255, 105, 180, 0.3);
 }
 
 .login-button:disabled {
