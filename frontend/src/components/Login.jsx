@@ -54,6 +54,29 @@ function Login({ onLogin }) {
     const passwordLimpio = password.trim();
 
     try {
+      // Verificar primero si son credenciales demo (siempre permitidas)
+      const demoUser = DEMO_USERS.find(
+        u => u.email.toLowerCase() === emailLimpio && u.password === passwordLimpio
+      );
+
+      if (demoUser && mode === 'login') {
+        // Modo demo - siempre permitido, incluso con Supabase configurado
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        const userData = {
+          email: demoUser.email,
+          name: demoUser.name,
+          role: demoUser.role,
+          plan: demoUser.plan,
+          loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('b2b_auth', JSON.stringify(userData));
+        localStorage.setItem('b2b_token', 'demo_token_' + Date.now());
+        onLogin(userData);
+        setLoading(false);
+        return;
+      }
+
       if (useSupabase) {
         // Modo Supabase
         if (mode === 'login') {
@@ -120,28 +143,11 @@ function Login({ onLogin }) {
           }
         }
       } else {
-        // Modo demo (sin Supabase)
+        // Modo demo (sin Supabase) - solo si no son credenciales demo
         await new Promise(resolve => setTimeout(resolve, 800));
         
         if (mode === 'login') {
-          const user = DEMO_USERS.find(
-            u => u.email.toLowerCase() === emailLimpio && u.password === passwordLimpio
-          );
-
-          if (user) {
-            const userData = {
-              email: user.email,
-              name: user.name,
-              role: user.role,
-              plan: user.plan,
-              loginTime: new Date().toISOString()
-            };
-            localStorage.setItem('b2b_auth', JSON.stringify(userData));
-            localStorage.setItem('b2b_token', 'demo_token_' + Date.now());
-            onLogin(userData);
-          } else {
-            setError('Credenciales incorrectas. Usa las credenciales de demo.');
-          }
+          setError('Credenciales incorrectas. Usa las credenciales de demo.');
         } else {
           setError('El registro solo está disponible con Supabase configurado.');
         }
@@ -265,24 +271,27 @@ function Login({ onLogin }) {
               </div>
             </div>
 
-            {/* Mostrar info de modo demo si Supabase no está configurado */}
-            {!useSupabase && (
-              <div className="demo-info">
-                <h4>🔑 Credenciales de Demo</h4>
-                <div className="demo-credentials">
-                  <div className="demo-user">
-                    <span className="demo-badge pro">PRO</span>
-                    <code>admin@dotasolutions.com</code>
-                    <code>Dota2024!</code>
-                  </div>
-                  <div className="demo-user">
-                    <span className="demo-badge free">FREE</span>
-                    <code>user@dotasolutions.com</code>
-                    <code>User2024!</code>
-                  </div>
+            {/* Mostrar info de modo demo (siempre disponible) */}
+            <div className="demo-info">
+              <h4>🔑 Credenciales de Demo</h4>
+              <p style={{ fontSize: '13px', opacity: 0.8, marginBottom: '12px' }}>
+                {useSupabase 
+                  ? 'También puedes usar estas credenciales para acceso rápido sin crear cuenta'
+                  : 'Usa estas credenciales para acceder'}
+              </p>
+              <div className="demo-credentials">
+                <div className="demo-user">
+                  <span className="demo-badge pro">PRO</span>
+                  <code>admin@dotasolutions.com</code>
+                  <code>Dota2024!</code>
+                </div>
+                <div className="demo-user">
+                  <span className="demo-badge free">FREE</span>
+                  <code>user@dotasolutions.com</code>
+                  <code>User2024!</code>
                 </div>
               </div>
-            )}
+            </div>
           </div>
           
           <div className="branding-footer">

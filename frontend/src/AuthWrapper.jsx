@@ -75,6 +75,18 @@ function AuthWrapper() {
 
   useEffect(() => {
     const initAuth = async () => {
+      // Primero verificar si hay sesión demo (siempre disponible)
+      const demoUserData = checkLocalAuth();
+      if (demoUserData) {
+        // Verificar si es un usuario demo válido
+        const isDemoUser = DEMO_USERS.some(u => u.email === demoUserData.email);
+        if (isDemoUser) {
+          setUser(demoUserData);
+          setLoading(false);
+          return;
+        }
+      }
+
       if (useSupabase) {
         // Modo Supabase
         try {
@@ -243,8 +255,16 @@ function AuthWrapper() {
     };
   };
 
-  // Login demo (sin Supabase)
+  // Login demo (siempre disponible, incluso con Supabase)
   const handleDemoLogin = (userData) => {
+    // Verificar si es un usuario demo válido
+    const isDemoUser = DEMO_USERS.some(u => u.email === userData.email);
+    if (isDemoUser) {
+      // Guardar en localStorage para persistencia
+      localStorage.setItem('b2b_auth', JSON.stringify(userData));
+      localStorage.setItem('b2b_token', 'demo_token_' + Date.now());
+    }
+    
     if (userData.plan === 'pro') {
       setShowProWelcome(true);
     }
@@ -323,7 +343,7 @@ function AuthWrapper() {
     signUp: useSupabase ? handleSupabaseSignUp : null,
     logout: handleLogout,
     updateUserPlan,
-    demoUsers: !useSupabase ? DEMO_USERS : null
+    demoUsers: DEMO_USERS // Siempre disponible
   };
 
   return (
