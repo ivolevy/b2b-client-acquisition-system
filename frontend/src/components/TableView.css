@@ -470,6 +470,10 @@
 .view-toggle-container {
   margin: 16px 0;
   padding: 0 16px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 10;
 }
 
 .view-toggle-inline {
