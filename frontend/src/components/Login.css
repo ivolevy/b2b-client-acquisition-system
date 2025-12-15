@@ -759,7 +759,164 @@
 }
 
 /* ============================================
-   DEMO INFO - Credenciales de prueba
+   DEMO BUTTONS - Botones de acceso rápido
+   ============================================ */
+
+.demo-buttons-container {
+  margin-top: 28px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.demo-buttons-container h4 {
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.demo-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.demo-button {
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.demo-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.demo-button-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-button-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.demo-button:hover:not(:disabled) .demo-button-content::before {
+  left: 100%;
+}
+
+.demo-button:hover:not(:disabled) .demo-button-content {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.demo-button:active:not(:disabled) .demo-button-content {
+  transform: translateY(0);
+}
+
+.demo-button-pro .demo-button-content {
+  border-color: rgba(255, 105, 180, 0.3);
+}
+
+.demo-button-pro:hover:not(:disabled) .demo-button-content {
+  background: rgba(255, 105, 180, 0.15);
+  border-color: rgba(255, 105, 180, 0.5);
+  box-shadow: 0 4px 16px rgba(255, 105, 180, 0.2);
+}
+
+.demo-button-free .demo-button-content {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.demo-button-free:hover:not(:disabled) .demo-button-content {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.demo-button-badge {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.demo-button-badge.pro {
+  background: linear-gradient(135deg, var(--login-primary), var(--login-secondary));
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+}
+
+.demo-button-badge.free {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.demo-button-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  text-align: left;
+}
+
+.demo-button-title {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.demo-button-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+}
+
+.demo-button-content svg {
+  width: 20px;
+  height: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.demo-button:hover:not(:disabled) .demo-button-content svg {
+  color: rgba(255, 255, 255, 0.9);
+  transform: translateX(4px);
+}
+
+/* ============================================
+   DEMO INFO - Credenciales de prueba (legacy)
    ============================================ */
 
 .demo-info {

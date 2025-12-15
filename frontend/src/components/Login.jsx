@@ -205,6 +205,44 @@ function Login({ onLogin }) {
     setResendingEmail(false);
   };
 
+  // Manejar clic en botón demo
+  const handleDemoClick = async (demoUser) => {
+    // Cambiar a modo login si está en registro
+    if (mode !== 'login') {
+      setMode('login');
+    }
+    
+    // Autocompletar campos
+    setEmail(demoUser.email);
+    setPassword(demoUser.password);
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    
+    // Esperar un momento para que se vea el autocompletado, luego hacer login
+    setTimeout(async () => {
+      try {
+        // Modo demo - siempre permitido, incluso con Supabase configurado
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        const userData = {
+          email: demoUser.email,
+          name: demoUser.name,
+          role: demoUser.role,
+          plan: demoUser.plan,
+          loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('b2b_auth', JSON.stringify(userData));
+        localStorage.setItem('b2b_token', 'demo_token_' + Date.now());
+        onLogin(userData);
+      } catch (err) {
+        setError('Error al iniciar sesión demo. Intenta de nuevo.');
+        console.error('Demo login error:', err);
+        setLoading(false);
+      }
+    }, 300);
+  };
+
   return (
     <div className="login-page">
       {/* Fondo animado */}
@@ -271,25 +309,49 @@ function Login({ onLogin }) {
               </div>
             </div>
 
-            {/* Mostrar info de modo demo (siempre disponible) */}
-            <div className="demo-info">
-              <h4>🔑 Credenciales de Demo</h4>
-              <p style={{ fontSize: '13px', opacity: 0.8, marginBottom: '12px' }}>
+            {/* Botones de acceso demo */}
+            <div className="demo-buttons-container">
+              <h4>🔑 Acceso Rápido Demo</h4>
+              <p style={{ fontSize: '13px', opacity: 0.8, marginBottom: '20px' }}>
                 {useSupabase 
-                  ? 'También puedes usar estas credenciales para acceso rápido sin crear cuenta'
-                  : 'Usa estas credenciales para acceder'}
+                  ? 'Acceso rápido sin crear cuenta'
+                  : 'Usa estos botones para acceder'}
               </p>
-              <div className="demo-credentials">
-                <div className="demo-user">
-                  <span className="demo-badge pro">PRO</span>
-                  <code>admin@dotasolutions.com</code>
-                  <code>Dota2024!</code>
-                </div>
-                <div className="demo-user">
-                  <span className="demo-badge free">FREE</span>
-                  <code>user@dotasolutions.com</code>
-                  <code>User2024!</code>
-                </div>
+              <div className="demo-buttons">
+                <button
+                  type="button"
+                  className="demo-button demo-button-pro"
+                  onClick={() => handleDemoClick(DEMO_USERS[0])}
+                  disabled={loading}
+                >
+                  <div className="demo-button-content">
+                    <span className="demo-button-badge pro">PRO</span>
+                    <div className="demo-button-text">
+                      <span className="demo-button-title">Administrador</span>
+                      <span className="demo-button-subtitle">Acceso completo</span>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="9,18 15,12 9,6"/>
+                    </svg>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  className="demo-button demo-button-free"
+                  onClick={() => handleDemoClick(DEMO_USERS[1])}
+                  disabled={loading}
+                >
+                  <div className="demo-button-content">
+                    <span className="demo-button-badge free">FREE</span>
+                    <div className="demo-button-text">
+                      <span className="demo-button-title">Usuario</span>
+                      <span className="demo-button-subtitle">Plan básico</span>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="9,18 15,12 9,6"/>
+                    </svg>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
@@ -489,57 +551,6 @@ function Login({ onLogin }) {
                   >
                     {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmación'}
                   </button>
-                </div>
-              )}
-
-              {/* Botones de acceso rápido con credenciales demo */}
-              {mode === 'login' && (
-                <div className="demo-quick-access">
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '8px',
-                    fontSize: '13px',
-                    color: 'rgba(255, 255, 255, 0.7)'
-                  }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '16px', height: '16px' }}>
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    </svg>
-                    <span>Acceso rápido:</span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    flexWrap: 'wrap'
-                  }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmail(DEMO_USERS[0].email);
-                        setPassword(DEMO_USERS[0].password);
-                      }}
-                      disabled={loading}
-                      className="demo-quick-btn pro-btn"
-                      title={`Usuario ${DEMO_USERS[0].name} - Plan ${DEMO_USERS[0].plan.toUpperCase()}`}
-                    >
-                      <span className="demo-badge-small pro">PRO</span>
-                      <span>Admin Demo</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmail(DEMO_USERS[1].email);
-                        setPassword(DEMO_USERS[1].password);
-                      }}
-                      disabled={loading}
-                      className="demo-quick-btn free-btn"
-                      title={`Usuario ${DEMO_USERS[1].name} - Plan ${DEMO_USERS[1].plan.toUpperCase()}`}
-                    >
-                      <span className="demo-badge-small free">FREE</span>
-                      <span>Usuario Demo</span>
-                    </button>
-                  </div>
                 </div>
               )}
 
