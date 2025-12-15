@@ -6,6 +6,7 @@ import TableViewB2B from './components/TableViewB2B';
 import EmailSender from './components/EmailSender';
 import TemplateEditor from './components/TemplateEditor';
 import TemplateManager from './components/TemplateManager';
+import UserProfile from './components/UserProfile';
 import ToastContainer from './components/ToastContainer';
 import ProBackground from './components/ProBackground';
 import { useToast } from './hooks/useToast';
@@ -24,6 +25,14 @@ function AppB2B() {
   const [rubros, setRubros] = useState({});
   const [showEmailSender, setShowEmailSender] = useState(false);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
+  
+  // Exponer setView globalmente para que Navbar pueda acceder
+  useEffect(() => {
+    window.setView = setView;
+    return () => {
+      delete window.setView;
+    };
+  }, []);
   const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
   const { user } = useAuth();
   
@@ -350,35 +359,37 @@ function AppB2B() {
           </div>
         )}
 
-        {/* Toggle de navegación Tabla/Emails - Siempre visible */}
-        <div className="view-toggle-container">
-          <div className="view-toggle-inline">
-            <button 
-              type="button"
-              className={view === 'table' ? 'active' : ''}
-              onClick={() => setView('table')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <line x1="3" y1="9" x2="21" y2="9"/>
-                <line x1="3" y1="15" x2="21" y2="15"/>
-                <line x1="9" y1="3" x2="9" y2="21"/>
-              </svg>
-              Tabla
-            </button>
-            <button 
-              type="button"
-              className={view === 'emails' ? 'active' : ''}
-              onClick={() => setView('emails')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
-              </svg>
-              Emails
-            </button>
+        {/* Toggle de navegación Tabla/Emails - Solo visible cuando no está en perfil */}
+        {view !== 'profile' && (
+          <div className="view-toggle-container">
+            <div className="view-toggle-inline">
+              <button 
+                type="button"
+                className={view === 'table' ? 'active' : ''}
+                onClick={() => setView('table')}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <line x1="3" y1="9" x2="21" y2="9"/>
+                  <line x1="3" y1="15" x2="21" y2="15"/>
+                  <line x1="9" y1="3" x2="9" y2="21"/>
+                </svg>
+                Tabla
+              </button>
+              <button 
+                type="button"
+                className={view === 'emails' ? 'active' : ''}
+                onClick={() => setView('emails')}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                Emails
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {view === 'table' && (
           <TableViewB2B 
@@ -400,6 +411,10 @@ function AppB2B() {
             onClose={() => setView('table')}
             embedded={true}
           />
+        )}
+
+        {view === 'profile' && (
+          <UserProfile onClose={() => setView('table')} />
         )}
       </main>
 
