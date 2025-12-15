@@ -513,10 +513,10 @@
 
 /* Tab de Templates */
 .templates-tab-content {
-  padding: 32px;
+  padding: 24px;
   max-height: calc(95vh - 200px);
   overflow-y: auto;
-  background: rgba(15, 23, 42, 0.015);
+  background: white;
 }
 
 .templates-header {
@@ -528,27 +528,27 @@
 
 .templates-header h3 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--gray-900);
 }
 
 .btn-new-template-main {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #1e3a8a 0%, #4338ca 100%);
+  background: #e91e63;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   font-weight: 700;
   font-size: 0.9375rem;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 4px rgba(233, 30, 99, 0.2);
 }
 
 .btn-new-template-main:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(30, 58, 138, 0.4);
+  background: #c2185b;
+  box-shadow: 0 4px 8px rgba(233, 30, 99, 0.3);
 }
 
 .templates-grid {
@@ -559,19 +559,19 @@
 
 .template-card {
   background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
   padding: 20px;
   transition: all 0.2s;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .template-card:hover {
-  border-color: #1e3a8a;
-  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.15);
-  transform: translateY(-2px);
+  border-color: #e91e63;
+  box-shadow: 0 4px 8px rgba(233, 30, 99, 0.15);
 }
 
 .template-card-header {
@@ -592,7 +592,7 @@
   margin: 0;
   font-size: 1.125rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--gray-900);
 }
 
 .template-card-actions {
@@ -603,20 +603,20 @@
 .btn-edit-template-card,
 .btn-delete-template-card {
   background: none;
-  border: 2px solid #e2e8f0;
+  border: 1px solid var(--gray-300);
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: all 0.2s;
-  color: #475569;
+  color: var(--gray-700);
 }
 
 .btn-edit-template-card:hover {
-  background: rgba(14, 165, 233, 0.1);
-  border-color: #0ea5ea;
-  color: #0ea5ea;
+  background: rgba(233, 30, 99, 0.1);
+  border-color: #e91e63;
+  color: #e91e63;
 }
 
 .btn-delete-template-card:hover {
@@ -649,7 +649,7 @@
 }
 
 .badge-default {
-  background: linear-gradient(135deg, #0ea5ea 0%, #1e3a8a 100%);
+  background: #e91e63;
   color: white;
   padding: 4px 10px;
   border-radius: 6px;
