@@ -78,6 +78,46 @@ function AuthWrapper() {
       if (useSupabase) {
         // Modo Supabase
         try {
+          // Manejar callback de confirmación de email
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const type = hashParams.get('type');
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
+          
+          if (type === 'signup' && accessToken && refreshToken) {
+            // El usuario viene de confirmar su email
+            const { data: { session }, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            
+            if (session?.user) {
+              // Limpiar la URL
+              window.history.replaceState({}, document.title, window.location.pathname);
+              
+              const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
+              
+              if (!profileError && profile) {
+                const userData = {
+                  id: session.user.id,
+                  email: session.user.email,
+                  name: profile?.name || session.user.email.split('@')[0],
+                  plan: profile?.plan || 'free',
+                  role: profile?.plan === 'pro' ? 'admin' : 'user',
+                  ...profile
+                };
+                setUser(userData);
+                
+                if (userData.plan === 'pro') {
+                  setShowProWelcome(true);
+                }
+                
+                setLoading(false);
+                return;
+              }
+            }
+          }
+          
           const { data: { session } } = await supabase.auth.getSession();
           
           if (session?.user) {

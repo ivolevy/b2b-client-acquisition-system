@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Login.css';
 import { authService } from '../lib/supabase';
 
@@ -36,6 +36,11 @@ function Login({ onLogin }) {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState(() => {
+    // Cargar email pendiente de localStorage
+    return localStorage.getItem('pending_email_confirmation') || '';
+  });
+  const [resendingEmail, setResendingEmail] = useState(false);
   
   const useSupabase = isSupabaseConfigured();
 
@@ -63,6 +68,12 @@ function Login({ onLogin }) {
               setError(error.message);
             }
           } else {
+            // Si el usuario inicia sesión exitosamente, limpiar email pendiente
+            if (pendingEmail && data.user.email === pendingEmail) {
+              setPendingEmail('');
+              localStorage.removeItem('pending_email_confirmation');
+            }
+            
             const userData = {
               id: data.user.id,
               email: data.user.email,
@@ -82,18 +93,30 @@ function Login({ onLogin }) {
             return;
           }
 
-          const { data, error } = await authService.signUp(emailLimpio, passwordLimpio, name.trim());
+          const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, name.trim());
           
           if (error) {
-            if (error.message.includes('already registered')) {
-              setError('Este email ya está registrado. Intenta iniciar sesión.');
+            if (error.message.includes('already registered') || error.message.includes('already exists')) {
+              setError('Este email ya está registrado. Intenta iniciar sesión o recuperar tu contraseña.');
+            } else if (error.message.includes('Invalid email')) {
+              setError('El formato del email no es válido.');
             } else {
-              setError(error.message);
+              setError(error.message || 'Error al crear la cuenta. Intenta de nuevo.');
             }
           } else {
-            setSuccess('¡Cuenta creada exitosamente! Revisa tu email para confirmar tu cuenta.');
+            // Verificar si el email fue enviado
+            if (needsConfirmation || (data?.user && !data.user.email_confirmed_at)) {
+              setSuccess(`¡Cuenta creada exitosamente! Revisa tu bandeja de entrada (y spam) para confirmar tu email. El link de confirmación expira en 24 horas.`);
+              setPendingEmail(emailLimpio); // Guardar email para permitir reenvío
+              localStorage.setItem('pending_email_confirmation', emailLimpio);
+            } else {
+              setSuccess('¡Cuenta creada exitosamente!');
+              setPendingEmail('');
+              localStorage.removeItem('pending_email_confirmation');
+            }
             setMode('login');
             setPassword('');
+            setName('');
           }
         }
       } else {
@@ -135,6 +158,45 @@ function Login({ onLogin }) {
     setMode(mode === 'login' ? 'register' : 'login');
     setError('');
     setSuccess('');
+    // No limpiar pendingEmail al cambiar de modo para mantener el estado
+  };
+
+  // Limpiar email pendiente cuando el usuario inicia sesión exitosamente
+  useEffect(() => {
+    // Verificar si el usuario confirmó su email al iniciar sesión
+    if (mode === 'login' && pendingEmail) {
+      // El usuario puede haber confirmado su email, pero no lo verificamos aquí
+      // Se limpiará cuando inicie sesión exitosamente
+    }
+  }, [mode, pendingEmail]);
+
+  const handleResendConfirmation = async () => {
+    if (!pendingEmail) return;
+    
+    setResendingEmail(true);
+    setError('');
+    setSuccess('');
+    
+    try {
+      const { error: resendError } = await authService.resendConfirmationEmail(pendingEmail);
+      
+      if (resendError) {
+        if (resendError.message.includes('already confirmed')) {
+          setError('Este email ya está confirmado. Puedes iniciar sesión.');
+          setPendingEmail('');
+          localStorage.removeItem('pending_email_confirmation');
+        } else {
+          setError(`Error al reenviar email: ${resendError.message}`);
+        }
+      } else {
+        setSuccess('Email de confirmación reenviado. Revisa tu bandeja de entrada (y spam).');
+      }
+    } catch (err) {
+      setError('Error al reenviar email. Intenta de nuevo.');
+      console.error('Error reenviando email:', err);
+    }
+    
+    setResendingEmail(false);
   };
 
   return (
@@ -274,7 +336,38 @@ function Login({ onLogin }) {
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                     <polyline points="22,4 12,14.01 9,11.01"/>
                   </svg>
-                  <span>{success}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                    <span>{success}</span>
+                    {pendingEmail && mode === 'login' && (
+                      <button
+                        type="button"
+                        onClick={handleResendConfirmation}
+                        disabled={resendingEmail}
+                        style={{
+                          marginTop: '8px',
+                          padding: '8px 16px',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '6px',
+                          color: 'white',
+                          cursor: resendingEmail ? 'not-allowed' : 'pointer',
+                          fontSize: '14px',
+                          opacity: resendingEmail ? 0.6 : 1,
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!resendingEmail) {
+                            e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                        }}
+                      >
+                        {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmación'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -354,6 +447,39 @@ function Login({ onLogin }) {
                     <span>Recordarme</span>
                   </label>
                   <a href="#" className="forgot-password">¿Olvidaste tu contraseña?</a>
+                </div>
+              )}
+
+              {mode === 'login' && pendingEmail && (
+                <div style={{
+                  padding: '12px',
+                  background: 'rgba(255, 193, 7, 0.1)',
+                  border: '1px solid rgba(255, 193, 7, 0.3)',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  color: '#ffc107',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ margin: '0 0 8px 0' }}>
+                    ⚠️ Tienes un email pendiente de confirmación: <strong>{pendingEmail}</strong>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleResendConfirmation}
+                    disabled={resendingEmail}
+                    style={{
+                      padding: '6px 12px',
+                      background: 'rgba(255, 193, 7, 0.2)',
+                      border: '1px solid rgba(255, 193, 7, 0.4)',
+                      borderRadius: '6px',
+                      color: '#ffc107',
+                      cursor: resendingEmail ? 'not-allowed' : 'pointer',
+                      fontSize: '13px',
+                      opacity: resendingEmail ? 0.6 : 1
+                    }}
+                  >
+                    {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmación'}
+                  </button>
                 </div>
               )}
 

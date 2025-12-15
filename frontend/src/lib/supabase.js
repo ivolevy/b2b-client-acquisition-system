@@ -17,11 +17,16 @@ export const authService = {
   // Registro de usuario
   async signUp(email, password, name) {
     try {
+      // Obtener la URL base de la aplicación para la redirección después de confirmar email
+      // Supabase redirigirá aquí después de que el usuario confirme su email
+      const redirectTo = `${window.location.origin}`;
+      
       // 1. Crear usuario en Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectTo,
           data: {
             name: name,
             plan: 'free'
@@ -29,26 +34,65 @@ export const authService = {
         }
       });
 
-      if (authError) throw authError;
-
-      // 2. Crear perfil en tabla users
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert({
-            id: authData.user.id,
-            email: email,
-            name: name,
-            plan: 'free'
-          });
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
+      if (authError) {
+        // Mejorar mensajes de error específicos
+        if (authError.message.includes('already registered') || authError.message.includes('already exists')) {
+          throw new Error('Este email ya está registrado. Intenta iniciar sesión o recuperar tu contraseña.');
         }
+        throw authError;
       }
 
-      return { data: authData, error: null };
+      // 2. El perfil se crea automáticamente mediante el trigger handle_new_user()
+      // No necesitamos crearlo manualmente aquí para evitar duplicados
+
+      // 3. Verificar si el email de confirmación fue enviado
+      // Si el usuario no tiene email_confirmed_at, significa que necesita confirmar
+      const needsConfirmation = authData.user && !authData.user.email_confirmed_at;
+      
+      // Verificar si Supabase tiene configurado el servicio de email
+      // Si session es null después del signUp, puede indicar que el email no se envió
+      if (needsConfirmation && !authData.session) {
+        // El email debería haberse enviado, pero verificamos
+        console.log('[Auth] Usuario creado, email de confirmación debería haberse enviado');
+      }
+
+      return { 
+        data: authData, 
+        error: null,
+        needsConfirmation: needsConfirmation
+      };
     } catch (error) {
+      console.error('[Auth] Error en signUp:', error);
+      return { data: null, error };
+    }
+  },
+
+  // Reenviar email de confirmación
+  async resendConfirmationEmail(email) {
+    try {
+      const redirectTo = `${window.location.origin}`;
+      const { data, error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: redirectTo
+        }
+      });
+
+      if (error) {
+        // Mejorar mensajes de error específicos
+        if (error.message.includes('already confirmed') || error.message.includes('already verified')) {
+          throw new Error('Este email ya está confirmado. Puedes iniciar sesión.');
+        }
+        if (error.message.includes('rate limit') || error.message.includes('too many')) {
+          throw new Error('Demasiados intentos. Espera unos minutos antes de intentar de nuevo.');
+        }
+        throw error;
+      }
+      
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Auth] Error reenviando email:', error);
       return { data: null, error };
     }
   },
