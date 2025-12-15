@@ -238,37 +238,7 @@ function Login({ onLogin }) {
             
             <div className="branding-message">
               <h2>Sistema de Captación de Clientes</h2>
-              <p>Encuentra empresas, valida contactos y automatiza tu prospección B2B de manera inteligente.</p>
-            </div>
-
-            <div className="features-list">
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                </div>
-                <span>Búsqueda geolocalizada</span>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <polyline points="22,4 12,14.01 9,11.01"/>
-                  </svg>
-                </div>
-                <span>Validación automática</span>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                    <polyline points="22,6 12,13 2,6"/>
-                  </svg>
-                </div>
-                <span>Envío masivo de emails</span>
-              </div>
+              <p>Encuentra empresas, valida contactos y automatiza tu prospección B2B.</p>
             </div>
 
             {/* Mostrar info de modo demo (siempre disponible) */}

@@ -26,7 +26,8 @@
   background: var(--login-darker);
   position: relative;
   overflow: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 400;
 }
 
 /* Fondo animado */
@@ -40,8 +41,8 @@
 .gradient-sphere {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.6;
+  filter: blur(90px);
+  opacity: 0.5;
   animation: float 20s ease-in-out infinite;
 }
 
@@ -85,23 +86,24 @@
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.5;
 }
 
 /* Container principal */
 .login-container {
   display: flex;
   width: 100%;
-  max-width: 1100px;
-  min-height: 650px;
+  max-width: 1000px;
+  min-height: 600px;
   margin: 20px;
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
   box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 20px 40px -12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
   position: relative;
   z-index: 1;
   background: rgba(255, 255, 255, 0.02);
@@ -112,7 +114,7 @@
 .login-branding {
   flex: 1;
   background: var(--login-gradient);
-  padding: 48px;
+  padding: 40px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -124,8 +126,8 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  opacity: 0.5;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.3;
 }
 
 .branding-content {
@@ -136,15 +138,15 @@
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 48px;
+  gap: 14px;
+  margin-bottom: 40px;
 }
 
 .logo-icon {
-  width: 56px;
-  height: 56px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,57 +154,58 @@
 }
 
 .logo-icon svg {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
 }
 
 .logo-text {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.4rem;
+  font-weight: 500;
   color: white;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .branding-message {
-  margin-bottom: 48px;
+  margin-bottom: 36px;
 }
 
 .branding-message h2 {
-  font-size: 2.25rem;
-  font-weight: 800;
+  font-size: 1.9rem;
+  font-weight: 500;
   color: white;
-  line-height: 1.2;
-  margin-bottom: 16px;
-  letter-spacing: -0.03em;
+  line-height: 1.3;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
 }
 
 .branding-message p {
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.7;
-  max-width: 380px;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  max-width: 360px;
+  font-weight: 400;
 }
 
 .features-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .feature-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   color: white;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 400;
 }
 
 .feature-icon {
-  width: 44px;
-  height: 44px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -211,32 +214,35 @@
 }
 
 .feature-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   stroke: white;
+  opacity: 0.9;
 }
 
 .branding-footer {
   position: relative;
   z-index: 1;
-  padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .branding-footer p {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.85rem;
+  font-weight: 400;
 }
 
 .branding-footer strong {
-  color: white;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
 }
 
 /* Panel de Formulario (derecho) */
 .login-form-panel {
   flex: 1;
   background: var(--login-light);
-  padding: 48px;
+  padding: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -244,27 +250,28 @@
 }
 
 .form-container {
-  max-width: 380px;
+  max-width: 360px;
   margin: 0 auto;
   width: 100%;
 }
 
 .form-header {
   text-align: center;
-  margin-bottom: 36px;
+  margin-bottom: 32px;
 }
 
 .form-header h2 {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 1.6rem;
+  font-weight: 500;
   color: var(--login-dark);
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
 }
 
 .form-header p {
   color: var(--login-gray);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  font-weight: 400;
 }
 
 /* Formulario */
@@ -282,7 +289,7 @@
 
 .form-group label {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--login-dark);
 }
 
@@ -389,8 +396,9 @@
 .forgot-password {
   color: var(--login-primary);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 400;
   transition: color 0.2s ease;
+  font-size: 0.85rem;
 }
 
 .forgot-password:hover {
@@ -400,20 +408,20 @@
 /* Botón de login */
 .login-button {
   width: 100%;
-  padding: 16px 24px;
+  padding: 14px 24px;
   background: var(--login-gradient);
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+  box-shadow: 0 3px 12px rgba(255, 105, 180, 0.3);
   margin-top: 8px;
 }
 
@@ -495,7 +503,7 @@
 .form-footer a {
   color: var(--login-primary);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
   transition: color 0.2s ease;
 }
 
@@ -689,21 +697,21 @@
 
 .auth-tabs {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 24px;
-  padding: 4px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
+  padding: 3px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 10px;
 }
 
 .auth-tab {
   flex: 1;
-  padding: 12px 16px;
+  padding: 10px 16px;
   border: none;
   background: transparent;
   color: var(--login-gray);
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 400;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -716,7 +724,8 @@
 .auth-tab.active {
   background: white;
   color: var(--login-secondary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
 }
 
 /* ============================================
@@ -754,18 +763,19 @@
    ============================================ */
 
 .demo-info {
-  margin-top: 32px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: 28px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(10px);
 }
 
 .demo-info h4 {
   color: white;
-  font-size: 0.95rem;
-  margin-bottom: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -826,7 +836,7 @@
   cursor: pointer;
   text-decoration: underline;
   padding: 0;
-  font-weight: 500;
+  font-weight: 400;
   transition: color 0.2s ease;
 }
 
