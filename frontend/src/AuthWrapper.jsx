@@ -2,6 +2,8 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import AppB2B from './App_B2B';
+import UserProfile from './components/UserProfile';
+import Navbar from './components/Navbar';
 import ProWelcome from './components/ProWelcome';
 import { supabase, authService, userService } from './lib/supabase';
 
@@ -353,7 +355,14 @@ function AuthWrapper() {
         {showProWelcome && <ProWelcome onComplete={handleProWelcomeComplete} />}
         {user ? (
           <Routes>
-            <Route path="/profile" element={<AppB2B />} />
+            <Route path="/profile" element={
+              <>
+                <Navbar />
+                <main className="main-content">
+                  <UserProfile />
+                </main>
+              </>
+            } />
             <Route path="/*" element={<AppB2B />} />
           </Routes>
         ) : (

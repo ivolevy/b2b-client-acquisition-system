@@ -351,24 +351,23 @@ function AppB2B() {
       <Navbar />
       
       <main className="main-content">
-        <FiltersB2B 
-          onBuscar={handleBuscar}
-          loading={loading}
-          rubros={rubros}
-          toastWarning={warning}
-          onSelectFromHistory={handleSelectFromHistory}
-          historySearchData={historySearchData}
-        />
-        
-        {blockingLoading && (
-          <div className="loading-overlay">
-            <div className="spinner"></div>
-            <p>Buscando y validando empresas...</p>
-          </div>
-        )}
+          <FiltersB2B 
+            onBuscar={handleBuscar}
+            loading={loading}
+            rubros={rubros}
+            toastWarning={warning}
+            onSelectFromHistory={handleSelectFromHistory}
+            historySearchData={historySearchData}
+          />
+          
+          {blockingLoading && (
+            <div className="loading-overlay">
+              <div className="spinner"></div>
+              <p>Buscando y validando empresas...</p>
+            </div>
+          )}
 
-        {/* Toggle de navegación Tabla/Emails - Solo visible cuando no está en perfil */}
-        {location.pathname !== '/profile' && (
+          {/* Toggle de navegación Tabla/Emails */}
           <div className="view-toggle-container">
             <div className="view-toggle-inline">
               <button 
@@ -402,36 +401,31 @@ function AppB2B() {
               </button>
             </div>
           </div>
-        )}
 
-        {view === 'table' && (
-          <TableViewB2B 
-            empresas={empresas}
-            showAllResults={showAllResults}
-            rubros={rubros}
-            view={view}
-            setView={setView}
-            onExportCSV={exportToCSVFrontend}
-            onDeleteResults={handleDeleteResults}
-            loading={loading}
-            toastWarning={warning}
-          />
-        )}
-        
-        {view === 'emails' && (
-          <EmailSender
-            empresas={empresas}
-            onClose={() => {
-              navigate('/');
-              setView('table');
-            }}
-            embedded={true}
-          />
-        )}
-
-        {view === 'profile' && (
-          <UserProfile />
-        )}
+          {view === 'table' && (
+            <TableViewB2B 
+              empresas={empresas}
+              showAllResults={showAllResults}
+              rubros={rubros}
+              view={view}
+              setView={setView}
+              onExportCSV={exportToCSVFrontend}
+              onDeleteResults={handleDeleteResults}
+              loading={loading}
+              toastWarning={warning}
+            />
+          )}
+          
+          {view === 'emails' && (
+            <EmailSender
+              empresas={empresas}
+              onClose={() => {
+                navigate('/');
+                setView('table');
+              }}
+              embedded={true}
+            />
+          )}
       </main>
 
       {showEmailSender && (
