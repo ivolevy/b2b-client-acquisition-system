@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import HelpModal from './HelpModal';
 import { useAuth } from '../AuthWrapper';
 
 function Navbar({ onNavigateToProfile }) {
+  const navigate = useNavigate();
   const [showHelp, setShowHelp] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -65,11 +67,7 @@ function Navbar({ onNavigateToProfile }) {
                       className="dropdown-item"
                       onClick={() => {
                         setShowUserMenu(false);
-                        if (onNavigateToProfile) {
-                          onNavigateToProfile();
-                        } else if (window.setView) {
-                          window.setView('profile');
-                        }
+                        navigate('/profile');
                       }}
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

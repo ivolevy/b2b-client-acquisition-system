@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthWrapper';
 import { authService, supabase } from '../lib/supabase';
 import './UserProfile.css';
 
-function UserProfile({ onClose }) {
+function UserProfile() {
+  const navigate = useNavigate();
   const { user, logout, useSupabase } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -96,9 +98,7 @@ function UserProfile({ onClose }) {
     <div className="user-profile-container">
       <div className="user-profile-header">
         <h2>Mi Perfil</h2>
-        {onClose && (
-          <button className="close-btn" onClick={onClose}>×</button>
-        )}
+        <button className="close-btn" onClick={() => navigate('/')}>×</button>
       </div>
 
       <div className="user-profile-content">
@@ -303,3 +303,4 @@ function UserProfile({ onClose }) {
 }
 
 export default UserProfile;
+

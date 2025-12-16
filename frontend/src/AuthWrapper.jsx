@@ -1,4 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import AppB2B from './App_B2B';
 import ProWelcome from './components/ProWelcome';
@@ -348,8 +349,19 @@ function AuthWrapper() {
 
   return (
     <AuthContext.Provider value={authValue}>
-      {showProWelcome && <ProWelcome onComplete={handleProWelcomeComplete} />}
-      {user ? <AppB2B /> : <Login onLogin={handleDemoLogin} />}
+      <BrowserRouter>
+        {showProWelcome && <ProWelcome onComplete={handleProWelcomeComplete} />}
+        {user ? (
+          <Routes>
+            <Route path="/profile" element={<AppB2B />} />
+            <Route path="/*" element={<AppB2B />} />
+          </Routes>
+        ) : (
+          <Routes>
+            <Route path="/*" element={<Login onLogin={handleDemoLogin} />} />
+          </Routes>
+        )}
+      </BrowserRouter>
     </AuthContext.Provider>
   );
 }
