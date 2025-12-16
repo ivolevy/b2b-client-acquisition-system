@@ -62,16 +62,19 @@
   padding: 2rem;
 }
 
-.profile-section {
-  margin-bottom: 2.5rem;
+.profile-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
 }
 
-.profile-section:last-child {
-  margin-bottom: 0;
+.profile-column {
+  display: flex;
+  flex-direction: column;
 }
 
 .profile-section-title {
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
   font-size: 1rem;
   font-weight: 600;
   color: var(--gray-900);
@@ -82,7 +85,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 0;
+  padding: 0.875rem 0;
   border-bottom: 1px solid var(--gray-100);
 }
 
@@ -128,6 +131,23 @@
   color: var(--gray-700);
 }
 
+.profile-change-password-btn {
+  background: none;
+  border: none;
+  color: #e91e63;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.profile-change-password-btn:hover {
+  color: #c2185b;
+  text-decoration: underline;
+}
+
 .profile-upgrade-link {
   background: none;
   border: none;
@@ -145,25 +165,8 @@
   text-decoration: underline;
 }
 
-.danger-section {
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--gray-200);
-}
-
-.danger-section .profile-section-title {
-  color: #dc2626;
-}
-
-.danger-content {
-  padding-top: 0.5rem;
-}
-
-.danger-text {
-  margin: 0 0 1.25rem 0;
-  color: var(--gray-600);
-  font-size: 0.875rem;
-  font-weight: 400;
-  line-height: 1.6;
+.danger-field {
+  margin-top: auto;
 }
 
 .btn-delete-account {
@@ -180,6 +183,118 @@
 
 .btn-delete-account:hover {
   background: #b91c1c;
+}
+
+/* Modal de contraseña */
+.password-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.password-modal {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  max-width: 480px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.password-modal-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.password-modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.password-modal-body {
+  padding: 24px;
+}
+
+.password-error {
+  padding: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  color: #dc2626;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.password-input-group {
+  margin-bottom: 20px;
+}
+
+.password-input-group:last-of-type {
+  margin-bottom: 0;
+}
+
+.password-input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--gray-900);
+  font-size: 0.875rem;
+}
+
+.password-input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  transition: all 0.2s;
+}
+
+.password-input-group input:focus {
+  outline: none;
+  border-color: #e91e63;
+  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+}
+
+.password-modal-footer {
+  padding: 24px;
+  border-top: 1px solid var(--gray-100);
+  display: flex;
+  gap: 12px;
+}
+
+.password-save-btn {
+  flex: 1;
+  padding: 12px 24px;
+  background: #e91e63;
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.password-save-btn:hover:not(:disabled) {
+  background: #c2185b;
+}
+
+.password-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Modales */

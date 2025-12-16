@@ -14,6 +14,14 @@ function UserProfile() {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [proTokenInput, setProTokenInput] = useState('');
   const [upgradeError, setUpgradeError] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
 
   const PRO_TOKEN = '3329';
 
@@ -52,6 +60,64 @@ function UserProfile() {
     } catch (error) {
       setUpgradeError('Error al procesar el upgrade');
       setUpgradeLoading(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      setPasswordError('Completá todos los campos');
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    setPasswordLoading(true);
+    setPasswordError('');
+
+    try {
+      if (useSupabase) {
+        // Primero verificar la contraseña actual intentando iniciar sesión
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: user?.email,
+          password: passwordForm.currentPassword
+        });
+
+        if (signInError) {
+          setPasswordError('Contraseña actual incorrecta');
+          setPasswordLoading(false);
+          return;
+        }
+
+        // Si la contraseña actual es correcta, actualizar a la nueva
+        const { error: updateError } = await supabase.auth.updateUser({
+          password: passwordForm.newPassword
+        });
+
+        if (updateError) {
+          setPasswordError('Error al actualizar la contraseña: ' + updateError.message);
+          setPasswordLoading(false);
+          return;
+        }
+
+        // Éxito
+        setShowPasswordModal(false);
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        alert('Contraseña actualizada exitosamente');
+      } else {
+        setPasswordError('Cambio de contraseña no disponible en modo demo');
+      }
+      setPasswordLoading(false);
+    } catch (error) {
+      setPasswordError('Error al cambiar la contraseña');
+      setPasswordLoading(false);
     }
   };
 
@@ -110,51 +176,61 @@ function UserProfile() {
       </div>
 
       <div className="user-profile-content">
-        {/* Información básica */}
-        <div className="profile-section">
-          <h3 className="profile-section-title">Información básica</h3>
-          <div className="profile-field">
-            <label className="profile-field-label">Nombre</label>
-            <div className="profile-field-value">{user?.name || 'Usuario'}</div>
-          </div>
-          <div className="profile-field">
-            <label className="profile-field-label">Email</label>
-            <div className="profile-field-value">{user?.email}</div>
-          </div>
-        </div>
-
-        {/* Información de cuenta */}
-        <div className="profile-section">
-          <h3 className="profile-section-title">Información de cuenta</h3>
-          <div className="profile-field">
-            <label className="profile-field-label">Tipo de plan</label>
-            <div className="profile-field-value">
-              <span className={`plan-badge ${user?.plan || 'free'}`}>
-                {user?.plan === 'pro' ? 'PRO' : 'Free'}
-              </span>
-              {user?.plan !== 'pro' && (
+        <div className="profile-content-grid">
+          {/* Columna izquierda */}
+          <div className="profile-column">
+            <h3 className="profile-section-title">Información básica</h3>
+            <div className="profile-field">
+              <label className="profile-field-label">Nombre</label>
+              <div className="profile-field-value">{user?.name || 'Usuario'}</div>
+            </div>
+            <div className="profile-field">
+              <label className="profile-field-label">Email</label>
+              <div className="profile-field-value">{user?.email}</div>
+            </div>
+            <div className="profile-field">
+              <label className="profile-field-label">Contraseña</label>
+              <div className="profile-field-value">
                 <button 
-                  className="profile-upgrade-link"
-                  onClick={() => setShowUpgradeModal(true)}
+                  className="profile-change-password-btn"
+                  onClick={() => setShowPasswordModal(true)}
                 >
-                  Actualizar a PRO
+                  Cambiar contraseña
                 </button>
-              )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Zona de peligro */}
-        <div className="profile-section danger-section">
-          <h3 className="profile-section-title">Eliminar cuenta</h3>
-          <div className="danger-content">
-            <p className="danger-text">Una vez que elimines tu cuenta, no podrás recuperarla. Esta acción es permanente.</p>
-            <button 
-              className="btn-delete-account"
-              onClick={() => setShowDeleteModal(true)}
-            >
-              Eliminar cuenta
-            </button>
+          {/* Columna derecha */}
+          <div className="profile-column">
+            <h3 className="profile-section-title">Información de cuenta</h3>
+            <div className="profile-field">
+              <label className="profile-field-label">Tipo de plan</label>
+              <div className="profile-field-value">
+                <span className={`plan-badge ${user?.plan || 'free'}`}>
+                  {user?.plan === 'pro' ? 'PRO' : 'Free'}
+                </span>
+                {user?.plan !== 'pro' && (
+                  <button 
+                    className="profile-upgrade-link"
+                    onClick={() => setShowUpgradeModal(true)}
+                  >
+                    Actualizar a PRO
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="profile-field danger-field">
+              <label className="profile-field-label">Eliminar cuenta</label>
+              <div className="profile-field-value">
+                <button 
+                  className="btn-delete-account"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  Eliminar cuenta
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -216,6 +292,80 @@ function UserProfile() {
                 disabled={deleteConfirmText !== 'ELIMINAR' || deleteLoading}
               >
                 {deleteLoading ? 'Eliminando...' : 'Eliminar mi cuenta'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para cambiar contraseña */}
+      {showPasswordModal && (
+        <div className="password-modal-overlay">
+          <div className="password-modal">
+            <div className="password-modal-header">
+              <h3>Cambiar contraseña</h3>
+            </div>
+            
+            <div className="password-modal-body">
+              {passwordError && (
+                <div className="password-error">
+                  {passwordError}
+                </div>
+              )}
+              
+              <div className="password-input-group">
+                <label>Contraseña actual</label>
+                <input
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                  placeholder="Ingresá tu contraseña actual"
+                  disabled={passwordLoading}
+                  autoFocus
+                />
+              </div>
+
+              <div className="password-input-group">
+                <label>Nueva contraseña</label>
+                <input
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  placeholder="Ingresá tu nueva contraseña"
+                  disabled={passwordLoading}
+                />
+              </div>
+
+              <div className="password-input-group">
+                <label>Confirmar nueva contraseña</label>
+                <input
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  placeholder="Confirmá tu nueva contraseña"
+                  disabled={passwordLoading}
+                />
+              </div>
+            </div>
+            
+            <div className="password-modal-footer">
+              <button 
+                className="cancel-btn"
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                  setPasswordError('');
+                }}
+                disabled={passwordLoading}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="password-save-btn"
+                onClick={handleChangePassword}
+                disabled={passwordLoading}
+              >
+                {passwordLoading ? 'Guardando...' : 'Guardar contraseña'}
               </button>
             </div>
           </div>
