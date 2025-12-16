@@ -110,56 +110,45 @@ function UserProfile() {
       </div>
 
       <div className="user-profile-content">
-        {/* Información del usuario */}
+        {/* Información básica */}
         <div className="profile-section">
-          <div className="profile-section-header">
-            <h3>Información de la cuenta</h3>
+          <h3 className="profile-section-title">Información básica</h3>
+          <div className="profile-field">
+            <label className="profile-field-label">Nombre</label>
+            <div className="profile-field-value">{user?.name || 'Usuario'}</div>
           </div>
-          <div className="profile-info-grid">
-            <div className="profile-info-item">
-              <label>Nombre</label>
-              <div className="profile-value">{user?.name || 'Usuario'}</div>
-            </div>
-            <div className="profile-info-item">
-              <label>Email</label>
-              <div className="profile-value">{user?.email}</div>
-            </div>
-            <div className="profile-info-item">
-              <label>Plan</label>
-              <div className="profile-value">
-                <span className={`plan-badge ${user?.plan || 'free'}`}>
-                  {user?.plan === 'pro' ? '⚡ PRO' : 'Free'}
-                </span>
-              </div>
+          <div className="profile-field">
+            <label className="profile-field-label">Email</label>
+            <div className="profile-field-value">{user?.email}</div>
+          </div>
+        </div>
+
+        {/* Información de cuenta */}
+        <div className="profile-section">
+          <h3 className="profile-section-title">Información de cuenta</h3>
+          <div className="profile-field">
+            <label className="profile-field-label">Tipo de plan</label>
+            <div className="profile-field-value">
+              <span className={`plan-badge ${user?.plan || 'free'}`}>
+                {user?.plan === 'pro' ? 'PRO' : 'Free'}
+              </span>
+              {user?.plan !== 'pro' && (
+                <button 
+                  className="profile-upgrade-link"
+                  onClick={() => setShowUpgradeModal(true)}
+                >
+                  Actualizar a PRO
+                </button>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Upgrade a PRO */}
-        {user?.plan !== 'pro' && (
-          <div className="profile-section">
-            <div className="profile-section-header">
-              <h3>Mejorar plan</h3>
-            </div>
-            <div className="upgrade-section">
-              <p>Desbloquea todas las funcionalidades premium con el plan PRO</p>
-              <button 
-                className="btn-upgrade-profile"
-                onClick={() => setShowUpgradeModal(true)}
-              >
-                ⚡ Cambiar a PRO
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Zona de peligro */}
         <div className="profile-section danger-section">
-          <div className="profile-section-header">
-            <h3>Zona de peligro</h3>
-          </div>
+          <h3 className="profile-section-title">Eliminar cuenta</h3>
           <div className="danger-content">
-            <p>Una vez que elimines tu cuenta, no podrás recuperarla. Esta acción es permanente.</p>
+            <p className="danger-text">Una vez que elimines tu cuenta, no podrás recuperarla. Esta acción es permanente.</p>
             <button 
               className="btn-delete-account"
               onClick={() => setShowDeleteModal(true)}

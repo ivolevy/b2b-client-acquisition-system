@@ -53,9 +53,9 @@
 .user-profile-header h2 {
   margin: 0;
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--gray-900);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .user-profile-content {
@@ -63,57 +63,59 @@
 }
 
 .profile-section {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .profile-section:last-child {
   margin-bottom: 0;
 }
 
-.profile-section-header {
-  margin-bottom: 1.25rem;
-}
-
-.profile-section-header h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
+.profile-section-title {
+  margin: 0 0 1.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--gray-900);
   letter-spacing: -0.01em;
 }
 
-.profile-info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-.profile-info-item {
+.profile-field {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--gray-100);
 }
 
-.profile-info-item label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--gray-600);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.profile-field:last-child {
+  border-bottom: none;
 }
 
-.profile-value {
-  font-size: 1rem;
-  color: var(--gray-900);
+.profile-field-label {
+  font-size: 0.9375rem;
   font-weight: 500;
+  color: var(--gray-700);
+  flex: 0 0 auto;
+  min-width: 140px;
+}
+
+.profile-field-value {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--gray-900);
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .plan-badge {
   display: inline-block;
-  padding: 6px 14px;
-  border-radius: 20px;
+  padding: 4px 12px;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .plan-badge.pro {
@@ -126,36 +128,21 @@
   color: var(--gray-700);
 }
 
-.upgrade-section {
-  padding: 1.5rem;
-  background: var(--gray-50);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-}
-
-.upgrade-section p {
-  margin: 0 0 1rem 0;
-  color: var(--gray-700);
-  font-size: 0.9375rem;
-  line-height: 1.6;
-}
-
-.btn-upgrade-profile {
-  padding: 12px 24px;
-  background: #e91e63;
-  color: white;
+.profile-upgrade-link {
+  background: none;
   border: none;
-  border-radius: var(--radius-lg);
-  font-weight: 600;
-  font-size: 0.9375rem;
+  color: #e91e63;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(233, 30, 99, 0.2);
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.2s;
 }
 
-.btn-upgrade-profile:hover {
-  background: #c2185b;
-  box-shadow: 0 4px 8px rgba(233, 30, 99, 0.3);
+.profile-upgrade-link:hover {
+  color: #c2185b;
+  text-decoration: underline;
 }
 
 .danger-section {
@@ -163,39 +150,36 @@
   border-top: 1px solid var(--gray-200);
 }
 
-.danger-section h3 {
+.danger-section .profile-section-title {
   color: #dc2626;
 }
 
 .danger-content {
-  padding: 1.5rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: var(--radius-lg);
+  padding-top: 0.5rem;
 }
 
-.danger-content p {
-  margin: 0 0 1rem 0;
-  color: #991b1b;
-  font-size: 0.9375rem;
+.danger-text {
+  margin: 0 0 1.25rem 0;
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  font-weight: 400;
   line-height: 1.6;
 }
 
 .btn-delete-account {
-  padding: 12px 24px;
+  padding: 10px 20px;
   background: #dc2626;
   color: white;
   border: none;
-  border-radius: var(--radius-lg);
-  font-weight: 600;
-  font-size: 0.9375rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-delete-account:hover {
   background: #b91c1c;
-  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
 }
 
 /* Modales */
@@ -249,13 +233,14 @@
 .upgrade-modal-header h3 {
   margin: 0 0 8px 0;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--gray-900);
 }
 
 .upgrade-modal-header p {
   margin: 0;
   color: var(--gray-600);
+  font-weight: 400;
 }
 
 .delete-modal-body,
@@ -265,14 +250,21 @@
 
 .delete-warning {
   color: #dc2626;
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: 16px;
+}
+
+.delete-modal-body p {
+  margin: 0 0 12px 0;
+  color: var(--gray-700);
+  font-weight: 400;
 }
 
 .delete-modal-body ul {
   margin: 16px 0;
   padding-left: 24px;
   color: var(--gray-700);
+  font-weight: 400;
 }
 
 .confirm-input {
@@ -282,7 +274,7 @@
 .confirm-input label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--gray-900);
 }
 
@@ -309,8 +301,14 @@
 
 .feature-check {
   color: #e91e63;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.25rem;
+}
+
+.pro-feature span:last-child {
+  color: var(--gray-900);
+  font-weight: 400;
+  font-size: 0.9375rem;
 }
 
 .token-input-group {
@@ -320,7 +318,7 @@
 .token-input-group label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--gray-900);
 }
 
@@ -339,6 +337,7 @@
   border-radius: var(--radius-md);
   color: #dc2626;
   margin-bottom: 16px;
+  font-weight: 400;
 }
 
 .delete-modal-footer,
@@ -356,7 +355,7 @@
   padding: 12px 24px;
   border: none;
   border-radius: var(--radius-lg);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.9375rem;
   cursor: pointer;
   transition: all 0.2s;
