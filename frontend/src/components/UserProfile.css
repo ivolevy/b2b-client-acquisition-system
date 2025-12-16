@@ -105,12 +105,11 @@
   font-size: 0.9375rem;
   font-weight: 400;
   color: var(--gray-900);
-  text-align: right;
+  text-align: left;
   display: flex;
   align-items: center;
   gap: 12px;
   flex: 1;
-  justify-content: flex-end;
 }
 
 .plan-badge {
@@ -139,6 +138,7 @@
   font-weight: 500;
   cursor: pointer;
   padding: 0;
+  text-align: left;
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -146,6 +146,42 @@
 .profile-change-password-btn:hover {
   color: #c2185b;
   text-decoration: underline;
+}
+
+.plan-section {
+  margin-bottom: 2rem;
+}
+
+.plan-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.plan-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-600);
+}
+
+.plan-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.plan-badge.pro {
+  background: #e91e63;
+  color: white;
+}
+
+.plan-badge.free {
+  background: var(--gray-200);
+  color: var(--gray-700);
 }
 
 .profile-upgrade-link {
@@ -156,6 +192,7 @@
   font-weight: 500;
   cursor: pointer;
   padding: 0;
+  text-align: left;
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -165,8 +202,17 @@
   text-decoration: underline;
 }
 
-.danger-field {
-  margin-top: auto;
+.delete-section {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.delete-section-text {
+  margin: 0 0 1rem 0;
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
 .btn-delete-account {

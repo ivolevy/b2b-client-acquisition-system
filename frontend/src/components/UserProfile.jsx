@@ -189,47 +189,45 @@ function UserProfile() {
               <div className="profile-field-value">{user?.email}</div>
             </div>
             <div className="profile-field">
-              <label className="profile-field-label">Contraseña</label>
-              <div className="profile-field-value">
-                <button 
-                  className="profile-change-password-btn"
-                  onClick={() => setShowPasswordModal(true)}
-                >
-                  Cambiar contraseña
-                </button>
-              </div>
+              <button 
+                className="profile-change-password-btn"
+                onClick={() => setShowPasswordModal(true)}
+              >
+                Cambiar contraseña
+              </button>
             </div>
           </div>
+
+          {/* Divider */}
+          <div className="profile-divider"></div>
 
           {/* Columna derecha */}
           <div className="profile-column">
             <h3 className="profile-section-title">Información de cuenta</h3>
-            <div className="profile-field">
-              <label className="profile-field-label">Tipo de plan</label>
-              <div className="profile-field-value">
+            <div className="plan-section">
+              <div className="plan-info">
+                <span className="plan-label">Plan actual</span>
                 <span className={`plan-badge ${user?.plan || 'free'}`}>
                   {user?.plan === 'pro' ? 'PRO' : 'Free'}
                 </span>
-                {user?.plan !== 'pro' && (
-                  <button 
-                    className="profile-upgrade-link"
-                    onClick={() => setShowUpgradeModal(true)}
-                  >
-                    Actualizar a PRO
-                  </button>
-                )}
               </div>
-            </div>
-            <div className="profile-field danger-field">
-              <label className="profile-field-label">Eliminar cuenta</label>
-              <div className="profile-field-value">
+              {user?.plan !== 'pro' && (
                 <button 
-                  className="btn-delete-account"
-                  onClick={() => setShowDeleteModal(true)}
+                  className="profile-upgrade-link"
+                  onClick={() => setShowUpgradeModal(true)}
                 >
-                  Eliminar cuenta
+                  Actualizar a PRO
                 </button>
-              </div>
+              )}
+            </div>
+            <div className="delete-section">
+              <p className="delete-section-text">Una vez que elimines tu cuenta, no podrás recuperarla.</p>
+              <button 
+                className="btn-delete-account"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Eliminar cuenta
+              </button>
             </div>
           </div>
         </div>
