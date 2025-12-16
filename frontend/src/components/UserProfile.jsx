@@ -189,6 +189,7 @@ function UserProfile() {
               <div className="profile-field-value">{user?.email}</div>
             </div>
             <div className="profile-field">
+              <label className="profile-field-label">Contraseña</label>
               <div className="profile-field-value">
                 <button 
                   className="profile-change-password-btn"
@@ -213,12 +214,21 @@ function UserProfile() {
                   <span className={`plan-badge-large ${user?.plan || 'free'}`}>
                     {user?.plan === 'pro' ? 'PRO' : 'Free'}
                   </span>
-                  {user?.plan !== 'pro' && (
+                </div>
+                <div className="account-plan-actions">
+                  {user?.plan !== 'pro' ? (
                     <button 
                       className="account-upgrade-btn"
                       onClick={() => setShowUpgradeModal(true)}
                     >
                       Actualizar a PRO
+                    </button>
+                  ) : (
+                    <button 
+                      className="account-change-plan-btn"
+                      onClick={() => {/* Aquí puedes agregar lógica para cambiar plan */}}
+                    >
+                      Cambiar plan
                     </button>
                   )}
                 </div>

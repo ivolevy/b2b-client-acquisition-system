@@ -147,7 +147,6 @@
   padding: 0;
   text-decoration: none;
   transition: color 0.2s;
-  text-align: left;
 }
 
 .profile-change-password-btn:hover {
@@ -177,10 +176,7 @@
 }
 
 .account-plan-content {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
 }
 
 .plan-badge-large {
@@ -201,7 +197,12 @@
   color: var(--gray-700);
 }
 
-.account-upgrade-btn {
+.account-plan-actions {
+  margin-top: 0.5rem;
+}
+
+.account-upgrade-btn,
+.account-change-plan-btn {
   background: none;
   border: none;
   color: #e91e63;
@@ -213,7 +214,8 @@
   transition: color 0.2s;
 }
 
-.account-upgrade-btn:hover {
+.account-upgrade-btn:hover,
+.account-change-plan-btn:hover {
   color: #c2185b;
   text-decoration: underline;
 }
