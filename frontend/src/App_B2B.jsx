@@ -340,7 +340,7 @@ function AppB2B() {
       {/* Fondo animado PRO */}
       {isPro && <ProBackground />}
       
-      <Navbar />
+      <Navbar onNavigateToProfile={() => setView('profile')} />
       
       <main className="main-content">
         <FiltersB2B 

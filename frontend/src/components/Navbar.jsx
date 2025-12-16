@@ -3,7 +3,7 @@ import './Navbar.css';
 import HelpModal from './HelpModal';
 import { useAuth } from '../AuthWrapper';
 
-function Navbar() {
+function Navbar({ onNavigateToProfile }) {
   const [showHelp, setShowHelp] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -54,7 +54,6 @@ function Navbar() {
                 {showUserMenu && (
                   <div className="user-dropdown">
                     <div className="dropdown-header">
-                      <span className="dropdown-email">{user.email}</span>
                       <div className="dropdown-plan-row">
                         <span className={`dropdown-plan ${user.plan}`}>
                           {user.plan === 'pro' ? '⚡ Plan PRO' : 'Plan Free'}
@@ -66,7 +65,9 @@ function Navbar() {
                       className="dropdown-item"
                       onClick={() => {
                         setShowUserMenu(false);
-                        if (window.setView) {
+                        if (onNavigateToProfile) {
+                          onNavigateToProfile();
+                        } else if (window.setView) {
                           window.setView('profile');
                         }
                       }}
