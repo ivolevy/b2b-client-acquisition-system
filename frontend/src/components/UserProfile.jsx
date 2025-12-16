@@ -163,16 +163,14 @@ function UserProfile() {
   return (
     <div className="user-profile-container">
       <div className="user-profile-header">
-        <div className="profile-header-left">
-          <button className="back-btn" onClick={() => navigate('/')}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5"/>
-              <path d="M12 19l-7-7 7-7"/>
-            </svg>
-            Volver al inicio
-          </button>
-          <h2>Mi Perfil</h2>
-        </div>
+        <button className="back-btn" onClick={() => navigate('/')}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 12H5"/>
+            <path d="M12 19l-7-7 7-7"/>
+          </svg>
+          Volver al inicio
+        </button>
+        <h2>Mi Perfil</h2>
       </div>
 
       <div className="user-profile-content">

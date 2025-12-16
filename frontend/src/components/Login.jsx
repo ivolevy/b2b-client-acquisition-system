@@ -540,23 +540,14 @@ function Login({ onLogin }) {
 
               <button 
                 type="submit" 
-                className={`login-button ${loading ? 'loading' : ''}`}
+                className="login-button"
                 disabled={loading}
               >
-                {loading ? (
-                  <>
-                    <span className="spinner"></span>
-                    <span>{mode === 'login' ? 'Iniciando sesión...' : 'Creando cuenta...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <line x1="5" y1="12" x2="19" y2="12"/>
-                      <polyline points="12,5 19,12 12,19"/>
-                    </svg>
-                  </>
-                )}
+                <span>{mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12,5 19,12 12,19"/>
+                </svg>
               </button>
             </form>
 

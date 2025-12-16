@@ -9,17 +9,11 @@
 
 .user-profile-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
   padding: 1.5rem 2rem;
   border-bottom: 1px solid var(--gray-100);
   background: linear-gradient(to right, #fff, #fdf2f8);
-}
-
-.profile-header-left {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
 }
 
 .back-btn {
