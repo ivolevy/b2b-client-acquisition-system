@@ -4,6 +4,7 @@ import Login from './components/Login';
 import AppB2B from './App_B2B';
 import UserProfile from './components/UserProfile';
 import Navbar from './components/Navbar';
+import ProBackground from './components/ProBackground';
 import ProWelcome from './components/ProWelcome';
 import { supabase, authService, userService } from './lib/supabase';
 
@@ -356,12 +357,13 @@ function AuthWrapper() {
         {user ? (
           <Routes>
             <Route path="/profile" element={
-              <>
+              <div className={`app ${user?.plan === 'pro' ? 'pro-theme' : ''}`}>
+                {user?.plan === 'pro' && <ProBackground />}
                 <Navbar />
                 <main className="main-content">
                   <UserProfile />
                 </main>
-              </>
+              </div>
             } />
             <Route path="/*" element={<AppB2B />} />
           </Routes>
