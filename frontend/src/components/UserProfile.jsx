@@ -255,28 +255,21 @@ function UserProfile() {
         <div className="delete-modal-overlay">
           <div className="delete-modal">
             <div className="delete-modal-header">
-              <div className="delete-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-              </div>
               <h3>Eliminar cuenta</h3>
+              <p className="delete-modal-subtitle">Esta acción es permanente y no se puede deshacer</p>
             </div>
             
             <div className="delete-modal-body">
-              <p className="delete-warning">
-                <strong>⚠️ Esta acción es irreversible.</strong>
-              </p>
-              <p>Se eliminarán permanentemente:</p>
-              <ul>
-                <li>Tu cuenta y perfil</li>
-                <li>Historial de búsquedas</li>
-                <li>Empresas guardadas</li>
-                <li>Templates de email</li>
-                <li>Todos tus datos</li>
-              </ul>
+              <div className="delete-warning-box">
+                <p className="delete-warning-title">Se eliminarán permanentemente:</p>
+                <ul className="delete-warning-list">
+                  <li>Tu cuenta y perfil</li>
+                  <li>Historial de búsquedas</li>
+                  <li>Empresas guardadas</li>
+                  <li>Templates de email</li>
+                  <li>Todos tus datos</li>
+                </ul>
+              </div>
               
               <div className="confirm-input">
                 <label>Escribe <strong>ELIMINAR</strong> para confirmar:</label>
@@ -306,7 +299,7 @@ function UserProfile() {
                 onClick={handleDeleteAccount}
                 disabled={deleteConfirmText !== 'ELIMINAR' || deleteLoading}
               >
-                {deleteLoading ? 'Eliminando...' : 'Eliminar mi cuenta'}
+                {deleteLoading ? 'Eliminando...' : 'Eliminar cuenta'}
               </button>
             </div>
           </div>
