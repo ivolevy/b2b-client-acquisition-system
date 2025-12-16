@@ -110,71 +110,60 @@ function UserProfile() {
       </div>
 
       <div className="user-profile-content">
-        {/* Información del usuario - Card principal */}
-        <div className="profile-card profile-card-main">
-          <div className="profile-card-header">
-            <div className="profile-avatar-large">
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
+        {/* Información del usuario */}
+        <div className="profile-section">
+          <div className="profile-section-header">
+            <h3>Información de la cuenta</h3>
+          </div>
+          <div className="profile-info-grid">
+            <div className="profile-info-item">
+              <label>Nombre</label>
+              <div className="profile-value">{user?.name || 'Usuario'}</div>
             </div>
-            <div className="profile-header-info">
-              <h3 className="profile-name">{user?.name || 'Usuario'}</h3>
-              <p className="profile-email">{user?.email}</p>
+            <div className="profile-info-item">
+              <label>Email</label>
+              <div className="profile-value">{user?.email}</div>
             </div>
-            <div className="profile-plan-badge-large">
-              <span className={`plan-badge-large ${user?.plan || 'free'}`}>
-                {user?.plan === 'pro' ? '⚡ PRO' : 'Free'}
-              </span>
+            <div className="profile-info-item">
+              <label>Plan</label>
+              <div className="profile-value">
+                <span className={`plan-badge ${user?.plan || 'free'}`}>
+                  {user?.plan === 'pro' ? '⚡ PRO' : 'Free'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Upgrade a PRO */}
         {user?.plan !== 'pro' && (
-          <div className="profile-card profile-card-upgrade">
-            <div className="upgrade-card-content">
-              <div className="upgrade-icon-large">⚡</div>
-              <div className="upgrade-text-content">
-                <h3>Desbloquea el Plan PRO</h3>
-                <p>Accede a todas las funcionalidades premium y potencia tu búsqueda de clientes</p>
-                <ul className="upgrade-features-list">
-                  <li>Búsquedas ilimitadas</li>
-                  <li>Historial de búsquedas</li>
-                  <li>Empresas favoritas</li>
-                  <li>Emails ilimitados</li>
-                  <li>Fondo animado premium</li>
-                </ul>
-              </div>
+          <div className="profile-section">
+            <div className="profile-section-header">
+              <h3>Mejorar plan</h3>
+            </div>
+            <div className="upgrade-section">
+              <p>Desbloquea todas las funcionalidades premium con el plan PRO</p>
               <button 
                 className="btn-upgrade-profile"
                 onClick={() => setShowUpgradeModal(true)}
               >
-                <span>⚡</span>
-                <span>Activar Plan PRO</span>
+                ⚡ Cambiar a PRO
               </button>
             </div>
           </div>
         )}
 
         {/* Zona de peligro */}
-        <div className="profile-card profile-card-danger">
-          <div className="danger-card-header">
-            <svg className="danger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 9v4"/>
-              <path d="M12 17h.01"/>
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            </svg>
+        <div className="profile-section danger-section">
+          <div className="profile-section-header">
             <h3>Zona de peligro</h3>
           </div>
-          <div className="danger-card-content">
-            <p>Una vez que elimines tu cuenta, no podrás recuperarla. Esta acción es permanente y eliminará todos tus datos.</p>
+          <div className="danger-content">
+            <p>Una vez que elimines tu cuenta, no podrás recuperarla. Esta acción es permanente.</p>
             <button 
               className="btn-delete-account"
               onClick={() => setShowDeleteModal(true)}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="3,6 5,6 21,6"/>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-              </svg>
               Eliminar cuenta
             </button>
           </div>
