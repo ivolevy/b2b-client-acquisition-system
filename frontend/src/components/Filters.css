@@ -602,20 +602,25 @@ select.filter-input {
     box-shadow: none;
     flex: 1;
     min-width: 0;
-    margin-left: var(--spacing-sm);
+    margin-left: 0;
     position: relative;
   }
   
-  /* Separadores rosados entre controles */
-  .form-row-compact .form-group-compact::after {
+  /* Separadores rosados simples entre controles - líneas verticales */
+  .form-row-compact > .form-group-compact {
+    margin-right: 0;
+    position: relative;
+    padding-right: var(--spacing-md);
+  }
+  
+  .form-row-compact > .form-group-compact::after {
     content: '';
     position: absolute;
-    right: calc(var(--spacing-sm) * -1);
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 60%;
-    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    right: calc(var(--spacing-md) / 2 - 1px);
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
+    background: var(--primary);
     opacity: 0.4;
   }
   
@@ -623,30 +628,29 @@ select.filter-input {
     flex: 0 0 auto;
     min-width: 120px;
     position: relative;
-    padding-left: var(--spacing-sm);
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
   }
   
   .form-row-compact .radius-control::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 60%;
-    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    left: calc(var(--spacing-md) / 2 - 1px);
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
+    background: var(--primary);
     opacity: 0.4;
   }
   
   .form-row-compact .radius-control::after {
     content: '';
     position: absolute;
-    right: calc(var(--spacing-sm) * -1);
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 60%;
-    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    right: calc(var(--spacing-md) / 2 - 1px);
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
+    background: var(--primary);
     opacity: 0.4;
   }
   
@@ -654,18 +658,29 @@ select.filter-input {
     flex: 1;
     min-width: 180px;
     position: relative;
-    padding-left: var(--spacing-sm);
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+  
+  .form-row-compact .address-search::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--spacing-md) / 2 - 1px);
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
+    background: var(--primary);
+    opacity: 0.4;
   }
   
   .form-row-compact .address-search::after {
     content: '';
     position: absolute;
-    right: calc(var(--spacing-sm) * -1);
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 60%;
-    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    right: calc(var(--spacing-md) / 2 - 1px);
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
+    background: var(--primary);
     opacity: 0.4;
   }
   
@@ -673,25 +688,18 @@ select.filter-input {
     flex: 0 0 auto;
     min-width: 140px;
     position: relative;
-    padding-left: var(--spacing-sm);
+    padding-left: var(--spacing-md);
   }
   
   .form-row-compact .btn-location::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 60%;
-    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    left: calc(var(--spacing-md) / 2 - 1px);
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
+    background: var(--primary);
     opacity: 0.4;
-  }
-  
-  /* Asegurar que rubroSelect se integre bien */
-  .form-row-compact > .form-group-compact {
-    margin-right: 0;
-    position: relative;
   }
   
   .filters-row-compact {
