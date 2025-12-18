@@ -59,22 +59,31 @@
   background: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 0;
   box-shadow: var(--shadow-sm);
 }
 
 /* Todos los controles con las mismas medidas */
-.form-row-compact > .form-group-compact {
+.form-row-compact > .form-group-compact,
+.form-row-compact > .rubro-inline {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   position: relative;
   gap: 0.2rem;
+  padding: var(--spacing-sm);
+  background: transparent;
+  border: none;
+}
+
+.rubro-inline {
+  margin: 0;
 }
 
 /* Separador rosado después del rubro */
-.form-row-compact > .form-group-compact::after {
+.form-row-compact > .form-group-compact::after,
+.form-row-compact > .rubro-inline::after {
   content: '';
   position: absolute;
   right: 0;
@@ -117,6 +126,9 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  gap: 0.2rem;
+  padding: var(--spacing-sm);
+  background: transparent;
 }
 
 /* Separador rosado después del radio */
@@ -144,6 +156,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  padding: var(--spacing-sm);
+  background: transparent;
 }
 
 .form-row-compact .address-search label {
@@ -172,12 +186,16 @@
 }
 
 .form-row-compact .btn-location {
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 auto;
+  min-width: 140px;
+  max-width: 160px;
   height: 36px;
   box-sizing: border-box;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.85rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  margin: var(--spacing-sm);
+  margin-left: 0;
 }
 
 .form-group {

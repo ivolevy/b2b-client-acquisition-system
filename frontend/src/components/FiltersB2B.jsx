@@ -111,22 +111,20 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
               onLocationChange={setLocationData}
               initialLocation={initialMapLocation}
               rubroSelect={
-                <div className="form-row form-row-compact">
-                  <div className="form-group form-group-compact">
-                    <label>Rubro Empresarial *</label>
-                    <select 
-                      value={rubro} 
-                      onChange={(e) => setRubro(e.target.value)}
-                      disabled={loading}
-                      required
-                      className="select-rubro-compact"
-                    >
-                      <option value="">-- Selecciona un rubro --</option>
-                      {Object.entries(rubros).map(([key, nombre]) => (
-                        <option key={key} value={key}>{nombre}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="form-group-compact rubro-inline">
+                  <label>Rubro Empresarial *</label>
+                  <select 
+                    value={rubro} 
+                    onChange={(e) => setRubro(e.target.value)}
+                    disabled={loading}
+                    required
+                    className="select-rubro-compact"
+                  >
+                    <option value="">-- Selecciona un rubro --</option>
+                    {Object.entries(rubros).map(([key, nombre]) => (
+                      <option key={key} value={key}>{nombre}</option>
+                    ))}
+                  </select>
                 </div>
               }
             />
@@ -135,22 +133,20 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
               onLocationChange={setLocationData}
               initialLocation={initialMapLocation}
               rubroSelect={
-                <div className="form-row form-row-compact">
-                  <div className="form-group form-group-compact">
-                    <label>Rubro Empresarial *</label>
-                    <select 
-                      value={rubro} 
-                      onChange={(e) => setRubro(e.target.value)}
-                      disabled={loading}
-                      required
-                      className="select-rubro-compact"
-                    >
-                      <option value="">-- Selecciona un rubro --</option>
-                      {Object.entries(rubros).map(([key, nombre]) => (
-                        <option key={key} value={key}>{nombre}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="form-group-compact rubro-inline">
+                  <label>Rubro Empresarial *</label>
+                  <select 
+                    value={rubro} 
+                    onChange={(e) => setRubro(e.target.value)}
+                    disabled={loading}
+                    required
+                    className="select-rubro-compact"
+                  >
+                    <option value="">-- Selecciona un rubro --</option>
+                    {Object.entries(rubros).map(([key, nombre]) => (
+                      <option key={key} value={key}>{nombre}</option>
+                    ))}
+                  </select>
                 </div>
               }
             />
