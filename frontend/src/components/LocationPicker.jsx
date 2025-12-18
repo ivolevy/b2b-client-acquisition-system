@@ -541,7 +541,7 @@ function LocationPicker({ onLocationChange, initialLocation }) {
       </div>
 
       <div className="map-instruction">
-         También puedes hacer clic en el mapa.
+        También puedes hacer clic directamente en el mapa para seleccionar una ubicación
       </div>
 
       <MapContainer

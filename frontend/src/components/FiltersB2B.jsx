@@ -106,14 +106,15 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
           )}
         </div>
         <form onSubmit={handleBuscarSubmit}>
-          <div className="form-row">
-            <div className="form-group">
+          <div className="form-row form-row-compact">
+            <div className="form-group form-group-compact">
               <label>Rubro Empresarial *</label>
               <select 
                 value={rubro} 
                 onChange={(e) => setRubro(e.target.value)}
                 disabled={loading}
                 required
+                className="select-rubro-compact"
               >
                 <option value="">-- Selecciona un rubro --</option>
                 {Object.entries(rubros).map(([key, nombre]) => (
@@ -121,34 +122,30 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                 ))}
               </select>
             </div>
-          </div>
 
-          {/* Selector de proveedor de mapa (solo si hay API key de Google) */}
-          {GOOGLE_API_KEY && (
-            <div className="map-provider-selector" style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <label style={{ fontSize: '0.875rem', color: 'var(--gray-700)', fontWeight: 500 }}>
-                Proveedor de mapa:
-              </label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => setMapProvider('google')}
-                  className={`mode-btn ${mapProvider === 'google' ? 'active' : ''}`}
-                  style={{ fontSize: '0.875rem', padding: '6px 12px' }}
-                >
-                  Google Maps
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMapProvider('osm')}
-                  className={`mode-btn ${mapProvider === 'osm' ? 'active' : ''}`}
-                  style={{ fontSize: '0.875rem', padding: '6px 12px' }}
-                >
-                  OpenStreetMap
-                </button>
+            {/* Selector de proveedor de mapa (solo si hay API key de Google) */}
+            {GOOGLE_API_KEY && (
+              <div className="form-group form-group-compact map-provider-group">
+                <label>Proveedor de mapa</label>
+                <div className="map-provider-toggle">
+                  <button
+                    type="button"
+                    onClick={() => setMapProvider('google')}
+                    className={`map-provider-btn ${mapProvider === 'google' ? 'active' : ''}`}
+                  >
+                    Google Maps
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMapProvider('osm')}
+                    className={`map-provider-btn ${mapProvider === 'osm' ? 'active' : ''}`}
+                  >
+                    OpenStreetMap
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Selector de ubicación en mapa */}
           <div className="location-section">

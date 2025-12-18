@@ -223,7 +223,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation }) {
     <div className="location-picker">
       <div className="search-row">
         <div className="radius-control">
-          <span className="radius-label">Radio de búsqueda:</span>
+          <label className="radius-label">Radio de búsqueda</label>
           <select
             value={radius}
             onChange={(e) => handleRadiusChange(Number(e.target.value))}
@@ -238,7 +238,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation }) {
         </div>
 
         <div className="address-search">
-          <label htmlFor="address-input" className="visually-hidden">Dirección para buscar</label>
+          <label htmlFor="address-input">Buscar dirección</label>
           <div className="address-input-wrapper">
             <Autocomplete
               onLoad={(autocomplete) => setAutocomplete(autocomplete)}
@@ -262,12 +262,12 @@ function GoogleLocationPicker({ onLocationChange, initialLocation }) {
           onClick={handleUseCurrentLocation}
           className="btn-location"
         >
-           Usar mi ubicación actual
+          Usar mi ubicación actual
         </button>
       </div>
 
       <div className="map-instruction">
-         También puedes hacer clic en el mapa.
+        También puedes hacer clic directamente en el mapa para seleccionar una ubicación
       </div>
 
       <div className="location-map">

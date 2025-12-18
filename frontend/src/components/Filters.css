@@ -49,6 +49,13 @@
   margin-bottom: var(--spacing-lg);
 }
 
+.form-row-compact {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -519,6 +526,19 @@ select.filter-input {
     grid-template-columns: 1fr;
   }
   
+  .form-row-compact {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .form-group-compact {
+    min-width: 100%;
+  }
+  
+  .map-provider-group {
+    min-width: 100%;
+  }
+  
   .filters-row-compact {
     flex-direction: column;
     align-items: stretch;
@@ -681,4 +701,44 @@ select.filter-input {
 .checkbox-inline.pro-feature:hover {
   background: linear-gradient(135deg, rgba(255, 105, 180, 0.2) 0%, rgba(255, 20, 147, 0.2) 100%);
   border-color: rgba(255, 105, 180, 0.5);
+}
+
+/* Map Provider Toggle */
+.map-provider-group {
+  min-width: 200px;
+}
+
+.map-provider-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--gray-100);
+  border-radius: var(--radius-lg);
+  padding: 0.2rem;
+  border: 2px solid var(--gray-200);
+}
+
+.map-provider-btn {
+  flex: 1;
+  padding: 0.65rem 0.9rem;
+  border: none;
+  background: transparent;
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: calc(var(--radius-lg) - 2px);
+  white-space: nowrap;
+}
+
+.map-provider-btn:hover:not(:disabled) {
+  color: var(--gray-800);
+  background: var(--gray-50);
+}
+
+.map-provider-btn.active {
+  background: white;
+  color: var(--primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
 }

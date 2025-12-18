@@ -521,7 +521,7 @@
 }
 
 .filter-inline-input {
-  padding: 6px 10px;
+  padding: 8px 10px;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
   font-size: 0.8rem;
@@ -529,6 +529,8 @@
   color: var(--gray-700);
   transition: border-color 0.2s, box-shadow 0.2s;
   width: 140px;
+  height: 36px;
+  box-sizing: border-box;
 }
 
 .filter-inline-input:focus {
@@ -549,6 +551,8 @@
   padding: 4px;
   border-radius: 8px;
   border: 1px solid var(--gray-300);
+  height: 36px;
+  box-sizing: border-box;
 }
 
 .filter-distance-toggle {
@@ -571,6 +575,8 @@
   font-weight: 500;
   cursor: pointer;
   border-radius: 4px;
+  height: 36px;
+  box-sizing: border-box;
   transition: all 0.2s ease;
   white-space: nowrap;
 }
@@ -601,10 +607,12 @@
 }
 
 .filter-km {
-  width: 140px;
+  width: 80px;
+  height: 36px;
   border-radius: 6px;
   border: 1px solid var(--gray-300);
   background: white;
+  box-sizing: border-box;
 }
 
 .filter-checkbox-inline {
@@ -616,6 +624,8 @@
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 6px;
+  height: 36px;
+  box-sizing: border-box;
   transition: background 0.2s;
 }
 
@@ -631,14 +641,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border: none;
   background: var(--gray-200);
   border-radius: 6px;
   cursor: pointer;
   color: var(--gray-500);
   transition: all 0.2s;
+  box-sizing: border-box;
 }
 
 .btn-clear-filters:hover {
@@ -662,6 +673,8 @@
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
+  height: 36px;
+  box-sizing: border-box;
   transition: all 0.2s;
 }
 
@@ -831,7 +844,8 @@
   }
   
   .filter-km {
-    width: 50px;
+    width: 60px;
+    height: 36px;
   }
   
   .filter-actions-right {

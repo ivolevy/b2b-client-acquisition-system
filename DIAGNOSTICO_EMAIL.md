@@ -188,3 +188,4 @@ Marca cada item cuando lo verifiques:
 - **Rate Limiting:** Supabase limita el número de emails. Si alcanzas el límite, espera o configura SMTP personalizado
 - **Seguridad:** Nunca compartas credenciales SMTP. Úsalas solo en la configuración segura de Supabase
 
+
