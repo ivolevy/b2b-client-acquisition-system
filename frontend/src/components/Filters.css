@@ -564,6 +564,7 @@ select.filter-input {
   }
   
   .form-row-compact {
+    display: flex;
     flex-direction: row;
     align-items: flex-end;
     gap: var(--spacing-sm);
@@ -572,6 +573,9 @@ select.filter-input {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     flex-wrap: nowrap;
+    background: #ffffff;
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
   }
   
   .form-group-compact {
@@ -582,6 +586,112 @@ select.filter-input {
   .select-rubro-compact {
     width: 160px;
     min-width: 160px;
+  }
+  
+  /* Integrar search-row dentro de form-row-compact */
+  .form-row-compact .search-row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 0;
+    flex-wrap: nowrap;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    flex: 1;
+    min-width: 0;
+    margin-left: var(--spacing-sm);
+    position: relative;
+  }
+  
+  /* Separadores rosados entre controles */
+  .form-row-compact .form-group-compact::after {
+    content: '';
+    position: absolute;
+    right: calc(var(--spacing-sm) * -1);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 60%;
+    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    opacity: 0.4;
+  }
+  
+  .form-row-compact .radius-control {
+    flex: 0 0 auto;
+    min-width: 120px;
+    position: relative;
+    padding-left: var(--spacing-sm);
+  }
+  
+  .form-row-compact .radius-control::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 60%;
+    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    opacity: 0.4;
+  }
+  
+  .form-row-compact .radius-control::after {
+    content: '';
+    position: absolute;
+    right: calc(var(--spacing-sm) * -1);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 60%;
+    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    opacity: 0.4;
+  }
+  
+  .form-row-compact .address-search {
+    flex: 1;
+    min-width: 180px;
+    position: relative;
+    padding-left: var(--spacing-sm);
+  }
+  
+  .form-row-compact .address-search::after {
+    content: '';
+    position: absolute;
+    right: calc(var(--spacing-sm) * -1);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 60%;
+    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    opacity: 0.4;
+  }
+  
+  .form-row-compact .btn-location {
+    flex: 0 0 auto;
+    min-width: 140px;
+    position: relative;
+    padding-left: var(--spacing-sm);
+  }
+  
+  .form-row-compact .btn-location::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 60%;
+    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    opacity: 0.4;
+  }
+  
+  /* Asegurar que rubroSelect se integre bien */
+  .form-row-compact > .form-group-compact {
+    margin-right: 0;
+    position: relative;
   }
   
   .filters-row-compact {
@@ -679,6 +789,32 @@ select.filter-input {
     width: 140px;
     min-width: 140px;
     height: 38px;
+  }
+  
+  .form-row-compact .radius-control {
+    min-width: 100px;
+    padding-left: var(--spacing-xs);
+  }
+  
+  .form-row-compact .address-search {
+    min-width: 150px;
+    padding-left: var(--spacing-xs);
+  }
+  
+  .form-row-compact .btn-location {
+    min-width: 120px;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.7rem;
+    padding-left: calc(0.5rem + var(--spacing-xs));
+  }
+  
+  /* Ajustar altura de separadores en móvil */
+  .form-row-compact .form-group-compact::after,
+  .form-row-compact .radius-control::before,
+  .form-row-compact .radius-control::after,
+  .form-row-compact .address-search::after,
+  .form-row-compact .btn-location::before {
+    height: 50%;
   }
   
   .status-badge {

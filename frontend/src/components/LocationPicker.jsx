@@ -39,7 +39,7 @@ const formatNominatimResult = (item) => {
   };
 };
 
-function LocationPicker({ onLocationChange, initialLocation }) {
+function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radius, setRadius] = useState(5000); // 5km por defecto
   const [mapCenter, setMapCenter] = useState([40.4168, -3.7038]); // Madrid por defecto
@@ -483,97 +483,107 @@ function LocationPicker({ onLocationChange, initialLocation }) {
     });
   };
 
-  return (
-    <div className="location-picker">
-      <div className="search-row" ref={suggestionsRef}>
-        <div className="radius-control">
-          <span className="radius-label">Radio de búsqueda:</span>
-          <select value={radius} onChange={(e) => handleRadiusChange(parseInt(e.target.value))}>
-            <option value="1000">1 km</option>
-            <option value="2000">2 km</option>
-            <option value="5000">5 km</option>
-            <option value="10000">10 km</option>
-            <option value="20000">20 km</option>
-            <option value="50000">50 km</option>
-          </select>
+  const controlsRow = (
+    <div className="search-row" ref={suggestionsRef}>
+      <div className="radius-control">
+        <label className="radius-label">Radio de búsqueda</label>
+        <select value={radius} onChange={(e) => handleRadiusChange(parseInt(e.target.value))}>
+          <option value="1000">1 km</option>
+          <option value="2000">2 km</option>
+          <option value="5000">5 km</option>
+          <option value="10000">10 km</option>
+          <option value="20000">20 km</option>
+          <option value="50000">50 km</option>
+        </select>
+      </div>
+
+      <div className="address-search" onKeyDown={handleAddressKeyDown}>
+        <label htmlFor="address-input">Buscar dirección</label>
+        <div className="address-input-wrapper">
+          <input
+            id="address-input"
+            type="text"
+            className="address-input"
+            placeholder="Ej: Paseo de la Castellana 100, Madrid"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+            autoComplete="off"
+          />
         </div>
+        {isSearching && <div className="address-status">Buscando coincidencias...</div>}
 
-        <div className="address-search" onKeyDown={handleAddressKeyDown}>
-          <label htmlFor="address-input" className="visually-hidden"> Dirección para buscar</label>
-          <div className="address-input-wrapper">
-            <input
-              id="address-input"
-              type="text"
-              className="address-input"
-              placeholder="Ej: Paseo de la Castellana 100, Madrid"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-              autoComplete="off"
-            />
-          </div>
-          {isSearching && <div className="address-status">Buscando coincidencias...</div>}
-
-          {showSuggestions && suggestions.length > 0 && (
-            <ul className="address-suggestions">
-              {suggestions.map((suggestion) => (
-                <li key={suggestion.place_id} onClick={() => handleSuggestionSelect(suggestion)}>
-                  <span className="suggestion-title">
-                    {suggestion.display_name}
+        {showSuggestions && suggestions.length > 0 && (
+          <ul className="address-suggestions">
+            {suggestions.map((suggestion) => (
+              <li key={suggestion.place_id} onClick={() => handleSuggestionSelect(suggestion)}>
+                <span className="suggestion-title">
+                  {suggestion.display_name}
+                </span>
+                {suggestion.full_label && (
+                  <span className="suggestion-subtitle">
+                    {suggestion.full_label.replace(`${suggestion.display_name}, `, '')}
                   </span>
-                  {suggestion.full_label && (
-                    <span className="suggestion-subtitle">
-                      {suggestion.full_label.replace(`${suggestion.display_name}, `, '')}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <button type="button" className="btn-location" onClick={handleUseCurrentLocation}>
+        Usar mi ubicación actual
+      </button>
+    </div>
+  );
+
+  return (
+    <>
+      <div className="form-row form-row-compact">
+        {rubroSelect}
+        {controlsRow}
+      </div>
+      
+      <div className="location-picker">
+
+        <div className="map-instruction">
+          También puedes hacer clic directamente en el mapa para seleccionar una ubicación
         </div>
 
-        <button type="button" className="btn-location" onClick={handleUseCurrentLocation}>
-           Usar mi ubicación actual
-        </button>
+        <MapContainer
+          center={mapCenter}
+          zoom={12}
+          className="location-map"
+          key={`${mapCenter[0]}-${mapCenter[1]}`}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; OpenStreetMap contributors'
+          />
+          
+          <MapClickHandler onLocationSelect={handleLocationSelect} />
+          
+          {selectedLocation && (
+            <>
+              <Marker position={[selectedLocation.lat, selectedLocation.lng]} />
+              <Circle
+                center={[selectedLocation.lat, selectedLocation.lng]}
+                radius={radius}
+                pathOptions={{
+                  color: '#667eea',
+                  fillColor: '#667eea',
+                  fillOpacity: 0.2
+                }}
+              />
+            </>
+          )}
+        </MapContainer>
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>
-
-      <div className="map-instruction">
-        También puedes hacer clic directamente en el mapa para seleccionar una ubicación
-      </div>
-
-      <MapContainer
-        center={mapCenter}
-        zoom={12}
-        className="location-map"
-        key={`${mapCenter[0]}-${mapCenter[1]}`}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap contributors'
-        />
-        
-        <MapClickHandler onLocationSelect={handleLocationSelect} />
-        
-        {selectedLocation && (
-          <>
-            <Marker position={[selectedLocation.lat, selectedLocation.lng]} />
-            <Circle
-              center={[selectedLocation.lat, selectedLocation.lng]}
-              radius={radius}
-              pathOptions={{
-                color: '#667eea',
-                fillColor: '#667eea',
-                fillOpacity: 0.2
-              }}
-            />
-          </>
-        )}
-      </MapContainer>
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
-    </div>
+    </>
   );
 }
 

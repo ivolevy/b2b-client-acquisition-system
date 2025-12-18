@@ -105,38 +105,56 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
           )}
         </div>
         <form onSubmit={handleBuscarSubmit}>
-          <div className="form-row form-row-compact">
-            <div className="form-group form-group-compact">
-              <label>Rubro Empresarial *</label>
-              <select 
-                value={rubro} 
-                onChange={(e) => setRubro(e.target.value)}
-                disabled={loading}
-                required
-                className="select-rubro-compact"
-              >
-                <option value="">-- Selecciona un rubro --</option>
-                {Object.entries(rubros).map(([key, nombre]) => (
-                  <option key={key} value={key}>{nombre}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Selector de ubicación en mapa */}
-          <div className="location-section">
-            {GOOGLE_API_KEY ? (
-              <GoogleLocationPicker 
-                onLocationChange={setLocationData}
-                initialLocation={initialMapLocation}
-              />
-            ) : (
-              <LocationPicker 
-                onLocationChange={setLocationData}
-                initialLocation={initialMapLocation}
-              />
-            )}
-          </div>
+          {/* Controles en una sola línea: Rubro + Radio + Dirección + Botón */}
+          {GOOGLE_API_KEY ? (
+            <GoogleLocationPicker 
+              onLocationChange={setLocationData}
+              initialLocation={initialMapLocation}
+              rubroSelect={
+                <div className="form-row form-row-compact">
+                  <div className="form-group form-group-compact">
+                    <label>Rubro Empresarial *</label>
+                    <select 
+                      value={rubro} 
+                      onChange={(e) => setRubro(e.target.value)}
+                      disabled={loading}
+                      required
+                      className="select-rubro-compact"
+                    >
+                      <option value="">-- Selecciona un rubro --</option>
+                      {Object.entries(rubros).map(([key, nombre]) => (
+                        <option key={key} value={key}>{nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              }
+            />
+          ) : (
+            <LocationPicker 
+              onLocationChange={setLocationData}
+              initialLocation={initialMapLocation}
+              rubroSelect={
+                <div className="form-row form-row-compact">
+                  <div className="form-group form-group-compact">
+                    <label>Rubro Empresarial *</label>
+                    <select 
+                      value={rubro} 
+                      onChange={(e) => setRubro(e.target.value)}
+                      disabled={loading}
+                      required
+                      className="select-rubro-compact"
+                    >
+                      <option value="">-- Selecciona un rubro --</option>
+                      {Object.entries(rubros).map(([key, nombre]) => (
+                        <option key={key} value={key}>{nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              }
+            />
+          )}
 
           <div className="filters-row-compact">
             <div className="option-card">

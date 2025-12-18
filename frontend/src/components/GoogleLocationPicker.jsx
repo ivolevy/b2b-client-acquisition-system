@@ -22,7 +22,7 @@ const calculateBoundingBox = (lat, lng, radiusMeters) => {
   };
 };
 
-function GoogleLocationPicker({ onLocationChange, initialLocation }) {
+function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect = null }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radius, setRadius] = useState(5000); // 5km por defecto
   const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 }); // Madrid por defecto
@@ -219,91 +219,101 @@ function GoogleLocationPicker({ onLocationChange, initialLocation }) {
     );
   }
 
-  return (
-    <div className="location-picker">
-      <div className="search-row">
-        <div className="radius-control">
-          <label className="radius-label">Radio de búsqueda</label>
-          <select
-            value={radius}
-            onChange={(e) => handleRadiusChange(Number(e.target.value))}
+  const controlsRow = (
+    <div className="search-row">
+      <div className="radius-control">
+        <label className="radius-label">Radio de búsqueda</label>
+        <select
+          value={radius}
+          onChange={(e) => handleRadiusChange(Number(e.target.value))}
+        >
+          <option value={1000}>1 km</option>
+          <option value={2000}>2 km</option>
+          <option value={5000}>5 km</option>
+          <option value={10000}>10 km</option>
+          <option value={20000}>20 km</option>
+          <option value={50000}>50 km</option>
+        </select>
+      </div>
+
+      <div className="address-search">
+        <label htmlFor="address-input">Buscar dirección</label>
+        <div className="address-input-wrapper">
+          <Autocomplete
+            onLoad={(autocomplete) => setAutocomplete(autocomplete)}
+            onPlaceChanged={handlePlaceSelect}
           >
-            <option value={1000}>1 km</option>
-            <option value={2000}>2 km</option>
-            <option value={5000}>5 km</option>
-            <option value={10000}>10 km</option>
-            <option value={20000}>20 km</option>
-            <option value={50000}>50 km</option>
-          </select>
+            <input
+              id="address-input"
+              type="text"
+              className="address-input"
+              placeholder="Ej: Paseo de la Castellana 100, Madrid"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
+            />
+          </Autocomplete>
         </div>
-
-        <div className="address-search">
-          <label htmlFor="address-input">Buscar dirección</label>
-          <div className="address-input-wrapper">
-            <Autocomplete
-              onLoad={(autocomplete) => setAutocomplete(autocomplete)}
-              onPlaceChanged={handlePlaceSelect}
-            >
-              <input
-                id="address-input"
-                type="text"
-                className="address-input"
-                placeholder="Ej: Paseo de la Castellana 100, Madrid"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoComplete="off"
-              />
-            </Autocomplete>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleUseCurrentLocation}
-          className="btn-location"
-        >
-          Usar mi ubicación actual
-        </button>
       </div>
 
-      <div className="map-instruction">
-        También puedes hacer clic directamente en el mapa para seleccionar una ubicación
-      </div>
-
-      <div className="location-map">
-        <GoogleMap
-          mapContainerStyle={{ width: '100%', height: '100%', borderRadius: '12px' }}
-          center={mapCenter}
-          zoom={selectedLocation ? 13 : 10}
-          onClick={handleMapClick}
-          onLoad={(mapInstance) => setMap(mapInstance)}
-          options={{
-            disableDefaultUI: false,
-            zoomControl: true,
-            streetViewControl: false,
-            mapTypeControl: true,
-            fullscreenControl: true,
-          }}
-        >
-          {selectedLocation && (
-            <>
-              <Marker position={selectedLocation} />
-              <Circle
-                center={selectedLocation}
-                radius={radius}
-                options={{
-                  fillColor: '#667eea',
-                  fillOpacity: 0.2,
-                  strokeColor: '#667eea',
-                  strokeOpacity: 0.8,
-                  strokeWeight: 2,
-                }}
-              />
-            </>
-          )}
-        </GoogleMap>
-      </div>
+      <button
+        type="button"
+        onClick={handleUseCurrentLocation}
+        className="btn-location"
+      >
+        Usar mi ubicación actual
+      </button>
     </div>
+  );
+
+  return (
+    <>
+      <div className="form-row form-row-compact">
+        {rubroSelect}
+        {controlsRow}
+      </div>
+      
+      <div className="location-picker">
+
+        <div className="map-instruction">
+          También puedes hacer clic directamente en el mapa para seleccionar una ubicación
+        </div>
+
+        <div className="location-map">
+          <GoogleMap
+            mapContainerStyle={{ width: '100%', height: '100%', borderRadius: '12px' }}
+            center={mapCenter}
+            zoom={selectedLocation ? 13 : 10}
+            onClick={handleMapClick}
+            onLoad={(mapInstance) => setMap(mapInstance)}
+            options={{
+              disableDefaultUI: false,
+              zoomControl: true,
+              streetViewControl: false,
+              mapTypeControl: true,
+              fullscreenControl: true,
+            }}
+          >
+            {selectedLocation && (
+              <>
+                <Marker position={selectedLocation} />
+                <Circle
+                  center={selectedLocation}
+                  radius={radius}
+                  options={{
+                    fillColor: '#667eea',
+                    fillOpacity: 0.2,
+                    strokeColor: '#667eea',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                  }}
+                />
+              </>
+            )}
+          </GoogleMap>
+        </div>
+      </div>
+    </>
   );
 }
 
