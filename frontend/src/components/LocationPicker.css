@@ -222,49 +222,56 @@
   }
   
   .search-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--spacing-md);
+    flex-direction: row;
+    align-items: flex-end;
+    gap: var(--spacing-sm);
     padding: var(--spacing-md);
     border-radius: var(--radius-lg);
     border: 1px solid var(--gray-200);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
   }
   
   .radius-control {
-    width: 100%;
-    flex: none;
+    flex: 0 0 auto;
+    min-width: 120px;
   }
   
   .radius-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
   
   .radius-control select {
     width: 100%;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
+    padding: 0.6rem 2rem 0.6rem 0.6rem;
+    height: 40px;
   }
   
   .address-search {
-    flex: none;
-    width: 100%;
-    min-width: 100%;
+    flex: 1;
+    min-width: 180px;
   }
   
   .address-search label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
   
   .address-input {
     width: 100%;
     font-size: 16px; /* Previene zoom en iOS */
+    height: 40px;
+    padding: 0.6rem 0.8rem;
   }
 
   .btn-location {
-    width: 100%;
-    flex: none;
-    height: 44px;
-    padding: 0.75rem 1rem;
-    font-size: 0.85rem;
+    flex: 0 0 auto;
+    min-width: 140px;
+    height: 40px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
   }
   
   .location-map {
@@ -292,36 +299,46 @@
   
   .search-row {
     padding: var(--spacing-sm);
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
+    flex-wrap: nowrap;
   }
   
   .radius-control {
-    width: 100%;
+    flex: 0 0 auto;
+    min-width: 100px;
   }
   
   .radius-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
   
   .radius-control select {
-    font-size: 0.85rem;
-    padding: 0.6rem 2.5rem 0.6rem 0.75rem;
-    height: 42px;
+    font-size: 0.75rem;
+    padding: 0.5rem 1.8rem 0.5rem 0.5rem;
+    height: 38px;
+  }
+  
+  .address-search {
+    flex: 1;
+    min-width: 150px;
   }
   
   .address-search label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
   
   .btn-location {
-    height: 42px;
-    padding: 0.6rem 0.75rem;
-    font-size: 0.8rem;
+    flex: 0 0 auto;
+    min-width: 120px;
+    height: 38px;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.75rem;
   }
   
   .address-input {
-    height: 42px;
+    height: 38px;
     font-size: 16px; /* Previene zoom en iOS */
+    padding: 0.5rem 0.7rem;
   }
   
   .location-map {

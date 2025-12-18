@@ -16,9 +16,8 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
   // Estado para inicializar el mapa desde historial
   const [initialMapLocation, setInitialMapLocation] = useState(null);
   
-  // Estado para elegir entre Google Maps y OpenStreetMap
+  // Verificar si hay API key de Google Maps
   const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const [mapProvider, setMapProvider] = useState(GOOGLE_API_KEY ? 'google' : 'osm');
   
   // Efecto para cargar datos desde historial
   useEffect(() => {
@@ -122,34 +121,11 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                 ))}
               </select>
             </div>
-
-            {/* Selector de proveedor de mapa (solo si hay API key de Google) */}
-            {GOOGLE_API_KEY && (
-              <div className="form-group form-group-compact map-provider-group">
-                <label>Proveedor de mapa</label>
-                <div className="map-provider-toggle">
-                  <button
-                    type="button"
-                    onClick={() => setMapProvider('google')}
-                    className={`map-provider-btn ${mapProvider === 'google' ? 'active' : ''}`}
-                  >
-                    Google Maps
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMapProvider('osm')}
-                    className={`map-provider-btn ${mapProvider === 'osm' ? 'active' : ''}`}
-                  >
-                    OpenStreetMap
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Selector de ubicación en mapa */}
           <div className="location-section">
-            {mapProvider === 'google' && GOOGLE_API_KEY ? (
+            {GOOGLE_API_KEY ? (
               <GoogleLocationPicker 
                 onLocationChange={setLocationData}
                 initialLocation={initialMapLocation}
