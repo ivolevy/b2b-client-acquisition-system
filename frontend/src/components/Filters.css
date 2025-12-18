@@ -58,8 +58,8 @@
   margin-bottom: 0;
   background: #ffffff;
   border: 1px solid var(--gray-200);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
   box-shadow: var(--shadow-sm);
 }
 
@@ -70,6 +70,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  gap: 0.2rem;
 }
 
 /* Separador rosado después del rubro */
@@ -87,8 +88,10 @@
 
 .select-rubro-compact {
   width: 100%;
-  height: 44px;
+  height: 36px;
   box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
 }
 
 /* Integrar search-row dentro de form-row-compact */
@@ -140,6 +143,12 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  gap: 0.2rem;
+}
+
+.form-row-compact .address-search label {
+  font-size: 0.7rem;
+  margin-bottom: 0.2rem;
 }
 
 /* Separador rosado después de la dirección */
@@ -156,15 +165,19 @@
 }
 
 .form-row-compact .address-input {
-  height: 44px;
+  height: 36px;
   box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
 }
 
 .form-row-compact .btn-location {
   flex: 1;
   min-width: 0;
-  height: 44px;
+  height: 36px;
   box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
 }
 
 .form-group {
