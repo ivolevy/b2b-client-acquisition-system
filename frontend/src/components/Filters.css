@@ -51,15 +51,120 @@
 
 .form-row-compact {
   display: flex;
-  align-items: flex-end;
-  gap: var(--spacing-md);
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
   flex-wrap: nowrap;
   margin-bottom: 0;
   background: #ffffff;
   border: 1px solid var(--gray-200);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  border-radius: var(--radius-xl);
   padding: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
+}
+
+/* Todos los controles con las mismas medidas */
+.form-row-compact > .form-group-compact {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Separador rosado después del rubro */
+.form-row-compact > .form-group-compact::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 15%;
+  bottom: 15%;
+  width: 2px;
+  background: var(--primary);
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.select-rubro-compact {
+  width: 100%;
+  height: 44px;
+  box-sizing: border-box;
+}
+
+/* Integrar search-row dentro de form-row-compact */
+.form-row-compact .search-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: nowrap;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Todos los controles de ubicación con las mismas medidas */
+.form-row-compact .radius-control {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Separador rosado después del radio */
+.form-row-compact .radius-control::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 15%;
+  bottom: 15%;
+  width: 2px;
+  background: var(--primary);
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.form-row-compact .radius-control select {
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.form-row-compact .address-search {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Separador rosado después de la dirección */
+.form-row-compact .address-search::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 15%;
+  bottom: 15%;
+  width: 2px;
+  background: var(--primary);
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.form-row-compact .address-input {
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.form-row-compact .btn-location {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  box-sizing: border-box;
 }
 
 .form-group {
