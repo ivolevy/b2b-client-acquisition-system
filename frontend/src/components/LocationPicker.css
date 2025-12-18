@@ -6,19 +6,20 @@
   display: flex;
   align-items: flex-end;
   gap: var(--spacing-md);
-  flex-wrap: wrap;
-  background: #ffffff;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-xl);
+  flex-wrap: nowrap;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--gray-200);
+  border-radius: 0;
   padding: var(--spacing-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
 
 .radius-control {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
-  flex: 0 0 180px;
+  flex: 0 0 160px;
 }
 
 .radius-label {
@@ -73,7 +74,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 200px;
+  flex: 0 0 180px;
   box-shadow: var(--shadow-sm);
   white-space: nowrap;
 }
@@ -216,53 +217,82 @@
 }
 
 @media (max-width: 768px) {
+  .location-picker {
+    margin-bottom: var(--spacing-md);
+  }
+  
   .search-row {
     flex-direction: column;
     align-items: stretch;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm);
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
   }
   
   .radius-control {
     width: 100%;
-    justify-content: space-between;
-    padding: 0.5rem 0.75rem;
+    flex: none;
+  }
+  
+  .radius-label {
+    font-size: 0.8rem;
+  }
+  
+  .radius-control select {
+    width: 100%;
+    font-size: 0.875rem;
   }
   
   .address-search {
     flex: none;
     width: 100%;
+    min-width: 100%;
+  }
+  
+  .address-search label {
+    font-size: 0.8rem;
   }
   
   .address-input {
     width: 100%;
-    font-size: 16px;
+    font-size: 16px; /* Previene zoom en iOS */
   }
 
   .btn-location {
     width: 100%;
     flex: none;
-    min-height: 44px;
+    height: 44px;
     padding: 0.75rem 1rem;
     font-size: 0.85rem;
   }
   
   .location-map {
-    height: 250px;
+    height: 300px;
     border-radius: var(--radius-lg);
+    margin-top: var(--spacing-md);
   }
   
   .map-instruction {
-    padding: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
     font-size: 0.8rem;
     margin-bottom: var(--spacing-md);
+    margin-top: var(--spacing-md);
+  }
+  
+  .address-suggestions {
+    max-height: 200px;
   }
 }
 
 @media (max-width: 480px) {
+  .location-picker {
+    margin-bottom: var(--spacing-sm);
+  }
+  
   .search-row {
     padding: var(--spacing-sm);
-    border-radius: var(--radius-lg);
+    gap: var(--spacing-sm);
   }
   
   .radius-control {
@@ -279,6 +309,10 @@
     height: 42px;
   }
   
+  .address-search label {
+    font-size: 0.75rem;
+  }
+  
   .btn-location {
     height: 42px;
     padding: 0.6rem 0.75rem;
@@ -287,15 +321,30 @@
   
   .address-input {
     height: 42px;
-    font-size: 16px;
+    font-size: 16px; /* Previene zoom en iOS */
   }
   
   .location-map {
-    height: 200px;
+    height: 250px;
+    border-radius: var(--radius-md);
   }
   
   .map-instruction {
     font-size: 0.75rem;
-    padding: 0.5rem;
+    padding: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .address-suggestions {
+    max-height: 180px;
+  }
+  
+  .suggestion-title {
+    font-size: 0.85rem;
+  }
+  
+  .suggestion-subtitle {
+    font-size: 0.7rem;
   }
 }

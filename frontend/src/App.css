@@ -110,14 +110,22 @@
    ============================================ */
 
 @media (max-width: 768px) {
+  .app {
+    overflow-x: hidden;
+  }
+  
   .main-content {
     padding: var(--spacing-md);
+    width: 100%;
+    max-width: 100%;
   }
   
   .results-module {
     padding: var(--spacing-md);
     margin-top: var(--spacing-md);
     border-radius: var(--radius-lg);
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .results-module__header {
@@ -130,9 +138,28 @@
     font-size: 1.25rem;
   }
   
+  .results-module__header p {
+    font-size: 0.875rem;
+  }
+  
   .results-delete-btn {
     width: 100%;
     text-align: center;
+    padding: 0.65rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .loading-overlay {
+    padding: var(--spacing-md);
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .loading-overlay p {
+    font-size: 0.9rem;
   }
 }
 
@@ -144,6 +171,29 @@
   .results-module {
     padding: var(--spacing-sm);
     border-radius: var(--radius-md);
+    margin-top: var(--spacing-sm);
+  }
+  
+  .results-module__header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .results-module__header p {
+    font-size: 0.8rem;
+  }
+  
+  .results-delete-btn {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.85rem;
+  }
+  
+  .spinner {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .loading-overlay p {
+    font-size: 0.85rem;
   }
 }
 

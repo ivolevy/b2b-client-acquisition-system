@@ -230,15 +230,41 @@ body.modal-open {
   html, body {
     overflow-x: hidden;
     width: 100%;
+    position: relative;
   }
   
   #root {
     width: 100%;
     overflow-x: hidden;
+    position: relative;
   }
   
-  input, select, textarea {
-    font-size: 16px; /* Previene zoom en iOS */
+  /* Previene zoom en iOS al hacer focus en inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Mejora el touch target en móvil */
+  button,
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Mejora scroll en móvil */
+  * {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -249,6 +275,10 @@ body.modal-open {
     --spacing-2xl: 2rem;
   }
   
+  html {
+    font-size: 14px;
+  }
+  
   body {
     font-size: 14px;
   }
@@ -256,5 +286,18 @@ body.modal-open {
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.25rem; }
   h3 { font-size: 1.1rem; }
+  h4 { font-size: 1rem; }
+  h5 { font-size: 0.9rem; }
+  h6 { font-size: 0.85rem; }
+  
+  /* Scrollbar más delgado en móvil */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    border: 1px solid var(--gray-100);
+  }
 }
 
