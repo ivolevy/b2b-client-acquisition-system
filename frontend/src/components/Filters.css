@@ -63,12 +63,11 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Todos los controles con las mismas medidas */
+/* Todos los controles con anchos fijos, no 100% */
 .form-row-compact > .form-group-compact,
 .form-row-compact > .rubro-inline {
   flex: 0 0 auto;
-  min-width: 180px;
-  max-width: 200px;
+  width: 180px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -196,18 +195,7 @@
   margin-bottom: 0.2rem;
 }
 
-/* Separador rosado después de la dirección */
-.form-row-compact .address-search::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 15%;
-  bottom: 15%;
-  width: 2px;
-  background: var(--primary);
-  opacity: 0.5;
-  z-index: 1;
-}
+/* NO hay separador después de la dirección - se eliminó */
 
 .form-row-compact .address-input {
   height: 36px;
@@ -218,15 +206,15 @@
 
 .form-row-compact .btn-location {
   flex: 0 0 auto;
-  min-width: 100px;
-  max-width: 120px;
+  width: 140px;
   height: 36px;
   box-sizing: border-box;
   padding: 0.4rem 0.5rem;
   font-size: 0.7rem;
   white-space: nowrap;
   margin: var(--spacing-sm);
-  margin-left: 0;
+  margin-left: auto;
+  align-self: center;
 }
 
 .form-group {
