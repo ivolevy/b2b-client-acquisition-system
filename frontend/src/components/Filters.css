@@ -66,8 +66,9 @@
 /* Todos los controles con las mismas medidas */
 .form-row-compact > .form-group-compact,
 .form-row-compact > .rubro-inline {
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 auto;
+  min-width: 180px;
+  max-width: 200px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -99,8 +100,35 @@
   width: 100%;
   height: 36px;
   box-sizing: border-box;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem;
   font-size: 0.85rem;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: white;
+  color: var(--gray-900);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%2364758b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 18px 18px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.select-rubro-compact:hover {
+  border-color: var(--gray-300);
+}
+
+.select-rubro-compact:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.1);
+}
+
+.select-rubro-compact::-ms-expand {
+  display: none;
 }
 
 /* Integrar search-row dentro de form-row-compact */
@@ -121,8 +149,9 @@
 
 /* Todos los controles de ubicación con las mismas medidas */
 .form-row-compact .radius-control {
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 auto;
+  min-width: 120px;
+  max-width: 140px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -145,8 +174,10 @@
 }
 
 .form-row-compact .radius-control select {
-  height: 44px;
+  height: 36px;
   box-sizing: border-box;
+  padding: 0.5rem 2rem 0.5rem 0.6rem;
+  font-size: 0.8rem;
 }
 
 .form-row-compact .address-search {
@@ -187,12 +218,12 @@
 
 .form-row-compact .btn-location {
   flex: 0 0 auto;
-  min-width: 140px;
-  max-width: 160px;
+  min-width: 100px;
+  max-width: 120px;
   height: 36px;
   box-sizing: border-box;
-  padding: 0.4rem 0.6rem;
-  font-size: 0.75rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.7rem;
   white-space: nowrap;
   margin: var(--spacing-sm);
   margin-left: 0;
