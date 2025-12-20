@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { searchHistoryService } from '../lib/supabase';
 import { useAuth } from '../AuthWrapper';
 import './SearchHistory.css';
@@ -9,26 +9,49 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (isOpen && user?.id) {
-      loadSearchHistory();
+  const loadSearchHistory = useCallback(async () => {
+    if (!user?.id) {
+      setLoading(false);
+      setError('Usuario no identificado');
+      return;
     }
-  }, [isOpen, user?.id]);
 
-  const loadSearchHistory = async () => {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: fetchError } = await searchHistoryService.getHistory(user.id, 20);
+      // Timeout para evitar que se quede cargando indefinidamente
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout: La solicitud tardó demasiado')), 10000)
+      );
+
+      const fetchPromise = searchHistoryService.getHistory(user.id, 20);
+      const { data, error: fetchError } = await Promise.race([fetchPromise, timeoutPromise]);
+      
       if (fetchError) throw fetchError;
       setSearches(data || []);
     } catch (err) {
       console.error('Error loading search history:', err);
-      setError('No se pudo cargar el historial');
+      setError(err.message || 'No se pudo cargar el historial');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (user?.id) {
+        loadSearchHistory();
+      } else {
+        setLoading(false);
+        setError('Debes estar autenticado para ver el historial');
+      }
+    } else {
+      // Resetear estado cuando se cierra
+      setLoading(true);
+      setError(null);
+      setSearches([]);
+    }
+  }, [isOpen, user?.id, loadSearchHistory]);
 
   const handleDeleteSearch = async (searchId, e) => {
     e.stopPropagation();
