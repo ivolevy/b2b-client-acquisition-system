@@ -259,10 +259,11 @@
 .form-row-compact .location-text {
   font-size: 0.85rem;
   color: var(--gray-700);
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  white-space: nowrap;
+  white-space: normal;
   margin-left: var(--spacing-xs);
+  gap: 0.25rem;
 }
 
 .form-row-compact .btn-location-inline {
