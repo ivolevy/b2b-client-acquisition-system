@@ -1,10 +1,11 @@
 .email-sender-embedded {
   width: 100%;
   background: white;
-  border-radius: var(--radius-xl);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   box-shadow: var(--shadow-lg);
   padding: 0;
   overflow: hidden;
+  margin-top: 0;
 }
 
 .email-sender-overlay {
@@ -86,7 +87,7 @@
 .email-tabs {
   display: flex;
   gap: 0;
-  background: var(--gray-50);
+  background: white;
   border-bottom: 1px solid var(--gray-100);
   padding: 1rem 0 0 1.5rem;
 }
@@ -113,7 +114,7 @@
 .email-tab.active {
   color: #e91e63;
   border-bottom-color: #e91e63;
-  background: white;
+  background: transparent;
 }
 
 /* Layout de dos columnas */
