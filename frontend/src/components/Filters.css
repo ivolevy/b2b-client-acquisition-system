@@ -238,6 +238,8 @@
 
 .form-row-compact .btn-location-wrapper {
   flex: 0 0 auto;
+  width: 280px;
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -255,6 +257,35 @@
   height: 1rem;
   display: flex;
   align-items: center;
+}
+
+.form-row-compact .btn-location {
+  width: 100%;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.form-row-compact .btn-location:hover {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #c2185b 100%);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.form-row-compact .btn-location:active {
+  transform: translateY(0);
 }
 
 .form-group {
@@ -1004,6 +1035,10 @@ select.filter-input {
   
   .form-row-compact .address-input {
     height: 38px;
+  }
+  
+  .form-row-compact .btn-location-wrapper {
+    width: auto;
   }
   
   .form-row-compact .btn-location {
