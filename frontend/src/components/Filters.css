@@ -261,7 +261,7 @@
   color: var(--gray-700);
   display: inline-flex;
   align-items: center;
-  white-space: normal;
+  white-space: nowrap;
   margin-left: var(--spacing-xs);
   gap: 0.25rem;
 }

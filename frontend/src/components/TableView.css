@@ -411,11 +411,22 @@
    UNIFIED RESULTS MODULE
    ============================================ */
 
+.view-toggle-container {
+  margin-top: var(--spacing-xl);
+  margin-bottom: 0;
+  padding: 1rem 1.25rem;
+  background: white;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  box-shadow: var(--shadow-lg);
+  border-bottom: none;
+}
+
 .unified-results-module {
   background: white;
-  border-radius: var(--radius-xl);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  margin-top: 0;
 }
 
 .results-unified-header {
@@ -424,7 +435,7 @@
   justify-content: space-between;
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--gray-100);
-  background: linear-gradient(to right, #fff, #fdf2f8);
+  background: white;
 }
 
 .results-title-section {
