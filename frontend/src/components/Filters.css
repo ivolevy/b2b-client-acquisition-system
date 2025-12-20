@@ -52,14 +52,14 @@
 .form-row-compact {
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: flex-end;
   gap: 0;
   flex-wrap: nowrap;
   margin-bottom: 0;
   background: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
-  padding: 0;
+  padding: var(--spacing-md);
   box-shadow: var(--shadow-sm);
 }
 
@@ -86,12 +86,12 @@
 .form-row-compact > .rubro-inline::after {
   content: '';
   position: absolute;
-  right: calc(var(--spacing-md) / 2 - 1px);
-  top: 15%;
-  bottom: 15%;
+  right: 0;
+  top: 20%;
+  bottom: 20%;
   width: 2px;
   background: var(--primary);
-  opacity: 0.5;
+  opacity: 0.4;
   z-index: 1;
 }
 
@@ -149,12 +149,12 @@
 /* Todos los controles de ubicación con las mismas medidas */
 .form-row-compact .radius-control {
   flex: 0 0 auto;
-  width: 160px;
+  width: 150px;
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  padding: var(--spacing-sm) var(--spacing-md);
+  gap: 0.35rem;
+  padding: 0 var(--spacing-lg);
   background: transparent;
 }
 
@@ -162,12 +162,12 @@
 .form-row-compact .radius-control::after {
   content: '';
   position: absolute;
-  right: calc(var(--spacing-md) / 2 - 1px);
-  top: 15%;
-  bottom: 15%;
+  right: 0;
+  top: 20%;
+  bottom: 20%;
   width: 2px;
   background: var(--primary);
-  opacity: 0.5;
+  opacity: 0.4;
   z-index: 1;
 }
 
@@ -190,8 +190,10 @@
 }
 
 .form-row-compact .address-search label {
-  font-size: 0.7rem;
-  margin-bottom: 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: var(--gray-700);
 }
 
 /* NO hay separador después de la dirección - se eliminó */
@@ -205,15 +207,15 @@
 
 .form-row-compact .btn-location {
   flex: 0 0 auto;
-  width: 180px;
+  width: 170px;
   height: 36px;
   box-sizing: border-box;
-  padding: 0.4rem 0.5rem;
+  padding: 0.5rem 0.75rem;
   font-size: 0.75rem;
   white-space: nowrap;
   margin: 0;
-  margin-top: calc(var(--spacing-sm) + 1.1rem);
-  align-self: flex-start;
+  margin-left: var(--spacing-lg);
+  align-self: flex-end;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -230,6 +232,14 @@
   font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: -0.01em;
+}
+
+.form-row-compact .form-group-compact label,
+.form-row-compact .rubro-inline label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: var(--gray-700);
 }
 
 .form-group input,
