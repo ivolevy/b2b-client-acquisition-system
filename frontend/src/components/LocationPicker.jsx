@@ -535,10 +535,9 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       </div>
 
       <div className="btn-location-wrapper">
-        <label className="btn-location-label">o usa tu ubicacion</label>
-        <button type="button" className="btn-location" onClick={handleUseCurrentLocation}>
-          usar ubicacion actual
-        </button>
+        <span className="location-text">
+          o <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>
+        </span>
       </div>
     </div>
   );
