@@ -238,11 +238,11 @@
 
 .form-row-compact .btn-location-wrapper {
   flex: 0 0 auto;
-  width: 160px;
+  width: 200px;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
   padding-left: var(--spacing-xs);
   background: transparent;
   justify-content: flex-start;
