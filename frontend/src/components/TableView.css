@@ -469,9 +469,10 @@
 /* View Toggle Inline */
 .view-toggle-inline {
   display: flex;
-  background: var(--gray-100);
+  background: transparent;
   border-radius: 8px;
-  padding: 3px;
+  padding: 0;
+  gap: var(--spacing-md);
 }
 
 .view-toggle-inline button {
@@ -491,6 +492,7 @@
 
 .view-toggle-inline button.active {
   color: #e91e63;
+  background: transparent;
 }
 
 .view-toggle-inline button:hover:not(.active) {
