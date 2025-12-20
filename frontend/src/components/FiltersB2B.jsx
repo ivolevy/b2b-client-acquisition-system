@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import GoogleLocationPicker from './GoogleLocationPicker';
 import LocationPicker from './LocationPicker';
 import { useAuth } from '../AuthWrapper';
@@ -16,12 +16,16 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
   // Estado para inicializar el mapa desde historial
   const [initialMapLocation, setInitialMapLocation] = useState(null);
   
+  // Ref para evitar ejecuciones múltiples de búsqueda desde historial
+  const historySearchExecutedRef = useRef(false);
+  
   // Verificar si hay API key de Google Maps
   const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   
   // Efecto para cargar datos desde historial
   useEffect(() => {
     if (historySearchData) {
+      historySearchExecutedRef.current = false;
       setRubro(historySearchData.rubro);
       if (historySearchData.centro_lat && historySearchData.centro_lng) {
         setInitialMapLocation({
@@ -34,15 +38,22 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
     }
   }, [historySearchData]);
   
+  const [scrapearWebsites, setScrapearWebsites] = useState(true);
+  const [soloValidadas, setSoloValidadas] = useState(false);
+  const [modoBusqueda, setModoBusqueda] = useState('nueva');
+  
   // Efecto separado para ejecutar búsqueda cuando locationData esté listo después de cargar historial
   useEffect(() => {
-    if (historySearchData && locationData && historySearchData.rubro) {
+    if (historySearchData && locationData && historySearchData.rubro && !historySearchExecutedRef.current) {
       // Solo ejecutar si el locationData coincide con el historial (para evitar loops)
       const matchesHistory = 
-        Math.abs(locationData.center?.lat - historySearchData.centro_lat) < 0.0001 &&
-        Math.abs(locationData.center?.lng - historySearchData.centro_lng) < 0.0001;
+        locationData.center?.lat &&
+        locationData.center?.lng &&
+        Math.abs(locationData.center.lat - historySearchData.centro_lat) < 0.0001 &&
+        Math.abs(locationData.center.lng - historySearchData.centro_lng) < 0.0001;
       
       if (matchesHistory && historySearchData.bbox) {
+        historySearchExecutedRef.current = true;
         const params = {
           rubro: historySearchData.rubro,
           bbox: historySearchData.bbox,
@@ -59,10 +70,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
       }
     }
   }, [locationData, historySearchData, scrapearWebsites, soloValidadas, onBuscar]);
-  
-  const [scrapearWebsites, setScrapearWebsites] = useState(true);
-  const [soloValidadas, setSoloValidadas] = useState(false);
-  const [modoBusqueda, setModoBusqueda] = useState('nueva');
 
   const handleBuscarSubmit = (e) => {
     e.preventDefault();
