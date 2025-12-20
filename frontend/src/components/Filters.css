@@ -112,12 +112,13 @@
   width: 100%;
   height: 36px;
   box-sizing: border-box;
-  padding: 0.5rem 2.5rem 0.5rem 0.75rem;
-  font-size: 0.85rem;
-  border: 2px solid var(--gray-200);
-  border-radius: var(--radius-lg);
+  padding: 6px 10px;
+  padding-right: 2.5rem;
+  font-size: 0.8rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
   background: white;
-  color: var(--gray-900);
+  color: var(--gray-700);
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -126,7 +127,7 @@
   background-position: right 0.75rem center;
   background-size: 18px 18px;
   transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
 
 .select-rubro-compact:hover {
@@ -208,8 +209,13 @@
 .form-row-compact .radius-control select {
   height: 36px;
   box-sizing: border-box;
-  padding: 0.5rem 2rem 0.5rem 0.6rem;
+  padding: 6px 10px;
+  padding-right: 2.5rem;
   font-size: 0.8rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  background: white;
+  color: var(--gray-700);
 }
 
 .form-row-compact .address-search {
@@ -224,10 +230,6 @@
   justify-content: flex-start;
   margin-right: 0;
   padding-right: 0;
-}
-
-.form-row-compact .address-input {
-  margin-right: 0;
 }
 
 .form-row-compact .address-search label {
@@ -246,8 +248,13 @@
 .form-row-compact .address-input {
   height: 36px;
   box-sizing: border-box;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.85rem;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  margin-right: 0;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  background: white;
+  color: var(--gray-700);
 }
 
 .form-row-compact .address-input-wrapper {
@@ -257,7 +264,7 @@
 }
 
 .form-row-compact .location-text {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--gray-700);
   display: inline-flex;
   align-items: center;
