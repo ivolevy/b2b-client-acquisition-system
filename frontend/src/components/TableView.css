@@ -518,6 +518,8 @@
   background: white;
   color: var(--gray-700);
   transition: border-color 0.2s, box-shadow 0.2s;
+  width: 140px;
+  box-sizing: border-box;
 }
 
 .filter-inline-input:focus {
@@ -527,7 +529,7 @@
 }
 
 .filter-city {
-  width: 110px;
+  width: 140px;
 }
 
 .filter-distance-group {
@@ -826,11 +828,28 @@
   }
   
   .filter-city {
-    width: 80px;
+    width: 120px;
+  }
+  
+  .filter-distance-group {
+    width: 120px;
   }
   
   .filter-km {
     width: 50px;
+  }
+  
+  .filter-inline-input {
+    width: 120px;
+  }
+  
+  .rubro-dropdown-trigger {
+    width: 120px;
+    min-width: 120px;
+  }
+  
+  .filter-checkbox-inline {
+    width: 120px;
   }
   
   .filter-actions-right {
@@ -885,7 +904,9 @@
   color: var(--gray-600);
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 180px;
+  width: 140px;
+  min-width: 140px;
+  box-sizing: border-box;
 }
 
 .rubro-dropdown-trigger:hover {
@@ -1054,7 +1075,15 @@
 
 @media (max-width: 480px) {
   .rubro-dropdown-trigger {
-    min-width: 120px;
+    width: 100px;
+    min-width: 100px;
+  }
+  
+  .filter-city,
+  .filter-distance-group,
+  .filter-inline-input,
+  .filter-checkbox-inline {
+    width: 100px;
   }
   
   .rubro-text {
