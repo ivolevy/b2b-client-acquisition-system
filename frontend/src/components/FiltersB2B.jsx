@@ -34,6 +34,32 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
     }
   }, [historySearchData]);
   
+  // Efecto separado para ejecutar búsqueda cuando locationData esté listo después de cargar historial
+  useEffect(() => {
+    if (historySearchData && locationData && historySearchData.rubro) {
+      // Solo ejecutar si el locationData coincide con el historial (para evitar loops)
+      const matchesHistory = 
+        Math.abs(locationData.center?.lat - historySearchData.centro_lat) < 0.0001 &&
+        Math.abs(locationData.center?.lng - historySearchData.centro_lng) < 0.0001;
+      
+      if (matchesHistory && historySearchData.bbox) {
+        const params = {
+          rubro: historySearchData.rubro,
+          bbox: historySearchData.bbox,
+          scrapear_websites: scrapearWebsites,
+          solo_validadas: soloValidadas,
+          limpiar_anterior: true,
+          busqueda_ubicacion_nombre: historySearchData.ubicacion_nombre || null,
+          busqueda_centro_lat: historySearchData.centro_lat || null,
+          busqueda_centro_lng: historySearchData.centro_lng || null,
+          busqueda_radio_km: historySearchData.radio_km || null
+        };
+        
+        onBuscar(params);
+      }
+    }
+  }, [locationData, historySearchData, scrapearWebsites, soloValidadas, onBuscar]);
+  
   const [scrapearWebsites, setScrapearWebsites] = useState(true);
   const [soloValidadas, setSoloValidadas] = useState(false);
   const [modoBusqueda, setModoBusqueda] = useState('nueva');
