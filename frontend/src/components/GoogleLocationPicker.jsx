@@ -261,7 +261,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         onClick={handleUseCurrentLocation}
         className="btn-location"
       >
-        Usar mi ubicación actual
+        o usa tu ubicación
       </button>
     </div>
   );
