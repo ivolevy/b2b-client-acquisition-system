@@ -211,7 +211,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-xs) var(--spacing-sm) var(--spacing-md);
   background: transparent;
   justify-content: flex-start;
 }
@@ -243,7 +243,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding: var(--spacing-sm) var(--spacing-xs) var(--spacing-sm) var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) var(--spacing-xs);
   background: transparent;
   justify-content: flex-start;
 }
