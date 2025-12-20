@@ -68,7 +68,7 @@ function TableViewB2B({
     let filtered = [...empresas];
 
     if (filtroRubro) {
-      filtered = filtered.filter(e => e.rubro === filtroRubro);
+      filtered = filtered.filter(e => e.rubro_key === filtroRubro);
     }
 
     if (filtroCiudad) {
@@ -577,37 +577,17 @@ function TableViewB2B({
                 </td>
                     {isPro && (
                       <td>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          {(empresa.direccion || (empresa.latitud && empresa.longitud)) && (
-                            <>
-                              <a
-                                href={`https://www.google.com/maps/dir/?api=1&destination=${empresa.direccion ? encodeURIComponent(empresa.direccion) : `${empresa.latitud},${empresa.longitud}`}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="action-btn-mini go-btn"
-                                title="Ir ahora"
-                              >
-                                🚗
-                              </a>
-                              <button
-                                onClick={() => {
-                                  const ubicacion = empresa.direccion || `${empresa.latitud}, ${empresa.longitud}`;
-                                  const text = `${empresa.nombre}\n📍 ${ubicacion}${empresa.telefono ? `\n📞 ${empresa.telefono}` : ''}${empresa.email ? `\n✉️ ${empresa.email}` : ''}`;
-                                  if (navigator.share) {
-                                    navigator.share({ title: empresa.nombre, text });
-                                  } else {
-                                    navigator.clipboard.writeText(text);
-                                    alert('Copiado al portapapeles');
-                                  }
-                                }}
-                                className="action-btn-mini share-btn"
-                                title="Compartir"
-                              >
-                                📤
-                              </button>
-                            </>
-                          )}
-                        </div>
+                        {(empresa.direccion || empresa.ciudad || (empresa.latitud && empresa.longitud)) && (
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${empresa.direccion && empresa.ciudad ? encodeURIComponent(`${empresa.direccion}, ${empresa.ciudad}${empresa.codigo_postal ? ` ${empresa.codigo_postal}` : ''}${empresa.pais ? `, ${empresa.pais}` : ''}`) : empresa.direccion ? encodeURIComponent(empresa.direccion) : `${empresa.latitud},${empresa.longitud}`}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="action-btn-mini go-btn"
+                            title="Mostrar dirección en Maps"
+                          >
+                            🚗
+                          </a>
+                        )}
                       </td>
                     )}
               </tr>
