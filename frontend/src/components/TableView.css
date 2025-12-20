@@ -536,6 +536,61 @@
   gap: 2px;
 }
 
+.filter-distance-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  overflow: hidden;
+  background: white;
+}
+
+.filter-toggle-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border: none;
+  background: white;
+  color: var(--gray-600);
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 50px;
+  height: 36px;
+  box-sizing: border-box;
+  border-right: 1px solid var(--gray-200);
+}
+
+.filter-toggle-btn:last-child {
+  border-right: none;
+}
+
+.filter-toggle-btn:hover {
+  background: var(--gray-50);
+}
+
+.filter-toggle-btn.active {
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+  color: #e91e63;
+}
+
+.filter-toggle-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.filter-toggle-btn span {
+  font-size: 0.65rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .filter-operator {
   width: 50px;
   padding: 6px;
@@ -547,6 +602,8 @@
 .filter-km {
   width: 60px;
   border-radius: 0 6px 6px 0;
+  height: 36px;
+  box-sizing: border-box;
 }
 
 .filter-checkbox-inline {

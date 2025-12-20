@@ -238,12 +238,10 @@
 
 .form-row-compact .btn-location-wrapper {
   flex: 0 0 auto;
-  width: 200px;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   padding: var(--spacing-sm) var(--spacing-md);
-  padding-left: var(--spacing-xs);
   background: transparent;
   justify-content: flex-start;
 }
@@ -257,19 +255,6 @@
   height: 1rem;
   display: flex;
   align-items: center;
-}
-
-.form-row-compact .btn-location {
-  width: 100%;
-  height: 36px;
-  box-sizing: border-box;
-  padding: 0.4rem 0.5rem;
-  font-size: 0.75rem;
-  white-space: nowrap;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .form-group {
