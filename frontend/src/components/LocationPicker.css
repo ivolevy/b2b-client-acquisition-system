@@ -24,16 +24,8 @@
 .radius-label {
   font-weight: 600;
   color: var(--gray-700);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   letter-spacing: -0.01em;
-  margin-bottom: 0.35rem;
-}
-
-.form-row-compact .radius-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-bottom: 0.35rem;
-  color: var(--gray-700);
 }
 
 .radius-control select {
