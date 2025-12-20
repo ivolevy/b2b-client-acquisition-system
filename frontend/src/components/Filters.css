@@ -160,6 +160,14 @@
   margin-left: var(--spacing-sm);
 }
 
+.form-row-compact .search-row .address-search {
+  margin-right: 0;
+}
+
+.form-row-compact .search-row .btn-location-wrapper {
+  margin-left: 0;
+}
+
 /* Todos los controles de ubicación con las mismas medidas */
 .form-row-compact .radius-control {
   flex: 0 0 auto;
@@ -211,9 +219,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding: var(--spacing-sm) var(--spacing-xs) var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-sm) 0 var(--spacing-sm) var(--spacing-md);
   background: transparent;
   justify-content: flex-start;
+  margin-right: 0;
 }
 
 .form-row-compact .address-search label {
@@ -243,9 +252,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 0;
   background: transparent;
   justify-content: flex-start;
+  margin-left: 0;
 }
 
 .form-row-compact .btn-location-label {

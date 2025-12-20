@@ -99,7 +99,7 @@
 
 .address-input-wrapper {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 0;
   align-items: center;
 }
 
