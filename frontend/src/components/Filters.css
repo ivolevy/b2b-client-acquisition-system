@@ -250,16 +250,10 @@
   font-size: 0.85rem;
 }
 
-.form-row-compact .btn-location-wrapper {
-  flex: 0 0 auto;
+.form-row-compact .address-input-wrapper {
   display: flex;
   align-items: center;
-  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 0;
-  background: transparent;
-  margin-left: 0;
-  padding-left: 0;
-  height: 36px;
-  box-sizing: border-box;
+  gap: var(--spacing-xs);
 }
 
 .form-row-compact .location-text {
@@ -267,7 +261,8 @@
   color: var(--gray-700);
   display: flex;
   align-items: center;
-  height: 100%;
+  white-space: nowrap;
+  margin-left: var(--spacing-xs);
 }
 
 .form-row-compact .btn-location-inline {

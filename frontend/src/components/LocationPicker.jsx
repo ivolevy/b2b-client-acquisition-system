@@ -513,6 +513,9 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             autoComplete="off"
           />
+          <span className="location-text">
+            o <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>
+          </span>
         </div>
         {isSearching && <div className="address-status">Buscando coincidencias...</div>}
 
@@ -532,12 +535,6 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             ))}
           </ul>
         )}
-      </div>
-
-      <div className="btn-location-wrapper">
-        <span className="location-text">
-          o <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>
-        </span>
       </div>
     </div>
   );
