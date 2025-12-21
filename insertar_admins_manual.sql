@@ -1,14 +1,24 @@
 -- ============================================================================
--- CREAR ADMINISTRADORES FREE Y PRO - Script Rápido
+-- INSERTAR ADMINISTRADORES EN TABLA USERS
 -- ============================================================================
--- Ejecuta este script DESPUÉS de crear los usuarios en Authentication → Users
+-- Este script inserta los usuarios admin en public.users
+-- Ejecutar en SQL Editor de Supabase Dashboard
 -- ============================================================================
 
--- Paso 1: Agregar columna role si no existe
-ALTER TABLE public.users 
-ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin'));
+-- Paso 1: Verificar usuarios admin en auth.users
+-- Ejecuta esto primero para obtener los UUIDs:
+SELECT 
+  id,
+  email,
+  created_at
+FROM auth.users
+WHERE email IN ('admin-free@dotasolutions.com', 'admin-pro@dotasolutions.com')
+ORDER BY email;
 
--- Paso 2: Insertar Admin Free si no existe, o actualizar si existe
+-- Paso 2: Reemplaza 'UUID_ADMIN_FREE' y 'UUID_ADMIN_PRO' con los UUIDs reales
+-- que obtuviste del Paso 1, luego ejecuta:
+
+-- Insertar Admin Free
 INSERT INTO public.users (id, email, name, phone, plan, role, searches_today, searches_reset_at)
 SELECT 
   id,
@@ -27,7 +37,7 @@ ON CONFLICT (id) DO UPDATE SET
   plan = 'free',
   role = 'admin';
 
--- Paso 3: Insertar Admin Pro si no existe, o actualizar si existe
+-- Insertar Admin Pro
 INSERT INTO public.users (id, email, name, phone, plan, role, searches_today, searches_reset_at)
 SELECT 
   id,
@@ -46,22 +56,28 @@ ON CONFLICT (id) DO UPDATE SET
   plan = 'pro',
   role = 'admin';
 
--- Paso 4: Verificar que se crearon correctamente
+-- Paso 3: Verificar que se insertaron correctamente
 SELECT 
+  id,
   email,
+  name,
   phone,
   plan,
   role,
   created_at
-FROM public.users 
+FROM public.users
 WHERE role = 'admin'
 ORDER BY plan, email;
 
 -- ============================================================================
--- Si los usuarios no existen aún, créalos primero:
+-- ALTERNATIVA: Si los usuarios NO existen en auth.users aún
 -- ============================================================================
--- 1. Ve a Authentication → Users → Add user
--- 2. Crea usuario: admin-free@dotasolutions.com / AdminFree2024!
--- 3. Crea usuario: admin-pro@dotasolutions.com / AdminPro2024!
--- 4. Luego ejecuta este script
+
+-- Primero créalos en Authentication → Users → Add user
+-- Luego ejecuta el script de arriba
+
+-- ============================================================================
+-- Si quieres crear usuarios admin con emails diferentes, cambia los emails
+-- en las consultas SELECT WHERE email = '...'
+-- ============================================================================
 

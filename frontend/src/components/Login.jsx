@@ -120,6 +120,10 @@ function Login({ onLogin }) {
     return localStorage.getItem('pending_email_confirmation') || '';
   });
   const [resendingEmail, setResendingEmail] = useState(false);
+  const [dismissedPendingEmail, setDismissedPendingEmail] = useState(() => {
+    // Verificar si el usuario cerró el mensaje de email pendiente
+    return localStorage.getItem('dismissed_pending_email') === 'true';
+  });
   
   // Estados de validación por campo
   const [emailError, setEmailError] = useState('');
@@ -279,7 +283,9 @@ function Login({ onLogin }) {
             // Si el usuario inicia sesión exitosamente, limpiar email pendiente
             if (pendingEmail && data.user.email === pendingEmail) {
               setPendingEmail('');
+              setDismissedPendingEmail(false);
               localStorage.removeItem('pending_email_confirmation');
+              localStorage.removeItem('dismissed_pending_email');
             }
             
             const userData = {
@@ -376,12 +382,12 @@ function Login({ onLogin }) {
 
   // Limpiar email pendiente cuando el usuario inicia sesión exitosamente
   useEffect(() => {
-    // Verificar si el usuario confirmó su email al iniciar sesión
-    if (mode === 'login' && pendingEmail) {
-      // El usuario puede haber confirmado su email, pero no lo verificamos aquí
-      // Se limpiará cuando inicie sesión exitosamente
+    // Si no hay pendingEmail, limpiar también el estado de dismissed
+    if (!pendingEmail) {
+      setDismissedPendingEmail(false);
+      localStorage.removeItem('dismissed_pending_email');
     }
-  }, [mode, pendingEmail]);
+  }, [pendingEmail]);
 
   const handleResendConfirmation = async () => {
     if (!pendingEmail) return;
@@ -397,7 +403,9 @@ function Login({ onLogin }) {
         if (resendError.message.includes('already confirmed')) {
           setError('Este email ya está confirmado. Puedes iniciar sesión.');
           setPendingEmail('');
+          setDismissedPendingEmail(false);
           localStorage.removeItem('pending_email_confirmation');
+          localStorage.removeItem('dismissed_pending_email');
         } else {
           setError(`Error al reenviar email: ${resendError.message}`);
         }
@@ -812,36 +820,43 @@ function Login({ onLogin }) {
                 </div>
               )}
 
-              {mode === 'login' && pendingEmail && (
-                <div style={{
-                  padding: '12px',
-                  background: 'rgba(255, 193, 7, 0.1)',
-                  border: '1px solid rgba(255, 193, 7, 0.3)',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  color: '#ffc107',
-                  textAlign: 'center'
-                }}>
-                  <p style={{ margin: '0 0 8px 0' }}>
-                    ⚠️ Tienes un email pendiente de confirmación: <strong>{pendingEmail}</strong>
-                  </p>
+              {mode === 'login' && pendingEmail && !dismissedPendingEmail && (
+                <div className="pending-email-warning">
                   <button
                     type="button"
-                    onClick={handleResendConfirmation}
-                    disabled={resendingEmail}
-                    style={{
-                      padding: '6px 12px',
-                      background: 'rgba(255, 193, 7, 0.2)',
-                      border: '1px solid rgba(255, 193, 7, 0.4)',
-                      borderRadius: '6px',
-                      color: '#ffc107',
-                      cursor: resendingEmail ? 'not-allowed' : 'pointer',
-                      fontSize: '13px',
-                      opacity: resendingEmail ? 0.6 : 1
+                    className="dismiss-warning-button"
+                    onClick={() => {
+                      setDismissedPendingEmail(true);
+                      localStorage.setItem('dismissed_pending_email', 'true');
                     }}
+                    aria-label="Cerrar advertencia"
                   >
-                    {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmación'}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
                   </button>
+                  <div className="warning-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                      <line x1="12" y1="9" x2="12" y2="13"/>
+                      <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                  </div>
+                  <div className="warning-content">
+                    <p className="warning-title">Email pendiente de confirmación</p>
+                    <p className="warning-text">
+                      Tienes un email pendiente: <strong>{pendingEmail}</strong>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleResendConfirmation}
+                      disabled={resendingEmail}
+                      className="resend-warning-button"
+                    >
+                      {resendingEmail ? 'Reenviando...' : 'Reenviar email'}
+                    </button>
+                  </div>
                 </div>
               )}
 
