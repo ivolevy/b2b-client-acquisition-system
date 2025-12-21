@@ -616,7 +616,6 @@ function Login({ onLogin }) {
         <div className="login-form-panel">
           <div className="form-container">
             <div className="form-header">
-              <h2>{mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}</h2>
             </div>
 
             {/* Tabs para cambiar entre login y registro */}
