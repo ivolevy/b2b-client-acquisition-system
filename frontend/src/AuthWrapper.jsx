@@ -312,17 +312,19 @@ function AuthWrapper() {
   }
 
   // Valor del contexto (memoizado para evitar re-renders innecesarios)
-  const authValue = useMemo(() => ({
-    user,
-    isAuthenticated: !!user,
-    isPro: user?.plan === 'pro',
-    useSupabase,
-    login: useSupabase ? handleSupabaseLogin : handleDemoLogin,
-    signUp: useSupabase ? handleSupabaseSignUp : null,
-    logout: handleLogout,
-    updateUserPlan,
-    demoUsers: DEMO_USERS // Siempre disponible
-  }), [user, useSupabase, handleSupabaseLogin, handleDemoLogin, handleSupabaseSignUp, handleLogout, updateUserPlan]);
+  const authValue = useMemo(() => {
+    return {
+      user,
+      isAuthenticated: !!user,
+      isPro: user?.plan === 'pro',
+      useSupabase,
+      login: useSupabase ? handleSupabaseLogin : handleDemoLogin,
+      signUp: useSupabase ? handleSupabaseSignUp : null,
+      logout: handleLogout,
+      updateUserPlan,
+      demoUsers: DEMO_USERS // Siempre disponible
+    };
+  }, [user, useSupabase, handleSupabaseLogin, handleDemoLogin, handleSupabaseSignUp, handleLogout, updateUserPlan]);
 
   // Componente de carga para Suspense
   const LoadingFallback = () => (
