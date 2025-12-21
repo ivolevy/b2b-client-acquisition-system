@@ -78,8 +78,8 @@ function AuthWrapper() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showProWelcome, setShowProWelcome] = useState(false);
-  // Memoizar useSupabase para evitar cambios innecesarios
-  const useSupabase = useMemo(() => isSupabaseConfigured(), []);
+  // useSupabase es constante durante la ejecución, no necesita memoización
+  const useSupabase = isSupabaseConfigured();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -312,24 +312,22 @@ function AuthWrapper() {
     );
   }
 
-  // Valor del contexto (memoizado para evitar re-renders innecesarios)
-  // Usar useMemo solo cuando sea necesario, asegurando que todas las dependencias sean estables
-  const authValue = useMemo(() => {
-    const loginFn = useSupabase ? handleSupabaseLogin : handleDemoLogin;
-    const signUpFn = useSupabase ? handleSupabaseSignUp : null;
-    
-    return {
-      user,
-      isAuthenticated: !!user,
-      isPro: user?.plan === 'pro',
-      useSupabase,
-      login: loginFn,
-      signUp: signUpFn,
-      logout: handleLogout,
-      updateUserPlan,
-      demoUsers: DEMO_USERS // Siempre disponible
-    };
-  }, [user, useSupabase, handleSupabaseLogin, handleDemoLogin, handleSupabaseSignUp, handleLogout, updateUserPlan]);
+  // Valor del contexto - simplificado sin useMemo para evitar problemas con dependencias
+  // Las funciones ya están memoizadas con useCallback, así que el objeto se recrea pero las funciones son estables
+  const loginFn = useSupabase ? handleSupabaseLogin : handleDemoLogin;
+  const signUpFn = useSupabase ? handleSupabaseSignUp : null;
+  
+  const authValue = {
+    user,
+    isAuthenticated: !!user,
+    isPro: user?.plan === 'pro',
+    useSupabase,
+    login: loginFn,
+    signUp: signUpFn,
+    logout: handleLogout,
+    updateUserPlan,
+    demoUsers: DEMO_USERS // Siempre disponible
+  };
 
   // Componente de carga para Suspense
   const LoadingFallback = () => (
