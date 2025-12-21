@@ -12,8 +12,10 @@
 CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email VARCHAR(255) UNIQUE NOT NULL,
-  name VARCHAR(255) NOT NULL,
+  name VARCHAR(50) NOT NULL,
+  phone VARCHAR(20),
   plan VARCHAR(20) DEFAULT 'free' CHECK (plan IN ('free', 'pro')),
+  role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   plan_expires_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -196,13 +198,22 @@ ON CONFLICT (plan, feature_key) DO NOTHING;
 -- Crear o reemplazar la función que crea el perfil automáticamente
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  v_role VARCHAR(20) := 'user';
 BEGIN
-  INSERT INTO public.users (id, email, name, plan)
+  -- Si el email contiene 'admin', asignar role admin automáticamente
+  IF NEW.email LIKE '%admin%' THEN
+    v_role := 'admin';
+  END IF;
+  
+  INSERT INTO public.users (id, email, name, phone, plan, role)
   VALUES (
     NEW.id, 
     NEW.email, 
-    COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)), 
-    'free'
+    COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
+    COALESCE(NEW.raw_user_meta_data->>'phone', ''),
+    'free',
+    v_role
   );
   RETURN NEW;
 END;

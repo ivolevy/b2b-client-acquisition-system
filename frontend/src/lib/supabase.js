@@ -15,7 +15,7 @@ export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
 export const authService = {
   // Registro de usuario
-  async signUp(email, password, phone) {
+  async signUp(email, password, name, phone) {
     try {
       // Obtener la URL base de la aplicación para la redirección después de confirmar email
       // Supabase redirigirá aquí después de que el usuario confirme su email
@@ -28,6 +28,7 @@ export const authService = {
         options: {
           emailRedirectTo: redirectTo,
           data: {
+            name: name,
             phone: phone,
             plan: 'free'
           }

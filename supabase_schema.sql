@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(50) NOT NULL,
   phone VARCHAR(20),
   plan VARCHAR(20) DEFAULT 'free' CHECK (plan IN ('free', 'pro')),
   plan_expires_at TIMESTAMP WITH TIME ZONE,
@@ -88,8 +89,14 @@ ON CONFLICT (plan, feature_key) DO NOTHING;
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.users (id, email, phone, plan)
-  VALUES (NEW.id, NEW.email, COALESCE(NEW.raw_user_meta_data->>'phone', ''), 'free');
+  INSERT INTO public.users (id, email, name, phone, plan)
+  VALUES (
+    NEW.id, 
+    NEW.email, 
+    COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
+    COALESCE(NEW.raw_user_meta_data->>'phone', ''),
+    'free'
+  );
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

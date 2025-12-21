@@ -117,6 +117,7 @@ function AuthWrapper() {
                 const userData = {
                   id: session.user.id,
                   email: session.user.email,
+                  name: profile?.name || session.user.email.split('@')[0],
                   phone: profile?.phone || '',
                   plan: profile?.plan || 'free',
                   role: profile?.plan === 'pro' ? 'admin' : 'user',

@@ -40,7 +40,7 @@ function Navbar({ onNavigateToProfile }) {
                 >
                   <div className="user-details">
                     <div className="user-name-row">
-                      <span className="user-name">{user.phone || user.email || 'Usuario'}</span>
+                      <span className="user-name">{user.name || user.email || 'Usuario'}</span>
                       {user.plan === 'pro' && (
                         <span className="pro-badge-small">PRO</span>
                       )}

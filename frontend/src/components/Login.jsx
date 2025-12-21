@@ -42,6 +42,25 @@ const validateEmail = (email) => {
   return { isValid: true, message: '' };
 };
 
+const validateName = (name) => {
+  if (!name || name.trim() === '') {
+    return { isValid: false, message: 'El nombre es requerido' };
+  }
+  const trimmedName = name.trim();
+  if (trimmedName.length < 2) {
+    return { isValid: false, message: 'El nombre debe tener al menos 2 caracteres' };
+  }
+  if (trimmedName.length > 20) {
+    return { isValid: false, message: 'El nombre es demasiado largo (máximo 20 caracteres)' };
+  }
+  // Permitir letras, espacios, acentos y caracteres especiales comunes
+  const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/;
+  if (!nameRegex.test(trimmedName)) {
+    return { isValid: false, message: 'El nombre solo puede contener letras, espacios y guiones' };
+  }
+  return { isValid: true, message: '' };
+};
+
 const validatePhone = (phone) => {
   if (!phone || phone.trim() === '') {
     return { isValid: false, message: 'El teléfono es requerido' };
@@ -91,6 +110,7 @@ function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -105,10 +125,12 @@ function Login({ onLogin }) {
   const [emailError, setEmailError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [nameError, setNameError] = useState('');
   const [touched, setTouched] = useState({
     email: false,
     phone: false,
-    password: false
+    password: false,
+    name: false
   });
   
   const useSupabase = isSupabaseConfigured();
@@ -118,8 +140,9 @@ function Login({ onLogin }) {
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password, mode);
     const phoneValidation = mode === 'register' ? validatePhone(phone) : { isValid: true };
+    const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
     
-    return emailValidation.isValid && passwordValidation.isValid && phoneValidation.isValid;
+    return emailValidation.isValid && passwordValidation.isValid && phoneValidation.isValid && nameValidation.isValid;
   };
   
   // Handlers de cambio con validación en tiempo real
@@ -129,6 +152,15 @@ function Login({ onLogin }) {
     if (touched.email) {
       const validation = validateEmail(value);
       setEmailError(validation.message);
+    }
+  };
+  
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    setName(value);
+    if (touched.name) {
+      const validation = validateName(value);
+      setNameError(validation.message);
     }
   };
   
@@ -157,6 +189,12 @@ function Login({ onLogin }) {
     setEmailError(validation.message);
   };
   
+  const handleNameBlur = () => {
+    setTouched({ ...touched, name: true });
+    const validation = validateName(name);
+    setNameError(validation.message);
+  };
+  
   const handlePhoneBlur = () => {
     setTouched({ ...touched, phone: true });
     const validation = validatePhone(phone);
@@ -175,19 +213,21 @@ function Login({ onLogin }) {
     setSuccess('');
     
     // Marcar todos los campos como touched para mostrar errores
-    setTouched({ email: true, phone: true, password: true });
+    setTouched({ email: true, phone: true, password: true, name: true });
     
     // Validar todos los campos
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password, mode);
     const phoneValidation = mode === 'register' ? validatePhone(phone) : { isValid: true };
+    const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
     
     setEmailError(emailValidation.message);
     setPasswordError(passwordValidation.message);
     setPhoneError(phoneValidation.message);
+    setNameError(nameValidation.message);
     
     // Si hay errores de validación, no continuar
-    if (!emailValidation.isValid || !passwordValidation.isValid || !phoneValidation.isValid) {
+    if (!emailValidation.isValid || !passwordValidation.isValid || !phoneValidation.isValid || !nameValidation.isValid) {
       setError('Por favor, revisa y corrige los errores marcados en el formulario');
       return;
     }
@@ -209,6 +249,7 @@ function Login({ onLogin }) {
         
         const userData = {
           email: demoUser.email,
+          name: demoUser.name || demoUser.email.split('@')[0],
           phone: demoUser.phone || '',
           role: demoUser.role,
           plan: demoUser.plan,
@@ -244,6 +285,7 @@ function Login({ onLogin }) {
             const userData = {
               id: data.user.id,
               email: data.user.email,
+              name: data.profile?.name || data.user.email.split('@')[0],
               phone: data.profile?.phone || '',
               plan: data.profile?.plan || 'free',
               role: data.profile?.plan === 'pro' ? 'admin' : 'user',
@@ -261,7 +303,7 @@ function Login({ onLogin }) {
             return;
           }
 
-          const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, phone.trim());
+          const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, name.trim(), phone.trim());
           
           if (error) {
             if (error.message.includes('already registered') || error.message.includes('already exists')) {
@@ -292,6 +334,7 @@ function Login({ onLogin }) {
             setMode('login');
             setPassword('');
             setPhone('');
+            setName('');
           }
         }
       } else {
@@ -321,11 +364,13 @@ function Login({ onLogin }) {
     setEmail('');
     setPassword('');
     setPhone('');
+    setName('');
     // Limpiar errores de validación
     setEmailError('');
     setPhoneError('');
     setPasswordError('');
-    setTouched({ email: false, phone: false, password: false });
+    setNameError('');
+    setTouched({ email: false, phone: false, password: false, name: false });
     // No limpiar pendingEmail al cambiar de modo para mantener el estado
   };
 
@@ -528,10 +573,12 @@ function Login({ onLogin }) {
                       setEmail('');
                       setPassword('');
                       setPhone('');
+                      setName('');
                       setEmailError('');
                       setPhoneError('');
                       setPasswordError('');
-                      setTouched({ email: false, phone: false, password: false });
+                      setNameError('');
+                      setTouched({ email: false, phone: false, password: false, name: false });
                     }
                   }}
                   type="button"
@@ -548,10 +595,12 @@ function Login({ onLogin }) {
                       setEmail('');
                       setPassword('');
                       setPhone('');
+                      setName('');
                       setEmailError('');
                       setPhoneError('');
                       setPasswordError('');
-                      setTouched({ email: false, phone: false, password: false });
+                      setNameError('');
+                      setTouched({ email: false, phone: false, password: false, name: false });
                     }
                   }}
                   type="button"
@@ -623,6 +672,7 @@ function Login({ onLogin }) {
                         setEmail('');
                         setPassword('');
                         setPhone('');
+                        setName('');
                       }}
                       className="back-to-login-button"
                     >
@@ -636,23 +686,24 @@ function Login({ onLogin }) {
                 <>
               {mode === 'register' && (
                 <div className="form-group">
-                  <label htmlFor="phone">Teléfono</label>
+                  <label htmlFor="name">Nombre</label>
                   <div className="input-wrapper">
                     <input
-                      type="tel"
-                      id="phone"
-                      value={phone}
-                      onChange={handlePhoneChange}
-                      onBlur={handlePhoneBlur}
-                      placeholder="+54 11 1234-5678"
+                      type="text"
+                      id="name"
+                      value={name}
+                      onChange={handleNameChange}
+                      onBlur={handleNameBlur}
+                      placeholder="Tu nombre"
                       required={mode === 'register'}
-                      autoComplete="tel"
+                      autoComplete="name"
                       disabled={loading}
-                      className={phoneError ? 'input-error' : ''}
+                      className={nameError ? 'input-error' : ''}
+                      minLength={2}
                       maxLength={20}
                     />
                   </div>
-                  {phoneError && <span className="field-error">{phoneError}</span>}
+                  {nameError && <span className="field-error">{nameError}</span>}
                 </div>
               )}
 
@@ -675,6 +726,28 @@ function Login({ onLogin }) {
                 </div>
                 {emailError && <span className="field-error">{emailError}</span>}
               </div>
+
+              {mode === 'register' && (
+                <div className="form-group">
+                  <label htmlFor="phone">Teléfono</label>
+                  <div className="input-wrapper">
+                    <input
+                      type="tel"
+                      id="phone"
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      onBlur={handlePhoneBlur}
+                      placeholder="+54 11 1234-5678"
+                      required={mode === 'register'}
+                      autoComplete="tel"
+                      disabled={loading}
+                      className={phoneError ? 'input-error' : ''}
+                      maxLength={20}
+                    />
+                  </div>
+                  {phoneError && <span className="field-error">{phoneError}</span>}
+                </div>
+              )}
 
               <div className="form-group">
                 <label htmlFor="password">Contraseña</label>
