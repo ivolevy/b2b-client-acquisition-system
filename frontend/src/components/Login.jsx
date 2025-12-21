@@ -2,6 +2,24 @@ import React, { useState, useEffect } from 'react';
 import './Login.css';
 import { authService, supabase } from '../lib/supabase';
 
+// Códigos telefónicos por país
+const COUNTRY_CODES = [
+  { code: '+54', country: 'AR', name: 'Argentina', flag: '🇦🇷' },
+  { code: '+55', country: 'BR', name: 'Brasil', flag: '🇧🇷' },
+  { code: '+56', country: 'CL', name: 'Chile', flag: '🇨🇱' },
+  { code: '+57', country: 'CO', name: 'Colombia', flag: '🇨🇴' },
+  { code: '+52', country: 'MX', name: 'México', flag: '🇲🇽' },
+  { code: '+51', country: 'PE', name: 'Perú', flag: '🇵🇪' },
+  { code: '+598', country: 'UY', name: 'Uruguay', flag: '🇺🇾' },
+  { code: '+58', country: 'VE', name: 'Venezuela', flag: '🇻🇪' },
+  { code: '+1', country: 'US', name: 'Estados Unidos', flag: '🇺🇸' },
+  { code: '+34', country: 'ES', name: 'España', flag: '🇪🇸' },
+  { code: '+33', country: 'FR', name: 'Francia', flag: '🇫🇷' },
+  { code: '+49', country: 'DE', name: 'Alemania', flag: '🇩🇪' },
+  { code: '+39', country: 'IT', name: 'Italia', flag: '🇮🇹' },
+  { code: '+44', country: 'GB', name: 'Reino Unido', flag: '🇬🇧' },
+];
+
 // Credenciales de prueba (modo demo cuando Supabase no está configurado)
 const DEMO_USERS = [
   {
@@ -61,23 +79,26 @@ const validateName = (name) => {
   return { isValid: true, message: '' };
 };
 
-const validatePhone = (phone) => {
+const validatePhone = (phone, countryCode) => {
   if (!phone || phone.trim() === '') {
     return { isValid: false, message: 'El teléfono es requerido' };
   }
-  // Permitir números, espacios, guiones, paréntesis y +
-  const phoneRegex = /^[\d\s\-\+\(\)]+$/;
-  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+  
+  // Solo permitir números
+  const phoneRegex = /^\d+$/;
   
   if (!phoneRegex.test(phone)) {
-    return { isValid: false, message: 'El teléfono solo puede contener números, espacios, guiones y paréntesis' };
+    return { isValid: false, message: 'El teléfono solo puede contener números' };
   }
-  if (cleanPhone.length < 8) {
+  
+  // Validar longitud mínima y máxima
+  if (phone.length < 8) {
     return { isValid: false, message: 'El teléfono debe tener al menos 8 dígitos' };
   }
-  if (cleanPhone.length > 15) {
+  if (phone.length > 15) {
     return { isValid: false, message: 'El teléfono es demasiado largo (máximo 15 dígitos)' };
   }
+  
   return { isValid: true, message: '' };
 };
 
@@ -110,6 +131,7 @@ function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('+54'); // Argentina por defecto
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -187,7 +209,7 @@ function Login({ onLogin }) {
   const isFormValid = () => {
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password, mode);
-    const phoneValidation = mode === 'register' ? validatePhone(phone) : { isValid: true };
+    const phoneValidation = mode === 'register' ? validatePhone(phone, countryCode) : { isValid: true };
     const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
     
     return emailValidation.isValid && passwordValidation.isValid && phoneValidation.isValid && nameValidation.isValid;
@@ -220,10 +242,11 @@ function Login({ onLogin }) {
   };
   
   const handlePhoneChange = (e) => {
-    const value = e.target.value;
+    // Solo permitir números
+    const value = e.target.value.replace(/\D/g, '');
     setPhone(value);
     if (touched.phone) {
-      const validation = validatePhone(value);
+      const validation = validatePhone(value, countryCode);
       setPhoneError(validation.message);
     }
   };
@@ -252,7 +275,7 @@ function Login({ onLogin }) {
   
   const handlePhoneBlur = () => {
     setTouched({ ...touched, phone: true });
-    const validation = validatePhone(phone);
+    const validation = validatePhone(phone, countryCode);
     setPhoneError(validation.message);
   };
   
@@ -273,7 +296,7 @@ function Login({ onLogin }) {
     // Validar todos los campos
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password, mode);
-    const phoneValidation = mode === 'register' ? validatePhone(phone) : { isValid: true };
+    const phoneValidation = mode === 'register' ? validatePhone(phone, countryCode) : { isValid: true };
     const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
     
     setEmailError(emailValidation.message);
@@ -353,14 +376,16 @@ function Login({ onLogin }) {
           }
         } else {
           // Registro - Validaciones adicionales antes de enviar
-          const phoneValidation = validatePhone(phone.trim());
+          const phoneValidation = validatePhone(phone.trim(), countryCode);
           if (!phoneValidation.isValid) {
             setError(phoneValidation.message);
             setLoading(false);
             return;
           }
 
-          const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, name.trim(), phone.trim());
+          // Combinar código de país con número de teléfono
+          const fullPhone = `${countryCode}${phone.trim()}`;
+          const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, name.trim(), fullPhone);
           
           if (error) {
             if (error.message.includes('already registered') || error.message.includes('already exists')) {
@@ -391,6 +416,7 @@ function Login({ onLogin }) {
             setMode('login');
             setPassword('');
             setPhone('');
+            setCountryCode('+54');
             setName('');
           }
         }
@@ -421,6 +447,7 @@ function Login({ onLogin }) {
     setEmail('');
     setPassword('');
     setPhone('');
+    setCountryCode('+54'); // Resetear a Argentina
     setName('');
     // Limpiar errores de validación
     setEmailError('');
@@ -632,6 +659,7 @@ function Login({ onLogin }) {
                       setEmail('');
                       setPassword('');
                       setPhone('');
+                      setCountryCode('+54');
                       setName('');
                       setEmailError('');
                       setPhoneError('');
@@ -654,6 +682,7 @@ function Login({ onLogin }) {
                       setEmail('');
                       setPassword('');
                       setPhone('');
+                      setCountryCode('+54');
                       setName('');
                       setEmailError('');
                       setPhoneError('');
@@ -731,6 +760,7 @@ function Login({ onLogin }) {
                         setEmail('');
                         setPassword('');
                         setPhone('');
+                        setCountryCode('+54');
                         setName('');
                       }}
                       className="back-to-login-button"
@@ -789,19 +819,32 @@ function Login({ onLogin }) {
               {mode === 'register' && (
                 <div className="form-group">
                   <label htmlFor="phone">Teléfono</label>
-                  <div className="input-wrapper">
+                  <div className="phone-input-wrapper">
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="country-code-select"
+                      disabled={loading}
+                    >
+                      {COUNTRY_CODES.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.flag} {country.code}
+                        </option>
+                      ))}
+                    </select>
                     <input
                       type="tel"
                       id="phone"
                       value={phone}
                       onChange={handlePhoneChange}
                       onBlur={handlePhoneBlur}
-                      placeholder="+54 11 1234-5678"
+                      placeholder="11 1234-5678"
                       required={mode === 'register'}
                       autoComplete="tel"
                       disabled={loading}
-                      className={phoneError ? 'input-error' : ''}
-                      maxLength={20}
+                      className={`phone-input ${phoneError ? 'input-error' : ''}`}
+                      maxLength={15}
+                      inputMode="numeric"
                     />
                   </div>
                   {phoneError && <span className="field-error">{phoneError}</span>}
