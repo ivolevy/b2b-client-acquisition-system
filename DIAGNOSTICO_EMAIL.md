@@ -189,3 +189,4 @@ Marca cada item cuando lo verifiques:
 - **Seguridad:** Nunca compartas credenciales SMTP. Úsalas solo en la configuración segura de Supabase
 
 
+

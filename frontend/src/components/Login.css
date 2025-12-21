@@ -714,9 +714,131 @@
 }
 
 /* ============================================
-   SUCCESS MESSAGE
+   SUCCESS MESSAGE (Full Screen Style)
    ============================================ */
 
+.success-message-full {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  animation: fadeInUp 0.4s ease-out;
+  min-height: 400px;
+  width: 100%;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.03), rgba(16, 185, 129, 0.01));
+  border-radius: 16px;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+.success-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  border: 3px solid rgba(16, 185, 129, 0.2);
+  animation: scaleIn 0.5s ease-out 0.2s both;
+}
+
+.success-icon-wrapper svg {
+  width: 40px;
+  height: 40px;
+  stroke: var(--login-success);
+  stroke-width: 2.5;
+}
+
+.success-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.success-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--login-dark);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.success-content p {
+  color: #065f46;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.resend-email-button {
+  padding: 12px 20px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  border-radius: 10px;
+  color: #065f46;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.resend-email-button:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.resend-email-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.resend-email-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.back-to-login-button {
+  padding: 12px 24px;
+  background: var(--login-gradient);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  box-shadow: 0 3px 12px rgba(255, 105, 180, 0.3);
+}
+
+.back-to-login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 20, 147, 0.4);
+}
+
+.back-to-login-button:active {
+  transform: translateY(0);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Legacy success message (mantener por compatibilidad) */
 .success-message {
   display: flex;
   align-items: flex-start;

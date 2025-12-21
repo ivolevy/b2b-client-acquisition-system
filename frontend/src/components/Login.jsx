@@ -386,46 +386,46 @@ function Login({ onLogin }) {
               )}
 
               {success && (
-                <div className="success-message">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <polyline points="22,4 12,14.01 9,11.01"/>
-                  </svg>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                    <span>{success}</span>
-                    {pendingEmail && mode === 'login' && (
+                <div className="success-message-full">
+                  <div className="success-icon-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                      <polyline points="22,4 12,14.01 9,11.01"/>
+                    </svg>
+                  </div>
+                  <div className="success-content">
+                    <h3>¡Cuenta creada exitosamente!</h3>
+                    <p>{success}</p>
+                    {pendingEmail && (
                       <button
                         type="button"
                         onClick={handleResendConfirmation}
                         disabled={resendingEmail}
-                        style={{
-                          marginTop: '8px',
-                          padding: '8px 16px',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          borderRadius: '6px',
-                          color: 'white',
-                          cursor: resendingEmail ? 'not-allowed' : 'pointer',
-                          fontSize: '14px',
-                          opacity: resendingEmail ? 0.6 : 1,
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!resendingEmail) {
-                            e.target.style.background = 'rgba(255, 255, 255, 0.15)';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-                        }}
+                        className="resend-email-button"
                       >
                         {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmación'}
                       </button>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSuccess('');
+                        setError('');
+                        setMode('login');
+                        setEmail('');
+                        setPassword('');
+                        setName('');
+                      }}
+                      className="back-to-login-button"
+                    >
+                      Volver a iniciar sesión
+                    </button>
                   </div>
                 </div>
               )}
 
+              {!success && (
+                <>
               {mode === 'register' && (
                 <div className="form-group">
                   <label htmlFor="name">Nombre</label>
@@ -549,6 +549,8 @@ function Login({ onLogin }) {
                   <polyline points="12,5 19,12 12,19"/>
                 </svg>
               </button>
+                </>
+              )}
             </form>
 
             <div className="form-footer">
