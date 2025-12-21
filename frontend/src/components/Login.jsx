@@ -128,15 +128,17 @@ const validatePhone = (phone) => {
   if (!phone || phone.trim() === '') {
     return { isValid: false, message: 'El teléfono es requerido' };
   }
-  // Permitir solo números, espacios, guiones y paréntesis
-  const phoneRegex = /^[\d\s\-\(\)]+$/;
-  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+  // Extraer solo los números del teléfono completo (incluyendo prefijo)
+  const cleanPhone = phone.replace(/[^\d]/g, '');
   
-  if (!phoneRegex.test(phone)) {
-    return { isValid: false, message: 'El teléfono solo puede contener números, espacios, guiones y paréntesis' };
+  // Validar que solo contenga números después de limpiar
+  if (cleanPhone.length === 0) {
+    return { isValid: false, message: 'El teléfono debe contener al menos un número' };
   }
-  if (cleanPhone.length < 8) {
-    return { isValid: false, message: 'El teléfono debe tener al menos 8 dígitos' };
+  
+  // Validar longitud mínima (prefijo + número local, mínimo 10 dígitos totales)
+  if (cleanPhone.length < 10) {
+    return { isValid: false, message: 'El teléfono debe tener al menos 10 dígitos' };
   }
   if (cleanPhone.length > 15) {
     return { isValid: false, message: 'El teléfono es demasiado largo (máximo 15 dígitos)' };
@@ -321,13 +323,13 @@ function Login({ onLogin }) {
   }, [touched.name]);
   
   const handlePhoneChange = useCallback((e) => {
-    // Solo permitir números, espacios, guiones y paréntesis
-    const value = e.target.value.replace(/[^\d\s\-\(\)]/g, '');
+    // Solo permitir números
+    const value = e.target.value.replace(/[^\d]/g, '');
     setPhone(value);
     
     if ((touched.phone || mode === 'register') && debouncedPhoneValidationRef.current) {
       // Validar con el prefijo incluido
-      const fullPhone = `${selectedCountry.prefix} ${value}`.trim();
+      const fullPhone = `${selectedCountry.prefix}${value}`;
       debouncedPhoneValidationRef.current(fullPhone);
     }
   }, [touched.phone, mode, selectedCountry]);
@@ -338,7 +340,7 @@ function Login({ onLogin }) {
     setCountrySearch('');
     // Revalidar el teléfono con el nuevo prefijo
     if (phone && (touched.phone || mode === 'register') && debouncedPhoneValidationRef.current) {
-      const fullPhone = `${country.prefix} ${phone}`.trim();
+      const fullPhone = `${country.prefix}${phone}`;
       debouncedPhoneValidationRef.current(fullPhone);
     }
   }, [phone, touched.phone, mode]);
@@ -378,7 +380,7 @@ function Login({ onLogin }) {
   
   const handlePhoneBlur = () => {
     setTouched({ ...touched, phone: true });
-    const fullPhone = `${selectedCountry.prefix} ${phone}`.trim();
+    const fullPhone = `${selectedCountry.prefix}${phone}`;
     const validation = validatePhone(fullPhone);
     setPhoneError(validation.message);
   };
@@ -414,7 +416,7 @@ function Login({ onLogin }) {
     // Validar todos los campos
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password, mode);
-    const fullPhone = mode === 'register' ? `${selectedCountry.prefix} ${phone}`.trim() : '';
+    const fullPhone = mode === 'register' ? `${selectedCountry.prefix}${phone}` : '';
     const phoneValidation = mode === 'register' ? validatePhone(fullPhone) : { isValid: true };
     const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
     
@@ -1008,7 +1010,7 @@ function Login({ onLogin }) {
                       value={phone}
                       onChange={handlePhoneChange}
                       onBlur={handlePhoneBlur}
-                      placeholder="11 1234-5678"
+                      placeholder="1112345678"
                       required={mode === 'register'}
                       autoComplete="tel"
                       disabled={loading}
