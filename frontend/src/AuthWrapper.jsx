@@ -111,6 +111,10 @@ function AuthWrapper() {
               // Limpiar la URL
               window.history.replaceState({}, document.title, window.location.pathname);
               
+              // Limpiar email pendiente de confirmación ya que el usuario acaba de confirmar
+              localStorage.removeItem('pending_email_confirmation');
+              localStorage.removeItem('dismissed_pending_email');
+              
               const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
               
               if (!profileError && profile) {

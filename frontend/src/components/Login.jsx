@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Login.css';
-import { authService } from '../lib/supabase';
+import { authService, supabase } from '../lib/supabase';
 
 // Credenciales de prueba (modo demo cuando Supabase no está configurado)
 const DEMO_USERS = [
@@ -138,6 +138,43 @@ function Login({ onLogin }) {
   });
   
   const useSupabase = isSupabaseConfigured();
+  
+  // Verificar sesión al cargar y limpiar pendingEmail si el usuario ya está autenticado
+  useEffect(() => {
+    const checkSession = async () => {
+      if (useSupabase && pendingEmail) {
+        try {
+          const { session } = await authService.getSession();
+          
+          // Si hay sesión activa, limpiar el email pendiente
+          if (session?.user) {
+            setPendingEmail('');
+            setDismissedPendingEmail(false);
+            localStorage.removeItem('pending_email_confirmation');
+            localStorage.removeItem('dismissed_pending_email');
+            return;
+          }
+          
+          // Si el usuario cerró el mensaje hace más de 7 días, limpiar el pendingEmail
+          const dismissedTime = localStorage.getItem('dismissed_pending_email_time');
+          if (dismissedTime) {
+            const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24);
+            if (daysSinceDismissed > 7) {
+              setPendingEmail('');
+              localStorage.removeItem('pending_email_confirmation');
+              localStorage.removeItem('dismissed_pending_email');
+              localStorage.removeItem('dismissed_pending_email_time');
+            }
+          }
+        } catch (error) {
+          // Si hay error, simplemente no hacer nada
+          console.log('[Login] Error verificando sesión:', error);
+        }
+      }
+    };
+    
+    checkSession();
+  }, []); // Solo ejecutar una vez al montar el componente
   
   // Validar formulario completo
   const isFormValid = () => {
@@ -828,6 +865,7 @@ function Login({ onLogin }) {
                     onClick={() => {
                       setDismissedPendingEmail(true);
                       localStorage.setItem('dismissed_pending_email', 'true');
+                      localStorage.setItem('dismissed_pending_email_time', Date.now().toString());
                     }}
                     aria-label="Cerrar advertencia"
                   >
