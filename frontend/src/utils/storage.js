@@ -27,14 +27,25 @@ class StorageService {
     try {
       const storage = useSession ? sessionStorage : localStorage;
       const value = storage.getItem(key);
-      const parsed = value ? JSON.parse(value) : null;
       
-      if (parsed !== null) {
-        MEMORY_CACHE.set(cacheKey, {
-          value: parsed,
-          timestamp: Date.now()
-        });
+      if (value === null) {
+        return null;
       }
+
+      // Intentar parsear JSON, pero si falla, devolver el string original
+      // Esto maneja valores antiguos que fueron guardados como strings simples
+      let parsed;
+      try {
+        parsed = JSON.parse(value);
+      } catch (parseError) {
+        // Si no es JSON válido, devolver el string original
+        parsed = value;
+      }
+      
+      MEMORY_CACHE.set(cacheKey, {
+        value: parsed,
+        timestamp: Date.now()
+      });
       
       return parsed;
     } catch (error) {
