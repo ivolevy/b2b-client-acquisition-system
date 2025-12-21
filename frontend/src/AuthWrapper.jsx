@@ -78,7 +78,8 @@ function AuthWrapper() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showProWelcome, setShowProWelcome] = useState(false);
-  const [useSupabase] = useState(isSupabaseConfigured());
+  // Memoizar useSupabase para evitar cambios innecesarios
+  const useSupabase = useMemo(() => isSupabaseConfigured(), []);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -312,14 +313,18 @@ function AuthWrapper() {
   }
 
   // Valor del contexto (memoizado para evitar re-renders innecesarios)
+  // Usar useMemo solo cuando sea necesario, asegurando que todas las dependencias sean estables
   const authValue = useMemo(() => {
+    const loginFn = useSupabase ? handleSupabaseLogin : handleDemoLogin;
+    const signUpFn = useSupabase ? handleSupabaseSignUp : null;
+    
     return {
       user,
       isAuthenticated: !!user,
       isPro: user?.plan === 'pro',
       useSupabase,
-      login: useSupabase ? handleSupabaseLogin : handleDemoLogin,
-      signUp: useSupabase ? handleSupabaseSignUp : null,
+      login: loginFn,
+      signUp: signUpFn,
       logout: handleLogout,
       updateUserPlan,
       demoUsers: DEMO_USERS // Siempre disponible

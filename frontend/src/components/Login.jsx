@@ -185,23 +185,29 @@ function Login({ onLogin }) {
     checkSession();
   }, [useSupabase, pendingEmail]); // Incluir dependencias correctas
   
-  // Validar formulario completo (memoizado)
-  const isFormValid = useMemo(() => {
+  // Validar formulario completo (función simple, sin memoizar para evitar problemas)
+  const isFormValid = () => {
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password, mode);
     const phoneValidation = mode === 'register' ? validatePhone(phone) : { isValid: true };
     const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
     
     return emailValidation.isValid && passwordValidation.isValid && phoneValidation.isValid && nameValidation.isValid;
-  }, [email, password, phone, name, mode]);
+  };
   
   // Referencias para funciones debounced (estables entre renders)
   const debouncedEmailValidationRef = useRef(null);
   const debouncedPhoneValidationRef = useRef(null);
   const debouncedPasswordValidationRef = useRef(null);
   const debouncedNameValidationRef = useRef(null);
+  const modeRef = useRef(mode);
 
-  // Crear funciones debounced una sola vez
+  // Actualizar ref cuando cambie mode
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
+
+  // Crear funciones debounced una sola vez al montar
   useEffect(() => {
     debouncedEmailValidationRef.current = debounce((value) => {
       const validation = validateEmail(value);
@@ -214,7 +220,7 @@ function Login({ onLogin }) {
     }, 300);
 
     debouncedPasswordValidationRef.current = debounce((value) => {
-      const validation = validatePassword(value, mode);
+      const validation = validatePassword(value, modeRef.current);
       setPasswordError(validation.message);
     }, 300);
 
@@ -222,15 +228,7 @@ function Login({ onLogin }) {
       const validation = validateName(value);
       setNameError(validation.message);
     }, 300);
-
-    // Cleanup al desmontar
-    return () => {
-      debouncedEmailValidationRef.current = null;
-      debouncedPhoneValidationRef.current = null;
-      debouncedPasswordValidationRef.current = null;
-      debouncedNameValidationRef.current = null;
-    };
-  }, [mode]); // Solo recrear cuando cambie el mode
+  }, []); // Solo crear una vez al montar
   
   // Handlers de cambio con validación optimizada
   const handleEmailChange = useCallback((e) => {
@@ -994,7 +992,7 @@ function Login({ onLogin }) {
               <button 
                 type="submit" 
                 className="login-button"
-                disabled={loading || !isFormValid}
+                disabled={loading || !isFormValid()}
                 aria-busy={loading}
               >
                 {loading ? (
