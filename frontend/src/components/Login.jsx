@@ -30,6 +30,66 @@ const isSupabaseConfigured = () => {
   return url && key && url !== '' && key !== '';
 };
 
+// Lista de países con prefijos telefónicos
+const COUNTRIES = [
+  { code: 'AR', name: 'Argentina', flag: '🇦🇷', prefix: '+54' },
+  { code: 'MX', name: 'México', flag: '🇲🇽', prefix: '+52' },
+  { code: 'ES', name: 'España', flag: '🇪🇸', prefix: '+34' },
+  { code: 'CO', name: 'Colombia', flag: '🇨🇴', prefix: '+57' },
+  { code: 'CL', name: 'Chile', flag: '🇨🇱', prefix: '+56' },
+  { code: 'PE', name: 'Perú', flag: '🇵🇪', prefix: '+51' },
+  { code: 'VE', name: 'Venezuela', flag: '🇻🇪', prefix: '+58' },
+  { code: 'EC', name: 'Ecuador', flag: '🇪🇨', prefix: '+593' },
+  { code: 'GT', name: 'Guatemala', flag: '🇬🇹', prefix: '+502' },
+  { code: 'CU', name: 'Cuba', flag: '🇨🇺', prefix: '+53' },
+  { code: 'BO', name: 'Bolivia', flag: '🇧🇴', prefix: '+591' },
+  { code: 'DO', name: 'República Dominicana', flag: '🇩🇴', prefix: '+1' },
+  { code: 'HN', name: 'Honduras', flag: '🇭🇳', prefix: '+504' },
+  { code: 'PY', name: 'Paraguay', flag: '🇵🇾', prefix: '+595' },
+  { code: 'SV', name: 'El Salvador', flag: '🇸🇻', prefix: '+503' },
+  { code: 'NI', name: 'Nicaragua', flag: '🇳🇮', prefix: '+505' },
+  { code: 'CR', name: 'Costa Rica', flag: '🇨🇷', prefix: '+506' },
+  { code: 'PA', name: 'Panamá', flag: '🇵🇦', prefix: '+507' },
+  { code: 'UY', name: 'Uruguay', flag: '🇺🇾', prefix: '+598' },
+  { code: 'US', name: 'Estados Unidos', flag: '🇺🇸', prefix: '+1' },
+  { code: 'BR', name: 'Brasil', flag: '🇧🇷', prefix: '+55' },
+  { code: 'FR', name: 'Francia', flag: '🇫🇷', prefix: '+33' },
+  { code: 'DE', name: 'Alemania', flag: '🇩🇪', prefix: '+49' },
+  { code: 'IT', name: 'Italia', flag: '🇮🇹', prefix: '+39' },
+  { code: 'GB', name: 'Reino Unido', flag: '🇬🇧', prefix: '+44' },
+  { code: 'CA', name: 'Canadá', flag: '🇨🇦', prefix: '+1' },
+  { code: 'AU', name: 'Australia', flag: '🇦🇺', prefix: '+61' },
+  { code: 'NZ', name: 'Nueva Zelanda', flag: '🇳🇿', prefix: '+64' },
+  { code: 'JP', name: 'Japón', flag: '🇯🇵', prefix: '+81' },
+  { code: 'CN', name: 'China', flag: '🇨🇳', prefix: '+86' },
+  { code: 'IN', name: 'India', flag: '🇮🇳', prefix: '+91' },
+  { code: 'RU', name: 'Rusia', flag: '🇷🇺', prefix: '+7' },
+  { code: 'KR', name: 'Corea del Sur', flag: '🇰🇷', prefix: '+82' },
+  { code: 'PT', name: 'Portugal', flag: '🇵🇹', prefix: '+351' },
+  { code: 'NL', name: 'Países Bajos', flag: '🇳🇱', prefix: '+31' },
+  { code: 'BE', name: 'Bélgica', flag: '🇧🇪', prefix: '+32' },
+  { code: 'CH', name: 'Suiza', flag: '🇨🇭', prefix: '+41' },
+  { code: 'AT', name: 'Austria', flag: '🇦🇹', prefix: '+43' },
+  { code: 'SE', name: 'Suecia', flag: '🇸🇪', prefix: '+46' },
+  { code: 'NO', name: 'Noruega', flag: '🇳🇴', prefix: '+47' },
+  { code: 'DK', name: 'Dinamarca', flag: '🇩🇰', prefix: '+45' },
+  { code: 'FI', name: 'Finlandia', flag: '🇫🇮', prefix: '+358' },
+  { code: 'PL', name: 'Polonia', flag: '🇵🇱', prefix: '+48' },
+  { code: 'GR', name: 'Grecia', flag: '🇬🇷', prefix: '+30' },
+  { code: 'TR', name: 'Turquía', flag: '🇹🇷', prefix: '+90' },
+  { code: 'SA', name: 'Arabia Saudí', flag: '🇸🇦', prefix: '+966' },
+  { code: 'AE', name: 'Emiratos Árabes', flag: '🇦🇪', prefix: '+971' },
+  { code: 'ZA', name: 'Sudáfrica', flag: '🇿🇦', prefix: '+27' },
+  { code: 'EG', name: 'Egipto', flag: '🇪🇬', prefix: '+20' },
+  { code: 'IL', name: 'Israel', flag: '🇮🇱', prefix: '+972' },
+  { code: 'SG', name: 'Singapur', flag: '🇸🇬', prefix: '+65' },
+  { code: 'MY', name: 'Malasia', flag: '🇲🇾', prefix: '+60' },
+  { code: 'TH', name: 'Tailandia', flag: '🇹🇭', prefix: '+66' },
+  { code: 'PH', name: 'Filipinas', flag: '🇵🇭', prefix: '+63' },
+  { code: 'ID', name: 'Indonesia', flag: '🇮🇩', prefix: '+62' },
+  { code: 'VN', name: 'Vietnam', flag: '🇻🇳', prefix: '+84' },
+];
+
 // Funciones de validación
 const validateEmail = (email) => {
   if (!email || email.trim() === '') {
@@ -113,6 +173,9 @@ function Login({ onLogin }) {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]); // Argentina por defecto
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -263,9 +326,33 @@ function Login({ onLogin }) {
     setPhone(value);
     
     if ((touched.phone || mode === 'register') && debouncedPhoneValidationRef.current) {
-      debouncedPhoneValidationRef.current(value);
+      // Validar con el prefijo incluido
+      const fullPhone = `${selectedCountry.prefix} ${value}`.trim();
+      debouncedPhoneValidationRef.current(fullPhone);
     }
-  }, [touched.phone, mode]);
+  }, [touched.phone, mode, selectedCountry]);
+  
+  const handleCountrySelect = useCallback((country) => {
+    setSelectedCountry(country);
+    setShowCountryDropdown(false);
+    setCountrySearch('');
+    // Revalidar el teléfono con el nuevo prefijo
+    if (phone && (touched.phone || mode === 'register') && debouncedPhoneValidationRef.current) {
+      const fullPhone = `${country.prefix} ${phone}`.trim();
+      debouncedPhoneValidationRef.current(fullPhone);
+    }
+  }, [phone, touched.phone, mode]);
+  
+  // Filtrar países según búsqueda
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch.trim()) return COUNTRIES;
+    const search = countrySearch.toLowerCase();
+    return COUNTRIES.filter(country => 
+      country.name.toLowerCase().includes(search) ||
+      country.prefix.includes(search) ||
+      country.code.toLowerCase().includes(search)
+    );
+  }, [countrySearch]);
   
   const handlePasswordChange = useCallback((e) => {
     const value = e.target.value;
@@ -291,9 +378,24 @@ function Login({ onLogin }) {
   
   const handlePhoneBlur = () => {
     setTouched({ ...touched, phone: true });
-    const validation = validatePhone(phone);
+    const fullPhone = `${selectedCountry.prefix} ${phone}`.trim();
+    const validation = validatePhone(fullPhone);
     setPhoneError(validation.message);
   };
+  
+  // Cerrar dropdown cuando se hace click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showCountryDropdown && !event.target.closest('.phone-country-selector')) {
+        setShowCountryDropdown(false);
+      }
+    };
+    
+    if (showCountryDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showCountryDropdown]);
   
   const handlePasswordBlur = () => {
     setTouched({ ...touched, password: true });
@@ -312,7 +414,8 @@ function Login({ onLogin }) {
     // Validar todos los campos
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password, mode);
-    const phoneValidation = mode === 'register' ? validatePhone(phone) : { isValid: true };
+    const fullPhone = mode === 'register' ? `${selectedCountry.prefix} ${phone}`.trim() : '';
+    const phoneValidation = mode === 'register' ? validatePhone(fullPhone) : { isValid: true };
     const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
     
     setEmailError(emailValidation.message);
@@ -404,7 +507,7 @@ function Login({ onLogin }) {
           }
 
           rateLimiter.recordAttempt(rateLimitKey);
-          const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, name.trim(), phone.trim());
+          const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, name.trim(), fullPhone);
           
           if (error) {
             setError(handleError(error, 'Login - signUp'));
@@ -652,7 +755,7 @@ function Login({ onLogin }) {
           </div>
           
           <div className="branding-footer">
-            <p>Powered by <strong>Dota Solutions</strong></p>
+            <p>Powered by <strong><a href="https://dotasolutions.agency" target="_blank" rel="noopener noreferrer">Dota Solutions</a></strong></p>
           </div>
         </div>
 
@@ -722,7 +825,7 @@ function Login({ onLogin }) {
                   </svg>
                   <div className="error-content">
                     <strong>Error</strong>
-                    <span>{error}</span>
+                  <span>{error}</span>
                   </div>
                 </div>
               )}
@@ -731,9 +834,9 @@ function Login({ onLogin }) {
                 <div className="success-message-full">
                   <div className="success-icon-wrapper">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                      <polyline points="22,4 12,14.01 9,11.01"/>
-                    </svg>
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                  </svg>
                   </div>
                   <div className="success-content">
                     <h3>¡Cuenta creada exitosamente!</h3>
@@ -751,10 +854,10 @@ function Login({ onLogin }) {
                             <li><strong>Tip:</strong> Puedes confirmar el email manualmente desde Supabase Dashboard → Users</li>
                           </ul>
                         </div>
-                        <button
-                          type="button"
-                          onClick={handleResendConfirmation}
-                          disabled={resendingEmail}
+                      <button
+                        type="button"
+                        onClick={handleResendConfirmation}
+                        disabled={resendingEmail}
                           className="resend-email-button"
                           aria-busy={resendingEmail}
                         >
@@ -775,7 +878,7 @@ function Login({ onLogin }) {
                               Reenviar email de confirmación
                             </>
                           )}
-                        </button>
+                      </button>
                         <div className="manual-confirm-hint">
                           <p>💡 <strong>Para desarrollo:</strong> Puedes confirmar el email manualmente desde Supabase Dashboard → Authentication → Users → Tu usuario → Confirm Email</p>
                         </div>
@@ -820,6 +923,7 @@ function Login({ onLogin }) {
                       className={nameError ? 'input-error' : ''}
                       minLength={2}
                       maxLength={20}
+                      inputMode="text"
                     />
                   </div>
                   {nameError && <span className="field-error">{nameError}</span>}
@@ -841,6 +945,7 @@ function Login({ onLogin }) {
                     disabled={loading}
                     className={emailError ? 'input-error' : ''}
                     maxLength={255}
+                    inputMode="email"
                   />
                 </div>
                 {emailError && <span className="field-error">{emailError}</span>}
@@ -849,19 +954,67 @@ function Login({ onLogin }) {
               {mode === 'register' && (
                 <div className="form-group">
                   <label htmlFor="phone">Teléfono</label>
-                  <div className="input-wrapper">
+                  <div className="input-wrapper phone-country-selector">
+                    <div className="country-selector-wrapper">
+                      <button
+                        type="button"
+                        className="country-selector-button"
+                        onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                        disabled={loading}
+                      >
+                        <span className="country-flag">{selectedCountry.flag}</span>
+                        <span className="country-prefix">{selectedCountry.prefix}</span>
+                        <svg className="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="6,9 12,15 18,9"/>
+                        </svg>
+                      </button>
+                      {showCountryDropdown && (
+                        <div className="country-dropdown">
+                          <div className="country-dropdown-search">
+                            <input
+                              type="text"
+                              placeholder="Buscar país..."
+                              className="country-search-input"
+                              value={countrySearch}
+                              onChange={(e) => setCountrySearch(e.target.value)}
+                              onFocus={(e) => e.stopPropagation()}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                          <div className="country-list">
+                            {filteredCountries.length > 0 ? (
+                              filteredCountries.map((country) => (
+                                <button
+                                  key={country.code}
+                                  type="button"
+                                  className={`country-option ${selectedCountry.code === country.code ? 'selected' : ''}`}
+                                  onClick={() => handleCountrySelect(country)}
+                                >
+                                  <span className="country-flag">{country.flag}</span>
+                                  <span className="country-name">{country.name}</span>
+                                  <span className="country-prefix">{country.prefix}</span>
+                                </button>
+                              ))
+                            ) : (
+                              <div className="country-no-results">No se encontraron países</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <input
                       type="tel"
                       id="phone"
                       value={phone}
                       onChange={handlePhoneChange}
                       onBlur={handlePhoneBlur}
-                      placeholder="+54 11 1234-5678"
+                      placeholder="11 1234-5678"
                       required={mode === 'register'}
                       autoComplete="tel"
                       disabled={loading}
-                      className={phoneError ? 'input-error' : ''}
+                      className={`phone-input ${phoneError ? 'input-error' : ''}`}
                       maxLength={20}
+                      inputMode="numeric"
                     />
                   </div>
                   {phoneError && <span className="field-error">{phoneError}</span>}
@@ -884,6 +1037,7 @@ function Login({ onLogin }) {
                     className={passwordError ? 'input-error' : ''}
                     maxLength={128}
                     minLength={mode === 'register' ? 8 : 6}
+                    inputMode="text"
                   />
                   <button
                     type="button"
@@ -1005,11 +1159,11 @@ function Login({ onLogin }) {
                   </>
                 ) : (
                   <>
-                    <span>{mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <line x1="5" y1="12" x2="19" y2="12"/>
-                      <polyline points="12,5 19,12 12,19"/>
-                    </svg>
+                <span>{mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12,5 19,12 12,19"/>
+                </svg>
                   </>
                 )}
               </button>
