@@ -291,7 +291,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--login-dark);
-  margin-bottom: -10px !important;
+  margin-bottom: -1px !important;
 }
 
 .input-wrapper {
