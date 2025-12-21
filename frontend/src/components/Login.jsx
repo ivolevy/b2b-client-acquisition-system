@@ -85,16 +85,15 @@ const validatePassword = (password, mode) => {
   if (!password || password.trim() === '') {
     return { isValid: false, message: 'La contraseña es requerida' };
   }
-  if (password.length < 6) {
-    return { isValid: false, message: 'La contraseña debe tener al menos 6 caracteres' };
+  // Validar longitud mínima según el modo (register requiere más caracteres)
+  const minLength = mode === 'register' ? 8 : 6;
+  if (password.length < minLength) {
+    return { isValid: false, message: `La contraseña debe tener al menos ${minLength} caracteres` };
   }
   if (password.length > 128) {
     return { isValid: false, message: 'La contraseña es demasiado larga (máximo 128 caracteres)' };
   }
-  if (mode === 'register' && password.length < 8) {
-    return { isValid: false, message: 'La contraseña debe tener al menos 8 caracteres' };
-  }
-  // Validar que tenga al menos una letra y un número (opcional pero recomendado)
+  // Validar que tenga al menos una letra y un número (solo en modo registro)
   if (mode === 'register') {
     const hasLetter = /[a-zA-Z]/.test(password);
     const hasNumber = /\d/.test(password);
@@ -331,6 +330,7 @@ function Login({ onLogin }) {
             } else {
               setError(error.message);
             }
+            setLoading(false);
           } else {
             // Si el usuario inicia sesión exitosamente, limpiar email pendiente
             if (pendingEmail && data.user.email === pendingEmail) {
@@ -346,21 +346,14 @@ function Login({ onLogin }) {
               name: data.profile?.name || data.user.email.split('@')[0],
               phone: data.profile?.phone || '',
               plan: data.profile?.plan || 'free',
-              role: data.profile?.plan === 'pro' ? 'admin' : 'user',
+              role: data.profile?.role || (data.profile?.plan === 'pro' ? 'admin' : 'user'),
               loginTime: new Date().toISOString()
             };
             localStorage.setItem('b2b_auth', JSON.stringify(userData));
             onLogin(userData);
           }
         } else {
-          // Registro - Validaciones adicionales antes de enviar
-          const phoneValidation = validatePhone(phone.trim());
-          if (!phoneValidation.isValid) {
-            setError(phoneValidation.message);
-            setLoading(false);
-            return;
-          }
-
+          // Registro - Las validaciones ya se hicieron al inicio del handleSubmit
           const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, name.trim(), phone.trim());
           
           if (error) {
@@ -740,7 +733,7 @@ function Login({ onLogin }) {
                 </div>
               )}
 
-              {!success && !error && (
+              {!success && (
                 <>
               {mode === 'register' && (
                 <div className="form-group">

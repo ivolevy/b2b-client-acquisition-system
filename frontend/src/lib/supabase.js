@@ -15,6 +15,9 @@ export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
 export const authService = {
   // Registro de usuario
+  // IMPORTANTE: Las contraseñas se hashean automáticamente por Supabase Auth usando bcrypt
+  // Nunca se almacenan en texto plano. Se guardan en auth.users (tabla interna de Supabase)
+  // y nunca se exponen ni se guardan en public.users
   async signUp(email, password, name, phone) {
     try {
       // Obtener la URL base de la aplicación para la redirección después de confirmar email
@@ -22,6 +25,7 @@ export const authService = {
       const redirectTo = `${window.location.origin}`;
       
       // 1. Crear usuario en Supabase Auth
+      // La contraseña se hashea automáticamente antes de guardarse en auth.users
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
