@@ -152,6 +152,7 @@ function Login({ onLogin }) {
             setDismissedPendingEmail(false);
             localStorage.removeItem('pending_email_confirmation');
             localStorage.removeItem('dismissed_pending_email');
+            localStorage.removeItem('dismissed_pending_email_time');
             return;
           }
           
@@ -170,6 +171,12 @@ function Login({ onLogin }) {
           // Si hay error, simplemente no hacer nada
           console.log('[Login] Error verificando sesión:', error);
         }
+      } else if (!useSupabase && pendingEmail) {
+        // Si no se usa Supabase, limpiar el email pendiente
+        setPendingEmail('');
+        localStorage.removeItem('pending_email_confirmation');
+        localStorage.removeItem('dismissed_pending_email');
+        localStorage.removeItem('dismissed_pending_email_time');
       }
     };
     
@@ -189,6 +196,13 @@ function Login({ onLogin }) {
   // Handlers de cambio con validación en tiempo real
   const handleEmailChange = (e) => {
     const value = e.target.value;
+    
+    // Si el usuario cambia el email y es diferente al pendingEmail, resetear el dismissed
+    if (pendingEmail && value.trim().toLowerCase() !== pendingEmail.toLowerCase()) {
+      setDismissedPendingEmail(false);
+      localStorage.removeItem('dismissed_pending_email');
+      localStorage.removeItem('dismissed_pending_email_time');
+    }
     setEmail(value);
     if (touched.email) {
       const validation = validateEmail(value);
@@ -857,7 +871,7 @@ function Login({ onLogin }) {
                 </div>
               )}
 
-              {mode === 'login' && pendingEmail && !dismissedPendingEmail && (
+              {mode === 'login' && pendingEmail && !dismissedPendingEmail && email.trim().toLowerCase() === pendingEmail.toLowerCase() && (
                 <div className="pending-email-warning">
                   <button
                     type="button"
