@@ -38,8 +38,15 @@ class StorageService {
       try {
         parsed = JSON.parse(value);
       } catch (parseError) {
-        // Si no es JSON válido, devolver el string original
+        // Si no es JSON válido, devolver el string original sin loguear error
+        // Esto es esperado para valores antiguos guardados como strings simples
         parsed = value;
+        // Migrar automáticamente al formato JSON para futuras lecturas
+        try {
+          storage.setItem(key, JSON.stringify(value));
+        } catch (migrateError) {
+          // Si falla la migración, ignorar silenciosamente
+        }
       }
       
       MEMORY_CACHE.set(cacheKey, {
@@ -49,7 +56,10 @@ class StorageService {
       
       return parsed;
     } catch (error) {
-      console.error(`[Storage] Error reading ${key}:`, error);
+      // Solo loguear errores críticos, no errores de parseo JSON
+      if (!error.message || !error.message.includes('JSON')) {
+        console.error(`[Storage] Error reading ${key}:`, error);
+      }
       return null;
     }
   }
@@ -140,6 +150,32 @@ class StorageService {
 }
 
 export const storage = new StorageService();
+
+// Migración automática de valores antiguos al formato JSON
+// Se ejecuta una vez al cargar el módulo
+if (typeof window !== 'undefined') {
+  try {
+    const keysToMigrate = [
+      'pending_email_confirmation',
+      'dismissed_pending_email',
+      'dismissed_pending_email_time'
+    ];
+    
+    keysToMigrate.forEach(key => {
+      try {
+        const value = localStorage.getItem(key);
+        if (value && !value.startsWith('"') && !value.startsWith('{') && !value.startsWith('[')) {
+          // Es un string simple sin formato JSON, migrarlo
+          localStorage.setItem(key, JSON.stringify(value));
+        }
+      } catch (e) {
+        // Ignorar errores de migración
+      }
+    });
+  } catch (e) {
+    // Ignorar errores de migración
+  }
+}
 
 // Helpers específicos para el dominio
 export const authStorage = {
