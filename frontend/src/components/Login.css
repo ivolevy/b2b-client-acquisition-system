@@ -284,13 +284,14 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 2px !important;
 }
 
 .form-group label {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--login-dark);
+  margin-bottom: -10px !important;
 }
 
 .input-wrapper {
