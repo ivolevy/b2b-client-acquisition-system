@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import './Login.css';
 import { authService, supabase } from '../lib/supabase';
 import { authStorage } from '../utils/storage';
@@ -195,46 +195,42 @@ function Login({ onLogin }) {
     return emailValidation.isValid && passwordValidation.isValid && phoneValidation.isValid && nameValidation.isValid;
   }, [email, password, phone, name, mode]);
   
-  // Validación con debounce (300ms)
-  const debouncedEmailValidation = useMemo(
-    () => debounce((value) => {
-      if (touched.email) {
-        const validation = validateEmail(value);
-        setEmailError(validation.message);
-      }
-    }, 300),
-    [touched.email]
-  );
+  // Referencias para funciones debounced (estables entre renders)
+  const debouncedEmailValidationRef = useRef(null);
+  const debouncedPhoneValidationRef = useRef(null);
+  const debouncedPasswordValidationRef = useRef(null);
+  const debouncedNameValidationRef = useRef(null);
 
-  const debouncedPhoneValidation = useMemo(
-    () => debounce((value) => {
-      if (touched.phone || mode === 'register') {
-        const validation = validatePhone(value);
-        setPhoneError(validation.message);
-      }
-    }, 300),
-    [touched.phone, mode]
-  );
+  // Crear funciones debounced una sola vez
+  useEffect(() => {
+    debouncedEmailValidationRef.current = debounce((value) => {
+      const validation = validateEmail(value);
+      setEmailError(validation.message);
+    }, 300);
 
-  const debouncedPasswordValidation = useMemo(
-    () => debounce((value) => {
-      if (touched.password) {
-        const validation = validatePassword(value, mode);
-        setPasswordError(validation.message);
-      }
-    }, 300),
-    [touched.password, mode]
-  );
+    debouncedPhoneValidationRef.current = debounce((value) => {
+      const validation = validatePhone(value);
+      setPhoneError(validation.message);
+    }, 300);
 
-  const debouncedNameValidation = useMemo(
-    () => debounce((value) => {
-      if (touched.name) {
-        const validation = validateName(value);
-        setNameError(validation.message);
-      }
-    }, 300),
-    [touched.name]
-  );
+    debouncedPasswordValidationRef.current = debounce((value) => {
+      const validation = validatePassword(value, mode);
+      setPasswordError(validation.message);
+    }, 300);
+
+    debouncedNameValidationRef.current = debounce((value) => {
+      const validation = validateName(value);
+      setNameError(validation.message);
+    }, 300);
+
+    // Cleanup al desmontar
+    return () => {
+      debouncedEmailValidationRef.current = null;
+      debouncedPhoneValidationRef.current = null;
+      debouncedPasswordValidationRef.current = null;
+      debouncedNameValidationRef.current = null;
+    };
+  }, [mode]); // Solo recrear cuando cambie el mode
   
   // Handlers de cambio con validación optimizada
   const handleEmailChange = useCallback((e) => {
@@ -247,27 +243,40 @@ function Login({ onLogin }) {
       authStorage.removeDismissedPendingEmailTime();
     }
     setEmail(value);
-    debouncedEmailValidation(value);
-  }, [pendingEmail, debouncedEmailValidation]);
+    
+    // Validar solo si el campo fue tocado
+    if (touched.email && debouncedEmailValidationRef.current) {
+      debouncedEmailValidationRef.current(value);
+    }
+  }, [pendingEmail, touched.email]);
   
   const handleNameChange = useCallback((e) => {
     const value = e.target.value;
     setName(value);
-    debouncedNameValidation(value);
-  }, [debouncedNameValidation]);
+    
+    if (touched.name && debouncedNameValidationRef.current) {
+      debouncedNameValidationRef.current(value);
+    }
+  }, [touched.name]);
   
   const handlePhoneChange = useCallback((e) => {
     // Solo permitir números, espacios, guiones y paréntesis
     const value = e.target.value.replace(/[^\d\s\-\(\)]/g, '');
     setPhone(value);
-    debouncedPhoneValidation(value);
-  }, [debouncedPhoneValidation]);
+    
+    if ((touched.phone || mode === 'register') && debouncedPhoneValidationRef.current) {
+      debouncedPhoneValidationRef.current(value);
+    }
+  }, [touched.phone, mode]);
   
   const handlePasswordChange = useCallback((e) => {
     const value = e.target.value;
     setPassword(value);
-    debouncedPasswordValidation(value);
-  }, [debouncedPasswordValidation]);
+    
+    if (touched.password && debouncedPasswordValidationRef.current) {
+      debouncedPasswordValidationRef.current(value);
+    }
+  }, [touched.password]);
   
   // Handlers de blur (cuando el usuario sale del campo)
   const handleEmailBlur = () => {
