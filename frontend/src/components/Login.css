@@ -278,14 +278,13 @@
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 4px;
+  gap: 8px;
 }
 
 .form-group label {
@@ -335,77 +334,6 @@
 }
 
 .input-wrapper input.input-error:focus {
-  border-color: var(--login-error);
-  background: rgba(239, 68, 68, 0.03);
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
-}
-
-.phone-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.country-code-select {
-  padding: 14px 10px;
-  border: 2px solid var(--login-gray-light);
-  border-radius: 12px;
-  font-size: 1rem;
-  color: var(--login-dark);
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 75px;
-  width: 75px;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  padding-right: 28px;
-}
-
-.country-code-select:focus {
-  outline: none;
-  border-color: var(--login-primary);
-  box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.2);
-}
-
-.country-code-select:disabled {
-  background: var(--login-gray-light);
-  cursor: not-allowed;
-}
-
-.phone-input {
-  flex: 1;
-  padding: 14px 18px;
-  border: 2px solid var(--login-gray-light);
-  border-radius: 12px;
-  font-size: 1rem;
-  color: var(--login-dark);
-  background: white;
-  transition: all 0.2s ease;
-}
-
-.phone-input:focus {
-  outline: none;
-  border-color: var(--login-primary);
-  box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.2);
-}
-
-.phone-input:disabled {
-  background: var(--login-gray-light);
-  cursor: not-allowed;
-}
-
-.phone-input.input-error {
-  border-color: var(--login-error);
-  background: rgba(239, 68, 68, 0.02);
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
-  animation: inputErrorPulse 0.3s ease-out;
-}
-
-.phone-input.input-error:focus {
   border-color: var(--login-error);
   background: rgba(239, 68, 68, 0.03);
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
