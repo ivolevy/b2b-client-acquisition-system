@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext, lazy, Suspense } from 'react';
+import React, { useState, useEffect, createContext, useContext, lazy, Suspense, useMemo, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase, authService, userService } from './lib/supabase';
 import { authStorage } from './utils/storage';
