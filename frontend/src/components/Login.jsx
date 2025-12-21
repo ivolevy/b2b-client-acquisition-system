@@ -617,7 +617,6 @@ function Login({ onLogin }) {
           <div className="form-container">
             <div className="form-header">
               <h2>{mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}</h2>
-              <p>{mode === 'login' ? 'Ingresa tus credenciales para acceder' : 'Completa el formulario para registrarte'}</p>
             </div>
 
             {/* Tabs para cambiar entre login y registro */}
