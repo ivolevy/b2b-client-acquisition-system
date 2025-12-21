@@ -1,12 +1,16 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/Login';
-import AppB2B from './App_B2B';
-import UserProfile from './components/UserProfile';
-import Navbar from './components/Navbar';
-import ProBackground from './components/ProBackground';
-import ProWelcome from './components/ProWelcome';
 import { supabase, authService, userService } from './lib/supabase';
+import { authStorage } from './utils/storage';
+import { handleError } from './utils/errorHandler';
+
+// Lazy loading de componentes pesados
+const Login = lazy(() => import('./components/Login'));
+const AppB2B = lazy(() => import('./App_B2B'));
+const UserProfile = lazy(() => import('./components/UserProfile'));
+const Navbar = lazy(() => import('./components/Navbar'));
+const ProBackground = lazy(() => import('./components/ProBackground'));
+const ProWelcome = lazy(() => import('./components/ProWelcome'));
 
 // Contexto de autenticación
 const AuthContext = createContext(null);
@@ -45,28 +49,27 @@ const isSupabaseConfigured = () => {
   return url && key && url !== '' && key !== '';
 };
 
-// Verificar sesión local (modo demo)
+// Verificar sesión local (modo demo) - usando servicio centralizado
 const checkLocalAuth = () => {
   try {
-    const authData = localStorage.getItem('b2b_auth');
-    const token = localStorage.getItem('b2b_token');
+    const authData = authStorage.getAuth();
+    const token = authStorage.getToken();
     
     if (authData && token) {
-      const userData = JSON.parse(authData);
-      const loginTime = new Date(userData.loginTime);
+      const loginTime = new Date(authData.loginTime);
       const now = new Date();
       const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
       
       if (hoursDiff < 24) {
-        return userData;
+        return authData;
       }
-      localStorage.removeItem('b2b_auth');
-      localStorage.removeItem('b2b_token');
+      authStorage.removeAuth();
+      authStorage.removeToken();
     }
   } catch (error) {
-    console.error('Error verificando autenticación local:', error);
-    localStorage.removeItem('b2b_auth');
-    localStorage.removeItem('b2b_token');
+    handleError(error, 'AuthWrapper - checkLocalAuth');
+    authStorage.removeAuth();
+    authStorage.removeToken();
   }
   return null;
 };
@@ -112,21 +115,13 @@ function AuthWrapper() {
               window.history.replaceState({}, document.title, window.location.pathname);
               
               // Limpiar email pendiente de confirmación ya que el usuario acaba de confirmar
-              localStorage.removeItem('pending_email_confirmation');
-              localStorage.removeItem('dismissed_pending_email');
+              authStorage.removePendingEmail();
+              authStorage.removeDismissedPendingEmail();
               
               const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
               
               if (!profileError && profile) {
-                const userData = {
-                  id: session.user.id,
-                  email: session.user.email,
-                  name: profile?.name || session.user.email.split('@')[0],
-                  phone: profile?.phone || '',
-                  plan: profile?.plan || 'free',
-                  role: profile?.plan === 'pro' ? 'admin' : 'user',
-                  ...profile
-                };
+                const userData = authService.buildUserData(session.user, profile);
                 setUser(userData);
                 
                 if (userData.plan === 'pro') {
@@ -146,31 +141,23 @@ function AuthWrapper() {
             
             // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
             if (profileError || !profile) {
-              console.warn('[AuthWrapper] Usuario sin perfil detectado - cerrando sesión');
+              handleError(new Error('Usuario sin perfil detectado'), 'AuthWrapper - initAuth');
               await supabase.auth.signOut();
-              localStorage.removeItem('b2b_auth');
-              localStorage.removeItem('b2b_token');
+              authStorage.clearAll();
               sessionStorage.clear();
               setUser(null);
               setLoading(false);
               return;
             }
             
-            setUser({
-              id: session.user.id,
-              email: session.user.email,
-              phone: profile?.phone || '',
-              plan: profile?.plan || 'free',
-              role: profile?.plan === 'pro' ? 'admin' : 'user',
-              ...profile
-            });
+            const userData = authService.buildUserData(session.user, profile);
+            setUser(userData);
           }
         } catch (error) {
-          console.error('Error inicializando auth con Supabase:', error);
+          handleError(error, 'AuthWrapper - initAuth');
           // En caso de error, cerrar sesión por seguridad
           await supabase.auth.signOut();
-          localStorage.removeItem('b2b_auth');
-          localStorage.removeItem('b2b_token');
+          authStorage.clearAll();
           sessionStorage.clear();
         }
 
@@ -182,23 +169,15 @@ function AuthWrapper() {
               
               // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
               if (profileError || !profile) {
-                console.warn('[AuthWrapper] Usuario sin perfil detectado en SIGNED_IN - cerrando sesión');
+                handleError(new Error('Usuario sin perfil detectado'), 'AuthWrapper - SIGNED_IN');
                 await supabase.auth.signOut();
-                localStorage.removeItem('b2b_auth');
-                localStorage.removeItem('b2b_token');
+                authStorage.clearAll();
                 sessionStorage.clear();
                 setUser(null);
                 return;
               }
               
-              const userData = {
-                id: session.user.id,
-                email: session.user.email,
-                phone: profile?.phone || '',
-                plan: profile?.plan || 'free',
-                role: profile?.plan === 'pro' ? 'admin' : 'user',
-                ...profile
-              };
+              const userData = authService.buildUserData(session.user, profile);
               setUser(userData);
               
               if (userData.plan === 'pro') {
@@ -231,15 +210,7 @@ function AuthWrapper() {
       throw error;
     }
 
-    const userData = {
-      id: data.user.id,
-      email: data.user.email,
-      phone: data.profile?.phone || '',
-      plan: data.profile?.plan || 'free',
-      role: data.profile?.plan === 'pro' ? 'admin' : 'user',
-      ...data.profile
-    };
-
+    const userData = authService.buildUserData(data.user, data.profile);
     setUser(userData);
     
     if (userData.plan === 'pro') {
@@ -249,8 +220,8 @@ function AuthWrapper() {
     return userData;
   };
 
-  // Registro con Supabase
-  const handleSupabaseSignUp = async (email, password, name) => {
+  // Registro con Supabase (memoizado)
+  const handleSupabaseSignUp = useCallback(async (email, password, name) => {
     const { data, error } = await authService.signUp(email, password, name);
     
     if (error) {
@@ -262,34 +233,32 @@ function AuthWrapper() {
       message: 'Cuenta creada. Revisa tu email para confirmar.',
       needsConfirmation: true
     };
-  };
+  }, []);
 
-  // Login demo (siempre disponible, incluso con Supabase)
-  const handleDemoLogin = (userData) => {
+  // Login demo (siempre disponible, incluso con Supabase) - memoizado
+  const handleDemoLogin = useCallback((userData) => {
     // Verificar si es un usuario demo válido
     const isDemoUser = DEMO_USERS.some(u => u.email === userData.email);
     if (isDemoUser) {
-      // Guardar en localStorage para persistencia
-      localStorage.setItem('b2b_auth', JSON.stringify(userData));
-      localStorage.setItem('b2b_token', 'demo_token_' + Date.now());
+      // Guardar usando servicio centralizado
+      authStorage.setAuth(userData);
+      authStorage.setToken('demo_token_' + Date.now());
     }
     
     if (userData.plan === 'pro') {
       setShowProWelcome(true);
     }
     setUser(userData);
-  };
+  }, []);
 
-  const handleProWelcomeComplete = () => {
+  const handleProWelcomeComplete = useCallback(() => {
     setShowProWelcome(false);
-  };
+  }, []);
 
-  // Logout - Instantáneo
-  const handleLogout = () => {
-    // Limpiar todo inmediatamente
-    localStorage.removeItem('b2b_auth');
-    localStorage.removeItem('b2b_token');
-    localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token');
+  // Logout - Instantáneo (memoizado)
+  const handleLogout = useCallback(() => {
+    // Limpiar todo inmediatamente usando servicio centralizado
+    authStorage.clearAll();
     sessionStorage.clear();
     
     // Logout de Supabase en background (no esperamos)
@@ -299,15 +268,15 @@ function AuthWrapper() {
     
     // Redirigir inmediatamente
     window.location.replace('/');
-  };
+  }, [useSupabase]);
 
-  // Actualizar plan del usuario
-  const updateUserPlan = async (plan) => {
+  // Actualizar plan del usuario (memoizado)
+  const updateUserPlan = useCallback(async (plan) => {
     if (useSupabase && user?.id) {
       await userService.updateProfile(user.id, { plan });
       setUser(prev => ({ ...prev, plan }));
     }
-  };
+  }, [useSupabase, user?.id]);
 
   // Pantalla de carga
   if (loading) {
@@ -342,8 +311,8 @@ function AuthWrapper() {
     );
   }
 
-  // Valor del contexto
-  const authValue = {
+  // Valor del contexto (memoizado para evitar re-renders innecesarios)
+  const authValue = useMemo(() => ({
     user,
     isAuthenticated: !!user,
     isPro: user?.plan === 'pro',
@@ -353,30 +322,63 @@ function AuthWrapper() {
     logout: handleLogout,
     updateUserPlan,
     demoUsers: DEMO_USERS // Siempre disponible
-  };
+  }), [user, useSupabase, handleSupabaseLogin, handleDemoLogin, handleSupabaseSignUp, handleLogout, updateUserPlan]);
+
+  // Componente de carga para Suspense
+  const LoadingFallback = () => (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #0f0f1a 0%, #1a0a1a 50%, #0a0a0f 100%)',
+      color: 'white',
+      fontFamily: 'Inter, -apple-system, sans-serif'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          width: '48px',
+          height: '48px',
+          border: '3px solid rgba(255, 105, 180, 0.2)',
+          borderTopColor: '#FF69B4',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+          margin: '0 auto 16px'
+        }} />
+        <p style={{ opacity: 0.7 }}>Cargando...</p>
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
 
   return (
     <AuthContext.Provider value={authValue}>
       <BrowserRouter>
-        {showProWelcome && <ProWelcome onComplete={handleProWelcomeComplete} />}
-        {user ? (
-          <Routes>
-            <Route path="/profile" element={
-              <div className={`app ${user?.plan === 'pro' ? 'pro-theme' : ''}`}>
-                {user?.plan === 'pro' && <ProBackground />}
-                <Navbar />
-                <main className="main-content">
-                  <UserProfile />
-                </main>
-              </div>
-            } />
-            <Route path="/*" element={<AppB2B />} />
-          </Routes>
-        ) : (
-          <Routes>
-            <Route path="/*" element={<Login onLogin={handleDemoLogin} />} />
-          </Routes>
-        )}
+        <Suspense fallback={<LoadingFallback />}>
+          {showProWelcome && <ProWelcome onComplete={handleProWelcomeComplete} />}
+          {user ? (
+            <Routes>
+              <Route path="/profile" element={
+                <div className={`app ${user?.plan === 'pro' ? 'pro-theme' : ''}`}>
+                  {user?.plan === 'pro' && <ProBackground />}
+                  <Navbar />
+                  <main className="main-content">
+                    <UserProfile />
+                  </main>
+                </div>
+              } />
+              <Route path="/*" element={<AppB2B />} />
+            </Routes>
+          ) : (
+            <Routes>
+              <Route path="/*" element={<Login onLogin={handleDemoLogin} />} />
+            </Routes>
+          )}
+        </Suspense>
       </BrowserRouter>
     </AuthContext.Provider>
   );

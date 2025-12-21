@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './Login.css';
 import { authService, supabase } from '../lib/supabase';
+import { authStorage } from '../utils/storage';
+import { rateLimiter, debounce } from '../utils/rateLimiter';
+import { handleError } from '../utils/errorHandler';
 
 // Credenciales de prueba (modo demo cuando Supabase no está configurado)
 const DEMO_USERS = [
@@ -115,13 +118,13 @@ function Login({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [pendingEmail, setPendingEmail] = useState(() => {
-    // Cargar email pendiente de localStorage
-    return localStorage.getItem('pending_email_confirmation') || '';
+    // Cargar email pendiente usando servicio centralizado
+    return authStorage.getPendingEmail() || '';
   });
   const [resendingEmail, setResendingEmail] = useState(false);
   const [dismissedPendingEmail, setDismissedPendingEmail] = useState(() => {
     // Verificar si el usuario cerró el mensaje de email pendiente
-    return localStorage.getItem('dismissed_pending_email') === 'true';
+    return authStorage.getDismissedPendingEmail();
   });
   
   // Estados de validación por campo
@@ -149,93 +152,122 @@ function Login({ onLogin }) {
           if (session?.user) {
             setPendingEmail('');
             setDismissedPendingEmail(false);
-            localStorage.removeItem('pending_email_confirmation');
-            localStorage.removeItem('dismissed_pending_email');
-            localStorage.removeItem('dismissed_pending_email_time');
+            authStorage.removePendingEmail();
+            authStorage.removeDismissedPendingEmail();
+            authStorage.removeDismissedPendingEmailTime();
             return;
           }
           
           // Si el usuario cerró el mensaje hace más de 7 días, limpiar el pendingEmail
-          const dismissedTime = localStorage.getItem('dismissed_pending_email_time');
+          const dismissedTime = authStorage.getDismissedPendingEmailTime();
           if (dismissedTime) {
-            const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24);
+            const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
             if (daysSinceDismissed > 7) {
               setPendingEmail('');
-              localStorage.removeItem('pending_email_confirmation');
-              localStorage.removeItem('dismissed_pending_email');
-              localStorage.removeItem('dismissed_pending_email_time');
+              authStorage.removePendingEmail();
+              authStorage.removeDismissedPendingEmail();
+              authStorage.removeDismissedPendingEmailTime();
             }
           }
         } catch (error) {
-          // Si hay error, simplemente no hacer nada
-          console.log('[Login] Error verificando sesión:', error);
+          // Si hay error, simplemente no hacer nada (ya está manejado por errorHandler)
+          handleError(error, 'Login - checkSession');
         }
       } else if (!useSupabase && pendingEmail) {
         // Si no se usa Supabase, limpiar el email pendiente
         setPendingEmail('');
-        localStorage.removeItem('pending_email_confirmation');
-        localStorage.removeItem('dismissed_pending_email');
-        localStorage.removeItem('dismissed_pending_email_time');
+        authStorage.removePendingEmail();
+        authStorage.removeDismissedPendingEmail();
+        authStorage.removeDismissedPendingEmailTime();
       }
     };
     
     checkSession();
-  }, []); // Solo ejecutar una vez al montar el componente
+  }, [useSupabase, pendingEmail]); // Incluir dependencias correctas
   
-  // Validar formulario completo
-  const isFormValid = () => {
+  // Validar formulario completo (memoizado)
+  const isFormValid = useMemo(() => {
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password, mode);
     const phoneValidation = mode === 'register' ? validatePhone(phone) : { isValid: true };
     const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
     
     return emailValidation.isValid && passwordValidation.isValid && phoneValidation.isValid && nameValidation.isValid;
-  };
+  }, [email, password, phone, name, mode]);
   
-  // Handlers de cambio con validación en tiempo real
-  const handleEmailChange = (e) => {
+  // Validación con debounce (300ms)
+  const debouncedEmailValidation = useMemo(
+    () => debounce((value) => {
+      if (touched.email) {
+        const validation = validateEmail(value);
+        setEmailError(validation.message);
+      }
+    }, 300),
+    [touched.email]
+  );
+
+  const debouncedPhoneValidation = useMemo(
+    () => debounce((value) => {
+      if (touched.phone || mode === 'register') {
+        const validation = validatePhone(value);
+        setPhoneError(validation.message);
+      }
+    }, 300),
+    [touched.phone, mode]
+  );
+
+  const debouncedPasswordValidation = useMemo(
+    () => debounce((value) => {
+      if (touched.password) {
+        const validation = validatePassword(value, mode);
+        setPasswordError(validation.message);
+      }
+    }, 300),
+    [touched.password, mode]
+  );
+
+  const debouncedNameValidation = useMemo(
+    () => debounce((value) => {
+      if (touched.name) {
+        const validation = validateName(value);
+        setNameError(validation.message);
+      }
+    }, 300),
+    [touched.name]
+  );
+  
+  // Handlers de cambio con validación optimizada
+  const handleEmailChange = useCallback((e) => {
     const value = e.target.value;
     
     // Si el usuario cambia el email y es diferente al pendingEmail, resetear el dismissed
     if (pendingEmail && value.trim().toLowerCase() !== pendingEmail.toLowerCase()) {
       setDismissedPendingEmail(false);
-      localStorage.removeItem('dismissed_pending_email');
-      localStorage.removeItem('dismissed_pending_email_time');
+      authStorage.removeDismissedPendingEmail();
+      authStorage.removeDismissedPendingEmailTime();
     }
     setEmail(value);
-    if (touched.email) {
-      const validation = validateEmail(value);
-      setEmailError(validation.message);
-    }
-  };
+    debouncedEmailValidation(value);
+  }, [pendingEmail, debouncedEmailValidation]);
   
-  const handleNameChange = (e) => {
+  const handleNameChange = useCallback((e) => {
     const value = e.target.value;
     setName(value);
-    if (touched.name) {
-      const validation = validateName(value);
-      setNameError(validation.message);
-    }
-  };
+    debouncedNameValidation(value);
+  }, [debouncedNameValidation]);
   
-  const handlePhoneChange = (e) => {
+  const handlePhoneChange = useCallback((e) => {
     // Solo permitir números, espacios, guiones y paréntesis
     const value = e.target.value.replace(/[^\d\s\-\(\)]/g, '');
     setPhone(value);
-    if (touched.phone) {
-      const validation = validatePhone(value);
-      setPhoneError(validation.message);
-    }
-  };
+    debouncedPhoneValidation(value);
+  }, [debouncedPhoneValidation]);
   
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = useCallback((e) => {
     const value = e.target.value;
     setPassword(value);
-    if (touched.password) {
-      const validation = validatePassword(value, mode);
-      setPasswordError(validation.message);
-    }
-  };
+    debouncedPasswordValidation(value);
+  }, [debouncedPasswordValidation]);
   
   // Handlers de blur (cuando el usuario sale del campo)
   const handleEmailBlur = () => {
@@ -310,8 +342,8 @@ function Login({ onLogin }) {
           plan: demoUser.plan,
           loginTime: new Date().toISOString()
         };
-        localStorage.setItem('b2b_auth', JSON.stringify(userData));
-        localStorage.setItem('b2b_token', 'demo_token_' + Date.now());
+        authStorage.setAuth(userData);
+        authStorage.setToken('demo_token_' + Date.now());
         onLogin(userData);
         setLoading(false);
         return;
@@ -320,67 +352,69 @@ function Login({ onLogin }) {
       if (useSupabase) {
         // Modo Supabase
         if (mode === 'login') {
+          // Rate limiting para login
+          const rateLimitKey = `login_${emailLimpio}`;
+          const rateCheck = rateLimiter.isAllowed(rateLimitKey, 5, 60000); // 5 intentos por minuto
+          
+          if (!rateCheck.allowed) {
+            setError(rateCheck.message);
+            setLoading(false);
+            return;
+          }
+
+          rateLimiter.recordAttempt(rateLimitKey);
           const { data, error } = await authService.signIn(emailLimpio, passwordLimpio);
           
           if (error) {
-            if (error.message.includes('Invalid login')) {
-              setError('Credenciales incorrectas. Verifica tu email y contraseña.');
-            } else if (error.message.includes('Email not confirmed')) {
-              setError('Debes confirmar tu email antes de iniciar sesión.');
-            } else {
-              setError(error.message);
-            }
+            setError(handleError(error, 'Login - signIn'));
             setLoading(false);
           } else {
+            // Limpiar rate limit en éxito
+            rateLimiter.clear(rateLimitKey);
+            
             // Si el usuario inicia sesión exitosamente, limpiar email pendiente
             if (pendingEmail && data.user.email === pendingEmail) {
               setPendingEmail('');
               setDismissedPendingEmail(false);
-              localStorage.removeItem('pending_email_confirmation');
-              localStorage.removeItem('dismissed_pending_email');
+              authStorage.removePendingEmail();
+              authStorage.removeDismissedPendingEmail();
             }
             
-            const userData = {
-              id: data.user.id,
-              email: data.user.email,
-              name: data.profile?.name || data.user.email.split('@')[0],
-              phone: data.profile?.phone || '',
-              plan: data.profile?.plan || 'free',
-              role: data.profile?.role || (data.profile?.plan === 'pro' ? 'admin' : 'user'),
-              loginTime: new Date().toISOString()
-            };
-            localStorage.setItem('b2b_auth', JSON.stringify(userData));
+            const userData = authService.buildUserData(data.user, data.profile);
+            authStorage.setAuth(userData);
             onLogin(userData);
           }
         } else {
           // Registro - Las validaciones ya se hicieron al inicio del handleSubmit
+          // Rate limiting para registro
+          const rateLimitKey = `signup_${emailLimpio}`;
+          const rateCheck = rateLimiter.isAllowed(rateLimitKey, 3, 300000); // 3 intentos por 5 minutos
+          
+          if (!rateCheck.allowed) {
+            setError(rateCheck.message);
+            setLoading(false);
+            return;
+          }
+
+          rateLimiter.recordAttempt(rateLimitKey);
           const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, name.trim(), phone.trim());
           
           if (error) {
-            if (error.message.includes('already registered') || error.message.includes('already exists')) {
-              setError('Este email ya está registrado. Intenta iniciar sesión o recuperar tu contraseña.');
-            } else if (error.message.includes('Invalid email')) {
-              setError('El formato del email no es válido.');
-            } else {
-              setError(error.message || 'Error al crear la cuenta. Intenta de nuevo.');
-            }
+            setError(handleError(error, 'Login - signUp'));
+            setLoading(false);
           } else {
+            // Limpiar rate limit en éxito
+            rateLimiter.clear(rateLimitKey);
+            
             // Verificar si el email fue enviado
             if (needsConfirmation || (data?.user && !data.user.email_confirmed_at)) {
               setSuccess(`¡Cuenta creada exitosamente! Revisa tu bandeja de entrada (y spam) para confirmar tu email. El link de confirmación expira en 24 horas.`);
-              setPendingEmail(emailLimpio); // Guardar email para permitir reenvío
-              localStorage.setItem('pending_email_confirmation', emailLimpio);
-              
-              // Log para depuración
-              console.log('[Auth] Usuario creado, necesita confirmar email:', emailLimpio);
-              console.log('[Auth] Si no recibes el email, verifica:');
-              console.log('[Auth] 1. Settings → Auth → Email Auth → "Enable email confirmations" está activado');
-              console.log('[Auth] 2. Settings → Auth → URL Configuration → URL de redirección configurada');
-              console.log('[Auth] 3. Settings → Auth → SMTP Settings → SMTP configurado (opcional pero recomendado)');
+              setPendingEmail(emailLimpio);
+              authStorage.setPendingEmail(emailLimpio);
             } else {
               setSuccess('¡Cuenta creada exitosamente!');
               setPendingEmail('');
-              localStorage.removeItem('pending_email_confirmation');
+              authStorage.removePendingEmail();
             }
             setMode('login');
             setPassword('');
@@ -430,18 +464,28 @@ function Login({ onLogin }) {
     // Si no hay pendingEmail, limpiar también el estado de dismissed
     if (!pendingEmail) {
       setDismissedPendingEmail(false);
-      localStorage.removeItem('dismissed_pending_email');
+      authStorage.removeDismissedPendingEmail();
     }
   }, [pendingEmail]);
 
-  const handleResendConfirmation = async () => {
+  const handleResendConfirmation = useCallback(async () => {
     if (!pendingEmail) return;
+    
+    // Rate limiting para reenvío de email (máximo 3 por hora)
+    const rateLimitKey = `resend_email_${pendingEmail}`;
+    const rateCheck = rateLimiter.isAllowed(rateLimitKey, 3, 3600000);
+    
+    if (!rateCheck.allowed) {
+      setError(rateCheck.message);
+      return;
+    }
     
     setResendingEmail(true);
     setError('');
     setSuccess('');
     
     try {
+      rateLimiter.recordAttempt(rateLimitKey);
       const { error: resendError } = await authService.resendConfirmationEmail(pendingEmail);
       
       if (resendError) {
@@ -449,21 +493,21 @@ function Login({ onLogin }) {
           setError('Este email ya está confirmado. Puedes iniciar sesión.');
           setPendingEmail('');
           setDismissedPendingEmail(false);
-          localStorage.removeItem('pending_email_confirmation');
-          localStorage.removeItem('dismissed_pending_email');
+          authStorage.removePendingEmail();
+          authStorage.removeDismissedPendingEmail();
+          rateLimiter.clear(rateLimitKey);
         } else {
-          setError(`Error al reenviar email: ${resendError.message}`);
+          setError(handleError(resendError, 'Login - resendConfirmation'));
         }
       } else {
         setSuccess('Email de confirmación reenviado. Revisa tu bandeja de entrada (y spam).');
       }
     } catch (err) {
-      setError('Error al reenviar email. Intenta de nuevo.');
-      console.error('Error reenviando email:', err);
+      setError(handleError(err, 'Login - resendConfirmation'));
+    } finally {
+      setResendingEmail(false);
     }
-    
-    setResendingEmail(false);
-  };
+  }, [pendingEmail]);
 
   // Manejar clic en botón demo
   const handleDemoClick = (demoUser) => {
@@ -705,8 +749,25 @@ function Login({ onLogin }) {
                           onClick={handleResendConfirmation}
                           disabled={resendingEmail}
                           className="resend-email-button"
+                          aria-busy={resendingEmail}
                         >
-                          {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmación'}
+                          {resendingEmail ? (
+                            <>
+                              <svg className="spinner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
+                                <path d="M12 2 A10 10 0 0 1 22 12" strokeLinecap="round"/>
+                              </svg>
+                              Reenviando...
+                            </>
+                          ) : (
+                            <>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{width: '16px', height: '16px', marginRight: '8px'}}>
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                              </svg>
+                              Reenviar email de confirmación
+                            </>
+                          )}
                         </button>
                         <div className="manual-confirm-hint">
                           <p>💡 <strong>Para desarrollo:</strong> Puedes confirmar el email manualmente desde Supabase Dashboard → Authentication → Users → Tu usuario → Confirm Email</p>
@@ -870,8 +931,8 @@ function Login({ onLogin }) {
                     className="dismiss-warning-button"
                     onClick={() => {
                       setDismissedPendingEmail(true);
-                      localStorage.setItem('dismissed_pending_email', 'true');
-                      localStorage.setItem('dismissed_pending_email_time', Date.now().toString());
+                      authStorage.setDismissedPendingEmail(true);
+                      authStorage.setDismissedPendingEmailTime(Date.now());
                     }}
                     aria-label="Cerrar advertencia"
                   >
@@ -897,8 +958,25 @@ function Login({ onLogin }) {
                       onClick={handleResendConfirmation}
                       disabled={resendingEmail}
                       className="resend-warning-button"
+                      aria-busy={resendingEmail}
                     >
-                      {resendingEmail ? 'Reenviando...' : 'Reenviar email'}
+                      {resendingEmail ? (
+                        <>
+                          <svg className="spinner-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
+                            <path d="M12 2 A10 10 0 0 1 22 12" strokeLinecap="round"/>
+                          </svg>
+                          Reenviando...
+                        </>
+                      ) : (
+                        <>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{width: '14px', height: '14px', marginRight: '6px', display: 'inline-block', verticalAlign: 'middle'}}>
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                          </svg>
+                          Reenviar email
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -908,12 +986,25 @@ function Login({ onLogin }) {
                 type="submit" 
                 className="login-button"
                 disabled={loading || !isFormValid()}
+                aria-busy={loading}
               >
-                <span>{mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12,5 19,12 12,19"/>
-                </svg>
+                {loading ? (
+                  <>
+                    <svg className="spinner-icon-button" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
+                      <path d="M12 2 A10 10 0 0 1 22 12" strokeLinecap="round"/>
+                    </svg>
+                    <span>{mode === 'login' ? 'Iniciando sesión...' : 'Creando cuenta...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                      <polyline points="12,5 19,12 12,19"/>
+                    </svg>
+                  </>
+                )}
               </button>
                 </>
               )}

@@ -1176,6 +1176,42 @@
   cursor: not-allowed;
 }
 
+/* Spinner animations para feedback visual */
+.spinner-icon,
+.spinner-icon-small,
+.spinner-icon-button {
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.spinner-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+.spinner-icon-small {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+}
+
+.spinner-icon-button {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes slideInWarning {
   from {
     opacity: 0;

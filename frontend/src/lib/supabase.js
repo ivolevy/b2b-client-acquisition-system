@@ -183,6 +183,23 @@ export const authService = {
     return supabase.auth.onAuthStateChange(callback);
   },
 
+  // Helper: Construir objeto userData de forma consistente
+  // Siempre usa role del perfil, nunca deriva del plan
+  buildUserData(user, profile) {
+    if (!user) return null;
+    
+    return {
+      id: user.id,
+      email: user.email,
+      name: profile?.name || user.email?.split('@')[0] || 'Usuario',
+      phone: profile?.phone || '',
+      plan: profile?.plan || 'free',
+      role: profile?.role || 'user', // Siempre usar role del perfil, nunca derivar del plan
+      loginTime: new Date().toISOString(),
+      ...profile // Incluir todos los campos adicionales del perfil
+    };
+  },
+
   // Eliminar cuenta del usuario
   async deleteAccount() {
     try {
