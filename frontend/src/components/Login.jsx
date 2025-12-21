@@ -27,11 +27,70 @@ const isSupabaseConfigured = () => {
   return url && key && url !== '' && key !== '';
 };
 
+// Funciones de validación
+const validateEmail = (email) => {
+  if (!email || email.trim() === '') {
+    return { isValid: false, message: 'El email es requerido' };
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.trim())) {
+    return { isValid: false, message: 'El formato del email no es válido' };
+  }
+  if (email.length > 255) {
+    return { isValid: false, message: 'El email es demasiado largo (máximo 255 caracteres)' };
+  }
+  return { isValid: true, message: '' };
+};
+
+const validatePhone = (phone) => {
+  if (!phone || phone.trim() === '') {
+    return { isValid: false, message: 'El teléfono es requerido' };
+  }
+  // Permitir números, espacios, guiones, paréntesis y +
+  const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+  
+  if (!phoneRegex.test(phone)) {
+    return { isValid: false, message: 'El teléfono solo puede contener números, espacios, guiones y paréntesis' };
+  }
+  if (cleanPhone.length < 8) {
+    return { isValid: false, message: 'El teléfono debe tener al menos 8 dígitos' };
+  }
+  if (cleanPhone.length > 15) {
+    return { isValid: false, message: 'El teléfono es demasiado largo (máximo 15 dígitos)' };
+  }
+  return { isValid: true, message: '' };
+};
+
+const validatePassword = (password, mode) => {
+  if (!password || password.trim() === '') {
+    return { isValid: false, message: 'La contraseña es requerida' };
+  }
+  if (password.length < 6) {
+    return { isValid: false, message: 'La contraseña debe tener al menos 6 caracteres' };
+  }
+  if (password.length > 128) {
+    return { isValid: false, message: 'La contraseña es demasiado larga (máximo 128 caracteres)' };
+  }
+  if (mode === 'register' && password.length < 8) {
+    return { isValid: false, message: 'La contraseña debe tener al menos 8 caracteres' };
+  }
+  // Validar que tenga al menos una letra y un número (opcional pero recomendado)
+  if (mode === 'register') {
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    if (!hasLetter || !hasNumber) {
+      return { isValid: false, message: 'La contraseña debe contener al menos una letra y un número' };
+    }
+  }
+  return { isValid: true, message: '' };
+};
+
 function Login({ onLogin }) {
   const [mode, setMode] = useState('login'); // 'login' o 'register'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,12 +101,97 @@ function Login({ onLogin }) {
   });
   const [resendingEmail, setResendingEmail] = useState(false);
   
+  // Estados de validación por campo
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [touched, setTouched] = useState({
+    email: false,
+    phone: false,
+    password: false
+  });
+  
   const useSupabase = isSupabaseConfigured();
+  
+  // Validar formulario completo
+  const isFormValid = () => {
+    const emailValidation = validateEmail(email);
+    const passwordValidation = validatePassword(password, mode);
+    const phoneValidation = mode === 'register' ? validatePhone(phone) : { isValid: true };
+    
+    return emailValidation.isValid && passwordValidation.isValid && phoneValidation.isValid;
+  };
+  
+  // Handlers de cambio con validación en tiempo real
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (touched.email) {
+      const validation = validateEmail(value);
+      setEmailError(validation.message);
+    }
+  };
+  
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+    setPhone(value);
+    if (touched.phone) {
+      const validation = validatePhone(value);
+      setPhoneError(validation.message);
+    }
+  };
+  
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+    if (touched.password) {
+      const validation = validatePassword(value, mode);
+      setPasswordError(validation.message);
+    }
+  };
+  
+  // Handlers de blur (cuando el usuario sale del campo)
+  const handleEmailBlur = () => {
+    setTouched({ ...touched, email: true });
+    const validation = validateEmail(email);
+    setEmailError(validation.message);
+  };
+  
+  const handlePhoneBlur = () => {
+    setTouched({ ...touched, phone: true });
+    const validation = validatePhone(phone);
+    setPhoneError(validation.message);
+  };
+  
+  const handlePasswordBlur = () => {
+    setTouched({ ...touched, password: true });
+    const validation = validatePassword(password, mode);
+    setPasswordError(validation.message);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    
+    // Marcar todos los campos como touched para mostrar errores
+    setTouched({ email: true, phone: true, password: true });
+    
+    // Validar todos los campos
+    const emailValidation = validateEmail(email);
+    const passwordValidation = validatePassword(password, mode);
+    const phoneValidation = mode === 'register' ? validatePhone(phone) : { isValid: true };
+    
+    setEmailError(emailValidation.message);
+    setPasswordError(passwordValidation.message);
+    setPhoneError(phoneValidation.message);
+    
+    // Si hay errores de validación, no continuar
+    if (!emailValidation.isValid || !passwordValidation.isValid || !phoneValidation.isValid) {
+      setError('Por favor, revisa y corrige los errores marcados en el formulario');
+      return;
+    }
+    
     setLoading(true);
 
     const emailLimpio = email.trim().toLowerCase();
@@ -65,7 +209,7 @@ function Login({ onLogin }) {
         
         const userData = {
           email: demoUser.email,
-          name: demoUser.name,
+          phone: demoUser.phone || '',
           role: demoUser.role,
           plan: demoUser.plan,
           loginTime: new Date().toISOString()
@@ -100,7 +244,7 @@ function Login({ onLogin }) {
             const userData = {
               id: data.user.id,
               email: data.user.email,
-              name: data.profile?.name || data.user.email.split('@')[0],
+              phone: data.profile?.phone || '',
               plan: data.profile?.plan || 'free',
               role: data.profile?.plan === 'pro' ? 'admin' : 'user',
               loginTime: new Date().toISOString()
@@ -109,14 +253,15 @@ function Login({ onLogin }) {
             onLogin(userData);
           }
         } else {
-          // Registro
-          if (passwordLimpio.length < 6) {
-            setError('La contraseña debe tener al menos 6 caracteres.');
+          // Registro - Validaciones adicionales antes de enviar
+          const phoneValidation = validatePhone(phone.trim());
+          if (!phoneValidation.isValid) {
+            setError(phoneValidation.message);
             setLoading(false);
             return;
           }
 
-          const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, name.trim());
+          const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, phone.trim());
           
           if (error) {
             if (error.message.includes('already registered') || error.message.includes('already exists')) {
@@ -132,6 +277,13 @@ function Login({ onLogin }) {
               setSuccess(`¡Cuenta creada exitosamente! Revisa tu bandeja de entrada (y spam) para confirmar tu email. El link de confirmación expira en 24 horas.`);
               setPendingEmail(emailLimpio); // Guardar email para permitir reenvío
               localStorage.setItem('pending_email_confirmation', emailLimpio);
+              
+              // Log para depuración
+              console.log('[Auth] Usuario creado, necesita confirmar email:', emailLimpio);
+              console.log('[Auth] Si no recibes el email, verifica:');
+              console.log('[Auth] 1. Settings → Auth → Email Auth → "Enable email confirmations" está activado');
+              console.log('[Auth] 2. Settings → Auth → URL Configuration → URL de redirección configurada');
+              console.log('[Auth] 3. Settings → Auth → SMTP Settings → SMTP configurado (opcional pero recomendado)');
             } else {
               setSuccess('¡Cuenta creada exitosamente!');
               setPendingEmail('');
@@ -139,7 +291,7 @@ function Login({ onLogin }) {
             }
             setMode('login');
             setPassword('');
-            setName('');
+            setPhone('');
           }
         }
       } else {
@@ -161,9 +313,19 @@ function Login({ onLogin }) {
   };
 
   const toggleMode = () => {
-    setMode(mode === 'login' ? 'register' : 'login');
+    const newMode = mode === 'login' ? 'register' : 'login';
+    setMode(newMode);
     setError('');
     setSuccess('');
+    // Limpiar todos los campos al cambiar de modo
+    setEmail('');
+    setPassword('');
+    setPhone('');
+    // Limpiar errores de validación
+    setEmailError('');
+    setPhoneError('');
+    setPasswordError('');
+    setTouched({ email: false, phone: false, password: false });
     // No limpiar pendingEmail al cambiar de modo para mantener el estado
   };
 
@@ -358,14 +520,40 @@ function Login({ onLogin }) {
               <div className="auth-tabs">
                 <button 
                   className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
-                  onClick={() => setMode('login')}
+                  onClick={() => {
+                    if (mode !== 'login') {
+                      setMode('login');
+                      setError('');
+                      setSuccess('');
+                      setEmail('');
+                      setPassword('');
+                      setPhone('');
+                      setEmailError('');
+                      setPhoneError('');
+                      setPasswordError('');
+                      setTouched({ email: false, phone: false, password: false });
+                    }
+                  }}
                   type="button"
                 >
                   Iniciar Sesión
                 </button>
                 <button 
                   className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
-                  onClick={() => setMode('register')}
+                  onClick={() => {
+                    if (mode !== 'register') {
+                      setMode('register');
+                      setError('');
+                      setSuccess('');
+                      setEmail('');
+                      setPassword('');
+                      setPhone('');
+                      setEmailError('');
+                      setPhoneError('');
+                      setPasswordError('');
+                      setTouched({ email: false, phone: false, password: false });
+                    }
+                  }}
                   type="button"
                 >
                   Registrarse
@@ -376,12 +564,15 @@ function Login({ onLogin }) {
             <form onSubmit={handleSubmit} className="login-form">
               {error && (
                 <div className="error-message">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <circle cx="12" cy="12" r="10"/>
                     <line x1="12" y1="8" x2="12" y2="12"/>
                     <line x1="12" y1="16" x2="12.01" y2="16"/>
                   </svg>
-                  <span>{error}</span>
+                  <div className="error-content">
+                    <strong>Error</strong>
+                    <span>{error}</span>
+                  </div>
                 </div>
               )}
 
@@ -396,16 +587,33 @@ function Login({ onLogin }) {
                   <div className="success-content">
                     <h3>¡Cuenta creada exitosamente!</h3>
                     <p>{success}</p>
+                    
                     {pendingEmail && (
-                      <button
-                        type="button"
-                        onClick={handleResendConfirmation}
-                        disabled={resendingEmail}
-                        className="resend-email-button"
-                      >
-                        {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmación'}
-                      </button>
+                      <>
+                        <div className="email-troubleshooting">
+                          <p className="troubleshooting-title">⚠️ ¿No recibiste el email?</p>
+                          <ul className="troubleshooting-list">
+                            <li>Revisa tu carpeta de <strong>spam</strong> o <strong>promociones</strong></li>
+                            <li>Espera 1-2 minutos (puede haber delay)</li>
+                            <li>Verifica que tu email sea correcto: <strong>{pendingEmail}</strong></li>
+                            <li>Usa el botón de abajo para reenviar el email</li>
+                            <li><strong>Tip:</strong> Puedes confirmar el email manualmente desde Supabase Dashboard → Users</li>
+                          </ul>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleResendConfirmation}
+                          disabled={resendingEmail}
+                          className="resend-email-button"
+                        >
+                          {resendingEmail ? 'Reenviando...' : 'Reenviar email de confirmación'}
+                        </button>
+                        <div className="manual-confirm-hint">
+                          <p>💡 <strong>Para desarrollo:</strong> Puedes confirmar el email manualmente desde Supabase Dashboard → Authentication → Users → Tu usuario → Confirm Email</p>
+                        </div>
+                      </>
                     )}
+                    
                     <button
                       type="button"
                       onClick={() => {
@@ -414,7 +622,7 @@ function Login({ onLogin }) {
                         setMode('login');
                         setEmail('');
                         setPassword('');
-                        setName('');
+                        setPhone('');
                       }}
                       className="back-to-login-button"
                     >
@@ -424,23 +632,27 @@ function Login({ onLogin }) {
                 </div>
               )}
 
-              {!success && (
+              {!success && !error && (
                 <>
               {mode === 'register' && (
                 <div className="form-group">
-                  <label htmlFor="name">Nombre</label>
+                  <label htmlFor="phone">Teléfono</label>
                   <div className="input-wrapper">
                     <input
-                      type="text"
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Tu nombre"
+                      type="tel"
+                      id="phone"
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      onBlur={handlePhoneBlur}
+                      placeholder="+54 11 1234-5678"
                       required={mode === 'register'}
-                      autoComplete="name"
+                      autoComplete="tel"
                       disabled={loading}
+                      className={phoneError ? 'input-error' : ''}
+                      maxLength={20}
                     />
                   </div>
+                  {phoneError && <span className="field-error">{phoneError}</span>}
                 </div>
               )}
 
@@ -451,13 +663,17 @@ function Login({ onLogin }) {
                     type="email"
                     id="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
+                    onBlur={handleEmailBlur}
                     placeholder="tu@email.com"
                     required
                     autoComplete="email"
                     disabled={loading}
+                    className={emailError ? 'input-error' : ''}
+                    maxLength={255}
                   />
                 </div>
+                {emailError && <span className="field-error">{emailError}</span>}
               </div>
 
               <div className="form-group">
@@ -467,11 +683,15 @@ function Login({ onLogin }) {
                     type={showPassword ? 'text' : 'password'}
                     id="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={mode === 'register' ? 'Mínimo 6 caracteres' : 'Tu contraseña'}
+                    onChange={handlePasswordChange}
+                    onBlur={handlePasswordBlur}
+                    placeholder={mode === 'register' ? 'Mínimo 8 caracteres, letra y número' : 'Tu contraseña'}
                     required
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                     disabled={loading}
+                    className={passwordError ? 'input-error' : ''}
+                    maxLength={128}
+                    minLength={mode === 'register' ? 8 : 6}
                   />
                   <button
                     type="button"
@@ -492,6 +712,20 @@ function Login({ onLogin }) {
                     )}
                   </button>
                 </div>
+                {passwordError && <span className="field-error">{passwordError}</span>}
+                {mode === 'register' && !passwordError && password.length > 0 && (
+                  <div className="password-requirements">
+                    <span className={password.length >= 8 ? 'requirement-met' : 'requirement-unmet'}>
+                      ✓ Mínimo 8 caracteres
+                    </span>
+                    <span className={/[a-zA-Z]/.test(password) ? 'requirement-met' : 'requirement-unmet'}>
+                      ✓ Al menos una letra
+                    </span>
+                    <span className={/\d/.test(password) ? 'requirement-met' : 'requirement-unmet'}>
+                      ✓ Al menos un número
+                    </span>
+                  </div>
+                )}
               </div>
 
               {mode === 'login' && (
@@ -541,7 +775,7 @@ function Login({ onLogin }) {
               <button 
                 type="submit" 
                 className="login-button"
-                disabled={loading}
+                disabled={loading || !isFormValid()}
               >
                 <span>{mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

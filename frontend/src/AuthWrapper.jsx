@@ -117,7 +117,7 @@ function AuthWrapper() {
                 const userData = {
                   id: session.user.id,
                   email: session.user.email,
-                  name: profile?.name || session.user.email.split('@')[0],
+                  phone: profile?.phone || '',
                   plan: profile?.plan || 'free',
                   role: profile?.plan === 'pro' ? 'admin' : 'user',
                   ...profile
@@ -154,7 +154,7 @@ function AuthWrapper() {
             setUser({
               id: session.user.id,
               email: session.user.email,
-              name: profile?.name || session.user.email.split('@')[0],
+              phone: profile?.phone || '',
               plan: profile?.plan || 'free',
               role: profile?.plan === 'pro' ? 'admin' : 'user',
               ...profile
@@ -189,7 +189,7 @@ function AuthWrapper() {
               const userData = {
                 id: session.user.id,
                 email: session.user.email,
-                name: profile?.name || session.user.email.split('@')[0],
+                phone: profile?.phone || '',
                 plan: profile?.plan || 'free',
                 role: profile?.plan === 'pro' ? 'admin' : 'user',
                 ...profile
@@ -229,7 +229,7 @@ function AuthWrapper() {
     const userData = {
       id: data.user.id,
       email: data.user.email,
-      name: data.profile?.name || data.user.email.split('@')[0],
+      phone: data.profile?.phone || '',
       plan: data.profile?.plan || 'free',
       role: data.profile?.plan === 'pro' ? 'admin' : 'user',
       ...data.profile

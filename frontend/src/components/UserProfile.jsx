@@ -179,8 +179,8 @@ function UserProfile() {
           <div className="profile-column">
             <h3 className="profile-section-title">Información básica</h3>
             <div className="profile-field">
-              <label className="profile-field-label">Nombre</label>
-              <div className="profile-field-value">{user?.name || 'Usuario'}</div>
+              <label className="profile-field-label">Teléfono</label>
+              <div className="profile-field-value">{user?.phone || 'No especificado'}</div>
             </div>
             <div className="profile-field">
               <label className="profile-field-label">Email</label>
@@ -462,6 +462,7 @@ function UserProfile() {
 }
 
 export default UserProfile;
+
 
 
 
