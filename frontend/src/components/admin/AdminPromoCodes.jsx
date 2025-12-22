@@ -64,13 +64,13 @@ function AdminPromoCodes() {
       errors.duration_days = 'La duración máxima es 365 días';
     }
     
-    // Validar límite de usos: máximo 1000000
+    // Validar límite de usos: máximo 10000
     if (newCode.max_uses && newCode.max_uses.trim()) {
       const maxUses = parseInt(newCode.max_uses);
       if (isNaN(maxUses) || maxUses < 1) {
         errors.max_uses = 'El límite de usos debe ser al menos 1';
-      } else if (maxUses > 1000000) {
-        errors.max_uses = 'El límite máximo es 1,000,000';
+      } else if (maxUses > 10000) {
+        errors.max_uses = 'El límite máximo es 10,000';
       }
     }
     
@@ -109,7 +109,7 @@ function AdminPromoCodes() {
     }
     
     // Validar límite de usos
-    if (maxUses !== null && (isNaN(maxUses) || maxUses < 1 || maxUses > 1000000)) {
+    if (maxUses !== null && (isNaN(maxUses) || maxUses < 1 || maxUses > 10000)) {
       return false;
     }
     
@@ -375,9 +375,9 @@ function AdminPromoCodes() {
             value={filters.expiration}
             onChange={(e) => setFilters({ ...filters, expiration: e.target.value })}
           >
-            <option value="">Ordenar: Más pronto primero</option>
-            <option value="sort_soonest">Ordenar: Más pronto primero</option>
-            <option value="sort_latest">Ordenar: Más tarde primero</option>
+            <option value="">Todas las fechas</option>
+            <option value="sort_soonest">Más pronto</option>
+            <option value="sort_latest">Más tarde</option>
             <option value="expired">Solo expirados</option>
             <option value="expiring_soon">Expiran pronto (7 días)</option>
             <option value="not_expired">Solo no expirados</option>
@@ -557,7 +557,7 @@ function AdminPromoCodes() {
               )}
             </div>
             <div className="form-group">
-              <label>Límite de usos (dejar vacío para ilimitado, máximo 1,000,000)</label>
+              <label>Límite de usos (dejar vacío para ilimitado, máximo 10,000)</label>
               <input
                 type="number"
                 value={newCode.max_uses}
@@ -570,7 +570,7 @@ function AdminPromoCodes() {
                 }}
                 className={`form-input ${validationErrors.max_uses ? 'error' : ''}`}
                 min="1"
-                max="1000000"
+                max="10000"
                 placeholder="Ilimitado"
               />
               {validationErrors.max_uses && (
