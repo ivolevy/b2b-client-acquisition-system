@@ -82,7 +82,10 @@ function AdminPromoCodes() {
         is_active: !currentStatus
       });
       if (updateError) throw updateError;
-      loadCodes();
+      // Actualizar estado local sin recargar todo
+      setCodes(codes.map(code => 
+        code.id === codeId ? { ...code, is_active: !currentStatus } : code
+      ));
     } catch (err) {
       console.error('Error updating promo code:', err);
       setError('Error al actualizar código: ' + err.message);
@@ -124,12 +127,6 @@ function AdminPromoCodes() {
       <div className="admin-header">
         <h1>Gestión de Códigos Promocionales</h1>
         <div className="admin-nav">
-          <button 
-            className="admin-nav-btn"
-            onClick={() => navigate('/backoffice')}
-          >
-            Dashboard
-          </button>
           <button 
             className="admin-nav-btn"
             onClick={() => navigate('/backoffice/users')}
@@ -196,7 +193,7 @@ function AdminPromoCodes() {
                     }}
                     title="Eliminar"
                   >
-                    🗑️
+                    Eliminar
                   </button>
                 </div>
               </div>

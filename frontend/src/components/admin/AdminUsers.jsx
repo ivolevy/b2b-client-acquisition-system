@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../lib/supabase';
 import './AdminUsers.css';
@@ -9,26 +9,21 @@ function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState({
-    plan: '',
-    role: '',
-    search: ''
-  });
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [search, setSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const searchTimeoutRef = useRef(null);
 
-  const loadUsers = useCallback(async () => {
+  const loadUsers = useCallback(async (searchTerm = '') => {
     setLoading(true);
     setError('');
     
     try {
-      // Aplicar filtros solo si tienen valor
       const activeFilters = {};
-      if (filters.plan) activeFilters.plan = filters.plan;
-      if (filters.role) activeFilters.role = filters.role;
-      if (filters.search && filters.search.trim()) activeFilters.search = filters.search.trim();
+      if (searchTerm && searchTerm.trim()) {
+        activeFilters.search = searchTerm.trim();
+      }
       
       const { data, error: usersError } = await adminService.getAllUsers(activeFilters);
       if (usersError) throw usersError;
@@ -39,11 +34,28 @@ function AdminUsers() {
     } finally {
       setLoading(false);
     }
-  }, [filters.plan, filters.role, filters.search]);
+  }, []);
 
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
+
+  // Debounce para búsqueda
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    searchTimeoutRef.current = setTimeout(() => {
+      loadUsers(search);
+    }, 300);
+    
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [search, loadUsers]);
 
   const handleDelete = async () => {
     if (!selectedUser) return;
@@ -64,26 +76,6 @@ function AdminUsers() {
     }
   };
 
-  const handleExport = async (userId) => {
-    try {
-      const { data, error: exportError } = await adminService.exportUserData(userId);
-      if (exportError) throw exportError;
-      
-      // Crear archivo JSON para descargar
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `user-${userId}-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Error exporting user data:', err);
-      alert('Error al exportar datos: ' + err.message);
-    }
-  };
 
   if (loading && users.length === 0) {
     return (
@@ -102,12 +94,6 @@ function AdminUsers() {
         <h1>Gestión de Usuarios</h1>
         <div className="admin-nav">
           <button 
-            className="admin-nav-btn"
-            onClick={() => navigate('/backoffice')}
-          >
-            Dashboard
-          </button>
-          <button 
             className="admin-nav-btn active"
             onClick={() => navigate('/backoffice/users')}
           >
@@ -122,45 +108,15 @@ function AdminUsers() {
         </div>
       </div>
 
-      {/* Filtros y búsqueda */}
+      {/* Búsqueda */}
       <div className="users-filters">
-        <div className="filter-group">
-          <input
-            type="text"
-            placeholder="Buscar por email o nombre..."
-            className="filter-input"
-            value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-          />
-        </div>
-        <div className="filter-group">
-          <select
-            className="filter-select"
-            value={filters.plan}
-            onChange={(e) => setFilters({ ...filters, plan: e.target.value })}
-          >
-            <option value="">Todos los planes</option>
-            <option value="free">Free</option>
-            <option value="pro">PRO</option>
-          </select>
-        </div>
-        <div className="filter-group">
-          <select
-            className="filter-select"
-            value={filters.role}
-            onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-          >
-            <option value="">Todos los roles</option>
-            <option value="user">Usuario</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
-        <button 
-          className="btn-primary"
-          onClick={() => setShowCreateModal(true)}
-        >
-          + Crear Usuario
-        </button>
+        <input
+          type="text"
+          placeholder="Buscar por email o nombre..."
+          className="filter-input"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       {error && (
@@ -177,27 +133,23 @@ function AdminUsers() {
             <tr>
               <th>Email</th>
               <th>Nombre</th>
-              <th>Teléfono</th>
               <th>Plan</th>
               <th>Rol</th>
-              <th>Registro</th>
-              <th>Último Login</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {users.length === 0 ? (
               <tr>
-                <td colSpan="8" className="no-data">
-                  No se encontraron usuarios
+                <td colSpan="5" className="no-data">
+                  {loading ? 'Cargando...' : 'No se encontraron usuarios'}
                 </td>
               </tr>
             ) : (
               users.map((user) => (
                 <tr key={user.id}>
                   <td>{user.email}</td>
-                  <td>{user.name}</td>
-                  <td>{user.phone || '-'}</td>
+                  <td>{user.name || '-'}</td>
                   <td>
                     <span className={`plan-badge ${user.plan}`}>
                       {user.plan === 'pro' ? 'PRO' : 'Free'}
@@ -209,32 +161,12 @@ function AdminUsers() {
                     </span>
                   </td>
                   <td>
-                    {user.created_at 
-                      ? new Date(user.created_at).toLocaleDateString('es-ES')
-                      : '-'
-                    }
-                  </td>
-                  <td>
-                    {user.last_login_at 
-                      ? new Date(user.last_login_at).toLocaleDateString('es-ES')
-                      : 'Nunca'
-                    }
-                  </td>
-                  <td>
                     <div className="action-buttons">
                       <button
                         className="btn-action btn-view"
                         onClick={() => navigate(`/backoffice/users/${user.id}`)}
-                        title="Ver detalles"
                       >
-                        Ver
-                      </button>
-                      <button
-                        className="btn-action btn-export"
-                        onClick={() => handleExport(user.id)}
-                        title="Exportar datos"
-                      >
-                        Exportar
+                        Editar
                       </button>
                       <button
                         className="btn-action btn-delete"
@@ -242,7 +174,6 @@ function AdminUsers() {
                           setSelectedUser(user);
                           setShowDeleteModal(true);
                         }}
-                        title="Eliminar"
                       >
                         Eliminar
                       </button>
@@ -289,26 +220,6 @@ function AdminUsers() {
         </div>
       )}
 
-      {/* Modal de crear usuario */}
-      {showCreateModal && (
-        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Crear Usuario</h2>
-            <p className="info-text">
-              Para crear usuarios, usa el panel de Supabase Auth o implementa una función edge.
-              Por ahora, los usuarios se crean automáticamente al registrarse.
-            </p>
-            <div className="modal-actions">
-              <button
-                className="btn-secondary"
-                onClick={() => setShowCreateModal(false)}
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

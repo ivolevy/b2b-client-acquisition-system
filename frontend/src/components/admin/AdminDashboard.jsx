@@ -12,12 +12,6 @@ function AdminDashboard() {
         <h1>Panel de Administración</h1>
         <div className="admin-nav">
           <button 
-            className="admin-nav-btn active"
-            onClick={() => navigate('/backoffice')}
-          >
-            Dashboard
-          </button>
-          <button 
             className="admin-nav-btn"
             onClick={() => navigate('/backoffice/users')}
           >
