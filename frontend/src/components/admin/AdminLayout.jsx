@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../AuthWrapper';
 import { adminService } from '../../lib/supabase';
 import ProBackground from '../ProBackground';
@@ -11,6 +11,8 @@ function AdminLayout() {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     checkAdminStatus();
@@ -77,12 +79,33 @@ function AdminLayout() {
     );
   }
 
+  const isUsersPage = location.pathname.includes('/users');
+  const isPromoCodesPage = location.pathname.includes('/promo-codes');
+
   return (
     <>
       <ProBackground />
       <Navbar />
       <main className="main-content">
-        <BackButton />
+        <div className="admin-navigation-container">
+          <BackButton />
+          {(isUsersPage || isPromoCodesPage) && (
+            <div className="admin-nav">
+              <button 
+                className={`admin-nav-btn ${isUsersPage ? 'active' : ''}`}
+                onClick={() => navigate('/backoffice/users')}
+              >
+                Usuarios
+              </button>
+              <button 
+                className={`admin-nav-btn ${isPromoCodesPage ? 'active' : ''}`}
+                onClick={() => navigate('/backoffice/promo-codes')}
+              >
+                Códigos Promocionales
+              </button>
+            </div>
+          )}
+        </div>
         <Outlet />
       </main>
     </>

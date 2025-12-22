@@ -36,7 +36,59 @@
   cursor: pointer;
 }
 
+.admin-navigation-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.admin-nav {
+  display: flex;
+  gap: 12px;
+}
+
+.admin-nav-btn {
+  padding: 10px 20px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  transition: all 0.2s;
+}
+
+.admin-nav-btn:hover {
+  border-color: #81D4FA;
+  color: #81D4FA;
+}
+
+.admin-nav-btn.active {
+  background: #81D4FA;
+  color: white;
+  border-color: #81D4FA;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .admin-navigation-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .admin-nav {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .admin-nav-btn {
+    width: 100%;
+  }
 }
 

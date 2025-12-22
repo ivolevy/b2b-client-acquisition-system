@@ -108,24 +108,6 @@ function AdminUsers() {
 
   return (
     <div className="admin-users">
-      <div className="admin-header">
-        <h1>Gestión de Usuarios</h1>
-        <div className="admin-nav">
-          <button 
-            className="admin-nav-btn active"
-            onClick={() => navigate('/backoffice/users')}
-          >
-            Usuarios
-          </button>
-          <button 
-            className="admin-nav-btn"
-            onClick={() => navigate('/backoffice/promo-codes')}
-          >
-            Códigos Promocionales
-          </button>
-        </div>
-      </div>
-
       {/* Filtros y búsqueda */}
       <div className="users-filters">
         <div className="filter-group">

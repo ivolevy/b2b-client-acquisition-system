@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../lib/supabase';
 import './AdminPromoCodes.css';
 import './AdminLayout.css';
 
 function AdminPromoCodes() {
-  const navigate = useNavigate();
   const [codes, setCodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -167,24 +165,6 @@ function AdminPromoCodes() {
 
   return (
     <div className="admin-promo-codes">
-      <div className="admin-header">
-        <h1>Gestión de Códigos Promocionales</h1>
-        <div className="admin-nav">
-          <button 
-            className="admin-nav-btn"
-            onClick={() => navigate('/backoffice/users')}
-          >
-            Usuarios
-          </button>
-          <button 
-            className="admin-nav-btn active"
-            onClick={() => navigate('/backoffice/promo-codes')}
-          >
-            Códigos Promocionales
-          </button>
-        </div>
-      </div>
-
       {/* Filtros y búsqueda */}
       <div className="codes-filters">
         <div className="filter-group">

@@ -6,50 +6,6 @@
   z-index: 1;
 }
 
-.admin-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  padding: 32px;
-  border-radius: 16px;
-  margin-bottom: 32px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(129, 212, 250, 0.1);
-}
-
-.admin-header h1 {
-  margin: 0 0 20px 0;
-  color: #1a1a1a;
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.admin-nav {
-  display: flex;
-  gap: 12px;
-}
-
-.admin-nav-btn {
-  padding: 12px 24px;
-  border: 2px solid #e0e0e0;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  color: #333;
-  transition: all 0.2s;
-}
-
-.admin-nav-btn:hover {
-  border-color: #81D4FA;
-  color: #81D4FA;
-}
-
-.admin-nav-btn.active {
-  background: #81D4FA;
-  color: white;
-  border-color: #81D4FA;
-}
 
 .users-filters {
   background: rgba(255, 255, 255, 0.95);
