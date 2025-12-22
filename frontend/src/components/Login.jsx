@@ -480,7 +480,7 @@ function Login({ onLogin }) {
           if (error) {
             setError(handleError(error, 'Login - signIn'));
             setLoading(false);
-          } else {
+            } else {
             // Limpiar rate limit en éxito
             rateLimiter.clear(rateLimitKey);
             
@@ -514,7 +514,7 @@ function Login({ onLogin }) {
           if (error) {
             setError(handleError(error, 'Login - signUp'));
             setLoading(false);
-          } else {
+            } else {
             // Limpiar rate limit en éxito
             rateLimiter.clear(rateLimitKey);
             
@@ -1115,11 +1115,11 @@ function Login({ onLogin }) {
                     <p className="warning-title">Email pendiente de confirmación</p>
                     <p className="warning-text">
                       Tienes un email pendiente: <strong>{pendingEmail}</strong>
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleResendConfirmation}
-                      disabled={resendingEmail}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleResendConfirmation}
+                    disabled={resendingEmail}
                       className="resend-warning-button"
                       aria-busy={resendingEmail}
                     >
@@ -1140,7 +1140,7 @@ function Login({ onLogin }) {
                           Reenviar email
                         </>
                       )}
-                    </button>
+                  </button>
                   </div>
                 </div>
               )}

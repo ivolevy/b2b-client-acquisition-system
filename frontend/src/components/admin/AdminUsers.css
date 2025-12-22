@@ -1,14 +1,19 @@
 .admin-users {
   background: transparent;
   min-height: 100vh;
+  padding: 32px;
+  position: relative;
+  z-index: 1;
 }
 
 .admin-header {
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 32px;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.1);
 }
 
 .admin-header h1 {
@@ -44,12 +49,14 @@
 }
 
 .users-filters {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
   padding: 20px;
-  border-radius: 8px 8px 0 0;
+  border-radius: 16px 16px 0 0;
   margin-bottom: 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.1);
+  border-bottom: none;
 }
 
 .filter-input,
@@ -85,9 +92,12 @@
 }
 
 .users-table-container {
-  background: white;
-  border-radius: 0 0 8px 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.1);
+  border-top: none;
   overflow-x: auto;
 }
 

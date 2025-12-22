@@ -1,12 +1,15 @@
 .admin-layout {
   min-height: 100vh;
   background: transparent;
+  position: relative;
 }
 
 .admin-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .admin-loading,

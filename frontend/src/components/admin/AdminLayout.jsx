@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../AuthWrapper';
 import { adminService } from '../../lib/supabase';
+import ProBackground from '../ProBackground';
 import Navbar from '../Navbar';
 import './AdminLayout.css';
 
@@ -49,6 +50,7 @@ function AdminLayout() {
   if (loading) {
     return (
       <div className="admin-layout">
+        <ProBackground />
         <div className="admin-loading">
           <div className="spinner"></div>
           <p>Verificando permisos...</p>
@@ -64,6 +66,7 @@ function AdminLayout() {
   if (!isAdmin) {
     return (
       <div className="admin-layout">
+        <ProBackground />
         <div className="admin-access-denied">
           <h2>Acceso Denegado</h2>
           <p>No tienes permisos para acceder al panel de administración.</p>
@@ -75,6 +78,8 @@ function AdminLayout() {
 
   return (
     <div className="admin-layout">
+      <ProBackground />
+      <Navbar />
       <div className="admin-container">
         <Outlet />
       </div>

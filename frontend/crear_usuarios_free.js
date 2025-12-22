@@ -1,5 +1,5 @@
 // ============================================================================
-// CREAR USUARIOS CON PLAN FREE
+// CREAR USUARIOS FREE
 // ============================================================================
 // Ejecutar: node crear_usuarios_free.js
 // ============================================================================
@@ -43,6 +43,13 @@ for (const envFile of envFiles) {
   }
 }
 
+if (!supabaseUrl && !supabaseServiceKey) {
+  console.log('⚠️  No se encontró .env o .env.local, usando variables de entorno o argumentos');
+}
+
+supabaseUrl = supabaseUrl || process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || process.argv[2];
+supabaseServiceKey = supabaseServiceKey || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_KEY || process.argv[3];
+
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ Error: Faltan las credenciales de Supabase');
   process.exit(1);
@@ -55,103 +62,91 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   }
 });
 
+async function crearUsuario(email, password, name) {
+  try {
+    // Crear usuario en auth.users
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: email,
+      password: password,
+      email_confirm: true,
+      user_metadata: {
+        name: name,
+        phone: ''
+      }
+    });
+
+    let userId;
+
+    if (authError) {
+      if (authError.message.includes('already registered') || 
+          authError.message.includes('already exists') ||
+          authError.message.includes('User already registered')) {
+        console.log(`⚠️  Usuario ${email} ya existe, obteniendo ID...`);
+        const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
+        
+        if (listError) throw listError;
+        
+        const user = users.find(u => u.email === email);
+        if (!user) {
+          throw new Error('Usuario existe pero no se pudo encontrar');
+        }
+        
+        userId = user.id;
+      } else {
+        throw authError;
+      }
+    } else {
+      userId = authData.user.id;
+    }
+
+    // Crear/actualizar en public.users con plan free
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .upsert({
+        id: userId,
+        email: email,
+        name: name,
+        phone: '',
+        plan: 'free',
+        role: 'user'
+      }, {
+        onConflict: 'id'
+      })
+      .select()
+      .single();
+
+    if (userError) {
+      throw userError;
+    }
+
+    return { success: true, user: userData };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
 async function crearUsuariosFree() {
   const usuarios = [
-    {
-      email: 'usuario1@test.com',
-      password: 'usuario123',
-      name: 'Usuario Uno'
-    },
-    {
-      email: 'usuario2@test.com',
-      password: 'usuario123',
-      name: 'Usuario Dos'
-    }
+    { email: 'user1@test.com', password: 'user1234', name: 'Usuario Test 1' },
+    { email: 'user2@test.com', password: 'user1234', name: 'Usuario Test 2' }
   ];
 
-  console.log('🔧 Creando usuarios con plan free...\n');
+  console.log('🔧 Creando usuarios free...\n');
 
   for (const usuario of usuarios) {
-    try {
-      console.log(`📝 Creando usuario: ${usuario.email}`);
-      
-      // Crear usuario en auth.users
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: usuario.email,
-        password: usuario.password,
-        email_confirm: true,
-        user_metadata: {
-          name: usuario.name,
-          phone: ''
-        }
-      });
-
-      let userId;
-
-      if (authError) {
-        if (authError.message.includes('already registered') || 
-            authError.message.includes('already exists') ||
-            authError.message.includes('User already registered')) {
-          console.log(`⚠️  Usuario ${usuario.email} ya existe, obteniendo ID...`);
-          const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-          
-          if (listError) throw listError;
-          
-          const user = users.find(u => u.email === usuario.email);
-          if (!user) {
-            throw new Error('Usuario existe pero no se pudo encontrar');
-          }
-          
-          userId = user.id;
-          console.log(`✅ Usuario encontrado: ${userId}`);
-        } else {
-          throw authError;
-        }
-      } else {
-        userId = authData.user.id;
-        console.log(`✅ Usuario creado en auth.users: ${userId}`);
-      }
-
-      // Crear/actualizar en public.users con plan free
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .upsert({
-          id: userId,
-          email: usuario.email,
-          name: usuario.name,
-          phone: '',
-          plan: 'free',
-          role: 'user'
-        }, {
-          onConflict: 'id'
-        })
-        .select()
-        .single();
-
-      if (userError) {
-        throw userError;
-      }
-
-      console.log(`✅ Usuario creado/actualizado en public.users`);
-      console.log(`   Email: ${userData.email}`);
-      console.log(`   Plan: ${userData.plan}`);
-      console.log(`   Role: ${userData.role}\n`);
-
-    } catch (error) {
-      console.error(`\n❌ Error creando usuario ${usuario.email}:`);
-      console.error(error.message);
-      if (error.details) {
-        console.error('Detalles:', error.details);
-      }
+    console.log(`📝 Creando ${usuario.email}...`);
+    const result = await crearUsuario(usuario.email, usuario.password, usuario.name);
+    
+    if (result.success) {
+      console.log(`✅ Usuario creado: ${usuario.email}`);
+      console.log(`   Password: ${usuario.password}`);
+      console.log(`   Plan: free\n`);
+    } else {
+      console.error(`❌ Error creando ${usuario.email}: ${result.error}\n`);
     }
   }
 
-  console.log('\n✅ Proceso completado!');
-  console.log('\n🔑 Credenciales de los usuarios:');
-  usuarios.forEach(u => {
-    console.log(`   ${u.email} / ${u.password}`);
-  });
+  console.log('✅ Proceso completado');
 }
 
 crearUsuariosFree();
-
