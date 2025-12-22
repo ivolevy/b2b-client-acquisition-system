@@ -8,8 +8,8 @@ import { handleError } from '../utils/errorHandler';
 // Credenciales de prueba (modo demo cuando Supabase no está configurado)
 const DEMO_USERS = [
   {
-    email: 'admin@dotasolutions.com',
-    password: 'Dota2024!',
+    email: 'admin@admin.com',
+    password: 'admin123',
     name: 'Administrador',
     role: 'admin',
     plan: 'pro'

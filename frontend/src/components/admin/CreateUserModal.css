@@ -1,0 +1,56 @@
+.create-user-modal {
+  max-width: 500px;
+}
+
+.create-user-modal .form-group {
+  margin-bottom: 20px;
+}
+
+.create-user-modal .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.create-user-modal .form-input,
+.create-user-modal .form-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.create-user-modal .form-input:focus,
+.create-user-modal .form-select:focus {
+  outline: none;
+  border-color: #FF69B4;
+}
+
+.create-user-modal .alert {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.create-user-modal .alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.create-user-modal .alert-success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.create-user-modal .alert p {
+  margin: 0;
+  font-size: 14px;
+}
+

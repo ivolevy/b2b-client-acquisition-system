@@ -32,8 +32,8 @@ export const useAuth = () => {
 // Credenciales de demo (fallback cuando Supabase no está configurado)
 const DEMO_USERS = [
   {
-    email: 'admin@dotasolutions.com',
-    password: 'Dota2024!',
+    email: 'admin@admin.com',
+    password: 'admin123',
     name: 'Administrador',
     role: 'admin',
     plan: 'pro'
@@ -369,18 +369,18 @@ function AuthWrapper() {
     <AuthContext.Provider value={authValue}>
       <BrowserRouter>
         <Suspense fallback={<LoadingFallback />}>
-          {showProWelcome && <ProWelcome onComplete={handleProWelcomeComplete} />}
-          {user ? (
-            <Routes>
-              <Route path="/profile" element={
-                <div className={`app ${user?.plan === 'pro' ? 'pro-theme' : ''}`}>
-                  {user?.plan === 'pro' && <ProBackground />}
-                  <Navbar />
-                  <main className="main-content">
-                    <UserProfile />
-                  </main>
-                </div>
-              } />
+        {showProWelcome && <ProWelcome onComplete={handleProWelcomeComplete} />}
+        {user ? (
+          <Routes>
+            <Route path="/profile" element={
+              <div className={`app ${user?.plan === 'pro' ? 'pro-theme' : ''}`}>
+                {user?.plan === 'pro' && <ProBackground />}
+                <Navbar />
+                <main className="main-content">
+                  <UserProfile />
+                </main>
+              </div>
+            } />
               <Route path="/backoffice" element={
                 <div className="app">
                   <Navbar />
@@ -394,13 +394,13 @@ function AuthWrapper() {
                 <Route path="users/:id" element={<AdminUserDetail />} />
                 <Route path="promo-codes" element={<AdminPromoCodes />} />
               </Route>
-              <Route path="/*" element={<AppB2B />} />
-            </Routes>
-          ) : (
-            <Routes>
-              <Route path="/*" element={<Login onLogin={handleDemoLogin} />} />
-            </Routes>
-          )}
+            <Route path="/*" element={<AppB2B />} />
+          </Routes>
+        ) : (
+          <Routes>
+            <Route path="/*" element={<Login onLogin={handleDemoLogin} />} />
+          </Routes>
+        )}
         </Suspense>
       </BrowserRouter>
     </AuthContext.Provider>

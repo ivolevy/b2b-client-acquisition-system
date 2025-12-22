@@ -511,15 +511,31 @@ export const adminService = {
   async isAdmin() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return false;
+      if (!user) {
+        console.log('[Admin] No user found');
+        return false;
+      }
       
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('users')
-        .select('role')
+        .select('role, email')
         .eq('id', user.id)
         .single();
       
-      return profile?.role === 'admin';
+      if (profileError) {
+        console.error('[Admin] Error fetching profile:', profileError);
+        return false;
+      }
+      
+      if (!profile) {
+        console.log('[Admin] No profile found for user:', user.id);
+        return false;
+      }
+      
+      const isAdminUser = profile.role === 'admin';
+      console.log('[Admin] User role check:', { email: profile.email, role: profile.role, isAdmin: isAdminUser });
+      
+      return isAdminUser;
     } catch (error) {
       console.error('[Admin] Error checking admin status:', error);
       return false;

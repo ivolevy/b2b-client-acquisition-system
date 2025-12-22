@@ -20,9 +20,23 @@ function AdminLayout() {
       return;
     }
 
+    // Primero verificar el role del usuario del contexto (más rápido)
+    if (user.role === 'admin') {
+      setIsAdmin(true);
+      setLoading(false);
+      return;
+    }
+
+    // Si no tiene role admin en el contexto, verificar en la base de datos
     try {
       const adminStatus = await adminService.isAdmin();
       setIsAdmin(adminStatus);
+      
+      // Si es admin en la BD pero no en el contexto, recargar la página para actualizar
+      if (adminStatus && user.role !== 'admin') {
+        console.log('Usuario es admin en BD pero no en contexto. Recargando...');
+        window.location.reload();
+      }
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
