@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../lib/supabase';
+import UserDetailModal from './UserDetailModal';
 import './AdminUsers.css';
 import './AdminLayout.css';
 
@@ -16,6 +17,7 @@ function AdminUsers() {
   });
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const searchTimeoutRef = useRef(null);
 
@@ -225,6 +227,18 @@ function AdminUsers() {
           </tbody>
         </table>
       </div>
+
+      {/* Modal de detalle de usuario */}
+      {showDetailModal && selectedUser && (
+        <UserDetailModal
+          userId={selectedUser.id}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedUser(null);
+          }}
+          onUpdate={loadUsers}
+        />
+      )}
 
       {/* Modal de confirmación de eliminación */}
       {showDeleteModal && selectedUser && (

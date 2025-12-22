@@ -11,8 +11,8 @@ html {
 
 :root {
   /* Paleta estilo Dota Solutions */
-  --primary: #FF69B4;
-  --primary-dark: #FF1493;
+  --primary: #48D1CC;
+  --primary-dark: #20B2AA;
   --primary-light: #FFB6D9;
   --secondary: #1a1a1a;
   --success: #10b981;
@@ -161,7 +161,7 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.14);
+  box-shadow: 0 0 0 4px rgba(72, 209, 204, 0.14);
   transform: translateY(-1px);
 }
 

@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 import HelpModal from './HelpModal';
 import { useAuth } from '../AuthWrapper';
 
 function Navbar({ onNavigateToProfile }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showHelp, setShowHelp] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth();
+  
+  const isHome = location.pathname === '/';
 
   const handleLogoutClick = () => {
     setShowUserMenu(false);
@@ -26,8 +29,23 @@ function Navbar({ onNavigateToProfile }) {
       <nav className="navbar">
         <div className="navbar-container">
           <div className="navbar-brand">
-            <h1>B2B Client Acquisition System</h1>
+            <h1>Smart Leads</h1>
           </div>
+          
+          {/* Botón de Home (visible cuando no estás en home) */}
+          {!isHome && (
+            <button 
+              className="home-btn"
+              onClick={() => navigate('/')}
+              title="Volver al inicio"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              Home
+            </button>
+          )}
           
           {/* Sección de usuario */}
           <div className="navbar-user">

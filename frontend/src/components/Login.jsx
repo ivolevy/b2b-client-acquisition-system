@@ -665,18 +665,18 @@ function Login({ onLogin }) {
                   <path d="M16 20L22 14L28 20L22 26L16 20Z" fill="white" fillOpacity="0.6"/>
                   <defs>
                     <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40">
-                      <stop stopColor="#FF69B4"/>
-                      <stop offset="1" stopColor="#FF1493"/>
+                      <stop stopColor="#48D1CC"/>
+                      <stop offset="1" stopColor="#20B2AA"/>
                     </linearGradient>
                   </defs>
                 </svg>
               </div>
-              <h1 className="logo-text">B2B Acquisition</h1>
+              <h1 className="logo-text">Smart Leads</h1>
             </div>
             
             <div className="branding-message">
               <h2>Sistema de Captación de Clientes</h2>
-              <p>Encuentra empresas, valida contactos y automatiza tu prospección B2B de manera inteligente.</p>
+              <p>Encuentra empresas, valida contactos y automatiza tu prospección empresarial de manera inteligente.</p>
             </div>
 
             <div className="features-list">

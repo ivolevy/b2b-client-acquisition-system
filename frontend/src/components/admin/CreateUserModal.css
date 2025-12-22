@@ -28,7 +28,7 @@
 .create-user-modal .form-input:focus,
 .create-user-modal .form-select:focus {
   outline: none;
-  border-color: #FF69B4;
+  border-color: #48D1CC;
 }
 
 .create-user-modal .alert {

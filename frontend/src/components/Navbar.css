@@ -18,6 +18,37 @@
   flex-wrap: wrap;
 }
 
+/* Botón de Home */
+.home-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #48D1CC 0%, #20B2AA 100%);
+  border: none;
+  border-radius: 50px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(72, 209, 204, 0.3);
+}
+
+.home-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(72, 209, 204, 0.4);
+}
+
+.home-btn:active {
+  transform: translateY(0);
+}
+
+.home-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
 .navbar-brand h1 {
   font-size: 1.5rem;
   font-weight: 700;
@@ -113,19 +144,19 @@
 
 .pro-badge-small {
   padding: 2px 6px;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  background: linear-gradient(135deg, #48D1CC 0%, #20B2AA 100%);
   color: white;
   font-size: 0.6rem;
   font-weight: 700;
   border-radius: 4px;
   letter-spacing: 0.05em;
-  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.4);
+  box-shadow: 0 2px 8px rgba(72, 209, 204, 0.4);
   animation: proBadgePulse 2s ease-in-out infinite;
 }
 
 @keyframes proBadgePulse {
-  0%, 100% { box-shadow: 0 2px 8px rgba(255, 105, 180, 0.4); }
-  50% { box-shadow: 0 2px 16px rgba(255, 105, 180, 0.6); }
+  0%, 100% { box-shadow: 0 2px 8px rgba(72, 209, 204, 0.4); }
+  50% { box-shadow: 0 2px 16px rgba(72, 209, 204, 0.6); }
 }
 
 .user-email {
@@ -227,7 +258,7 @@
 }
 
 .dropdown-plan.pro {
-  color: #FF1493;
+  color: #20B2AA;
 }
 
 .dropdown-plan.free {
@@ -243,7 +274,7 @@
 
 .upgrade-btn-small {
   padding: 4px 10px;
-  background: linear-gradient(135deg, #FF69B4, #FF1493);
+  background: linear-gradient(135deg, #48D1CC, #20B2AA);
   color: white;
   border: none;
   border-radius: 12px;
@@ -256,7 +287,7 @@
 
 .upgrade-btn-small:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+  box-shadow: 0 4px 12px rgba(72, 209, 204, 0.4);
 }
 
 .dropdown-divider {
@@ -497,7 +528,7 @@
 .upgrade-modal-header {
   padding: 32px 24px 24px;
   text-align: center;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  background: linear-gradient(135deg, #48D1CC 0%, #20B2AA 100%);
   color: white;
 }
 
@@ -541,7 +572,7 @@
 .feature-check {
   width: 20px;
   height: 20px;
-  background: linear-gradient(135deg, #FF69B4, #FF1493);
+  background: linear-gradient(135deg, #48D1CC, #20B2AA);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -587,8 +618,8 @@
 
 .token-input-group input:focus {
   outline: none;
-  border-color: #FF69B4;
-  box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+  border-color: #48D1CC;
+  box-shadow: 0 0 0 3px rgba(72, 209, 204, 0.1);
 }
 
 .upgrade-modal-footer {
@@ -600,7 +631,7 @@
 .upgrade-btn {
   flex: 1;
   padding: 14px 20px;
-  background: linear-gradient(135deg, #FF69B4, #FF1493);
+  background: linear-gradient(135deg, #48D1CC, #20B2AA);
   border: none;
   border-radius: 12px;
   color: white;
@@ -612,7 +643,7 @@
 
 .upgrade-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
+  box-shadow: 0 8px 20px rgba(72, 209, 204, 0.4);
 }
 
 .upgrade-btn:disabled {
@@ -721,7 +752,7 @@
 .logout-confirm-btn {
   flex: 1;
   padding: 12px 20px;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  background: linear-gradient(135deg, #48D1CC 0%, #20B2AA 100%);
   border: none;
   border-radius: 10px;
   color: white;
@@ -736,9 +767,9 @@
 }
 
 .logout-confirm-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #FF1493 0%, #db2777 100%);
+  background: linear-gradient(135deg, #20B2AA 0%, #db2777 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+  box-shadow: 0 4px 12px rgba(72, 209, 204, 0.4);
 }
 
 .logout-confirm-btn:disabled {
@@ -780,6 +811,16 @@
   .navbar-brand h1 {
     font-size: 1rem;
     white-space: nowrap;
+  }
+  
+  .home-btn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .home-btn svg {
+    width: 16px;
+    height: 16px;
   }
   
   .navbar-user {

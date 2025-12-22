@@ -176,7 +176,7 @@ function HelpModal({ onClose }) {
 
         <div className="db-viewer-footer">
           <div className="footer-stats" style={{ fontSize: '0.875rem', color: '#64748b' }}>
-            Sistema B2B Client Acquisition - Versión 2.0 | Google Maps Integration | Almacenamiento en Memoria
+            Smart Leads - Versión 2.0 | Google Maps Integration | Almacenamiento en Memoria
           </div>
           <button className="btn-close" onClick={onClose}>Cerrar</button>
         </div>

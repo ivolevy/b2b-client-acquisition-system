@@ -4,8 +4,8 @@
 
 /* Variables CSS locales - Colores rosa Dota Solutions */
 .login-page {
-  --login-primary: #FF69B4;
-  --login-secondary: #FF1493;
+  --login-primary: #48D1CC;
+  --login-secondary: #20B2AA;
   --login-accent: #FFB6D9;
   --login-dark: #1a1a1a;
   --login-darker: #0f0f0f;
@@ -329,7 +329,7 @@
 .input-wrapper input:focus {
   outline: none;
   border-color: var(--login-primary);
-  box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.2);
+  box-shadow: 0 0 0 4px rgba(72, 209, 204, 0.2);
 }
 
 
@@ -386,13 +386,13 @@
 
 .country-selector-button:hover {
   border-color: var(--login-primary);
-  box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.1);
+  box-shadow: 0 0 0 4px rgba(72, 209, 204, 0.1);
 }
 
 .country-selector-button:focus {
   outline: none;
   border-color: var(--login-primary);
-  box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.2);
+  box-shadow: 0 0 0 4px rgba(72, 209, 204, 0.2);
 }
 
 .country-selector-button:disabled {
@@ -468,7 +468,7 @@
 .country-search-input:focus {
   outline: none;
   border-color: var(--login-primary);
-  box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.15);
+  box-shadow: 0 0 0 3px rgba(72, 209, 204, 0.15);
 }
 
 .country-list {
@@ -510,11 +510,11 @@
 }
 
 .country-option:hover {
-  background: rgba(255, 105, 180, 0.08);
+  background: rgba(72, 209, 204, 0.08);
 }
 
 .country-option.selected {
-  background: rgba(255, 105, 180, 0.15);
+  background: rgba(72, 209, 204, 0.15);
   font-weight: 500;
 }
 
@@ -772,7 +772,7 @@
   justify-content: center;
   gap: 8px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-  box-shadow: 0 3px 12px rgba(255, 105, 180, 0.3);
+  box-shadow: 0 3px 12px rgba(72, 209, 204, 0.3);
   margin-top: 8px;
   box-sizing: border-box;
 }
@@ -784,7 +784,7 @@
 
 .login-button:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 3px 12px rgba(255, 105, 180, 0.3);
+  box-shadow: 0 3px 12px rgba(72, 209, 204, 0.3);
 }
 
 .login-button:disabled {
@@ -1196,7 +1196,7 @@
   font-weight: 500;
   transition: all 0.3s ease;
   margin-top: 8px;
-  box-shadow: 0 3px 12px rgba(255, 105, 180, 0.3);
+  box-shadow: 0 3px 12px rgba(72, 209, 204, 0.3);
 }
 
 .back-to-login-button:hover {
@@ -1562,13 +1562,13 @@
 }
 
 .demo-button-pro .demo-button-content {
-  border-color: rgba(255, 105, 180, 0.3);
+  border-color: rgba(72, 209, 204, 0.3);
 }
 
 .demo-button-pro:hover:not(:disabled) .demo-button-content {
-  background: rgba(255, 105, 180, 0.15);
-  border-color: rgba(255, 105, 180, 0.5);
-  box-shadow: 0 4px 16px rgba(255, 105, 180, 0.2);
+  background: rgba(72, 209, 204, 0.15);
+  border-color: rgba(72, 209, 204, 0.5);
+  box-shadow: 0 4px 16px rgba(72, 209, 204, 0.2);
 }
 
 .demo-button-free .demo-button-content {
@@ -1593,7 +1593,7 @@
 .demo-button-badge.pro {
   background: linear-gradient(135deg, var(--login-primary), var(--login-secondary));
   color: white;
-  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+  box-shadow: 0 2px 8px rgba(72, 209, 204, 0.3);
 }
 
 .demo-button-badge.free {
@@ -1707,8 +1707,8 @@
 .demo-quick-access {
   margin: 16px 0;
   padding: 12px;
-  background: rgba(255, 105, 180, 0.08);
-  border: 1px solid rgba(255, 105, 180, 0.2);
+  background: rgba(72, 209, 204, 0.08);
+  border: 1px solid rgba(72, 209, 204, 0.2);
   border-radius: 10px;
   backdrop-filter: blur(10px);
 }
@@ -1748,13 +1748,13 @@
 }
 
 .demo-quick-btn.pro-btn {
-  border-color: rgba(255, 105, 180, 0.4);
-  background: rgba(255, 105, 180, 0.1);
+  border-color: rgba(72, 209, 204, 0.4);
+  background: rgba(72, 209, 204, 0.1);
 }
 
 .demo-quick-btn.pro-btn:hover:not(:disabled) {
-  background: rgba(255, 105, 180, 0.2);
-  border-color: rgba(255, 105, 180, 0.5);
+  background: rgba(72, 209, 204, 0.2);
+  border-color: rgba(72, 209, 204, 0.5);
 }
 
 .demo-quick-btn.free-btn {

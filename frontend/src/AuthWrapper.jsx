@@ -301,7 +301,7 @@ function AuthWrapper() {
             width: '48px',
             height: '48px',
             border: '3px solid rgba(255, 105, 180, 0.2)',
-            borderTopColor: '#FF69B4',
+            borderTopColor: '#48D1CC',
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
             margin: '0 auto 16px'
@@ -350,7 +350,7 @@ function AuthWrapper() {
           width: '48px',
           height: '48px',
           border: '3px solid rgba(255, 105, 180, 0.2)',
-          borderTopColor: '#FF69B4',
+          borderTopColor: '#48D1CC',
           borderRadius: '50%',
           animation: 'spin 0.8s linear infinite',
           margin: '0 auto 16px'
