@@ -598,12 +598,17 @@ export const adminService = {
         query = query.eq('role', filters.role);
       }
       if (filters.search && filters.search.trim()) {
-        const searchTerm = filters.search.trim();
-        query = query.or(`email.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%`);
+        const searchTerm = `%${filters.search.trim()}%`;
+        query = query.or(`email.ilike.${searchTerm},name.ilike.${searchTerm}`);
       }
 
+      console.log('[Admin] Fetching users with filters:', filters);
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        console.error('[Admin] Error fetching users:', error);
+        throw error;
+      }
+      console.log('[Admin] Fetched users:', data?.length || 0);
       return { data, error: null };
     } catch (error) {
       console.error('[Admin] Error getting users:', error);
