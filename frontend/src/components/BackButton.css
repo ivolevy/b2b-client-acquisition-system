@@ -5,13 +5,13 @@
 .back-to-home-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
+  gap: 6px;
+  padding: 8px 14px;
   background: white;
   border: 2px solid #e0e0e0;
   border-radius: 10px;
   color: #333;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -24,24 +24,22 @@
   background: #f8f9fa;
   border-color: #81D4FA;
   color: #81D4FA;
-  transform: translateX(-4px);
   box-shadow: 0 4px 12px rgba(129, 212, 250, 0.3);
 }
 
 .back-to-home-btn:active {
-  transform: translateX(-2px);
+  transform: scale(0.98);
 }
 
 .back-to-home-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke: #666;
-  transition: all 0.2s ease;
+  transition: stroke 0.2s ease;
 }
 
 .back-to-home-btn:hover svg {
   stroke: #81D4FA;
-  transform: translateX(-2px);
 }
 
 /* Responsive */

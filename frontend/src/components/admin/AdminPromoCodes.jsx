@@ -12,7 +12,7 @@ function AdminPromoCodes() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [filters, setFilters] = useState({
-    status: '',
+    status: '', // 'active', 'inactive', 'expired', 'available', 'exhausted'
     plan: '',
     search: ''
   });
@@ -38,16 +38,33 @@ function AdminPromoCodes() {
       // Aplicar filtros en el frontend
       let filteredCodes = data || [];
       
+      // Filtro por estado
       if (filters.status === 'active') {
         filteredCodes = filteredCodes.filter(code => code.is_active);
       } else if (filters.status === 'inactive') {
         filteredCodes = filteredCodes.filter(code => !code.is_active);
+      } else if (filters.status === 'expired') {
+        filteredCodes = filteredCodes.filter(code => 
+          code.expires_at && new Date(code.expires_at) < new Date()
+        );
+      } else if (filters.status === 'available') {
+        filteredCodes = filteredCodes.filter(code => {
+          const isNotExpired = !code.expires_at || new Date(code.expires_at) >= new Date();
+          const hasUsesLeft = !code.max_uses || code.used_count < code.max_uses;
+          return code.is_active && isNotExpired && hasUsesLeft;
+        });
+      } else if (filters.status === 'exhausted') {
+        filteredCodes = filteredCodes.filter(code => 
+          code.max_uses && code.used_count >= code.max_uses
+        );
       }
       
+      // Filtro por plan
       if (filters.plan) {
         filteredCodes = filteredCodes.filter(code => code.plan === filters.plan);
       }
       
+      // Filtro de búsqueda
       if (filters.search && filters.search.trim()) {
         const searchTerm = filters.search.trim().toLowerCase();
         filteredCodes = filteredCodes.filter(code =>
@@ -185,6 +202,9 @@ function AdminPromoCodes() {
             <option value="">Todos los estados</option>
             <option value="active">Activos</option>
             <option value="inactive">Inactivos</option>
+            <option value="expired">Expirados</option>
+            <option value="available">Disponibles</option>
+            <option value="exhausted">Agotados</option>
           </select>
         </div>
         <div className="filter-group">
