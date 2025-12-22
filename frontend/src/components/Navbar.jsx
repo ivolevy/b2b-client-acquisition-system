@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Navbar.css';
-import HelpModal from './HelpModal';
 import { useAuth } from '../AuthWrapper';
 
 function Navbar({ onNavigateToProfile }) {
   const navigate = useNavigate();
-  const [showHelp, setShowHelp] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth();
@@ -122,8 +120,6 @@ function Navbar({ onNavigateToProfile }) {
         </div>
       </nav>
 
-      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
-
       {/* Modal de confirmación de logout */}
       {showLogoutModal && (
         <div className="logout-modal-overlay">
@@ -161,15 +157,6 @@ function Navbar({ onNavigateToProfile }) {
           </div>
         </div>
       )}
-
-      {/* Botón de ayuda flotante */}
-      <button
-        className="floating-help-btn"
-        onClick={() => setShowHelp(true)}
-        title="Ayuda"
-      >
-        ?
-      </button>
     </>
   );
 }
