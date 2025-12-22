@@ -50,18 +50,18 @@ function UserProfile() {
           setUpgradeError(data?.error || 'Error al activar el código promocional.');
           setUpgradeLoading(false);
           return;
-        }
+      }
 
-        // Actualizar localStorage
-        const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
-        authData.plan = 'pro';
+      // Actualizar localStorage
+      const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
+      authData.plan = 'pro';
         authData.plan_expires_at = data.expires_at;
-        localStorage.setItem('b2b_auth', JSON.stringify(authData));
+      localStorage.setItem('b2b_auth', JSON.stringify(authData));
 
-        // Cerrar modal y recargar para aplicar cambios
-        setShowUpgradeModal(false);
-        setProTokenInput('');
-        window.location.reload();
+      // Cerrar modal y recargar para aplicar cambios
+      setShowUpgradeModal(false);
+      setProTokenInput('');
+      window.location.reload();
       } else {
         setUpgradeError('Supabase no está configurado.');
         setUpgradeLoading(false);

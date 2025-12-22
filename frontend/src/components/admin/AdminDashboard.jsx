@@ -1,33 +1,51 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
+import './AdminLayout.css';
 
 function AdminDashboard() {
   const navigate = useNavigate();
 
   return (
     <div className="admin-dashboard">
-      <h1>Panel de Administración</h1>
-      
-      <div className="admin-menu">
-        <button 
+      <div className="admin-header">
+        <h1>Panel de Administración</h1>
+        <div className="admin-nav">
+          <button 
+            className="admin-nav-btn"
+            onClick={() => navigate('/backoffice/users')}
+          >
+            Usuarios
+          </button>
+          <button 
+            className="admin-nav-btn"
+            onClick={() => navigate('/backoffice/promo-codes')}
+          >
+            Códigos Promocionales
+          </button>
+        </div>
+      </div>
+
+      <div className="admin-menu-grid">
+        <div 
           className="admin-menu-card"
           onClick={() => navigate('/backoffice/users')}
         >
           <h2>Usuarios</h2>
-          <p>Gestionar usuarios del sistema</p>
-        </button>
-        
-        <button 
+          <p>Gestiona usuarios, edita perfiles y administra permisos</p>
+        </div>
+
+        <div 
           className="admin-menu-card"
           onClick={() => navigate('/backoffice/promo-codes')}
         >
           <h2>Códigos Promocionales</h2>
-          <p>Crear y gestionar códigos promo</p>
-        </button>
+          <p>Crea y gestiona códigos promocionales para suscripciones</p>
+        </div>
       </div>
     </div>
   );
 }
 
 export default AdminDashboard;
+

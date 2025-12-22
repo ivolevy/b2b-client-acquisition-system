@@ -19,6 +19,12 @@ DROP POLICY IF EXISTS "Enable delete for users based on id" ON public.users;
 DROP POLICY IF EXISTS "Admins can insert users" ON public.users;
 DROP POLICY IF EXISTS "Admins can update all users" ON public.users;
 DROP POLICY IF EXISTS "Admins can delete users" ON public.users;
+DROP POLICY IF EXISTS "users_select_own" ON public.users;
+DROP POLICY IF EXISTS "users_update_own" ON public.users;
+DROP POLICY IF EXISTS "admins_select_all" ON public.users;
+DROP POLICY IF EXISTS "admins_insert" ON public.users;
+DROP POLICY IF EXISTS "admins_update_all" ON public.users;
+DROP POLICY IF EXISTS "admins_delete" ON public.users;
 
 -- PASO 3: Eliminar función is_admin si existe
 DROP FUNCTION IF EXISTS public.is_admin();
