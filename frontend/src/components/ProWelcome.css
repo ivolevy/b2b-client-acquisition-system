@@ -32,7 +32,7 @@
   position: absolute;
   width: var(--size);
   height: var(--size);
-  background: linear-gradient(135deg, #48D1CC, #20B2AA);
+  background: linear-gradient(135deg, #81D4FA, #4FC3F7);
   border-radius: 50%;
   opacity: 0;
   filter: blur(1px);
@@ -85,7 +85,7 @@
   position: absolute;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(72, 209, 204, 0.4) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(129, 212, 250, 0.4) 0%, transparent 70%);
   border-radius: 50%;
   filter: blur(40px);
   animation: glowPulse 2s ease-in-out infinite;
@@ -101,10 +101,10 @@
   align-items: center;
   gap: 16px;
   padding: 24px 48px;
-  background: linear-gradient(135deg, #48D1CC 0%, #20B2AA 50%, #C71585 100%);
+  background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 50%, #C71585 100%);
   border-radius: 20px;
   box-shadow: 
-    0 0 60px rgba(72, 209, 204, 0.6),
+    0 0 60px rgba(129, 212, 250, 0.6),
     0 0 120px rgba(255, 20, 147, 0.4),
     inset 0 0 30px rgba(255, 255, 255, 0.2);
   transform: scale(0);
@@ -174,7 +174,7 @@
   color: white;
   text-shadow: 
     0 0 20px rgba(255, 255, 255, 0.8),
-    0 0 40px rgba(72, 209, 204, 0.6),
+    0 0 40px rgba(129, 212, 250, 0.6),
     0 0 60px rgba(255, 20, 147, 0.4);
   letter-spacing: 0.1em;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -234,7 +234,7 @@
   position: absolute;
   width: 8px;
   height: 8px;
-  background: linear-gradient(135deg, #48D1CC, #ffffff);
+  background: linear-gradient(135deg, #81D4FA, #ffffff);
   border-radius: 2px;
   opacity: 0;
 }
@@ -267,7 +267,7 @@
 
 .wave {
   position: absolute;
-  border: 3px solid rgba(72, 209, 204, 0.6);
+  border: 3px solid rgba(129, 212, 250, 0.6);
   border-radius: 50%;
   opacity: 0;
 }

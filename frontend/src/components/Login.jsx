@@ -665,8 +665,8 @@ function Login({ onLogin }) {
                   <path d="M16 20L22 14L28 20L22 26L16 20Z" fill="white" fillOpacity="0.6"/>
                   <defs>
                     <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40">
-                      <stop stopColor="#48D1CC"/>
-                      <stop offset="1" stopColor="#20B2AA"/>
+                      <stop stopColor="#81D4FA"/>
+                      <stop offset="1" stopColor="#4FC3F7"/>
                     </linearGradient>
                   </defs>
                 </svg>

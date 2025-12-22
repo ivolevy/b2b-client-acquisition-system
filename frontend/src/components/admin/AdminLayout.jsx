@@ -4,6 +4,7 @@ import { useAuth } from '../../AuthWrapper';
 import { adminService } from '../../lib/supabase';
 import ProBackground from '../ProBackground';
 import Navbar from '../Navbar';
+import BackButton from '../BackButton';
 import './AdminLayout.css';
 
 function AdminLayout() {
@@ -80,6 +81,7 @@ function AdminLayout() {
     <>
       <ProBackground />
       <Navbar />
+      <BackButton />
       <main className="main-content">
         <Outlet />
       </main>

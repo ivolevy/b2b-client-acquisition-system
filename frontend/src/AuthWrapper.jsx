@@ -11,6 +11,7 @@ const UserProfile = lazy(() => import('./components/UserProfile'));
 const Navbar = lazy(() => import('./components/Navbar'));
 const ProBackground = lazy(() => import('./components/ProBackground'));
 const ProWelcome = lazy(() => import('./components/ProWelcome'));
+const BackButton = lazy(() => import('./components/BackButton'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
@@ -301,7 +302,7 @@ function AuthWrapper() {
             width: '48px',
             height: '48px',
             border: '3px solid rgba(255, 105, 180, 0.2)',
-            borderTopColor: '#48D1CC',
+            borderTopColor: '#81D4FA',
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
             margin: '0 auto 16px'
@@ -350,7 +351,7 @@ function AuthWrapper() {
           width: '48px',
           height: '48px',
           border: '3px solid rgba(255, 105, 180, 0.2)',
-          borderTopColor: '#48D1CC',
+          borderTopColor: '#81D4FA',
           borderRadius: '50%',
           animation: 'spin 0.8s linear infinite',
           margin: '0 auto 16px'
@@ -376,6 +377,7 @@ function AuthWrapper() {
               <div className={`app ${user?.plan === 'pro' ? 'pro-theme' : ''}`}>
                 {user?.plan === 'pro' && <ProBackground />}
                 <Navbar />
+                <BackButton />
                 <main className="main-content">
                   <UserProfile />
                 </main>

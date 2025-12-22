@@ -247,7 +247,7 @@
 }
 
 .sort-indicator {
-  color: #20B2AA;
+  color: #4FC3F7;
   font-weight: 700;
   margin-left: 4px;
 }
@@ -283,13 +283,13 @@
 }
 
 .share-btn {
-  background: linear-gradient(135deg, #48D1CC 0%, #20B2AA 100%);
+  background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%);
   color: white;
 }
 
 .share-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(72, 209, 204, 0.3);
+  box-shadow: 0 4px 12px rgba(129, 212, 250, 0.3);
 }
 
 /* ============================================
@@ -813,7 +813,7 @@
 }
 
 .action-btn-mini.share-btn {
-  background: linear-gradient(135deg, #48D1CC 0%, #20B2AA 100%);
+  background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%);
 }
 
 .action-btn-mini.share-btn:hover {

@@ -1,0 +1,47 @@
+.back-to-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: white;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: 20px 0 0 20px;
+}
+
+.back-to-home-btn:hover {
+  background: #f8f9fa;
+  border-color: rgba(129, 212, 250, 0.4);
+  transform: translateX(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.back-to-home-btn:active {
+  transform: translateX(-2px);
+}
+
+.back-to-home-btn svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+}
+
+.back-to-home-btn:hover svg {
+  transform: translateX(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .back-to-home-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    margin: 12px 0 0 12px;
+  }
+}
+

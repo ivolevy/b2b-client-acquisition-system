@@ -21,7 +21,7 @@
 .pro-sphere-1 {
   width: 700px;
   height: 700px;
-  background: linear-gradient(135deg, #20B2AA 0%, #48D1CC 100%);
+  background: linear-gradient(135deg, #4FC3F7 0%, #81D4FA 100%);
   top: -250px;
   left: -150px;
   animation-delay: 0s;
@@ -30,7 +30,7 @@
 .pro-sphere-2 {
   width: 600px;
   height: 600px;
-  background: linear-gradient(135deg, #48D1CC 0%, #FFB6D9 100%);
+  background: linear-gradient(135deg, #81D4FA 0%, #FFB6D9 100%);
   bottom: -200px;
   right: -150px;
   animation-delay: -8s;
@@ -39,7 +39,7 @@
 .pro-sphere-3 {
   width: 500px;
   height: 500px;
-  background: linear-gradient(135deg, #C71585 0%, #20B2AA 100%);
+  background: linear-gradient(135deg, #C71585 0%, #4FC3F7 100%);
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -66,8 +66,8 @@
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(rgba(72, 209, 204, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(72, 209, 204, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(129, 212, 250, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(129, 212, 250, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
   animation: gridShift 20s linear infinite;
 }
@@ -90,14 +90,14 @@
 .app.pro-theme .navbar {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  box-shadow: 0 4px 30px rgba(72, 209, 204, 0.1);
+  box-shadow: 0 4px 30px rgba(129, 212, 250, 0.1);
 }
 
 .app.pro-theme .filter-section {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(72, 209, 204, 0.1);
+  border: 1px solid rgba(129, 212, 250, 0.1);
 }
 
 .app.pro-theme .results-module {
@@ -107,7 +107,7 @@
   padding: 20px;
   margin-bottom: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(72, 209, 204, 0.1);
+  border: 1px solid rgba(129, 212, 250, 0.1);
 }
 
 .app.pro-theme .table-container {
@@ -115,7 +115,7 @@
   backdrop-filter: blur(20px);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(72, 209, 204, 0.1);
+  border: 1px solid rgba(129, 212, 250, 0.1);
 }
 
 /* Badge PRO flotante */
@@ -127,13 +127,13 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: linear-gradient(135deg, #48D1CC 0%, #20B2AA 100%);
+  background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%);
   border-radius: 50px;
   color: white;
   font-size: 0.85rem;
   font-weight: 600;
   box-shadow: 
-    0 4px 20px rgba(72, 209, 204, 0.4),
+    0 4px 20px rgba(129, 212, 250, 0.4),
     0 0 40px rgba(255, 20, 147, 0.2);
   z-index: 1000;
   animation: badgeGlow 2s ease-in-out infinite;
@@ -146,12 +146,12 @@
 @keyframes badgeGlow {
   0%, 100% { 
     box-shadow: 
-      0 4px 20px rgba(72, 209, 204, 0.4),
+      0 4px 20px rgba(129, 212, 250, 0.4),
       0 0 40px rgba(255, 20, 147, 0.2);
   }
   50% { 
     box-shadow: 
-      0 4px 30px rgba(72, 209, 204, 0.6),
+      0 4px 30px rgba(129, 212, 250, 0.6),
       0 0 60px rgba(255, 20, 147, 0.3);
   }
 }
