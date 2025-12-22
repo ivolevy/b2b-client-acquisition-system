@@ -1,16 +1,19 @@
 .admin-dashboard {
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  background: transparent;
   min-height: 100vh;
   padding: 32px;
+  position: relative;
+  z-index: 1;
 }
 
 .admin-header {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
   padding: 32px;
   border-radius: 16px;
   margin-bottom: 32px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.1);
 }
 
 .admin-header h1 {
@@ -47,54 +50,43 @@
   border-color: #FF69B4;
 }
 
-.metrics-grid {
+.admin-menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
-  margin-bottom: 32px;
+  margin-top: 32px;
 }
 
-.metric-card {
-  background: white;
-  padding: 28px;
+.admin-menu-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 40px;
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.1);
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.metric-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+.admin-menu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(255, 105, 180, 0.2);
+  border-color: rgba(255, 105, 180, 0.3);
 }
 
-.metric-content {
-  flex: 1;
-}
-
-.metric-content h3 {
+.admin-menu-card h2 {
   margin: 0 0 12px 0;
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.metric-value {
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 24px;
   color: #1e293b;
-  margin: 0 0 4px 0;
-  line-height: 1;
-  letter-spacing: -1px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
-.metric-subtitle {
-  font-size: 13px;
-  color: #94a3b8;
-  margin: 8px 0 0 0;
-  font-weight: 500;
+.admin-menu-card p {
+  margin: 0;
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
 }
 
 .charts-grid {
