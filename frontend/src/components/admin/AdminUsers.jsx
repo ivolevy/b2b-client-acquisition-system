@@ -36,9 +36,11 @@ function AdminUsers() {
     }
   }, []);
 
+  // Cargar usuarios al montar
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    loadUsers('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Debounce para búsqueda
   useEffect(() => {
@@ -46,6 +48,13 @@ function AdminUsers() {
       clearTimeout(searchTimeoutRef.current);
     }
     
+    // Si search está vacío, cargar todos los usuarios inmediatamente
+    if (!search) {
+      loadUsers('');
+      return;
+    }
+    
+    // Si hay búsqueda, esperar 300ms
     searchTimeoutRef.current = setTimeout(() => {
       loadUsers(search);
     }, 300);
@@ -55,7 +64,8 @@ function AdminUsers() {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [search, loadUsers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   const handleDelete = async () => {
     if (!selectedUser) return;
