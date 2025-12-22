@@ -14,7 +14,9 @@ function AdminPromoCodes() {
   const [filters, setFilters] = useState({
     status: '',
     plan: '',
-    search: ''
+    search: '',
+    expiration: '',
+    usage: ''
   });
   const searchTimeoutRef = useRef(null);
 
@@ -38,23 +40,56 @@ function AdminPromoCodes() {
       // Aplicar filtros en el frontend
       let filteredCodes = data || [];
       
+      const now = new Date();
+      
       // Filtro por estado (activo/inactivo)
       if (filters.status === 'active') {
         filteredCodes = filteredCodes.filter(code => code.is_active);
       } else if (filters.status === 'inactive') {
         filteredCodes = filteredCodes.filter(code => !code.is_active);
-      } else if (filters.status === 'expired') {
+      }
+      
+      // Filtro por expiración
+      if (filters.expiration === 'expired') {
         // Códigos expirados (tienen expires_at y ya pasó la fecha)
-        const now = new Date();
         filteredCodes = filteredCodes.filter(code => 
           code.expires_at && new Date(code.expires_at) < now
         );
-      } else if (filters.status === 'valid') {
-        // Códigos válidos (activos y no expirados)
-        const now = new Date();
+      } else if (filters.expiration === 'expiring_soon') {
+        // Códigos que expiran en los próximos 7 días
+        const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
         filteredCodes = filteredCodes.filter(code => 
-          code.is_active && (!code.expires_at || new Date(code.expires_at) >= now)
+          code.expires_at && 
+          new Date(code.expires_at) >= now && 
+          new Date(code.expires_at) <= weekFromNow
         );
+      } else if (filters.expiration === 'no_expiration') {
+        // Códigos sin fecha de expiración
+        filteredCodes = filteredCodes.filter(code => !code.expires_at);
+      } else if (filters.expiration === 'not_expired') {
+        // Códigos que no han expirado (tienen fecha futura o no tienen fecha)
+        filteredCodes = filteredCodes.filter(code => 
+          !code.expires_at || new Date(code.expires_at) >= now
+        );
+      }
+      
+      // Filtro por usos
+      if (filters.usage === 'exhausted') {
+        // Códigos agotados (alcanzaron el límite de usos)
+        filteredCodes = filteredCodes.filter(code => 
+          code.max_uses && code.used_count >= code.max_uses
+        );
+      } else if (filters.usage === 'available') {
+        // Códigos con usos disponibles
+        filteredCodes = filteredCodes.filter(code => 
+          !code.max_uses || code.used_count < code.max_uses
+        );
+      } else if (filters.usage === 'unlimited') {
+        // Códigos ilimitados (sin max_uses)
+        filteredCodes = filteredCodes.filter(code => !code.max_uses);
+      } else if (filters.usage === 'limited') {
+        // Códigos con límite de usos
+        filteredCodes = filteredCodes.filter(code => code.max_uses);
       }
       
       // Filtro por plan
@@ -98,7 +133,7 @@ function AdminPromoCodes() {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.status, filters.plan, filters.search]);
+  }, [filters.status, filters.plan, filters.search, filters.expiration, filters.usage]);
 
   const handleCreate = async () => {
     if (!newCode.code.trim()) {
@@ -200,8 +235,32 @@ function AdminPromoCodes() {
             <option value="">Todos los estados</option>
             <option value="active">Activos</option>
             <option value="inactive">Inactivos</option>
+          </select>
+        </div>
+        <div className="filter-group">
+          <select
+            className="filter-select"
+            value={filters.expiration}
+            onChange={(e) => setFilters({ ...filters, expiration: e.target.value })}
+          >
+            <option value="">Todas las fechas</option>
             <option value="expired">Expirados</option>
-            <option value="valid">Válidos</option>
+            <option value="expiring_soon">Expiran pronto (7 días)</option>
+            <option value="not_expired">No expirados</option>
+            <option value="no_expiration">Sin fecha de expiración</option>
+          </select>
+        </div>
+        <div className="filter-group">
+          <select
+            className="filter-select"
+            value={filters.usage}
+            onChange={(e) => setFilters({ ...filters, usage: e.target.value })}
+          >
+            <option value="">Todos los usos</option>
+            <option value="available">Con usos disponibles</option>
+            <option value="exhausted">Agotados</option>
+            <option value="unlimited">Ilimitados</option>
+            <option value="limited">Con límite</option>
           </select>
         </div>
         <div className="filter-group">
