@@ -214,13 +214,28 @@
 .form-section {
   margin: 0 !important;
   background: white;
-  padding: 24px !important;
+  padding: 24px 0 !important;
   border-radius: 0;
   border: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box;
+}
+
+.form-section h3 {
+  padding: 0 24px !important;
+  margin: 0 0 16px 0 !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.form-section .form-grid {
+  padding: 0 24px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  margin: 0 !important;
 }
 
 .form-section:last-of-type {
