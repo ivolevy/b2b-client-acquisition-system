@@ -388,7 +388,7 @@ function AuthWrapper() {
                 <AdminLayout />
               </div>
             }>
-                <Route index element={<AdminDashboard />} />
+                <Route index element={<Navigate to="/backoffice/users" replace />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="users/:id" element={<AdminUserDetail />} />
                 <Route path="promo-codes" element={<AdminPromoCodes />} />

@@ -94,7 +94,7 @@
   margin: 0;
 }
 
-/* Separador rosado después del rubro */
+/* Separador celestedo después del rubro */
 .form-row-compact > .form-group-compact::after,
 .form-row-compact > .rubro-inline::after {
   content: '';
@@ -193,7 +193,7 @@
   align-items: center;
 }
 
-/* Separador rosado después del radio */
+/* Separador celestedo después del radio */
 .form-row-compact .radius-control::after {
   content: '';
   position: absolute;
@@ -414,7 +414,7 @@
 .btn-primary:hover:not(:disabled) {
   background: var(--primary-dark);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-pink);
+  box-shadow: var(--shadow-#81D4FA);
 }
 
 .btn-secondary {
