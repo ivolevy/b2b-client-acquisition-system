@@ -3,7 +3,6 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../AuthWrapper';
 import { adminService } from '../../lib/supabase';
 import ProBackground from '../ProBackground';
-import Navbar from '../Navbar';
 import './AdminLayout.css';
 
 function AdminLayout() {
@@ -79,7 +78,6 @@ function AdminLayout() {
   return (
     <div className="admin-layout">
       <ProBackground />
-      <Navbar />
       <div className="admin-container">
         <Outlet />
       </div>

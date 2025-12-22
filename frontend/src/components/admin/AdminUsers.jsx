@@ -9,20 +9,26 @@ function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState({
+    plan: '',
+    role: '',
+    search: ''
+  });
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const searchTimeoutRef = useRef(null);
 
-  const loadUsers = useCallback(async (searchTerm = '') => {
+  const loadUsers = useCallback(async () => {
     setLoading(true);
     setError('');
     
     try {
       const activeFilters = {};
-      if (searchTerm && searchTerm.trim()) {
-        activeFilters.search = searchTerm.trim();
+      if (filters.plan) activeFilters.plan = filters.plan;
+      if (filters.role) activeFilters.role = filters.role;
+      if (filters.search && filters.search.trim()) {
+        activeFilters.search = filters.search.trim();
       }
       
       const { data, error: usersError } = await adminService.getAllUsers(activeFilters);
@@ -34,38 +40,30 @@ function AdminUsers() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filters.plan, filters.role, filters.search]);
 
-  // Cargar usuarios al montar
-  useEffect(() => {
-    loadUsers('');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Debounce para búsqueda
+  // Cargar usuarios al montar y cuando cambien los filtros
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
     
-    // Si search está vacío, cargar todos los usuarios inmediatamente
-    if (!search) {
-      loadUsers('');
-      return;
-    }
-    
     // Si hay búsqueda, esperar 300ms
-    searchTimeoutRef.current = setTimeout(() => {
-      loadUsers(search);
-    }, 300);
+    if (filters.search) {
+      searchTimeoutRef.current = setTimeout(() => {
+        loadUsers();
+      }, 300);
+    } else {
+      // Si no hay búsqueda, cargar inmediatamente
+      loadUsers();
+    }
     
     return () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [filters.plan, filters.role, filters.search, loadUsers]);
 
   const handleDelete = async () => {
     if (!selectedUser) return;
@@ -118,15 +116,39 @@ function AdminUsers() {
         </div>
       </div>
 
-      {/* Búsqueda */}
+      {/* Filtros y búsqueda */}
       <div className="users-filters">
-        <input
-          type="text"
-          placeholder="Buscar por email o nombre..."
-          className="filter-input"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="filter-group">
+          <input
+            type="text"
+            placeholder="Buscar por email o nombre..."
+            className="filter-input"
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          />
+        </div>
+        <div className="filter-group">
+          <select
+            className="filter-select"
+            value={filters.plan}
+            onChange={(e) => setFilters({ ...filters, plan: e.target.value })}
+          >
+            <option value="">Todos los planes</option>
+            <option value="free">Free</option>
+            <option value="pro">PRO</option>
+          </select>
+        </div>
+        <div className="filter-group">
+          <select
+            className="filter-select"
+            value={filters.role}
+            onChange={(e) => setFilters({ ...filters, role: e.target.value })}
+          >
+            <option value="">Todos los roles</option>
+            <option value="user">Usuario</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
       </div>
 
       {error && (
