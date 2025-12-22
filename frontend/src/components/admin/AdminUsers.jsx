@@ -19,7 +19,7 @@ function AdminUsers() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const searchTimeoutRef = useRef(null);
 
-  const loadUsers = useCallback(async () => {
+  const loadUsers = async () => {
     setLoading(true);
     setError('');
     
@@ -31,16 +31,23 @@ function AdminUsers() {
         activeFilters.search = filters.search.trim();
       }
       
+      console.log('[AdminUsers] Loading users with filters:', activeFilters);
       const { data, error: usersError } = await adminService.getAllUsers(activeFilters);
-      if (usersError) throw usersError;
+      
+      if (usersError) {
+        console.error('[AdminUsers] Error from getAllUsers:', usersError);
+        throw usersError;
+      }
+      
+      console.log('[AdminUsers] Loaded users:', data);
       setUsers(data || []);
     } catch (err) {
-      console.error('Error loading users:', err);
+      console.error('[AdminUsers] Error loading users:', err);
       setError(`Error al cargar usuarios: ${err.message || 'Error desconocido'}`);
     } finally {
       setLoading(false);
     }
-  }, [filters.plan, filters.role, filters.search]);
+  };
 
   // Cargar usuarios al montar y cuando cambien los filtros
   useEffect(() => {
@@ -63,7 +70,8 @@ function AdminUsers() {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [filters.plan, filters.role, filters.search, loadUsers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.plan, filters.role, filters.search]);
 
   const handleDelete = async () => {
     if (!selectedUser) return;
