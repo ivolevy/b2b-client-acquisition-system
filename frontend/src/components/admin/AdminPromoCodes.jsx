@@ -76,12 +76,15 @@ function AdminPromoCodes() {
     
     // Validar fecha de expiración: debe ser igual o posterior a hoy
     if (newCode.expires_at) {
-      const expirationDate = new Date(newCode.expires_at);
+      // Obtener fecha de hoy en formato YYYY-MM-DD (fecha local, no UTC)
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      expirationDate.setHours(0, 0, 0, 0);
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
       
-      if (expirationDate < today) {
+      // Comparar directamente los strings de fecha (YYYY-MM-DD)
+      if (newCode.expires_at < todayStr) {
         errors.expires_at = 'La fecha de expiración debe ser igual o posterior a hoy';
       }
     }
@@ -112,11 +115,15 @@ function AdminPromoCodes() {
     
     // Validar fecha de expiración
     if (newCode.expires_at) {
-      const expirationDate = new Date(newCode.expires_at);
+      // Obtener fecha de hoy en formato YYYY-MM-DD (fecha local, no UTC)
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      expirationDate.setHours(0, 0, 0, 0);
-      if (expirationDate < today) {
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+      
+      // Comparar directamente los strings de fecha (YYYY-MM-DD)
+      if (newCode.expires_at < todayStr) {
         return false;
       }
     }
@@ -528,7 +535,7 @@ function AdminPromoCodes() {
               </select>
             </div>
             <div className="form-group">
-              <label>Duración (días) * (1-365)</label>
+              <label>Duración (de 1 a 365 dias) *</label>
               <input
                 type="number"
                 value={newCode.duration_days}
@@ -573,7 +580,7 @@ function AdminPromoCodes() {
               )}
             </div>
             <div className="form-group">
-              <label>Fecha de expiración del código (opcional, debe ser igual o posterior a hoy)</label>
+              <label>Fecha de expiración del código (opcional)</label>
               <input
                 type="date"
                 value={newCode.expires_at}
