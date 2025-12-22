@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, lazy, Suspense, useMemo, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { supabase, authService, userService } from './lib/supabase';
+import { supabase, authService, userService, adminService } from './lib/supabase';
 import { authStorage } from './utils/storage';
 import { handleError } from './utils/errorHandler';
 
@@ -11,6 +11,11 @@ const UserProfile = lazy(() => import('./components/UserProfile'));
 const Navbar = lazy(() => import('./components/Navbar'));
 const ProBackground = lazy(() => import('./components/ProBackground'));
 const ProWelcome = lazy(() => import('./components/ProWelcome'));
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
+const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
+const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'));
+const AdminPromoCodes = lazy(() => import('./components/admin/AdminPromoCodes'));
 
 // Contexto de autenticación
 const AuthContext = createContext(null);
@@ -376,6 +381,19 @@ function AuthWrapper() {
                   </main>
                 </div>
               } />
+              <Route path="/admin" element={
+                <div className="app">
+                  <Navbar />
+                  <main className="main-content">
+                    <AdminLayout />
+                  </main>
+                </div>
+              }>
+                <Route index element={<AdminDashboard />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="users/:id" element={<AdminUserDetail />} />
+                <Route path="promo-codes" element={<AdminPromoCodes />} />
+              </Route>
               <Route path="/*" element={<AppB2B />} />
             </Routes>
           ) : (

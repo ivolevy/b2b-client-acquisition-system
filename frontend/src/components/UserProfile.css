@@ -547,6 +547,14 @@
   border: 1px solid var(--gray-300);
   border-radius: var(--radius-md);
   font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.promo-hint {
+  margin-top: 8px;
+  font-size: 0.875rem;
+  color: #666;
+  font-style: italic;
 }
 
 .upgrade-error {
@@ -614,5 +622,6 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
 
 

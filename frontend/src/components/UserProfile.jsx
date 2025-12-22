@@ -23,11 +23,9 @@ function UserProfile() {
     confirmPassword: ''
   });
 
-  const PRO_TOKEN = '3329';
-
   const handleUpgradeToPro = async () => {
-    if (proTokenInput.trim() !== PRO_TOKEN) {
-      setUpgradeError('Token incorrecto. Verificá e intentá de nuevo.');
+    if (!proTokenInput.trim()) {
+      setUpgradeError('Por favor, ingresa un código promocional.');
       return;
     }
 
@@ -36,29 +34,41 @@ function UserProfile() {
 
     try {
       if (useSupabase && user?.id) {
-        const { error } = await supabase
-          .from('users')
-          .update({ plan: 'pro' })
-          .eq('id', user.id);
+        // Usar la función RPC para activar suscripción con código
+        const { data, error: rpcError } = await supabase.rpc('activate_subscription_with_code', {
+          p_user_id: user.id,
+          p_code: proTokenInput.trim().toUpperCase()
+        });
 
-        if (error) {
-          setUpgradeError('Error al actualizar: ' + error.message);
+        if (rpcError) {
+          setUpgradeError(rpcError.message || 'Código promocional inválido o expirado.');
           setUpgradeLoading(false);
           return;
         }
+
+        if (!data || !data.success) {
+          setUpgradeError(data?.error || 'Error al activar el código promocional.');
+          setUpgradeLoading(false);
+          return;
+        }
+
+        // Actualizar localStorage
+        const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
+        authData.plan = 'pro';
+        authData.plan_expires_at = data.expires_at;
+        localStorage.setItem('b2b_auth', JSON.stringify(authData));
+
+        // Cerrar modal y recargar para aplicar cambios
+        setShowUpgradeModal(false);
+        setProTokenInput('');
+        window.location.reload();
+      } else {
+        setUpgradeError('Supabase no está configurado.');
+        setUpgradeLoading(false);
       }
-
-      // Actualizar localStorage
-      const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
-      authData.plan = 'pro';
-      localStorage.setItem('b2b_auth', JSON.stringify(authData));
-
-      // Cerrar modal y recargar para aplicar cambios
-      setShowUpgradeModal(false);
-      setProTokenInput('');
-      window.location.reload();
     } catch (error) {
-      setUpgradeError('Error al procesar el upgrade');
+      console.error('Error upgrading to PRO:', error);
+      setUpgradeError('Error al procesar el upgrade: ' + (error.message || 'Error desconocido'));
       setUpgradeLoading(false);
     }
   };
@@ -423,18 +433,19 @@ function UserProfile() {
               )}
               
               <div className="token-input-group">
-                <label>Ingresá tu token PRO:</label>
+                <label>Ingresá tu código promocional:</label>
                 <input
                   type="text"
                   value={proTokenInput}
                   onChange={(e) => {
-                    setProTokenInput(e.target.value);
+                    setProTokenInput(e.target.value.toUpperCase());
                     setUpgradeError('');
                   }}
-                  placeholder="Token PRO"
+                  placeholder="Código promocional"
                   disabled={upgradeLoading}
                   autoFocus
                 />
+                <p className="promo-hint">¿No tienes código? Contáctanos para obtener uno.</p>
               </div>
             </div>
             

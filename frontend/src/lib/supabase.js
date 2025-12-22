@@ -502,5 +502,421 @@ export const savedCompaniesService = {
   }
 };
 
+// ============================================
+// ADMIN FUNCTIONS
+// ============================================
+
+export const adminService = {
+  // Verificar si el usuario actual es admin
+  async isAdmin() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+      
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      
+      return profile?.role === 'admin';
+    } catch (error) {
+      console.error('[Admin] Error checking admin status:', error);
+      return false;
+    }
+  },
+
+  // ============================================
+  // MÉTRICAS Y DASHBOARD
+  // ============================================
+
+  async getMetrics() {
+    try {
+      const { data, error } = await supabase.rpc('get_admin_metrics');
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error getting metrics:', error);
+      return { data: null, error };
+    }
+  },
+
+  async getUsersByMonth(monthsBack = 12) {
+    try {
+      const { data, error } = await supabase.rpc('get_users_by_month', { months_back: monthsBack });
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error getting users by month:', error);
+      return { data: null, error };
+    }
+  },
+
+  async getSearchesByDay(daysBack = 30) {
+    try {
+      const { data, error } = await supabase.rpc('get_searches_by_day', { days_back: daysBack });
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error getting searches by day:', error);
+      return { data: null, error };
+    }
+  },
+
+  // ============================================
+  // GESTIÓN DE USUARIOS (CRUD)
+  // ============================================
+
+  async getAllUsers(filters = {}) {
+    try {
+      let query = supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Aplicar filtros
+      if (filters.plan) {
+        query = query.eq('plan', filters.plan);
+      }
+      if (filters.role) {
+        query = query.eq('role', filters.role);
+      }
+      if (filters.search) {
+        query = query.or(`email.ilike.%${filters.search}%,name.ilike.%${filters.search}%`);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error getting users:', error);
+      return { data: null, error };
+    }
+  },
+
+  async getUserById(userId) {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error getting user:', error);
+      return { data: null, error };
+    }
+  },
+
+  async getUserActivity(userId) {
+    try {
+      // Obtener historial de búsquedas
+      const { data: searches, error: searchesError } = await supabase
+        .from('search_history')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      // Obtener empresas guardadas
+      const { data: companies, error: companiesError } = await supabase
+        .from('saved_companies')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      // Obtener suscripciones
+      const { data: subscriptions, error: subscriptionsError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (searchesError || companiesError || subscriptionsError) {
+        throw searchesError || companiesError || subscriptionsError;
+      }
+
+      return {
+        data: {
+          searches: searches || [],
+          companies: companies || [],
+          subscriptions: subscriptions || []
+        },
+        error: null
+      };
+    } catch (error) {
+      console.error('[Admin] Error getting user activity:', error);
+      return { data: null, error };
+    }
+  },
+
+  async createUser(userData) {
+    try {
+      // Primero crear usuario en auth.users (requiere función edge o admin)
+      // Por ahora, retornamos error indicando que se debe crear desde Supabase Dashboard
+      // O implementar función edge para crear usuarios
+      return {
+        data: null,
+        error: new Error('Crear usuarios requiere función edge. Usa Supabase Dashboard por ahora.')
+      };
+    } catch (error) {
+      console.error('[Admin] Error creating user:', error);
+      return { data: null, error };
+    }
+  },
+
+  async updateUser(userId, updates) {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Si se cambió el plan, actualizar suscripciones
+      if (updates.plan) {
+        if (updates.plan === 'pro' && updates.plan_expires_at) {
+          // Crear o actualizar suscripción
+          await supabase
+            .from('subscriptions')
+            .upsert({
+              user_id: userId,
+              plan: 'pro',
+              status: 'active',
+              payment_method: 'manual',
+              payment_reference: 'Admin update',
+              expires_at: updates.plan_expires_at,
+              starts_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id'
+            });
+        } else if (updates.plan === 'free') {
+          // Cancelar suscripciones activas
+          await supabase
+            .from('subscriptions')
+            .update({ status: 'cancelled' })
+            .eq('user_id', userId)
+            .eq('status', 'active');
+        }
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error updating user:', error);
+      return { data: null, error };
+    }
+  },
+
+  async deleteUser(userId) {
+    try {
+      // Eliminar usuario (el CASCADE eliminará sus datos relacionados)
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      // También eliminar de auth.users (requiere función edge)
+      // Por ahora solo eliminamos de public.users
+      
+      return { data: { success: true }, error: null };
+    } catch (error) {
+      console.error('[Admin] Error deleting user:', error);
+      return { data: null, error };
+    }
+  },
+
+  async exportUserData(userId) {
+    try {
+      const { data: user } = await this.getUserById(userId);
+      const { data: activity } = await this.getUserActivity(userId);
+
+      const exportData = {
+        user: user.data,
+        activity: activity.data,
+        exported_at: new Date().toISOString()
+      };
+
+      return { data: exportData, error: null };
+    } catch (error) {
+      console.error('[Admin] Error exporting user data:', error);
+      return { data: null, error };
+    }
+  },
+
+  // ============================================
+  // GESTIÓN DE CÓDIGOS PROMOCIONALES
+  // ============================================
+
+  async getAllPromoCodes() {
+    try {
+      const { data, error } = await supabase
+        .from('promo_codes')
+        .select(`
+          *,
+          promo_code_uses (
+            id,
+            user_id,
+            used_at,
+            users (
+              email,
+              name
+            )
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error getting promo codes:', error);
+      return { data: null, error };
+    }
+  },
+
+  async createPromoCode(codeData) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase
+        .from('promo_codes')
+        .insert({
+          code: codeData.code.toUpperCase(),
+          plan: codeData.plan || 'pro',
+          duration_days: codeData.duration_days || 30,
+          max_uses: codeData.max_uses || null,
+          expires_at: codeData.expires_at || null,
+          is_active: codeData.is_active !== false,
+          created_by: user?.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error creating promo code:', error);
+      return { data: null, error };
+    }
+  },
+
+  async updatePromoCode(codeId, updates) {
+    try {
+      const { data, error } = await supabase
+        .from('promo_codes')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', codeId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error updating promo code:', error);
+      return { data: null, error };
+    }
+  },
+
+  async deletePromoCode(codeId) {
+    try {
+      const { error } = await supabase
+        .from('promo_codes')
+        .delete()
+        .eq('id', codeId);
+
+      if (error) throw error;
+      return { data: { success: true }, error: null };
+    } catch (error) {
+      console.error('[Admin] Error deleting promo code:', error);
+      return { data: null, error };
+    }
+  },
+
+  // ============================================
+  // GESTIÓN DE SUSCRIPCIONES
+  // ============================================
+
+  async getAllSubscriptions(filters = {}) {
+    try {
+      let query = supabase
+        .from('subscriptions')
+        .select(`
+          *,
+          users (
+            email,
+            name,
+            plan
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters.plan) {
+        query = query.eq('plan', filters.plan);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error getting subscriptions:', error);
+      return { data: null, error };
+    }
+  },
+
+  async checkAndExpireSubscriptions() {
+    try {
+      const { data, error } = await supabase.rpc('check_and_expire_subscriptions');
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Admin] Error checking subscriptions:', error);
+      return { data: null, error };
+    }
+  },
+
+  // ============================================
+  // ENVÍO DE EMAILS (requiere configuración SMTP)
+  // ============================================
+
+  async sendEmailToUser(userId, subject, body, isHtml = false) {
+    try {
+      const { data: user } = await this.getUserById(userId);
+      if (!user.data) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      // Aquí integrarías con servicio de email (SendGrid, Resend, etc.)
+      // Por ahora retornamos estructura para implementar después
+      return {
+        data: {
+          success: true,
+          message: 'Email enviado (requiere configuración de servicio de email)',
+          to: user.data.email
+        },
+        error: null
+      };
+    } catch (error) {
+      console.error('[Admin] Error sending email:', error);
+      return { data: null, error };
+    }
+  }
+};
+
 export default supabase;
 
