@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { adminService } from '../../lib/supabase';
 import './UserDetailModal.css';
 
@@ -26,9 +27,9 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
 
   // Bloquear scroll del body cuando el modal está abierto
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
     return () => {
-      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
     };
   }, []);
 
@@ -122,29 +123,21 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="modal-overlay">
-        <div className="user-detail-modal loading-modal">
-          <div className="spinner"></div>
-          <p>Cargando usuario...</p>
-        </div>
+  const modalContent = loading ? (
+    <div className="modal-overlay">
+      <div className="user-detail-modal loading-modal">
+        <div className="spinner"></div>
+        <p>Cargando usuario...</p>
       </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="modal-overlay">
-        <div className="user-detail-modal error-modal">
-          <p>Usuario no encontrado</p>
-          <button onClick={onClose} className="btn-close">Cerrar</button>
-        </div>
+    </div>
+  ) : !user ? (
+    <div className="modal-overlay">
+      <div className="user-detail-modal error-modal">
+        <p>Usuario no encontrado</p>
+        <button onClick={onClose} className="btn-close">Cerrar</button>
       </div>
-    );
-  }
-
-  return (
+    </div>
+  ) : (
     <div className="modal-overlay" onClick={onClose}>
       <div className="user-detail-modal" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
@@ -345,6 +338,8 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
 
 export default UserDetailModal;
