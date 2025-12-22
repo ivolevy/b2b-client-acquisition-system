@@ -168,7 +168,7 @@ function Navbar({ onNavigateToProfile }) {
         onClick={() => setShowHelp(true)}
         title="Ayuda"
       >
-        Ayuda
+        ?
       </button>
     </>
   );

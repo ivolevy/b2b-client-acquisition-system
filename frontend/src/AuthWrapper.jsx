@@ -377,8 +377,8 @@ function AuthWrapper() {
               <div className={`app ${user?.plan === 'pro' ? 'pro-theme' : ''}`}>
                 {user?.plan === 'pro' && <ProBackground />}
                 <Navbar />
-                <BackButton />
                 <main className="main-content">
+                  <BackButton />
                   <UserProfile />
                 </main>
               </div>

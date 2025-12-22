@@ -5,7 +5,7 @@
   top: 1rem;
   z-index: 1000;
   margin: 1rem auto;
-  max-width: 1200px;
+  max-width: 1300px;
   border-radius: var(--radius-pill);
   padding: 0.5rem 1.5rem;
 }
@@ -44,26 +44,30 @@
   bottom: 2rem;
   right: 2rem;
   z-index: 1000;
-  background: #ef4444;
+  background: #81D4FA;
   color: white;
   border: none;
-  border-radius: 50px;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(129, 212, 250, 0.4);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .floating-help-btn:hover {
-  background: #dc2626;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+  background: #4FC3F7;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(129, 212, 250, 0.5);
 }
 
 .floating-help-btn:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 /* eliminado soporte de tema oscuro */
@@ -821,8 +825,9 @@
   .floating-help-btn {
     bottom: 1rem;
     right: 1rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
   }
 }
 

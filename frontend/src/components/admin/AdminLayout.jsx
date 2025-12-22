@@ -81,8 +81,8 @@ function AdminLayout() {
     <>
       <ProBackground />
       <Navbar />
-      <BackButton />
       <main className="main-content">
+        <BackButton />
         <Outlet />
       </main>
     </>
