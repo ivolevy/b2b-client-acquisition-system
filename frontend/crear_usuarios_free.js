@@ -63,64 +63,64 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 async function crearUsuario(email, password, name) {
-  try {
-    // Crear usuario en auth.users
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    try {
+      // Crear usuario en auth.users
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: email,
       password: password,
-      email_confirm: true,
-      user_metadata: {
+        email_confirm: true,
+        user_metadata: {
         name: name,
-        phone: ''
-      }
-    });
-
-    let userId;
-
-    if (authError) {
-      if (authError.message.includes('already registered') || 
-          authError.message.includes('already exists') ||
-          authError.message.includes('User already registered')) {
-        console.log(`⚠️  Usuario ${email} ya existe, obteniendo ID...`);
-        const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-        
-        if (listError) throw listError;
-        
-        const user = users.find(u => u.email === email);
-        if (!user) {
-          throw new Error('Usuario existe pero no se pudo encontrar');
+          phone: ''
         }
-        
-        userId = user.id;
-      } else {
-        throw authError;
-      }
-    } else {
-      userId = authData.user.id;
-    }
+      });
 
-    // Crear/actualizar en public.users con plan free
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .upsert({
-        id: userId,
+      let userId;
+
+      if (authError) {
+        if (authError.message.includes('already registered') || 
+            authError.message.includes('already exists') ||
+            authError.message.includes('User already registered')) {
+        console.log(`⚠️  Usuario ${email} ya existe, obteniendo ID...`);
+          const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
+          
+          if (listError) throw listError;
+          
+        const user = users.find(u => u.email === email);
+          if (!user) {
+            throw new Error('Usuario existe pero no se pudo encontrar');
+          }
+          
+          userId = user.id;
+        } else {
+          throw authError;
+        }
+      } else {
+        userId = authData.user.id;
+      }
+
+      // Crear/actualizar en public.users con plan free
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .upsert({
+          id: userId,
         email: email,
         name: name,
-        phone: '',
-        plan: 'free',
-        role: 'user'
-      }, {
-        onConflict: 'id'
-      })
-      .select()
-      .single();
+          phone: '',
+          plan: 'free',
+          role: 'user'
+        }, {
+          onConflict: 'id'
+        })
+        .select()
+        .single();
 
-    if (userError) {
-      throw userError;
-    }
+      if (userError) {
+        throw userError;
+      }
 
     return { success: true, user: userData };
-  } catch (error) {
+    } catch (error) {
     return { success: false, error: error.message };
   }
 }
