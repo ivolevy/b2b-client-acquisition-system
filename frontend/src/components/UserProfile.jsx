@@ -50,21 +50,32 @@ function UserProfile() {
           setUpgradeError(data?.error || 'Error al activar el código promocional.');
           setUpgradeLoading(false);
           return;
-      }
+        }
 
-      // Actualizar localStorage
-      const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
-      authData.plan = 'pro';
+        // Actualizar localStorage
+        const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
+        authData.plan = 'pro';
         authData.plan_expires_at = data.expires_at;
-      localStorage.setItem('b2b_auth', JSON.stringify(authData));
+        localStorage.setItem('b2b_auth', JSON.stringify(authData));
 
-      // Cerrar modal y recargar para aplicar cambios
-      setShowUpgradeModal(false);
-      setProTokenInput('');
-      window.location.reload();
+        // Cerrar modal y recargar para aplicar cambios
+        setShowUpgradeModal(false);
+        setProTokenInput('');
+        window.location.reload();
       } else {
-        setUpgradeError('Supabase no está configurado.');
-        setUpgradeLoading(false);
+        // Modo demo: activar plan PRO directamente en localStorage
+        const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
+        authData.plan = 'pro';
+        // Establecer expiración a 1 año desde ahora
+        const expiresAt = new Date();
+        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+        authData.plan_expires_at = expiresAt.toISOString();
+        localStorage.setItem('b2b_auth', JSON.stringify(authData));
+
+        // Cerrar modal y recargar para aplicar cambios
+        setShowUpgradeModal(false);
+        setProTokenInput('');
+        window.location.reload();
       }
     } catch (error) {
       console.error('Error upgrading to PRO:', error);
@@ -438,7 +449,6 @@ function UserProfile() {
                   disabled={upgradeLoading}
                   autoFocus
                 />
-                <p className="promo-hint">¿No tienes código? Contáctanos para obtener uno.</p>
               </div>
             </div>
             
