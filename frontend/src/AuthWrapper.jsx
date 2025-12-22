@@ -14,7 +14,6 @@ const ProWelcome = lazy(() => import('./components/ProWelcome'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
-const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'));
 const AdminPromoCodes = lazy(() => import('./components/admin/AdminPromoCodes'));
 
 // Contexto de autenticación
@@ -381,14 +380,13 @@ function AuthWrapper() {
                 </main>
               </div>
             } />
-            <Route path="/backoffice" element={
+              <Route path="/backoffice" element={
               <div className="app">
                 <AdminLayout />
               </div>
             }>
                 <Route index element={<AdminDashboard />} />
                 <Route path="users" element={<AdminUsers />} />
-                <Route path="users/:id" element={<AdminUserDetail />} />
                 <Route path="promo-codes" element={<AdminPromoCodes />} />
               </Route>
             <Route path="/*" element={<AppB2B />} />
