@@ -20,6 +20,7 @@
   margin: 0 0 20px 0;
   color: #1a1a1a;
   font-size: 28px;
+  font-weight: 700;
 }
 
 .admin-nav {
@@ -28,12 +29,14 @@
 }
 
 .admin-nav-btn {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: 2px solid #e0e0e0;
   background: white;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
   transition: all 0.2s;
 }
 
@@ -71,11 +74,18 @@
 .filter-input,
 .filter-select {
   width: 100%;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1a1a;
   transition: border-color 0.2s;
+}
+
+.filter-input::placeholder {
+  color: #999;
+  font-weight: 400;
 }
 
 .filter-input:focus,
@@ -85,19 +95,21 @@
 }
 
 .btn-primary {
-  padding: 10px 20px;
+  padding: 12px 24px;
   background: #81D4FA;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background 0.2s;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
 .btn-primary:hover {
   background: #4FC3F7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(129, 212, 250, 0.4);
 }
 
 .users-table-container {
@@ -120,19 +132,20 @@
 }
 
 .users-table th {
-  padding: 16px;
+  padding: 18px;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
   color: #1a1a1a;
-  font-size: 14px;
+  font-size: 15px;
   border-bottom: 2px solid #e0e0e0;
 }
 
 .users-table td {
-  padding: 16px;
+  padding: 18px;
   border-bottom: 1px solid #f0f0f0;
-  font-size: 14px;
-  color: #333;
+  font-size: 15px;
+  color: #1a1a1a;
+  font-weight: 500;
 }
 
 .users-table tbody tr:hover {
@@ -141,10 +154,10 @@
 
 .plan-badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .plan-badge.free {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../lib/supabase';
 import './AdminPromoCodes.css';
@@ -13,6 +13,12 @@ function AdminPromoCodes() {
   const [selectedCode, setSelectedCode] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    status: '',
+    plan: '',
+    search: ''
+  });
+  const searchTimeoutRef = useRef(null);
 
   const [newCode, setNewCode] = useState({
     code: '',
@@ -23,10 +29,6 @@ function AdminPromoCodes() {
     is_active: true
   });
 
-  useEffect(() => {
-    loadCodes();
-  }, []);
-
   const loadCodes = async () => {
     setLoading(true);
     setError('');
@@ -34,7 +36,28 @@ function AdminPromoCodes() {
     try {
       const { data, error: codesError } = await adminService.getAllPromoCodes();
       if (codesError) throw codesError;
-      setCodes(data || []);
+      
+      // Aplicar filtros en el frontend
+      let filteredCodes = data || [];
+      
+      if (filters.status === 'active') {
+        filteredCodes = filteredCodes.filter(code => code.is_active);
+      } else if (filters.status === 'inactive') {
+        filteredCodes = filteredCodes.filter(code => !code.is_active);
+      }
+      
+      if (filters.plan) {
+        filteredCodes = filteredCodes.filter(code => code.plan === filters.plan);
+      }
+      
+      if (filters.search && filters.search.trim()) {
+        const searchTerm = filters.search.trim().toLowerCase();
+        filteredCodes = filteredCodes.filter(code =>
+          code.code.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      setCodes(filteredCodes);
     } catch (err) {
       console.error('Error loading promo codes:', err);
       setError('Error al cargar códigos promocionales');
@@ -42,6 +65,27 @@ function AdminPromoCodes() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    if (filters.search) {
+      searchTimeoutRef.current = setTimeout(() => {
+        loadCodes();
+      }, 300);
+    } else {
+      loadCodes();
+    }
+    
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.status, filters.plan, filters.search]);
 
   const handleCreate = async () => {
     if (!newCode.code.trim()) {
@@ -82,7 +126,6 @@ function AdminPromoCodes() {
         is_active: !currentStatus
       });
       if (updateError) throw updateError;
-      // Actualizar estado local sin recargar todo
       setCodes(codes.map(code => 
         code.id === codeId ? { ...code, is_active: !currentStatus } : code
       ));
@@ -142,13 +185,47 @@ function AdminPromoCodes() {
         </div>
       </div>
 
-      <div className="codes-header">
-        <button 
-          className="btn-primary"
-          onClick={() => setShowCreateModal(true)}
-        >
-          + Crear Código
-        </button>
+      {/* Filtros y búsqueda */}
+      <div className="codes-filters">
+        <div className="filter-group">
+          <input
+            type="text"
+            placeholder="Buscar por código..."
+            className="filter-input"
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          />
+        </div>
+        <div className="filter-group">
+          <select
+            className="filter-select"
+            value={filters.status}
+            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+          >
+            <option value="">Todos los estados</option>
+            <option value="active">Activos</option>
+            <option value="inactive">Inactivos</option>
+          </select>
+        </div>
+        <div className="filter-group">
+          <select
+            className="filter-select"
+            value={filters.plan}
+            onChange={(e) => setFilters({ ...filters, plan: e.target.value })}
+          >
+            <option value="">Todos los planes</option>
+            <option value="free">Free</option>
+            <option value="pro">PRO</option>
+          </select>
+        </div>
+        <div className="filter-group">
+          <button 
+            className="btn-primary"
+            onClick={() => setShowCreateModal(true)}
+          >
+            + Crear Código
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -158,100 +235,72 @@ function AdminPromoCodes() {
         </div>
       )}
 
-      {/* Lista de códigos */}
-      <div className="codes-list">
-        {codes.length === 0 ? (
-          <div className="no-data">
-            <p>No hay códigos promocionales creados</p>
-            <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
-              Crear primer código
-            </button>
-          </div>
-        ) : (
-          codes.map((code) => (
-            <div key={code.id} className={`code-card ${!code.is_active ? 'inactive' : ''}`}>
-              <div className="code-header">
-                <div className="code-info">
-                  <h3 className="code-name">{code.code}</h3>
-                  <span className={`code-status ${code.is_active ? 'active' : 'inactive'}`}>
-                    {code.is_active ? 'Activo' : 'Inactivo'}
-                  </span>
-                </div>
-                <div className="code-actions">
-                  <button
-                    className={`btn-toggle ${code.is_active ? 'active' : ''}`}
-                    onClick={() => handleToggleActive(code.id, code.is_active)}
-                    title={code.is_active ? 'Desactivar' : 'Activar'}
-                  >
-                    {code.is_active ? '✓' : '✗'}
-                  </button>
-                  <button
-                    className="btn-delete"
-                    onClick={() => {
-                      setSelectedCode(code);
-                      setShowDeleteModal(true);
-                    }}
-                    title="Eliminar"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-              <div className="code-details">
-                <div className="detail-item">
-                  <span className="detail-label">Plan:</span>
-                  <span className={`plan-badge ${code.plan}`}>
-                    {code.plan === 'pro' ? 'PRO' : 'Free'}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Duración:</span>
-                  <span>{code.duration_days} días</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Usos:</span>
-                  <span>
-                    {code.used_count} / {code.max_uses || '∞'}
-                  </span>
-                </div>
-                {code.expires_at && (
-                  <div className="detail-item">
-                    <span className="detail-label">Expira:</span>
-                    <span>
-                      {new Date(code.expires_at).toLocaleDateString('es-ES')}
+      {/* Tabla de códigos */}
+      <div className="codes-table-container">
+        <table className="codes-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Plan</th>
+              <th>Duración</th>
+              <th>Usos</th>
+              <th>Estado</th>
+              <th>Expira</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {codes.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="no-data">
+                  {loading ? 'Cargando...' : 'No se encontraron códigos'}
+                </td>
+              </tr>
+            ) : (
+              codes.map((code) => (
+                <tr key={code.id}>
+                  <td className="code-name">{code.code}</td>
+                  <td>
+                    <span className={`plan-badge ${code.plan}`}>
+                      {code.plan === 'pro' ? 'PRO' : 'Free'}
                     </span>
-                  </div>
-                )}
-                <div className="detail-item">
-                  <span className="detail-label">Creado:</span>
-                  <span>
-                    {new Date(code.created_at).toLocaleDateString('es-ES')}
-                  </span>
-                </div>
-              </div>
-              {code.promo_code_uses && code.promo_code_uses.length > 0 && (
-                <div className="code-uses">
-                  <h4>Usos recientes:</h4>
-                  <div className="uses-list">
-                    {code.promo_code_uses.slice(0, 5).map((use) => (
-                      <div key={use.id} className="use-item">
-                        <span>{use.users?.email || 'Usuario desconocido'}</span>
-                        <span className="use-date">
-                          {new Date(use.used_at).toLocaleDateString('es-ES')}
-                        </span>
-                      </div>
-                    ))}
-                    {code.promo_code_uses.length > 5 && (
-                      <p className="more-uses">
-                        +{code.promo_code_uses.length - 5} usos más
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))
-        )}
+                  </td>
+                  <td>{code.duration_days} días</td>
+                  <td>{code.used_count} / {code.max_uses || '∞'}</td>
+                  <td>
+                    <span className={`status-badge ${code.is_active ? 'active' : 'inactive'}`}>
+                      {code.is_active ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
+                  <td>
+                    {code.expires_at
+                      ? new Date(code.expires_at).toLocaleDateString('es-ES')
+                      : '-'}
+                  </td>
+                  <td className="actions-cell">
+                    <button
+                      className={`btn-toggle ${code.is_active ? 'active' : ''}`}
+                      onClick={() => handleToggleActive(code.id, code.is_active)}
+                      title={code.is_active ? 'Desactivar' : 'Activar'}
+                    >
+                      {code.is_active ? '✓' : '✗'}
+                    </button>
+                    <button
+                      className="btn-delete"
+                      onClick={() => {
+                        setSelectedCode(code);
+                        setShowDeleteModal(true);
+                      }}
+                      title="Eliminar"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* Modal de crear código */}
@@ -388,4 +437,3 @@ function AdminPromoCodes() {
 }
 
 export default AdminPromoCodes;
-

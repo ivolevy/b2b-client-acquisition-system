@@ -1,26 +1,31 @@
+/* ============================================
+   BACK BUTTON STYLES
+   ============================================ */
+
 .back-to-home-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  gap: 8px;
+  padding: 10px 20px;
   background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  color: #666;
-  font-size: 0.85rem;
-  font-weight: 500;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  margin: 0 auto 32px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: 0 auto 20px 0;
   width: fit-content;
 }
 
 .back-to-home-btn:hover {
   background: #f8f9fa;
-  border-color: rgba(129, 212, 250, 0.4);
+  border-color: #81D4FA;
+  color: #81D4FA;
   transform: translateX(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(129, 212, 250, 0.3);
 }
 
 .back-to-home-btn:active {
@@ -28,21 +33,26 @@
 }
 
 .back-to-home-btn svg {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.2s ease;
+  width: 18px;
+  height: 18px;
+  stroke: #666;
+  transition: all 0.2s ease;
 }
 
 .back-to-home-btn:hover svg {
+  stroke: #81D4FA;
   transform: translateX(-2px);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .back-to-home-btn {
-    padding: 10px 20px;
-    font-size: 0.9rem;
-    margin: 12px 0 0 12px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .back-to-home-btn svg {
+    width: 16px;
+    height: 16px;
   }
 }
-
