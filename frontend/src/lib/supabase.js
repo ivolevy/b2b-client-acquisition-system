@@ -597,8 +597,9 @@ export const adminService = {
       if (filters.role) {
         query = query.eq('role', filters.role);
       }
-      if (filters.search) {
-        query = query.or(`email.ilike.%${filters.search}%,name.ilike.%${filters.search}%`);
+      if (filters.search && filters.search.trim()) {
+        const searchTerm = `%${filters.search.trim()}%`;
+        query = query.or(`email.ilike.${searchTerm},name.ilike.${searchTerm}`);
       }
 
       const { data, error } = await query;

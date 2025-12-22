@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../lib/supabase';
 import './AdminUsers.css';
@@ -19,25 +19,31 @@ function AdminUsers() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  useEffect(() => {
-    loadUsers();
-  }, [filters]);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true);
     setError('');
     
     try {
-      const { data, error: usersError } = await adminService.getAllUsers(filters);
+      // Aplicar filtros solo si tienen valor
+      const activeFilters = {};
+      if (filters.plan) activeFilters.plan = filters.plan;
+      if (filters.role) activeFilters.role = filters.role;
+      if (filters.search && filters.search.trim()) activeFilters.search = filters.search.trim();
+      
+      const { data, error: usersError } = await adminService.getAllUsers(activeFilters);
       if (usersError) throw usersError;
       setUsers(data || []);
     } catch (err) {
       console.error('Error loading users:', err);
-      setError('Error al cargar usuarios');
+      setError(`Error al cargar usuarios: ${err.message || 'Error desconocido'}`);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters.plan, filters.role, filters.search]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const handleDelete = async () => {
     if (!selectedUser) return;
@@ -221,14 +227,14 @@ function AdminUsers() {
                         onClick={() => navigate(`/backoffice/users/${user.id}`)}
                         title="Ver detalles"
                       >
-                        👁️
+                        Ver
                       </button>
                       <button
                         className="btn-action btn-export"
                         onClick={() => handleExport(user.id)}
                         title="Exportar datos"
                       >
-                        📥
+                        Exportar
                       </button>
                       <button
                         className="btn-action btn-delete"
@@ -238,7 +244,7 @@ function AdminUsers() {
                         }}
                         title="Eliminar"
                       >
-                        🗑️
+                        Eliminar
                       </button>
                     </div>
                   </td>

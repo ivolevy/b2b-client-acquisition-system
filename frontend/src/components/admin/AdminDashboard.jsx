@@ -94,7 +94,6 @@ function AdminDashboard() {
       {/* Métricas principales */}
       <div className="metrics-grid">
         <div className="metric-card">
-          <div className="metric-icon">👥</div>
           <div className="metric-content">
             <h3>Total Usuarios</h3>
             <p className="metric-value">{metrics?.total_users || 0}</p>
@@ -102,7 +101,6 @@ function AdminDashboard() {
         </div>
 
         <div className="metric-card">
-          <div className="metric-icon">⭐</div>
           <div className="metric-content">
             <h3>Usuarios PRO</h3>
             <p className="metric-value">{metrics?.pro_users || 0}</p>
@@ -111,7 +109,6 @@ function AdminDashboard() {
         </div>
 
         <div className="metric-card">
-          <div className="metric-icon">📈</div>
           <div className="metric-content">
             <h3>Nuevos (30 días)</h3>
             <p className="metric-value">{metrics?.new_users_last_30_days || 0}</p>
@@ -120,7 +117,6 @@ function AdminDashboard() {
         </div>
 
         <div className="metric-card">
-          <div className="metric-icon">🔍</div>
           <div className="metric-content">
             <h3>Búsquedas Totales</h3>
             <p className="metric-value">{metrics?.total_searches || 0}</p>
@@ -129,7 +125,6 @@ function AdminDashboard() {
         </div>
 
         <div className="metric-card">
-          <div className="metric-icon">💎</div>
           <div className="metric-content">
             <h3>Suscripciones Activas</h3>
             <p className="metric-value">{metrics?.active_subscriptions || 0}</p>
@@ -138,7 +133,6 @@ function AdminDashboard() {
         </div>
 
         <div className="metric-card">
-          <div className="metric-icon">🎫</div>
           <div className="metric-content">
             <h3>Códigos Activos</h3>
             <p className="metric-value">{metrics?.active_promo_codes || 0}</p>
