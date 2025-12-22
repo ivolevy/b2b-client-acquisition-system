@@ -5,8 +5,7 @@
   top: 1rem;
   z-index: 1000;
   margin: 1rem auto;
-  max-width: 1400px !important;
-  width: 100%;
+  width: 40%;
   border-radius: var(--radius-pill);
   padding: 0.5rem 1.5rem;
 }
@@ -773,10 +772,10 @@
 
 @media (max-width: 768px) {
   .navbar {
-    margin: 0.5rem;
+    margin: 0.5rem auto;
     padding: 0.5rem 1rem;
     border-radius: var(--radius-lg);
-    max-width: calc(100% - 1rem) !important;
+    width: 40%;
   }
   
   .navbar-container {
@@ -836,9 +835,9 @@
 
 @media (max-width: 480px) {
   .navbar {
-    margin: 0.25rem;
+    margin: 0.25rem auto;
     padding: 0.4rem 0.75rem;
-    max-width: calc(100% - 0.5rem) !important;
+    width: 40%;
   }
   
   .navbar-brand h1 {
