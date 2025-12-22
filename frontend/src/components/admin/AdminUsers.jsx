@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../lib/supabase';
 import UserDetailModal from './UserDetailModal';
 import './AdminUsers.css';
 import './AdminLayout.css';
 
 function AdminUsers() {
-  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -188,7 +186,10 @@ function AdminUsers() {
                     <div className="action-buttons">
                       <button
                         className="btn-action btn-view"
-                        onClick={() => navigate(`/backoffice/users/${user.id}`)}
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowDetailModal(true);
+                        }}
                       >
                         Editar
                       </button>
