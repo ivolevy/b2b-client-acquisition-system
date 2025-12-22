@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../AuthWrapper';
 import { adminService } from '../../lib/supabase';
+import Navbar from '../Navbar';
 import './AdminLayout.css';
 
 function AdminLayout() {

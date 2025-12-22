@@ -126,20 +126,6 @@ function AdminPromoCodes() {
     <div className="admin-promo-codes">
       <div className="admin-header">
         <h1>Gestión de Códigos Promocionales</h1>
-        <div className="admin-nav">
-          <button 
-            className="admin-nav-btn"
-            onClick={() => navigate('/backoffice/users')}
-          >
-            Usuarios
-          </button>
-          <button 
-            className="admin-nav-btn active"
-            onClick={() => navigate('/backoffice/promo-codes')}
-          >
-            Códigos Promocionales
-          </button>
-        </div>
       </div>
 
       <div className="codes-header">
