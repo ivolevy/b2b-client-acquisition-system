@@ -3,7 +3,7 @@
   box-shadow: var(--shadow-md);
   position: sticky;
   top: 1rem;
-  z-index: 1 !important;
+  z-index: 1000;
   margin: 1rem auto;
   width: 40%;
   border-radius: var(--radius-pill);
