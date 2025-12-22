@@ -73,6 +73,33 @@ function AdminPromoCodes() {
         );
       }
       
+      // Ordenamiento por fecha de vencimiento
+      if (filters.expiration === 'sort_soonest') {
+        // Ordenar: más pronto a más tarde (los sin fecha al final)
+        filteredCodes.sort((a, b) => {
+          if (!a.expires_at && !b.expires_at) return 0;
+          if (!a.expires_at) return 1;
+          if (!b.expires_at) return -1;
+          return new Date(a.expires_at) - new Date(b.expires_at);
+        });
+      } else if (filters.expiration === 'sort_latest') {
+        // Ordenar: más tarde a más pronto (los sin fecha al final)
+        filteredCodes.sort((a, b) => {
+          if (!a.expires_at && !b.expires_at) return 0;
+          if (!a.expires_at) return 1;
+          if (!b.expires_at) return -1;
+          return new Date(b.expires_at) - new Date(a.expires_at);
+        });
+      } else if (!filters.expiration) {
+        // Por defecto, ordenar por fecha de vencimiento (más pronto primero)
+        filteredCodes.sort((a, b) => {
+          if (!a.expires_at && !b.expires_at) return 0;
+          if (!a.expires_at) return 1;
+          if (!b.expires_at) return -1;
+          return new Date(a.expires_at) - new Date(b.expires_at);
+        });
+      }
+      
       // Filtro por usos
       if (filters.usage === 'exhausted') {
         // Códigos agotados (alcanzaron el límite de usos)
@@ -243,11 +270,13 @@ function AdminPromoCodes() {
             value={filters.expiration}
             onChange={(e) => setFilters({ ...filters, expiration: e.target.value })}
           >
-            <option value="">Todas las fechas</option>
-            <option value="expired">Expirados</option>
+            <option value="">Ordenar: Más pronto primero</option>
+            <option value="sort_soonest">Ordenar: Más pronto primero</option>
+            <option value="sort_latest">Ordenar: Más tarde primero</option>
+            <option value="expired">Solo expirados</option>
             <option value="expiring_soon">Expiran pronto (7 días)</option>
-            <option value="not_expired">No expirados</option>
-            <option value="no_expiration">Sin fecha de expiración</option>
+            <option value="not_expired">Solo no expirados</option>
+            <option value="no_expiration">Solo sin fecha</option>
           </select>
         </div>
         <div className="filter-group">
