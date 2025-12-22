@@ -12,7 +12,7 @@ function AdminPromoCodes() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [filters, setFilters] = useState({
-    status: '', // 'active', 'inactive', 'expired', 'available', 'exhausted'
+    status: '',
     plan: '',
     search: ''
   });
@@ -38,24 +38,22 @@ function AdminPromoCodes() {
       // Aplicar filtros en el frontend
       let filteredCodes = data || [];
       
-      // Filtro por estado
+      // Filtro por estado (activo/inactivo)
       if (filters.status === 'active') {
         filteredCodes = filteredCodes.filter(code => code.is_active);
       } else if (filters.status === 'inactive') {
         filteredCodes = filteredCodes.filter(code => !code.is_active);
       } else if (filters.status === 'expired') {
+        // Códigos expirados (tienen expires_at y ya pasó la fecha)
+        const now = new Date();
         filteredCodes = filteredCodes.filter(code => 
-          code.expires_at && new Date(code.expires_at) < new Date()
+          code.expires_at && new Date(code.expires_at) < now
         );
-      } else if (filters.status === 'available') {
-        filteredCodes = filteredCodes.filter(code => {
-          const isNotExpired = !code.expires_at || new Date(code.expires_at) >= new Date();
-          const hasUsesLeft = !code.max_uses || code.used_count < code.max_uses;
-          return code.is_active && isNotExpired && hasUsesLeft;
-        });
-      } else if (filters.status === 'exhausted') {
+      } else if (filters.status === 'valid') {
+        // Códigos válidos (activos y no expirados)
+        const now = new Date();
         filteredCodes = filteredCodes.filter(code => 
-          code.max_uses && code.used_count >= code.max_uses
+          code.is_active && (!code.expires_at || new Date(code.expires_at) >= now)
         );
       }
       
@@ -64,7 +62,7 @@ function AdminPromoCodes() {
         filteredCodes = filteredCodes.filter(code => code.plan === filters.plan);
       }
       
-      // Filtro de búsqueda
+      // Filtro por búsqueda
       if (filters.search && filters.search.trim()) {
         const searchTerm = filters.search.trim().toLowerCase();
         filteredCodes = filteredCodes.filter(code =>
@@ -203,8 +201,7 @@ function AdminPromoCodes() {
             <option value="active">Activos</option>
             <option value="inactive">Inactivos</option>
             <option value="expired">Expirados</option>
-            <option value="available">Disponibles</option>
-            <option value="exhausted">Agotados</option>
+            <option value="valid">Válidos</option>
           </select>
         </div>
         <div className="filter-group">
