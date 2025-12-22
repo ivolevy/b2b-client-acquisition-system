@@ -97,19 +97,19 @@ function AdminUsers() {
         <div className="admin-nav">
           <button 
             className="admin-nav-btn"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/backoffice')}
           >
             Dashboard
           </button>
           <button 
             className="admin-nav-btn active"
-            onClick={() => navigate('/admin/users')}
+            onClick={() => navigate('/backoffice/users')}
           >
             Usuarios
           </button>
           <button 
             className="admin-nav-btn"
-            onClick={() => navigate('/admin/promo-codes')}
+            onClick={() => navigate('/backoffice/promo-codes')}
           >
             Códigos Promocionales
           </button>
@@ -218,7 +218,7 @@ function AdminUsers() {
                     <div className="action-buttons">
                       <button
                         className="btn-action btn-view"
-                        onClick={() => navigate(`/admin/users/${user.id}`)}
+                        onClick={() => navigate(`/backoffice/users/${user.id}`)}
                         title="Ver detalles"
                       >
                         👁️

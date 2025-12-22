@@ -172,7 +172,7 @@ function AdminUserDetail() {
       <div className="admin-user-detail">
         <div className="admin-error">
           <p>Usuario no encontrado</p>
-          <button onClick={() => navigate('/admin/users')}>Volver a usuarios</button>
+          <button onClick={() => navigate('/backoffice/users')}>Volver a usuarios</button>
         </div>
       </div>
     );
@@ -184,7 +184,7 @@ function AdminUserDetail() {
         <div>
           <button 
             className="btn-back"
-            onClick={() => navigate('/admin/users')}
+            onClick={() => navigate('/backoffice/users')}
           >
             ← Volver
           </button>

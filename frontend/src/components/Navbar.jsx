@@ -69,7 +69,7 @@ function Navbar({ onNavigateToProfile }) {
                           className="dropdown-item"
                           onClick={() => {
                             setShowUserMenu(false);
-                            navigate('/admin');
+                            navigate('/backoffice');
                           }}
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

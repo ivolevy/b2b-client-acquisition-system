@@ -381,7 +381,7 @@ function AuthWrapper() {
                   </main>
                 </div>
               } />
-              <Route path="/admin" element={
+              <Route path="/backoffice" element={
                 <div className="app">
                   <Navbar />
                   <main className="main-content">

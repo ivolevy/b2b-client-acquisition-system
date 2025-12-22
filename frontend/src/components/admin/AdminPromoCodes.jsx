@@ -126,19 +126,19 @@ function AdminPromoCodes() {
         <div className="admin-nav">
           <button 
             className="admin-nav-btn"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/backoffice')}
           >
             Dashboard
           </button>
           <button 
             className="admin-nav-btn"
-            onClick={() => navigate('/admin/users')}
+            onClick={() => navigate('/backoffice/users')}
           >
             Usuarios
           </button>
           <button 
             className="admin-nav-btn active"
-            onClick={() => navigate('/admin/promo-codes')}
+            onClick={() => navigate('/backoffice/promo-codes')}
           >
             Códigos Promocionales
           </button>
