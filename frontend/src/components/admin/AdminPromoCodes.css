@@ -1,3 +1,7 @@
+body.modal-open {
+  overflow: hidden !important;
+}
+
 .admin-promo-codes {
   background: transparent;
   min-height: 100vh;
@@ -202,19 +206,23 @@
 }
 
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   background: rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 99999999 !important;
+  overflow: hidden !important;
+  isolation: isolate;
 }
 
 .modal-content {
+  position: relative;
+  z-index: 99999999 !important;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
   border-radius: 16px;
@@ -263,6 +271,18 @@
 .form-select:focus {
   outline: none;
   border-color: #81D4FA;
+}
+
+.form-input.error,
+.form-select.error {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.form-input.error:focus,
+.form-select.error:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .form-group input[type="checkbox"] {

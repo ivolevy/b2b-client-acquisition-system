@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { adminService } from '../../lib/supabase';
 import './AdminPromoCodes.css';
 import './AdminLayout.css';
@@ -28,6 +29,100 @@ function AdminPromoCodes() {
     expires_at: '',
     is_active: true
   });
+
+  const [validationErrors, setValidationErrors] = useState({});
+
+  // Prevenir scroll cuando el modal está abierto
+  useEffect(() => {
+    if (showCreateModal || showDeleteModal) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [showCreateModal, showDeleteModal]);
+
+  // Validar formulario
+  const validateForm = () => {
+    const errors = {};
+    
+    // Validar código: exactamente 6 caracteres, solo letras y números
+    const codeRegex = /^[A-Z0-9]{6}$/;
+    if (!newCode.code.trim()) {
+      errors.code = 'El código es requerido';
+    } else if (!codeRegex.test(newCode.code.toUpperCase())) {
+      errors.code = 'El código debe tener exactamente 6 caracteres (solo letras y números)';
+    }
+    
+    // Validar duración: 1-365 días
+    const duration = parseInt(newCode.duration_days);
+    if (!duration || duration < 1) {
+      errors.duration_days = 'La duración mínima es 1 día';
+    } else if (duration > 365) {
+      errors.duration_days = 'La duración máxima es 365 días';
+    }
+    
+    // Validar límite de usos: máximo 1000000
+    if (newCode.max_uses && newCode.max_uses.trim()) {
+      const maxUses = parseInt(newCode.max_uses);
+      if (isNaN(maxUses) || maxUses < 1) {
+        errors.max_uses = 'El límite de usos debe ser al menos 1';
+      } else if (maxUses > 1000000) {
+        errors.max_uses = 'El límite máximo es 1,000,000';
+      }
+    }
+    
+    // Validar fecha de expiración: debe ser igual o posterior a hoy
+    if (newCode.expires_at) {
+      const expirationDate = new Date(newCode.expires_at);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      expirationDate.setHours(0, 0, 0, 0);
+      
+      if (expirationDate < today) {
+        errors.expires_at = 'La fecha de expiración debe ser igual o posterior a hoy';
+      }
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const isFormValid = () => {
+    const codeRegex = /^[A-Z0-9]{6}$/;
+    const duration = parseInt(newCode.duration_days);
+    const maxUses = newCode.max_uses ? parseInt(newCode.max_uses) : null;
+    
+    // Validar código
+    if (!newCode.code.trim() || !codeRegex.test(newCode.code.toUpperCase())) {
+      return false;
+    }
+    
+    // Validar duración
+    if (!duration || duration < 1 || duration > 365) {
+      return false;
+    }
+    
+    // Validar límite de usos
+    if (maxUses !== null && (isNaN(maxUses) || maxUses < 1 || maxUses > 1000000)) {
+      return false;
+    }
+    
+    // Validar fecha de expiración
+    if (newCode.expires_at) {
+      const expirationDate = new Date(newCode.expires_at);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      expirationDate.setHours(0, 0, 0, 0);
+      if (expirationDate < today) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
 
   const loadCodes = async () => {
     setLoading(true);
@@ -163,15 +258,17 @@ function AdminPromoCodes() {
   }, [filters.status, filters.plan, filters.search, filters.expiration, filters.usage]);
 
   const handleCreate = async () => {
-    if (!newCode.code.trim()) {
-      setError('El código es requerido');
+    if (!validateForm()) {
+      setError('Por favor corrige los errores en el formulario');
       return;
     }
 
     setError('');
+    setValidationErrors({});
     try {
       const codeData = {
         ...newCode,
+        code: newCode.code.toUpperCase().trim(),
         max_uses: newCode.max_uses ? parseInt(newCode.max_uses) : null,
         expires_at: newCode.expires_at || null
       };
@@ -188,6 +285,7 @@ function AdminPromoCodes() {
         expires_at: '',
         is_active: true
       });
+      setValidationErrors({});
       loadCodes();
     } catch (err) {
       console.error('Error creating promo code:', err);
@@ -389,20 +487,34 @@ function AdminPromoCodes() {
       </div>
 
       {/* Modal de crear código */}
-      {showCreateModal && (
-        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+      {showCreateModal && createPortal(
+        <div className="modal-overlay" onClick={() => {
+          setShowCreateModal(false);
+          setValidationErrors({});
+        }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Crear Código Promocional</h2>
             <div className="form-group">
-              <label>Código *</label>
+              <label>Código * (6 caracteres, solo letras y números)</label>
               <input
                 type="text"
                 value={newCode.code}
-                onChange={(e) => setNewCode({ ...newCode, code: e.target.value.toUpperCase() })}
-                className="form-input"
-                placeholder="PRO2024"
-                maxLength={50}
+                onChange={(e) => {
+                  const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+                  setNewCode({ ...newCode, code: value });
+                  if (validationErrors.code) {
+                    setValidationErrors({ ...validationErrors, code: '' });
+                  }
+                }}
+                className={`form-input ${validationErrors.code ? 'error' : ''}`}
+                placeholder="ABC123"
+                maxLength={6}
               />
+              {validationErrors.code && (
+                <span style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '4px' }}>
+                  {validationErrors.code}
+                </span>
+              )}
             </div>
             <div className="form-group">
               <label>Plan</label>
@@ -416,34 +528,69 @@ function AdminPromoCodes() {
               </select>
             </div>
             <div className="form-group">
-              <label>Duración (días) *</label>
+              <label>Duración (días) * (1-365)</label>
               <input
                 type="number"
                 value={newCode.duration_days}
-                onChange={(e) => setNewCode({ ...newCode, duration_days: parseInt(e.target.value) || 30 })}
-                className="form-input"
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || '';
+                  setNewCode({ ...newCode, duration_days: value });
+                  if (validationErrors.duration_days) {
+                    setValidationErrors({ ...validationErrors, duration_days: '' });
+                  }
+                }}
+                className={`form-input ${validationErrors.duration_days ? 'error' : ''}`}
                 min="1"
+                max="365"
               />
+              {validationErrors.duration_days && (
+                <span style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '4px' }}>
+                  {validationErrors.duration_days}
+                </span>
+              )}
             </div>
             <div className="form-group">
-              <label>Límite de usos (dejar vacío para ilimitado)</label>
+              <label>Límite de usos (dejar vacío para ilimitado, máximo 1,000,000)</label>
               <input
                 type="number"
                 value={newCode.max_uses}
-                onChange={(e) => setNewCode({ ...newCode, max_uses: e.target.value })}
-                className="form-input"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setNewCode({ ...newCode, max_uses: value });
+                  if (validationErrors.max_uses) {
+                    setValidationErrors({ ...validationErrors, max_uses: '' });
+                  }
+                }}
+                className={`form-input ${validationErrors.max_uses ? 'error' : ''}`}
                 min="1"
+                max="1000000"
                 placeholder="Ilimitado"
               />
+              {validationErrors.max_uses && (
+                <span style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '4px' }}>
+                  {validationErrors.max_uses}
+                </span>
+              )}
             </div>
             <div className="form-group">
-              <label>Fecha de expiración del código (opcional)</label>
+              <label>Fecha de expiración del código (opcional, debe ser igual o posterior a hoy)</label>
               <input
                 type="date"
                 value={newCode.expires_at}
-                onChange={(e) => setNewCode({ ...newCode, expires_at: e.target.value })}
-                className="form-input"
+                onChange={(e) => {
+                  setNewCode({ ...newCode, expires_at: e.target.value });
+                  if (validationErrors.expires_at) {
+                    setValidationErrors({ ...validationErrors, expires_at: '' });
+                  }
+                }}
+                className={`form-input ${validationErrors.expires_at ? 'error' : ''}`}
+                min={new Date().toISOString().split('T')[0]}
               />
+              {validationErrors.expires_at && (
+                <span style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '4px' }}>
+                  {validationErrors.expires_at}
+                </span>
+              )}
             </div>
             <div className="form-group">
               <label>
@@ -468,24 +615,33 @@ function AdminPromoCodes() {
                     expires_at: '',
                     is_active: true
                   });
+                  setValidationErrors({});
                 }}
               >
                 Cancelar
               </button>
               <button
-                className="btn-primary"
+                className={`btn-primary ${isFormValid() ? 'enabled' : 'disabled'}`}
                 onClick={handleCreate}
-                disabled={!newCode.code.trim()}
+                disabled={!isFormValid()}
+                style={{
+                  opacity: isFormValid() ? 1 : 0.5,
+                  cursor: isFormValid() ? 'pointer' : 'not-allowed',
+                  background: isFormValid() 
+                    ? 'linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%)' 
+                    : '#ccc'
+                }}
               >
                 Crear Código
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal de confirmación de eliminación */}
-      {showDeleteModal && selectedCode && (
+      {showDeleteModal && selectedCode && createPortal(
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Confirmar Eliminación</h2>
@@ -515,7 +671,8 @@ function AdminPromoCodes() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
