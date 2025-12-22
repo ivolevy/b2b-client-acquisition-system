@@ -1,15 +1,19 @@
 /* Modal Overlay */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
+  position: fixed !important;
+  inset: 0 !important;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 99999;
+  z-index: 999999 !important;
   padding: 20px;
   animation: fadeIn 0.2s ease;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
 }
 
 @keyframes fadeIn {
@@ -34,6 +38,8 @@
   animation: modalSlideIn 0.3s ease;
   overflow: hidden;
   box-sizing: border-box;
+  position: relative;
+  z-index: 999999;
 }
 
 @keyframes modalSlideIn {
@@ -58,6 +64,7 @@
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
+  margin: 0;
 }
 
 .modal-header-content h2 {
@@ -185,8 +192,10 @@
 
 .tab-content {
   animation: fadeInUp 0.3s ease;
-  padding: 0;
-  width: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
   box-sizing: border-box;
 }
 
@@ -203,13 +212,14 @@
 
 /* Form Sections */
 .form-section {
-  margin: 0;
+  margin: 0 !important;
   background: white;
-  padding: 24px;
+  padding: 24px !important;
   border-radius: 0;
   border: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
   box-sizing: border-box;
 }
 
@@ -229,7 +239,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .form-group {
