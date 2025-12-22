@@ -24,6 +24,14 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
     loadUserData();
   }, [userId]);
 
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   const loadUserData = async () => {
     setLoading(true);
     setError('');
