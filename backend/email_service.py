@@ -1,5 +1,5 @@
 """
-Servicio de envío de emails para contacto B2B
+Emails B2B
 Soporta templates personalizables y envío individual/masivo
 """
 
