@@ -49,13 +49,13 @@ function AdminLayout() {
 
   if (loading) {
     return (
-      <div className="admin-layout">
+      <>
         <ProBackground />
         <div className="admin-loading">
           <div className="spinner"></div>
           <p>Verificando permisos...</p>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -65,27 +65,25 @@ function AdminLayout() {
 
   if (!isAdmin) {
     return (
-      <div className="admin-layout">
+      <>
         <ProBackground />
         <div className="admin-access-denied">
           <h2>Acceso Denegado</h2>
           <p>No tienes permisos para acceder al panel de administración.</p>
           <button onClick={() => window.history.back()}>Volver</button>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="app">
+    <>
       <ProBackground />
       <Navbar />
       <main className="main-content">
-        <div className="admin-container">
-          <Outlet />
-        </div>
+        <Outlet />
       </main>
-    </div>
+    </>
   );
 }
 

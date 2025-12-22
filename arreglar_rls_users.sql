@@ -1,78 +1,98 @@
 -- ============================================================================
 -- ARREGLAR POLÍTICAS RLS PARA TABLA USERS
 -- ============================================================================
--- Los admins no pueden ver los usuarios por las políticas RLS
--- Este script arregla las políticas para permitir que los admins vean todos
+-- EJECUTAR EN SUPABASE SQL EDITOR
 -- ============================================================================
 
--- Eliminar políticas existentes
+-- PASO 1: Deshabilitar RLS temporalmente para limpiar
+ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
+
+-- PASO 2: Eliminar TODAS las políticas existentes
 DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
 DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
 DROP POLICY IF EXISTS "Admins can view all users" ON public.users;
 DROP POLICY IF EXISTS "Admins can manage all users" ON public.users;
+DROP POLICY IF EXISTS "Enable read for authenticated users" ON public.users;
+DROP POLICY IF EXISTS "Enable insert for authenticated users" ON public.users;
+DROP POLICY IF EXISTS "Enable update for users based on id" ON public.users;
+DROP POLICY IF EXISTS "Enable delete for users based on id" ON public.users;
+DROP POLICY IF EXISTS "Admins can insert users" ON public.users;
+DROP POLICY IF EXISTS "Admins can update all users" ON public.users;
+DROP POLICY IF EXISTS "Admins can delete users" ON public.users;
 
--- POLÍTICA 1: Usuarios pueden ver su propio perfil
-CREATE POLICY "Users can view own profile" 
-  ON public.users 
-  FOR SELECT 
-  USING (auth.uid() = id);
+-- PASO 3: Eliminar función is_admin si existe
+DROP FUNCTION IF EXISTS public.is_admin();
 
--- POLÍTICA 2: Usuarios pueden actualizar su propio perfil
-CREATE POLICY "Users can update own profile" 
-  ON public.users 
-  FOR UPDATE 
-  USING (auth.uid() = id);
+-- PASO 4: Volver a habilitar RLS
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
--- POLÍTICA 3: Admins pueden ver TODOS los usuarios
-CREATE POLICY "Admins can view all users" 
-  ON public.users 
-  FOR SELECT 
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.users 
-      WHERE users.id = auth.uid() 
-      AND users.role = 'admin'
-    )
-  );
+-- PASO 5: Crear políticas SIMPLES y FUNCIONALES
 
--- POLÍTICA 4: Admins pueden hacer TODO (INSERT, UPDATE, DELETE) en cualquier usuario
-CREATE POLICY "Admins can manage all users" 
-  ON public.users 
-  FOR ALL 
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.users 
-      WHERE users.id = auth.uid() 
-      AND users.role = 'admin'
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.users 
-      WHERE users.id = auth.uid() 
-      AND users.role = 'admin'
-    )
-  );
+-- Política 1: Usuarios pueden ver su propio perfil
+CREATE POLICY "users_select_own"
+ON public.users
+FOR SELECT
+TO authenticated
+USING (auth.uid() = id);
 
--- Verificar que las políticas se crearon correctamente
+-- Política 2: Usuarios pueden actualizar su propio perfil
+CREATE POLICY "users_update_own"
+ON public.users
+FOR UPDATE
+TO authenticated
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
+
+-- Política 3: Admins pueden hacer SELECT de todos los usuarios
+-- Usa una subquery en lugar de EXISTS para evitar problemas de recursión
+CREATE POLICY "admins_select_all"
+ON public.users
+FOR SELECT
+TO authenticated
+USING (
+  (SELECT role FROM public.users WHERE id = auth.uid() LIMIT 1) = 'admin'
+);
+
+-- Política 4: Admins pueden hacer INSERT
+CREATE POLICY "admins_insert"
+ON public.users
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  (SELECT role FROM public.users WHERE id = auth.uid() LIMIT 1) = 'admin'
+);
+
+-- Política 5: Admins pueden hacer UPDATE de todos
+CREATE POLICY "admins_update_all"
+ON public.users
+FOR UPDATE
+TO authenticated
+USING (
+  (SELECT role FROM public.users WHERE id = auth.uid() LIMIT 1) = 'admin'
+)
+WITH CHECK (
+  (SELECT role FROM public.users WHERE id = auth.uid() LIMIT 1) = 'admin'
+);
+
+-- Política 6: Admins pueden hacer DELETE
+CREATE POLICY "admins_delete"
+ON public.users
+FOR DELETE
+TO authenticated
+USING (
+  (SELECT role FROM public.users WHERE id = auth.uid() LIMIT 1) = 'admin'
+);
+
+-- VERIFICACIÓN
 SELECT 
-  schemaname,
-  tablename,
+  'Políticas creadas:' as mensaje,
+  COUNT(*) as total
+FROM pg_policies 
+WHERE tablename = 'users';
+
+SELECT 
   policyname,
-  permissive,
-  roles,
-  cmd,
-  qual,
-  with_check
+  cmd as operacion
 FROM pg_policies 
 WHERE tablename = 'users'
 ORDER BY policyname;
-
--- Verificar que RLS está habilitado
-SELECT 
-  schemaname, 
-  tablename, 
-  rowsecurity 
-FROM pg_tables 
-WHERE tablename = 'users';
-
