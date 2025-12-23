@@ -146,7 +146,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           const element = document.createElement('gmp-place-autocomplete');
           element.setAttribute('placeholder', 'Ej: Paseo de la Castellana 100, Madrid');
           element.style.width = '100%';
-          element.style.height = '44px';
+          element.style.height = '40px';
           element.style.border = '1px solid #d1d5db';
           element.style.borderRadius = '12px';
           element.style.padding = '0 0.85rem';
