@@ -5,15 +5,23 @@
 /* Estilos globales para el dropdown de Google Places Autocomplete */
 .pac-container {
   background-color: #ffffff !important;
+  background: #ffffff !important;
   border: 1px solid #e5e7eb !important;
   border-radius: 6px !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
   margin-top: 4px !important;
   font-family: inherit !important;
+  z-index: 10000 !important;
+}
+
+.pac-container * {
+  color: #1a1a1a !important;
+  background-color: transparent !important;
 }
 
 .pac-item {
   background-color: #ffffff !important;
+  background: #ffffff !important;
   color: #1a1a1a !important;
   padding: 8px 12px !important;
   border-top: 1px solid #f3f4f6 !important;
@@ -27,12 +35,17 @@
 .pac-item:hover,
 .pac-item-selected {
   background-color: #f9fafb !important;
+  background: #f9fafb !important;
   color: #1a1a1a !important;
 }
 
 .pac-item-query {
   color: #1a1a1a !important;
   font-size: 0.875rem !important;
+}
+
+.pac-item-query * {
+  color: #1a1a1a !important;
 }
 
 .pac-matched {
@@ -45,6 +58,26 @@
   width: 15px !important;
   height: 20px !important;
   margin-right: 8px !important;
+}
+
+/* Forzar todos los elementos del dropdown a tener fondo blanco y texto negro */
+.pac-container .pac-item,
+.pac-container .pac-item span,
+.pac-container .pac-item div {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+}
+
+.pac-container .pac-item:hover,
+.pac-container .pac-item-selected,
+.pac-container .pac-item:hover span,
+.pac-container .pac-item-selected span,
+.pac-container .pac-item:hover div,
+.pac-container .pac-item-selected div {
+  background-color: #f9fafb !important;
+  background: #f9fafb !important;
+  color: #1a1a1a !important;
 }
 
 .search-row {

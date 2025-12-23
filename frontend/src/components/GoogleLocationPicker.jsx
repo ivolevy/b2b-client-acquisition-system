@@ -200,16 +200,42 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
                 inputElement.style.borderRadius = '6px';
                 inputElement.style.padding = '6px 10px';
                 inputElement.style.fontSize = '0.8rem';
-                inputElement.style.background = '#ffffff !important';
-                inputElement.style.backgroundColor = '#ffffff !important';
-                inputElement.style.backgroundImage = 'none !important';
-                inputElement.style.color = '#1a1a1a';
                 inputElement.style.setProperty('background', '#ffffff', 'important');
                 inputElement.style.setProperty('background-color', '#ffffff', 'important');
                 inputElement.style.setProperty('background-image', 'none', 'important');
-                inputElement.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
                 inputElement.style.setProperty('color', '#1a1a1a', 'important');
+                inputElement.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
+                inputElement.style.setProperty('caret-color', '#1a1a1a', 'important');
+                // Forzar que el input muestre el texto
+                inputElement.setAttribute('style', inputElement.getAttribute('style') + '; color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;');
               }
+              
+              // Buscar todos los inputs y aplicar estilos
+              const allInputs = shadowRoot.querySelectorAll('input');
+              allInputs.forEach(inp => {
+                inp.style.setProperty('color', '#1a1a1a', 'important');
+                inp.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
+                inp.style.setProperty('caret-color', '#1a1a1a', 'important');
+                inp.style.setProperty('background', '#ffffff', 'important');
+                inp.style.setProperty('background-color', '#ffffff', 'important');
+                
+                // Agregar listener para mantener el texto visible mientras se escribe
+                inp.addEventListener('input', () => {
+                  inp.style.setProperty('color', '#1a1a1a', 'important');
+                  inp.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
+                });
+                
+                // También en keyup y keydown
+                inp.addEventListener('keyup', () => {
+                  inp.style.setProperty('color', '#1a1a1a', 'important');
+                  inp.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
+                });
+                
+                inp.addEventListener('keydown', () => {
+                  inp.style.setProperty('color', '#1a1a1a', 'important');
+                  inp.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
+                });
+              });
               
               // Agregar estilos CSS para placeholder y dropdown
               if (!shadowRoot.querySelector('style[data-custom-styles]')) {
@@ -225,24 +251,41 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
                   }
                   input,
                   input[type="text"],
-                  input[type="search"] {
+                  input[type="search"],
+                  input[type="text"]:not([disabled]),
+                  input[type="search"]:not([disabled]) {
                     background: #ffffff !important;
                     background-color: #ffffff !important;
                     background-image: none !important;
                     color: #1a1a1a !important;
                     -webkit-text-fill-color: #1a1a1a !important;
+                    caret-color: #1a1a1a !important;
                     -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
                     box-shadow: 0 0 0px 1000px #ffffff inset !important;
                   }
+                  /* Asegurar que el texto sea visible siempre */
+                  input::value,
+                  input::-webkit-textfield-decoration-container {
+                    color: #1a1a1a !important;
+                    -webkit-text-fill-color: #1a1a1a !important;
+                  }
                   input:focus,
-                  input:active {
+                  input:active,
+                  input:not(:placeholder-shown) {
                     background: #ffffff !important;
                     background-color: #ffffff !important;
                     background-image: none !important;
                     color: #1a1a1a !important;
                     -webkit-text-fill-color: #1a1a1a !important;
+                    caret-color: #1a1a1a !important;
                     -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
                     box-shadow: 0 0 0px 1000px #ffffff inset !important;
+                  }
+                  /* Forzar que el valor del input sea visible */
+                  input[value],
+                  input:not([value=""]) {
+                    color: #1a1a1a !important;
+                    -webkit-text-fill-color: #1a1a1a !important;
                   }
                   input:hover {
                     background: #ffffff !important;
