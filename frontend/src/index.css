@@ -14,12 +14,14 @@ html {
   --primary: #81D4FA;
   --primary-dark: #4FC3F7;
   --primary-light: #B3E5FC;
+  --primary-rgb: 129, 212, 250;
   --secondary: #1a1a1a;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
+  --danger-dark: #dc2626;
   
-  /* Grises suaves */
+  /* Grises suaves - mejor contraste */
   --gray-50: #fafafa;
   --gray-100: #f4f4f5;
   --gray-200: #e4e4e7;
@@ -30,6 +32,23 @@ html {
   --gray-700: #3f3f46;
   --gray-800: #27272a;
   --gray-900: #18181b;
+  
+  /* Colores de texto - mejor contraste */
+  --text-primary: #1a1a1a;
+  --text-secondary: #3f3f46;
+  --text-tertiary: #52525b;
+  --text-placeholder: #71717a;
+  
+  /* Colores de fondo */
+  --bg-white: #ffffff;
+  --bg-gray-50: #fafafa;
+  --bg-gray-100: #f4f4f5;
+  --bg-gray-200: #e4e4e7;
+  
+  /* Bordes */
+  --border-light: #e4e4e7;
+  --border-medium: #d4d4d8;
+  --border-primary: rgba(129, 212, 250, 0.3);
   
   /* Espaciado */
   --spacing-xs: 0.25rem;
@@ -226,10 +245,13 @@ body.modal-open {
    RESPONSIVE GLOBAL - MOBILE
    ============================================ */
 
+/* Mobile-first optimizations */
 @media (max-width: 768px) {
   html, body {
     overflow-x: hidden;
     width: 100%;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
   }
   
   #root {
@@ -239,6 +261,19 @@ body.modal-open {
   
   input, select, textarea {
     font-size: 16px; /* Previene zoom en iOS */
+    -webkit-appearance: none;
+    border-radius: var(--radius-md);
+  }
+  
+  /* Touch-friendly targets */
+  button, a, input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Mejorar scroll en móvil */
+  * {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -246,7 +281,7 @@ body.modal-open {
   :root {
     --spacing-lg: 1rem;
     --spacing-xl: 1.5rem;
-    --spacing-2xl: 2rem;
+    --spacing-2xl: 1.5rem;
   }
   
   body {
@@ -256,5 +291,10 @@ body.modal-open {
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.25rem; }
   h3 { font-size: 1.1rem; }
+  
+  /* Reducir padding en móviles pequeños */
+  .main-content {
+    padding: var(--spacing-md) !important;
+  }
 }
 

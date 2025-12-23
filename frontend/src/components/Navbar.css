@@ -775,7 +775,8 @@
     margin: 0.5rem auto;
     padding: 0.5rem 1rem;
     border-radius: var(--radius-lg);
-    width: 40%;
+    width: calc(100% - 1rem);
+    max-width: 100%;
   }
   
   .navbar-container {
@@ -835,9 +836,10 @@
 
 @media (max-width: 480px) {
   .navbar {
-    margin: 0.25rem auto;
-    padding: 0.4rem 0.75rem;
-    width: 40%;
+    margin: 0.5rem;
+    padding: 0.5rem 1rem;
+    width: calc(100% - 1rem);
+    max-width: 100%;
   }
   
   .navbar-brand h1 {

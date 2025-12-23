@@ -425,7 +425,7 @@ function AdminPromoCodes() {
         </div>
       )}
 
-      {/* Tabla de códigos */}
+      {/* Tabla de códigos (Desktop) */}
       <div className="codes-table-container">
         <table className="codes-table">
           <thead>
@@ -491,6 +491,66 @@ function AdminPromoCodes() {
             )}
           </tbody>
         </table>
+        
+        {/* Cards para móvil */}
+        <div className="codes-cards">
+          {codes.length === 0 ? (
+            <div className="no-data">
+              {loading ? 'Cargando...' : 'No se encontraron códigos'}
+            </div>
+          ) : (
+            codes.map((code) => (
+              <div key={code.id} className="code-card">
+                <div className="code-card-header">
+                  <div className="code-card-code">{code.code}</div>
+                  <div className="code-card-badges">
+                    <span className={`plan-badge ${code.plan}`}>
+                      {code.plan === 'pro' ? 'PRO' : 'Free'}
+                    </span>
+                    <span className={`status-badge ${code.is_active ? 'active' : 'inactive'}`}>
+                      {code.is_active ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </div>
+                </div>
+                <div className="code-card-body">
+                  <div className="code-card-row">
+                    <span className="code-card-label">Duración:</span>
+                    <span className="code-card-value">{code.duration_days} días</span>
+                  </div>
+                  <div className="code-card-row">
+                    <span className="code-card-label">Usos:</span>
+                    <span className="code-card-value">{code.used_count} / {code.max_uses || '∞'}</span>
+                  </div>
+                  <div className="code-card-row">
+                    <span className="code-card-label">Expira:</span>
+                    <span className="code-card-value">
+                      {code.expires_at
+                        ? new Date(code.expires_at).toLocaleDateString('es-ES')
+                        : 'Sin fecha'}
+                    </span>
+                  </div>
+                </div>
+                <div className="code-card-actions">
+                  <button
+                    className={`btn-action btn-toggle ${code.is_active ? 'active' : ''}`}
+                    onClick={() => handleToggleActive(code.id, code.is_active)}
+                  >
+                    {code.is_active ? 'Desactivar' : 'Activar'}
+                  </button>
+                  <button
+                    className="btn-action btn-delete"
+                    onClick={() => {
+                      setSelectedCode(code);
+                      setShowDeleteModal(true);
+                    }}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Modal de crear código */}
