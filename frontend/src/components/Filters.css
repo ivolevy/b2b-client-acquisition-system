@@ -255,8 +255,22 @@
   margin-right: 0;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
-  background: white !important;
-  background-color: white !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #1a1a1a !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+}
+
+/* Forzar fondo blanco para todos los estados y planes */
+.form-row-compact .address-input,
+.form-row-compact .address-input:focus,
+.form-row-compact .address-input:hover,
+.form-row-compact .address-input:active,
+.app:not(.pro-theme) .form-row-compact .address-input,
+.app.pro-theme .form-row-compact .address-input {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
   background-image: none !important;
   color: #1a1a1a !important;
   -webkit-text-fill-color: #1a1a1a !important;
@@ -341,9 +355,22 @@
   border-radius: var(--radius-lg);
   font-size: 0.9rem;
   transition: all 0.2s ease;
-  background: white;
-  color: var(--gray-900);
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
   box-shadow: var(--shadow-sm);
+}
+
+/* Forzar fondo blanco para inputs en todos los estados */
+.form-group input,
+.form-group input:focus,
+.form-group input:hover,
+.form-group input:active,
+.app:not(.pro-theme) .form-group input,
+.app.pro-theme .form-group input {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
 }
 
 /* Select moderno con chevron personalizado */

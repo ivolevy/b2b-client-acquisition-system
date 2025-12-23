@@ -110,12 +110,31 @@ html {
 
 /* Asegurar que el input de dirección siempre sea blanco */
 [data-theme="dark"] .address-input,
-.address-input {
+.address-input,
+.app:not(.pro-theme) .address-input,
+.app.pro-theme .address-input,
+.address-input:focus,
+.address-input:hover,
+.address-input:active {
   background: #ffffff !important;
   background-color: #ffffff !important;
+  background-image: none !important;
   color: #1a1a1a !important;
   -webkit-text-fill-color: #1a1a1a !important;
   border-color: var(--gray-300) !important;
+}
+
+/* Asegurar que todos los inputs de búsqueda sean blancos */
+.form-row-compact .address-input,
+.form-group input[type="text"],
+.form-group input[type="search"],
+.app:not(.pro-theme) .form-row-compact .address-input,
+.app.pro-theme .form-row-compact .address-input {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #1a1a1a !important;
+  -webkit-text-fill-color: #1a1a1a !important;
 }
 
 [data-theme="dark"] .properties-table th {

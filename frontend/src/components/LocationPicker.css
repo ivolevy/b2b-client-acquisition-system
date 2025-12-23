@@ -112,8 +112,22 @@
   transition: all 0.2s ease;
   height: 48px;
   box-sizing: border-box;
-  background: white !important;
-  background-color: white !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #1a1a1a !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+}
+
+/* Forzar fondo blanco para todos los estados y planes */
+.address-input,
+.address-input:focus,
+.address-input:hover,
+.address-input:active,
+.app:not(.pro-theme) .address-input,
+.app.pro-theme .address-input {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
   background-image: none !important;
   color: #1a1a1a !important;
   -webkit-text-fill-color: #1a1a1a !important;
