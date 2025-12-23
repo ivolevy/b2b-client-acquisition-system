@@ -265,10 +265,19 @@ body.modal-open {
     border-radius: var(--radius-md);
   }
   
-  /* Touch-friendly targets */
-  button, a, input[type="checkbox"], input[type="radio"] {
+  /* Touch-friendly targets - solo para botones interactivos principales */
+  button:not(.btn-action):not(.btn-toggle):not(.btn-close-icon), 
+  .btn-primary, 
+  .btn-secondary, 
+  .btn-danger {
     min-height: 44px;
-    min-width: 44px;
+  }
+  
+  /* Checkboxes y radios más grandes pero no tan grandes */
+  input[type="checkbox"], 
+  input[type="radio"] {
+    min-height: 20px;
+    min-width: 20px;
   }
   
   /* Mejorar scroll en móvil */

@@ -207,6 +207,7 @@
 .users-table {
   width: 100%;
   border-collapse: collapse;
+  display: table; /* Asegurar que se muestre en desktop */
 }
 
 .users-table thead {
