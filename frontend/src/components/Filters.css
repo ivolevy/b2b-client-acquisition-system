@@ -253,8 +253,8 @@
   margin-right: 0;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
-  background: white;
-  color: var(--gray-700);
+  background: white !important;
+  color: #1a1a1a !important;
 }
 
 .form-row-compact .address-input-wrapper {
@@ -908,6 +908,8 @@ select.filter-input {
   .form-row-compact .address-input {
     height: 44px;
     box-sizing: border-box;
+    background: white !important;
+    color: #1a1a1a !important;
   }
   
   .form-row-compact .btn-location {
@@ -1042,6 +1044,8 @@ select.filter-input {
   
   .form-row-compact .address-input {
     height: 38px;
+    background: white !important;
+    color: #1a1a1a !important;
   }
   
   .form-row-compact .btn-location-wrapper {
