@@ -12,6 +12,13 @@
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content > .back-to-home-btn {
+  align-self: flex-start;
+  margin-bottom: var(--spacing-lg);
 }
 
 .loading-overlay {

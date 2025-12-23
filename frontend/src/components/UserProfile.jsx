@@ -33,50 +33,40 @@ function UserProfile() {
     setUpgradeError('');
 
     try {
-      if (useSupabase && user?.id) {
-        // Usar la función RPC para activar suscripción con código
-        const { data, error: rpcError } = await supabase.rpc('activate_subscription_with_code', {
-          p_user_id: user.id,
-          p_code: proTokenInput.trim().toUpperCase()
-        });
-
-        if (rpcError) {
-          setUpgradeError(rpcError.message || 'Código promocional inválido o expirado.');
-          setUpgradeLoading(false);
-          return;
-        }
-
-        if (!data || !data.success) {
-          setUpgradeError(data?.error || 'Error al activar el código promocional.');
-          setUpgradeLoading(false);
-          return;
-        }
-
-        // Actualizar localStorage
-        const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
-        authData.plan = 'pro';
-        authData.plan_expires_at = data.expires_at;
-        localStorage.setItem('b2b_auth', JSON.stringify(authData));
-
-        // Cerrar modal y recargar para aplicar cambios
-        setShowUpgradeModal(false);
-        setProTokenInput('');
-        window.location.reload();
-      } else {
-        // Modo demo: activar plan PRO directamente en localStorage
-        const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
-        authData.plan = 'pro';
-        // Establecer expiración a 1 año desde ahora
-        const expiresAt = new Date();
-        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-        authData.plan_expires_at = expiresAt.toISOString();
-        localStorage.setItem('b2b_auth', JSON.stringify(authData));
-
-        // Cerrar modal y recargar para aplicar cambios
-        setShowUpgradeModal(false);
-        setProTokenInput('');
-        window.location.reload();
+      if (!useSupabase || !user?.id) {
+        setUpgradeError('No se puede validar el código promocional. Supabase no está configurado o no hay sesión activa.');
+        setUpgradeLoading(false);
+        return;
       }
+
+      // Usar la función RPC para activar suscripción con código
+      const { data, error: rpcError } = await supabase.rpc('activate_subscription_with_code', {
+        p_user_id: user.id,
+        p_code: proTokenInput.trim().toUpperCase()
+      });
+
+      if (rpcError) {
+        setUpgradeError(rpcError.message || 'Código promocional inválido o expirado.');
+        setUpgradeLoading(false);
+        return;
+      }
+
+      if (!data || !data.success) {
+        setUpgradeError(data?.error || 'Código promocional inválido o expirado.');
+        setUpgradeLoading(false);
+        return;
+      }
+
+      // Actualizar localStorage
+      const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
+      authData.plan = 'pro';
+      authData.plan_expires_at = data.expires_at;
+      localStorage.setItem('b2b_auth', JSON.stringify(authData));
+
+      // Cerrar modal y recargar para aplicar cambios
+      setShowUpgradeModal(false);
+      setProTokenInput('');
+      window.location.reload();
     } catch (error) {
       console.error('Error upgrading to PRO:', error);
       setUpgradeError('Error al procesar el upgrade: ' + (error.message || 'Error desconocido'));

@@ -609,7 +609,7 @@ export const adminService = {
         throw error;
       }
       console.log('[Admin] Fetched users:', data?.length || 0);
-      return { data, error: null };
+      return { data: data || [], error: null };
     } catch (error) {
       console.error('[Admin] Error getting users:', error);
       return { data: null, error };

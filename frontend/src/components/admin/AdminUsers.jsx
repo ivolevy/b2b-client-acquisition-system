@@ -19,7 +19,7 @@ function AdminUsers() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const searchTimeoutRef = useRef(null);
 
-  const loadUsers = async () => {
+  const loadUsers = async (forceRefresh = false) => {
     setLoading(true);
     setError('');
     
@@ -29,6 +29,11 @@ function AdminUsers() {
       if (filters.role) activeFilters.role = filters.role;
       if (filters.search && filters.search.trim()) {
         activeFilters.search = filters.search.trim();
+      }
+      
+      // Agregar timestamp para evitar caché si es refresh forzado
+      if (forceRefresh) {
+        activeFilters._refresh = Date.now();
       }
       
       console.log('[AdminUsers] Loading users with filters:', activeFilters);
@@ -219,7 +224,7 @@ function AdminUsers() {
             setShowDetailModal(false);
             setSelectedUser(null);
           }}
-          onUpdate={loadUsers}
+          onUpdate={() => loadUsers(true)}
         />
       )}
 

@@ -89,10 +89,17 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
       if (updateError) throw updateError;
 
       setSuccess('Usuario actualizado exitosamente');
-      onUpdate && onUpdate();
-      setTimeout(() => {
-        loadUserData();
-      }, 500);
+      
+      // Recargar datos del usuario actualizado
+      await loadUserData();
+      
+      // Llamar al callback para actualizar la lista de usuarios
+      if (onUpdate) {
+        // Pequeño delay para asegurar que la BD se actualizó
+        setTimeout(() => {
+          onUpdate();
+        }, 300);
+      }
     } catch (err) {
       console.error('Error updating user:', err);
       setError('Error al actualizar usuario: ' + err.message);

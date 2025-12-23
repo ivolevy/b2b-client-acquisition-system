@@ -131,7 +131,7 @@ function AuthWrapper() {
                 const userData = authService.buildUserData(session.user, profile);
                 setUser(userData);
                 
-                if (userData.plan === 'pro') {
+                if (userData.plan === 'pro' && userData.role !== 'admin') {
                   setShowProWelcome(true);
                 }
                 
@@ -187,7 +187,7 @@ function AuthWrapper() {
               const userData = authService.buildUserData(session.user, profile);
               setUser(userData);
               
-              if (userData.plan === 'pro') {
+              if (userData.plan === 'pro' && userData.role !== 'admin') {
                 setShowProWelcome(true);
               }
             } else if (event === 'SIGNED_OUT') {
@@ -220,7 +220,7 @@ function AuthWrapper() {
     const userData = authService.buildUserData(data.user, data.profile);
     setUser(userData);
     
-    if (userData.plan === 'pro') {
+    if (userData.plan === 'pro' && userData.role !== 'admin') {
       setShowProWelcome(true);
     }
 
@@ -252,7 +252,7 @@ function AuthWrapper() {
       authStorage.setToken('demo_token_' + Date.now());
     }
     
-    if (userData.plan === 'pro') {
+    if (userData.plan === 'pro' && userData.role !== 'admin') {
       setShowProWelcome(true);
     }
     setUser(userData);
