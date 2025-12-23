@@ -5,7 +5,7 @@ body.modal-open {
 .admin-promo-codes {
   background: transparent;
   min-height: 100vh;
-  padding: 16px;
+  padding: 32px;
   position: relative;
   z-index: 1;
 }
@@ -14,19 +14,21 @@ body.modal-open {
 .codes-filters {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  padding: 16px;
+  padding: 20px;
   border-radius: 16px 16px 0 0;
   margin-bottom: 0;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(129, 212, 250, 0.1);
   border-bottom: none;
   display: flex;
-  flex-direction: column;
   gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
 }
 
 .filter-group {
-  width: 100%;
+  flex: 1;
+  min-width: 200px;
 }
 
 .filter-input,
@@ -376,56 +378,24 @@ body.modal-open {
 }
 
 @media (max-width: 768px) {
-  .admin-promo-codes {
-    padding: 12px;
-  }
-  
   .codes-filters {
-    padding: 12px;
-    border-radius: 12px 12px 0 0;
+    flex-direction: column;
   }
   
-  .filter-input,
-  .filter-select {
-    font-size: 16px; /* Previene zoom en iOS */
+  .filter-group {
+    min-width: 100%;
   }
   
-  .btn-primary {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
+  .codes-table {
+    font-size: 13px;
   }
   
   .codes-table th,
   .codes-table td {
-    padding: 10px 6px;
-    font-size: 12px;
+    padding: 12px 8px;
   }
   
   .actions-cell {
     flex-direction: column;
-    gap: 8px;
-  }
-  
-  .actions-cell button {
-    width: 100%;
-    padding: 10px;
-  }
-}
-
-@media (min-width: 769px) {
-  .codes-filters {
-    flex-direction: row;
-    align-items: flex-end;
-    padding: 20px;
-  }
-  
-  .filter-group {
-    flex: 1;
-    min-width: 200px;
-  }
-  
-  .admin-promo-codes {
-    padding: 32px;
   }
 }

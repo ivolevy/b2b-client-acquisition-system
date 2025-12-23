@@ -1,7 +1,7 @@
 .admin-users {
   background: transparent;
   min-height: 100vh;
-  padding: 16px;
+  padding: 32px;
   position: relative;
   z-index: 1;
 }
@@ -10,19 +10,21 @@
 .users-filters {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  padding: 16px;
+  padding: 20px;
   border-radius: 16px 16px 0 0;
   margin-bottom: 0;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(129, 212, 250, 0.1);
   border-bottom: none;
   display: flex;
-  flex-direction: column;
   gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
 }
 
 .filter-group {
-  width: 100%;
+  flex: 1;
+  min-width: 200px;
 }
 
 .filter-input,
@@ -76,61 +78,6 @@
   overflow-x: auto;
 }
 
-/* Cards para móvil */
-.users-cards {
-  display: none;
-  gap: 12px;
-  padding: 16px;
-}
-
-.user-card {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
-}
-
-.user-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.user-card-email {
-  font-weight: 700;
-  font-size: 16px;
-  color: #1a1a1a;
-  margin-bottom: 4px;
-}
-
-.user-card-name {
-  font-size: 14px;
-  color: #666;
-}
-
-.user-card-badges {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-.user-card-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.user-card-actions .btn-action {
-  flex: 1;
-  padding: 10px;
-  text-align: center;
-}
-
 .users-table {
   width: 100%;
   border-collapse: collapse;
@@ -141,18 +88,18 @@
 }
 
 .users-table th {
-  padding: 12px 8px;
+  padding: 18px;
   text-align: left;
   font-weight: 700;
   color: #1a1a1a;
-  font-size: 13px;
+  font-size: 15px;
   border-bottom: 2px solid #e0e0e0;
 }
 
 .users-table td {
-  padding: 12px 8px;
+  padding: 18px;
   border-bottom: 1px solid #f0f0f0;
-  font-size: 14px;
+  font-size: 15px;
   color: #1a1a1a;
   font-weight: 500;
 }
@@ -331,61 +278,5 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* Mobile-first: mostrar cards en móvil, tabla en desktop */
-@media (max-width: 768px) {
-  .users-table-container {
-    display: none;
-  }
-  
-  .users-cards {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .admin-users {
-    padding: 12px;
-  }
-  
-  .users-filters {
-    padding: 12px;
-    border-radius: 12px 12px 0 0;
-  }
-  
-  .filter-input,
-  .filter-select {
-    font-size: 16px; /* Previene zoom en iOS */
-  }
-  
-  .btn-primary {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-  }
-}
-
-@media (min-width: 769px) {
-  .users-cards {
-    display: none;
-  }
-  
-  .users-table-container {
-    display: block;
-  }
-  
-  .users-filters {
-    flex-direction: row;
-    align-items: flex-end;
-  }
-  
-  .filter-group {
-    flex: 1;
-    min-width: 200px;
-  }
-  
-  .admin-users {
-    padding: 32px;
-  }
 }
 

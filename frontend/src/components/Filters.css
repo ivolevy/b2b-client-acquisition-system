@@ -67,7 +67,8 @@
 .form-row-compact > .form-group-compact,
 .form-row-compact > .rubro-inline {
   flex: 0 0 auto;
-  width: 200px;
+  min-width: 220px;
+  width: auto;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -172,7 +173,8 @@
 /* Todos los controles de ubicación con las mismas medidas */
 .form-row-compact .radius-control {
   flex: 0 0 auto;
-  width: 200px;
+  min-width: 180px;
+  width: auto;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -219,8 +221,8 @@
 }
 
 .form-row-compact .address-search {
-  flex: 0 0 auto;
-  width: 280px;
+  flex: 1 1 auto;
+  min-width: 300px;
   position: relative;
   display: flex;
   flex-direction: column;

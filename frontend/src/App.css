@@ -57,9 +57,9 @@
   letter-spacing: -0.01em;
 }
 
-@media (min-width: 769px) {
+@media (max-width: 768px) {
   .main-content {
-    padding: var(--spacing-2xl);
+    padding: var(--spacing-lg);
   }
 }
 
