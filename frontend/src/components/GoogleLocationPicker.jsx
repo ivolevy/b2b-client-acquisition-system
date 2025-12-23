@@ -228,122 +228,38 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             document.head.appendChild(globalStyle);
           }
           
-          // Función para aplicar estilos al dropdown de Google Places cuando aparezca
+          // Función simple para aplicar estilos al dropdown
           const styleDropdown = () => {
-            const pacContainers = document.querySelectorAll('.pac-container');
-            pacContainers.forEach(pacContainer => {
-              // Estilos del contenedor
-              pacContainer.style.cssText += 'background-color: #ffffff !important; background: #ffffff !important; color: #1a1a1a !important;';
+            const pacContainer = document.querySelector('.pac-container');
+            if (pacContainer) {
+              pacContainer.style.setProperty('background-color', '#ffffff', 'important');
+              pacContainer.style.setProperty('color', '#1a1a1a', 'important');
               
-              // Aplicar estilos a TODOS los elementos dentro del contenedor - FORZAR TEXTO NEGRO
               const allElements = pacContainer.querySelectorAll('*');
               allElements.forEach(el => {
-                // Forzar color de texto negro en TODOS los elementos
-                el.style.cssText += 'color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;';
-                
-                // Si es un item, también fondo blanco
+                el.style.setProperty('color', '#1a1a1a', 'important');
                 if (el.classList.contains('pac-item')) {
-                  el.style.cssText += 'background-color: #ffffff !important; background: #ffffff !important;';
-                } else {
-                  el.style.cssText += 'background-color: transparent !important; background: transparent !important;';
-                }
-                
-                // También aplicar directamente al atributo style
-                const currentStyle = el.getAttribute('style') || '';
-                if (!currentStyle.includes('color: #1a1a1a')) {
-                  el.setAttribute('style', currentStyle + '; color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;');
+                  el.style.setProperty('background-color', '#ffffff', 'important');
                 }
               });
-              
-              // Aplicar estilos específicos a todos los items del dropdown
-              const pacItems = pacContainer.querySelectorAll('.pac-item');
-              pacItems.forEach(item => {
-                item.style.cssText += 'background-color: #ffffff !important; background: #ffffff !important; color: #1a1a1a !important;';
-                
-                // Aplicar a todos los hijos del item - FORZAR TEXTO NEGRO
-                const children = item.querySelectorAll('*');
-                children.forEach(child => {
-                  child.style.cssText += 'color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;';
-                  const childStyle = child.getAttribute('style') || '';
-                  if (!childStyle.includes('color: #1a1a1a')) {
-                    child.setAttribute('style', childStyle + '; color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;');
-                  }
-                });
-                
-                // También aplicar directamente al texto del item
-                if (item.textContent) {
-                  item.style.cssText += 'color: #1a1a1a !important;';
-                }
-              });
-              
-              // Aplicar estilos específicos a queries y matched
-              const queries = pacContainer.querySelectorAll('.pac-item-query');
-              queries.forEach(query => {
-                query.style.cssText += 'color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;';
-                const children = query.querySelectorAll('*');
-                children.forEach(child => {
-                  child.style.cssText += 'color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;';
-                });
-              });
-              
-              const matched = pacContainer.querySelectorAll('.pac-matched');
-              matched.forEach(m => {
-                m.style.cssText += 'color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important; font-weight: 600 !important;';
-              });
-              
-              // Aplicar estilos a items hover y selected
-              const hoverItems = pacContainer.querySelectorAll('.pac-item:hover, .pac-item-selected');
-              hoverItems.forEach(item => {
-                item.style.cssText += 'background-color: #f9fafb !important; background: #f9fafb !important; color: #1a1a1a !important;';
-              });
-            });
+            }
           };
           
           // Observar cuando se crea el dropdown
-          const dropdownObserver = new MutationObserver(() => {
-            styleDropdown();
-          });
-          
-          // Observar cambios en el body para detectar cuando aparece el dropdown
+          const dropdownObserver = new MutationObserver(styleDropdown);
           dropdownObserver.observe(document.body, {
             childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['style', 'class']
+            subtree: true
           });
           
-          // También observar cuando el usuario escribe (el dropdown puede aparecer después)
-          if (input) {
-            input.addEventListener('input', () => {
-              setTimeout(styleDropdown, 50);
-              setTimeout(styleDropdown, 150);
-              setTimeout(styleDropdown, 300);
-            });
-            
-            input.addEventListener('focus', () => {
-              setTimeout(styleDropdown, 50);
-              setTimeout(styleDropdown, 150);
-              setTimeout(styleDropdown, 300);
-            });
-          }
+          // Aplicar estilos periódicamente
+          const intervalId = setInterval(styleDropdown, 500);
           
-          // Aplicar estilos inmediatamente y periódicamente - MÁS FRECUENTE
-          setTimeout(styleDropdown, 0);
-          setTimeout(styleDropdown, 50);
-          setTimeout(styleDropdown, 100);
-          setTimeout(styleDropdown, 200);
-          setTimeout(styleDropdown, 300);
-          setTimeout(styleDropdown, 500);
-          setTimeout(styleDropdown, 1000);
-          
-          // Ejecutar periódicamente mientras el componente esté montado - MÁS FRECUENTE
-          const intervalId = setInterval(styleDropdown, 200);
-          
-          // Limpiar observer e interval después de 60 segundos o cuando se desmonte
+          // Limpiar después de 30 segundos
           setTimeout(() => {
             dropdownObserver.disconnect();
             clearInterval(intervalId);
-          }, 60000);
+          }, 30000);
           
           // Aplicar estilos al input interno después de que el componente esté conectado
           const applyStyles = () => {
