@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { GoogleMap, Marker, Circle, useJsApiLoader, Autocomplete } from '@react-google-maps/api';
+import { GoogleMap, Marker, Circle, useJsApiLoader } from '@react-google-maps/api';
 import { useToast } from '../hooks/useToast';
 import './LocationPicker.css';
 
@@ -27,8 +27,9 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   const [radius, setRadius] = useState(5000); // 5km por defecto
   const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 }); // Madrid por defecto
   const [searchQuery, setSearchQuery] = useState('');
-  const [autocomplete, setAutocomplete] = useState(null);
+  const [autocompleteElement, setAutocompleteElement] = useState(null);
   const [map, setMap] = useState(null);
+  const autocompleteInputRef = useRef(null);
   const [initialLocationApplied, setInitialLocationApplied] = useState(false);
   const { success, error, warning, info, removeToast } = useToast();
 
@@ -110,13 +111,13 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     }
   };
 
-  const handlePlaceSelect = useCallback(() => {
-    if (autocomplete) {
-      const place = autocomplete.getPlace();
+  const handlePlaceSelect = useCallback((event) => {
+    if (event && event.detail && event.detail.place) {
+      const place = event.detail.place;
       if (place.geometry) {
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        const nombre = place.formatted_address || place.name;
+        const nombre = place.formattedAddress || place.name;
         setSearchQuery(nombre);
         setMapCenter({ lat, lng });
         if (map) {
@@ -125,7 +126,57 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         handleLocationSelect(lat, lng, nombre);
       }
     }
-  }, [autocomplete, map, handleLocationSelect]);
+  }, [map, handleLocationSelect]);
+
+  // Inicializar PlaceAutocompleteElement cuando el mapa esté cargado
+  useEffect(() => {
+    if (isLoaded && autocompleteInputRef.current && window.google?.maps?.places) {
+      // Verificar si PlaceAutocompleteElement está disponible
+      if (!autocompleteElement && window.google.maps.places.PlaceAutocompleteElement) {
+        try {
+          // Registrar el custom element si no está registrado
+          if (!customElements.get('gmp-place-autocomplete')) {
+            customElements.define('gmp-place-autocomplete', window.google.maps.places.PlaceAutocompleteElement);
+          }
+          
+          const input = autocompleteInputRef.current;
+          const wrapper = input.parentElement;
+          
+          // Crear el web component
+          const element = document.createElement('gmp-place-autocomplete');
+          element.setAttribute('placeholder', 'Ej: Paseo de la Castellana 100, Madrid');
+          element.style.width = '100%';
+          element.style.height = '40px';
+          element.style.border = '1px solid #ccc';
+          element.style.borderRadius = '8px';
+          element.style.padding = '8px';
+          
+          // Configurar opciones
+          if (element.componentRestrictions) {
+            element.componentRestrictions = { country: 'es' };
+          }
+          if (element.requestedResultFields) {
+            element.requestedResultFields = ['FORMATTED_ADDRESS', 'GEOMETRY', 'NAME'];
+          }
+          
+          // Agregar listener para cuando se selecciona un lugar
+          element.addEventListener('gmp-placeselect', handlePlaceSelect);
+          
+          // Reemplazar el input
+          wrapper.replaceChild(element, input);
+          setAutocompleteElement(element);
+        } catch (error) {
+          console.warn('Error initializing PlaceAutocompleteElement, using fallback:', error);
+        }
+      }
+    }
+    
+    return () => {
+      if (autocompleteElement) {
+        autocompleteElement.removeEventListener('gmp-placeselect', handlePlaceSelect);
+      }
+    };
+  }, [isLoaded, autocompleteElement, handlePlaceSelect]);
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -239,10 +290,18 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       <div className="address-search">
         <label htmlFor="address-input">Buscar dirección</label>
         <div className="address-input-wrapper">
-          <Autocomplete
-            onLoad={(autocomplete) => setAutocomplete(autocomplete)}
-            onPlaceChanged={handlePlaceSelect}
-          >
+          {window.google?.maps?.places?.PlaceAutocompleteElement ? (
+            <input
+              ref={autocompleteInputRef}
+              id="address-input"
+              type="text"
+              className="address-input"
+              placeholder="Ej: Paseo de la Castellana 100, Madrid"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
+            />
+          ) : (
             <input
               id="address-input"
               type="text"
@@ -252,7 +311,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               onChange={(e) => setSearchQuery(e.target.value)}
               autoComplete="off"
             />
-          </Autocomplete>
+          )}
           <span className="location-text">
             <span>o</span> <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>
           </span>
