@@ -27,9 +27,9 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   const [radius, setRadius] = useState(5000); // 5km por defecto
   const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 }); // Madrid por defecto
   const [searchQuery, setSearchQuery] = useState('');
-  const [autocompleteElement, setAutocompleteElement] = useState(null);
   const [map, setMap] = useState(null);
   const autocompleteInputRef = useRef(null);
+  const autocompleteRef = useRef(null);
   const [initialLocationApplied, setInitialLocationApplied] = useState(false);
   const { success, error, warning, info, removeToast } = useToast();
 
@@ -107,167 +107,47 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     }
   };
 
-  const handlePlaceSelect = useCallback((event) => {
-    if (event && event.detail && event.detail.place) {
-      const place = event.detail.place;
-      if (place.geometry) {
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        const nombre = place.formattedAddress || place.name;
-        const location = { lat, lng };
-        
-        setSearchQuery(nombre);
-        setMapCenter(location);
-        setSelectedLocation(location);
-        
-        // Mover el mapa a la ubicación seleccionada con zoom apropiado
-        if (map) {
-          map.panTo(location);
-          map.setZoom(15); // Zoom más cercano para ver la dirección
-        }
-        
-        handleLocationSelect(lat, lng, nombre);
-      }
-    }
-  }, [map, handleLocationSelect]);
-
-  // Inicializar PlaceAutocompleteElement
+  // Inicializar Autocomplete de Google Places
   useEffect(() => {
     if (isLoaded && autocompleteInputRef.current && window.google?.maps?.places) {
-      if (!autocompleteElement && window.google.maps.places.PlaceAutocompleteElement) {
-        try {
-          if (!customElements.get('gmp-place-autocomplete')) {
-            customElements.define('gmp-place-autocomplete', window.google.maps.places.PlaceAutocompleteElement);
+      if (!autocompleteRef.current) {
+        autocompleteRef.current = new window.google.maps.places.Autocomplete(
+          autocompleteInputRef.current,
+          {
+            componentRestrictions: { country: 'es' },
+            fields: ['formatted_address', 'geometry', 'name']
           }
-          
-          const input = autocompleteInputRef.current;
-          const wrapper = input.parentElement;
-          
-          const element = document.createElement('gmp-place-autocomplete');
-          element.setAttribute('placeholder', 'Ej: Plaza Mayor, Madrid');
-          
-          if (element.componentRestrictions) {
-            element.componentRestrictions = { country: 'es' };
-          }
-          if (element.requestedResultFields) {
-            element.requestedResultFields = ['FORMATTED_ADDRESS', 'GEOMETRY', 'NAME'];
-          }
-          
-          element.style.width = '100%';
-          element.style.height = '36px';
-          element.style.boxSizing = 'border-box';
-          
-          element.style.setProperty('--gm3-sys-color-surface', '#ffffff');
-          element.style.setProperty('--gm3-sys-color-on-surface', '#1a1a1a');
-          element.style.setProperty('--gm3-filled-text-field-container-color', '#ffffff');
-          element.style.setProperty('--gm3-filled-text-field-input-text-color', '#1a1a1a');
-          
-          // Agregar listener para cuando se selecciona un lugar
-          element.addEventListener('gmp-placeselect', (event) => {
-            console.log('Place selected:', event);
-            handlePlaceSelect(event);
-          });
-          
-          wrapper.replaceChild(element, input);
-          setAutocompleteElement(element);
-          
-          // Aplicar estilos al input interno
-          const applyInputStyles = () => {
-            const shadowRoot = element.shadowRoot;
-            if (shadowRoot) {
-              const inputEl = shadowRoot.querySelector('input');
-              if (inputEl) {
-                inputEl.setAttribute('placeholder', 'Ej: Plaza Mayor, Madrid');
-                inputEl.style.border = '1px solid #e5e7eb';
-                inputEl.style.borderRadius = '6px';
-                inputEl.style.padding = '6px 10px';
-                inputEl.style.fontSize = '0.8rem';
-                inputEl.style.setProperty('background', '#ffffff', 'important');
-                inputEl.style.setProperty('background-color', '#ffffff', 'important');
-                inputEl.style.setProperty('color', '#374151', 'important'); // Gris oscuro
-                inputEl.style.setProperty('-webkit-text-fill-color', '#374151', 'important');
-                
-                // Agregar estilos CSS para placeholder
-                if (!shadowRoot.querySelector('style[data-placeholder-styles]')) {
-                  const style = document.createElement('style');
-                  style.setAttribute('data-placeholder-styles', 'true');
-                  style.textContent = `
-                    input {
-                      background: #ffffff !important;
-                      background-color: #ffffff !important;
-                      color: #374151 !important;
-                      -webkit-text-fill-color: #374151 !important;
-                    }
-                    input::placeholder {
-                      color: #9ca3af !important;
-                      opacity: 1 !important;
-                      -webkit-text-fill-color: #9ca3af !important;
-                    }
-                    input::-webkit-input-placeholder {
-                      color: #9ca3af !important;
-                      opacity: 1 !important;
-                      -webkit-text-fill-color: #9ca3af !important;
-                    }
-                    input::-moz-placeholder {
-                      color: #9ca3af !important;
-                      opacity: 1 !important;
-                    }
-                    input:-ms-input-placeholder {
-                      color: #9ca3af !important;
-                      opacity: 1 !important;
-                    }
-                  `;
-                  shadowRoot.appendChild(style);
-                }
-              }
-            } else {
-              setTimeout(applyInputStyles, 100);
+        );
+        
+        autocompleteRef.current.addListener('place_changed', () => {
+          const place = autocompleteRef.current.getPlace();
+          if (place.geometry) {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            const nombre = place.formatted_address || place.name;
+            const location = { lat, lng };
+            
+            setSearchQuery(nombre);
+            setMapCenter(location);
+            setSelectedLocation(location);
+            
+            if (map) {
+              map.panTo(location);
+              map.setZoom(15);
             }
-          };
-          setTimeout(applyInputStyles, 100);
-          setTimeout(applyInputStyles, 300);
-          setTimeout(applyInputStyles, 500);
-          
-          // Forzar estilos del dropdown cuando aparezca
-          const forceDropdownStyles = () => {
-            const pacContainer = document.querySelector('.pac-container');
-            if (pacContainer) {
-              pacContainer.style.setProperty('background-color', '#ffffff', 'important');
-              pacContainer.style.setProperty('background', '#ffffff', 'important');
-              pacContainer.style.setProperty('color', '#1a1a1a', 'important');
-              
-              const allElements = pacContainer.querySelectorAll('*');
-              allElements.forEach(el => {
-                el.style.setProperty('color', '#1a1a1a', 'important');
-                el.style.setProperty('background-color', el.classList.contains('pac-item') ? '#ffffff' : 'transparent', 'important');
-              });
-            }
-          };
-          
-          // Observer para cuando aparezca el dropdown
-          const observer = new MutationObserver(forceDropdownStyles);
-          observer.observe(document.body, { childList: true, subtree: true });
-          
-          // También ejecutar periódicamente
-          const interval = setInterval(forceDropdownStyles, 300);
-          
-          // Limpiar después de 30 segundos
-          setTimeout(() => {
-            observer.disconnect();
-            clearInterval(interval);
-          }, 30000);
-        } catch (error) {
-          console.warn('Error initializing PlaceAutocompleteElement:', error);
-        }
+            
+            handleLocationSelect(lat, lng, nombre);
+          }
+        });
       }
     }
     
     return () => {
-      if (autocompleteElement) {
-        autocompleteElement.removeEventListener('gmp-placeselect', handlePlaceSelect);
+      if (autocompleteRef.current) {
+        window.google?.maps?.event?.clearInstanceListeners?.(autocompleteRef.current);
       }
     };
-  }, [isLoaded, autocompleteElement, handlePlaceSelect]);
+  }, [isLoaded, map, handleLocationSelect]);
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -384,40 +264,16 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       <div className="address-search">
         <label htmlFor="address-input">Buscar dirección</label>
         <div className="address-input-wrapper">
-          {window.google?.maps?.places?.PlaceAutocompleteElement ? (
-            <input
-              ref={autocompleteInputRef}
-              id="address-input"
-              type="text"
-              className="address-input"
-              placeholder="Ej: Plaza Mayor, Madrid"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoComplete="off"
-              style={{
-                background: '#ffffff',
-                backgroundColor: '#ffffff',
-                color: '#374151',
-                WebkitTextFillColor: '#374151'
-              }}
-            />
-          ) : (
-            <input
-              id="address-input"
-              type="text"
-              className="address-input"
-              placeholder="Ej: Plaza Mayor, Madrid"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoComplete="off"
-              style={{
-                background: '#ffffff',
-                backgroundColor: '#ffffff',
-                color: '#374151',
-                WebkitTextFillColor: '#374151'
-              }}
-            />
-          )}
+          <input
+            ref={autocompleteInputRef}
+            id="address-input"
+            type="text"
+            className="address-input"
+            placeholder="Ej: Plaza Mayor, Madrid"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            autoComplete="off"
+          />
           <span className="location-text">
             <span>o</span> <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>
           </span>
