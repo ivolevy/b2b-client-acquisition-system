@@ -21,19 +21,6 @@
   margin-bottom: var(--spacing-lg);
 }
 
-@media (max-width: 768px) {
-  .main-content {
-    padding: var(--spacing-md);
-    max-width: 100%;
-  }
-  
-  .main-content > .back-to-home-btn {
-    margin-bottom: var(--spacing-md);
-    width: 100%;
-    justify-content: center;
-  }
-}
-
 .loading-overlay {
   position: fixed;
   top: 0;

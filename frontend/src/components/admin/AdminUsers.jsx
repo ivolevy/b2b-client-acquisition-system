@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { adminService } from '../../lib/supabase';
 import UserDetailModal from './UserDetailModal';
+import ToastContainer from '../ToastContainer';
+import { useToast } from '../../hooks/useToast';
 import './AdminUsers.css';
 import './AdminLayout.css';
 
@@ -18,6 +20,7 @@ function AdminUsers() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const searchTimeoutRef = useRef(null);
+  const { toasts, success, error: toastError, removeToast } = useToast();
 
   const loadUsers = async (forceRefresh = false) => {
     setLoading(true);
@@ -87,10 +90,11 @@ function AdminUsers() {
       
       setShowDeleteModal(false);
       setSelectedUser(null);
+      success(`Usuario ${selectedUser.email} eliminado exitosamente`);
       loadUsers();
     } catch (err) {
       console.error('Error deleting user:', err);
-      alert('Error al eliminar usuario: ' + err.message);
+      toastError('Error al eliminar usuario: ' + (err.message || 'Error desconocido'));
     } finally {
       setDeleteLoading(false);
     }
@@ -152,7 +156,7 @@ function AdminUsers() {
         </div>
       )}
 
-      {/* Tabla de usuarios (Desktop) */}
+      {/* Tabla de usuarios - Desktop */}
       <div className="users-table-container">
         <table className="users-table">
           <thead>
@@ -215,7 +219,7 @@ function AdminUsers() {
         </table>
         
         {/* Cards para móvil */}
-        <div className="users-cards">
+        <div className="users-table-mobile">
           {users.length === 0 ? (
             <div className="no-data">
               {loading ? 'Cargando...' : 'No se encontraron usuarios'}
@@ -228,10 +232,16 @@ function AdminUsers() {
                     <div className="user-card-email">{user.email}</div>
                     <div className="user-card-name">{user.name || 'Sin nombre'}</div>
                   </div>
-                  <div className="user-card-badges">
+                </div>
+                <div className="user-card-body">
+                  <div className="user-card-row">
+                    <span className="user-card-label">Plan:</span>
                     <span className={`plan-badge ${user.plan}`}>
                       {user.plan === 'pro' ? 'PRO' : 'Free'}
                     </span>
+                  </div>
+                  <div className="user-card-row">
+                    <span className="user-card-label">Rol:</span>
                     <span className={`role-badge ${user.role}`}>
                       {user.role === 'admin' ? 'Admin' : 'Usuario'}
                     </span>
@@ -309,6 +319,7 @@ function AdminUsers() {
         </div>
       )}
 
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

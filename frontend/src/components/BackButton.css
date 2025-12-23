@@ -41,15 +41,12 @@
 /* Responsive */
 @media (max-width: 768px) {
   .back-to-home-btn {
-    padding: 12px 20px;
-    font-size: 15px;
-    min-height: 44px; /* Touch-friendly */
-    width: 100%;
-    justify-content: center;
+    padding: 8px 16px;
+    font-size: 0.85rem;
   }
   
   .back-to-home-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 }
