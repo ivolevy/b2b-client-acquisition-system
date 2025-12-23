@@ -146,15 +146,15 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           const element = document.createElement('gmp-place-autocomplete');
           element.setAttribute('placeholder', 'Ej: Paseo de la Castellana 100, Madrid');
           element.style.width = '100%';
-          element.style.height = '40px';
-          element.style.border = '1px solid #d1d5db';
-          element.style.borderRadius = '12px';
-          element.style.padding = '0 0.85rem';
+          element.style.height = '36px';
+          element.style.border = '1px solid #e5e7eb';
+          element.style.borderRadius = '6px';
+          element.style.padding = '6px 10px';
           element.style.boxSizing = 'border-box';
-          element.style.fontSize = '0.9rem';
+          element.style.fontSize = '0.8rem';
           element.style.background = '#ffffff';
           element.style.backgroundColor = '#ffffff';
-          element.style.color = '#111827';
+          element.style.color = '#1a1a1a';
 
           // Forzar paleta clara del tema Material 3 de Google Maps
           element.style.setProperty('--gm3-sys-color-surface', '#ffffff');
