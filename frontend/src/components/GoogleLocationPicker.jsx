@@ -144,7 +144,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           
           // Crear el web component (input de autocompletado de direcciones)
           const element = document.createElement('gmp-place-autocomplete');
-          element.setAttribute('placeholder', 'Ej: Paseo de la Castellana 100, Madrid');
+          element.setAttribute('placeholder', 'Ej: Plaza Mayor, Madrid');
           
           // Configurar opciones ANTES de agregar al DOM
           try {
@@ -351,6 +351,10 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             if (shadowRoot) {
               const inputElement = shadowRoot.querySelector('input');
               if (inputElement) {
+                // Asegurar que el placeholder esté establecido
+                if (!inputElement.getAttribute('placeholder')) {
+                  inputElement.setAttribute('placeholder', 'Ej: Plaza Mayor, Madrid');
+                }
                 inputElement.style.border = '1px solid #e5e7eb';
                 inputElement.style.borderRadius = '6px';
                 inputElement.style.padding = '6px 10px';
@@ -669,7 +673,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               id="address-input"
               type="text"
               className="address-input"
-              placeholder="Ej: Paseo de la Castellana 100, Madrid"
+              placeholder="Ej: Plaza Mayor, Madrid"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoComplete="off"
@@ -685,7 +689,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               id="address-input"
               type="text"
               className="address-input"
-              placeholder="Ej: Paseo de la Castellana 100, Madrid"
+              placeholder="Ej: Plaza Mayor, Madrid"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoComplete="off"
