@@ -114,11 +114,18 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
         const nombre = place.formattedAddress || place.name;
+        const location = { lat, lng };
+        
         setSearchQuery(nombre);
-        setMapCenter({ lat, lng });
+        setMapCenter(location);
+        setSelectedLocation(location);
+        
+        // Mover el mapa a la ubicación seleccionada con zoom apropiado
         if (map) {
-          map.panTo({ lat, lng });
+          map.panTo(location);
+          map.setZoom(15); // Zoom más cercano para ver la dirección
         }
+        
         handleLocationSelect(lat, lng, nombre);
       }
     }
@@ -155,13 +162,17 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           element.style.setProperty('--gm3-filled-text-field-container-color', '#ffffff');
           element.style.setProperty('--gm3-filled-text-field-input-text-color', '#1a1a1a');
           
-          element.addEventListener('gmp-placeselect', handlePlaceSelect);
+          // Agregar listener para cuando se selecciona un lugar
+          element.addEventListener('gmp-placeselect', (event) => {
+            console.log('Place selected:', event);
+            handlePlaceSelect(event);
+          });
           
           wrapper.replaceChild(element, input);
           setAutocompleteElement(element);
           
           // Aplicar estilos al input interno
-          setTimeout(() => {
+          const applyInputStyles = () => {
             const shadowRoot = element.shadowRoot;
             if (shadowRoot) {
               const inputEl = shadowRoot.querySelector('input');
@@ -172,10 +183,46 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
                 inputEl.style.padding = '6px 10px';
                 inputEl.style.fontSize = '0.8rem';
                 inputEl.style.background = '#ffffff';
+                inputEl.style.backgroundColor = '#ffffff';
                 inputEl.style.color = '#1a1a1a';
+                inputEl.style.setProperty('background', '#ffffff', 'important');
+                inputEl.style.setProperty('background-color', '#ffffff', 'important');
+                inputEl.style.setProperty('color', '#1a1a1a', 'important');
               }
+            } else {
+              setTimeout(applyInputStyles, 100);
             }
-          }, 100);
+          };
+          setTimeout(applyInputStyles, 100);
+          
+          // Forzar estilos del dropdown cuando aparezca
+          const forceDropdownStyles = () => {
+            const pacContainer = document.querySelector('.pac-container');
+            if (pacContainer) {
+              pacContainer.style.setProperty('background-color', '#ffffff', 'important');
+              pacContainer.style.setProperty('background', '#ffffff', 'important');
+              pacContainer.style.setProperty('color', '#1a1a1a', 'important');
+              
+              const allElements = pacContainer.querySelectorAll('*');
+              allElements.forEach(el => {
+                el.style.setProperty('color', '#1a1a1a', 'important');
+                el.style.setProperty('background-color', el.classList.contains('pac-item') ? '#ffffff' : 'transparent', 'important');
+              });
+            }
+          };
+          
+          // Observer para cuando aparezca el dropdown
+          const observer = new MutationObserver(forceDropdownStyles);
+          observer.observe(document.body, { childList: true, subtree: true });
+          
+          // También ejecutar periódicamente
+          const interval = setInterval(forceDropdownStyles, 300);
+          
+          // Limpiar después de 30 segundos
+          setTimeout(() => {
+            observer.disconnect();
+            clearInterval(interval);
+          }, 30000);
         } catch (error) {
           console.warn('Error initializing PlaceAutocompleteElement:', error);
         }
@@ -246,10 +293,13 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   };
 
   useEffect(() => {
-    if (isLoaded && map && selectedLocation) {
-      map.panTo(selectedLocation);
+    if (isLoaded && map && mapCenter) {
+      map.panTo(mapCenter);
+      if (selectedLocation) {
+        map.setZoom(15);
+      }
     }
-  }, [isLoaded, map, selectedLocation]);
+  }, [isLoaded, map, mapCenter, selectedLocation]);
 
   if (!GOOGLE_API_KEY) {
     return (
@@ -360,7 +410,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           <GoogleMap
             mapContainerStyle={{ width: '100%', height: '100%', borderRadius: '12px' }}
             center={mapCenter}
-            zoom={selectedLocation ? 13 : 10}
+            zoom={selectedLocation ? 15 : 10}
             onClick={handleMapClick}
             onLoad={(mapInstance) => setMap(mapInstance)}
             options={{
@@ -370,6 +420,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               mapTypeControl: true,
               fullscreenControl: true,
             }}
+            key={selectedLocation ? `${selectedLocation.lat}-${selectedLocation.lng}` : 'default'}
           >
             {selectedLocation && (
               <>
