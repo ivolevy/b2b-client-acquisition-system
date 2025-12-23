@@ -8,29 +8,29 @@
 .pac-container {
   background-color: #ffffff !important;
   background: #ffffff !important;
-  color: #1a1a1a !important;
+  color: #374151 !important;
 }
 
 .pac-container * {
-  color: #1a1a1a !important;
+  color: #374151 !important;
 }
 
 .pac-item {
   background-color: #ffffff !important;
-  color: #1a1a1a !important;
+  color: #374151 !important;
 }
 
 .pac-item:hover,
 .pac-item-selected {
   background-color: #f9fafb !important;
-  color: #1a1a1a !important;
+  color: #374151 !important;
 }
 
 .pac-item-query,
 .pac-item-query *,
 .pac-matched,
 .pac-matched * {
-  color: #1a1a1a !important;
+  color: #374151 !important;
 }
 
 html {

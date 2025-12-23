@@ -25,7 +25,7 @@ const calculateBoundingBox = (lat, lng, radiusMeters) => {
 function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect = null }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radius, setRadius] = useState(5000); // 5km por defecto
-  const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 }); // Madrid por defecto
+  const [mapCenter, setMapCenter] = useState({ lat: -34.6037, lng: -58.3816 }); // Buenos Aires, Argentina por defecto
   const [searchQuery, setSearchQuery] = useState('');
   const [map, setMap] = useState(null);
   const autocompleteInputRef = useRef(null);
@@ -113,8 +113,8 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       if (!autocompleteRef.current) {
         // Establecer bounds de Argentina para priorizar resultados de allí
         const argentinaBounds = new window.google.maps.LatLngBounds(
-          new window.google.maps.LatLng(-55.0, -73.0), // Sudoeste
-          new window.google.maps.LatLng(-21.0, -53.0)  // Noreste
+          new window.google.maps.LatLng(-55.0, -73.6), // Sudoeste (Tierra del Fuego)
+          new window.google.maps.LatLng(-21.8, -53.6)  // Noreste (Misiones)
         );
         
         autocompleteRef.current = new window.google.maps.places.Autocomplete(
@@ -128,8 +128,16 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         autocompleteRef.current.addListener('place_changed', () => {
           const place = autocompleteRef.current.getPlace();
           if (place.geometry) {
-            const lat = place.geometry.location.lat();
-            const lng = place.geometry.location.lng();
+            // Manejar tanto location como función como objeto
+            let lat, lng;
+            if (typeof place.geometry.location.lat === 'function') {
+              lat = place.geometry.location.lat();
+              lng = place.geometry.location.lng();
+            } else {
+              lat = place.geometry.location.lat;
+              lng = place.geometry.location.lng;
+            }
+            
             const nombre = place.formatted_address || place.name;
             const location = { lat, lng };
             
@@ -137,11 +145,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             setMapCenter(location);
             setSelectedLocation(location);
             
-            if (map) {
-              map.panTo(location);
-              map.setZoom(15);
-            }
-            
+            // El useEffect que actualiza el mapa se encargará de moverlo
             handleLocationSelect(lat, lng, nombre);
           }
         });
@@ -153,7 +157,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         window.google?.maps?.event?.clearInstanceListeners?.(autocompleteRef.current);
       }
     };
-  }, [isLoaded, map, handleLocationSelect]);
+  }, [isLoaded, handleLocationSelect]);
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -216,9 +220,33 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       map.panTo(mapCenter);
       if (selectedLocation) {
         map.setZoom(15);
+      } else {
+        map.setZoom(10);
       }
     }
   }, [isLoaded, map, mapCenter, selectedLocation]);
+
+  // Actualizar bounds del autocomplete cuando el mapa cambie
+  useEffect(() => {
+    if (isLoaded && map && autocompleteRef.current) {
+      const updateBounds = () => {
+        if (map && autocompleteRef.current) {
+          const bounds = map.getBounds();
+          if (bounds) {
+            autocompleteRef.current.setBounds(bounds);
+          }
+        }
+      };
+      
+      map.addListener('bounds_changed', updateBounds);
+      map.addListener('center_changed', updateBounds);
+      
+      return () => {
+        window.google?.maps?.event?.clearListeners?.(map, 'bounds_changed');
+        window.google?.maps?.event?.clearListeners?.(map, 'center_changed');
+      };
+    }
+  }, [isLoaded, map]);
 
   if (!GOOGLE_API_KEY) {
     return (
@@ -275,7 +303,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             id="address-input"
             type="text"
             className="address-input"
-            placeholder="Ej: Plaza Mayor, Madrid"
+            placeholder="Ej: Plaza de Mayo, Buenos Aires"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             autoComplete="off"

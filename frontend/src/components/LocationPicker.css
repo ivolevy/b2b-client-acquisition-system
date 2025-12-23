@@ -12,19 +12,19 @@
   margin-top: 4px !important;
   font-family: inherit !important;
   z-index: 10000 !important;
-  color: #1a1a1a !important;
+  color: #374151 !important;
 
 }
 
 .pac-container * {
-  color: #1a1a1a !important;
+  color: #374151 !important;
   background-color: transparent !important;
 }
 
 .pac-item {
   background-color: #ffffff !important;
   background: #ffffff !important;
-  color: #1a1a1a !important;
+  color: #374151 !important;
   padding: 8px 12px !important;
   border-top: 1px solid #f3f4f6 !important;
   cursor: pointer !important;
@@ -38,37 +38,37 @@
 .pac-item-selected {
   background-color: #f9fafb !important;
   background: #f9fafb !important;
-  color: #1a1a1a !important;
+  color: #374151 !important;
 }
 
 .pac-item-query {
-  color: #1a1a1a !important;
+  color: #374151 !important;
   font-size: 0.875rem !important;
 }
 
 .pac-item-query * {
-  color: #1a1a1a !important;
+  color: #374151 !important;
 }
 
 .pac-matched {
-  color: #1a1a1a !important;
+  color: #374151 !important;
   font-weight: 600 !important;
 }
 
 .pac-icon {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231a1a1a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E") !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E") !important;
   width: 15px !important;
   height: 20px !important;
   margin-right: 8px !important;
 }
 
-/* Forzar todos los elementos del dropdown a tener fondo blanco y texto negro */
+/* Forzar todos los elementos del dropdown a tener fondo blanco y texto gris oscuro */
 .pac-container .pac-item,
 .pac-container .pac-item span,
 .pac-container .pac-item div {
   background-color: #ffffff !important;
   background: #ffffff !important;
-  color: #1a1a1a !important;
+  color: #374151 !important;
 }
 
 .pac-container .pac-item:hover,
@@ -79,7 +79,7 @@
 .pac-container .pac-item-selected div {
   background-color: #f9fafb !important;
   background: #f9fafb !important;
-  color: #1a1a1a !important;
+  color: #374151 !important;
 }
 
 .search-row {
