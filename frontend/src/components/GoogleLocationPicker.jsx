@@ -142,14 +142,29 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           const input = autocompleteInputRef.current;
           const wrapper = input.parentElement;
           
-          // Crear el web component
+          // Crear el web component (input de autocompletado de direcciones)
           const element = document.createElement('gmp-place-autocomplete');
           element.setAttribute('placeholder', 'Ej: Paseo de la Castellana 100, Madrid');
           element.style.width = '100%';
-          element.style.height = '40px';
-          element.style.border = '1px solid #ccc';
-          element.style.borderRadius = '8px';
-          element.style.padding = '8px';
+          element.style.height = '44px';
+          element.style.border = '1px solid #d1d5db';
+          element.style.borderRadius = '12px';
+          element.style.padding = '0 0.85rem';
+          element.style.boxSizing = 'border-box';
+          element.style.fontSize = '0.9rem';
+          element.style.background = '#ffffff';
+          element.style.backgroundColor = '#ffffff';
+          element.style.color = '#111827';
+
+          // Forzar paleta clara del tema Material 3 de Google Maps
+          element.style.setProperty('--gm3-sys-color-surface', '#ffffff');
+          element.style.setProperty('--gm3-sys-color-on-surface', '#111827');
+          element.style.setProperty('--gm3-sys-color-surface-container-high', '#ffffff');
+          element.style.setProperty('--gm3-sys-color-outline', '#e5e7eb');
+          element.style.setProperty('--gm3-sys-color-primary', '#2563eb');
+          element.style.setProperty('--gm3-sys-color-on-primary', '#ffffff');
+          element.style.setProperty('--gm3-sys-color-surface-variant', '#f9fafb');
+          element.style.setProperty('--gm3-sys-color-on-surface-variant', '#4b5563');
           
           // Configurar opciones
           if (element.componentRestrictions) {
