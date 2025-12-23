@@ -102,11 +102,13 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
       
       // Llamar al callback para actualizar la lista de usuarios
       if (onUpdate) {
-        // Delay adicional para asegurar sincronización
-        setTimeout(() => {
-          onUpdate();
-        }, 300);
+        onUpdate();
       }
+      
+      // Cerrar el modal después de un breve delay para mostrar el mensaje de éxito
+      setTimeout(() => {
+        onClose();
+      }, 500);
     } catch (err) {
       console.error('Error updating user:', err);
       setError('Error al actualizar usuario: ' + err.message);
