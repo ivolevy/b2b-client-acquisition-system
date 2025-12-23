@@ -108,6 +108,16 @@ html {
   border-color: #3f3f46;
 }
 
+/* Asegurar que el input de dirección siempre sea blanco */
+[data-theme="dark"] .address-input,
+.address-input {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+  border-color: var(--gray-300) !important;
+}
+
 [data-theme="dark"] .properties-table th {
   background: #18181b;
   color: #fafafa;

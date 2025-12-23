@@ -253,7 +253,28 @@
   margin-right: 0;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
-  background: white !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+}
+
+.form-row-compact .address-input::placeholder {
+  color: #999 !important;
+  opacity: 1 !important;
+}
+
+.form-row-compact .address-input:-webkit-autofill,
+.form-row-compact .address-input:-webkit-autofill:hover,
+.form-row-compact .address-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+  background-color: #ffffff !important;
+}
+
+.form-row-compact .address-input:focus {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
   color: #1a1a1a !important;
 }
 
