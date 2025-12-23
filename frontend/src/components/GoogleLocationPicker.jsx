@@ -163,6 +163,10 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           element.style.width = '100%';
           element.style.height = '36px';
           element.style.boxSizing = 'border-box';
+          element.style.background = '#ffffff';
+          element.style.backgroundColor = '#ffffff';
+          element.style.setProperty('background', '#ffffff', 'important');
+          element.style.setProperty('background-color', '#ffffff', 'important');
           
           // Forzar paleta clara del tema Material 3 de Google Maps
           element.style.setProperty('--gm3-sys-color-surface', '#ffffff');
@@ -171,8 +175,13 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           element.style.setProperty('--gm3-sys-color-outline', '#e5e7eb');
           element.style.setProperty('--gm3-sys-color-primary', '#2563eb');
           element.style.setProperty('--gm3-sys-color-on-primary', '#ffffff');
-          element.style.setProperty('--gm3-sys-color-surface-variant', '#f9fafb');
-          element.style.setProperty('--gm3-sys-color-on-surface-variant', '#4b5563');
+          element.style.setProperty('--gm3-sys-color-surface-variant', '#ffffff');
+          element.style.setProperty('--gm3-sys-color-on-surface-variant', '#1a1a1a');
+          element.style.setProperty('--gm3-filled-text-field-container-color', '#ffffff');
+          element.style.setProperty('--gm3-filled-text-field-input-text-color', '#1a1a1a');
+          element.style.setProperty('--gm3-filled-text-field-label-text-color', '#6b7280');
+          element.style.setProperty('--gm3-filled-text-field-active-indicator-color', '#2563eb');
+          element.style.setProperty('--gm3-filled-text-field-inactive-indicator-color', '#e5e7eb');
           
           // Agregar listener para cuando se selecciona un lugar
           element.addEventListener('gmp-placeselect', handlePlaceSelect);
@@ -191,10 +200,15 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
                 inputElement.style.borderRadius = '6px';
                 inputElement.style.padding = '6px 10px';
                 inputElement.style.fontSize = '0.8rem';
-                inputElement.style.background = '#ffffff';
-                inputElement.style.backgroundColor = '#ffffff';
+                inputElement.style.background = '#ffffff !important';
+                inputElement.style.backgroundColor = '#ffffff !important';
+                inputElement.style.backgroundImage = 'none !important';
                 inputElement.style.color = '#1a1a1a';
+                inputElement.style.setProperty('background', '#ffffff', 'important');
+                inputElement.style.setProperty('background-color', '#ffffff', 'important');
+                inputElement.style.setProperty('background-image', 'none', 'important');
                 inputElement.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
+                inputElement.style.setProperty('color', '#1a1a1a', 'important');
               }
               
               // Agregar estilos CSS para placeholder y dropdown
@@ -202,9 +216,55 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
                 const style = document.createElement('style');
                 style.setAttribute('data-custom-styles', 'true');
                 style.textContent = `
-                  input {
+                  * {
+                    --gm3-sys-color-surface: #ffffff !important;
+                    --gm3-sys-color-on-surface: #1a1a1a !important;
+                    --gm3-sys-color-surface-container-high: #ffffff !important;
+                    --gm3-filled-text-field-container-color: #ffffff !important;
+                    --gm3-filled-text-field-input-text-color: #1a1a1a !important;
+                  }
+                  input,
+                  input[type="text"],
+                  input[type="search"] {
+                    background: #ffffff !important;
+                    background-color: #ffffff !important;
+                    background-image: none !important;
                     color: #1a1a1a !important;
                     -webkit-text-fill-color: #1a1a1a !important;
+                    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+                    box-shadow: 0 0 0px 1000px #ffffff inset !important;
+                  }
+                  input:focus,
+                  input:active {
+                    background: #ffffff !important;
+                    background-color: #ffffff !important;
+                    background-image: none !important;
+                    color: #1a1a1a !important;
+                    -webkit-text-fill-color: #1a1a1a !important;
+                    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+                    box-shadow: 0 0 0px 1000px #ffffff inset !important;
+                  }
+                  input:hover {
+                    background: #ffffff !important;
+                    background-color: #ffffff !important;
+                    background-image: none !important;
+                  }
+                  input:-webkit-autofill,
+                  input:-webkit-autofill:hover,
+                  input:-webkit-autofill:focus,
+                  input:-webkit-autofill:active {
+                    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+                    box-shadow: 0 0 0px 1000px #ffffff inset !important;
+                    -webkit-text-fill-color: #1a1a1a !important;
+                    background-color: #ffffff !important;
+                    background-image: none !important;
+                    color: #1a1a1a !important;
+                  }
+                  /* Forzar fondo blanco en todos los contenedores */
+                  div,
+                  span,
+                  form {
+                    background-color: transparent !important;
                   }
                   input::placeholder {
                     color: #9ca3af !important;
@@ -267,8 +327,19 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           };
           
           // Usar MutationObserver o setTimeout para aplicar estilos después de la conexión
+          setTimeout(applyStyles, 0);
           setTimeout(applyStyles, 100);
           setTimeout(applyStyles, 300);
+          setTimeout(applyStyles, 500);
+          
+          // Usar MutationObserver para aplicar estilos cuando cambie el DOM
+          const observer = new MutationObserver(() => {
+            applyStyles();
+          });
+          observer.observe(element, { childList: true, subtree: true, attributes: true });
+          
+          // Desconectar después de 3 segundos
+          setTimeout(() => observer.disconnect(), 3000);
         } catch (error) {
           console.warn('Error initializing PlaceAutocompleteElement, using fallback:', error);
         }
