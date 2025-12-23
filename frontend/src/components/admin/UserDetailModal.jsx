@@ -79,8 +79,12 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
         role: editForm.role
       };
 
-      if (editForm.plan === 'pro' && editForm.plan_expires_at) {
-        updates.plan_expires_at = new Date(editForm.plan_expires_at).toISOString();
+      if (editForm.plan === 'pro') {
+        // Si hay fecha de expiración, usarla; si no, se establecerá una por defecto en el backend
+        if (editForm.plan_expires_at) {
+          updates.plan_expires_at = new Date(editForm.plan_expires_at).toISOString();
+        }
+        // Si no hay fecha, no la incluimos en updates y el backend usará una por defecto
       } else if (editForm.plan === 'free') {
         updates.plan_expires_at = null;
       }
@@ -90,12 +94,15 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
 
       setSuccess('Usuario actualizado exitosamente');
       
+      // Esperar un momento para asegurar que la BD se actualizó completamente
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       // Recargar datos del usuario actualizado
       await loadUserData();
       
       // Llamar al callback para actualizar la lista de usuarios
       if (onUpdate) {
-        // Pequeño delay para asegurar que la BD se actualizó
+        // Delay adicional para asegurar sincronización
         setTimeout(() => {
           onUpdate();
         }, 300);

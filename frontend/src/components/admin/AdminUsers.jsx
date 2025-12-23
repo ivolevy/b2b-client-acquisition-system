@@ -31,12 +31,11 @@ function AdminUsers() {
         activeFilters.search = filters.search.trim();
       }
       
-      // Agregar timestamp para evitar caché si es refresh forzado
-      if (forceRefresh) {
-        activeFilters._refresh = Date.now();
-      }
-      
       console.log('[AdminUsers] Loading users with filters:', activeFilters);
+      // Si es refresh forzado, hacer una pequeña pausa para asegurar que la BD se actualizó
+      if (forceRefresh) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
       const { data, error: usersError } = await adminService.getAllUsers(activeFilters);
       
       if (usersError) {
