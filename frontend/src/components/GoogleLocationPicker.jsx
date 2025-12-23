@@ -145,7 +145,20 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             setMapCenter(location);
             setSelectedLocation(location);
             
-            // El useEffect que actualiza el mapa se encargará de moverlo
+            // Mover el mapa inmediatamente
+            if (map) {
+              map.panTo(location);
+              map.setZoom(15);
+            } else {
+              // Si el mapa no está listo, esperar un poco y volver a intentar
+              setTimeout(() => {
+                if (map) {
+                  map.panTo(location);
+                  map.setZoom(15);
+                }
+              }, 100);
+            }
+            
             handleLocationSelect(lat, lng, nombre);
           }
         });
