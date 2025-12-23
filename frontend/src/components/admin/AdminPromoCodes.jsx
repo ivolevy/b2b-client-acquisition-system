@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { adminService } from '../../lib/supabase';
-import ToastContainer from '../ToastContainer';
-import { useToast } from '../../hooks/useToast';
 import './AdminPromoCodes.css';
 import './AdminLayout.css';
 
@@ -33,7 +31,6 @@ function AdminPromoCodes() {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
-  const { toasts, success, error: toastError, removeToast } = useToast();
 
   // Prevenir scroll cuando el modal está abierto
   useEffect(() => {
@@ -296,13 +293,10 @@ function AdminPromoCodes() {
         is_active: true
       });
       setValidationErrors({});
-      success(`Código promocional ${codeData.code} creado exitosamente`);
       loadCodes();
     } catch (err) {
       console.error('Error creating promo code:', err);
-      const errorMsg = 'Error al crear código: ' + (err.message || 'Error desconocido');
-      setError(errorMsg);
-      toastError(errorMsg);
+      setError('Error al crear código: ' + err.message);
     }
   };
 
@@ -315,12 +309,9 @@ function AdminPromoCodes() {
       setCodes(codes.map(code => 
         code.id === codeId ? { ...code, is_active: !currentStatus } : code
       ));
-      success(`Código ${!currentStatus ? 'activado' : 'desactivado'} exitosamente`);
     } catch (err) {
       console.error('Error updating promo code:', err);
-      const errorMsg = 'Error al actualizar código: ' + (err.message || 'Error desconocido');
-      setError(errorMsg);
-      toastError(errorMsg);
+      setError('Error al actualizar código: ' + err.message);
     }
   };
 
@@ -333,14 +324,11 @@ function AdminPromoCodes() {
       if (deleteError) throw deleteError;
       
       setShowDeleteModal(false);
-      success(`Código promocional ${selectedCode.code} eliminado exitosamente`);
       setSelectedCode(null);
       loadCodes();
     } catch (err) {
       console.error('Error deleting promo code:', err);
-      const errorMsg = 'Error al eliminar código: ' + (err.message || 'Error desconocido');
-      setError(errorMsg);
-      toastError(errorMsg);
+      setError('Error al eliminar código: ' + err.message);
     } finally {
       setDeleteLoading(false);
     }
@@ -437,7 +425,7 @@ function AdminPromoCodes() {
         </div>
       )}
 
-      {/* Tabla de códigos - Desktop */}
+      {/* Tabla de códigos */}
       <div className="codes-table-container">
         <table className="codes-table">
           <thead>
@@ -503,69 +491,6 @@ function AdminPromoCodes() {
             )}
           </tbody>
         </table>
-        
-        {/* Cards para móvil */}
-        <div className="codes-table-mobile">
-          {codes.length === 0 ? (
-            <div className="no-data">
-              {loading ? 'Cargando...' : 'No se encontraron códigos'}
-            </div>
-          ) : (
-            codes.map((code) => (
-              <div key={code.id} className="code-card">
-                <div className="code-card-header">
-                  <div className="code-card-code">{code.code}</div>
-                  <span className={`plan-badge ${code.plan}`}>
-                    {code.plan === 'pro' ? 'PRO' : 'Free'}
-                  </span>
-                </div>
-                <div className="code-card-body">
-                  <div className="code-card-row">
-                    <span className="code-card-label">Duración:</span>
-                    <span className="code-card-value">{code.duration_days} días</span>
-                  </div>
-                  <div className="code-card-row">
-                    <span className="code-card-label">Usos:</span>
-                    <span className="code-card-value">{code.used_count} / {code.max_uses || '∞'}</span>
-                  </div>
-                  <div className="code-card-row">
-                    <span className="code-card-label">Estado:</span>
-                    <span className={`status-badge ${code.is_active ? 'active' : 'inactive'}`}>
-                      {code.is_active ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </div>
-                  <div className="code-card-row">
-                    <span className="code-card-label">Expira:</span>
-                    <span className="code-card-value">
-                      {code.expires_at
-                        ? new Date(code.expires_at).toLocaleDateString('es-ES')
-                        : 'Sin fecha'}
-                    </span>
-                  </div>
-                </div>
-                <div className="code-card-actions">
-                  <button
-                    className={`btn-toggle ${code.is_active ? 'active' : ''}`}
-                    onClick={() => handleToggleActive(code.id, code.is_active)}
-                    title={code.is_active ? 'Desactivar' : 'Activar'}
-                  >
-                    {code.is_active ? '✓ Activo' : '✗ Inactivo'}
-                  </button>
-                  <button
-                    className="btn-delete"
-                    onClick={() => {
-                      setSelectedCode(code);
-                      setShowDeleteModal(true);
-                    }}
-                    title="Eliminar"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
       </div>
 
       {/* Modal de crear código */}
@@ -756,8 +681,6 @@ function AdminPromoCodes() {
         </div>,
         document.body
       )}
-      
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

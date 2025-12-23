@@ -67,7 +67,7 @@ body.modal-open {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 24px 24px 20px 24px;
+  padding: 20px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   background: white;
   flex-shrink: 0;
@@ -77,7 +77,7 @@ body.modal-open {
 }
 
 .modal-header-content {
-  padding: 0;
+  padding: 0 24px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -92,8 +92,7 @@ body.modal-open {
 .modal-subtitle {
   margin: 4px 0 0;
   font-size: 0.9rem;
-  color: #3f3f46;
-  font-weight: 400;
+  color: #666;
 }
 
 .btn-close-icon {
@@ -103,7 +102,7 @@ body.modal-open {
   height: 40px;
   border-radius: 50%;
   font-size: 1.5rem;
-  color: #3f3f46;
+  color: #666;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -175,7 +174,7 @@ body.modal-open {
   padding: 12px 20px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #3f3f46;
+  color: #666;
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 12px 12px 0 0;
@@ -236,7 +235,7 @@ body.modal-open {
 .form-section {
   margin: 0 !important;
   background: white;
-  padding: 24px 24px !important;
+  padding: 24px 0 !important;
   border-radius: 0;
   border: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -247,7 +246,7 @@ body.modal-open {
 
 .form-section h3 {
   padding: 0 !important;
-  margin: 0 0 20px 0 !important;
+  margin: 0 0 16px 0 !important;
   width: 100% !important;
   box-sizing: border-box;
 }
@@ -258,38 +257,6 @@ body.modal-open {
   max-width: 100% !important;
   box-sizing: border-box;
   margin: 0 !important;
-}
-
-@media (max-width: 767px) {
-  .user-detail-modal {
-    max-width: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-    margin: 0;
-  }
-  
-  .modal-header {
-    padding: 16px 16px 12px 16px;
-  }
-  
-  .form-section {
-    padding: 20px 16px !important;
-  }
-  
-  .form-grid {
-    grid-template-columns: 1fr !important;
-  }
-  
-  .modal-tabs {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .tab-btn {
-    padding: 10px 16px;
-    font-size: 0.9rem;
-    white-space: nowrap;
-  }
 }
 
 .form-section:last-of-type {
@@ -316,47 +283,27 @@ body.modal-open {
 
 .form-group label {
   font-size: 0.85rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 4px;
+  font-weight: 500;
+  color: #555;
 }
 
 .form-input,
 .form-select {
   padding: 12px 16px;
-  border: 2px solid rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   font-size: 0.95rem;
   background: white;
-  color: #1a1a1a;
   transition: all 0.2s ease;
   width: 100%;
   box-sizing: border-box;
-  font-weight: 400;
-}
-
-.form-input::placeholder {
-  color: #71717a;
-  font-weight: 400;
 }
 
 .form-input:focus,
 .form-select:focus {
   outline: none;
   border-color: #81D4FA;
-  box-shadow: 0 0 0 3px rgba(129, 212, 250, 0.15);
-}
-
-.form-input.error,
-.form-select.error {
-  border-color: #ef4444;
-  background-color: #fef2f2;
-}
-
-.form-input.error:focus,
-.form-select.error:focus {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 0 3px rgba(129, 212, 250, 0.1);
 }
 
 /* Activity */
@@ -544,6 +491,76 @@ body.modal-open {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .user-detail-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    height: 100vh;
+  }
+  
+  .modal-overlay {
+    padding: 0;
+  }
+  
+  .modal-header {
+    padding: 16px;
+  }
+  
+  .modal-content {
+    padding: 16px;
+  }
+  
+  .tab-buttons {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .tab-btn {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    padding: 10px 8px;
+    font-size: 14px;
+  }
+  
+  .form-section {
+    padding: 16px 0 !important;
+  }
+  
+  .form-section h3 {
+    padding: 0 16px !important;
+    font-size: 16px;
+  }
+  
+  .form-section .form-grid {
+    padding: 0 16px !important;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .form-group {
+    width: 100%;
+  }
+  
+  .form-input,
+  .form-select {
+    font-size: 16px; /* Previene zoom en iOS */
+    padding: 12px;
+  }
+  
+  .modal-footer {
+    padding: 16px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modal-footer button {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 769px) {
   .modal-header,
   .modal-content,
   .modal-footer {

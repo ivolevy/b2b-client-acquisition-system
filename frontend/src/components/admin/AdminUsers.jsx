@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { adminService } from '../../lib/supabase';
 import UserDetailModal from './UserDetailModal';
-import ToastContainer from '../ToastContainer';
-import { useToast } from '../../hooks/useToast';
 import './AdminUsers.css';
 import './AdminLayout.css';
 
@@ -20,7 +18,6 @@ function AdminUsers() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const searchTimeoutRef = useRef(null);
-  const { toasts, success, error: toastError, removeToast } = useToast();
 
   const loadUsers = async (forceRefresh = false) => {
     setLoading(true);
@@ -90,11 +87,10 @@ function AdminUsers() {
       
       setShowDeleteModal(false);
       setSelectedUser(null);
-      success(`Usuario ${selectedUser.email} eliminado exitosamente`);
       loadUsers();
     } catch (err) {
       console.error('Error deleting user:', err);
-      toastError('Error al eliminar usuario: ' + (err.message || 'Error desconocido'));
+      alert('Error al eliminar usuario: ' + err.message);
     } finally {
       setDeleteLoading(false);
     }
@@ -156,7 +152,7 @@ function AdminUsers() {
         </div>
       )}
 
-      {/* Tabla de usuarios - Desktop */}
+      {/* Tabla de usuarios (Desktop) */}
       <div className="users-table-container">
         <table className="users-table">
           <thead>
@@ -217,60 +213,54 @@ function AdminUsers() {
             )}
           </tbody>
         </table>
-        
-        {/* Cards para móvil */}
-        <div className="users-table-mobile">
-          {users.length === 0 ? (
-            <div className="no-data">
-              {loading ? 'Cargando...' : 'No se encontraron usuarios'}
-            </div>
-          ) : (
-            users.map((user) => (
-              <div key={user.id} className="user-card">
-                <div className="user-card-header">
-                  <div>
-                    <div className="user-card-email">{user.email}</div>
-                    <div className="user-card-name">{user.name || 'Sin nombre'}</div>
-                  </div>
-                </div>
-                <div className="user-card-body">
-                  <div className="user-card-row">
-                    <span className="user-card-label">Plan:</span>
-                    <span className={`plan-badge ${user.plan}`}>
-                      {user.plan === 'pro' ? 'PRO' : 'Free'}
-                    </span>
-                  </div>
-                  <div className="user-card-row">
-                    <span className="user-card-label">Rol:</span>
-                    <span className={`role-badge ${user.role}`}>
-                      {user.role === 'admin' ? 'Admin' : 'Usuario'}
-                    </span>
-                  </div>
-                </div>
-                <div className="user-card-actions">
-                  <button
-                    className="btn-action btn-view"
-                    onClick={() => {
-                      setSelectedUser(user);
-                      setShowDetailModal(true);
-                    }}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="btn-action btn-delete"
-                    onClick={() => {
-                      setSelectedUser(user);
-                      setShowDeleteModal(true);
-                    }}
-                  >
-                    Eliminar
-                  </button>
+      </div>
+
+      {/* Cards de usuarios (Mobile) */}
+      <div className="users-cards">
+        {users.length === 0 ? (
+          <div className="no-data">
+            {loading ? 'Cargando...' : 'No se encontraron usuarios'}
+          </div>
+        ) : (
+          users.map((user) => (
+            <div key={user.id} className="user-card">
+              <div className="user-card-header">
+                <div>
+                  <div className="user-card-email">{user.email}</div>
+                  <div className="user-card-name">{user.name || 'Sin nombre'}</div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+              <div className="user-card-badges">
+                <span className={`plan-badge ${user.plan}`}>
+                  {user.plan === 'pro' ? 'PRO' : 'Free'}
+                </span>
+                <span className={`role-badge ${user.role}`}>
+                  {user.role === 'admin' ? 'Admin' : 'Usuario'}
+                </span>
+              </div>
+              <div className="user-card-actions">
+                <button
+                  className="btn-action btn-view"
+                  onClick={() => {
+                    setSelectedUser(user);
+                    setShowDetailModal(true);
+                  }}
+                >
+                  Editar
+                </button>
+                <button
+                  className="btn-action btn-delete"
+                  onClick={() => {
+                    setSelectedUser(user);
+                    setShowDeleteModal(true);
+                  }}
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Modal de detalle de usuario */}
@@ -319,7 +309,6 @@ function AdminUsers() {
         </div>
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }
