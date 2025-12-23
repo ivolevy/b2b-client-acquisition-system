@@ -2,6 +2,35 @@
   margin-bottom: var(--spacing-lg);
 }
 
+/* Estilos para el componente de Google Maps PlaceAutocompleteElement */
+gmp-place-autocomplete {
+  width: 100%;
+  height: 36px;
+  display: block;
+  --gm3-sys-color-surface: #ffffff;
+  --gm3-sys-color-on-surface: #1a1a1a;
+  --gm3-sys-color-on-surface-variant: #6b7280;
+  --gm3-sys-color-surface-container-high: #ffffff;
+  --gm3-sys-color-outline: #e5e7eb;
+  --gm3-sys-color-primary: #2563eb;
+  --gm3-sys-color-on-primary: #ffffff;
+  --gm3-sys-color-surface-variant: #f9fafb;
+}
+
+gmp-place-autocomplete::part(input) {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+gmp-place-autocomplete::part(input)::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
 .search-row {
   display: flex;
   align-items: flex-end;

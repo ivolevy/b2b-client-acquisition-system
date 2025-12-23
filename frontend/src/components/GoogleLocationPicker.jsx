@@ -167,12 +167,12 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           // Forzar paleta clara del tema Material 3 de Google Maps
           element.style.setProperty('--gm3-sys-color-surface', '#ffffff');
           element.style.setProperty('--gm3-sys-color-on-surface', '#1a1a1a');
+          element.style.setProperty('--gm3-sys-color-on-surface-variant', '#6b7280');
           element.style.setProperty('--gm3-sys-color-surface-container-high', '#ffffff');
           element.style.setProperty('--gm3-sys-color-outline', '#e5e7eb');
           element.style.setProperty('--gm3-sys-color-primary', '#2563eb');
           element.style.setProperty('--gm3-sys-color-on-primary', '#ffffff');
           element.style.setProperty('--gm3-sys-color-surface-variant', '#f9fafb');
-          element.style.setProperty('--gm3-sys-color-on-surface-variant', '#4b5563');
           
           // Agregar listener para cuando se selecciona un lugar
           element.addEventListener('gmp-placeselect', handlePlaceSelect);
@@ -185,8 +185,10 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           const applyStyles = () => {
             const shadowRoot = element.shadowRoot;
             if (shadowRoot) {
+              // Buscar el input dentro del shadow DOM
               const inputElement = shadowRoot.querySelector('input');
               if (inputElement) {
+                // Aplicar estilos básicos sin romper funcionalidad
                 inputElement.style.border = '1px solid #e5e7eb';
                 inputElement.style.borderRadius = '6px';
                 inputElement.style.padding = '6px 10px';
@@ -194,15 +196,71 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
                 inputElement.style.background = '#ffffff';
                 inputElement.style.backgroundColor = '#ffffff';
                 inputElement.style.color = '#1a1a1a';
+                inputElement.style.setProperty('color', '#1a1a1a', 'important');
+                
+                // Aplicar estilos al placeholder mediante CSS en el shadow DOM
+                const style = document.createElement('style');
+                style.textContent = `
+                  input {
+                    color: #1a1a1a !important;
+                    -webkit-text-fill-color: #1a1a1a !important;
+                  }
+                  input::placeholder {
+                    color: #9ca3af !important;
+                    opacity: 1 !important;
+                    -webkit-text-fill-color: #9ca3af !important;
+                  }
+                  input::-webkit-input-placeholder {
+                    color: #9ca3af !important;
+                    opacity: 1 !important;
+                    -webkit-text-fill-color: #9ca3af !important;
+                  }
+                  input::-moz-placeholder {
+                    color: #9ca3af !important;
+                    opacity: 1 !important;
+                  }
+                  input:-ms-input-placeholder {
+                    color: #9ca3af !important;
+                    opacity: 1 !important;
+                  }
+                `;
+                
+                // Verificar si ya existe un estilo, si no, agregarlo
+                if (!shadowRoot.querySelector('style[data-custom-styles]')) {
+                  style.setAttribute('data-custom-styles', 'true');
+                  shadowRoot.appendChild(style);
+                }
               }
+              
+              // También aplicar estilos a otros elementos que puedan contener texto
+              const allInputs = shadowRoot.querySelectorAll('input, textarea');
+              allInputs.forEach(inp => {
+                if (inp.style) {
+                  inp.style.color = '#1a1a1a';
+                  inp.style.setProperty('color', '#1a1a1a', 'important');
+                  inp.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
+                }
+              });
             } else {
               // Si aún no tiene shadowRoot, intentar de nuevo
               setTimeout(applyStyles, 50);
             }
           };
           
-          // Usar MutationObserver o setTimeout para aplicar estilos después de la conexión
+          // Aplicar estilos inmediatamente y también después de un delay
+          setTimeout(applyStyles, 0);
           setTimeout(applyStyles, 100);
+          setTimeout(applyStyles, 300);
+          
+          // Usar MutationObserver para aplicar estilos cuando el componente esté listo
+          const observer = new MutationObserver(() => {
+            applyStyles();
+          });
+          
+          observer.observe(element, { childList: true, subtree: true });
+          
+          // Desconectar el observer después de 2 segundos
+          setTimeout(() => observer.disconnect(), 2000);
         } catch (error) {
           console.warn('Error initializing PlaceAutocompleteElement, using fallback:', error);
         }
