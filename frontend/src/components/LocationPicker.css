@@ -112,8 +112,9 @@
   transition: all 0.2s ease;
   height: 48px;
   box-sizing: border-box;
-  background: #ffffff !important;
-  background-color: #ffffff !important;
+  background: white !important;
+  background-color: white !important;
+  background-image: none !important;
   color: #1a1a1a !important;
   -webkit-text-fill-color: #1a1a1a !important;
 }
@@ -126,17 +127,19 @@
 .address-input:-webkit-autofill,
 .address-input:-webkit-autofill:hover,
 .address-input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
   -webkit-text-fill-color: #1a1a1a !important;
-  background-color: #ffffff !important;
+  background-color: white !important;
+  background-image: none !important;
 }
 
 .address-input:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-  background: #ffffff !important;
-  background-color: #ffffff !important;
+  background: white !important;
+  background-color: white !important;
+  background-image: none !important;
   color: #1a1a1a !important;
 }
 
