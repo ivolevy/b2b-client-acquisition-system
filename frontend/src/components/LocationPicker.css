@@ -12,6 +12,8 @@
   margin-top: 4px !important;
   font-family: inherit !important;
   z-index: 10000 !important;
+  color: #1a1a1a !important;
+
 }
 
 .pac-container * {
