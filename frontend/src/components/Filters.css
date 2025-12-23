@@ -222,8 +222,8 @@
 
 .form-row-compact .address-search {
   flex: 0 0 auto;
-  min-width: 400px;
-  width: 400px;
+  min-width: 480px;
+  width: 480px;
   position: relative;
   display: flex;
   flex-direction: column;
