@@ -512,6 +512,12 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             }}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             autoComplete="off"
+            style={{
+              background: '#ffffff',
+              backgroundColor: '#ffffff',
+              color: '#1a1a1a',
+              WebkitTextFillColor: '#1a1a1a'
+            }}
           />
           <span className="location-text">
             <span>o</span> <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>

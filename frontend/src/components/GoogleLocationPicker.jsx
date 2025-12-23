@@ -300,6 +300,12 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoComplete="off"
+              style={{
+                background: '#ffffff',
+                backgroundColor: '#ffffff',
+                color: '#1a1a1a',
+                WebkitTextFillColor: '#1a1a1a'
+              }}
             />
           ) : (
             <input
@@ -310,6 +316,12 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoComplete="off"
+              style={{
+                background: '#ffffff',
+                backgroundColor: '#ffffff',
+                color: '#1a1a1a',
+                WebkitTextFillColor: '#1a1a1a'
+              }}
             />
           )}
           <span className="location-text">
