@@ -182,18 +182,51 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
                 inputEl.style.borderRadius = '6px';
                 inputEl.style.padding = '6px 10px';
                 inputEl.style.fontSize = '0.8rem';
-                inputEl.style.background = '#ffffff';
-                inputEl.style.backgroundColor = '#ffffff';
-                inputEl.style.color = '#1a1a1a';
                 inputEl.style.setProperty('background', '#ffffff', 'important');
                 inputEl.style.setProperty('background-color', '#ffffff', 'important');
-                inputEl.style.setProperty('color', '#1a1a1a', 'important');
+                inputEl.style.setProperty('color', '#374151', 'important'); // Gris oscuro
+                inputEl.style.setProperty('-webkit-text-fill-color', '#374151', 'important');
+                
+                // Agregar estilos CSS para placeholder
+                if (!shadowRoot.querySelector('style[data-placeholder-styles]')) {
+                  const style = document.createElement('style');
+                  style.setAttribute('data-placeholder-styles', 'true');
+                  style.textContent = `
+                    input {
+                      background: #ffffff !important;
+                      background-color: #ffffff !important;
+                      color: #374151 !important;
+                      -webkit-text-fill-color: #374151 !important;
+                    }
+                    input::placeholder {
+                      color: #9ca3af !important;
+                      opacity: 1 !important;
+                      -webkit-text-fill-color: #9ca3af !important;
+                    }
+                    input::-webkit-input-placeholder {
+                      color: #9ca3af !important;
+                      opacity: 1 !important;
+                      -webkit-text-fill-color: #9ca3af !important;
+                    }
+                    input::-moz-placeholder {
+                      color: #9ca3af !important;
+                      opacity: 1 !important;
+                    }
+                    input:-ms-input-placeholder {
+                      color: #9ca3af !important;
+                      opacity: 1 !important;
+                    }
+                  `;
+                  shadowRoot.appendChild(style);
+                }
               }
             } else {
               setTimeout(applyInputStyles, 100);
             }
           };
           setTimeout(applyInputStyles, 100);
+          setTimeout(applyInputStyles, 300);
+          setTimeout(applyInputStyles, 500);
           
           // Forzar estilos del dropdown cuando aparezca
           const forceDropdownStyles = () => {
@@ -364,8 +397,8 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               style={{
                 background: '#ffffff',
                 backgroundColor: '#ffffff',
-                color: '#1a1a1a',
-                WebkitTextFillColor: '#1a1a1a'
+                color: '#374151',
+                WebkitTextFillColor: '#374151'
               }}
             />
           ) : (
@@ -380,8 +413,8 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               style={{
                 background: '#ffffff',
                 backgroundColor: '#ffffff',
-                color: '#1a1a1a',
-                WebkitTextFillColor: '#1a1a1a'
+                color: '#374151',
+                WebkitTextFillColor: '#374151'
               }}
             />
           )}

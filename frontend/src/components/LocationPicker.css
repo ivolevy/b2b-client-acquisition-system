@@ -197,8 +197,8 @@
   background: #ffffff !important;
   background-color: #ffffff !important;
   background-image: none !important;
-  color: #1a1a1a !important;
-  -webkit-text-fill-color: #1a1a1a !important;
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
 }
 
 /* Forzar fondo blanco para todos los estados y planes */
@@ -211,12 +211,29 @@
   background: #ffffff !important;
   background-color: #ffffff !important;
   background-image: none !important;
-  color: #1a1a1a !important;
-  -webkit-text-fill-color: #1a1a1a !important;
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
 }
 
 .address-input::placeholder {
-  color: #999 !important;
+  color: #9ca3af !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #9ca3af !important;
+}
+
+.address-input::-webkit-input-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #9ca3af !important;
+}
+
+.address-input::-moz-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.address-input:-ms-input-placeholder {
+  color: #9ca3af !important;
   opacity: 1 !important;
 }
 
@@ -224,7 +241,7 @@
 .address-input:-webkit-autofill:hover,
 .address-input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px white inset !important;
-  -webkit-text-fill-color: #1a1a1a !important;
+  -webkit-text-fill-color: #374151 !important;
   background-color: white !important;
   background-image: none !important;
 }
@@ -236,7 +253,7 @@
   background: white !important;
   background-color: white !important;
   background-image: none !important;
-  color: #1a1a1a !important;
+  color: #374151 !important;
 }
 
 .address-status {
