@@ -45,18 +45,15 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       const { lat, lng, name, radius: initialRadius } = initialLocation;
       const location = { lat, lng };
       
-      // Configurar radio si viene
       if (initialRadius) {
         setRadius(initialRadius);
       }
       
-      // Configurar ubicación
       setSelectedLocation(location);
       setMapCenter(location);
       setSearchQuery(name || '');
       map.panTo(location);
       
-      // Notificar al padre
       const bbox = calculateBoundingBox(lat, lng, initialRadius || radius);
       onLocationChange({
         center: location,
@@ -69,7 +66,6 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     }
   }, [initialLocation, initialLocationApplied, map, isLoaded, radius, onLocationChange]);
   
-  // Resetear flag cuando cambia initialLocation
   useEffect(() => {
     if (initialLocation) {
       setInitialLocationApplied(false);
@@ -128,13 +124,11 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     }
   }, [map, handleLocationSelect]);
 
-  // Inicializar PlaceAutocompleteElement cuando el mapa esté cargado
+  // Inicializar PlaceAutocompleteElement
   useEffect(() => {
     if (isLoaded && autocompleteInputRef.current && window.google?.maps?.places) {
-      // Verificar si PlaceAutocompleteElement está disponible
       if (!autocompleteElement && window.google.maps.places.PlaceAutocompleteElement) {
         try {
-          // Registrar el custom element si no está registrado
           if (!customElements.get('gmp-place-autocomplete')) {
             customElements.define('gmp-place-autocomplete', window.google.maps.places.PlaceAutocompleteElement);
           }
@@ -142,324 +136,48 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           const input = autocompleteInputRef.current;
           const wrapper = input.parentElement;
           
-          // Crear el web component (input de autocompletado de direcciones)
           const element = document.createElement('gmp-place-autocomplete');
           element.setAttribute('placeholder', 'Ej: Plaza Mayor, Madrid');
           
-          // Configurar opciones ANTES de agregar al DOM
-          try {
+          if (element.componentRestrictions) {
             element.componentRestrictions = { country: 'es' };
-          } catch (e) {
-            console.warn('Could not set componentRestrictions:', e);
           }
-          
-          try {
+          if (element.requestedResultFields) {
             element.requestedResultFields = ['FORMATTED_ADDRESS', 'GEOMETRY', 'NAME'];
-          } catch (e) {
-            console.warn('Could not set requestedResultFields:', e);
           }
           
-          // Estilos básicos del contenedor
           element.style.width = '100%';
           element.style.height = '36px';
           element.style.boxSizing = 'border-box';
-          element.style.background = '#ffffff';
-          element.style.backgroundColor = '#ffffff';
-          element.style.setProperty('background', '#ffffff', 'important');
-          element.style.setProperty('background-color', '#ffffff', 'important');
           
-          // Forzar paleta clara del tema Material 3 de Google Maps
           element.style.setProperty('--gm3-sys-color-surface', '#ffffff');
           element.style.setProperty('--gm3-sys-color-on-surface', '#1a1a1a');
-          element.style.setProperty('--gm3-sys-color-surface-container-high', '#ffffff');
-          element.style.setProperty('--gm3-sys-color-outline', '#e5e7eb');
-          element.style.setProperty('--gm3-sys-color-primary', '#2563eb');
-          element.style.setProperty('--gm3-sys-color-on-primary', '#ffffff');
-          element.style.setProperty('--gm3-sys-color-surface-variant', '#ffffff');
-          element.style.setProperty('--gm3-sys-color-on-surface-variant', '#1a1a1a');
           element.style.setProperty('--gm3-filled-text-field-container-color', '#ffffff');
           element.style.setProperty('--gm3-filled-text-field-input-text-color', '#1a1a1a');
-          element.style.setProperty('--gm3-filled-text-field-label-text-color', '#6b7280');
-          element.style.setProperty('--gm3-filled-text-field-active-indicator-color', '#2563eb');
-          element.style.setProperty('--gm3-filled-text-field-inactive-indicator-color', '#e5e7eb');
           
-          // Agregar listener para cuando se selecciona un lugar
           element.addEventListener('gmp-placeselect', handlePlaceSelect);
           
-          // Reemplazar el input
           wrapper.replaceChild(element, input);
           setAutocompleteElement(element);
           
-          // Agregar estilos globales directamente al head del documento
-          if (!document.getElementById('google-places-dropdown-styles')) {
-            const globalStyle = document.createElement('style');
-            globalStyle.id = 'google-places-dropdown-styles';
-            globalStyle.textContent = `
-              .pac-container,
-              .pac-container *,
-              .pac-item,
-              .pac-item *,
-              .pac-item-query,
-              .pac-item-query *,
-              .pac-matched,
-              .pac-matched *,
-              .pac-icon {
-                color: #1a1a1a !important;
-                -webkit-text-fill-color: #1a1a1a !important;
-                background-color: #ffffff !important;
-                background: #ffffff !important;
-              }
-              .pac-container {
-                background-color: #ffffff !important;
-                background: #ffffff !important;
-              }
-              .pac-item {
-                background-color: #ffffff !important;
-                background: #ffffff !important;
-                color: #1a1a1a !important;
-              }
-              .pac-item:hover,
-              .pac-item-selected {
-                background-color: #f9fafb !important;
-                background: #f9fafb !important;
-                color: #1a1a1a !important;
-              }
-            `;
-            document.head.appendChild(globalStyle);
-          }
-          
-          // Función simple para aplicar estilos al dropdown
-          const styleDropdown = () => {
-            const pacContainer = document.querySelector('.pac-container');
-            if (pacContainer) {
-              pacContainer.style.setProperty('background-color', '#ffffff', 'important');
-              pacContainer.style.setProperty('color', '#1a1a1a', 'important');
-              
-              const allElements = pacContainer.querySelectorAll('*');
-              allElements.forEach(el => {
-                el.style.setProperty('color', '#1a1a1a', 'important');
-                if (el.classList.contains('pac-item')) {
-                  el.style.setProperty('background-color', '#ffffff', 'important');
-                }
-              });
-            }
-          };
-          
-          // Observar cuando se crea el dropdown
-          const dropdownObserver = new MutationObserver(styleDropdown);
-          dropdownObserver.observe(document.body, {
-            childList: true,
-            subtree: true
-          });
-          
-          // Aplicar estilos periódicamente
-          const intervalId = setInterval(styleDropdown, 500);
-          
-          // Limpiar después de 30 segundos
+          // Aplicar estilos al input interno
           setTimeout(() => {
-            dropdownObserver.disconnect();
-            clearInterval(intervalId);
-          }, 30000);
-          
-          // Aplicar estilos al input interno después de que el componente esté conectado
-          const applyStyles = () => {
             const shadowRoot = element.shadowRoot;
             if (shadowRoot) {
-              const inputElement = shadowRoot.querySelector('input');
-              if (inputElement) {
-                // Asegurar que el placeholder esté establecido
-                if (!inputElement.getAttribute('placeholder')) {
-                  inputElement.setAttribute('placeholder', 'Ej: Plaza Mayor, Madrid');
-                }
-                inputElement.style.border = '1px solid #e5e7eb';
-                inputElement.style.borderRadius = '6px';
-                inputElement.style.padding = '6px 10px';
-                inputElement.style.fontSize = '0.8rem';
-                inputElement.style.setProperty('background', '#ffffff', 'important');
-                inputElement.style.setProperty('background-color', '#ffffff', 'important');
-                inputElement.style.setProperty('background-image', 'none', 'important');
-                inputElement.style.setProperty('color', '#1a1a1a', 'important');
-                inputElement.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
-                inputElement.style.setProperty('caret-color', '#1a1a1a', 'important');
-                // Forzar que el input muestre el texto
-                inputElement.setAttribute('style', inputElement.getAttribute('style') + '; color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;');
+              const inputEl = shadowRoot.querySelector('input');
+              if (inputEl) {
+                inputEl.setAttribute('placeholder', 'Ej: Plaza Mayor, Madrid');
+                inputEl.style.border = '1px solid #e5e7eb';
+                inputEl.style.borderRadius = '6px';
+                inputEl.style.padding = '6px 10px';
+                inputEl.style.fontSize = '0.8rem';
+                inputEl.style.background = '#ffffff';
+                inputEl.style.color = '#1a1a1a';
               }
-              
-              // Buscar todos los inputs y aplicar estilos
-              const allInputs = shadowRoot.querySelectorAll('input');
-              allInputs.forEach(inp => {
-                inp.style.setProperty('color', '#1a1a1a', 'important');
-                inp.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
-                inp.style.setProperty('caret-color', '#1a1a1a', 'important');
-                inp.style.setProperty('background', '#ffffff', 'important');
-                inp.style.setProperty('background-color', '#ffffff', 'important');
-                
-                // Agregar listener para mantener el texto visible mientras se escribe
-                inp.addEventListener('input', () => {
-                  inp.style.setProperty('color', '#1a1a1a', 'important');
-                  inp.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
-                });
-                
-                // También en keyup y keydown
-                inp.addEventListener('keyup', () => {
-                  inp.style.setProperty('color', '#1a1a1a', 'important');
-                  inp.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
-                });
-                
-                inp.addEventListener('keydown', () => {
-                  inp.style.setProperty('color', '#1a1a1a', 'important');
-                  inp.style.setProperty('-webkit-text-fill-color', '#1a1a1a', 'important');
-                });
-              });
-              
-              // Agregar estilos CSS para placeholder y dropdown
-              if (!shadowRoot.querySelector('style[data-custom-styles]')) {
-                const style = document.createElement('style');
-                style.setAttribute('data-custom-styles', 'true');
-                style.textContent = `
-                  * {
-                    --gm3-sys-color-surface: #ffffff !important;
-                    --gm3-sys-color-on-surface: #1a1a1a !important;
-                    --gm3-sys-color-surface-container-high: #ffffff !important;
-                    --gm3-filled-text-field-container-color: #ffffff !important;
-                    --gm3-filled-text-field-input-text-color: #1a1a1a !important;
-                  }
-                  input,
-                  input[type="text"],
-                  input[type="search"],
-                  input[type="text"]:not([disabled]),
-                  input[type="search"]:not([disabled]) {
-                    background: #ffffff !important;
-                    background-color: #ffffff !important;
-                    background-image: none !important;
-                    color: #1a1a1a !important;
-                    -webkit-text-fill-color: #1a1a1a !important;
-                    caret-color: #1a1a1a !important;
-                    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
-                    box-shadow: 0 0 0px 1000px #ffffff inset !important;
-                  }
-                  /* Asegurar que el texto sea visible siempre */
-                  input::value,
-                  input::-webkit-textfield-decoration-container {
-                    color: #1a1a1a !important;
-                    -webkit-text-fill-color: #1a1a1a !important;
-                  }
-                  input:focus,
-                  input:active,
-                  input:not(:placeholder-shown) {
-                    background: #ffffff !important;
-                    background-color: #ffffff !important;
-                    background-image: none !important;
-                    color: #1a1a1a !important;
-                    -webkit-text-fill-color: #1a1a1a !important;
-                    caret-color: #1a1a1a !important;
-                    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
-                    box-shadow: 0 0 0px 1000px #ffffff inset !important;
-                  }
-                  /* Forzar que el valor del input sea visible */
-                  input[value],
-                  input:not([value=""]) {
-                    color: #1a1a1a !important;
-                    -webkit-text-fill-color: #1a1a1a !important;
-                  }
-                  input:hover {
-                    background: #ffffff !important;
-                    background-color: #ffffff !important;
-                    background-image: none !important;
-                  }
-                  input:-webkit-autofill,
-                  input:-webkit-autofill:hover,
-                  input:-webkit-autofill:focus,
-                  input:-webkit-autofill:active {
-                    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
-                    box-shadow: 0 0 0px 1000px #ffffff inset !important;
-                    -webkit-text-fill-color: #1a1a1a !important;
-                    background-color: #ffffff !important;
-                    background-image: none !important;
-                    color: #1a1a1a !important;
-                  }
-                  /* Forzar fondo blanco en todos los contenedores */
-                  div,
-                  span,
-                  form {
-                    background-color: transparent !important;
-                  }
-                  input::placeholder {
-                    color: #9ca3af !important;
-                    opacity: 1 !important;
-                    -webkit-text-fill-color: #9ca3af !important;
-                  }
-                  input::-webkit-input-placeholder {
-                    color: #9ca3af !important;
-                    opacity: 1 !important;
-                    -webkit-text-fill-color: #9ca3af !important;
-                  }
-                  input::-moz-placeholder {
-                    color: #9ca3af !important;
-                    opacity: 1 !important;
-                  }
-                  input:-ms-input-placeholder {
-                    color: #9ca3af !important;
-                    opacity: 1 !important;
-                  }
-                  /* Estilos para el dropdown de sugerencias */
-                  .pac-container {
-                    background-color: #ffffff !important;
-                    border: 1px solid #e5e7eb !important;
-                    border-radius: 6px !important;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-                    margin-top: 4px !important;
-                  }
-                  .pac-item {
-                    background-color: #ffffff !important;
-                    color: #1a1a1a !important;
-                    padding: 8px 12px !important;
-                    border-top: 1px solid #f3f4f6 !important;
-                  }
-                  .pac-item:first-child {
-                    border-top: none !important;
-                  }
-                  .pac-item:hover,
-                  .pac-item-selected {
-                    background-color: #f9fafb !important;
-                    color: #1a1a1a !important;
-                  }
-                  .pac-item-query {
-                    color: #1a1a1a !important;
-                    font-size: 0.875rem !important;
-                  }
-                  .pac-matched {
-                    color: #1a1a1a !important;
-                    font-weight: 600 !important;
-                  }
-                  .pac-icon {
-                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231a1a1a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E") !important;
-                  }
-                `;
-                shadowRoot.appendChild(style);
-              }
-            } else {
-              // Si aún no tiene shadowRoot, intentar de nuevo
-              setTimeout(applyStyles, 50);
             }
-          };
-          
-          // Usar MutationObserver o setTimeout para aplicar estilos después de la conexión
-          setTimeout(applyStyles, 0);
-          setTimeout(applyStyles, 100);
-          setTimeout(applyStyles, 300);
-          setTimeout(applyStyles, 500);
-          
-          // Usar MutationObserver para aplicar estilos cuando cambie el DOM
-          const observer = new MutationObserver(() => {
-            applyStyles();
-          });
-          observer.observe(element, { childList: true, subtree: true, attributes: true });
-          
-          // Desconectar después de 3 segundos
-          setTimeout(() => observer.disconnect(), 3000);
+          }, 100);
         } catch (error) {
-          console.warn('Error initializing PlaceAutocompleteElement, using fallback:', error);
+          console.warn('Error initializing PlaceAutocompleteElement:', error);
         }
       }
     }
@@ -677,4 +395,3 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
 }
 
 export default GoogleLocationPicker;
-
