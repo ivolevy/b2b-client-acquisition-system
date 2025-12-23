@@ -145,20 +145,28 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           // Crear el web component (input de autocompletado de direcciones)
           const element = document.createElement('gmp-place-autocomplete');
           element.setAttribute('placeholder', 'Ej: Paseo de la Castellana 100, Madrid');
+          
+          // Configurar opciones ANTES de agregar al DOM
+          try {
+            element.componentRestrictions = { country: 'es' };
+          } catch (e) {
+            console.warn('Could not set componentRestrictions:', e);
+          }
+          
+          try {
+            element.requestedResultFields = ['FORMATTED_ADDRESS', 'GEOMETRY', 'NAME'];
+          } catch (e) {
+            console.warn('Could not set requestedResultFields:', e);
+          }
+          
+          // Estilos básicos del contenedor
           element.style.width = '100%';
           element.style.height = '36px';
-          element.style.border = '1px solid #e5e7eb';
-          element.style.borderRadius = '6px';
-          element.style.padding = '6px 10px';
           element.style.boxSizing = 'border-box';
-          element.style.fontSize = '0.8rem';
-          element.style.background = '#ffffff';
-          element.style.backgroundColor = '#ffffff';
-          element.style.color = '#1a1a1a';
-
+          
           // Forzar paleta clara del tema Material 3 de Google Maps
           element.style.setProperty('--gm3-sys-color-surface', '#ffffff');
-          element.style.setProperty('--gm3-sys-color-on-surface', '#111827');
+          element.style.setProperty('--gm3-sys-color-on-surface', '#1a1a1a');
           element.style.setProperty('--gm3-sys-color-surface-container-high', '#ffffff');
           element.style.setProperty('--gm3-sys-color-outline', '#e5e7eb');
           element.style.setProperty('--gm3-sys-color-primary', '#2563eb');
@@ -166,20 +174,35 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           element.style.setProperty('--gm3-sys-color-surface-variant', '#f9fafb');
           element.style.setProperty('--gm3-sys-color-on-surface-variant', '#4b5563');
           
-          // Configurar opciones
-          if (element.componentRestrictions) {
-            element.componentRestrictions = { country: 'es' };
-          }
-          if (element.requestedResultFields) {
-            element.requestedResultFields = ['FORMATTED_ADDRESS', 'GEOMETRY', 'NAME'];
-          }
-          
           // Agregar listener para cuando se selecciona un lugar
           element.addEventListener('gmp-placeselect', handlePlaceSelect);
           
           // Reemplazar el input
           wrapper.replaceChild(element, input);
           setAutocompleteElement(element);
+          
+          // Aplicar estilos al input interno después de que el componente esté conectado
+          const applyStyles = () => {
+            const shadowRoot = element.shadowRoot;
+            if (shadowRoot) {
+              const inputElement = shadowRoot.querySelector('input');
+              if (inputElement) {
+                inputElement.style.border = '1px solid #e5e7eb';
+                inputElement.style.borderRadius = '6px';
+                inputElement.style.padding = '6px 10px';
+                inputElement.style.fontSize = '0.8rem';
+                inputElement.style.background = '#ffffff';
+                inputElement.style.backgroundColor = '#ffffff';
+                inputElement.style.color = '#1a1a1a';
+              }
+            } else {
+              // Si aún no tiene shadowRoot, intentar de nuevo
+              setTimeout(applyStyles, 50);
+            }
+          };
+          
+          // Usar MutationObserver o setTimeout para aplicar estilos después de la conexión
+          setTimeout(applyStyles, 100);
         } catch (error) {
           console.warn('Error initializing PlaceAutocompleteElement, using fallback:', error);
         }
