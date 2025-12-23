@@ -190,65 +190,111 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           wrapper.replaceChild(element, input);
           setAutocompleteElement(element);
           
+          // Agregar estilos globales directamente al head del documento
+          if (!document.getElementById('google-places-dropdown-styles')) {
+            const globalStyle = document.createElement('style');
+            globalStyle.id = 'google-places-dropdown-styles';
+            globalStyle.textContent = `
+              .pac-container,
+              .pac-container *,
+              .pac-item,
+              .pac-item *,
+              .pac-item-query,
+              .pac-item-query *,
+              .pac-matched,
+              .pac-matched *,
+              .pac-icon {
+                color: #1a1a1a !important;
+                -webkit-text-fill-color: #1a1a1a !important;
+                background-color: #ffffff !important;
+                background: #ffffff !important;
+              }
+              .pac-container {
+                background-color: #ffffff !important;
+                background: #ffffff !important;
+              }
+              .pac-item {
+                background-color: #ffffff !important;
+                background: #ffffff !important;
+                color: #1a1a1a !important;
+              }
+              .pac-item:hover,
+              .pac-item-selected {
+                background-color: #f9fafb !important;
+                background: #f9fafb !important;
+                color: #1a1a1a !important;
+              }
+            `;
+            document.head.appendChild(globalStyle);
+          }
+          
           // Función para aplicar estilos al dropdown de Google Places cuando aparezca
           const styleDropdown = () => {
             const pacContainers = document.querySelectorAll('.pac-container');
             pacContainers.forEach(pacContainer => {
               // Estilos del contenedor
-              pacContainer.style.setProperty('background-color', '#ffffff', 'important');
-              pacContainer.style.setProperty('background', '#ffffff', 'important');
-              pacContainer.style.setProperty('background-image', 'none', 'important');
+              pacContainer.style.cssText += 'background-color: #ffffff !important; background: #ffffff !important; color: #1a1a1a !important;';
               
-              // Aplicar estilos a TODOS los elementos dentro del contenedor
+              // Aplicar estilos a TODOS los elementos dentro del contenedor - FORZAR TEXTO NEGRO
               const allElements = pacContainer.querySelectorAll('*');
               allElements.forEach(el => {
-                // Solo cambiar color de texto, no fondo (excepto items)
-                if (!el.classList.contains('pac-item')) {
-                  el.style.setProperty('color', '#1a1a1a', 'important');
-                  el.style.setProperty('background-color', 'transparent', 'important');
-                  el.style.setProperty('background', 'transparent', 'important');
+                // Forzar color de texto negro en TODOS los elementos
+                el.style.cssText += 'color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;';
+                
+                // Si es un item, también fondo blanco
+                if (el.classList.contains('pac-item')) {
+                  el.style.cssText += 'background-color: #ffffff !important; background: #ffffff !important;';
+                } else {
+                  el.style.cssText += 'background-color: transparent !important; background: transparent !important;';
+                }
+                
+                // También aplicar directamente al atributo style
+                const currentStyle = el.getAttribute('style') || '';
+                if (!currentStyle.includes('color: #1a1a1a')) {
+                  el.setAttribute('style', currentStyle + '; color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;');
                 }
               });
               
-              // Aplicar estilos a todos los items del dropdown
+              // Aplicar estilos específicos a todos los items del dropdown
               const pacItems = pacContainer.querySelectorAll('.pac-item');
               pacItems.forEach(item => {
-                item.style.setProperty('background-color', '#ffffff', 'important');
-                item.style.setProperty('background', '#ffffff', 'important');
-                item.style.setProperty('background-image', 'none', 'important');
-                item.style.setProperty('color', '#1a1a1a', 'important');
+                item.style.cssText += 'background-color: #ffffff !important; background: #ffffff !important; color: #1a1a1a !important;';
                 
-                // Aplicar a todos los hijos del item
+                // Aplicar a todos los hijos del item - FORZAR TEXTO NEGRO
                 const children = item.querySelectorAll('*');
                 children.forEach(child => {
-                  child.style.setProperty('color', '#1a1a1a', 'important');
-                  child.style.setProperty('background-color', 'transparent', 'important');
-                  child.style.setProperty('background', 'transparent', 'important');
+                  child.style.cssText += 'color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;';
+                  const childStyle = child.getAttribute('style') || '';
+                  if (!childStyle.includes('color: #1a1a1a')) {
+                    child.setAttribute('style', childStyle + '; color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;');
+                  }
                 });
+                
+                // También aplicar directamente al texto del item
+                if (item.textContent) {
+                  item.style.cssText += 'color: #1a1a1a !important;';
+                }
               });
               
               // Aplicar estilos específicos a queries y matched
               const queries = pacContainer.querySelectorAll('.pac-item-query');
               queries.forEach(query => {
-                query.style.setProperty('color', '#1a1a1a', 'important');
+                query.style.cssText += 'color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;';
                 const children = query.querySelectorAll('*');
                 children.forEach(child => {
-                  child.style.setProperty('color', '#1a1a1a', 'important');
+                  child.style.cssText += 'color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important;';
                 });
               });
               
               const matched = pacContainer.querySelectorAll('.pac-matched');
               matched.forEach(m => {
-                m.style.setProperty('color', '#1a1a1a', 'important');
-                m.style.setProperty('font-weight', '600', 'important');
+                m.style.cssText += 'color: #1a1a1a !important; -webkit-text-fill-color: #1a1a1a !important; font-weight: 600 !important;';
               });
               
               // Aplicar estilos a items hover y selected
               const hoverItems = pacContainer.querySelectorAll('.pac-item:hover, .pac-item-selected');
               hoverItems.forEach(item => {
-                item.style.setProperty('background-color', '#f9fafb', 'important');
-                item.style.setProperty('background', '#f9fafb', 'important');
-                item.style.setProperty('color', '#1a1a1a', 'important');
+                item.style.cssText += 'background-color: #f9fafb !important; background: #f9fafb !important; color: #1a1a1a !important;';
               });
             });
           };
@@ -281,21 +327,23 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             });
           }
           
-          // Aplicar estilos inmediatamente y periódicamente
+          // Aplicar estilos inmediatamente y periódicamente - MÁS FRECUENTE
           setTimeout(styleDropdown, 0);
+          setTimeout(styleDropdown, 50);
           setTimeout(styleDropdown, 100);
+          setTimeout(styleDropdown, 200);
           setTimeout(styleDropdown, 300);
           setTimeout(styleDropdown, 500);
           setTimeout(styleDropdown, 1000);
           
-          // Ejecutar periódicamente mientras el componente esté montado
-          const intervalId = setInterval(styleDropdown, 500);
+          // Ejecutar periódicamente mientras el componente esté montado - MÁS FRECUENTE
+          const intervalId = setInterval(styleDropdown, 200);
           
-          // Limpiar observer e interval después de 30 segundos o cuando se desmonte
+          // Limpiar observer e interval después de 60 segundos o cuando se desmonte
           setTimeout(() => {
             dropdownObserver.disconnect();
             clearInterval(intervalId);
-          }, 30000);
+          }, 60000);
           
           // Aplicar estilos al input interno después de que el componente esté conectado
           const applyStyles = () => {
