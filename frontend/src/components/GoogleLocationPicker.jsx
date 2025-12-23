@@ -111,10 +111,16 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   useEffect(() => {
     if (isLoaded && autocompleteInputRef.current && window.google?.maps?.places) {
       if (!autocompleteRef.current) {
+        // Establecer bounds de Argentina para priorizar resultados de allí
+        const argentinaBounds = new window.google.maps.LatLngBounds(
+          new window.google.maps.LatLng(-55.0, -73.0), // Sudoeste
+          new window.google.maps.LatLng(-21.0, -53.0)  // Noreste
+        );
+        
         autocompleteRef.current = new window.google.maps.places.Autocomplete(
           autocompleteInputRef.current,
           {
-            componentRestrictions: { country: 'es' },
+            bounds: argentinaBounds,
             fields: ['formatted_address', 'geometry', 'name']
           }
         );
