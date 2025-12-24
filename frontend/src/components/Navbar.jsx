@@ -14,9 +14,17 @@ function Navbar({ onNavigateToProfile }) {
     setShowLogoutModal(true);
   };
 
-  const handleLogoutConfirm = () => {
-    // Cerrar sesión inmediatamente - la función redirige sola
-    logout();
+  const handleLogoutConfirm = async () => {
+    try {
+      // Cerrar el modal primero
+      setShowLogoutModal(false);
+      // Cerrar sesión inmediatamente - la función redirige sola
+      logout();
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      // Aún así, intentar cerrar sesión
+      logout();
+    }
   };
 
   return (
@@ -126,7 +134,14 @@ function Navbar({ onNavigateToProfile }) {
 
       {/* Modal de confirmación de logout */}
       {showLogoutModal && (
-        <div className="logout-modal-overlay">
+        <div 
+          className="logout-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowLogoutModal(false);
+            }
+          }}
+        >
           <div className="logout-modal">
             <div className="logout-modal-header">
               <div className="logout-modal-icon">
@@ -137,6 +152,14 @@ function Navbar({ onNavigateToProfile }) {
                 </svg>
               </div>
               <h3>Cerrar sesión</h3>
+              <button 
+                className="logout-modal-close"
+                onClick={() => setShowLogoutModal(false)}
+                type="button"
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
             </div>
             
             <div className="logout-modal-body">
@@ -147,13 +170,23 @@ function Navbar({ onNavigateToProfile }) {
             <div className="logout-modal-footer">
               <button 
                 className="cancel-btn"
-                onClick={() => setShowLogoutModal(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowLogoutModal(false);
+                }}
+                type="button"
               >
                 Cancelar
               </button>
               <button 
                 className="logout-confirm-btn"
-                onClick={handleLogoutConfirm}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleLogoutConfirm();
+                }}
+                type="button"
               >
                 Sí, cerrar sesión
               </button>
