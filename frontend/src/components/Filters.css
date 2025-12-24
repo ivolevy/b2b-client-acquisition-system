@@ -869,39 +869,32 @@ select.filter-input {
   
   .form-row-compact {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: stretch;
-    gap: 0;
+    gap: var(--spacing-sm);
     padding: var(--spacing-md);
     border-radius: var(--radius-lg);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    flex-wrap: nowrap;
     background: #ffffff;
     border: 1px solid var(--gray-200);
     box-shadow: var(--shadow-sm);
   }
   
-  /* Todos los controles con las mismas medidas */
-  .form-row-compact > .form-group-compact {
+  /* Todos los controles en columna en mobile */
+  .form-row-compact > .form-group-compact,
+  .form-row-compact > .rubro-inline {
     flex: 1;
-    min-width: 0;
+    width: 100%;
+    min-width: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
+    padding: var(--spacing-sm) 0;
   }
   
-  /* Separador después del rubro */
-  .form-row-compact > .form-group-compact::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 15%;
-    bottom: 15%;
-    width: 2px;
-    background: var(--primary);
-    opacity: 0.5;
-    z-index: 1;
+  /* Eliminar separadores verticales en mobile */
+  .form-row-compact > .form-group-compact::after,
+  .form-row-compact > .rubro-inline::after {
+    display: none;
   }
   
   .select-rubro-compact {
@@ -910,70 +903,53 @@ select.filter-input {
     box-sizing: border-box;
   }
   
-  /* Integrar search-row dentro de form-row-compact */
+  /* Integrar search-row dentro de form-row-compact - en columna en mobile */
   .form-row-compact .search-row {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: stretch;
-    gap: 0;
-    flex-wrap: nowrap;
+    gap: var(--spacing-sm);
     background: transparent;
     border: none;
     border-radius: 0;
     padding: 0;
     box-shadow: none;
-    flex: 1;
-    min-width: 0;
+    width: 100%;
     margin-left: 0;
     position: relative;
   }
   
-  /* Todos los controles de ubicación con las mismas medidas */
+  /* Todos los controles de ubicación en columna en mobile */
   .form-row-compact .radius-control {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
+    min-width: 100%;
     position: relative;
     display: flex;
     flex-direction: column;
   }
   
-  /* Separador después del radio */
+  /* Eliminar separadores verticales en mobile */
   .form-row-compact .radius-control::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 15%;
-    bottom: 15%;
-    width: 2px;
-    background: var(--primary);
-    opacity: 0.5;
-    z-index: 1;
+    display: none;
   }
   
   .form-row-compact .radius-control select {
     height: 44px;
     box-sizing: border-box;
+    width: 100%;
   }
   
   .form-row-compact .address-search {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
+    min-width: 100%;
     position: relative;
     display: flex;
     flex-direction: column;
   }
   
-  /* Separador después de la dirección */
+  /* Eliminar separador después de la dirección en mobile */
   .form-row-compact .address-search::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 15%;
-    bottom: 15%;
-    width: 2px;
-    background: var(--primary);
-    opacity: 0.5;
-    z-index: 1;
+    display: none;
   }
   
   .form-row-compact .address-input {
@@ -1068,63 +1044,78 @@ select.filter-input {
   
   .form-row-compact {
     padding: var(--spacing-sm);
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm);
+    flex-direction: column;
   }
   
   .form-group label {
     font-size: 0.75rem;
   }
   
-  .form-group-compact {
-    min-width: 140px;
+  .form-group-compact,
+  .rubro-inline {
+    min-width: 100%;
+    width: 100%;
   }
   
   .select-rubro-compact {
     font-size: 0.8rem;
     padding: 0.6rem 0.8rem;
-    width: 140px;
-    min-width: 140px;
+    width: 100%;
+    min-width: 100%;
     height: 38px;
   }
   
-  .form-row-compact > .form-group-compact {
+  .form-row-compact > .form-group-compact,
+  .form-row-compact > .rubro-inline {
     flex: 1;
+    width: 100%;
   }
   
   .form-row-compact .radius-control {
     flex: 1;
+    width: 100%;
   }
   
   .form-row-compact .address-search {
     flex: 1;
+    width: 100%;
   }
   
   .form-row-compact .btn-location {
     flex: 1;
     font-size: 0.75rem;
     padding: 0.5rem 0.7rem;
-  }
-  
-  .select-rubro-compact {
-    height: 38px;
+    width: 100%;
   }
   
   .form-row-compact .radius-control select {
     height: 38px;
+    width: 100%;
   }
   
   .form-row-compact .address-input {
     height: 38px;
     background: white !important;
     color: #1a1a1a !important;
+    width: 100%;
   }
   
   .form-row-compact .btn-location-wrapper {
-    width: auto;
+    width: 100%;
   }
   
   .form-row-compact .btn-location {
     height: 38px;
+    width: 100%;
+  }
+  
+  /* Eliminar separadores en mobile pequeño también */
+  .form-row-compact > .form-group-compact::after,
+  .form-row-compact > .rubro-inline::after,
+  .form-row-compact .radius-control::after,
+  .form-row-compact .address-search::after {
+    display: none;
   }
   
   .status-badge {

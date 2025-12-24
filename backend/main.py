@@ -134,16 +134,16 @@ def obtener_estadisticas() -> Dict:
     por_rubro = {}
     for e in _memoria_empresas:
         if isinstance(e, dict):
-        rubro = e.get('rubro', 'Sin rubro')
-        por_rubro[rubro] = por_rubro.get(rubro, 0) + 1
+            rubro = e.get('rubro', 'Sin rubro')
+            por_rubro[rubro] = por_rubro.get(rubro, 0) + 1
     
     # Por ciudad
     por_ciudad = {}
     for e in _memoria_empresas:
         if isinstance(e, dict):
-        ciudad = e.get('ciudad', '')
-        if ciudad:
-            por_ciudad[ciudad] = por_ciudad.get(ciudad, 0) + 1
+            ciudad = e.get('ciudad', '')
+            if ciudad:
+                por_ciudad[ciudad] = por_ciudad.get(ciudad, 0) + 1
     
     return {
         'total': total,
@@ -436,10 +436,23 @@ app = FastAPI(
 )
 
 # CORS - Configurar orígenes permitidos desde variable de entorno
-ALLOWED_ORIGINS = os.getenv('CORS_ORIGINS', '*').split(',')
-if '*' in ALLOWED_ORIGINS and len(ALLOWED_ORIGINS) > 1:
-    # Si hay * y otros orígenes, remover * (no tiene sentido)
-    ALLOWED_ORIGINS = [o for o in ALLOWED_ORIGINS if o != '*']
+# Por defecto, permitir todos los orígenes en desarrollo
+# En producción, usar variable de entorno o detectar automáticamente
+CORS_ORIGINS_ENV = os.getenv('CORS_ORIGINS', '').strip()
+
+if CORS_ORIGINS_ENV:
+    # Si hay variable de entorno, usar esos orígenes
+    ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ORIGINS_ENV.split(',') if origin.strip()]
+    if '*' in ALLOWED_ORIGINS and len(ALLOWED_ORIGINS) > 1:
+        # Si hay * y otros orígenes, remover * (no tiene sentido)
+        ALLOWED_ORIGINS = [o for o in ALLOWED_ORIGINS if o != '*']
+else:
+    # Si no hay variable de entorno, permitir todos los orígenes
+    # Esto es seguro porque el backend no maneja autenticación sensible
+    ALLOWED_ORIGINS = ["*"]
+
+# Logging para debugging
+logger.info(f"CORS configurado con orígenes permitidos: {ALLOWED_ORIGINS}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -447,6 +460,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Modelos
