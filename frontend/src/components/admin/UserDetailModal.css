@@ -585,7 +585,7 @@ body.modal-open {
   }
   
   .modal-content {
-    padding: 0 !important;
+    padding: 0 20px !important;
   }
   
   .modal-footer {
@@ -619,7 +619,7 @@ body.modal-open {
   }
 
   .form-section h3 {
-    padding: 0 20px !important;
+    padding: 0 !important;
     margin: 0 0 16px 0 !important;
     width: 100% !important;
     box-sizing: border-box;
@@ -627,7 +627,7 @@ body.modal-open {
 
   .form-grid {
     grid-template-columns: 1fr !important;
-    padding: 0 20px !important;
+    padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box;
@@ -673,7 +673,7 @@ body.modal-open {
   }
   
   .modal-content {
-    padding: 0 !important;
+    padding: 0 16px !important;
   }
   
   .modal-footer {
@@ -700,14 +700,14 @@ body.modal-open {
   }
 
   .form-section {
-    padding: 16px 0 !important;
+    padding: 16px !important;
     width: 100% !important;
     margin: 0 !important;
     box-sizing: border-box;
   }
 
   .form-section h3 {
-    padding: 0 16px !important;
+    padding: 0 !important;
     margin: 0 0 16px 0 !important;
     width: 100% !important;
     box-sizing: border-box;
@@ -715,7 +715,7 @@ body.modal-open {
 
   .form-grid {
     grid-template-columns: 1fr !important;
-    padding: 0 16px !important;
+    padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box;
