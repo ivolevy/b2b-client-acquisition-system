@@ -86,37 +86,41 @@ function AdminLayout() {
       <ProBackground />
       <Navbar />
       <main className="main-content">
-        <div className="admin-header-container">
-          <div className="admin-header-content">
-            <button 
-              className="admin-back-btn"
-              onClick={() => navigate('/')}
-              title="Volver al inicio"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-            </button>
-            <h2 className="admin-header-title">Panel de Administración</h2>
-          </div>
-          {(isUsersPage || isPromoCodesPage) && (
-            <div className="admin-nav">
+        <div className="admin-container">
+          <div className="admin-header">
+            <div className="admin-header-content">
               <button 
-                className={`admin-nav-btn ${isUsersPage ? 'active' : ''}`}
-                onClick={() => navigate('/backoffice/users')}
+                className="admin-back-btn"
+                onClick={() => navigate('/')}
+                title="Volver al inicio"
               >
-                Usuarios
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
               </button>
-              <button 
-                className={`admin-nav-btn ${isPromoCodesPage ? 'active' : ''}`}
-                onClick={() => navigate('/backoffice/promo-codes')}
-              >
-                Códigos Promocionales
-              </button>
+              <h2 className="admin-header-title">Panel de Administración</h2>
             </div>
-          )}
+            {(isUsersPage || isPromoCodesPage) && (
+              <div className="admin-nav">
+                <button 
+                  className={`admin-nav-btn ${isUsersPage ? 'active' : ''}`}
+                  onClick={() => navigate('/backoffice/users')}
+                >
+                  Usuarios
+                </button>
+                <button 
+                  className={`admin-nav-btn ${isPromoCodesPage ? 'active' : ''}`}
+                  onClick={() => navigate('/backoffice/promo-codes')}
+                >
+                  Códigos Promocionales
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="admin-content">
+            <Outlet />
+          </div>
         </div>
-        <Outlet />
       </main>
     </>
   );

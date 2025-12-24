@@ -4,8 +4,6 @@ body.modal-open {
 
 .admin-promo-codes {
   background: transparent;
-  min-height: 100vh;
-  padding: 32px;
   position: relative;
   z-index: 1;
 }
