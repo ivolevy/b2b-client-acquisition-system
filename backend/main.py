@@ -445,46 +445,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Exception handler para asegurar CORS headers incluso en errores
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    """Maneja todas las excepciones y asegura que los headers CORS se envíen"""
-    logger.error(f"Error no manejado: {exc}", exc_info=True)
-    
-    response = JSONResponse(
-        status_code=500,
-        content={
-            "success": False,
-            "error": str(exc),
-            "detail": "Error interno del servidor"
-        }
-    )
-    
-    # Agregar headers CORS siempre
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    
-    return response
-
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    """Maneja HTTPException y asegura que los headers CORS se envíen"""
-    response = JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "success": False,
-            "detail": exc.detail
-        }
-    )
-    
-    # Agregar headers CORS siempre
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    
-    return response
-
 # Modelos
 class BusquedaRubroRequest(BaseModel):
     rubro: str
@@ -575,28 +535,23 @@ async def root():
     }
 
 @app.get("/rubros")
-async def obtener_rubros():
+def obtener_rubros():
     """Lista todos los rubros disponibles para búsqueda"""
-    try:
-        rubros = listar_rubros_disponibles()
-        
-        if not rubros:
-            logger.warning("listar_rubros_disponibles retornó un diccionario vacío")
-            rubros = {}
-        
-        return {
-            "success": True,
-            "total": len(rubros),
-            "rubros": rubros,
-            "ejemplo_uso": {
-                "rubro": "desarrolladoras_inmobiliarias",
-                "pais": "España",
-                "ciudad": "Madrid"
-            }
+    rubros = listar_rubros_disponibles()
+    
+    if not rubros:
+        rubros = {}
+    
+    return {
+        "success": True,
+        "total": len(rubros),
+        "rubros": rubros,
+        "ejemplo_uso": {
+            "rubro": "desarrolladoras_inmobiliarias",
+            "pais": "España",
+            "ciudad": "Madrid"
         }
-    except Exception as e:
-        logger.error(f"Error obteniendo rubros: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error al obtener rubros: {str(e)}")
+    }
 
 @app.post("/buscar")
 async def buscar_por_rubro(request: BusquedaRubroRequest):
