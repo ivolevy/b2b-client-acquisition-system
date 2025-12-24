@@ -49,6 +49,9 @@ function Navbar({ onNavigateToProfile }) {
                     </div>
                     <span className="user-email">{user.email}</span>
                   </div>
+                  <div className="user-avatar-mobile">
+                    {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                  </div>
                   <svg className="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="6,9 12,15 18,9"/>
                   </svg>
