@@ -3,8 +3,9 @@ API FastAPI para sistema B2B de captación de clientes por rubro
 Enfocado en empresas, no en propiedades por zona
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional, List
 import logging
@@ -60,12 +61,12 @@ def insertar_empresa(empresa: Dict) -> bool:
     
     try:
         with insertar_empresa._lock:
-    _empresa_counter += 1
-    empresa['id'] = _empresa_counter
-    empresa['created_at'] = datetime.now().isoformat()
-    _memoria_empresas.append(empresa.copy())
+            _empresa_counter += 1
+            empresa['id'] = _empresa_counter
+            empresa['created_at'] = datetime.now().isoformat()
+            _memoria_empresas.append(empresa.copy())
             logger.debug(f" Empresa guardada en memoria: {empresa.get('nombre')} (ID: {_empresa_counter})")
-    return True
+        return True
     except Exception as e:
         logger.error(f"Error insertando empresa: {e}")
         return False
@@ -463,60 +464,61 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# Exception handler global para asegurar que CORS funcione incluso con errores no manejados
-from fastapi.responses import JSONResponse
-from fastapi import Request
-
+# Exception handler para asegurar que CORS headers se envíen incluso en errores
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
-    """Maneja HTTPException y asegura que CORS funcione"""
-    # Determinar origen permitido
-    origin = request.headers.get("origin", "*")
-    allowed_origin = "*"
-    if "*" not in ALLOWED_ORIGINS and ALLOWED_ORIGINS:
-        if origin in ALLOWED_ORIGINS:
-            allowed_origin = origin
-        elif ALLOWED_ORIGINS:
-            allowed_origin = ALLOWED_ORIGINS[0]
+    """Maneja HTTPException y asegura que los headers CORS se envíen"""
+    origin = request.headers.get("origin")
     
-    return JSONResponse(
+    response = JSONResponse(
         status_code=exc.status_code,
-        content={"detail": exc.detail},
-        headers={
-            "Access-Control-Allow-Origin": allowed_origin,
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*",
+        content={
+            "success": False,
+            "detail": exc.detail
         }
     )
+    
+    # Agregar headers CORS siempre
+    if "*" in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    elif origin and origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Maneja excepciones globales y asegura que CORS funcione"""
-    import traceback
-    logger.error(f"Error no manejado en {request.url.path}: {exc}")
-    logger.error(traceback.format_exc())
+    """Maneja excepciones globales no capturadas y asegura que los headers CORS se envíen"""
+    logger.error(f"Error no manejado: {exc}", exc_info=True)
     
-    # Determinar origen permitido
-    origin = request.headers.get("origin", "*")
-    allowed_origin = "*"
-    if "*" not in ALLOWED_ORIGINS and ALLOWED_ORIGINS:
-        if origin in ALLOWED_ORIGINS:
-            allowed_origin = origin
-        elif ALLOWED_ORIGINS:
-            allowed_origin = ALLOWED_ORIGINS[0]
+    origin = request.headers.get("origin")
     
-    # Retornar error con headers CORS
-    return JSONResponse(
+    response = JSONResponse(
         status_code=500,
-        content={"detail": str(exc) if str(exc) else "Error interno del servidor"},
-        headers={
-            "Access-Control-Allow-Origin": allowed_origin,
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*",
+        content={
+            "success": False,
+            "error": str(exc),
+            "detail": "Error interno del servidor"
         }
     )
+    
+    # Agregar headers CORS siempre
+    if "*" in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    elif origin and origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
 
 # Modelos
 class BusquedaRubroRequest(BaseModel):
@@ -613,6 +615,10 @@ async def obtener_rubros():
     try:
         rubros = listar_rubros_disponibles()
         
+        if not rubros:
+            logger.warning("listar_rubros_disponibles retornó un diccionario vacío")
+            rubros = {}
+        
         return {
             "success": True,
             "total": len(rubros),
@@ -624,8 +630,8 @@ async def obtener_rubros():
             }
         }
     except Exception as e:
-        logger.error(f"Error obteniendo rubros: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error obteniendo rubros: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error al obtener rubros: {str(e)}")
 
 @app.post("/buscar")
 async def buscar_por_rubro(request: BusquedaRubroRequest):
@@ -976,14 +982,25 @@ async def estadisticas():
     try:
         stats = obtener_estadisticas()
         
+        if not stats:
+            logger.warning("obtener_estadisticas retornó un diccionario vacío")
+            stats = {
+                'total': 0,
+                'con_email': 0,
+                'con_telefono': 0,
+                'con_website': 0,
+                'por_rubro': {},
+                'por_ciudad': {}
+            }
+        
         return {
             "success": True,
             "data": stats
         }
         
     except Exception as e:
-        logger.error(f"Error obteniendo estadísticas: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error obteniendo estadísticas: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
 
 @app.post("/exportar")
 async def exportar(request: ExportRequest):

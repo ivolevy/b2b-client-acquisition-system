@@ -146,10 +146,7 @@
 
 @media (max-width: 768px) {
   .admin-container {
-    width: 85%;
-    max-width: 85%;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 1rem;
   }
 
   .admin-header {

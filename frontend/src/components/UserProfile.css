@@ -705,10 +705,7 @@
 /* Responsive - Mobile */
 @media (max-width: 768px) {
   .user-profile-container {
-    width: 85%;
-    max-width: 85%;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 1rem;
   }
 
   .user-profile-header {
@@ -743,10 +740,7 @@
 
 @media (max-width: 480px) {
   .user-profile-container {
-    width: 85%;
-    max-width: 85%;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 0.5rem;
   }
 
   .user-profile-header {

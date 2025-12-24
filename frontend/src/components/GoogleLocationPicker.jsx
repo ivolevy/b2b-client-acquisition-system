@@ -197,7 +197,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             }
             
             handleLocationSelect(lat, lng, nombre);
-          } catch (error) {
+        } catch (error) {
             console.error('Error handling place selection:', error);
             error(
               <>
@@ -417,15 +417,15 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       <div className="address-search">
         <label htmlFor="address-input">Buscar dirección</label>
         <div className="address-input-wrapper">
-          <input
-            ref={autocompleteInputRef}
-            id="address-input"
-            type="text"
-            className="address-input"
+            <input
+              ref={autocompleteInputRef}
+              id="address-input"
+              type="text"
+              className="address-input"
             placeholder="Ej: Plaza de Mayo, Buenos Aires"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoComplete="off"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
           />
           <span className="location-text">
             <span>o</span> <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>
