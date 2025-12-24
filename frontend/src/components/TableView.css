@@ -540,13 +540,14 @@
 }
 
 .filter-city {
-  width: 140px;
+  width: 200px;
 }
 
 .filter-distance-group {
   display: flex;
   align-items: center;
   gap: 2px;
+  flex-wrap: nowrap;
 }
 
 .filter-distance-toggle {
@@ -554,9 +555,10 @@
   align-items: center;
   gap: 0;
   border: 1px solid var(--gray-200);
-  border-radius: 6px;
+  border-radius: 6px 0 0 6px;
   overflow: hidden;
   background: white;
+  flex-shrink: 0;
 }
 
 .filter-toggle-btn {
@@ -615,8 +617,10 @@
 .filter-km {
   width: 60px;
   border-radius: 0 6px 6px 0;
+  border-left: 1px solid var(--gray-200);
   height: 36px;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .filter-checkbox-inline {
@@ -637,6 +641,12 @@
 
 .filter-checkbox-inline input[type="checkbox"] {
   accent-color: #e91e63;
+}
+
+.filter-checkboxes-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-clear-filters {

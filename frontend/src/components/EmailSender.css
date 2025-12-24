@@ -202,6 +202,7 @@
   cursor: pointer;
   transition: all 0.2s;
   color: #475569;
+  min-height: 44px;
 }
 
 .modo-selector button.active {
@@ -884,13 +885,18 @@
   }
   
   .modo-selector {
-    flex-direction: column;
-    gap: var(--spacing-xs);
+    flex-direction: row;
+    gap: 6px;
+    padding: 3px;
+    border-radius: 12px;
   }
   
   .modo-selector button {
-    width: 100%;
-    padding: 12px;
+    flex: 1;
+    padding: 12px 8px;
+    font-size: 0.8rem;
+    min-height: 44px;
+    border-radius: 10px;
   }
 
   .templates-header {
@@ -957,5 +963,20 @@
   .templates-grid {
     padding: var(--spacing-sm);
     gap: var(--spacing-sm);
+  }
+  
+  .modo-selector {
+    flex-direction: row;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 10px;
+  }
+  
+  .modo-selector button {
+    flex: 1;
+    padding: 10px 6px;
+    font-size: 0.75rem;
+    min-height: 44px;
+    border-radius: 8px;
   }
 }

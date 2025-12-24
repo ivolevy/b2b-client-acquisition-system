@@ -333,23 +333,25 @@ function TableViewB2B({
           <option value="sin">Sin redes</option>
         </select>
 
-        <label className="filter-checkbox-inline">
-          <input
-            type="checkbox"
-            checked={filtroConEmail}
-            onChange={(e) => setFiltroConEmail(e.target.checked)}
-          />
-          <span>Email</span>
-        </label>
+        <div className="filter-checkboxes-group">
+          <label className="filter-checkbox-inline">
+            <input
+              type="checkbox"
+              checked={filtroConEmail}
+              onChange={(e) => setFiltroConEmail(e.target.checked)}
+            />
+            <span>Email</span>
+          </label>
 
-        <label className="filter-checkbox-inline">
-          <input
-            type="checkbox"
-            checked={filtroConTelefono}
-            onChange={(e) => setFiltroConTelefono(e.target.checked)}
-          />
-          <span>Tel</span>
-        </label>
+          <label className="filter-checkbox-inline">
+            <input
+              type="checkbox"
+              checked={filtroConTelefono}
+              onChange={(e) => setFiltroConTelefono(e.target.checked)}
+            />
+            <span>Tel</span>
+          </label>
+        </div>
 
         {hayFiltrosActivos && (
           <button 
