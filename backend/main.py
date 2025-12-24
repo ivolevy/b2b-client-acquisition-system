@@ -34,6 +34,8 @@ _memoria_templates: List[Dict] = []
 _memoria_email_history: List[Dict] = []
 _template_counter = 0
 _empresa_counter = 0
+# Almacenamiento de códigos de validación para cambio de contraseña
+_memoria_codigos_validacion: Dict[str, Dict] = {}  # email -> {codigo, expires_at, user_id}
 
 def calcular_distancia_km(lat1, lon1, lat2, lon2):
     """Calcula distancia entre dos puntos geográficos"""
@@ -400,7 +402,7 @@ Sitio web: https://www.dotasolutions.agency/'''
     except Exception as e:
         logger.error(f"Error inicializando templates por defecto: {e}")
 
-from email_service import enviar_email_empresa, enviar_emails_masivo
+from email_service import enviar_email_empresa, enviar_emails_masivo, enviar_email
 
 # Configurar logging
 _default_log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
@@ -1267,6 +1269,149 @@ async def obtener_historial_email(empresa_id: Optional[int] = None, template_id:
         }
     except Exception as e:
         logger.error(f"Error obteniendo historial: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ========== ENDPOINTS DE VALIDACIÓN DE CÓDIGO PARA CAMBIO DE CONTRASEÑA ==========
+
+class SolicitarCodigoRequest(BaseModel):
+    email: str
+    user_id: Optional[str] = None
+
+class ValidarCodigoRequest(BaseModel):
+    email: str
+    codigo: str
+
+@app.post("/auth/solicitar-codigo-cambio-password")
+async def solicitar_codigo_cambio_password(request: SolicitarCodigoRequest):
+    """Genera y envía un código de validación por email para cambio de contraseña"""
+    try:
+        from validators import validar_email
+        email_valido, email_limpio = validar_email(request.email)
+        if not email_valido:
+            raise HTTPException(status_code=400, detail="Email inválido")
+        
+        email = email_limpio
+        
+        # Generar código de 6 dígitos
+        codigo = ''.join(random.choices(string.digits, k=6))
+        
+        # Guardar código en memoria con expiración de 10 minutos
+        expires_at = datetime.now() + timedelta(minutes=10)
+        _memoria_codigos_validacion[email] = {
+            'codigo': codigo,
+            'expires_at': expires_at.isoformat(),
+            'user_id': request.user_id,
+            'created_at': datetime.now().isoformat()
+        }
+        
+        # Enviar email con el código
+        asunto = "Código de validación para cambio de contraseña - Smart Leads"
+        cuerpo_html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+                .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+                .codigo {{ background: white; border: 2px solid #81D4FA; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; font-size: 32px; font-weight: bold; color: #1a1a1a; letter-spacing: 8px; }}
+                .warning {{ background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                .footer {{ text-align: center; margin-top: 30px; color: #666; font-size: 12px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Smart Leads</h1>
+                </div>
+                <div class="content">
+                    <h2>Código de validación</h2>
+                    <p>Hola,</p>
+                    <p>Recibiste este email porque solicitaste cambiar tu contraseña en Smart Leads.</p>
+                    <p>Ingresá el siguiente código para continuar:</p>
+                    <div class="codigo">{codigo}</div>
+                    <div class="warning">
+                        <strong>⚠️ Importante:</strong> Este código expirará en 10 minutos. Si no solicitaste este cambio, ignorá este email.
+                    </div>
+                    <p>Si no solicitaste este cambio, podés ignorar este mensaje de forma segura.</p>
+                </div>
+                <div class="footer">
+                    <p>Este es un email automático, por favor no respondas.</p>
+                    <p>© 2024 Smart Leads - Dota Solutions</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        resultado = enviar_email(
+            destinatario=email,
+            asunto=asunto,
+            cuerpo_html=cuerpo_html
+        )
+        
+        if not resultado['success']:
+            raise HTTPException(status_code=500, detail=f"Error enviando email: {resultado.get('message', 'Error desconocido')}")
+        
+        logger.info(f"Código de validación enviado a {email}")
+        
+        return {
+            "success": True,
+            "message": "Código de validación enviado exitosamente",
+            "expires_in_minutes": 10
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error solicitando código: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/auth/validar-codigo-cambio-password")
+async def validar_codigo_cambio_password(request: ValidarCodigoRequest):
+    """Valida el código de verificación para cambio de contraseña"""
+    try:
+        from validators import validar_email
+        email_valido, email_limpio = validar_email(request.email)
+        if not email_valido:
+            raise HTTPException(status_code=400, detail="Email inválido")
+        
+        email = email_limpio
+        
+        # Verificar si existe un código para este email
+        if email not in _memoria_codigos_validacion:
+            raise HTTPException(status_code=400, detail="No se encontró un código de validación para este email. Por favor, solicitá uno nuevo.")
+        
+        codigo_data = _memoria_codigos_validacion[email]
+        
+        # Verificar expiración
+        expires_at = datetime.fromisoformat(codigo_data['expires_at'])
+        if datetime.now() > expires_at:
+            # Eliminar código expirado
+            del _memoria_codigos_validacion[email]
+            raise HTTPException(status_code=400, detail="El código de validación ha expirado. Por favor, solicitá uno nuevo.")
+        
+        # Verificar código
+        if codigo_data['codigo'] != request.codigo:
+            raise HTTPException(status_code=400, detail="Código de validación incorrecto")
+        
+        # Código válido - eliminar de memoria (solo se puede usar una vez)
+        del _memoria_codigos_validacion[email]
+        
+        logger.info(f"Código de validación verificado correctamente para {email}")
+        
+        return {
+            "success": True,
+            "message": "Código de validación verificado correctamente",
+            "valid": True
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error validando código: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

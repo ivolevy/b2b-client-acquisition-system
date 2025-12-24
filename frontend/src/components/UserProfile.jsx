@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthWrapper';
 import { authService, supabase } from '../lib/supabase';
+import { API_URL } from '../config';
+import axios from 'axios';
 import './UserProfile.css';
 
 function UserProfile() {
@@ -22,6 +24,10 @@ function UserProfile() {
     newPassword: '',
     confirmPassword: ''
   });
+  const [passwordStep, setPasswordStep] = useState('request'); // 'request', 'verify', 'change'
+  const [verificationCode, setVerificationCode] = useState('');
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
   const [showCancelPlanModal, setShowCancelPlanModal] = useState(false);
   const [cancelPlanLoading, setCancelPlanLoading] = useState(false);
   const [cancelPlanError, setCancelPlanError] = useState('');
@@ -104,8 +110,72 @@ function UserProfile() {
     }
   };
 
+  const handleRequestCode = async () => {
+    if (!user?.email) {
+      setPasswordError('No se encontró el email del usuario');
+      return;
+    }
+
+    setCodeLoading(true);
+    setPasswordError('');
+
+    try {
+      const response = await axios.post(`${API_URL}/auth/solicitar-codigo-cambio-password`, {
+        email: user.email,
+        user_id: user.id
+      });
+
+      if (response.data.success) {
+        setCodeSent(true);
+        setPasswordStep('verify');
+        setPasswordError('');
+      } else {
+        setPasswordError(response.data.message || 'Error al solicitar el código');
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || error.message || 'Error al solicitar el código';
+      setPasswordError(errorMsg);
+    } finally {
+      setCodeLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      setPasswordError('Ingresá el código de 6 dígitos');
+      return;
+    }
+
+    if (!user?.email) {
+      setPasswordError('No se encontró el email del usuario');
+      return;
+    }
+
+    setCodeLoading(true);
+    setPasswordError('');
+
+    try {
+      const response = await axios.post(`${API_URL}/auth/validar-codigo-cambio-password`, {
+        email: user.email,
+        codigo: verificationCode
+      });
+
+      if (response.data.success && response.data.valid) {
+        setPasswordStep('change');
+        setPasswordError('');
+      } else {
+        setPasswordError('Código de validación incorrecto');
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || error.message || 'Error al validar el código';
+      setPasswordError(errorMsg);
+    } finally {
+      setCodeLoading(false);
+    }
+  };
+
   const handleChangePassword = async () => {
-    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+    if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
       setPasswordError('Completá todos los campos');
       return;
     }
@@ -125,19 +195,7 @@ function UserProfile() {
 
     try {
       if (useSupabase) {
-        // Primero verificar la contraseña actual intentando iniciar sesión
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: user?.email,
-          password: passwordForm.currentPassword
-        });
-
-        if (signInError) {
-          setPasswordError('Contraseña actual incorrecta');
-          setPasswordLoading(false);
-          return;
-        }
-
-        // Si la contraseña actual es correcta, actualizar a la nueva
+        // Actualizar la contraseña (ya no necesitamos verificar la contraseña actual porque el código ya fue validado)
         const { error: updateError } = await supabase.auth.updateUser({
           password: passwordForm.newPassword
         });
@@ -151,6 +209,9 @@ function UserProfile() {
         // Éxito
         setShowPasswordModal(false);
         setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setPasswordStep('request');
+        setVerificationCode('');
+        setCodeSent(false);
         alert('Contraseña actualizada exitosamente');
       } else {
         setPasswordError('Cambio de contraseña no disponible en modo demo');
@@ -324,7 +385,14 @@ function UserProfile() {
               <div className="profile-field-value">
                 <button 
                   className="profile-change-password-btn"
-                  onClick={() => setShowPasswordModal(true)}
+                  onClick={() => {
+                    setShowPasswordModal(true);
+                    setPasswordStep('request');
+                    setVerificationCode('');
+                    setCodeSent(false);
+                    setPasswordError('');
+                    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                  }}
                 >
                   Cambiar contraseña
                 </button>
@@ -451,40 +519,102 @@ function UserProfile() {
                   {passwordError}
                 </div>
               )}
-              
-              <div className="password-input-group">
-                <label>Contraseña actual</label>
-                <input
-                  type="password"
-                  value={passwordForm.currentPassword}
-                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                  placeholder="Ingresá tu contraseña actual"
-                  disabled={passwordLoading}
-                  autoFocus
-                />
-              </div>
 
-              <div className="password-input-group">
-                <label>Nueva contraseña</label>
-                <input
-                  type="password"
-                  value={passwordForm.newPassword}
-                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                  placeholder="Ingresá tu nueva contraseña"
-                  disabled={passwordLoading}
-                />
-              </div>
+              {passwordStep === 'request' && (
+                <>
+                  <p style={{ marginBottom: '20px', color: '#666' }}>
+                    Para cambiar tu contraseña, necesitamos verificar tu identidad. 
+                    Te enviaremos un código de validación a tu email.
+                  </p>
+                  <div className="password-input-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      value={user?.email || ''}
+                      disabled
+                      style={{ background: '#f5f5f5', cursor: 'not-allowed' }}
+                    />
+                  </div>
+                </>
+              )}
 
-              <div className="password-input-group">
-                <label>Confirmar nueva contraseña</label>
-                <input
-                  type="password"
-                  value={passwordForm.confirmPassword}
-                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                  placeholder="Confirmá tu nueva contraseña"
-                  disabled={passwordLoading}
-                />
-              </div>
+              {passwordStep === 'verify' && (
+                <>
+                  {codeSent && (
+                    <div style={{ 
+                      background: '#d4edda', 
+                      border: '1px solid #c3e6cb', 
+                      borderRadius: '8px', 
+                      padding: '12px', 
+                      marginBottom: '20px',
+                      color: '#155724'
+                    }}>
+                      ✓ Código enviado a {user?.email}. Revisá tu bandeja de entrada.
+                    </div>
+                  )}
+                  <div className="password-input-group">
+                    <label>Código de validación</label>
+                    <input
+                      type="text"
+                      value={verificationCode}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                        setVerificationCode(value);
+                      }}
+                      placeholder="Ingresá el código de 6 dígitos"
+                      disabled={codeLoading}
+                      autoFocus
+                      maxLength={6}
+                      style={{ 
+                        textAlign: 'center', 
+                        fontSize: '24px', 
+                        letterSpacing: '8px',
+                        fontFamily: 'monospace'
+                      }}
+                    />
+                    <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                      El código expira en 10 minutos
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {passwordStep === 'change' && (
+                <>
+                  <div style={{ 
+                    background: '#d4edda', 
+                    border: '1px solid #c3e6cb', 
+                    borderRadius: '8px', 
+                    padding: '12px', 
+                    marginBottom: '20px',
+                    color: '#155724'
+                  }}>
+                    ✓ Código verificado correctamente. Ahora podés cambiar tu contraseña.
+                  </div>
+                  <div className="password-input-group">
+                    <label>Nueva contraseña</label>
+                    <input
+                      type="password"
+                      value={passwordForm.newPassword}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                      placeholder="Ingresá tu nueva contraseña"
+                      disabled={passwordLoading}
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="password-input-group">
+                    <label>Confirmar nueva contraseña</label>
+                    <input
+                      type="password"
+                      value={passwordForm.confirmPassword}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                      placeholder="Confirmá tu nueva contraseña"
+                      disabled={passwordLoading}
+                    />
+                  </div>
+                </>
+              )}
             </div>
             
             <div className="password-modal-footer">
@@ -493,19 +623,42 @@ function UserProfile() {
                 onClick={() => {
                   setShowPasswordModal(false);
                   setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                  setPasswordStep('request');
+                  setVerificationCode('');
+                  setCodeSent(false);
                   setPasswordError('');
                 }}
-                disabled={passwordLoading}
+                disabled={passwordLoading || codeLoading}
               >
                 Cancelar
               </button>
-              <button 
-                className="password-save-btn"
-                onClick={handleChangePassword}
-                disabled={passwordLoading}
-              >
-                {passwordLoading ? 'Guardando...' : 'Guardar contraseña'}
-              </button>
+              {passwordStep === 'request' && (
+                <button 
+                  className="password-save-btn"
+                  onClick={handleRequestCode}
+                  disabled={codeLoading}
+                >
+                  {codeLoading ? 'Enviando...' : 'Enviar código'}
+                </button>
+              )}
+              {passwordStep === 'verify' && (
+                <button 
+                  className="password-save-btn"
+                  onClick={handleVerifyCode}
+                  disabled={codeLoading || verificationCode.length !== 6}
+                >
+                  {codeLoading ? 'Verificando...' : 'Verificar código'}
+                </button>
+              )}
+              {passwordStep === 'change' && (
+                <button 
+                  className="password-save-btn"
+                  onClick={handleChangePassword}
+                  disabled={passwordLoading}
+                >
+                  {passwordLoading ? 'Guardando...' : 'Guardar contraseña'}
+                </button>
+              )}
             </div>
           </div>
         </div>
