@@ -915,18 +915,38 @@
     font-size: 0.85rem;
   }
   
+  .user-info {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0.4rem;
+  }
+  
+  .user-avatar-mobile {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+  
   .user-avatar {
     width: 32px;
     height: 32px;
     font-size: 0.8rem;
   }
   
+  .dropdown-arrow {
+    width: 12px;
+    height: 12px;
+  }
+  
   .user-dropdown {
-    right: 0;
+    right: 5%;
     left: auto;
     min-width: 180px;
-    max-width: calc(100vw - 20px);
+    max-width: calc(100vw - 40px);
     z-index: 10002;
+    position: fixed !important;
+    top: 60px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   }
   
   .navbar-user {
