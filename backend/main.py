@@ -464,62 +464,6 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# Exception handler para asegurar que CORS headers se envíen incluso en errores
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    """Maneja HTTPException y asegura que los headers CORS se envíen"""
-    origin = request.headers.get("origin")
-    
-    response = JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "success": False,
-            "detail": exc.detail
-        }
-    )
-    
-    # Agregar headers CORS siempre
-    if "*" in ALLOWED_ORIGINS:
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-    elif origin and origin in ALLOWED_ORIGINS:
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Methods"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-    
-    return response
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    """Maneja excepciones globales no capturadas y asegura que los headers CORS se envíen"""
-    logger.error(f"Error no manejado: {exc}", exc_info=True)
-    
-    origin = request.headers.get("origin")
-    
-    response = JSONResponse(
-        status_code=500,
-        content={
-            "success": False,
-            "error": str(exc),
-            "detail": "Error interno del servidor"
-        }
-    )
-    
-    # Agregar headers CORS siempre
-    if "*" in ALLOWED_ORIGINS:
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-    elif origin and origin in ALLOWED_ORIGINS:
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Methods"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-    
-    return response
-
 # Modelos
 class BusquedaRubroRequest(BaseModel):
     rubro: str
