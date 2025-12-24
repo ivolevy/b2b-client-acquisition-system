@@ -49,7 +49,7 @@ function AppB2B() {
   const [showAllResults, setShowAllResults] = useState(false);
 
   useEffect(() => {
-    loadEmpresas();
+    // No cargar empresas automáticamente - solo cuando el usuario hace una búsqueda
     loadStats();
     loadRubros();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,20 +75,27 @@ function AppB2B() {
     }
   };
 
-  const loadEmpresas = async () => {
+  const loadEmpresas = async (showError = true) => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/empresas`);
       setEmpresas(response.data.data || []);
     } catch (err) {
       console.error('Error al cargar empresas:', err);
-      const errorMsg = err.response?.data?.detail || err.message;
-      toastError(
-        <>
-          <strong>No se pudieron cargar las empresas</strong>
-          <p>{errorMsg}</p>
-        </>
-      );
+      // Solo mostrar error si se solicita explícitamente (por ejemplo, después de una búsqueda)
+      // No mostrar error si simplemente no hay empresas en memoria
+      if (showError) {
+        const errorMsg = err.response?.data?.detail || err.message;
+        // Solo mostrar error si es un error de red real, no si simplemente no hay empresas
+        if (err.code === 'ERR_NETWORK' || err.response?.status >= 500) {
+          toastError(
+            <>
+              <strong>No se pudieron cargar las empresas</strong>
+              <p>{errorMsg}</p>
+            </>
+          );
+        }
+      }
     } finally {
       setLoading(false);
     }

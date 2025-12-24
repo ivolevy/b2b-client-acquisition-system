@@ -23,7 +23,11 @@ function Navbar({ onNavigateToProfile }) {
     <>
       <nav className="navbar">
         <div className="navbar-container">
-          <div className="navbar-brand">
+          <div 
+            className="navbar-brand"
+            onClick={() => navigate('/')}
+            style={{ cursor: 'pointer' }}
+          >
             <h1>Smart Leads</h1>
           </div>
           
