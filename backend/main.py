@@ -610,7 +610,7 @@ async def root():
     }
 
 @app.get("/rubros")
-async def obtener_rubros(request: Request = None):
+async def obtener_rubros():
     """Lista todos los rubros disponibles para búsqueda"""
     try:
         rubros = listar_rubros_disponibles()

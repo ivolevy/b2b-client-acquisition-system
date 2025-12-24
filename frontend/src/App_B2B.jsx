@@ -69,21 +69,9 @@ function AppB2B() {
   const loadRubros = async () => {
     try {
       const response = await axios.get(`${API_URL}/rubros`);
-      if (response.data && response.data.rubros) {
-        setRubros(response.data.rubros);
-      } else {
-        console.error('Respuesta inválida al cargar rubros:', response.data);
-        toastError('No se pudieron cargar los rubros: respuesta inválida');
-      }
+      setRubros(response.data.rubros || {});
     } catch (error) {
       console.error('Error al cargar rubros:', error);
-      if (error.response) {
-        toastError(`Error al cargar rubros: ${error.response.data?.detail || error.response.statusText}`);
-      } else if (error.request) {
-        toastError('Error de conexión al cargar rubros. Verifica que el servidor esté funcionando.');
-      } else {
-        toastError(`Error al cargar rubros: ${error.message}`);
-      }
     }
   };
 
