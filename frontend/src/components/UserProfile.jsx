@@ -185,8 +185,13 @@ function UserProfile() {
       return;
     }
 
-    if (passwordForm.newPassword.length < 6) {
-      setPasswordError('La contraseña debe tener al menos 6 caracteres');
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    if (passwordForm.newPassword.length > 16) {
+      setPasswordError('La contraseña no puede tener más de 16 caracteres');
       return;
     }
 
@@ -212,7 +217,7 @@ function UserProfile() {
         setPasswordStep('request');
         setVerificationCode('');
         setCodeSent(false);
-        alert('Contraseña actualizada exitosamente');
+        alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
       } else {
         setPasswordError('Cambio de contraseña no disponible en modo demo');
       }

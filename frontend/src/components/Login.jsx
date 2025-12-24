@@ -1333,10 +1333,26 @@ function Login({ onLogin }) {
                       type="password"
                       value={forgotPasswordNewPassword}
                       onChange={(e) => setForgotPasswordNewPassword(e.target.value)}
-                      placeholder="Ingresá tu nueva contraseña"
+                      placeholder="Ingresá tu nueva contraseña (8-16 caracteres)"
                       disabled={forgotPasswordLoading}
                       autoFocus
+                      minLength={8}
+                      maxLength={16}
                     />
+                    {forgotPasswordNewPassword && (
+                      <p style={{ 
+                        fontSize: '12px', 
+                        marginTop: '4px',
+                        color: forgotPasswordNewPassword.length >= 8 && forgotPasswordNewPassword.length <= 16 ? '#10b981' : '#ef4444'
+                      }}>
+                        {forgotPasswordNewPassword.length < 8 
+                          ? `Mínimo 8 caracteres (${forgotPasswordNewPassword.length}/8)`
+                          : forgotPasswordNewPassword.length > 16
+                          ? `Máximo 16 caracteres (${forgotPasswordNewPassword.length}/16)`
+                          : `✓ Longitud válida (${forgotPasswordNewPassword.length} caracteres)`
+                        }
+                      </p>
+                    )}
                   </div>
 
                   <div className="forgot-password-input-group">
@@ -1347,7 +1363,21 @@ function Login({ onLogin }) {
                       onChange={(e) => setForgotPasswordConfirmPassword(e.target.value)}
                       placeholder="Confirmá tu nueva contraseña"
                       disabled={forgotPasswordLoading}
+                      minLength={8}
+                      maxLength={16}
                     />
+                    {forgotPasswordConfirmPassword && forgotPasswordNewPassword && (
+                      <p style={{ 
+                        fontSize: '12px', 
+                        marginTop: '4px',
+                        color: forgotPasswordNewPassword === forgotPasswordConfirmPassword ? '#10b981' : '#ef4444'
+                      }}>
+                        {forgotPasswordNewPassword === forgotPasswordConfirmPassword 
+                          ? '✓ Las contraseñas coinciden'
+                          : '✗ Las contraseñas no coinciden'
+                        }
+                      </p>
+                    )}
                   </div>
                 </>
               )}
@@ -1458,8 +1488,13 @@ function Login({ onLogin }) {
                       return;
                     }
 
-                    if (forgotPasswordNewPassword.length < 6) {
-                      setForgotPasswordError('La contraseña debe tener al menos 6 caracteres');
+                    if (forgotPasswordNewPassword.length < 8) {
+                      setForgotPasswordError('La contraseña debe tener al menos 8 caracteres');
+                      return;
+                    }
+
+                    if (forgotPasswordNewPassword.length > 16) {
+                      setForgotPasswordError('La contraseña no puede tener más de 16 caracteres');
                       return;
                     }
 
@@ -1505,9 +1540,9 @@ function Login({ onLogin }) {
                         setForgotPasswordCode('');
                         setForgotPasswordNewPassword('');
                         setForgotPasswordConfirmPassword('');
-                        setForgotPasswordError('');
-                        setForgotPasswordCodeSent(false);
-                        alert('Contraseña actualizada exitosamente. Podés iniciar sesión con tu nueva contraseña.');
+                      setForgotPasswordError('');
+                      setForgotPasswordCodeSent(false);
+                      alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
                       } else {
                         setForgotPasswordError(resetResponse.data.message || 'Error al actualizar la contraseña');
                       }
