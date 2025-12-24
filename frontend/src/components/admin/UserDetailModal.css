@@ -205,10 +205,12 @@ body.modal-open {
 .modal-content {
   flex: 1;
   overflow-y: auto;
-  padding: 0;
+  padding: 0 !important;
   background: white;
   min-height: 0;
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
 }
 
 .tab-content {
@@ -242,6 +244,79 @@ body.modal-open {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .form-section {
+    padding: 20px 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .form-section h3 {
+    padding: 0 20px !important;
+    margin: 0 0 16px 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    padding: 0 20px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    margin: 0 !important;
+  }
+  
+  .form-group {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+  
+  .form-input,
+  .form-select {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-section {
+    padding: 16px 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .form-section h3 {
+    padding: 0 16px !important;
+    margin: 0 0 16px 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .form-grid {
+    padding: 0 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    margin: 0 !important;
+  }
+  
+  .form-group {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+  
+  .form-input,
+  .form-select {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
 }
 
 .form-section h3 {
@@ -504,8 +579,15 @@ body.modal-open {
     margin: 0;
   }
 
-  .modal-header,
-  .modal-content,
+  .modal-header {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  .modal-content {
+    padding: 0 !important;
+  }
+  
   .modal-footer {
     padding-left: 20px;
     padding-right: 20px;
@@ -530,36 +612,47 @@ body.modal-open {
   }
 
   .form-section {
-    padding: 20px 20px !important;
+    padding: 20px 0 !important;
     width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box;
   }
 
   .form-section h3 {
-    padding: 0 !important;
+    padding: 0 20px !important;
     margin: 0 0 16px 0 !important;
     width: 100% !important;
+    box-sizing: border-box;
   }
 
   .form-grid {
-    grid-template-columns: 1fr;
-    padding: 0 !important;
+    grid-template-columns: 1fr !important;
+    padding: 0 20px !important;
     width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box;
+    margin: 0 !important;
   }
   
   .form-group {
     width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box;
+    padding: 0 !important;
+    margin: 0 !important;
   }
   
   .form-input,
   .form-select {
     width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box;
+    margin: 0 !important;
   }
 
   .tab-content {
     padding: 0 !important;
+    width: 100% !important;
   }
 
   .modal-footer {
@@ -574,8 +667,15 @@ body.modal-open {
     border-radius: 16px 16px 0 0;
   }
 
-  .modal-header,
-  .modal-content,
+  .modal-header {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .modal-content {
+    padding: 0 !important;
+  }
+  
   .modal-footer {
     padding-left: 16px;
     padding-right: 16px;
@@ -600,31 +700,47 @@ body.modal-open {
   }
 
   .form-section {
-    padding: 16px 16px !important;
+    padding: 16px 0 !important;
     width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box;
   }
 
   .form-section h3 {
-    padding: 0 !important;
+    padding: 0 16px !important;
     margin: 0 0 16px 0 !important;
     width: 100% !important;
+    box-sizing: border-box;
   }
 
   .form-grid {
-    padding: 0 !important;
+    grid-template-columns: 1fr !important;
+    padding: 0 16px !important;
     width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box;
+    margin: 0 !important;
   }
   
   .form-group {
     width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box;
+    padding: 0 !important;
+    margin: 0 !important;
   }
   
   .form-input,
   .form-select {
     width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box;
+    margin: 0 !important;
+  }
+
+  .tab-content {
+    padding: 0 !important;
+    width: 100% !important;
   }
 
   .modal-footer {
