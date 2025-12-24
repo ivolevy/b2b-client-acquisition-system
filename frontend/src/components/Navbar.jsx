@@ -14,16 +14,24 @@ function Navbar({ onNavigateToProfile }) {
     setShowLogoutModal(true);
   };
 
-  const handleLogoutConfirm = async () => {
-    try {
-      // Cerrar el modal primero
-      setShowLogoutModal(false);
-      // Cerrar sesión inmediatamente - la función redirige sola
+  const handleLogoutConfirm = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    console.log('handleLogoutConfirm llamado');
+    // Cerrar el modal
+    setShowLogoutModal(false);
+    // Ejecutar logout directamente
+    console.log('Ejecutando logout');
+    if (logout && typeof logout === 'function') {
       logout();
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-      // Aún así, intentar cerrar sesión
-      logout();
+    } else {
+      console.error('logout no es una función:', logout);
+      // Fallback: limpiar y redirigir manualmente
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/';
     }
   };
 
@@ -142,7 +150,10 @@ function Navbar({ onNavigateToProfile }) {
             }
           }}
         >
-          <div className="logout-modal">
+          <div 
+            className="logout-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="logout-modal-header">
               <div className="logout-modal-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -181,11 +192,7 @@ function Navbar({ onNavigateToProfile }) {
               </button>
               <button 
                 className="logout-confirm-btn"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleLogoutConfirm();
-                }}
+                onClick={handleLogoutConfirm}
                 type="button"
               >
                 Sí, cerrar sesión

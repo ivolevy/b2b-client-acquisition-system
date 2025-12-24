@@ -768,6 +768,8 @@
 }
 
 .logout-confirm-btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
   flex: 1;
   padding: 12px 20px;
   background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%);
