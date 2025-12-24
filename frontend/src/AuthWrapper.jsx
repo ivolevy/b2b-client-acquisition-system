@@ -378,7 +378,6 @@ function AuthWrapper() {
                 {user?.plan === 'pro' && <ProBackground />}
                 <Navbar />
                 <main className="main-content">
-                  <BackButton />
                   <UserProfile />
                 </main>
               </div>
