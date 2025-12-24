@@ -445,6 +445,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Exception handler para asegurar CORS headers incluso en errores
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Maneja todas las excepciones y asegura que los headers CORS se envíen"""
+    logger.error(f"Error no manejado: {exc}", exc_info=True)
+    
+    response = JSONResponse(
+        status_code=500,
+        content={
+            "success": False,
+            "error": str(exc),
+            "detail": "Error interno del servidor"
+        }
+    )
+    
+    # Agregar headers CORS siempre
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Maneja HTTPException y asegura que los headers CORS se envíen"""
+    response = JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "detail": exc.detail
+        }
+    )
+    
+    # Agregar headers CORS siempre
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
 # Modelos
 class BusquedaRubroRequest(BaseModel):
     rubro: str
