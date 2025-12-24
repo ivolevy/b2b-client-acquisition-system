@@ -397,6 +397,9 @@ CTO – Dota Solutions
 LinkedIn: https://www.linkedin.com/in/ivan-levy/
 Sitio web: https://www.dotasolutions.agency/'''
         )
+    except Exception as e:
+        logger.error(f"Error inicializando templates por defecto: {e}")
+
 from email_service import enviar_email_empresa, enviar_emails_masivo
 
 # Configurar logging
@@ -683,12 +686,12 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     )
                     # Validar que la distancia sea válida
                     if distancia is not None and isinstance(distancia, (int, float)) and distancia >= 0:
-                    empresa['distancia_km'] = distancia
-                    
-                    # Filtrar por radio: solo incluir empresas dentro del radio
+                        empresa['distancia_km'] = distancia
+                        
+                        # Filtrar por radio: solo incluir empresas dentro del radio
                         if radio_km is not None and isinstance(radio_km, (int, float)) and radio_km > 0:
-                        if distancia > radio_km:
-                            logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio: {distancia:.2f}km > {radio_km:.2f}km")
+                            if distancia > radio_km:
+                                logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio: {distancia:.2f}km > {radio_km:.2f}km")
                             continue  # Saltar esta empresa, está fuera del radio
                     else:
                         empresa['distancia_km'] = None
