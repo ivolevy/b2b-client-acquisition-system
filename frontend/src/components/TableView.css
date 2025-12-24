@@ -299,6 +299,10 @@
 @media (max-width: 768px) {
   .table-container {
     border-radius: var(--radius-lg);
+    width: 85%;
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .table-header {
@@ -822,6 +826,14 @@
 
 /* Responsive Unified Module */
 @media (max-width: 768px) {
+  .view-toggle-container,
+  .unified-results-module {
+    width: 85%;
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
   .results-unified-header {
     flex-direction: column;
     gap: 0.75rem;
@@ -889,6 +901,14 @@
 }
 
 @media (max-width: 480px) {
+  .view-toggle-container,
+  .unified-results-module {
+    width: 85%;
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
   .results-title-section {
     flex-direction: column;
     align-items: flex-start;

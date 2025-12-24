@@ -818,11 +818,16 @@ select.filter-input {
 @media (max-width: 768px) {
   .filters-container {
     gap: var(--spacing-md);
+    width: 85%;
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .filter-section {
     padding: var(--spacing-md);
     border-radius: var(--radius-lg);
+    width: 100%;
   }
   
   .filter-section h3 {
@@ -1030,11 +1035,16 @@ select.filter-input {
 @media (max-width: 480px) {
   .filters-container {
     gap: var(--spacing-sm);
+    width: 85%;
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .filter-section {
     padding: var(--spacing-sm);
     border-radius: var(--radius-md);
+    width: 100%;
   }
   
   .filter-section h3 {

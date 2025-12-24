@@ -343,6 +343,25 @@ body.modal-open {
   * {
     -webkit-overflow-scrolling: touch;
   }
+  
+  /* Contenedores principales al 85% en mobile */
+  .main-content {
+    width: 85%;
+    max-width: 85%;
+  }
+  
+  .filter-section,
+  .filters-container,
+  .table-container,
+  .user-profile-container,
+  .admin-container,
+  .unified-results-module,
+  .view-toggle-container {
+    width: 85%;
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 @media (max-width: 480px) {
@@ -363,6 +382,22 @@ body.modal-open {
   /* Reducir padding en móviles pequeños */
   .main-content {
     padding: var(--spacing-md) !important;
+    width: 85%;
+    max-width: 85%;
+  }
+  
+  /* Contenedores principales al 85% en mobile pequeño */
+  .filter-section,
+  .filters-container,
+  .table-container,
+  .user-profile-container,
+  .admin-container,
+  .unified-results-module,
+  .view-toggle-container {
+    width: 85%;
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 

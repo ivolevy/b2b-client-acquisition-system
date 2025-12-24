@@ -463,6 +463,61 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+# Exception handler global para asegurar que CORS funcione incluso con errores no manejados
+from fastapi.responses import JSONResponse
+from fastapi import Request
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Maneja HTTPException y asegura que CORS funcione"""
+    # Determinar origen permitido
+    origin = request.headers.get("origin", "*")
+    allowed_origin = "*"
+    if "*" not in ALLOWED_ORIGINS and ALLOWED_ORIGINS:
+        if origin in ALLOWED_ORIGINS:
+            allowed_origin = origin
+        elif ALLOWED_ORIGINS:
+            allowed_origin = ALLOWED_ORIGINS[0]
+    
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers={
+            "Access-Control-Allow-Origin": allowed_origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Maneja excepciones globales y asegura que CORS funcione"""
+    import traceback
+    logger.error(f"Error no manejado en {request.url.path}: {exc}")
+    logger.error(traceback.format_exc())
+    
+    # Determinar origen permitido
+    origin = request.headers.get("origin", "*")
+    allowed_origin = "*"
+    if "*" not in ALLOWED_ORIGINS and ALLOWED_ORIGINS:
+        if origin in ALLOWED_ORIGINS:
+            allowed_origin = origin
+        elif ALLOWED_ORIGINS:
+            allowed_origin = ALLOWED_ORIGINS[0]
+    
+    # Retornar error con headers CORS
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc) if str(exc) else "Error interno del servidor"},
+        headers={
+            "Access-Control-Allow-Origin": allowed_origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
 # Modelos
 class BusquedaRubroRequest(BaseModel):
     rubro: str
