@@ -786,6 +786,7 @@
 
 @media (max-width: 768px) {
   .navbar {
+    width: 90%;
     margin: 0.5rem auto;
     padding: 0.5rem 1rem;
     border-radius: var(--radius-lg);
@@ -851,7 +852,7 @@
   .navbar {
     margin: 0.25rem auto;
     padding: 0.4rem 0.75rem;
-    width: 40%;
+    width: 90%;
   }
   
   .navbar-brand h1 {

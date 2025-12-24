@@ -829,44 +829,62 @@
   }
   
   .filters-inline-bar {
-    gap: 6px;
-    padding: 0.5rem 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
   }
   
   .filter-inline-input {
     font-size: 0.75rem;
     padding: 5px 8px;
+    width: 100%;
+    min-width: 100%;
   }
   
   .filter-city {
-    width: 120px;
+    width: 100%;
+    min-width: 100%;
   }
   
   .filter-distance-group {
-    width: 120px;
+    width: 100%;
+    min-width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .filter-distance-toggle {
+    width: 100%;
   }
   
   .filter-km {
-    width: 50px;
+    width: 100%;
+    min-width: 100%;
   }
   
-  .filter-inline-input {
-    width: 120px;
+  .rubro-dropdown {
+    width: 100%;
+    min-width: 100%;
   }
   
   .rubro-dropdown-trigger {
-    width: 120px;
-    min-width: 120px;
+    width: 100%;
+    min-width: 100%;
   }
   
   .filter-checkbox-inline {
-    width: 120px;
+    width: 100%;
+    min-width: 100%;
+    justify-content: flex-start;
   }
   
   .filter-actions-right {
     width: 100%;
-    justify-content: flex-end;
-    margin-top: 4px;
+    justify-content: flex-start;
+    margin-top: var(--spacing-sm);
+    margin-left: 0;
   }
 }
 
@@ -887,11 +905,35 @@
   }
   
   .filters-inline-bar {
-    gap: 4px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
   }
   
   .filter-checkbox-inline span {
-    display: none;
+    display: inline;
+  }
+  
+  .filter-city,
+  .filter-distance-group,
+  .filter-inline-input,
+  .filter-checkbox-inline,
+  .rubro-dropdown {
+    width: 100%;
+    min-width: 100%;
+  }
+  
+  .filter-distance-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .filter-actions-right {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
   }
 }
 
@@ -1086,19 +1128,33 @@
 
 @media (max-width: 480px) {
   .rubro-dropdown-trigger {
-    width: 100px;
-    min-width: 100px;
+    width: 100%;
+    min-width: 100%;
   }
   
   .filter-city,
   .filter-distance-group,
   .filter-inline-input,
-  .filter-checkbox-inline {
-    width: 100px;
+  .filter-checkbox-inline,
+  .rubro-dropdown {
+    width: 100%;
+    min-width: 100%;
   }
   
   .rubro-text {
-    max-width: 80px;
+    max-width: none;
+  }
+  
+  .filter-distance-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .filter-actions-right {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
   }
   
   .rubro-dropdown-menu {

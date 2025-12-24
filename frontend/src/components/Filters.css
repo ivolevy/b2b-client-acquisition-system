@@ -887,6 +887,7 @@ select.filter-input {
     min-width: 100%;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     position: relative;
     padding: var(--spacing-sm) 0;
   }
@@ -926,6 +927,7 @@ select.filter-input {
     position: relative;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
   }
   
   /* Eliminar separadores verticales en mobile */
@@ -945,6 +947,7 @@ select.filter-input {
     position: relative;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
   }
   
   /* Eliminar separador después de la dirección en mobile */
@@ -1056,6 +1059,21 @@ select.filter-input {
   .rubro-inline {
     min-width: 100%;
     width: 100%;
+    align-items: flex-start;
+  }
+  
+  .form-row-compact > .form-group-compact label,
+  .form-row-compact > .rubro-inline label,
+  .form-row-compact .radius-control label,
+  .form-row-compact .address-search label {
+    text-align: left;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+  
+  .form-row-compact .radius-label {
+    text-align: left;
+    justify-content: flex-start;
   }
   
   .select-rubro-compact {

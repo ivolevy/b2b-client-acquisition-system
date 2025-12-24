@@ -702,5 +702,67 @@
   cursor: not-allowed;
 }
 
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+  .user-profile-container {
+    margin: 0 1rem;
+  }
+
+  .user-profile-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .user-profile-content {
+    padding: 1.5rem;
+  }
+
+  .profile-content-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .profile-divider {
+    display: none;
+  }
+
+  .profile-column {
+    margin-bottom: 2rem;
+  }
+
+  .profile-column:last-child {
+    margin-bottom: 0;
+  }
+
+  .profile-section-title {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-profile-container {
+    margin: 0 0.5rem;
+  }
+
+  .user-profile-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .user-profile-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .user-profile-content {
+    padding: 1rem;
+  }
+
+  .profile-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-column {
+    margin-bottom: 1.5rem;
+  }
+}
+
 
 
