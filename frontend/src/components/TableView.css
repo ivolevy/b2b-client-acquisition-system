@@ -514,11 +514,12 @@
 .filters-inline-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   padding: 0.75rem 1.25rem;
   background: var(--gray-50);
   border-bottom: 1px solid var(--gray-100);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .filter-inline-input {
@@ -546,18 +547,22 @@
 .filter-distance-group {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   flex-wrap: nowrap;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  overflow: hidden;
+  background: white;
 }
 
 .filter-distance-toggle {
   display: flex;
   align-items: center;
   gap: 0;
-  border: 1px solid var(--gray-200);
-  border-radius: 6px 0 0 6px;
+  border: none;
+  border-radius: 0;
   overflow: hidden;
-  background: white;
+  background: transparent;
   flex-shrink: 0;
 }
 
@@ -617,10 +622,12 @@
 .filter-km {
   width: 60px;
   border-radius: 0 6px 6px 0;
+  border: none;
   border-left: 1px solid var(--gray-200);
   height: 36px;
   box-sizing: border-box;
   flex-shrink: 0;
+  padding: 6px 8px;
 }
 
 .filter-checkbox-inline {
@@ -643,10 +650,20 @@
   accent-color: #e91e63;
 }
 
+.filter-checkboxes-and-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  width: 100%;
+  flex-shrink: 0;
+}
+
 .filter-checkboxes-group {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .btn-clear-filters {
@@ -654,6 +671,7 @@
   align-items: center;
   justify-content: center;
   width: 28px;
+  flex-shrink: 0;
   height: 28px;
   border: none;
   background: var(--gray-200);
@@ -672,6 +690,7 @@
   margin-left: auto;
   display: flex;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .btn-action-inline {
@@ -845,6 +864,13 @@
     padding: var(--spacing-md);
   }
   
+  .filter-checkboxes-and-actions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
   .filter-inline-input {
     font-size: 0.75rem;
     padding: 5px 8px;
@@ -860,18 +886,20 @@
   .filter-distance-group {
     width: 100%;
     min-width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
   }
   
   .filter-distance-toggle {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
   }
   
   .filter-km {
-    width: 100%;
-    min-width: 100%;
+    width: 80px;
+    min-width: 80px;
+    flex-shrink: 0;
   }
   
   .rubro-dropdown {
@@ -921,6 +949,13 @@
     padding: var(--spacing-sm);
   }
   
+  .filter-checkboxes-and-actions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
   .filter-checkbox-inline span {
     display: inline;
   }
@@ -935,9 +970,20 @@
   }
   
   .filter-distance-group {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+  }
+  
+  .filter-distance-toggle {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .filter-km {
+    width: 80px;
+    min-width: 80px;
+    flex-shrink: 0;
   }
   
   .filter-actions-right {
@@ -1156,9 +1202,20 @@
   }
   
   .filter-distance-group {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+  }
+  
+  .filter-distance-toggle {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .filter-km {
+    width: 80px;
+    min-width: 80px;
+    flex-shrink: 0;
   }
   
   .filter-actions-right {
