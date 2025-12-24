@@ -73,11 +73,19 @@ def _rate_limited_request(url: Optional[str]):
     if not url or MIN_DELAY_PER_DOMAIN <= 0:
         return
     
-    domain = urlparse(url).netloc or "default"
+    try:
+        parsed = urlparse(url)
+        domain = parsed.netloc or "default"
+        if not domain or domain == "default":
+            logger.warning(f"URL inválida para rate limiting: {url}")
+            return
+    except Exception as e:
+        logger.warning(f"Error parseando URL para rate limiting: {url}, error: {e}")
+        return
     
     with rate_limit_lock:
         current_time = time.time()
-        last_time = last_request_by_domain[domain]
+        last_time = last_request_by_domain.get(domain, 0)
         elapsed = current_time - last_time
         
         if elapsed < MIN_DELAY_PER_DOMAIN:
@@ -132,14 +140,24 @@ def _programar_enriquecimiento_diferido(empresas: List[Dict]):
     if not DEFERRED_ENABLED or not BACKGROUND_EXECUTOR or not empresas:
         return
     
+    if not isinstance(empresas, list):
+        logger.error(f"empresas debe ser una lista en _programar_enriquecimiento_diferido")
+        return
+    
     for empresa in empresas:
-        BACKGROUND_EXECUTOR.submit(
-            _enriquecer_empresa_individual,
-            empresa,
-            usar_cache=True,
-            guardar_en_cache=True,
-            guardar_en_db=True
-        )
+        if not isinstance(empresa, dict):
+            logger.warning(f"Empresa inválida en enriquecimiento diferido: {type(empresa)}")
+            continue
+        try:
+            BACKGROUND_EXECUTOR.submit(
+                _enriquecer_empresa_individual,
+                empresa,
+                usar_cache=True,
+                guardar_en_cache=True,
+                guardar_en_db=True
+            )
+        except Exception as e:
+            logger.error(f"Error encolando empresa para enriquecimiento diferido: {e}")
 
 
 def _enriquecer_empresa_individual(
@@ -231,7 +249,12 @@ def enriquecer_empresas_paralelo(
     """
     Enriquece múltiples empresas con paralelismo optimizado y enriquecimiento diferido.
     """
+    # Validar entrada
     if not empresas:
+        return []
+    
+    if not isinstance(empresas, list):
+        logger.error(f"empresas debe ser una lista, recibido: {type(empresas)}")
         return []
     
     pendientes = [

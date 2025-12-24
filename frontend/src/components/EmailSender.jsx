@@ -45,21 +45,31 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     const template = templates.find(t => t.id === selectedTemplate);
     if (!template) return null;
 
-    const variables = {
-      nombre_empresa: empresa.nombre || '',
-      rubro: empresa.rubro || '',
-      ciudad: empresa.ciudad || '',
-      direccion: empresa.direccion || '',
-      website: empresa.website || ''
+    // Escapar HTML en variables para prevenir XSS
+    const escapeHtml = (text) => {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = String(text);
+      return div.innerHTML;
     };
 
-    let subject = asuntoPersonalizado || template.subject;
-    let body = template.body_html;
+    const variables = {
+      nombre_empresa: escapeHtml(empresa.nombre || ''),
+      rubro: escapeHtml(empresa.rubro || ''),
+      ciudad: escapeHtml(empresa.ciudad || ''),
+      direccion: escapeHtml(empresa.direccion || ''),
+      website: escapeHtml(empresa.website || '')
+    };
 
+    let subject = asuntoPersonalizado || template.subject || '';
+    let body = template.body_html || '';
+
+    // Reemplazar variables, manejando casos donde no existan
     Object.keys(variables).forEach(key => {
-      const value = variables[key];
-      subject = subject.replace(new RegExp(`\\{${key}\\}`, 'g'), value);
-      body = body.replace(new RegExp(`\\{${key}\\}`, 'g'), value);
+      const value = variables[key] || '';
+      const regex = new RegExp(`\\{${key}\\}`, 'g');
+      subject = subject.replace(regex, value);
+      body = body.replace(regex, value);
     });
 
     return { subject, body };
@@ -177,6 +187,34 @@ function EmailSender({ empresas, onClose, embedded = false }) {
       return;
     }
 
+    // Validar que el template existe
+    const template = templates.find(t => t.id === selectedTemplate);
+    if (!template) {
+      toastError(
+        <>
+          <strong>Template no encontrado</strong>
+          <p>El template seleccionado ya no existe. Por favor, selecciona otro.</p>
+        </>
+      );
+      return;
+    }
+
+    // Validar que todas las empresas tienen email
+    const empresasSinEmail = selectedEmpresas.filter(e => !e.email || !e.email.trim());
+    if (empresasSinEmail.length > 0) {
+      warning(
+        <>
+          <strong>Algunas empresas no tienen email</strong>
+          <p>{empresasSinEmail.length} empresa(s) no tienen email válido. Serán excluidas del envío.</p>
+        </>
+      );
+      // Filtrar empresas sin email
+      setSelectedEmpresas(selectedEmpresas.filter(e => e.email && e.email.trim()));
+      if (selectedEmpresas.length === 0) {
+        return;
+      }
+    }
+
     if (!window.confirm(`¿Enviar email${selectedEmpresas.length > 1 ? 's' : ''} a ${selectedEmpresas.length} empresa${selectedEmpresas.length > 1 ? 's' : ''}?`)) {
       return;
     }
@@ -201,11 +239,23 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           onClose();
         }
       } else {
+        // Limitar cantidad de emails para evitar rate limiting
+        const MAX_EMAILS_MASIVOS = 100;
+        const empresasAEnviar = selectedEmpresas.slice(0, MAX_EMAILS_MASIVOS);
+        if (selectedEmpresas.length > MAX_EMAILS_MASIVOS) {
+          warning(
+            <>
+              <strong>Límite de envío masivo</strong>
+              <p>Se enviarán solo las primeras {MAX_EMAILS_MASIVOS} empresas de {selectedEmpresas.length} seleccionadas.</p>
+            </>
+          );
+        }
+
         const response = await axios.post(`${API_URL}/email/enviar-masivo`, {
-          empresa_ids: selectedEmpresas.map(e => e.id),
+          empresa_ids: empresasAEnviar.map(e => e.id),
           template_id: selectedTemplate,
           asunto_personalizado: asuntoPersonalizado || null,
-          delay_segundos: DELAY_AUTOMATICO_SEGUNDOS
+          delay_segundos: 3.0  // Delay automático: 3 segundos (óptimo para evitar spam y rate limiting)
         });
 
         if (response.data.success) {
@@ -497,7 +547,13 @@ function EmailSender({ empresas, onClose, embedded = false }) {
                     <strong>Asunto:</strong> {template.subject}
                   </div>
                   <div className="template-card-preview">
-                    <div dangerouslySetInnerHTML={{ __html: template.body_html.substring(0, 150) + '...' }} />
+                    <div dangerouslySetInnerHTML={{ 
+                      __html: template.body_html 
+                        ? (template.body_html.length > 150 
+                            ? template.body_html.substring(0, 150).replace(/<[^>]*>/g, '') + '...' 
+                            : template.body_html.replace(/<[^>]*>/g, ''))
+                        : 'Sin contenido'
+                    }} />
                   </div>
                 </div>
               ))}

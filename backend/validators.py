@@ -26,14 +26,17 @@ def validar_email(email: str) -> Tuple[bool, Optional[str]]:
     # Patrón RFC 5322 simplificado
     patron = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     
-    # Filtrar emails falsos comunes
+    # Filtrar emails falsos comunes y dominios temporales
     emails_invalidos = [
         'example.com', 'test.com', 'spam.com', 'fake.com',
         'noreply@', 'no-reply@', 'donotreply@',
-        'ejemplo@', 'prueba@'
+        'ejemplo@', 'prueba@', 'temp@', 'temporary@',
+        '10minutemail', 'guerrillamail', 'mailinator'
     ]
     
-    if any(fake in email for fake in emails_invalidos):
+    # Verificar dominio común inválido
+    dominio = email.split('@')[1] if '@' in email else ''
+    if any(fake in email.lower() for fake in emails_invalidos) or any(fake in dominio.lower() for fake in ['example', 'test', 'spam', 'fake']):
         return False, None
     
     if re.match(patron, email):

@@ -52,7 +52,8 @@ function AppB2B() {
     loadEmpresas();
     loadStats();
     loadRubros();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo ejecutar una vez al montar
   
   // Manejar selección desde historial de búsquedas
   const handleSelectFromHistory = (searchData) => {
@@ -430,7 +431,7 @@ function AppB2B() {
 
       {showEmailSender && (
         <EmailSender
-          empresas={filteredEmpresas}
+          empresas={empresas}
           onClose={() => setShowEmailSender(false)}
         />
       )}

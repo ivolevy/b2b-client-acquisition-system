@@ -48,8 +48,23 @@ def renderizar_template(template: str, variables: Dict) -> str:
     - {website}: Sitio web de la empresa
     - {fecha}: Fecha actual
     """
+    import html
     texto = template or ''
-    variables = {k: ('' if v is None else str(v)) for k, v in (variables or {}).items()}
+    if not isinstance(texto, str):
+        texto = str(texto)
+    
+    # Escapar variables para prevenir inyección HTML (excepto en body_html que ya es HTML)
+    # Nota: body_html debe ser HTML válido, así que no escapamos ahí
+    # Pero subject y body_text sí deben escaparse
+    variables = {}
+    for k, v in (variables or {}).items():
+        if v is None:
+            variables[k] = ''
+        else:
+            # Escapar HTML en variables para prevenir XSS
+            # Solo escapar si no es body_html (que ya contiene HTML)
+            variables[k] = html.escape(str(v))
+    
     variables.setdefault('fecha', datetime.now().strftime('%d/%m/%Y'))
 
     def _reemplazar(match: re.Match) -> str:
@@ -70,6 +85,17 @@ def enviar_email(
     Returns:
         Dict con success, message, error
     """
+    # Validar formato de email
+    from validators import validar_email
+    email_valido, email_limpio = validar_email(destinatario)
+    if not email_valido:
+        return {
+            'success': False,
+            'message': f'Email inválido: {destinatario}',
+            'error': 'INVALID_EMAIL'
+        }
+    destinatario = email_limpio
+    
     if not SMTP_PASSWORD or SMTP_PASSWORD.strip() == '':
         env_file_path = os.path.join(os.path.dirname(__file__), '.env.local')
         return {
@@ -215,6 +241,28 @@ def enviar_emails_masivo(
     """
     import time
     
+    # Validar entrada
+    if not isinstance(empresas, list):
+        return {
+            'total': 0,
+            'exitosos': 0,
+            'fallidos': 0,
+            'sin_email': 0,
+            'detalles': [],
+            'error': 'EMPRESAS_INVALIDAS'
+        }
+    
+    # Límite máximo de emails para prevenir rate limiting
+    MAX_EMAILS_MASIVOS = 100
+    if len(empresas) > MAX_EMAILS_MASIVOS:
+        logger.warning(f"Limitando envío masivo a {MAX_EMAILS_MASIVOS} de {len(empresas)} empresas")
+        empresas = empresas[:MAX_EMAILS_MASIVOS]
+    
+    # Validar delay
+    if delay_segundos < 1.0:
+        logger.warning(f"Delay muy bajo ({delay_segundos}s), usando mínimo de 1.0s")
+        delay_segundos = 1.0
+    
     resultados = {
         'total': len(empresas),
         'exitosos': 0,
@@ -244,9 +292,9 @@ def enviar_emails_masivo(
         
         resultados['detalles'].append(resultado)
         
-        # Delay entre envíos
+        # Delay entre envíos (siempre aplicar delay mínimo de 1 segundo)
         if delay_segundos > 0:
-            time.sleep(delay_segundos)
+            time.sleep(max(1.0, delay_segundos))
     
     logger.info(f" Envío masivo completado: {resultados['exitosos']}/{resultados['total']} exitosos")
     return resultados

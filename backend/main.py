@@ -51,13 +51,24 @@ def calcular_distancia_km(lat1, lon1, lat2, lon2):
 
 def insertar_empresa(empresa: Dict) -> bool:
     """Guarda empresa en memoria (no persiste)"""
-    global _empresa_counter
+    import threading
+    global _empresa_counter, _memoria_empresas
+    
+    # Lock para evitar race conditions
+    if not hasattr(insertar_empresa, '_lock'):
+        insertar_empresa._lock = threading.Lock()
+    
+    try:
+        with insertar_empresa._lock:
     _empresa_counter += 1
     empresa['id'] = _empresa_counter
     empresa['created_at'] = datetime.now().isoformat()
     _memoria_empresas.append(empresa.copy())
-    logger.debug(f" Empresa guardada en memoria: {empresa.get('nombre')}")
+            logger.debug(f" Empresa guardada en memoria: {empresa.get('nombre')} (ID: {_empresa_counter})")
     return True
+    except Exception as e:
+        logger.error(f"Error insertando empresa: {e}")
+        return False
 
 def obtener_todas_empresas() -> List[Dict]:
     """Obtiene todas las empresas de memoria"""
@@ -67,13 +78,27 @@ def buscar_empresas(rubro: Optional[str] = None, ciudad: Optional[str] = None,
                    solo_validas: bool = False, con_email: bool = False,
                    con_telefono: bool = False) -> List[Dict]:
     """Busca empresas en memoria con filtros"""
+    # Validar que _memoria_empresas existe y es una lista
+    if not isinstance(_memoria_empresas, list):
+        logger.error("_memoria_empresas no es una lista válida")
+        return []
+    
     resultado = _memoria_empresas.copy()
     
     if rubro:
-        resultado = [e for e in resultado if e.get('rubro_key') == rubro or e.get('rubro') == rubro]
+        # Buscar tanto por rubro_key como por rubro (nombre)
+        resultado = [e for e in resultado 
+                    if (isinstance(e, dict) and 
+                        (e.get('rubro_key') == rubro or e.get('rubro') == rubro or 
+                         (isinstance(e.get('rubro'), str) and rubro.lower() in e.get('rubro', '').lower())))]
     
     if ciudad:
-        resultado = [e for e in resultado if ciudad.lower() in (e.get('ciudad') or '').lower()]
+        # Búsqueda más precisa: coincidencia exacta o contiene (case insensitive)
+        ciudad_lower = ciudad.lower().strip()
+        resultado = [e for e in resultado 
+                    if (isinstance(e, dict) and e.get('ciudad') and 
+                        (ciudad_lower == e.get('ciudad', '').lower().strip() or 
+                         ciudad_lower in e.get('ciudad', '').lower()))]
     
     if solo_validas:
         resultado = [e for e in resultado if e.get('email_valido') or e.get('telefono_valido')]
@@ -88,20 +113,34 @@ def buscar_empresas(rubro: Optional[str] = None, ciudad: Optional[str] = None,
 
 def obtener_estadisticas() -> Dict:
     """Obtiene estadísticas de empresas en memoria"""
+    # Validar que _memoria_empresas existe y es una lista
+    if not isinstance(_memoria_empresas, list):
+        logger.error("_memoria_empresas no es una lista válida")
+        return {
+            'total': 0,
+            'con_email': 0,
+            'con_telefono': 0,
+            'con_website': 0,
+            'por_rubro': {},
+            'por_ciudad': {}
+        }
+    
     total = len(_memoria_empresas)
-    con_email = sum(1 for e in _memoria_empresas if e.get('email') and e.get('email_valido'))
-    con_telefono = sum(1 for e in _memoria_empresas if e.get('telefono') and e.get('telefono_valido'))
-    con_website = sum(1 for e in _memoria_empresas if e.get('website') and e.get('website_valido'))
+    con_email = sum(1 for e in _memoria_empresas if isinstance(e, dict) and e.get('email') and e.get('email_valido'))
+    con_telefono = sum(1 for e in _memoria_empresas if isinstance(e, dict) and e.get('telefono') and e.get('telefono_valido'))
+    con_website = sum(1 for e in _memoria_empresas if isinstance(e, dict) and e.get('website') and e.get('website_valido'))
     
     # Por rubro
     por_rubro = {}
     for e in _memoria_empresas:
+        if isinstance(e, dict):
         rubro = e.get('rubro', 'Sin rubro')
         por_rubro[rubro] = por_rubro.get(rubro, 0) + 1
     
     # Por ciudad
     por_ciudad = {}
     for e in _memoria_empresas:
+        if isinstance(e, dict):
         ciudad = e.get('ciudad', '')
         if ciudad:
             por_ciudad[ciudad] = por_ciudad.get(ciudad, 0) + 1
@@ -204,24 +243,52 @@ def crear_template(nombre: str, subject: str, body_html: str, body_text: Optiona
 def actualizar_template(template_id: int, nombre: Optional[str] = None, subject: Optional[str] = None,
                        body_html: Optional[str] = None, body_text: Optional[str] = None) -> bool:
     """Actualiza un template en memoria"""
+    # Validar que al menos un campo se actualice
+    if not any([nombre, subject, body_html, body_text is not None]):
+        logger.warning(f"Intento de actualizar template {template_id} sin campos")
+        return False
+    
     for i, t in enumerate(_memoria_templates):
         if t.get('id') == template_id:
-            if nombre:
-                _memoria_templates[i]['nombre'] = nombre
-            if subject:
+            cambios = False
+            if nombre and isinstance(nombre, str) and nombre.strip():
+                _memoria_templates[i]['nombre'] = nombre.strip()
+                cambios = True
+            if subject and isinstance(subject, str) and subject.strip():
                 _memoria_templates[i]['subject'] = subject
-            if body_html:
+                cambios = True
+            if body_html and isinstance(body_html, str) and body_html.strip():
                 _memoria_templates[i]['body_html'] = body_html
+                cambios = True
             if body_text is not None:
-                _memoria_templates[i]['body_text'] = body_text
-            _memoria_templates[i]['updated_at'] = datetime.now().isoformat()
-            logger.info(f" Template actualizado en memoria: ID {template_id}")
-            return True
+                _memoria_templates[i]['body_text'] = body_text if body_text else None
+                cambios = True
+            
+            if cambios:
+                _memoria_templates[i]['updated_at'] = datetime.now().isoformat()
+                logger.info(f" Template actualizado en memoria: ID {template_id}")
+                return True
+            else:
+                logger.warning(f"No se aplicaron cambios válidos al template {template_id}")
+                return False
     return False
 
 def eliminar_template(template_id: int) -> bool:
     """Elimina un template de memoria"""
     global _memoria_templates
+    
+    # Verificar si el template está en uso (búsqueda simple en historial)
+    # Nota: En producción debería verificar en base de datos
+    template_en_uso = False
+    for hist in _memoria_email_history:
+        if hist.get('template_id') == template_id:
+            template_en_uso = True
+            break
+    
+    if template_en_uso:
+        logger.warning(f"Template {template_id} está en uso en historial, no se puede eliminar")
+        return False
+    
     original_len = len(_memoria_templates)
     _memoria_templates = [t for t in _memoria_templates if t.get('id') != template_id]
     deleted = len(_memoria_templates) < original_len
@@ -233,19 +300,36 @@ def guardar_email_history(empresa_id: int, empresa_nombre: str, empresa_email: s
                          template_id: int, template_nombre: str, subject: str,
                          status: str, error_message: Optional[str] = None) -> bool:
     """Guarda historial de email en memoria"""
-    _memoria_email_history.append({
-        'id': len(_memoria_email_history) + 1,
-        'empresa_id': empresa_id,
-        'empresa_nombre': empresa_nombre,
-        'empresa_email': empresa_email,
-        'template_id': template_id,
-        'template_nombre': template_nombre,
-        'subject': subject,
-        'status': status,
-        'error_message': error_message,
-        'sent_at': datetime.now().isoformat()
-    })
-    return True
+    # Validar datos antes de guardar
+    if not isinstance(empresa_id, int) or empresa_id <= 0:
+        logger.warning(f"empresa_id inválido: {empresa_id}")
+        return False
+    
+    if not isinstance(template_id, int) or template_id <= 0:
+        logger.warning(f"template_id inválido: {template_id}")
+        return False
+    
+    if not status or status not in ['success', 'error']:
+        logger.warning(f"status inválido: {status}")
+        return False
+    
+    try:
+        _memoria_email_history.append({
+            'id': len(_memoria_email_history) + 1,
+            'empresa_id': empresa_id,
+            'empresa_nombre': str(empresa_nombre) if empresa_nombre else '',
+            'empresa_email': str(empresa_email) if empresa_email else '',
+            'template_id': template_id,
+            'template_nombre': str(template_nombre) if template_nombre else '',
+            'subject': str(subject) if subject else '',
+            'status': status,
+            'error_message': str(error_message) if error_message else None,
+            'sent_at': datetime.now().isoformat()
+        })
+        return True
+    except Exception as e:
+        logger.error(f"Error guardando historial de email: {e}")
+        return False
 
 def obtener_email_history(empresa_id: Optional[int] = None, template_id: Optional[int] = None,
                          limit: int = 100) -> List[Dict]:
@@ -263,11 +347,12 @@ def obtener_email_history(empresa_id: Optional[int] = None, template_id: Optiona
 # Inicializar templates por defecto
 def _init_default_templates():
     """Inicializa templates por defecto en memoria"""
-    if len(_memoria_templates) == 0:
-        crear_template(
-            nombre='Presentación Dota Solutions',
-            subject='Hola equipo de {nombre_empresa} - Oportunidad de colaboración',
-            body_html='''<html>
+    try:
+        if len(_memoria_templates) == 0:
+            template_id = crear_template(
+                nombre='Presentación Dota Solutions',
+                subject='Hola equipo de {nombre_empresa} - Oportunidad de colaboración',
+                body_html='''<html>
 <body style="font-family: Arial, sans-serif; line-height: 1.8; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: #ffffff; border-radius: 8px; padding: 30px;">
         <p style="font-size: 16px; margin-bottom: 20px;">Hola equipo de <strong>{nombre_empresa}</strong>, ¿cómo están?</p>
@@ -350,10 +435,15 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
-# CORS
+# CORS - Configurar orígenes permitidos desde variable de entorno
+ALLOWED_ORIGINS = os.getenv('CORS_ORIGINS', '*').split(',')
+if '*' in ALLOWED_ORIGINS and len(ALLOWED_ORIGINS) > 1:
+    # Si hay * y otros orígenes, remover * (no tiene sentido)
+    ALLOWED_ORIGINS = [o for o in ALLOWED_ORIGINS if o != '*']
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -492,21 +582,52 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         logger.info(f" Búsqueda B2B - Rubro: {request.rubro}, Solo válidas: {solo_validadas}, Limpiar anterior: {limpiar_anterior}")
         
-        # Buscar en OpenStreetMap
+        # Validar bbox si se proporciona
+        bbox_valido = False
         if request.bbox:
+            try:
+                # Validar formato: debe ser "south,west,north,east" con 4 números
+                partes = request.bbox.split(',')
+                if len(partes) == 4:
+                    coords = [float(p.strip()) for p in partes]
+                    # Validar rangos: latitud -90 a 90, longitud -180 a 180
+                    if (-90 <= coords[0] <= 90 and -90 <= coords[2] <= 90 and
+                        -180 <= coords[1] <= 180 and -180 <= coords[3] <= 180 and
+                        coords[0] < coords[2] and coords[1] < coords[3]):
+                        bbox_valido = True
+            except (ValueError, AttributeError) as e:
+                logger.warning(f"Bbox inválido: {request.bbox}, error: {e}")
+        
+        # Buscar en OpenStreetMap
+        if request.bbox and bbox_valido:
             # Búsqueda por bounding box (ubicación en mapa)
             logger.info(f" Búsqueda por bbox: {request.bbox}")
             empresas = query_by_bbox(
                 bbox=request.bbox,
                 rubro=request.rubro
             )
+            # Validar que query_by_bbox retornó una lista válida
+            if empresas is None:
+                logger.error("query_by_bbox retornó None")
+                empresas = []
         else:
             # Búsqueda por ciudad/país (método antiguo)
+            if request.bbox and not bbox_valido:
+                logger.warning(f"Bbox inválido, usando búsqueda por ciudad/país")
             empresas = buscar_empresas_por_rubro(
                 rubro=request.rubro,
                 pais=request.pais,
                 ciudad=request.ciudad
             )
+            # Validar que buscar_empresas_por_rubro retornó una lista válida
+            if empresas is None:
+                logger.error("buscar_empresas_por_rubro retornó None")
+                empresas = []
+        
+        # Asegurar que empresas es una lista
+        if not isinstance(empresas, list):
+            logger.error(f"Empresas no es una lista: {type(empresas)}")
+            empresas = []
         
         if not empresas:
             return {
@@ -524,10 +645,19 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         # Enriquecer con scraping paralelo si está habilitado
         if request.scrapear_websites:
             logger.info(" Iniciando enriquecimiento paralelo de empresas...")
-            empresas = enriquecer_empresas_paralelo(
+            try:
+                empresas_enriquecidas = enriquecer_empresas_paralelo(
                 empresas=empresas,
                 timeout_por_empresa=20
             )
+                # Validar que retornó una lista válida
+                if isinstance(empresas_enriquecidas, list):
+                    empresas = empresas_enriquecidas
+                else:
+                    logger.warning("enriquecer_empresas_paralelo no retornó una lista válida, usando empresas originales")
+            except Exception as e:
+                logger.error(f"Error en enriquecimiento paralelo: {e}, usando empresas originales")
+                # Continuar con empresas sin enriquecer
         
         # Agregar información de búsqueda y calcular distancias
         if request.busqueda_centro_lat and request.busqueda_centro_lng:
@@ -543,26 +673,36 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 empresa['busqueda_centro_lng'] = request.busqueda_centro_lng
                 empresa['busqueda_radio_km'] = request.busqueda_radio_km
                 
-                # Calcular distancia si la empresa tiene coordenadas
-                if empresa.get('latitud') and empresa.get('longitud'):
+                # Calcular distancia si la empresa tiene coordenadas válidas
+                lat_empresa = empresa.get('latitud')
+                lng_empresa = empresa.get('longitud')
+                
+                if (lat_empresa is not None and lng_empresa is not None and
+                    isinstance(lat_empresa, (int, float)) and isinstance(lng_empresa, (int, float)) and
+                    -90 <= lat_empresa <= 90 and -180 <= lng_empresa <= 180):
                     distancia = calcular_distancia_km(
                         request.busqueda_centro_lat,
                         request.busqueda_centro_lng,
-                        empresa.get('latitud'),
-                        empresa.get('longitud')
+                        lat_empresa,
+                        lng_empresa
                     )
+                    # Validar que la distancia sea válida
+                    if distancia is not None and isinstance(distancia, (int, float)) and distancia >= 0:
                     empresa['distancia_km'] = distancia
                     
                     # Filtrar por radio: solo incluir empresas dentro del radio
-                    if radio_km is not None and distancia is not None:
+                        if radio_km is not None and isinstance(radio_km, (int, float)) and radio_km > 0:
                         if distancia > radio_km:
                             logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio: {distancia:.2f}km > {radio_km:.2f}km")
                             continue  # Saltar esta empresa, está fuera del radio
+                    else:
+                        empresa['distancia_km'] = None
+                        logger.debug(f" Distancia inválida calculada para {empresa.get('nombre', 'Sin nombre')}")
                 else:
                     empresa['distancia_km'] = None
                     # Si no tiene coordenadas y hay un radio definido, excluir la empresa
-                    if radio_km is not None:
-                        logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} sin coordenadas, excluida del radio")
+                    if radio_km is not None and isinstance(radio_km, (int, float)) and radio_km > 0:
+                        logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} sin coordenadas válidas, excluida del radio")
                         continue
                 
                 empresas_con_distancia.append(empresa)

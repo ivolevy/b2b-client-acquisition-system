@@ -19,6 +19,10 @@ def check_robots_txt(url: str) -> bool:
     """Verifica robots.txt"""
     try:
         parsed = urlparse(url)
+        if not parsed.netloc:
+            logger.warning(f"URL sin netloc válido: {url}")
+            return False
+        
         robots_url = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
         
         rp = RobotFileParser()
@@ -26,7 +30,9 @@ def check_robots_txt(url: str) -> bool:
         rp.read()
         
         return rp.can_fetch("B2BDataCollectorBot/1.0", url)
-    except:
+    except Exception as e:
+        logger.warning(f"Error verificando robots.txt para {url}: {e}, asumiendo permitido")
+        # Por defecto permitir, pero loguear el error
         return True
 
 def extraer_emails_b2b(soup: BeautifulSoup, text: str) -> List[str]:
@@ -114,8 +120,9 @@ def buscar_en_pagina_contacto(base_url: str, soup: BeautifulSoup) -> Dict:
             time.sleep(1)
             response = requests.get(
                 contacto_urls[0], 
-                timeout=10,
-                headers={'User-Agent': 'B2BDataCollectorBot/1.0'}
+                timeout=15,  # Aumentado de 10 a 15 para consistencia
+                headers={'User-Agent': 'B2BDataCollectorBot/1.0'},
+                allow_redirects=True
             )
             
             if response.status_code == 200:
@@ -220,7 +227,22 @@ def enriquecer_empresa_b2b(empresa: Dict) -> Dict:
     """
     Enriquece datos de empresa con web scraping si tiene sitio web
     """
-    if not empresa.get('website'):
+    if not empresa or not isinstance(empresa, dict):
+        logger.error("Empresa inválida en enriquecer_empresa_b2b")
+        return empresa or {}
+    
+    website = empresa.get('website')
+    if not website or not isinstance(website, str) or not website.strip():
+        return empresa
+    
+    # Validar que website sea una URL válida básica
+    try:
+        parsed = urlparse(website if website.startswith('http') else f'https://{website}')
+        if not parsed.netloc:
+            logger.warning(f"Website inválido: {website}")
+            return empresa
+    except Exception as e:
+        logger.warning(f"Error validando website {website}: {e}")
         return empresa
     
     # Si ya tiene email y teléfono, podemos saltarlo para ser más rápidos
@@ -229,7 +251,7 @@ def enriquecer_empresa_b2b(empresa: Dict) -> Dict:
         return empresa
     
     # Scrapear sitio web
-    datos_scraped = scrapear_empresa_b2b(empresa['website'])
+    datos_scraped = scrapear_empresa_b2b(website)
     
     # Actualizar solo si están vacíos
     if not empresa.get('email') and datos_scraped['emails']:

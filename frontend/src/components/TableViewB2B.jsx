@@ -19,7 +19,8 @@ function TableViewB2B({
   const [sortColumn, setSortColumn] = useState(null);
   const { user } = useAuth();
   const isPro = user?.plan === 'pro';
-  const itemsPerPage = (isPro && showAllResults) ? 9999 : 10;
+  // Limitar itemsPerPage para evitar problemas de rendimiento
+  const itemsPerPage = (isPro && showAllResults) ? 500 : 10;
   const tableContainerRef = useRef(null);
 
   // Filtros instantáneos
@@ -87,15 +88,19 @@ function TableViewB2B({
 
     if (filtroDistancia) {
       const distanciaValue = parseFloat(filtroDistancia);
-      if (!isNaN(distanciaValue)) {
+      if (!isNaN(distanciaValue) && isFinite(distanciaValue) && distanciaValue >= 0) {
         if (filtroDistanciaOperador === 'mayor') {
-          filtered = filtered.filter(e => 
-            e.distancia_km !== null && e.distancia_km !== undefined && e.distancia_km > distanciaValue
-          );
+          filtered = filtered.filter(e => {
+            const dist = e.distancia_km;
+            return dist !== null && dist !== undefined && 
+                   typeof dist === 'number' && isFinite(dist) && dist > distanciaValue;
+          });
         } else {
-          filtered = filtered.filter(e => 
-            e.distancia_km !== null && e.distancia_km !== undefined && e.distancia_km < distanciaValue
-          );
+          filtered = filtered.filter(e => {
+            const dist = e.distancia_km;
+            return dist !== null && dist !== undefined && 
+                   typeof dist === 'number' && isFinite(dist) && dist < distanciaValue;
+          });
         }
       }
     }

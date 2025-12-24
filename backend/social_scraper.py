@@ -42,9 +42,9 @@ SHARE_PATTERNS = [
     '/sharer/', '/intent/', '/share?', 'whatsapp.com', 'telegram.me'
 ]
 
-def limpiar_url(url: str, red_social: str) -> str:
+def limpiar_url(url: str, red_social: str) -> Optional[str]:
     """Limpia y normaliza la URL de red social"""
-    if not url:
+    if not url or not isinstance(url, str):
         return None
     
     # Remover parámetros de URL
@@ -113,7 +113,10 @@ def extraer_desde_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     scripts = soup.find_all('script', type='application/ld+json')
     for script in scripts:
         try:
-            data = json.loads(script.string)
+            script_content = script.string
+            if not script_content:
+                continue
+            data = json.loads(script_content)
             
             # Buscar en sameAs (array de URLs de redes sociales)
             same_as = data.get('sameAs', [])
@@ -169,6 +172,22 @@ def enriquecer_con_redes_sociales(sitio_web: str, timeout: int = 10) -> Dict[str
         Diccionario con las redes sociales encontradas
         Ejemplo: {'instagram': 'https://instagram.com/empresa', 'facebook': '...'}
     """
+    # Validar entrada
+    if not sitio_web or not isinstance(sitio_web, str) or not sitio_web.strip():
+        logger.warning("sitio_web inválido o vacío")
+        return {}
+    
+    # Validar que sea una URL válida
+    from urllib.parse import urlparse
+    try:
+        parsed = urlparse(sitio_web if sitio_web.startswith('http') else f'https://{sitio_web}')
+        if not parsed.netloc:
+            logger.warning(f"URL inválida: {sitio_web}")
+            return {}
+    except Exception as e:
+        logger.warning(f"Error validando URL {sitio_web}: {e}")
+        return {}
+    
     try:
         # Headers para simular navegador real
         headers = {
