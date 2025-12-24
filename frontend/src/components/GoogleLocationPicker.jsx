@@ -28,9 +28,11 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   const [mapCenter, setMapCenter] = useState({ lat: -34.6037, lng: -58.3816 }); // Buenos Aires, Argentina por defecto
   const [searchQuery, setSearchQuery] = useState('');
   const [map, setMap] = useState(null);
+  const mapRef = useRef(null); // Ref para evitar stale closures
   const autocompleteInputRef = useRef(null);
   const autocompleteRef = useRef(null);
   const [initialLocationApplied, setInitialLocationApplied] = useState(false);
+  const boundsUpdateTimeoutRef = useRef(null); // Para debounce de bounds
   const { success, error, warning, info, removeToast } = useToast();
 
   const { isLoaded, loadError } = useJsApiLoader({
@@ -41,9 +43,10 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   
   // Efecto para aplicar ubicación inicial desde historial
   useEffect(() => {
-    if (initialLocation && !initialLocationApplied && map && isLoaded) {
+    if (initialLocation && !initialLocationApplied && mapRef.current && isLoaded) {
       const { lat, lng, name, radius: initialRadius } = initialLocation;
       const location = { lat, lng };
+      const finalRadius = initialRadius || radius;
       
       if (initialRadius) {
         setRadius(initialRadius);
@@ -52,22 +55,29 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       setSelectedLocation(location);
       setMapCenter(location);
       setSearchQuery(name || '');
-      map.panTo(location);
       
-      const bbox = calculateBoundingBox(lat, lng, initialRadius || radius);
+      if (mapRef.current) {
+        mapRef.current.panTo(location);
+        mapRef.current.setZoom(15);
+      }
+      
+      const bbox = calculateBoundingBox(lat, lng, finalRadius);
       onLocationChange({
         center: location,
-        radius: initialRadius || radius,
+        radius: finalRadius,
         bbox: bbox,
         ubicacion_nombre: name || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
       });
       
       setInitialLocationApplied(true);
     }
-  }, [initialLocation, initialLocationApplied, map, isLoaded, radius, onLocationChange]);
+  }, [initialLocation, initialLocationApplied, isLoaded, radius, onLocationChange]);
   
+  // Reset initialLocationApplied cuando cambia initialLocation
   useEffect(() => {
     if (initialLocation) {
+      setInitialLocationApplied(false);
+    } else {
       setInitialLocationApplied(false);
     }
   }, [initialLocation]);
@@ -90,7 +100,14 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     if (e.latLng) {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
-      handleLocationSelect(lat, lng);
+      const location = { lat, lng };
+      
+      // Actualizar searchQuery con coordenadas cuando se hace click
+      setSearchQuery(`Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+      setMapCenter(location);
+      setSelectedLocation(location);
+      
+      handleLocationSelect(lat, lng, `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
     }
   }, [handleLocationSelect]);
 
@@ -126,40 +143,68 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         );
         
         autocompleteRef.current.addListener('place_changed', () => {
-          const place = autocompleteRef.current.getPlace();
-          if (place.geometry) {
-            // Manejar tanto location como función como objeto
-            let lat, lng;
-            if (typeof place.geometry.location.lat === 'function') {
-              lat = place.geometry.location.lat();
-              lng = place.geometry.location.lng();
-            } else {
-              lat = place.geometry.location.lat;
-              lng = place.geometry.location.lng;
+          try {
+            const place = autocompleteRef.current.getPlace();
+            
+            // Validar que place y geometry existan
+            if (!place || !place.geometry || !place.geometry.location) {
+              console.warn('Place selection invalid:', place);
+              return;
             }
             
-            const nombre = place.formatted_address || place.name;
+            // Manejar tanto location como función como objeto
+            let lat, lng;
+            const locationObj = place.geometry.location;
+            
+            if (typeof locationObj.lat === 'function') {
+              lat = locationObj.lat();
+              lng = locationObj.lng();
+            } else if (typeof locationObj.lat === 'number' && typeof locationObj.lng === 'number') {
+              lat = locationObj.lat;
+              lng = locationObj.lng;
+            } else {
+              console.error('Invalid location format:', locationObj);
+              return;
+            }
+            
+            // Validar que lat y lng sean números válidos
+            if (isNaN(lat) || isNaN(lng) || !isFinite(lat) || !isFinite(lng)) {
+              console.error('Invalid coordinates:', { lat, lng });
+              return;
+            }
+            
+            const nombre = place.formatted_address || place.name || '';
             const location = { lat, lng };
             
             setSearchQuery(nombre);
             setMapCenter(location);
             setSelectedLocation(location);
             
-            // Mover el mapa inmediatamente
-            if (map) {
-              map.panTo(location);
-              map.setZoom(15);
+            // Mover el mapa usando el ref para evitar stale closure
+            const currentMap = mapRef.current;
+            if (currentMap) {
+              currentMap.panTo(location);
+              currentMap.setZoom(15);
             } else {
               // Si el mapa no está listo, esperar un poco y volver a intentar
               setTimeout(() => {
-                if (map) {
-                  map.panTo(location);
-                  map.setZoom(15);
+                const retryMap = mapRef.current;
+                if (retryMap) {
+                  retryMap.panTo(location);
+                  retryMap.setZoom(15);
                 }
               }, 100);
             }
             
             handleLocationSelect(lat, lng, nombre);
+          } catch (error) {
+            console.error('Error handling place selection:', error);
+            error(
+              <>
+                <strong>Error al seleccionar ubicación</strong>
+                <p>Hubo un problema al procesar la dirección seleccionada. Intenta nuevamente.</p>
+              </>
+            );
           }
         });
       }
@@ -168,9 +213,10 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     return () => {
       if (autocompleteRef.current) {
         window.google?.maps?.event?.clearInstanceListeners?.(autocompleteRef.current);
+        autocompleteRef.current = null;
       }
     };
-  }, [isLoaded, handleLocationSelect]);
+  }, [isLoaded, handleLocationSelect, error]);
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -191,10 +237,16 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         const location = { lat, lng };
+        
         setMapCenter(location);
-        if (map) {
-          map.panTo(location);
+        setSelectedLocation(location);
+        setSearchQuery('Mi ubicación actual');
+        
+        if (mapRef.current) {
+          mapRef.current.panTo(location);
+          mapRef.current.setZoom(15);
         }
+        
         handleLocationSelect(lat, lng, 'Mi ubicación actual');
         success(
           <>
@@ -228,38 +280,92 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     );
   };
 
+  // Actualizar mapa cuando cambia mapCenter (optimizado para evitar movimientos innecesarios)
   useEffect(() => {
-    if (isLoaded && map && mapCenter) {
-      map.panTo(mapCenter);
-      if (selectedLocation) {
-        map.setZoom(15);
-      } else {
-        map.setZoom(10);
+    if (isLoaded && mapRef.current && mapCenter) {
+      const currentCenter = mapRef.current.getCenter();
+      const centerLat = currentCenter?.lat();
+      const centerLng = currentCenter?.lng();
+      
+      // Solo mover el mapa si el centro cambió significativamente (más de 100 metros)
+      if (!centerLat || !centerLng || 
+          Math.abs(centerLat - mapCenter.lat) > 0.001 || 
+          Math.abs(centerLng - mapCenter.lng) > 0.001) {
+        mapRef.current.panTo(mapCenter);
+        if (selectedLocation) {
+          mapRef.current.setZoom(15);
+        } else {
+          mapRef.current.setZoom(10);
+        }
       }
     }
-  }, [isLoaded, map, mapCenter, selectedLocation]);
+  }, [isLoaded, mapCenter, selectedLocation]);
 
-  // Actualizar bounds del autocomplete cuando el mapa cambie
+  // Actualizar bounds del autocomplete cuando el mapa cambie (con debounce para evitar loops)
   useEffect(() => {
-    if (isLoaded && map && autocompleteRef.current) {
+    if (isLoaded && mapRef.current && autocompleteRef.current) {
       const updateBounds = () => {
-        if (map && autocompleteRef.current) {
-          const bounds = map.getBounds();
-          if (bounds) {
-            autocompleteRef.current.setBounds(bounds);
+        // Limpiar timeout anterior
+        if (boundsUpdateTimeoutRef.current) {
+          clearTimeout(boundsUpdateTimeoutRef.current);
+        }
+        
+        // Debounce para evitar actualizaciones excesivas
+        boundsUpdateTimeoutRef.current = setTimeout(() => {
+          const currentMap = mapRef.current;
+          const currentAutocomplete = autocompleteRef.current;
+          
+          if (currentMap && currentAutocomplete) {
+            try {
+              const bounds = currentMap.getBounds();
+              if (bounds && bounds.isValid && bounds.isValid()) {
+                currentAutocomplete.setBounds(bounds);
+              }
+            } catch (error) {
+              console.warn('Error updating autocomplete bounds:', error);
+            }
+          }
+        }, 300); // 300ms de debounce
+      };
+      
+      const boundsListener = mapRef.current.addListener('bounds_changed', updateBounds);
+      const centerListener = mapRef.current.addListener('center_changed', updateBounds);
+      
+      return () => {
+        if (boundsUpdateTimeoutRef.current) {
+          clearTimeout(boundsUpdateTimeoutRef.current);
+          boundsUpdateTimeoutRef.current = null;
+        }
+        if (mapRef.current) {
+          try {
+            window.google?.maps?.event?.removeListener?.(boundsListener);
+            window.google?.maps?.event?.removeListener?.(centerListener);
+          } catch (error) {
+            console.warn('Error removing map listeners:', error);
           }
         }
       };
-      
-      map.addListener('bounds_changed', updateBounds);
-      map.addListener('center_changed', updateBounds);
-      
-      return () => {
-        window.google?.maps?.event?.clearListeners?.(map, 'bounds_changed');
-        window.google?.maps?.event?.clearListeners?.(map, 'center_changed');
-      };
     }
-  }, [isLoaded, map]);
+  }, [isLoaded]);
+  
+  // Cleanup general al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (boundsUpdateTimeoutRef.current) {
+        clearTimeout(boundsUpdateTimeoutRef.current);
+        boundsUpdateTimeoutRef.current = null;
+      }
+      if (autocompleteRef.current) {
+        try {
+          window.google?.maps?.event?.clearInstanceListeners?.(autocompleteRef.current);
+        } catch (error) {
+          console.warn('Error clearing autocomplete listeners:', error);
+        }
+        autocompleteRef.current = null;
+      }
+      mapRef.current = null;
+    };
+  }, []);
 
   if (!GOOGLE_API_KEY) {
     return (
@@ -348,7 +454,10 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             center={mapCenter}
             zoom={selectedLocation ? 15 : 10}
             onClick={handleMapClick}
-            onLoad={(mapInstance) => setMap(mapInstance)}
+            onLoad={(mapInstance) => {
+              setMap(mapInstance);
+              mapRef.current = mapInstance; // Actualizar ref también
+            }}
             options={{
               disableDefaultUI: false,
               zoomControl: true,
@@ -356,7 +465,6 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               mapTypeControl: true,
               fullscreenControl: true,
             }}
-            key={selectedLocation ? `${selectedLocation.lat}-${selectedLocation.lng}` : 'default'}
           >
             {selectedLocation && (
               <>
