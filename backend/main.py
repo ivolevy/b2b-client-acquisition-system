@@ -436,32 +436,13 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
-# CORS - Configurar orígenes permitidos desde variable de entorno
-# Por defecto, permitir todos los orígenes en desarrollo
-# En producción, usar variable de entorno o detectar automáticamente
-CORS_ORIGINS_ENV = os.getenv('CORS_ORIGINS', '').strip()
-
-if CORS_ORIGINS_ENV:
-    # Si hay variable de entorno, usar esos orígenes
-    ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ORIGINS_ENV.split(',') if origin.strip()]
-    if '*' in ALLOWED_ORIGINS and len(ALLOWED_ORIGINS) > 1:
-        # Si hay * y otros orígenes, remover * (no tiene sentido)
-        ALLOWED_ORIGINS = [o for o in ALLOWED_ORIGINS if o != '*']
-else:
-    # Si no hay variable de entorno, permitir todos los orígenes
-    # Esto es seguro porque el backend no maneja autenticación sensible
-    ALLOWED_ORIGINS = ["*"]
-
-# Logging para debugging
-logger.info(f"CORS configurado con orígenes permitidos: {ALLOWED_ORIGINS}")
-
+# CORS - Permitir todos los orígenes
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
 
 # Modelos
