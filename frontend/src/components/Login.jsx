@@ -1096,7 +1096,23 @@ function Login({ onLogin }) {
                     <span className="checkmark"></span>
                     <span>Recordarme</span>
                   </label>
-                  <a href="#" className="forgot-password">¿Olvidaste tu contraseña?</a>
+                  <a 
+                    href="#" 
+                    className="forgot-password"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowForgotPasswordModal(true);
+                      setForgotPasswordStep('request');
+                      setForgotPasswordEmail(email); // Pre-llenar con el email del login si existe
+                      setForgotPasswordCode('');
+                      setForgotPasswordNewPassword('');
+                      setForgotPasswordConfirmPassword('');
+                      setForgotPasswordError('');
+                      setForgotPasswordCodeSent(false);
+                    }}
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </a>
                 </div>
               )}
 
@@ -1502,47 +1518,52 @@ function Login({ onLogin }) {
                     setForgotPasswordError('');
 
                     try {
-                      // Primero validar el código nuevamente para obtener el token de sesión
-                      const verifyResponse = await axios.post(`${API_URL}/auth/reset-password`, {
-                        email: forgotPasswordEmail,
-                        codigo: forgotPasswordCode
-                      });
-
-                      if (!verifyResponse.data.success || !verifyResponse.data.valid) {
-                        setForgotPasswordError('El código de validación ha expirado. Por favor, solicitá uno nuevo.');
-                        setForgotPasswordLoading(false);
-                        return;
-                      }
-
-                      // Usar Supabase Admin API a través del backend para resetear la contraseña
-                      // O usar el método de Supabase que requiere autenticación temporal
-                      // Por ahora, vamos a usar updateUser después de autenticarnos temporalmente
-                      // Nota: Esto requiere que el usuario tenga una sesión activa, así que necesitamos
-                      // un endpoint en el backend que use la API de administración de Supabase
-                      
-                      // Alternativa: usar resetPasswordForEmail y luego updateUser
-                      // Pero primero necesitamos crear un endpoint en el backend que use Supabase Admin
-                      
-                      // Por ahora, vamos a usar un enfoque más simple: 
-                      // El backend ya validó el código, ahora necesitamos actualizar la contraseña
-                      // usando la API de administración de Supabase desde el backend
-                      
+                      // Validar el código y actualizar la contraseña en un solo paso
                       const resetResponse = await axios.post(`${API_URL}/auth/actualizar-password-reset`, {
                         email: forgotPasswordEmail,
+                        codigo: forgotPasswordCode,
                         new_password: forgotPasswordNewPassword
                       });
 
                       if (resetResponse.data.success) {
-                        // Éxito
-                        setShowForgotPasswordModal(false);
-                        setForgotPasswordStep('request');
-                        setForgotPasswordEmail('');
-                        setForgotPasswordCode('');
-                        setForgotPasswordNewPassword('');
-                        setForgotPasswordConfirmPassword('');
-                      setForgotPasswordError('');
-                      setForgotPasswordCodeSent(false);
-                      alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
+                        // Si requiere reset desde el frontend (método alternativo)
+                        if (resetResponse.data.requires_frontend_reset) {
+                          // Usar el método de Supabase que envía un email con link de reset
+                          const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+                            forgotPasswordEmail,
+                            {
+                              redirectTo: `${window.location.origin}/reset-password`
+                            }
+                          );
+                          
+                          if (resetError) {
+                            setForgotPasswordError('Error al enviar el email de recuperación: ' + resetError.message);
+                            setForgotPasswordLoading(false);
+                            return;
+                          }
+                          
+                          // Mostrar mensaje de que se envió el email
+                          setShowForgotPasswordModal(false);
+                          setForgotPasswordStep('request');
+                          setForgotPasswordEmail('');
+                          setForgotPasswordCode('');
+                          setForgotPasswordNewPassword('');
+                          setForgotPasswordConfirmPassword('');
+                          setForgotPasswordError('');
+                          setForgotPasswordCodeSent(false);
+                          alert('Se envió un email a tu dirección con un link para cambiar tu contraseña. Revisá tu bandeja de entrada.');
+                        } else {
+                          // Éxito - contraseña actualizada directamente
+                          setShowForgotPasswordModal(false);
+                          setForgotPasswordStep('request');
+                          setForgotPasswordEmail('');
+                          setForgotPasswordCode('');
+                          setForgotPasswordNewPassword('');
+                          setForgotPasswordConfirmPassword('');
+                          setForgotPasswordError('');
+                          setForgotPasswordCodeSent(false);
+                          alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
+                        }
                       } else {
                         setForgotPasswordError(resetResponse.data.message || 'Error al actualizar la contraseña');
                       }

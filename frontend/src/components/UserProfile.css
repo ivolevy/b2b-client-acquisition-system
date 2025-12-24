@@ -702,6 +702,143 @@
   cursor: not-allowed;
 }
 
+/* Modal de éxito al cancelar plan PRO */
+.cancel-plan-success-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.cancel-plan-success-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease;
+  overflow: hidden;
+}
+
+.cancel-plan-success-modal-header {
+  padding: 32px 24px 24px;
+  text-align: center;
+}
+
+.cancel-plan-success-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  animation: scaleIn 0.3s ease;
+}
+
+.cancel-plan-success-icon svg {
+  width: 40px;
+  height: 40px;
+  stroke: white;
+  stroke-width: 3;
+}
+
+.cancel-plan-success-modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.cancel-plan-success-modal-body {
+  padding: 0 24px 24px;
+  text-align: center;
+}
+
+.cancel-plan-success-message {
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  margin: 0 0 12px;
+  font-weight: 500;
+}
+
+.cancel-plan-success-submessage {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.cancel-plan-success-submessage strong {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.cancel-plan-success-modal-footer {
+  padding: 0 24px 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.cancel-plan-success-btn {
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 12px rgba(129, 212, 250, 0.3);
+}
+
+.cancel-plan-success-btn:hover {
+  background: linear-gradient(135deg, #4FC3F7 0%, #81D4FA 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(129, 212, 250, 0.4);
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Responsive - Mobile */
 @media (max-width: 768px) {
   .user-profile-container {

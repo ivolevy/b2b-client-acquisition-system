@@ -29,13 +29,14 @@ function UserProfile() {
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [showCancelPlanModal, setShowCancelPlanModal] = useState(false);
+  const [showCancelPlanSuccessModal, setShowCancelPlanSuccessModal] = useState(false);
   const [cancelPlanLoading, setCancelPlanLoading] = useState(false);
   const [cancelPlanError, setCancelPlanError] = useState('');
   const [cancelConfirmText, setCancelConfirmText] = useState('');
 
   // Bloquear scroll del body cuando cualquier modal está abierto
   useEffect(() => {
-    const hasModalOpen = showDeleteModal || showUpgradeModal || showPasswordModal || showCancelPlanModal;
+    const hasModalOpen = showDeleteModal || showUpgradeModal || showPasswordModal || showCancelPlanModal || showCancelPlanSuccessModal;
     
     if (hasModalOpen) {
       // Guardar el scroll actual
@@ -57,7 +58,7 @@ function UserProfile() {
       document.body.classList.remove('modal-open');
       document.body.style.top = '';
     };
-  }, [showDeleteModal, showUpgradeModal, showPasswordModal, showCancelPlanModal]);
+  }, [showDeleteModal, showUpgradeModal, showPasswordModal, showCancelPlanModal, showCancelPlanSuccessModal]);
 
   const handleUpgradeToPro = async () => {
     if (!proTokenInput.trim()) {
@@ -298,13 +299,10 @@ function UserProfile() {
       authData.plan_expires_at = null;
       localStorage.setItem('b2b_auth', JSON.stringify(authData));
 
-      // 4. Cerrar modal y recargar para aplicar cambios
+      // 4. Cerrar modal de confirmación y mostrar modal de éxito
       setShowCancelPlanModal(false);
       setCancelConfirmText('');
-      alert('Tu plan PRO ha sido cancelado exitosamente. Ahora tienes plan Free.');
-      
-      // Recargar la página para que AuthWrapper cargue los datos actualizados de Supabase
-      window.location.reload();
+      setShowCancelPlanSuccessModal(true);
     } catch (error) {
       console.error('Error al cancelar plan:', error);
       setCancelPlanError('Error al cancelar el plan: ' + (error.message || 'Error desconocido'));
@@ -806,6 +804,45 @@ function UserProfile() {
                 disabled={cancelConfirmText !== 'CANCELAR' || cancelPlanLoading}
               >
                 {cancelPlanLoading ? 'Cancelando...' : 'Cancelar Plan PRO'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de éxito al cancelar plan PRO */}
+      {showCancelPlanSuccessModal && (
+        <div className="cancel-plan-success-modal-overlay">
+          <div className="cancel-plan-success-modal">
+            <div className="cancel-plan-success-modal-header">
+              <div className="cancel-plan-success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+              <h3>Plan Cancelado Exitosamente</h3>
+            </div>
+            
+            <div className="cancel-plan-success-modal-body">
+              <p className="cancel-plan-success-message">
+                Tu plan PRO ha sido cancelado exitosamente.
+              </p>
+              <p className="cancel-plan-success-submessage">
+                Ahora tienes plan <strong>Free</strong>. Podés actualizar a PRO nuevamente cuando lo desees.
+              </p>
+            </div>
+            
+            <div className="cancel-plan-success-modal-footer">
+              <button 
+                className="cancel-plan-success-btn"
+                onClick={() => {
+                  setShowCancelPlanSuccessModal(false);
+                  // Recargar la página para que AuthWrapper cargue los datos actualizados de Supabase
+                  window.location.reload();
+                }}
+              >
+                Entendido
               </button>
             </div>
           </div>

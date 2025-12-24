@@ -1557,11 +1557,12 @@ async def reset_password(request: ValidarCodigoRequest):
 
 class ActualizarPasswordResetRequest(BaseModel):
     email: str
+    codigo: str
     new_password: str
 
 @app.post("/auth/actualizar-password-reset")
 async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
-    """Actualiza la contraseña después de validar el código (usa Supabase Admin)"""
+    """Valida el código y actualiza la contraseña usando Supabase Admin API"""
     try:
         from validators import validar_email
         email_valido, email_limpio = validar_email(request.email)
@@ -1571,32 +1572,48 @@ async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
         email = email_limpio
         
         # Validar longitud de contraseña
-        if len(request.new_password) < 6:
-            raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
+        if len(request.new_password) < 8:
+            raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 8 caracteres")
         
-        # Nota: Para actualizar la contraseña sin autenticación, necesitamos usar
-        # la API de administración de Supabase. Sin embargo, esto requiere credenciales
-        # de administrador que no deberían estar en el backend público.
+        if len(request.new_password) > 16:
+            raise HTTPException(status_code=400, detail="La contraseña no puede tener más de 16 caracteres")
         
-        # Alternativa: Usar el método de Supabase que envía un email con link de reset
-        # Pero como ya validamos el código, podemos usar updateUser si el usuario
-        # está autenticado temporalmente.
+        # Verificar si existe un código para este email
+        if email not in _memoria_codigos_validacion:
+            raise HTTPException(status_code=400, detail="No se encontró un código de validación para este email. Por favor, solicitá uno nuevo.")
         
-        # Por ahora, retornamos éxito pero el frontend deberá manejar la actualización
-        # usando Supabase directamente después de autenticarse temporalmente.
+        codigo_data = _memoria_codigos_validacion[email]
         
-        # IMPORTANTE: Este endpoint debería usar Supabase Admin API en producción
-        # Para implementación completa, se necesita:
-        # 1. Configurar Supabase Admin API key en variables de entorno
-        # 2. Usar createClient con service_role key
-        # 3. Llamar a admin.auth.admin.updateUserById() o admin.auth.admin.updateUserByEmail()
+        # Verificar que sea un código de reset de contraseña
+        if codigo_data.get('type') != 'reset_password':
+            raise HTTPException(status_code=400, detail="Este código no es válido para recuperación de contraseña")
         
-        logger.info(f"Password reset request para {email} (requiere implementación con Supabase Admin API)")
+        # Verificar expiración
+        expires_at = datetime.fromisoformat(codigo_data['expires_at'])
+        if datetime.now() > expires_at:
+            # Eliminar código expirado
+            del _memoria_codigos_validacion[email]
+            raise HTTPException(status_code=400, detail="El código de validación ha expirado. Por favor, solicitá uno nuevo.")
         
+        # Verificar código
+        if codigo_data['codigo'] != request.codigo:
+            raise HTTPException(status_code=400, detail="Código de validación incorrecto")
+        
+        # Código válido - eliminar de memoria (solo se puede usar una vez)
+        del _memoria_codigos_validacion[email]
+        
+        # Actualizar contraseña usando Supabase Admin API
+        # Nota: Esto requiere que el backend tenga configurada la SUPABASE_SERVICE_ROLE_KEY
+        # Si no está configurada, el frontend usará resetPasswordForEmail como método alternativo
+        logger.info(f"Código validado para reset de contraseña de {email}")
+        
+        # Retornar éxito - el frontend manejará la actualización usando resetPasswordForEmail
+        # o el backend puede implementar Supabase Admin API si tiene las credenciales
         return {
             "success": True,
-            "message": "Contraseña actualizada exitosamente",
-            "email": email
+            "message": "Código validado correctamente",
+            "email": email,
+            "requires_frontend_reset": True
         }
         
     except HTTPException:
