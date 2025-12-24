@@ -181,12 +181,15 @@ function AdminUserDetail() {
   return (
     <div className="admin-user-detail">
       <div className="admin-header">
-        <div>
+        <div className="admin-header-content-wrapper">
           <button 
-            className="btn-back"
+            className="admin-detail-back-btn"
             onClick={() => navigate('/backoffice/users')}
+            title="Volver a usuarios"
           >
-            ← Volver
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
           </button>
           <h1>Detalle de Usuario</h1>
         </div>
