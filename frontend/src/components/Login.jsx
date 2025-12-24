@@ -4,6 +4,8 @@ import { authService, supabase } from '../lib/supabase';
 import { authStorage } from '../utils/storage';
 import { rateLimiter, debounce } from '../utils/rateLimiter';
 import { handleError } from '../utils/errorHandler';
+import { API_URL } from '../config';
+import axios from 'axios';
 
 // Credenciales de prueba (modo demo cuando Supabase no está configurado)
 const DEMO_USERS = [
@@ -191,6 +193,17 @@ function Login({ onLogin }) {
     // Verificar si el usuario cerró el mensaje de email pendiente
     return authStorage.getDismissedPendingEmail();
   });
+  
+  // Estados para recuperación de contraseña
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [forgotPasswordStep, setForgotPasswordStep] = useState('request'); // 'request', 'verify', 'reset'
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [forgotPasswordCode, setForgotPasswordCode] = useState('');
+  const [forgotPasswordNewPassword, setForgotPasswordNewPassword] = useState('');
+  const [forgotPasswordConfirmPassword, setForgotPasswordConfirmPassword] = useState('');
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+  const [forgotPasswordError, setForgotPasswordError] = useState('');
+  const [forgotPasswordCodeSent, setForgotPasswordCodeSent] = useState(false);
   
   // Estados de validación por campo
   const [emailError, setEmailError] = useState('');
@@ -1197,6 +1210,323 @@ function Login({ onLogin }) {
           </div>
         </div>
       </div>
+
+      {/* Modal de recuperación de contraseña */}
+      {showForgotPasswordModal && (
+        <div className="forgot-password-modal-overlay" onClick={() => {
+          if (!forgotPasswordLoading) {
+            setShowForgotPasswordModal(false);
+            setForgotPasswordStep('request');
+            setForgotPasswordEmail('');
+            setForgotPasswordCode('');
+            setForgotPasswordNewPassword('');
+            setForgotPasswordConfirmPassword('');
+            setForgotPasswordError('');
+            setForgotPasswordCodeSent(false);
+          }
+        }}>
+          <div className="forgot-password-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="forgot-password-modal-header">
+              <h3>Recuperar contraseña</h3>
+              <button 
+                className="close-btn"
+                onClick={() => {
+                  if (!forgotPasswordLoading) {
+                    setShowForgotPasswordModal(false);
+                    setForgotPasswordStep('request');
+                    setForgotPasswordEmail('');
+                    setForgotPasswordCode('');
+                    setForgotPasswordNewPassword('');
+                    setForgotPasswordConfirmPassword('');
+                    setForgotPasswordError('');
+                    setForgotPasswordCodeSent(false);
+                  }
+                }}
+                disabled={forgotPasswordLoading}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="forgot-password-modal-body">
+              {forgotPasswordError && (
+                <div className="forgot-password-error">
+                  {forgotPasswordError}
+                </div>
+              )}
+
+              {forgotPasswordStep === 'request' && (
+                <>
+                  <p style={{ marginBottom: '20px', color: '#666' }}>
+                    Ingresá tu email y te enviaremos un código de verificación para recuperar tu contraseña.
+                  </p>
+                  <div className="forgot-password-input-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      value={forgotPasswordEmail}
+                      onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                      placeholder="Ingresá tu email"
+                      disabled={forgotPasswordLoading}
+                      autoFocus
+                    />
+                  </div>
+                </>
+              )}
+
+              {forgotPasswordStep === 'verify' && (
+                <>
+                  {forgotPasswordCodeSent && (
+                    <div style={{ 
+                      background: '#d4edda', 
+                      border: '1px solid #c3e6cb', 
+                      borderRadius: '8px', 
+                      padding: '12px', 
+                      marginBottom: '20px',
+                      color: '#155724'
+                    }}>
+                      ✓ Código enviado a {forgotPasswordEmail}. Revisá tu bandeja de entrada.
+                    </div>
+                  )}
+                  <div className="forgot-password-input-group">
+                    <label>Código de validación</label>
+                    <input
+                      type="text"
+                      value={forgotPasswordCode}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                        setForgotPasswordCode(value);
+                      }}
+                      placeholder="Ingresá el código de 6 dígitos"
+                      disabled={forgotPasswordLoading}
+                      autoFocus
+                      maxLength={6}
+                      style={{ 
+                        textAlign: 'center', 
+                        fontSize: '24px', 
+                        letterSpacing: '8px',
+                        fontFamily: 'monospace'
+                      }}
+                    />
+                    <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                      El código expira en 10 minutos
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {forgotPasswordStep === 'reset' && (
+                <>
+                  <div style={{ 
+                    background: '#d4edda', 
+                    border: '1px solid #c3e6cb', 
+                    borderRadius: '8px', 
+                    padding: '12px', 
+                    marginBottom: '20px',
+                    color: '#155724'
+                  }}>
+                    ✓ Código verificado correctamente. Ingresá tu nueva contraseña.
+                  </div>
+                  <div className="forgot-password-input-group">
+                    <label>Nueva contraseña</label>
+                    <input
+                      type="password"
+                      value={forgotPasswordNewPassword}
+                      onChange={(e) => setForgotPasswordNewPassword(e.target.value)}
+                      placeholder="Ingresá tu nueva contraseña"
+                      disabled={forgotPasswordLoading}
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="forgot-password-input-group">
+                    <label>Confirmar nueva contraseña</label>
+                    <input
+                      type="password"
+                      value={forgotPasswordConfirmPassword}
+                      onChange={(e) => setForgotPasswordConfirmPassword(e.target.value)}
+                      placeholder="Confirmá tu nueva contraseña"
+                      disabled={forgotPasswordLoading}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <div className="forgot-password-modal-footer">
+              <button 
+                className="cancel-btn"
+                onClick={() => {
+                  if (!forgotPasswordLoading) {
+                    setShowForgotPasswordModal(false);
+                    setForgotPasswordStep('request');
+                    setForgotPasswordEmail('');
+                    setForgotPasswordCode('');
+                    setForgotPasswordNewPassword('');
+                    setForgotPasswordConfirmPassword('');
+                    setForgotPasswordError('');
+                    setForgotPasswordCodeSent(false);
+                  }
+                }}
+                disabled={forgotPasswordLoading}
+              >
+                Cancelar
+              </button>
+              {forgotPasswordStep === 'request' && (
+                <button 
+                  className="forgot-password-save-btn"
+                  onClick={async () => {
+                    if (!forgotPasswordEmail) {
+                      setForgotPasswordError('Ingresá tu email');
+                      return;
+                    }
+
+                    setForgotPasswordLoading(true);
+                    setForgotPasswordError('');
+
+                    try {
+                      const response = await axios.post(`${API_URL}/auth/solicitar-codigo-reset-password`, {
+                        email: forgotPasswordEmail
+                      });
+
+                      if (response.data.success) {
+                        setForgotPasswordCodeSent(true);
+                        setForgotPasswordStep('verify');
+                        setForgotPasswordError('');
+                      } else {
+                        setForgotPasswordError(response.data.message || 'Error al solicitar el código');
+                      }
+                    } catch (error) {
+                      const errorMsg = error.response?.data?.detail || error.message || 'Error al solicitar el código';
+                      setForgotPasswordError(errorMsg);
+                    } finally {
+                      setForgotPasswordLoading(false);
+                    }
+                  }}
+                  disabled={forgotPasswordLoading || !forgotPasswordEmail}
+                >
+                  {forgotPasswordLoading ? 'Enviando...' : 'Enviar código'}
+                </button>
+              )}
+              {forgotPasswordStep === 'verify' && (
+                <button 
+                  className="forgot-password-save-btn"
+                  onClick={async () => {
+                    if (!forgotPasswordCode || forgotPasswordCode.length !== 6) {
+                      setForgotPasswordError('Ingresá el código de 6 dígitos');
+                      return;
+                    }
+
+                    setForgotPasswordLoading(true);
+                    setForgotPasswordError('');
+
+                    try {
+                      const response = await axios.post(`${API_URL}/auth/reset-password`, {
+                        email: forgotPasswordEmail,
+                        codigo: forgotPasswordCode
+                      });
+
+                      if (response.data.success && response.data.valid) {
+                        setForgotPasswordStep('reset');
+                        setForgotPasswordError('');
+                      } else {
+                        setForgotPasswordError('Código de validación incorrecto');
+                      }
+                    } catch (error) {
+                      const errorMsg = error.response?.data?.detail || error.message || 'Error al validar el código';
+                      setForgotPasswordError(errorMsg);
+                    } finally {
+                      setForgotPasswordLoading(false);
+                    }
+                  }}
+                  disabled={forgotPasswordLoading || forgotPasswordCode.length !== 6}
+                >
+                  {forgotPasswordLoading ? 'Verificando...' : 'Verificar código'}
+                </button>
+              )}
+              {forgotPasswordStep === 'reset' && (
+                <button 
+                  className="forgot-password-save-btn"
+                  onClick={async () => {
+                    if (!forgotPasswordNewPassword || !forgotPasswordConfirmPassword) {
+                      setForgotPasswordError('Completá todos los campos');
+                      return;
+                    }
+
+                    if (forgotPasswordNewPassword !== forgotPasswordConfirmPassword) {
+                      setForgotPasswordError('Las contraseñas no coinciden');
+                      return;
+                    }
+
+                    if (forgotPasswordNewPassword.length < 6) {
+                      setForgotPasswordError('La contraseña debe tener al menos 6 caracteres');
+                      return;
+                    }
+
+                    setForgotPasswordLoading(true);
+                    setForgotPasswordError('');
+
+                    try {
+                      // Primero validar el código nuevamente para obtener el token de sesión
+                      const verifyResponse = await axios.post(`${API_URL}/auth/reset-password`, {
+                        email: forgotPasswordEmail,
+                        codigo: forgotPasswordCode
+                      });
+
+                      if (!verifyResponse.data.success || !verifyResponse.data.valid) {
+                        setForgotPasswordError('El código de validación ha expirado. Por favor, solicitá uno nuevo.');
+                        setForgotPasswordLoading(false);
+                        return;
+                      }
+
+                      // Usar Supabase Admin API a través del backend para resetear la contraseña
+                      // O usar el método de Supabase que requiere autenticación temporal
+                      // Por ahora, vamos a usar updateUser después de autenticarnos temporalmente
+                      // Nota: Esto requiere que el usuario tenga una sesión activa, así que necesitamos
+                      // un endpoint en el backend que use la API de administración de Supabase
+                      
+                      // Alternativa: usar resetPasswordForEmail y luego updateUser
+                      // Pero primero necesitamos crear un endpoint en el backend que use Supabase Admin
+                      
+                      // Por ahora, vamos a usar un enfoque más simple: 
+                      // El backend ya validó el código, ahora necesitamos actualizar la contraseña
+                      // usando la API de administración de Supabase desde el backend
+                      
+                      const resetResponse = await axios.post(`${API_URL}/auth/actualizar-password-reset`, {
+                        email: forgotPasswordEmail,
+                        new_password: forgotPasswordNewPassword
+                      });
+
+                      if (resetResponse.data.success) {
+                        // Éxito
+                        setShowForgotPasswordModal(false);
+                        setForgotPasswordStep('request');
+                        setForgotPasswordEmail('');
+                        setForgotPasswordCode('');
+                        setForgotPasswordNewPassword('');
+                        setForgotPasswordConfirmPassword('');
+                        setForgotPasswordError('');
+                        setForgotPasswordCodeSent(false);
+                        alert('Contraseña actualizada exitosamente. Podés iniciar sesión con tu nueva contraseña.');
+                      } else {
+                        setForgotPasswordError(resetResponse.data.message || 'Error al actualizar la contraseña');
+                      }
+                    } catch (error) {
+                      const errorMsg = error.response?.data?.detail || error.message || 'Error al cambiar la contraseña';
+                      setForgotPasswordError(errorMsg);
+                    } finally {
+                      setForgotPasswordLoading(false);
+                    }
+                  }}
+                  disabled={forgotPasswordLoading}
+                >
+                  {forgotPasswordLoading ? 'Guardando...' : 'Guardar contraseña'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
