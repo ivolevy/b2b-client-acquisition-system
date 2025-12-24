@@ -377,7 +377,8 @@
 
 /* Modales */
 .delete-modal-overlay,
-.upgrade-modal-overlay {
+.upgrade-modal-overlay,
+.cancel-plan-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -393,7 +394,8 @@
 }
 
 .delete-modal,
-.upgrade-modal {
+.upgrade-modal,
+.cancel-plan-modal {
   background: white;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
@@ -403,12 +405,14 @@
   overflow-y: auto;
 }
 
-.delete-modal-header {
+.delete-modal-header,
+.cancel-plan-modal-header {
   padding: 28px 32px;
   border-bottom: 1px solid var(--gray-100);
 }
 
-.delete-modal-header h3 {
+.delete-modal-header h3,
+.cancel-plan-modal-header h3 {
   margin: 0 0 8px 0;
   font-size: 1.5rem;
   font-weight: 600;
@@ -416,7 +420,8 @@
   letter-spacing: -0.01em;
 }
 
-.delete-modal-subtitle {
+.delete-modal-subtitle,
+.cancel-plan-modal-subtitle {
   margin: 0;
   font-size: 0.9375rem;
   color: var(--gray-600);
@@ -448,11 +453,13 @@
 }
 
 .delete-modal-body,
-.upgrade-modal-body {
+.upgrade-modal-body,
+.cancel-plan-modal-body {
   padding: 28px 32px;
 }
 
-.delete-warning-box {
+.delete-warning-box,
+.cancel-plan-warning-box {
   background: #fef2f2;
   border: 1px solid #fecaca;
   border-radius: var(--radius-lg);
@@ -460,7 +467,8 @@
   margin-bottom: 24px;
 }
 
-.delete-warning-title {
+.delete-warning-title,
+.cancel-plan-warning-title {
   margin: 0 0 12px 0;
   font-size: 0.875rem;
   font-weight: 600;
@@ -469,7 +477,8 @@
   letter-spacing: 0.05em;
 }
 
-.delete-warning-list {
+.delete-warning-list,
+.cancel-plan-warning-list {
   margin: 0;
   padding-left: 20px;
   color: #991b1b;
@@ -478,11 +487,13 @@
   font-size: 0.9375rem;
 }
 
-.delete-warning-list li {
+.delete-warning-list li,
+.cancel-plan-warning-list li {
   margin-bottom: 6px;
 }
 
-.delete-warning-list li:last-child {
+.delete-warning-list li:last-child,
+.cancel-plan-warning-list li:last-child {
   margin-bottom: 0;
 }
 
@@ -568,7 +579,8 @@
 }
 
 .delete-modal-footer,
-.upgrade-modal-footer {
+.upgrade-modal-footer,
+.cancel-plan-modal-footer {
   padding: 24px;
   border-top: 1px solid var(--gray-100);
   display: flex;
@@ -616,9 +628,38 @@
   background: #c2185b;
 }
 
+.cancel-plan-error {
+  padding: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  color: #dc2626;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.cancel-plan-btn {
+  flex: 1;
+  padding: 12px 24px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-plan-btn:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
 .cancel-btn:disabled,
 .delete-btn:disabled,
-.upgrade-btn:disabled {
+.upgrade-btn:disabled,
+.cancel-plan-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

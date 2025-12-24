@@ -22,6 +22,10 @@ function UserProfile() {
     newPassword: '',
     confirmPassword: ''
   });
+  const [showCancelPlanModal, setShowCancelPlanModal] = useState(false);
+  const [cancelPlanLoading, setCancelPlanLoading] = useState(false);
+  const [cancelPlanError, setCancelPlanError] = useState('');
+  const [cancelConfirmText, setCancelConfirmText] = useState('');
 
   const handleUpgradeToPro = async () => {
     if (!proTokenInput.trim()) {
@@ -132,6 +136,73 @@ function UserProfile() {
     }
   };
 
+  const handleCancelPlan = async () => {
+    if (cancelConfirmText !== 'CANCELAR') {
+      return;
+    }
+
+    setCancelPlanLoading(true);
+    setCancelPlanError('');
+    
+    try {
+      if (!useSupabase || !user?.id) {
+        setCancelPlanError('No se puede cancelar el plan. Supabase no está configurado o no hay sesión activa.');
+        setCancelPlanLoading(false);
+        return;
+      }
+
+      // 1. Cancelar suscripciones activas
+      const { error: cancelSubError } = await supabase
+        .from('subscriptions')
+        .update({ 
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+      
+      if (cancelSubError) {
+        console.error('Error cancelando suscripciones:', cancelSubError);
+        setCancelPlanError('Error al cancelar las suscripciones: ' + cancelSubError.message);
+        setCancelPlanLoading(false);
+        return;
+      }
+
+      // 2. Actualizar plan del usuario a 'free'
+      const { error: updateUserError } = await supabase
+        .from('users')
+        .update({ 
+          plan: 'free',
+          plan_expires_at: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+      
+      if (updateUserError) {
+        console.error('Error actualizando usuario:', updateUserError);
+        setCancelPlanError('Error al actualizar el plan: ' + updateUserError.message);
+        setCancelPlanLoading(false);
+        return;
+      }
+
+      // 3. Actualizar localStorage
+      const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
+      authData.plan = 'free';
+      authData.plan_expires_at = null;
+      localStorage.setItem('b2b_auth', JSON.stringify(authData));
+
+      // 4. Cerrar modal y recargar para aplicar cambios
+      setShowCancelPlanModal(false);
+      setCancelConfirmText('');
+      alert('Tu plan PRO ha sido cancelado exitosamente. Ahora tienes plan Free.');
+      window.location.reload();
+    } catch (error) {
+      console.error('Error al cancelar plan:', error);
+      setCancelPlanError('Error al cancelar el plan: ' + (error.message || 'Error desconocido'));
+      setCancelPlanLoading(false);
+    }
+  };
+
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'ELIMINAR') {
       return;
@@ -232,9 +303,9 @@ function UserProfile() {
                   ) : (
                     <button 
                       className="account-change-plan-btn"
-                      onClick={() => {/* Aquí puedes agregar lógica para cambiar plan */}}
+                      onClick={() => setShowCancelPlanModal(true)}
                     >
-                      Cambiar plan
+                      Cancelar plan
                     </button>
                   )}
                 </div>
@@ -460,6 +531,69 @@ function UserProfile() {
                 disabled={!proTokenInput.trim() || upgradeLoading}
               >
                 {upgradeLoading ? 'Activando...' : '⚡ Activar PRO'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para cancelar plan PRO */}
+      {showCancelPlanModal && (
+        <div className="cancel-plan-modal-overlay">
+          <div className="cancel-plan-modal">
+            <div className="cancel-plan-modal-header">
+              <h3>Cancelar Plan PRO</h3>
+              <p className="cancel-plan-modal-subtitle">¿Estás seguro de que deseas cancelar tu plan PRO?</p>
+            </div>
+            
+            <div className="cancel-plan-modal-body">
+              <div className="cancel-plan-warning-box">
+                <p className="cancel-plan-warning-title">Al cancelar tu plan PRO:</p>
+                <ul className="cancel-plan-warning-list">
+                  <li>Perderás acceso a búsquedas ilimitadas</li>
+                  <li>No podrás guardar historial de búsquedas</li>
+                  <li>No podrás guardar empresas favoritas</li>
+                  <li>Perderás el fondo animado premium</li>
+                  <li>Tu plan cambiará a Free inmediatamente</li>
+                </ul>
+              </div>
+              
+              {cancelPlanError && (
+                <div className="cancel-plan-error">
+                  {cancelPlanError}
+                </div>
+              )}
+              
+              <div className="confirm-input">
+                <label>Escribe <strong>CANCELAR</strong> para confirmar:</label>
+                <input
+                  type="text"
+                  value={cancelConfirmText}
+                  onChange={(e) => setCancelConfirmText(e.target.value.toUpperCase())}
+                  placeholder="CANCELAR"
+                  disabled={cancelPlanLoading}
+                />
+              </div>
+            </div>
+            
+            <div className="cancel-plan-modal-footer">
+              <button 
+                className="cancel-btn"
+                onClick={() => {
+                  setShowCancelPlanModal(false);
+                  setCancelConfirmText('');
+                  setCancelPlanError('');
+                }}
+                disabled={cancelPlanLoading}
+              >
+                Volver
+              </button>
+              <button 
+                className="cancel-plan-btn"
+                onClick={handleCancelPlan}
+                disabled={cancelConfirmText !== 'CANCELAR' || cancelPlanLoading}
+              >
+                {cancelPlanLoading ? 'Cancelando...' : 'Cancelar Plan PRO'}
               </button>
             </div>
           </div>
