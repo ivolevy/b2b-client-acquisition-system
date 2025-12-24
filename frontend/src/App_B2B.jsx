@@ -69,9 +69,17 @@ function AppB2B() {
   const loadRubros = async () => {
     try {
       const response = await axios.get(`${API_URL}/rubros`);
-      setRubros(response.data.rubros || {});
+      console.log('Respuesta de rubros:', response.data);
+      if (response.data && response.data.rubros) {
+        setRubros(response.data.rubros);
+        console.log('Rubros cargados:', Object.keys(response.data.rubros).length);
+      } else {
+        console.error('No se encontraron rubros en la respuesta:', response.data);
+        setRubros({});
+      }
     } catch (error) {
       console.error('Error al cargar rubros:', error);
+      setRubros({});
     }
   };
 

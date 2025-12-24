@@ -154,9 +154,13 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                     className="select-rubro-compact"
                   >
                     <option value="">-- Selecciona un rubro --</option>
-                    {Object.entries(rubros).map(([key, nombre]) => (
-                      <option key={key} value={key}>{nombre}</option>
-                    ))}
+                    {rubros && Object.keys(rubros).length > 0 ? (
+                      Object.entries(rubros).map(([key, nombre]) => (
+                        <option key={key} value={key}>{nombre}</option>
+                      ))
+                    ) : (
+                      <option value="" disabled>Cargando rubros...</option>
+                    )}
                   </select>
                 </div>
               }
@@ -176,9 +180,13 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                     className="select-rubro-compact"
                   >
                     <option value="">-- Selecciona un rubro --</option>
-                    {Object.entries(rubros).map(([key, nombre]) => (
-                      <option key={key} value={key}>{nombre}</option>
-                    ))}
+                    {rubros && Object.keys(rubros).length > 0 ? (
+                      Object.entries(rubros).map(([key, nombre]) => (
+                        <option key={key} value={key}>{nombre}</option>
+                      ))
+                    ) : (
+                      <option value="" disabled>Cargando rubros...</option>
+                    )}
                   </select>
                 </div>
               }
