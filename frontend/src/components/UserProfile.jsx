@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthWrapper';
 import { authService, supabase } from '../lib/supabase';
@@ -26,6 +26,32 @@ function UserProfile() {
   const [cancelPlanLoading, setCancelPlanLoading] = useState(false);
   const [cancelPlanError, setCancelPlanError] = useState('');
   const [cancelConfirmText, setCancelConfirmText] = useState('');
+
+  // Bloquear scroll del body cuando cualquier modal está abierto
+  useEffect(() => {
+    const hasModalOpen = showDeleteModal || showUpgradeModal || showPasswordModal || showCancelPlanModal;
+    
+    if (hasModalOpen) {
+      // Guardar el scroll actual
+      const scrollY = window.scrollY;
+      document.body.classList.add('modal-open');
+      document.body.style.top = `-${scrollY}px`;
+    } else {
+      // Restaurar el scroll
+      const scrollY = document.body.style.top;
+      document.body.classList.remove('modal-open');
+      document.body.style.top = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+
+    // Cleanup
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.top = '';
+    };
+  }, [showDeleteModal, showUpgradeModal, showPasswordModal, showCancelPlanModal]);
 
   const handleUpgradeToPro = async () => {
     if (!proTokenInput.trim()) {
@@ -151,15 +177,16 @@ function UserProfile() {
         return;
       }
 
-      // 1. Cancelar suscripciones activas
-      const { error: cancelSubError } = await supabase
+      // 1. Cancelar suscripciones activas en Supabase
+      const { data: cancelledSubs, error: cancelSubError } = await supabase
         .from('subscriptions')
         .update({ 
           status: 'cancelled',
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id)
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .select();
       
       if (cancelSubError) {
         console.error('Error cancelando suscripciones:', cancelSubError);
@@ -168,15 +195,19 @@ function UserProfile() {
         return;
       }
 
-      // 2. Actualizar plan del usuario a 'free'
-      const { error: updateUserError } = await supabase
+      console.log(`[CancelPlan] ${cancelledSubs?.length || 0} suscripción(es) cancelada(s)`);
+
+      // 2. Actualizar plan del usuario a 'free' en Supabase
+      const { data: updatedUser, error: updateUserError } = await supabase
         .from('users')
         .update({ 
           plan: 'free',
           plan_expires_at: null,
           updated_at: new Date().toISOString()
         })
-        .eq('id', user.id);
+        .eq('id', user.id)
+        .select()
+        .single();
       
       if (updateUserError) {
         console.error('Error actualizando usuario:', updateUserError);
@@ -184,6 +215,16 @@ function UserProfile() {
         setCancelPlanLoading(false);
         return;
       }
+
+      // Verificar que la actualización se haya realizado correctamente
+      if (!updatedUser || updatedUser.plan !== 'free') {
+        console.error('Error: El plan no se actualizó correctamente', updatedUser);
+        setCancelPlanError('Error: El plan no se actualizó correctamente en la base de datos.');
+        setCancelPlanLoading(false);
+        return;
+      }
+
+      console.log('[CancelPlan] Usuario actualizado en Supabase:', updatedUser);
 
       // 3. Actualizar localStorage
       const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
@@ -195,6 +236,8 @@ function UserProfile() {
       setShowCancelPlanModal(false);
       setCancelConfirmText('');
       alert('Tu plan PRO ha sido cancelado exitosamente. Ahora tienes plan Free.');
+      
+      // Recargar la página para que AuthWrapper cargue los datos actualizados de Supabase
       window.location.reload();
     } catch (error) {
       console.error('Error al cancelar plan:', error);

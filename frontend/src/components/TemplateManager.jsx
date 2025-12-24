@@ -13,6 +13,21 @@ function TemplateManager({ onClose }) {
   const [editingTemplateId, setEditingTemplateId] = useState(null);
   const { toasts, success, error: toastError, removeToast } = useToast();
 
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    document.body.classList.add('modal-open');
+    document.body.style.top = `-${scrollY}px`;
+    
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.top = '';
+      if (scrollY) {
+        window.scrollTo(0, scrollY);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     loadTemplates();
   }, []);

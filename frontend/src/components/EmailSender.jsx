@@ -6,6 +6,22 @@ import { API_URL } from '../config';
 import './EmailSender.css';
 
 function EmailSender({ empresas, onClose, embedded = false }) {
+  // Bloquear scroll del body cuando el modal está abierto (solo si no está embedded)
+  useEffect(() => {
+    if (!embedded) {
+      const scrollY = window.scrollY;
+      document.body.classList.add('modal-open');
+      document.body.style.top = `-${scrollY}px`;
+      
+      return () => {
+        document.body.classList.remove('modal-open');
+        document.body.style.top = '';
+        if (scrollY) {
+          window.scrollTo(0, scrollY);
+        }
+      };
+    }
+  }, [embedded]);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedEmpresas, setSelectedEmpresas] = useState([]);

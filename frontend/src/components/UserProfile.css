@@ -1,3 +1,5 @@
+/* Bloquear scroll del body cuando hay un modal abierto - definido en index.css */
+
 .user-profile-container {
   background: white;
   border-radius: var(--radius-xl);

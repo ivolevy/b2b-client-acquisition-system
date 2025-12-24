@@ -9,6 +9,27 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (isOpen) {
+      const scrollY = window.scrollY;
+      document.body.classList.add('modal-open');
+      document.body.style.top = `-${scrollY}px`;
+    } else {
+      const scrollY = document.body.style.top;
+      document.body.classList.remove('modal-open');
+      document.body.style.top = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.top = '';
+    };
+  }, [isOpen]);
+
   const loadSearchHistory = useCallback(async () => {
     if (!user?.id) {
       setLoading(false);

@@ -259,9 +259,10 @@ textarea:disabled {
 
 /* Bloquear scroll cuando un modal está abierto */
 body.modal-open {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 #root {
