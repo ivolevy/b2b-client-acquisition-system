@@ -462,24 +462,24 @@ app.add_middleware(
     max_age=3600,
 )
 
-# Middleware personalizado para asegurar CORS en todas las respuestas
+# Middleware personalizado para asegurar CORS en todas las respuestas (debe ir después de CORSMiddleware)
 @app.middleware("http")
 async def add_cors_header(request: Request, call_next):
     """Agrega headers CORS a todas las respuestas"""
-    # Manejar peticiones OPTIONS (preflight)
+    # Manejar peticiones OPTIONS (preflight) inmediatamente
     if request.method == "OPTIONS":
-        from fastapi.responses import Response
-        response = Response()
+        response = Response(status_code=200)
         response.headers["Access-Control-Allow-Origin"] = "*"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
         response.headers["Access-Control-Allow-Headers"] = "*"
         response.headers["Access-Control-Max-Age"] = "3600"
         return response
     
-    # Para otras peticiones, procesar normalmente y agregar CORS
+    # Para otras peticiones, procesar normalmente
+    # Los exception handlers se encargarán de agregar CORS a las respuestas de error
     response = await call_next(request)
     
-    # Agregar headers CORS a la respuesta
+    # Agregar headers CORS a la respuesta (siempre)
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
     response.headers["Access-Control-Allow-Headers"] = "*"
@@ -625,13 +625,14 @@ async def root():
     }
 
 @app.get("/rubros")
-def obtener_rubros():
+async def obtener_rubros():
     """Lista todos los rubros disponibles para búsqueda"""
+    try:
         rubros = listar_rubros_disponibles()
         
-    if not rubros:
-        rubros = {}
-    
+        if not rubros:
+            rubros = {}
+        
         return {
             "success": True,
             "total": len(rubros),
@@ -642,6 +643,9 @@ def obtener_rubros():
                 "ciudad": "Madrid"
             }
         }
+    except Exception as e:
+        logger.error(f"Error obteniendo rubros: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error al obtener rubros: {str(e)}")
 
 @app.post("/buscar")
 async def buscar_por_rubro(request: BusquedaRubroRequest):
