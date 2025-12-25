@@ -209,8 +209,14 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
 
     const timeoutId = setTimeout(async () => {
       try {
+        // Priorizar Argentina en las sugerencias
+        let searchQueryWithCountry = searchQuery;
+        if (!searchQuery.toLowerCase().includes('argentina') && !searchQuery.toLowerCase().includes('buenos aires')) {
+          searchQueryWithCountry = `${searchQuery}, Argentina`;
+        }
+        
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(searchQuery)}`,
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=ar&q=${encodeURIComponent(searchQueryWithCountry)}`,
           {
             headers: {
               'Accept-Language': 'es',
@@ -326,10 +332,16 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     }
   };
 
-  const searchWithNominatim = async (query) => {
+  const searchWithNominatim = async (query, tryWithArgentina = true) => {
     try {
+      // Primero intentar con restricción a Argentina
+      let searchQuery = query;
+      if (tryWithArgentina && !query.toLowerCase().includes('argentina') && !query.toLowerCase().includes('buenos aires')) {
+        searchQuery = `${query}, Argentina`;
+      }
+      
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=${encodeURIComponent(query)}`,
+        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=ar&q=${encodeURIComponent(searchQuery)}`,
         {
           headers: {
             'Accept-Language': 'es',
@@ -350,6 +362,12 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           setIsSearching(false);
           return;
         }
+      }
+      
+      // Si no se encontró con Argentina y es el primer intento, intentar sin restricción
+      if (tryWithArgentina && !query.toLowerCase().includes('argentina')) {
+        setIsSearching(false);
+        return await searchWithNominatim(query, false);
       }
       
       setIsSearching(false);
@@ -398,7 +416,15 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       // Intentar con Google Geocoding si está disponible
       if (useGooglePlaces && GOOGLE_API_KEY && window.google?.maps?.Geocoder) {
         const geocoder = new window.google.maps.Geocoder();
-        geocoder.geocode({ address: query }, (results, status) => {
+        // Priorizar Argentina en la búsqueda
+        let searchQuery = query;
+        if (!query.toLowerCase().includes('argentina') && !query.toLowerCase().includes('buenos aires')) {
+          searchQuery = `${query}, Buenos Aires, Argentina`;
+        }
+        geocoder.geocode({ 
+          address: searchQuery,
+          componentRestrictions: { country: 'ar' }
+        }, (results, status) => {
           setIsSearching(false);
           if (status === 'OK' && results && results[0]) {
             const location = results[0].geometry.location;
@@ -419,6 +445,44 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
               </>
             );
           } else {
+            // Si no encontró con Argentina, intentar sin restricción
+            if (!query.toLowerCase().includes('argentina')) {
+              geocoder.geocode({ address: query }, (results2, status2) => {
+                setIsSearching(false);
+                if (status2 === 'OK' && results2 && results2[0]) {
+                  const location = results2[0].geometry.location;
+                  const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
+                  const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
+                  const nombreUbicacion = results2[0].formatted_address;
+                  setSearchQuery(nombreUbicacion);
+                  setMapCenter([lat, lng]);
+                  handleLocationSelect({ lat, lng }, nombreUbicacion);
+                  if (window.google?.maps?.places) {
+                    sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
+                  }
+                  setSuggestions([]);
+                  success(
+                    <>
+                      <strong>Dirección encontrada</strong>
+                      <p>Se ha establecido la ubicación en el mapa.</p>
+                    </>
+                  );
+                } else {
+                  // Fallback a Nominatim
+                  searchWithNominatim(query).catch(err => {
+                    console.error('Error con Nominatim:', err);
+                    setIsSearching(false);
+                    error(
+                      <>
+                        <strong>No se encontró la dirección</strong>
+                        <p>No se pudo encontrar esa dirección. Intenta con otra búsqueda.</p>
+                      </>
+                    );
+                  });
+                }
+              });
+              return;
+            }
             // Fallback a Nominatim
             searchWithNominatim(query).catch(err => {
               console.error('Error con Nominatim:', err);

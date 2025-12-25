@@ -153,11 +153,12 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     if (isLoaded && window.google?.maps?.places && autocompleteServiceRef.current) {
       const timeoutId = setTimeout(() => {
         if (autocompleteServiceRef.current) {
-          autocompleteServiceRef.current.getPlacePredictions(
-            {
-              input: searchQuery,
-              types: ['geocode']
-            },
+        autocompleteServiceRef.current.getPlacePredictions(
+          {
+            input: searchQuery,
+            types: ['geocode'],
+            componentRestrictions: { country: 'ar' }
+          },
             (predictions, status) => {
               if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
                 setSuggestions(predictions);
@@ -202,7 +203,15 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     }
 
     const geocoder = new window.google.maps.Geocoder();
-    geocoder.geocode({ address: query }, (results, status) => {
+    // Priorizar Argentina en la búsqueda
+    let searchQuery = query;
+    if (!query.toLowerCase().includes('argentina') && !query.toLowerCase().includes('buenos aires')) {
+      searchQuery = `${query}, Buenos Aires, Argentina`;
+    }
+    geocoder.geocode({ 
+      address: searchQuery,
+      componentRestrictions: { country: 'ar' }
+    }, (results, status) => {
       if (status === 'OK' && results && results[0]) {
         const location = results[0].geometry.location;
         const lat = typeof location.lat === 'function' ? location.lat() : location.lat;

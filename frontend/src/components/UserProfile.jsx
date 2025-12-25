@@ -12,6 +12,7 @@ function UserProfile() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [proTokenInput, setProTokenInput] = useState('');
@@ -32,13 +33,14 @@ function UserProfile() {
   const [canResendCode, setCanResendCode] = useState(false);
   const [showCancelPlanModal, setShowCancelPlanModal] = useState(false);
   const [showCancelPlanSuccessModal, setShowCancelPlanSuccessModal] = useState(false);
+  const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [cancelPlanLoading, setCancelPlanLoading] = useState(false);
   const [cancelPlanError, setCancelPlanError] = useState('');
   const [cancelConfirmText, setCancelConfirmText] = useState('');
 
   // Bloquear scroll del body cuando cualquier modal está abierto
   useEffect(() => {
-    const hasModalOpen = showDeleteModal || showUpgradeModal || showPasswordModal || showCancelPlanModal || showCancelPlanSuccessModal;
+    const hasModalOpen = showDeleteModal || showUpgradeModal || showPasswordModal || showCancelPlanModal || showCancelPlanSuccessModal || showDeleteSuccessModal;
     
     if (hasModalOpen) {
       // Guardar el scroll actual
@@ -365,8 +367,8 @@ function UserProfile() {
         const { success, error } = await authService.deleteAccount();
         if (!success || error) {
           const errorMessage = error?.message || 'No se pudo eliminar la cuenta. Por favor, intenta de nuevo.';
-          alert('Error al eliminar la cuenta: ' + errorMessage);
           setDeleteLoading(false);
+          setDeleteError(errorMessage);
           return;
         }
       }
@@ -381,14 +383,19 @@ function UserProfile() {
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
       
-      alert('Tu cuenta ha sido eliminada exitosamente.');
+      // Cerrar el modal de confirmación y mostrar el modal de éxito
+      setShowDeleteModal(false);
+      setDeleteLoading(false);
+      setShowDeleteSuccessModal(true);
       
-      // Redirigir al login
+      // Redirigir al login después de 2 segundos
+      setTimeout(() => {
       window.location.replace('/');
+      }, 2000);
     } catch (error) {
       console.error('Error al eliminar cuenta:', error);
-      alert('Error al eliminar la cuenta. Por favor, intenta de nuevo.');
       setDeleteLoading(false);
+      setDeleteError('Error al eliminar la cuenta. Por favor, intenta de nuevo.');
     }
   };
 
@@ -470,30 +477,30 @@ function UserProfile() {
                     </button>
                   ) : (
                     user?.role !== 'admin' && (
-                      <button 
-                        className="account-change-plan-btn"
+                    <button 
+                      className="account-change-plan-btn"
                         onClick={() => setShowCancelPlanModal(true)}
-                      >
+                    >
                         Cancelar plan
-                      </button>
+                    </button>
                     )
                   )}
                 </div>
               </div>
             </div>
             {user?.role !== 'admin' && (
-              <div className="account-danger-section">
-                <div className="account-danger-label">Zona de peligro</div>
-                <div className="account-danger-content">
-                  <p className="account-danger-text">Esta acción es permanente y no se puede deshacer.</p>
-                  <button 
-                    className="btn-delete-account"
-                    onClick={() => setShowDeleteModal(true)}
-                  >
-                    Eliminar cuenta
-                  </button>
-                </div>
+            <div className="account-danger-section">
+              <div className="account-danger-label">Zona de peligro</div>
+              <div className="account-danger-content">
+                <p className="account-danger-text">Esta acción es permanente y no se puede deshacer.</p>
+                <button 
+                  className="btn-delete-account"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  Eliminar cuenta
+                </button>
               </div>
+            </div>
             )}
           </div>
         </div>
@@ -525,7 +532,10 @@ function UserProfile() {
                 <input
                   type="text"
                   value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
+                  onChange={(e) => {
+                    setDeleteConfirmText(e.target.value.toUpperCase());
+                    setDeleteError(''); // Limpiar error al escribir
+                  }}
                   placeholder="ELIMINAR"
                   disabled={deleteLoading}
                 />
@@ -538,6 +548,7 @@ function UserProfile() {
                 onClick={() => {
                   setShowDeleteModal(false);
                   setDeleteConfirmText('');
+                  setDeleteError('');
                 }}
                 disabled={deleteLoading}
               >
@@ -996,6 +1007,43 @@ function UserProfile() {
                   setShowCancelPlanSuccessModal(false);
                   // Recargar la página para que AuthWrapper cargue los datos actualizados de Supabase
                   window.location.reload();
+                }}
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de éxito al eliminar cuenta */}
+      {showDeleteSuccessModal && (
+        <div className="cancel-plan-success-modal-overlay">
+          <div className="cancel-plan-success-modal">
+            <div className="cancel-plan-success-modal-header">
+              <div className="cancel-plan-success-icon" style={{ background: 'rgba(16, 185, 129, 0.1)' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#10b981' }}>
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+              <h3>Cuenta Eliminada Exitosamente</h3>
+            </div>
+            
+            <div className="cancel-plan-success-modal-body">
+              <p className="cancel-plan-success-message">
+                Tu cuenta ha sido eliminada exitosamente.
+              </p>
+              <p className="cancel-plan-success-submessage">
+                Todos tus datos han sido eliminados permanentemente. Serás redirigido al inicio de sesión.
+              </p>
+            </div>
+            
+            <div className="cancel-plan-success-modal-footer">
+              <button 
+                className="cancel-plan-success-btn"
+                onClick={() => {
+                  window.location.replace('/');
                 }}
               >
                 Entendido
