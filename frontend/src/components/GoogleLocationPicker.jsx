@@ -37,6 +37,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   const autocompleteServiceRef = useRef(null);
   const placesServiceRef = useRef(null);
   const handleManualGeocodeRef = useRef(null);
+  const suggestionsRef = useRef(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
@@ -149,27 +150,32 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       return;
     }
 
-    if (isLoaded && autocompleteServiceRef.current) {
+    if (isLoaded && window.google?.maps?.places && autocompleteServiceRef.current) {
       const timeoutId = setTimeout(() => {
-        autocompleteServiceRef.current.getPlacePredictions(
-          {
-            input: searchQuery,
-            types: ['geocode'],
-            componentRestrictions: { country: 'ar' } // Priorizar Argentina
-          },
-          (predictions, status) => {
-            if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-              setSuggestions(predictions);
-              setShowSuggestions(true);
-            } else {
-              setSuggestions([]);
-              setShowSuggestions(false);
+        if (autocompleteServiceRef.current) {
+          autocompleteServiceRef.current.getPlacePredictions(
+            {
+              input: searchQuery,
+              types: ['geocode']
+            },
+            (predictions, status) => {
+              if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+                setSuggestions(predictions);
+                setShowSuggestions(true);
+              } else {
+                setSuggestions([]);
+                setShowSuggestions(false);
+              }
             }
-          }
-        );
+          );
+        }
       }, 300);
 
       return () => clearTimeout(timeoutId);
+    } else if (!isLoaded) {
+      // Si Google Maps no está cargado, usar geocoding directo cuando se presiona Enter
+      setSuggestions([]);
+      setShowSuggestions(false);
     }
   }, [searchQuery, isLoaded]);
 
@@ -418,8 +424,9 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
 
       <div className="address-search" style={{ position: 'relative' }}>
         <label htmlFor="address-input">Buscar dirección</label>
-        <div className="address-input-wrapper" ref={autocompleteInputRef}>
+        <div className="address-input-wrapper">
             <input
+              ref={autocompleteInputRef}
               id="address-input"
               type="text"
               className="address-input"
@@ -474,7 +481,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           </span>
         </div>
         {showSuggestions && suggestions.length > 0 && (
-          <ul className="address-suggestions" style={{ position: 'absolute', zIndex: 1000, background: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', marginTop: '4px', maxHeight: '200px', overflowY: 'auto', width: '100%', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', listStyle: 'none', padding: 0, margin: 0 }}>
+          <ul ref={suggestionsRef} className="address-suggestions" style={{ position: 'absolute', zIndex: 1000, background: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', marginTop: '4px', maxHeight: '200px', overflowY: 'auto', width: '100%', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', listStyle: 'none', padding: 0, margin: 0 }}>
             {suggestions.map((prediction) => (
               <li 
                 key={prediction.place_id} 

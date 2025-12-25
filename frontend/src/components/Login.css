@@ -323,7 +323,8 @@
 }
 
 .input-wrapper input::placeholder {
-  color: var(--login-gray);
+  color: #9ca3af; /* Gris claro para placeholder */
+  opacity: 1; /* Asegurar que el color se aplique correctamente */
 }
 
 .input-wrapper input:focus {

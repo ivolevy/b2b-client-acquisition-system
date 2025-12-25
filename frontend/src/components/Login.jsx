@@ -127,8 +127,9 @@ const validateName = (name) => {
 };
 
 const validatePhone = (phone) => {
+  // El teléfono es opcional, si está vacío es válido
   if (!phone || phone.trim() === '') {
-    return { isValid: false, message: 'El teléfono es requerido' };
+    return { isValid: true, message: '' };
   }
   // Extraer solo los números del teléfono completo (incluyendo prefijo)
   const cleanPhone = phone.replace(/[^\d]/g, '');
@@ -547,11 +548,11 @@ function Login({ onLogin }) {
             
             // Verificar si el email fue enviado
             if (needsConfirmation || (data?.user && !data.user.email_confirmed_at)) {
-              setSuccess(`¡Cuenta creada exitosamente! Revisa tu bandeja de entrada (y spam) para confirmar tu email. El link de confirmación expira en 24 horas.`);
+              setSuccess(`Revisa tu bandeja de entrada (y spam) para confirmar tu email. El link de confirmación expira en 24 horas.`);
               setPendingEmail(emailLimpio);
               authStorage.setPendingEmail(emailLimpio);
             } else {
-              setSuccess('¡Cuenta creada exitosamente!');
+              setSuccess('');
               setPendingEmail('');
               authStorage.removePendingEmail();
             }
@@ -891,9 +892,6 @@ function Login({ onLogin }) {
                             </>
                           )}
                       </button>
-                        <div className="manual-confirm-hint">
-                          <p>💡 <strong>Para desarrollo:</strong> Puedes confirmar el email manualmente desde Supabase Dashboard → Authentication → Users → Tu usuario → Confirm Email</p>
-                        </div>
                       </>
                     )}
                     
@@ -1021,11 +1019,11 @@ function Login({ onLogin }) {
                       onChange={handlePhoneChange}
                       onBlur={handlePhoneBlur}
                       placeholder="1112345678"
-                      required={mode === 'register'}
                       autoComplete="tel"
                       disabled={loading}
                       className={`phone-input ${phoneError ? 'input-error' : ''}`}
-                      maxLength={20}
+                      minLength={10}
+                      maxLength={15}
                       inputMode="numeric"
                     />
                   </div>

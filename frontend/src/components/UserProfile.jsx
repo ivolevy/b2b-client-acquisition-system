@@ -217,12 +217,35 @@ function UserProfile() {
 
     try {
       if (useSupabase) {
-        // Actualizar la contraseña (ya no necesitamos verificar la contraseña actual porque el código ya fue validado)
-        const { error: updateError } = await supabase.auth.updateUser({
+        // Verificar que haya una sesión activa
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Error obteniendo sesión:', sessionError);
+          setPasswordError('Error al verificar la sesión: ' + sessionError.message);
+          setPasswordLoading(false);
+          return;
+        }
+
+        if (!session) {
+          setPasswordError('No hay una sesión activa. Por favor, iniciá sesión nuevamente.');
+          setPasswordLoading(false);
+          return;
+        }
+
+        // Actualizar la contraseña con timeout
+        const updatePromise = supabase.auth.updateUser({
           password: passwordForm.newPassword
         });
 
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('La operación tardó demasiado. Por favor, intentá nuevamente.')), 30000)
+        );
+
+        const { data, error: updateError } = await Promise.race([updatePromise, timeoutPromise]);
+
         if (updateError) {
+          console.error('Error actualizando contraseña:', updateError);
           setPasswordError('Error al actualizar la contraseña: ' + updateError.message);
           setPasswordLoading(false);
           return;
@@ -242,7 +265,8 @@ function UserProfile() {
       }
       setPasswordLoading(false);
     } catch (error) {
-      setPasswordError('Error al cambiar la contraseña');
+      console.error('Error en handleChangePassword:', error);
+      setPasswordError('Error al cambiar la contraseña: ' + (error.message || 'Error desconocido'));
       setPasswordLoading(false);
     }
   };
