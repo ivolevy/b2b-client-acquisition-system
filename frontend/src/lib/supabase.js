@@ -212,52 +212,60 @@ export const authService = {
       const userId = user.id;
       console.log('[DeleteAccount] Eliminando datos del usuario:', userId);
 
-      // PASO 1: Intentar eliminar el usuario de auth.users usando función edge PRIMERO
-      // Esto es crítico para evitar que el usuario pueda iniciar sesión después
-      let authUserDeleted = false;
-      try {
-        const { data: edgeData, error: edgeError } = await supabase.functions.invoke('delete-user', {
-          body: { userId: userId }
-        });
+      // Crear timeout para evitar que se quede colgado
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout: La operación tardó demasiado')), 30000);
+      });
 
-        if (edgeError) {
-          console.warn('[DeleteAccount] Función edge no disponible o falló:', edgeError.message);
-          // Si la función edge falla, intentamos eliminar manualmente de auth.users
-          // usando el método admin (requiere service role key en función edge)
-          throw new Error('Función edge no disponible');
-        } else if (edgeData?.success) {
-          authUserDeleted = true;
-          console.log('[DeleteAccount] Usuario eliminado completamente de auth.users mediante función edge');
+      // PASO 1: Eliminar datos del usuario de las tablas relacionadas (con timeout)
+      const deleteDataPromise = (async () => {
+        const tables = ['search_history', 'saved_companies', 'email_templates', 'email_history'];
+        
+        for (const table of tables) {
+          try {
+            const { error } = await supabase.from(table).delete().eq('user_id', userId);
+            if (error) {
+              console.warn(`[DeleteAccount] Error eliminando ${table}:`, error.message);
+            } else {
+              console.log(`[DeleteAccount] ${table} eliminado`);
+            }
+          } catch (err) {
+            console.warn(`[DeleteAccount] Error en ${table}:`, err);
+          }
         }
-      } catch (edgeErr) {
-        console.warn('[DeleteAccount] No se pudo eliminar de auth.users. El usuario seguirá existiendo pero no podrá iniciar sesión sin perfil.');
-      }
+      })();
 
-      // PASO 2: Eliminar datos del usuario de las tablas relacionadas
-      const tables = ['search_history', 'saved_companies', 'email_templates', 'email_history'];
-      
-      for (const table of tables) {
-        const { error } = await supabase.from(table).delete().eq('user_id', userId);
-        if (error) {
-          console.warn(`[DeleteAccount] Error eliminando ${table}:`, error.message);
-        } else {
-          console.log(`[DeleteAccount] ${table} eliminado`);
+      // PASO 2: Eliminar perfil de usuario (CRÍTICO - esto previene que el usuario inicie sesión)
+      const deleteProfilePromise = supabase.from('users').delete().eq('id', userId);
+
+      // Ejecutar ambas operaciones con timeout
+      const results = await Promise.race([
+        Promise.all([deleteDataPromise, deleteProfilePromise]),
+        timeoutPromise
+      ]);
+
+      // Verificar resultado del perfil
+      if (results && Array.isArray(results) && results[1]) {
+        const { error: userError } = results[1];
+        if (userError) {
+          console.error('[DeleteAccount] Error eliminando perfil:', userError);
+          throw new Error(`Error eliminando perfil: ${userError.message}`);
         }
-      }
-
-      // PASO 3: Eliminar perfil de usuario (CRÍTICO - esto previene que el usuario inicie sesión)
-      // Incluso si el usuario existe en auth.users, sin perfil en users no podrá iniciar sesión
-      const { error: userError } = await supabase.from('users').delete().eq('id', userId);
-      if (userError) {
-        console.error('[DeleteAccount] Error eliminando perfil:', userError);
-        throw new Error(`Error eliminando perfil: ${userError.message}`);
+      } else {
+        // Si no hay resultado, verificar directamente
+        const { error: userError } = await deleteProfilePromise;
+        if (userError) {
+          console.error('[DeleteAccount] Error eliminando perfil:', userError);
+          throw new Error(`Error eliminando perfil: ${userError.message}`);
+        }
       }
       console.log('[DeleteAccount] Perfil eliminado exitosamente');
 
-      // PASO 4: Cerrar sesión inmediatamente
-      await supabase.auth.signOut();
+      // PASO 3: Cerrar sesión inmediatamente (con timeout)
+      const signOutPromise = supabase.auth.signOut();
+      await Promise.race([signOutPromise, timeoutPromise]);
       
-      // PASO 5: Limpiar todas las sesiones y tokens locales
+      // PASO 4: Limpiar todas las sesiones y tokens locales
       localStorage.removeItem('b2b_auth');
       localStorage.removeItem('b2b_token');
       sessionStorage.clear();
@@ -268,18 +276,26 @@ export const authService = {
       });
       
       console.log('[DeleteAccount] Cuenta eliminada exitosamente');
-      return { success: true, error: null, authUserDeleted };
+      return { success: true, error: null };
     } catch (error) {
       console.error('[DeleteAccount] Error:', error);
+      
       // Aún así, intentar cerrar sesión y limpiar datos locales
       try {
-        await supabase.auth.signOut();
+        const signOutPromise = supabase.auth.signOut();
+        await Promise.race([signOutPromise, new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))]);
+      } catch (signOutErr) {
+        console.warn('[DeleteAccount] Error al cerrar sesión:', signOutErr);
+      }
+      
+      try {
         localStorage.removeItem('b2b_auth');
         localStorage.removeItem('b2b_token');
         sessionStorage.clear();
       } catch (cleanupError) {
-        console.error('[DeleteAccount] Error en limpieza:', cleanupError);
+        console.warn('[DeleteAccount] Error en limpieza:', cleanupError);
       }
+      
       return { success: false, error };
     }
   }
