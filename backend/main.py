@@ -462,38 +462,36 @@ app.add_middleware(
     max_age=3600,
 )
 
-# Middleware personalizado para asegurar CORS en todas las respuestas (debe ir después de CORSMiddleware)
+# Middleware personalizado para asegurar CORS en todas las respuestas
 @app.middleware("http")
 async def add_cors_header(request: Request, call_next):
     """Agrega headers CORS a todas las respuestas"""
-    # Manejar peticiones OPTIONS (preflight) inmediatamente
+    # Manejar peticiones OPTIONS (preflight)
     if request.method == "OPTIONS":
-        response = Response(status_code=200)
+        response = Response()
         response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
         response.headers["Access-Control-Allow-Headers"] = "*"
         response.headers["Access-Control-Max-Age"] = "3600"
         return response
     
-    # Para otras peticiones, procesar normalmente
-    # Los exception handlers se encargarán de agregar CORS a las respuestas de error
+    # Para otras peticiones, procesar normalmente y agregar CORS
     response = await call_next(request)
     
-    # Agregar headers CORS a la respuesta (siempre)
+    # Agregar headers CORS a la respuesta
     response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "*"
     
     return response
 
 # Handler explícito para peticiones OPTIONS (backup)
 @app.options("/{full_path:path}")
-async def options_handler(request: Request, full_path: str):
+async def options_handler(full_path: str):
     """Maneja peticiones OPTIONS (preflight) para CORS"""
-    from fastapi.responses import Response
-    response = Response(status_code=200)
+    response = Response()
     response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "*"
     response.headers["Access-Control-Max-Age"] = "3600"
     return response
@@ -625,27 +623,23 @@ async def root():
     }
 
 @app.get("/rubros")
-async def obtener_rubros():
+def obtener_rubros():
     """Lista todos los rubros disponibles para búsqueda"""
-    try:
-        rubros = listar_rubros_disponibles()
-        
-        if not rubros:
-            rubros = {}
-        
-        return {
-            "success": True,
-            "total": len(rubros),
-            "rubros": rubros,
-            "ejemplo_uso": {
-                "rubro": "desarrolladoras_inmobiliarias",
-                "pais": "España",
-                "ciudad": "Madrid"
-            }
+    rubros = listar_rubros_disponibles()
+    
+    if not rubros:
+        rubros = {}
+    
+    return {
+        "success": True,
+        "total": len(rubros),
+        "rubros": rubros,
+        "ejemplo_uso": {
+            "rubro": "desarrolladoras_inmobiliarias",
+            "pais": "España",
+            "ciudad": "Madrid"
         }
-    except Exception as e:
-        logger.error(f"Error obteniendo rubros: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error al obtener rubros: {str(e)}")
+    }
 
 @app.post("/buscar")
 async def buscar_por_rubro(request: BusquedaRubroRequest):
