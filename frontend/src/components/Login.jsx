@@ -1307,24 +1307,74 @@ function Login({ onLogin }) {
                   )}
                   <div className="forgot-password-input-group">
                     <label>Código de validación</label>
-                    <input
-                      type="text"
-                      value={forgotPasswordCode}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
-                        setForgotPasswordCode(value);
-                      }}
-                      placeholder="Ingresá el código de 6 dígitos"
-                      disabled={forgotPasswordLoading}
-                      autoFocus
-                      maxLength={6}
-                      style={{ 
-                        textAlign: 'center', 
-                        fontSize: '24px', 
-                        letterSpacing: '8px',
-                        fontFamily: 'monospace'
-                      }}
-                    />
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '8px' }}>
+                      {[0, 1, 2, 3, 4, 5].map((index) => (
+                        <input
+                          key={index}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={forgotPasswordCode[index] || ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
+                            if (value) {
+                              const newCode = forgotPasswordCode.split('');
+                              newCode[index] = value;
+                              const updatedCode = newCode.join('').slice(0, 6);
+                              setForgotPasswordCode(updatedCode);
+                              
+                              // Mover al siguiente input si hay valor
+                              if (index < 5 && value) {
+                                const nextInput = e.target.parentElement?.children[index + 1];
+                                if (nextInput) {
+                                  nextInput.focus();
+                                }
+                              }
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Backspace' && !forgotPasswordCode[index] && index > 0) {
+                              const prevInput = e.target.parentElement?.children[index - 1];
+                              if (prevInput) {
+                                prevInput.focus();
+                              }
+                            }
+                          }}
+                          onPaste={(e) => {
+                            e.preventDefault();
+                            const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                            setForgotPasswordCode(pastedData);
+                            if (pastedData.length === 6) {
+                              const lastInput = e.target.parentElement?.children[5];
+                              if (lastInput) {
+                                lastInput.focus();
+                              }
+                            }
+                          }}
+                          disabled={forgotPasswordLoading}
+                          autoFocus={index === 0}
+                          style={{ 
+                            width: '48px',
+                            height: '56px',
+                            textAlign: 'center', 
+                            fontSize: '24px', 
+                            fontFamily: 'monospace',
+                            border: '2px solid #e5e7eb',
+                            borderRadius: '8px',
+                            outline: 'none',
+                            transition: 'all 0.2s'
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.borderColor = '#81D4FA';
+                            e.target.style.boxShadow = '0 0 0 3px rgba(129, 212, 250, 0.1)';
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.borderColor = '#e5e7eb';
+                            e.target.style.boxShadow = 'none';
+                          }}
+                        />
+                      ))}
+                    </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', flexWrap: 'wrap', gap: '8px' }}>
                       <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>
                         El código expira en 10 minutos

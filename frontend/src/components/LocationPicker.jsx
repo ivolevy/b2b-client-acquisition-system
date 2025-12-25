@@ -296,13 +296,12 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           if (status === window.google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
             const lat = place.geometry.location.lat();
             const lng = place.geometry.location.lng();
-            setSearchQuery(suggestion.full_label || suggestion.display_name);
+            const nombreUbicacion = suggestion.full_label || suggestion.display_name || place?.formatted_address;
+            setSearchQuery(nombreUbicacion);
             if (window.google?.maps?.places) {
               sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
             }
             setMapCenter([lat, lng]);
-            const nombreUbicacion = suggestion.full_label || suggestion.display_name || place?.formatted_address;
-            setSearchQuery(nombreUbicacion);
             handleLocationSelect({ lat, lng }, nombreUbicacion);
           } else {
             error(
@@ -327,56 +326,16 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     }
   };
 
-  const handleAddressSubmit = async (e = null) => {
-    if (e) {
-      e.preventDefault();
-    }
-    if (!searchQuery || searchQuery.trim().length < 3) {
-      warning(
-        <>
-          <strong>Búsqueda muy corta</strong>
-          <p>Escribe al menos 3 caracteres para buscar una dirección.</p>
-        </>
-      );
-      return;
-    }
-
-    if (suggestions.length > 0) {
-      handleSuggestionSelect(suggestions[0]);
-      return;
-    }
-
+  const searchWithNominatim = async (query) => {
     try {
-      setIsSearching(true);
-      if (useGooglePlaces && GOOGLE_API_KEY) {
-        const response = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(searchQuery)}&key=${GOOGLE_API_KEY}`
-        );
-        const data = await response.json();
-        if (data.status === 'OK' && data.results.length > 0) {
-          const result = data.results[0];
-          setSearchQuery(result.formatted_address);
-          const { lat, lng } = result.geometry.location;
-          const nombreUbicacion = result.formatted_address;
-          setMapCenter([lat, lng]);
-          handleLocationSelect({ lat, lng }, nombreUbicacion);
-          if (window.google?.maps?.places) {
-            sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
-          }
-          setSuggestions([]);
-        } else {
-          warning(
-            <>
-              <strong>No se encontraron resultados</strong>
-              <p>No se encontraron coincidencias para esa dirección. Intenta con otra búsqueda.</p>
-            </>
-          );
-        }
-        return;
-      }
-
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=${encodeURIComponent(searchQuery)}`
+        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=${encodeURIComponent(query)}`,
+        {
+          headers: {
+            'Accept-Language': 'es',
+            'User-Agent': 'b2b-client-acquisition-system/1.0'
+          }
+        }
       );
       const data = await response.json();
       if (data.length > 0) {
@@ -394,22 +353,94 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
         );
       }
     } catch (error) {
+      console.error('Error con Nominatim:', error);
+      throw error;
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleAddressSubmit = async (e = null) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    const query = searchQuery?.trim();
+    if (!query || query.length < 3) {
+      warning(
+        <>
+          <strong>Búsqueda muy corta</strong>
+          <p>Escribe al menos 3 caracteres para buscar una dirección.</p>
+        </>
+      );
+      return;
+    }
+
+    setShowSuggestions(false);
+
+    // Si hay sugerencias, usar la primera
+    if (suggestions.length > 0) {
+      handleSuggestionSelect(suggestions[0]);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      
+      // Intentar con Google Geocoding si está disponible
+      if (useGooglePlaces && GOOGLE_API_KEY && window.google?.maps) {
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ address: query }, (results, status) => {
+          setIsSearching(false);
+          if (status === 'OK' && results && results[0]) {
+            const location = results[0].geometry.location;
+            const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
+            const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
+            const nombreUbicacion = results[0].formatted_address;
+            setSearchQuery(nombreUbicacion);
+            setMapCenter([lat, lng]);
+            handleLocationSelect({ lat, lng }, nombreUbicacion);
+            if (window.google?.maps?.places) {
+              sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
+            }
+            setSuggestions([]);
+            success(
+              <>
+                <strong>Dirección encontrada</strong>
+                <p>Se ha establecido la ubicación en el mapa.</p>
+              </>
+            );
+          } else {
+            // Fallback a Nominatim
+            searchWithNominatim(query);
+          }
+        });
+        return;
+      }
+
+      // Usar Nominatim como fallback
+      await searchWithNominatim(query);
+    } catch (error) {
       console.error('Error buscando dirección manual:', error);
+      setIsSearching(false);
       error(
         <>
           <strong>Error en la búsqueda</strong>
           <p>No se pudo buscar la dirección. Intenta nuevamente.</p>
         </>
       );
-    } finally {
-      setIsSearching(false);
     }
   };
 
   const handleAddressKeyDown = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
+      event.stopPropagation();
+      setShowSuggestions(false);
       handleAddressSubmit();
+    } else if (event.key === 'Escape') {
+      setShowSuggestions(false);
     }
   };
 

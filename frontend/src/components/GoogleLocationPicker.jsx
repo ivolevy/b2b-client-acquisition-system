@@ -180,7 +180,8 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   }, [searchQuery, isLoaded]);
 
   const handleManualGeocode = useCallback(() => {
-    if (!searchQuery || searchQuery.trim().length < 3) {
+    const query = searchQuery?.trim();
+    if (!query || query.length < 3) {
       warning(
         <>
           <strong>Búsqueda muy corta</strong>
@@ -190,7 +191,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       return;
     }
 
-    if (!window.google?.maps?.Geocoder) {
+    if (!isLoaded || !window.google?.maps?.Geocoder) {
       error(
         <>
           <strong>Error</strong>
@@ -201,7 +202,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     }
 
     const geocoder = new window.google.maps.Geocoder();
-    geocoder.geocode({ address: searchQuery }, (results, status) => {
+    geocoder.geocode({ address: query }, (results, status) => {
       if (status === 'OK' && results && results[0]) {
         const location = results[0].geometry.location;
         const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
@@ -210,6 +211,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         setSearchQuery(nombre);
         setMapCenter({ lat, lng });
         setSelectedLocation({ lat, lng });
+        setShowSuggestions(false);
         if (mapRef.current) {
           mapRef.current.panTo({ lat, lng });
           mapRef.current.setZoom(15);
@@ -230,7 +232,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         );
       }
     });
-  }, [searchQuery, handleLocationSelect, warning, error, success]);
+  }, [searchQuery, isLoaded, handleLocationSelect, warning, error, success]);
 
   // Actualizar ref cuando cambia la función
   useEffect(() => {
@@ -446,6 +448,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   e.stopPropagation();
+                  setShowSuggestions(false);
                   if (suggestions.length > 0 && showSuggestions) {
                     handleSuggestionSelect(suggestions[0]);
                   } else {
@@ -462,6 +465,8 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             className="btn-search-address"
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
+              setShowSuggestions(false);
               if (suggestions.length > 0 && showSuggestions) {
                 handleSuggestionSelect(suggestions[0]);
               } else {

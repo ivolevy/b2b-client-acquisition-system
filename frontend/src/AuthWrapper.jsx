@@ -10,7 +10,6 @@ const AppB2B = lazy(() => import('./App_B2B'));
 const UserProfile = lazy(() => import('./components/UserProfile'));
 const Navbar = lazy(() => import('./components/Navbar'));
 const ProBackground = lazy(() => import('./components/ProBackground'));
-const ProWelcome = lazy(() => import('./components/ProWelcome'));
 const BackButton = lazy(() => import('./components/BackButton'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
@@ -83,7 +82,6 @@ const checkLocalAuth = () => {
 function AuthWrapper() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showProWelcome, setShowProWelcome] = useState(false);
   // useSupabase es constante durante la ejecución, no necesita memoización
   const useSupabase = isSupabaseConfigured();
 
@@ -130,11 +128,6 @@ function AuthWrapper() {
               if (!profileError && profile) {
                 const userData = authService.buildUserData(session.user, profile);
                 setUser(userData);
-                
-                if (userData.plan === 'pro' && userData.role !== 'admin') {
-                  setShowProWelcome(true);
-                }
-                
                 setLoading(false);
                 return;
               }
@@ -186,10 +179,6 @@ function AuthWrapper() {
               
               const userData = authService.buildUserData(session.user, profile);
               setUser(userData);
-              
-              if (userData.plan === 'pro' && userData.role !== 'admin') {
-                setShowProWelcome(true);
-              }
             } else if (event === 'SIGNED_OUT') {
               setUser(null);
             }
@@ -219,10 +208,6 @@ function AuthWrapper() {
 
     const userData = authService.buildUserData(data.user, data.profile);
     setUser(userData);
-    
-    if (userData.plan === 'pro' && userData.role !== 'admin') {
-      setShowProWelcome(true);
-    }
 
     return userData;
   };
@@ -252,15 +237,9 @@ function AuthWrapper() {
       authStorage.setToken('demo_token_' + Date.now());
     }
     
-    if (userData.plan === 'pro' && userData.role !== 'admin') {
-      setShowProWelcome(true);
-    }
     setUser(userData);
   }, []);
 
-  const handleProWelcomeComplete = useCallback(() => {
-    setShowProWelcome(false);
-  }, []);
 
   // Logout - Instantáneo (memoizado)
   const handleLogout = useCallback(() => {
@@ -383,7 +362,6 @@ function AuthWrapper() {
     <AuthContext.Provider value={authValue}>
       <BrowserRouter>
         <Suspense fallback={<LoadingFallback />}>
-        {showProWelcome && <ProWelcome onComplete={handleProWelcomeComplete} />}
         {user ? (
           <Routes>
             <Route path="/profile" element={
