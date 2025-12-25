@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Circle, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Circle, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import ToastContainer from './ToastContainer';
 import { useToast } from '../hooks/useToast';
@@ -21,6 +21,23 @@ function MapClickHandler({ onLocationSelect }) {
       onLocationSelect(e.latlng);
     },
   });
+  return null;
+}
+
+// Componente para actualizar el mapa cuando cambia el centro
+function MapUpdater({ center, zoom = 15 }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (center && Array.isArray(center) && center.length === 2) {
+      map.setView(center, zoom);
+      // Invalidar tamaño para asegurar que el mapa se renderice correctamente
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+    }
+  }, [center, zoom, map]);
+  
   return null;
 }
 
@@ -562,12 +579,13 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           center={mapCenter}
           zoom={12}
           className="location-map"
-          key={`${mapCenter[0]}-${mapCenter[1]}`}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; OpenStreetMap contributors'
           />
+          
+          <MapUpdater center={mapCenter} zoom={selectedLocation ? 15 : 12} />
           
           <MapClickHandler onLocationSelect={handleLocationSelect} />
           

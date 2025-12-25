@@ -162,17 +162,19 @@ function TableViewB2B({
   }, [empresas, sortBy, filtroRubro, filtroCiudad, filtroConEmail, filtroConTelefono, filtroDistancia, filtroDistanciaOperador, filtroConRedes]);
 
   const handleSort = (column) => {
-    if (!isPro) return;
-    if (sortColumn === column) {
-      if (sortBy === 'asc') {
-        setSortBy('desc');
-      } else if (sortBy === 'desc') {
-        setSortBy(null);
-        setSortColumn(null);
+    // Permitir ordenar por distancia a todos los usuarios
+    if (column === 'distancia' || isPro) {
+      if (sortColumn === column) {
+        if (sortBy === 'asc') {
+          setSortBy('desc');
+        } else if (sortBy === 'desc') {
+          setSortBy(null);
+          setSortColumn(null);
+        }
+      } else {
+        setSortColumn(column);
+        setSortBy('asc');
       }
-    } else {
-      setSortColumn(column);
-      setSortBy('asc');
     }
   };
 
@@ -472,11 +474,11 @@ function TableViewB2B({
                   </th>
                   <th
                     onClick={() => handleSort('distancia')}
-                    className={isPro ? 'sortable-header' : ''}
-                    title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
+                    className="sortable-header"
+                    title="Click para ordenar por distancia"
                   >
                     Dist.
-                    {isPro && sortColumn === 'distancia' && (
+                    {sortColumn === 'distancia' && (
                       <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
                     )}
                   </th>
@@ -484,6 +486,7 @@ function TableViewB2B({
               <th>Teléfono</th>
                   <th>Web</th>
               <th>Redes</th>
+              <th style={{ width: '60px', textAlign: 'center' }}>Ir</th>
                   {isPro && <th style={{ width: '90px' }}>Acciones</th>}
             </tr>
           </thead>
@@ -495,9 +498,14 @@ function TableViewB2B({
                     </td>
                 <td className="name-cell">
                   {empresa.nombre || 'Sin nombre'}
-                  {empresa.direccion && (
-                        <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
-                       {empresa.direccion}
+                  {(empresa.direccion || empresa.ciudad || empresa.codigo_postal || empresa.pais) && (
+                    <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
+                      {[
+                        empresa.direccion,
+                        empresa.ciudad,
+                        empresa.codigo_postal,
+                        empresa.pais
+                      ].filter(Boolean).join(', ')}
                     </div>
                   )}
                 </td>
@@ -584,19 +592,32 @@ function TableViewB2B({
                     )}
                   </div>
                 </td>
+                <td style={{ textAlign: 'center' }}>
+                  {(empresa.direccion || empresa.ciudad || (empresa.latitud && empresa.longitud)) && (
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${empresa.direccion && empresa.ciudad ? encodeURIComponent(`${empresa.direccion}, ${empresa.ciudad}${empresa.codigo_postal ? ` ${empresa.codigo_postal}` : ''}${empresa.pais ? `, ${empresa.pais}` : ''}`) : empresa.direccion ? encodeURIComponent(empresa.direccion) : `${empresa.latitud},${empresa.longitud}`}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="action-btn-mini go-btn"
+                      title="Ir a la ubicación en Google Maps"
+                      style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        fontSize: '16px',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      🚗
+                    </a>
+                  )}
+                  {!empresa.direccion && !empresa.ciudad && !empresa.latitud && !empresa.longitud && (
+                    <span className="no-data">-</span>
+                  )}
+                </td>
                     {isPro && (
                       <td>
-                        {(empresa.direccion || empresa.ciudad || (empresa.latitud && empresa.longitud)) && (
-                          <a
-                            href={`https://www.google.com/maps/dir/?api=1&destination=${empresa.direccion && empresa.ciudad ? encodeURIComponent(`${empresa.direccion}, ${empresa.ciudad}${empresa.codigo_postal ? ` ${empresa.codigo_postal}` : ''}${empresa.pais ? `, ${empresa.pais}` : ''}`) : empresa.direccion ? encodeURIComponent(empresa.direccion) : `${empresa.latitud},${empresa.longitud}`}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="action-btn-mini go-btn"
-                            title="Mostrar dirección en Maps"
-                          >
-                            🚗
-                          </a>
-                        )}
+                        {/* Acciones adicionales para PRO */}
                       </td>
                     )}
               </tr>
