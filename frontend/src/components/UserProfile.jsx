@@ -28,6 +28,8 @@ function UserProfile() {
   const [verificationCode, setVerificationCode] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0); // Countdown en segundos
+  const [canResendCode, setCanResendCode] = useState(false);
   const [showCancelPlanModal, setShowCancelPlanModal] = useState(false);
   const [showCancelPlanSuccessModal, setShowCancelPlanSuccessModal] = useState(false);
   const [cancelPlanLoading, setCancelPlanLoading] = useState(false);
@@ -59,6 +61,18 @@ function UserProfile() {
       document.body.style.top = '';
     };
   }, [showDeleteModal, showUpgradeModal, showPasswordModal, showCancelPlanModal, showCancelPlanSuccessModal]);
+
+  // Countdown para reenviar código de cambio de contraseña
+  useEffect(() => {
+    if (resendCountdown > 0) {
+      const timer = setTimeout(() => {
+        setResendCountdown(resendCountdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (resendCountdown === 0 && codeSent) {
+      setCanResendCode(true);
+    }
+  }, [resendCountdown, codeSent]);
 
   const handleUpgradeToPro = async () => {
     if (!proTokenInput.trim()) {
@@ -129,6 +143,8 @@ function UserProfile() {
       if (response.data.success) {
         setCodeSent(true);
         setPasswordStep('verify');
+        setResendCountdown(60); // Iniciar countdown de 60 segundos
+        setCanResendCode(false);
         setPasswordError('');
       } else {
         setPasswordError(response.data.message || 'Error al solicitar el código');
@@ -218,6 +234,8 @@ function UserProfile() {
         setPasswordStep('request');
         setVerificationCode('');
         setCodeSent(false);
+        setResendCountdown(0);
+        setCanResendCode(false);
         alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
       } else {
         setPasswordError('Cambio de contraseña no disponible en modo demo');
@@ -575,9 +593,66 @@ function UserProfile() {
                         fontFamily: 'monospace'
                       }}
                     />
-                    <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
-                      El código expira en 10 minutos
-                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                      <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>
+                        El código expira en 10 minutos
+                      </p>
+                      {canResendCode ? (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!user?.email) {
+                              setPasswordError('No se encontró el email del usuario');
+                              return;
+                            }
+
+                            setCodeLoading(true);
+                            setPasswordError('');
+                            setCanResendCode(false);
+
+                            try {
+                              const response = await axios.post(`${API_URL}/auth/solicitar-codigo-cambio-password`, {
+                                email: user.email,
+                                user_id: user.id
+                              });
+
+                              if (response.data.success) {
+                                setCodeSent(true);
+                                setVerificationCode(''); // Limpiar código anterior
+                                setResendCountdown(60); // Reiniciar countdown a 60 segundos
+                                setPasswordError('');
+                              } else {
+                                setPasswordError(response.data.message || 'Error al solicitar el código');
+                                setCanResendCode(true);
+                              }
+                            } catch (error) {
+                              const errorMsg = error.response?.data?.detail || error.message || 'Error al solicitar el código';
+                              setPasswordError(errorMsg);
+                              setCanResendCode(true);
+                            } finally {
+                              setCodeLoading(false);
+                            }
+                          }}
+                          disabled={codeLoading}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#81D4FA',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            textDecoration: 'underline',
+                            padding: 0,
+                            margin: 0
+                          }}
+                        >
+                          Reenviar código
+                        </button>
+                      ) : (
+                        <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>
+                          Reenviar código en {resendCountdown}s
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </>
               )}
@@ -630,6 +705,8 @@ function UserProfile() {
                   setVerificationCode('');
                   setCodeSent(false);
                   setPasswordError('');
+                  setResendCountdown(0);
+                  setCanResendCode(false);
                 }}
                 disabled={passwordLoading || codeLoading}
               >

@@ -42,7 +42,11 @@
   box-shadow: var(--shadow-lg, 0 2px 8px rgba(0, 0, 0, 0.1));
   overflow: hidden;
   max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .admin-header {
