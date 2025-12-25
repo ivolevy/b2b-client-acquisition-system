@@ -35,6 +35,9 @@ function AppB2B() {
     } else if (view === 'profile') {
       setView('table');
     }
+    // Limpiar estados de carga al cambiar de sección
+    setLoading(false);
+    setBlockingLoading(false);
   }, [location.pathname]);
   const [stats, setStats] = useState(null);
   const [rubros, setRubros] = useState({});
@@ -217,6 +220,9 @@ function AppB2B() {
           <p>{errorMsg}</p>
         </>
       );
+      // Asegurar que se limpien los estados incluso si hay error
+      setLoading(false);
+      setBlockingLoading(false);
     } finally {
       setLoading(false);
       setBlockingLoading(false);
