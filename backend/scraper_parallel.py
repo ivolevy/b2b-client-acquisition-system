@@ -148,7 +148,7 @@ def _programar_enriquecimiento_diferido(empresas: List[Dict]):
         if not isinstance(empresa, dict):
             logger.warning(f"Empresa inválida en enriquecimiento diferido: {type(empresa)}")
             continue
-        try:
+    try:
         BACKGROUND_EXECUTOR.submit(
             _enriquecer_empresa_individual,
             empresa,
@@ -156,8 +156,8 @@ def _programar_enriquecimiento_diferido(empresas: List[Dict]):
             guardar_en_cache=True,
             guardar_en_db=True
         )
-        except Exception as e:
-            logger.error(f"Error encolando empresa para enriquecimiento diferido: {e}")
+    except Exception as e:
+        logger.error(f"Error encolando empresa para enriquecimiento diferido: {e}")
 
 
 def _enriquecer_empresa_individual(
