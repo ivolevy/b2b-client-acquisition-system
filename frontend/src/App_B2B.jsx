@@ -50,6 +50,7 @@ function AppB2B() {
   const isPro = user?.plan === 'pro';
   const [historySearchData, setHistorySearchData] = useState(null);
   const [showAllResults, setShowAllResults] = useState(false);
+  const [isFromHistory, setIsFromHistory] = useState(false);
 
   useEffect(() => {
     // No cargar empresas automáticamente - solo cuando el usuario hace una búsqueda
@@ -60,6 +61,7 @@ function AppB2B() {
   
   // Manejar selección desde historial de búsquedas
   const handleSelectFromHistory = (searchData) => {
+    setIsFromHistory(true);
     setHistorySearchData(searchData);
     info(
       <>
@@ -134,7 +136,8 @@ function AppB2B() {
         const empresasEncontradas = response.data.data || [];
 
         // Guardar búsqueda en historial si es PRO (en background, sin bloquear)
-        if (isPro && user?.id && total > 0) {
+        // NO guardar si viene del historial para evitar duplicados
+        if (isPro && user?.id && total > 0 && !isFromHistory) {
           // Ejecutar en background sin await para no bloquear la UI
           searchHistoryService.saveSearch(user.id, {
             rubro: params.rubro,
@@ -149,6 +152,11 @@ function AppB2B() {
             if (error) console.warn('Historial no guardado:', error.message);
             else console.log('Historial guardado:', data?.id);
           }).catch(e => console.warn('Error historial:', e));
+        }
+        
+        // Resetear flag después de la búsqueda
+        if (isFromHistory) {
+          setIsFromHistory(false);
         }
         
         if (total === 0) {

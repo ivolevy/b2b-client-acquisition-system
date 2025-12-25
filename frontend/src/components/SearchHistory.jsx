@@ -40,13 +40,14 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
     setLoading(true);
     setError(null);
     try {
-      // Timeout para evitar que se quede cargando indefinidamente
+      // Timeout reducido para mejor UX
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout: La solicitud tardó demasiado')), 10000)
+        setTimeout(() => reject(new Error('Timeout: La solicitud tardó demasiado')), 5000)
       );
 
       const fetchPromise = searchHistoryService.getHistory(user.id, 20);
-      const { data, error: fetchError } = await Promise.race([fetchPromise, timeoutPromise]);
+      const result = await Promise.race([fetchPromise, timeoutPromise]);
+      const { data, error: fetchError } = result || { data: null, error: new Error('No se recibió respuesta') };
       
       if (fetchError) throw fetchError;
       setSearches(data || []);

@@ -514,7 +514,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
         </select>
       </div>
 
-      <div className="address-search" onKeyDown={handleAddressKeyDown}>
+      <div className="address-search">
         <label htmlFor="address-input">Buscar dirección</label>
         <div className="address-input-wrapper">
           <input
@@ -527,6 +527,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
               setSearchQuery(e.target.value);
               setShowSuggestions(true);
             }}
+            onKeyDown={handleAddressKeyDown}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             autoComplete="off"
             style={{

@@ -422,9 +422,42 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               id="address-input"
               type="text"
               className="address-input"
-            placeholder="Ej: Plaza de Mayo, Buenos Aires"
+              placeholder="Ej: Plaza de Mayo, Buenos Aires"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                // Permitir que el autocomplete maneje Enter, pero también permitir escribir
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  // Si hay un lugar seleccionado, el autocomplete lo manejará
+                  // Si no, intentar buscar manualmente
+                  if (autocompleteRef.current && autocompleteInputRef.current) {
+                    const place = autocompleteRef.current.getPlace();
+                    if (!place || !place.geometry) {
+                      // Si no hay lugar seleccionado, disparar búsqueda manual
+                      const geocoder = new window.google.maps.Geocoder();
+                      geocoder.geocode({ address: searchQuery }, (results, status) => {
+                        if (status === 'OK' && results && results[0]) {
+                          const location = results[0].geometry.location;
+                          const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
+                          const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
+                          const nombre = results[0].formatted_address;
+                          setSearchQuery(nombre);
+                          setMapCenter({ lat, lng });
+                          setSelectedLocation({ lat, lng });
+                          if (mapRef.current) {
+                            mapRef.current.panTo({ lat, lng });
+                            mapRef.current.setZoom(15);
+                          }
+                          handleLocationSelect(lat, lng, nombre);
+                        }
+                      });
+                    }
+                  }
+                }
+              }}
               autoComplete="off"
           />
           <span className="location-text">
