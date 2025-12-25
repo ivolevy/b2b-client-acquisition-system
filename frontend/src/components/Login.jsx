@@ -1662,6 +1662,7 @@ function Login({ onLogin }) {
                 <button 
                   className="forgot-password-save-btn"
                   onClick={async () => {
+                    // Validaciones
                     if (!forgotPasswordNewPassword || !forgotPasswordConfirmPassword) {
                       setForgotPasswordError('Completá todos los campos');
                       return;
@@ -1672,13 +1673,8 @@ function Login({ onLogin }) {
                       return;
                     }
 
-                    if (forgotPasswordNewPassword.length < 8) {
-                      setForgotPasswordError('La contraseña debe tener al menos 8 caracteres');
-                      return;
-                    }
-
-                    if (forgotPasswordNewPassword.length > 16) {
-                      setForgotPasswordError('La contraseña no puede tener más de 16 caracteres');
+                    if (forgotPasswordNewPassword.length < 8 || forgotPasswordNewPassword.length > 16) {
+                      setForgotPasswordError('La contraseña debe tener entre 8 y 16 caracteres');
                       return;
                     }
 
@@ -1687,19 +1683,35 @@ function Login({ onLogin }) {
                       return;
                     }
 
+                    if (!forgotPasswordEmail) {
+                      setForgotPasswordError('El email es requerido');
+                      return;
+                    }
+
                     setForgotPasswordLoading(true);
                     setForgotPasswordError('');
 
                     try {
-                      // Validar el código y actualizar la contraseña en un solo paso
-                      const resetResponse = await axios.post(`${API_URL}/auth/actualizar-password-reset`, {
+                      console.log('Actualizando contraseña con:', {
+                        email: forgotPasswordEmail,
+                        codigo: forgotPasswordCode,
+                        passwordLength: forgotPasswordNewPassword.length
+                      });
+
+                      // Llamar al endpoint que actualiza la contraseña
+                      const response = await axios.post(`${API_URL}/auth/actualizar-password-reset`, {
                         email: forgotPasswordEmail,
                         codigo: forgotPasswordCode,
                         new_password: forgotPasswordNewPassword
                       });
 
-                      if (resetResponse.data.success) {
-                        // Éxito - contraseña actualizada directamente por el backend
+                      console.log('Respuesta del servidor:', response.data);
+
+                      if (response.data && response.data.success === true) {
+                        // Éxito - contraseña actualizada
+                        alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
+                        
+                        // Limpiar todo
                         setShowForgotPasswordModal(false);
                         setForgotPasswordStep('request');
                         setForgotPasswordEmail('');
@@ -1710,49 +1722,21 @@ function Login({ onLogin }) {
                         setForgotPasswordCodeSent(false);
                         setResendCountdown(0);
                         setCanResendCode(false);
-                        alert(resetResponse.data.message || 'Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
                       } else {
-                        // Si falla, verificar si requiere reset desde el frontend
-                        if (resetResponse.data.requires_frontend_reset) {
-                          // Intentar usar el método de Supabase como último recurso
-                          try {
-                            const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-                              forgotPasswordEmail,
-                              {
-                                redirectTo: `${window.location.origin}/reset-password`
-                              }
-                            );
-                            
-                            if (resetError) {
-                              setForgotPasswordError('Error al actualizar la contraseña: ' + resetError.message);
-                              setForgotPasswordLoading(false);
-                              return;
-                            }
-                            
-                            // Mostrar mensaje de que se envió el email
-                            setShowForgotPasswordModal(false);
-                            setForgotPasswordStep('request');
-                            setForgotPasswordEmail('');
-                            setForgotPasswordCode('');
-                            setForgotPasswordNewPassword('');
-                            setForgotPasswordConfirmPassword('');
-                            setForgotPasswordError('');
-                            setForgotPasswordCodeSent(false);
-                            setResendCountdown(0);
-                            setCanResendCode(false);
-                            alert('Se envió un email a tu dirección con un link para cambiar tu contraseña. Revisá tu bandeja de entrada.');
-                          } catch (frontendError) {
-                            setForgotPasswordError('Error al actualizar la contraseña. Por favor, intentá nuevamente.');
-                            setForgotPasswordLoading(false);
-                          }
-                        } else {
-                          setForgotPasswordError(resetResponse.data.message || 'Error al actualizar la contraseña');
-                          setForgotPasswordLoading(false);
-                        }
+                        // Error del servidor
+                        const errorMsg = response.data?.message || 'Error al actualizar la contraseña';
+                        setForgotPasswordError(errorMsg);
+                        setForgotPasswordLoading(false);
                       }
                     } catch (error) {
-                      console.error('Error actualizando contraseña:', error);
-                      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Error al cambiar la contraseña';
+                      console.error('Error completo:', error);
+                      console.error('Error response:', error.response?.data);
+                      
+                      const errorMsg = error.response?.data?.detail || 
+                                     error.response?.data?.message || 
+                                     error.message || 
+                                     'Error al cambiar la contraseña. Por favor, intentá nuevamente.';
+                      
                       setForgotPasswordError(errorMsg);
                       setForgotPasswordLoading(false);
                     }
