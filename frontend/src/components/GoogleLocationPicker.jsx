@@ -36,6 +36,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   const [showSuggestions, setShowSuggestions] = useState(false);
   const autocompleteServiceRef = useRef(null);
   const placesServiceRef = useRef(null);
+  const handleManualGeocodeRef = useRef(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
@@ -172,45 +173,6 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     }
   }, [searchQuery, isLoaded]);
 
-  // Manejar selección de sugerencia
-  const handleSuggestionSelect = useCallback((prediction) => {
-    if (!placesServiceRef.current || !prediction.place_id) {
-      // Si no hay place_id, usar geocoding directo
-      handleManualGeocode();
-      return;
-    }
-
-    placesServiceRef.current.getDetails(
-      {
-        placeId: prediction.place_id,
-        fields: ['formatted_address', 'geometry', 'name']
-      },
-      (place, status) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
-          const location = place.geometry.location;
-          const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
-          const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
-          const nombre = place.formatted_address || place.name || searchQuery;
-          
-          setSearchQuery(nombre);
-          setMapCenter({ lat, lng });
-          setSelectedLocation({ lat, lng });
-          setShowSuggestions(false);
-          
-          if (mapRef.current) {
-            mapRef.current.panTo({ lat, lng });
-            mapRef.current.setZoom(15);
-          }
-          
-          handleLocationSelect(lat, lng, nombre);
-        } else {
-          // Fallback a geocoding manual
-          handleManualGeocode();
-        }
-      }
-    );
-  }, [handleLocationSelect, searchQuery, handleManualGeocode]);
-
   const handleManualGeocode = useCallback(() => {
     if (!searchQuery || searchQuery.trim().length < 3) {
       warning(
@@ -263,6 +225,54 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       }
     });
   }, [searchQuery, handleLocationSelect, warning, error, success]);
+
+  // Actualizar ref cuando cambia la función
+  useEffect(() => {
+    handleManualGeocodeRef.current = handleManualGeocode;
+  }, [handleManualGeocode]);
+
+  // Manejar selección de sugerencia (usa ref para evitar dependencia circular)
+  const handleSuggestionSelect = useCallback((prediction) => {
+    if (!placesServiceRef.current || !prediction.place_id) {
+      // Si no hay place_id, usar geocoding directo
+      if (handleManualGeocodeRef.current) {
+        handleManualGeocodeRef.current();
+      }
+      return;
+    }
+
+    placesServiceRef.current.getDetails(
+      {
+        placeId: prediction.place_id,
+        fields: ['formatted_address', 'geometry', 'name']
+      },
+      (place, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
+          const location = place.geometry.location;
+          const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
+          const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
+          const nombre = place.formatted_address || place.name || searchQuery;
+          
+          setSearchQuery(nombre);
+          setMapCenter({ lat, lng });
+          setSelectedLocation({ lat, lng });
+          setShowSuggestions(false);
+          
+          if (mapRef.current) {
+            mapRef.current.panTo({ lat, lng });
+            mapRef.current.setZoom(15);
+          }
+          
+          handleLocationSelect(lat, lng, nombre);
+        } else {
+          // Fallback a geocoding manual
+          if (handleManualGeocodeRef.current) {
+            handleManualGeocodeRef.current();
+          }
+        }
+      }
+    );
+  }, [handleLocationSelect, searchQuery]);
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
