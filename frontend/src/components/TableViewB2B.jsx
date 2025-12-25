@@ -487,7 +487,6 @@ function TableViewB2B({
                   <th>Web</th>
               <th>Redes</th>
               <th style={{ width: '60px', textAlign: 'center' }}>Ir</th>
-                  {isPro && <th style={{ width: '90px' }}>Acciones</th>}
             </tr>
           </thead>
           <tbody>
@@ -615,11 +614,6 @@ function TableViewB2B({
                     <span className="no-data">-</span>
                   )}
                 </td>
-                    {isPro && (
-                      <td>
-                        {/* Acciones adicionales para PRO */}
-                      </td>
-                    )}
               </tr>
             ))}
           </tbody>

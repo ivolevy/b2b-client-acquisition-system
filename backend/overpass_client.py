@@ -12,6 +12,28 @@ logger = logging.getLogger(__name__)
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 
+def _construir_direccion_completa(calle: str, numero: str) -> str:
+    """
+    Construye la dirección completa combinando calle y número.
+    
+    Args:
+        calle: Nombre de la calle (addr:street)
+        numero: Número de casa/edificio (addr:housenumber)
+    
+    Returns:
+        Dirección completa (ej: "Loyola 202" o solo "Loyola" si no hay número)
+    """
+    calle = (calle or '').strip()
+    numero = (numero or '').strip()
+    
+    if not calle:
+        return ''
+    
+    if numero:
+        return f"{calle} {numero}"
+    
+    return calle
+
 # Mapeo de rubros a tags de OpenStreetMap
 RUBROS_DISPONIBLES = {
     # CONSTRUCCIÓN E INMOBILIARIA
@@ -539,7 +561,10 @@ def buscar_empresas_por_rubro(
                 'website': tags_elem.get('website', tags_elem.get('contact:website', '')),
                 'email': tags_elem.get('email', tags_elem.get('contact:email', '')),
                 'telefono': tags_elem.get('phone', tags_elem.get('contact:phone', '')),
-                'direccion': tags_elem.get('addr:street', ''),
+                'direccion': _construir_direccion_completa(
+                    tags_elem.get('addr:street', ''),
+                    tags_elem.get('addr:housenumber', '')
+                ),
                 'ciudad': tags_elem.get('addr:city', ciudad or ''),
                 'pais': tags_elem.get('addr:country', pais or ''),
                 'codigo_postal': tags_elem.get('addr:postcode', ''),
@@ -642,7 +667,10 @@ def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limi
                 'website': tags_elem.get('website', tags_elem.get('contact:website', '')),
                 'email': tags_elem.get('email', tags_elem.get('contact:email', '')),
                 'telefono': tags_elem.get('phone', tags_elem.get('contact:phone', '')),
-                'direccion': tags_elem.get('addr:street', ''),
+                'direccion': _construir_direccion_completa(
+                    tags_elem.get('addr:street', ''),
+                    tags_elem.get('addr:housenumber', '')
+                ),
                 'ciudad': tags_elem.get('addr:city', 'Desconocida'),
                 'pais': tags_elem.get('addr:country', ''),
                 'codigo_postal': tags_elem.get('addr:postcode', ''),
