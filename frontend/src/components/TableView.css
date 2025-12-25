@@ -514,7 +514,7 @@
 .filters-inline-bar {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: 8px;
   padding: 0.75rem 1.25rem;
   background: var(--gray-50);
@@ -662,10 +662,11 @@
 .filter-checkboxes-and-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--spacing-sm);
   flex-shrink: 0;
   min-width: fit-content;
+  margin-left: auto;
 }
 
 .filter-checkboxes-group {
@@ -696,11 +697,11 @@
 }
 
 .filter-actions-right {
-  margin-left: auto;
   display: flex;
   gap: 6px;
   flex-shrink: 0;
   flex-wrap: nowrap;
+  margin-left: auto;
 }
 
 .btn-action-inline {
