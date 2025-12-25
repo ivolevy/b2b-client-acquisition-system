@@ -337,26 +337,33 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           }
         }
       );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      if (data.length > 0) {
+      if (data && data.length > 0) {
         const formatted = formatNominatimResult(data[0]);
         if (formatted) {
           handleSuggestionSelect(formatted);
+          setIsSearching(false);
+          return;
         }
-      } else {
-        warning(
-          <>
-            <strong>No se encontraron resultados</strong>
-            <p>No se encontraron coincidencias para esa dirección. Intenta con otra búsqueda.</p>
-          </>,
-          4000
-        );
       }
+      
+      setIsSearching(false);
+      warning(
+        <>
+          <strong>No se encontraron resultados</strong>
+          <p>No se encontraron coincidencias para esa dirección. Intenta con otra búsqueda.</p>
+        </>,
+        4000
+      );
     } catch (error) {
       console.error('Error con Nominatim:', error);
-      throw error;
-    } finally {
       setIsSearching(false);
+      throw error;
     }
   };
 
@@ -379,8 +386,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
 
     setShowSuggestions(false);
 
-    // Si hay sugerencias, usar la primera
-    if (suggestions.length > 0) {
+    // Si hay sugerencias visibles, usar la primera
+    if (suggestions.length > 0 && showSuggestions) {
       handleSuggestionSelect(suggestions[0]);
       return;
     }
@@ -389,7 +396,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       setIsSearching(true);
       
       // Intentar con Google Geocoding si está disponible
-      if (useGooglePlaces && GOOGLE_API_KEY && window.google?.maps) {
+      if (useGooglePlaces && GOOGLE_API_KEY && window.google?.maps?.Geocoder) {
         const geocoder = new window.google.maps.Geocoder();
         geocoder.geocode({ address: query }, (results, status) => {
           setIsSearching(false);
@@ -413,13 +420,22 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             );
           } else {
             // Fallback a Nominatim
-            searchWithNominatim(query);
+            searchWithNominatim(query).catch(err => {
+              console.error('Error con Nominatim:', err);
+              setIsSearching(false);
+              error(
+                <>
+                  <strong>No se encontró la dirección</strong>
+                  <p>No se pudo encontrar esa dirección. Intenta con otra búsqueda.</p>
+                </>
+              );
+            });
           }
         });
         return;
       }
 
-      // Usar Nominatim como fallback
+      // Usar Nominatim como fallback o principal
       await searchWithNominatim(query);
     } catch (error) {
       console.error('Error buscando dirección manual:', error);

@@ -323,8 +323,28 @@
 }
 
 .input-wrapper input::placeholder {
-  color: #9ca3af; /* Gris claro para placeholder */
-  opacity: 1; /* Asegurar que el color se aplique correctamente */
+  color: #9ca3af !important; /* Gris claro para placeholder */
+  opacity: 1 !important; /* Asegurar que el color se aplique correctamente */
+}
+
+.input-wrapper input::-webkit-input-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.input-wrapper input::-moz-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.input-wrapper input:-ms-input-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.input-wrapper input:-moz-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
 }
 
 .input-wrapper input:focus {

@@ -126,12 +126,13 @@ const validateName = (name) => {
   return { isValid: true, message: '' };
 };
 
-const validatePhone = (phone) => {
+const validatePhone = (phone, countryPrefix = '') => {
   // El teléfono es opcional, si está vacío es válido
   if (!phone || phone.trim() === '') {
     return { isValid: true, message: '' };
   }
-  // Extraer solo los números del teléfono completo (incluyendo prefijo)
+  
+  // Extraer solo los números del número local (sin el prefijo)
   const cleanPhone = phone.replace(/[^\d]/g, '');
   
   // Validar que solo contenga números después de limpiar
@@ -139,13 +140,14 @@ const validatePhone = (phone) => {
     return { isValid: false, message: 'El teléfono debe contener al menos un número' };
   }
   
-  // Validar longitud mínima (prefijo + número local, mínimo 10 dígitos totales)
-  if (cleanPhone.length < 10) {
-    return { isValid: false, message: 'El teléfono debe tener al menos 10 dígitos' };
+  // Validar longitud del número local (8-12 dígitos, sin contar el prefijo del país)
+  if (cleanPhone.length < 8) {
+    return { isValid: false, message: 'El número debe tener al menos 8 dígitos (sin contar el prefijo del país)' };
   }
-  if (cleanPhone.length > 15) {
-    return { isValid: false, message: 'El teléfono es demasiado largo (máximo 15 dígitos)' };
+  if (cleanPhone.length > 12) {
+    return { isValid: false, message: 'El número es demasiado largo (máximo 12 dígitos sin contar el prefijo)' };
   }
+  
   return { isValid: true, message: '' };
 };
 
@@ -270,7 +272,8 @@ function Login({ onLogin }) {
   const isFormValid = () => {
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password, mode);
-    const phoneValidation = mode === 'register' ? validatePhone(phone) : { isValid: true };
+    // Validar solo el número local (sin el prefijo)
+    const phoneValidation = mode === 'register' ? validatePhone(phone, selectedCountry.prefix) : { isValid: true };
     const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
     
     return emailValidation.isValid && passwordValidation.isValid && phoneValidation.isValid && nameValidation.isValid;
@@ -295,8 +298,9 @@ function Login({ onLogin }) {
       setEmailError(validation.message);
     }, 300);
 
-    debouncedPhoneValidationRef.current = debounce((value) => {
-      const validation = validatePhone(value);
+    debouncedPhoneValidationRef.current = debounce((phoneNumber, prefix) => {
+      // Validar solo el número local (sin el prefijo)
+      const validation = validatePhone(phoneNumber, prefix || '');
       setPhoneError(validation.message);
     }, 300);
 
@@ -355,10 +359,13 @@ function Login({ onLogin }) {
     const value = e.target.value.replace(/[^\d]/g, '');
     setPhone(value);
     
-    if ((touched.phone || mode === 'register') && debouncedPhoneValidationRef.current) {
-      // Validar con el prefijo incluido
-      const fullPhone = `${selectedCountry.prefix}${value}`;
-      debouncedPhoneValidationRef.current(fullPhone);
+    // Solo validar si hay contenido (el teléfono es opcional)
+    if (value && (touched.phone || mode === 'register') && debouncedPhoneValidationRef.current) {
+      // Validar solo el número local (sin el prefijo)
+      debouncedPhoneValidationRef.current(value, selectedCountry.prefix);
+    } else if (!value) {
+      // Si está vacío, limpiar el error (es opcional)
+      setPhoneError('');
     }
   }, [touched.phone, mode, selectedCountry]);
   
@@ -366,10 +373,9 @@ function Login({ onLogin }) {
     setSelectedCountry(country);
     setShowCountryDropdown(false);
     setCountrySearch('');
-    // Revalidar el teléfono con el nuevo prefijo
+    // Revalidar el teléfono con el nuevo prefijo (solo el número local)
     if (phone && (touched.phone || mode === 'register') && debouncedPhoneValidationRef.current) {
-      const fullPhone = `${country.prefix}${phone}`;
-      debouncedPhoneValidationRef.current(fullPhone);
+      debouncedPhoneValidationRef.current(phone, country.prefix);
     }
   }, [phone, touched.phone, mode]);
   
@@ -408,23 +414,45 @@ function Login({ onLogin }) {
   
   const handlePhoneBlur = () => {
     setTouched({ ...touched, phone: true });
-    const fullPhone = `${selectedCountry.prefix}${phone}`;
-    const validation = validatePhone(fullPhone);
-    setPhoneError(validation.message);
+    // Solo validar si el teléfono tiene algún valor (es opcional)
+    if (phone && phone.trim() !== '') {
+      // Validar solo el número local (sin el prefijo)
+      const validation = validatePhone(phone, selectedCountry.prefix);
+      setPhoneError(validation.message);
+    } else {
+      // Si está vacío, no mostrar error (es opcional)
+      setPhoneError('');
+    }
   };
   
   // Cerrar dropdown cuando se hace click fuera
   useEffect(() => {
+    if (!showCountryDropdown) return;
+    
     const handleClickOutside = (event) => {
-      if (showCountryDropdown && !event.target.closest('.phone-country-selector')) {
-        setShowCountryDropdown(false);
+      try {
+        if (showCountryDropdown && !event.target.closest('.phone-country-selector')) {
+          setShowCountryDropdown(false);
+        }
+      } catch (error) {
+        // Silenciar errores de extensiones del navegador
+        if (!error.message?.includes('message channel closed')) {
+          console.warn('Error en handleClickOutside:', error);
+        }
       }
     };
     
-    if (showCountryDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
+    document.addEventListener('mousedown', handleClickOutside, { passive: true });
+    return () => {
+      try {
+        document.removeEventListener('mousedown', handleClickOutside);
+      } catch (error) {
+        // Silenciar errores de limpieza
+        if (!error.message?.includes('message channel closed')) {
+          console.warn('Error al limpiar listener:', error);
+        }
+      }
+    };
   }, [showCountryDropdown]);
   
   const handlePasswordBlur = () => {
@@ -445,7 +473,8 @@ function Login({ onLogin }) {
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password, mode);
     const fullPhone = mode === 'register' ? `${selectedCountry.prefix}${phone}` : '';
-    const phoneValidation = mode === 'register' ? validatePhone(fullPhone) : { isValid: true };
+    // Validar solo el número local (sin el prefijo)
+    const phoneValidation = mode === 'register' ? validatePhone(phone, selectedCountry.prefix) : { isValid: true };
     const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
     
     setEmailError(emailValidation.message);
@@ -963,7 +992,10 @@ function Login({ onLogin }) {
 
               {mode === 'register' && (
                 <div className="form-group">
-                  <label htmlFor="phone">Teléfono</label>
+                  <label htmlFor="phone">
+                    Teléfono
+                    <span className="optional-badge">Opcional</span>
+                  </label>
                   <div className="input-wrapper phone-country-selector">
                     <div className="country-selector-wrapper">
                       <button
@@ -1022,8 +1054,7 @@ function Login({ onLogin }) {
                       autoComplete="tel"
                       disabled={loading}
                       className={`phone-input ${phoneError ? 'input-error' : ''}`}
-                      minLength={10}
-                      maxLength={15}
+                      maxLength={12}
                       inputMode="numeric"
                     />
                   </div>
@@ -1637,50 +1668,55 @@ function Login({ onLogin }) {
                       });
 
                       if (resetResponse.data.success) {
-                        // Si requiere reset desde el frontend (método alternativo)
-                        if (resetResponse.data.requires_frontend_reset) {
-                          // Usar el método de Supabase que envía un email con link de reset
-                          const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-                            forgotPasswordEmail,
-                            {
-                              redirectTo: `${window.location.origin}/reset-password`
-                            }
-                          );
-                          
-                          if (resetError) {
-                            setForgotPasswordError('Error al enviar el email de recuperación: ' + resetError.message);
-                            setForgotPasswordLoading(false);
-                            return;
-                          }
-                          
-                          // Mostrar mensaje de que se envió el email
-                          setShowForgotPasswordModal(false);
-                          setForgotPasswordStep('request');
-                          setForgotPasswordEmail('');
-                          setForgotPasswordCode('');
-                          setForgotPasswordNewPassword('');
-                          setForgotPasswordConfirmPassword('');
-                          setForgotPasswordError('');
-                          setForgotPasswordCodeSent(false);
-                          setResendCountdown(0);
-                          setCanResendCode(false);
-                          alert('Se envió un email a tu dirección con un link para cambiar tu contraseña. Revisá tu bandeja de entrada.');
-                        } else {
-                          // Éxito - contraseña actualizada directamente
-                          setShowForgotPasswordModal(false);
-                          setForgotPasswordStep('request');
-                          setForgotPasswordEmail('');
-                          setForgotPasswordCode('');
-                          setForgotPasswordNewPassword('');
-                          setForgotPasswordConfirmPassword('');
-                          setForgotPasswordError('');
-                          setForgotPasswordCodeSent(false);
-                          setResendCountdown(0);
-                          setCanResendCode(false);
-                          alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
-                        }
+                        // Éxito - contraseña actualizada directamente por el backend
+                        setShowForgotPasswordModal(false);
+                        setForgotPasswordStep('request');
+                        setForgotPasswordEmail('');
+                        setForgotPasswordCode('');
+                        setForgotPasswordNewPassword('');
+                        setForgotPasswordConfirmPassword('');
+                        setForgotPasswordError('');
+                        setForgotPasswordCodeSent(false);
+                        setResendCountdown(0);
+                        setCanResendCode(false);
+                        alert(resetResponse.data.message || 'Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
                       } else {
-                        setForgotPasswordError(resetResponse.data.message || 'Error al actualizar la contraseña');
+                        // Si falla, verificar si requiere reset desde el frontend
+                        if (resetResponse.data.requires_frontend_reset) {
+                          // Intentar usar el método de Supabase como último recurso
+                          try {
+                            const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+                              forgotPasswordEmail,
+                              {
+                                redirectTo: `${window.location.origin}/reset-password`
+                              }
+                            );
+                            
+                            if (resetError) {
+                              setForgotPasswordError('Error al actualizar la contraseña: ' + resetError.message);
+                              setForgotPasswordLoading(false);
+                              return;
+                            }
+                            
+                            // Mostrar mensaje de que se envió el email
+                            setShowForgotPasswordModal(false);
+                            setForgotPasswordStep('request');
+                            setForgotPasswordEmail('');
+                            setForgotPasswordCode('');
+                            setForgotPasswordNewPassword('');
+                            setForgotPasswordConfirmPassword('');
+                            setForgotPasswordError('');
+                            setForgotPasswordCodeSent(false);
+                            setResendCountdown(0);
+                            setCanResendCode(false);
+                            alert('Se envió un email a tu dirección con un link para cambiar tu contraseña. Revisá tu bandeja de entrada.');
+                          } catch (frontendError) {
+                            setForgotPasswordError('Error al actualizar la contraseña. Por favor, intentá nuevamente.');
+                            setForgotPasswordLoading(false);
+                          }
+                        } else {
+                          setForgotPasswordError(resetResponse.data.message || 'Error al actualizar la contraseña');
+                        }
                       }
                     } catch (error) {
                       const errorMsg = error.response?.data?.detail || error.message || 'Error al cambiar la contraseña';

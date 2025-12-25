@@ -1670,18 +1670,70 @@ async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
         del _memoria_codigos_validacion[email]
         
         # Actualizar contraseña usando Supabase Admin API
-        # Nota: Esto requiere que el backend tenga configurada la SUPABASE_SERVICE_ROLE_KEY
-        # Si no está configurada, el frontend usará resetPasswordForEmail como método alternativo
         logger.info(f"Código validado para reset de contraseña de {email}")
         
-        # Retornar éxito - el frontend manejará la actualización usando resetPasswordForEmail
-        # o el backend puede implementar Supabase Admin API si tiene las credenciales
-        return {
-            "success": True,
-            "message": "Código validado correctamente",
-            "email": email,
-            "requires_frontend_reset": True
-        }
+        # Intentar actualizar la contraseña usando Supabase Admin API
+        supabase_service_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+        supabase_url = os.getenv('SUPABASE_URL')
+        
+        if supabase_service_key and supabase_url:
+            try:
+                from supabase import create_client, Client
+                supabase_admin: Client = create_client(supabase_url, supabase_service_key)
+                
+                # Buscar el usuario por email
+                users_response = supabase_admin.auth.admin.list_users()
+                user = None
+                for u in users_response.users:
+                    if u.email == email:
+                        user = u
+                        break
+                
+                if user:
+                    # Actualizar la contraseña del usuario
+                    update_response = supabase_admin.auth.admin.update_user_by_id(
+                        user.id,
+                        {"password": request.new_password}
+                    )
+                    
+                    if update_response.user:
+                        logger.info(f"Contraseña actualizada exitosamente para {email}")
+                        return {
+                            "success": True,
+                            "message": "Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.",
+                            "email": email,
+                            "requires_frontend_reset": False
+                        }
+                    else:
+                        logger.error(f"Error al actualizar contraseña: No se recibió el usuario actualizado")
+                        return {
+                            "success": False,
+                            "message": "Error al actualizar la contraseña. Por favor, intentá nuevamente.",
+                            "requires_frontend_reset": True
+                        }
+                else:
+                    logger.error(f"Usuario no encontrado para {email}")
+                    return {
+                        "success": False,
+                        "message": "Usuario no encontrado. Por favor, verificá tu email.",
+                        "requires_frontend_reset": True
+                    }
+            except Exception as e:
+                logger.error(f"Error actualizando contraseña con Supabase Admin API: {e}", exc_info=True)
+                # Si falla, retornar que requiere reset desde el frontend
+                return {
+                    "success": False,
+                    "message": f"Error al actualizar la contraseña: {str(e)}",
+                    "requires_frontend_reset": True
+                }
+        else:
+            # Si no hay credenciales de Supabase Admin, retornar que requiere reset desde el frontend
+            logger.warning("SUPABASE_SERVICE_ROLE_KEY no configurada, se requiere reset desde el frontend")
+            return {
+                "success": False,
+                "message": "Configuración de Supabase incompleta. Por favor, contactá al administrador.",
+                "requires_frontend_reset": True
+            }
         
     except HTTPException:
         raise
