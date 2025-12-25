@@ -25,7 +25,7 @@ function Navbar({ onNavigateToProfile }) {
     // Ejecutar logout directamente
     console.log('Ejecutando logout');
     if (logout && typeof logout === 'function') {
-    logout();
+      logout();
     } else {
       console.error('logout no es una función:', logout);
       // Fallback: limpiar y redirigir manualmente

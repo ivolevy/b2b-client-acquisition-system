@@ -100,25 +100,25 @@ function AdminLayout() {
               </button>
               <h2 className="admin-header-title">Panel de Administración</h2>
             </div>
-          {(isUsersPage || isPromoCodesPage) && (
-            <div className="admin-nav">
-              <button 
-                className={`admin-nav-btn ${isUsersPage ? 'active' : ''}`}
-                onClick={() => navigate('/backoffice/users')}
-              >
-                Usuarios
-              </button>
-              <button 
-                className={`admin-nav-btn ${isPromoCodesPage ? 'active' : ''}`}
-                onClick={() => navigate('/backoffice/promo-codes')}
-              >
-                Códigos Promocionales
-              </button>
-            </div>
-          )}
-        </div>
+            {(isUsersPage || isPromoCodesPage) && (
+              <div className="admin-nav">
+                <button 
+                  className={`admin-nav-btn ${isUsersPage ? 'active' : ''}`}
+                  onClick={() => navigate('/backoffice/users')}
+                >
+                  Usuarios
+                </button>
+                <button 
+                  className={`admin-nav-btn ${isPromoCodesPage ? 'active' : ''}`}
+                  onClick={() => navigate('/backoffice/promo-codes')}
+                >
+                  Códigos Promocionales
+                </button>
+              </div>
+            )}
+          </div>
           <div className="admin-content">
-        <Outlet />
+            <Outlet />
           </div>
         </div>
       </main>

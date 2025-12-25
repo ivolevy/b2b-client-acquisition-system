@@ -5,8 +5,7 @@ Enfocado en empresas, no en propiedades por zona
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
-from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional, List
 import logging
@@ -66,12 +65,12 @@ def insertar_empresa(empresa: Dict) -> bool:
     
     try:
         with insertar_empresa._lock:
-            _empresa_counter += 1
-            empresa['id'] = _empresa_counter
-            empresa['created_at'] = datetime.now().isoformat()
-            _memoria_empresas.append(empresa.copy())
+    _empresa_counter += 1
+    empresa['id'] = _empresa_counter
+    empresa['created_at'] = datetime.now().isoformat()
+    _memoria_empresas.append(empresa.copy())
             logger.debug(f" Empresa guardada en memoria: {empresa.get('nombre')} (ID: {_empresa_counter})")
-        return True
+    return True
     except Exception as e:
         logger.error(f"Error insertando empresa: {e}")
         return False
@@ -444,13 +443,6 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
-# Configurar logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
 # CORS - Permitir todos los orígenes
 app.add_middleware(
     CORSMiddleware,
@@ -458,73 +450,7 @@ app.add_middleware(
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
-
-# Middleware para asegurar CORS en todas las respuestas
-@app.middleware("http")
-async def cors_middleware(request: Request, call_next):
-    """Middleware que asegura CORS en todas las respuestas"""
-    if request.method == "OPTIONS":
-        response = Response(status_code=200)
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-        return response
-    
-    response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    return response
-
-# Handler explícito para peticiones OPTIONS (backup)
-@app.options("/{full_path:path}")
-async def options_handler(request: Request, full_path: str):
-    """Maneja peticiones OPTIONS (preflight) para CORS"""
-    response = Response(status_code=200)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    response.headers["Access-Control-Max-Age"] = "3600"
-    return response
-
-# Exception handler para HTTPException (asegura CORS en errores HTTP)
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    """Maneja HTTPException y asegura que CORS siempre se incluya"""
-    response = JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail}
-    )
-    
-    # Agregar headers CORS manualmente
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    
-    return response
-
-# Exception handler global para asegurar que CORS siempre se incluya
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    """Maneja todas las excepciones y asegura que CORS siempre se incluya"""
-    import traceback
-    logger.error(f"Error no manejado: {exc}", exc_info=True)
-    logger.error(f"Traceback: {traceback.format_exc()}")
-    
-    # Crear respuesta con headers CORS
-    response = JSONResponse(
-        status_code=500,
-        content={"detail": "Error interno del servidor", "error": str(exc)}
-    )
-    
-    # Agregar headers CORS manualmente
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    
-    return response
 
 # Modelos
 class BusquedaRubroRequest(BaseModel):
@@ -616,14 +542,13 @@ async def root():
     }
 
 @app.get("/rubros")
-async def obtener_rubros():
+def obtener_rubros():
     """Lista todos los rubros disponibles para búsqueda"""
-    try:
         rubros = listar_rubros_disponibles()
         
-        if not rubros:
-            rubros = {}
-        
+    if not rubros:
+        rubros = {}
+    
         return {
             "success": True,
             "total": len(rubros),
@@ -634,9 +559,6 @@ async def obtener_rubros():
                 "ciudad": "Madrid"
             }
         }
-    except Exception as e:
-        logger.error(f"Error obteniendo rubros: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error al obtener rubros: {str(e)}")
 
 @app.post("/buscar")
 async def buscar_por_rubro(request: BusquedaRubroRequest):
@@ -1513,7 +1435,7 @@ async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
         _memoria_codigos_validacion[email] = {
             'codigo': codigo,
             'expires_at': expires_at.isoformat(),
-            'user_id': getattr(request, 'user_id', None),  # user_id es opcional para reset
+            'user_id': request.user_id,
             'created_at': datetime.now().isoformat(),
             'type': 'reset_password'  # Marcar como reset de contraseña
         }

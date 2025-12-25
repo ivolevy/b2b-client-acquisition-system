@@ -335,40 +335,40 @@ function TableViewB2B({
 
         <div className="filter-checkboxes-and-actions">
           <div className="filter-checkboxes-group">
-        <label className="filter-checkbox-inline">
-          <input
-            type="checkbox"
-            checked={filtroConEmail}
-            onChange={(e) => setFiltroConEmail(e.target.checked)}
-          />
-          <span>Email</span>
-        </label>
+            <label className="filter-checkbox-inline">
+              <input
+                type="checkbox"
+                checked={filtroConEmail}
+                onChange={(e) => setFiltroConEmail(e.target.checked)}
+              />
+              <span>Email</span>
+            </label>
 
-        <label className="filter-checkbox-inline">
-          <input
-            type="checkbox"
-            checked={filtroConTelefono}
-            onChange={(e) => setFiltroConTelefono(e.target.checked)}
-          />
-          <span>Tel</span>
-        </label>
-
-        {hayFiltrosActivos && (
-          <button 
-            type="button" 
-            className="btn-clear-filters"
-            onClick={handleLimpiarFiltros}
-            title="Limpiar filtros"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        )}
+            <label className="filter-checkbox-inline">
+              <input
+                type="checkbox"
+                checked={filtroConTelefono}
+                onChange={(e) => setFiltroConTelefono(e.target.checked)}
+              />
+              <span>Tel</span>
+            </label>
+            
+            {hayFiltrosActivos && (
+              <button 
+                type="button" 
+                className="btn-clear-filters"
+                onClick={handleLimpiarFiltros}
+                title="Limpiar filtros"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            )}
           </div>
 
-        <div className="filter-actions-right">
+          <div className="filter-actions-right">
           {isPro ? (
             <button 
               type="button" 
