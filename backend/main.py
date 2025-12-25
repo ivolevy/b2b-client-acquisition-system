@@ -65,12 +65,12 @@ def insertar_empresa(empresa: Dict) -> bool:
     
     try:
         with insertar_empresa._lock:
-            _empresa_counter += 1
-            empresa['id'] = _empresa_counter
-            empresa['created_at'] = datetime.now().isoformat()
-            _memoria_empresas.append(empresa.copy())
+    _empresa_counter += 1
+    empresa['id'] = _empresa_counter
+    empresa['created_at'] = datetime.now().isoformat()
+    _memoria_empresas.append(empresa.copy())
             logger.debug(f" Empresa guardada en memoria: {empresa.get('nombre')} (ID: {_empresa_counter})")
-        return True
+    return True
     except Exception as e:
         logger.error(f"Error insertando empresa: {e}")
         return False
@@ -139,16 +139,16 @@ def obtener_estadisticas() -> Dict:
     por_rubro = {}
     for e in _memoria_empresas:
         if isinstance(e, dict):
-            rubro = e.get('rubro', 'Sin rubro')
-            por_rubro[rubro] = por_rubro.get(rubro, 0) + 1
+        rubro = e.get('rubro', 'Sin rubro')
+        por_rubro[rubro] = por_rubro.get(rubro, 0) + 1
     
     # Por ciudad
     por_ciudad = {}
     for e in _memoria_empresas:
         if isinstance(e, dict):
-            ciudad = e.get('ciudad', '')
-            if ciudad:
-                por_ciudad[ciudad] = por_ciudad.get(ciudad, 0) + 1
+        ciudad = e.get('ciudad', '')
+        if ciudad:
+            por_ciudad[ciudad] = por_ciudad.get(ciudad, 0) + 1
     
     return {
         'total': total,
@@ -270,9 +270,9 @@ def actualizar_template(template_id: int, nombre: Optional[str] = None, subject:
                 cambios = True
             
             if cambios:
-                _memoria_templates[i]['updated_at'] = datetime.now().isoformat()
-                logger.info(f" Template actualizado en memoria: ID {template_id}")
-                return True
+            _memoria_templates[i]['updated_at'] = datetime.now().isoformat()
+            logger.info(f" Template actualizado en memoria: ID {template_id}")
+            return True
             else:
                 logger.warning(f"No se aplicaron cambios válidos al template {template_id}")
                 return False
@@ -319,19 +319,19 @@ def guardar_email_history(empresa_id: int, empresa_nombre: str, empresa_email: s
         return False
     
     try:
-        _memoria_email_history.append({
-            'id': len(_memoria_email_history) + 1,
-            'empresa_id': empresa_id,
+    _memoria_email_history.append({
+        'id': len(_memoria_email_history) + 1,
+        'empresa_id': empresa_id,
             'empresa_nombre': str(empresa_nombre) if empresa_nombre else '',
             'empresa_email': str(empresa_email) if empresa_email else '',
-            'template_id': template_id,
+        'template_id': template_id,
             'template_nombre': str(template_nombre) if template_nombre else '',
             'subject': str(subject) if subject else '',
-            'status': status,
+        'status': status,
             'error_message': str(error_message) if error_message else None,
-            'sent_at': datetime.now().isoformat()
-        })
-        return True
+        'sent_at': datetime.now().isoformat()
+    })
+    return True
     except Exception as e:
         logger.error(f"Error guardando historial de email: {e}")
         return False
@@ -353,11 +353,11 @@ def obtener_email_history(empresa_id: Optional[int] = None, template_id: Optiona
 def _init_default_templates():
     """Inicializa templates por defecto en memoria"""
     try:
-        if len(_memoria_templates) == 0:
+    if len(_memoria_templates) == 0:
             template_id = crear_template(
-                nombre='Presentación Dota Solutions',
-                subject='Hola equipo de {nombre_empresa} - Oportunidad de colaboración',
-                body_html='''<html>
+            nombre='Presentación Dota Solutions',
+            subject='Hola equipo de {nombre_empresa} - Oportunidad de colaboración',
+            body_html='''<html>
 <body style="font-family: Arial, sans-serif; line-height: 1.8; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: #ffffff; border-radius: 8px; padding: 30px;">
         <p style="font-size: 16px; margin-bottom: 20px;">Hola equipo de <strong>{nombre_empresa}</strong>, ¿cómo están?</p>
@@ -544,21 +544,21 @@ async def root():
 @app.get("/rubros")
 def obtener_rubros():
     """Lista todos los rubros disponibles para búsqueda"""
-    rubros = listar_rubros_disponibles()
-    
+        rubros = listar_rubros_disponibles()
+        
     if not rubros:
         rubros = {}
     
-    return {
-        "success": True,
-        "total": len(rubros),
-        "rubros": rubros,
-        "ejemplo_uso": {
-            "rubro": "desarrolladoras_inmobiliarias",
-            "pais": "España",
-            "ciudad": "Madrid"
+        return {
+            "success": True,
+            "total": len(rubros),
+            "rubros": rubros,
+            "ejemplo_uso": {
+                "rubro": "desarrolladoras_inmobiliarias",
+                "pais": "España",
+                "ciudad": "Madrid"
+            }
         }
-    }
 
 @app.post("/buscar")
 async def buscar_por_rubro(request: BusquedaRubroRequest):
@@ -690,12 +690,12 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     )
                     # Validar que la distancia sea válida
                     if distancia is not None and isinstance(distancia, (int, float)) and distancia >= 0:
-                        empresa['distancia_km'] = distancia
-                        
-                        # Filtrar por radio: solo incluir empresas dentro del radio
+                    empresa['distancia_km'] = distancia
+                    
+                    # Filtrar por radio: solo incluir empresas dentro del radio
                         if radio_km is not None and isinstance(radio_km, (int, float)) and radio_km > 0:
-                            if distancia > radio_km:
-                                logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio: {distancia:.2f}km > {radio_km:.2f}km")
+                        if distancia > radio_km:
+                            logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio: {distancia:.2f}km > {radio_km:.2f}km")
                             continue  # Saltar esta empresa, está fuera del radio
                     else:
                         empresa['distancia_km'] = None

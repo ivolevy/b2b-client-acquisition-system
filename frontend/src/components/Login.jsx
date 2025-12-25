@@ -586,19 +586,6 @@ function Login({ onLogin }) {
     // No limpiar pendingEmail al cambiar de modo para mantener el estado
   };
 
-  // Timer para permitir reenvío de código después de 1 minuto
-  useEffect(() => {
-    if (forgotPasswordCodeSentTime && forgotPasswordStep === 'verify') {
-      const timer = setTimeout(() => {
-        setCanResendForgotPasswordCode(true);
-      }, 60000); // 1 minuto
-
-      return () => clearTimeout(timer);
-    } else {
-      setCanResendForgotPasswordCode(false);
-    }
-  }, [forgotPasswordCodeSentTime, forgotPasswordStep]);
-
   // Limpiar email pendiente cuando el usuario inicia sesión exitosamente
   useEffect(() => {
     // Si no hay pendingEmail, limpiar también el estado de dismissed
@@ -1124,8 +1111,8 @@ function Login({ onLogin }) {
                       setForgotPasswordConfirmPassword('');
                       setForgotPasswordError('');
                       setForgotPasswordCodeSent(false);
-                    setForgotPasswordCodeSentTime(null);
-                    setCanResendForgotPasswordCode(false);
+                      setForgotPasswordCodeSentTime(null);
+                      setCanResendForgotPasswordCode(false);
                     }}
                   >
                     ¿Olvidaste tu contraseña?
@@ -1256,8 +1243,6 @@ function Login({ onLogin }) {
             setForgotPasswordConfirmPassword('');
             setForgotPasswordError('');
             setForgotPasswordCodeSent(false);
-            setForgotPasswordCodeSentTime(null);
-            setCanResendForgotPasswordCode(false);
           }
         }}>
           <div className="forgot-password-modal" onClick={(e) => e.stopPropagation()}>
@@ -1270,20 +1255,20 @@ function Login({ onLogin }) {
                     setShowForgotPasswordModal(false);
                     setForgotPasswordStep('request');
                     setForgotPasswordEmail('');
-                    setForgotPasswordCode('');
-                    setForgotPasswordNewPassword('');
-                    setForgotPasswordConfirmPassword('');
-                    setForgotPasswordError('');
-                    setForgotPasswordCodeSent(false);
-                    setForgotPasswordCodeSentTime(null);
-                    setCanResendForgotPasswordCode(false);
-                  }
-                }}
-                disabled={forgotPasswordLoading}
-              >
-                ×
-              </button>
-            </div>
+            setForgotPasswordCode('');
+            setForgotPasswordNewPassword('');
+            setForgotPasswordConfirmPassword('');
+            setForgotPasswordError('');
+            setForgotPasswordCodeSent(false);
+            setForgotPasswordCodeSentTime(null);
+            setCanResendForgotPasswordCode(false);
+          }
+        }}
+        disabled={forgotPasswordLoading}
+      >
+        ×
+      </button>
+    </div>
             
             <div className="forgot-password-modal-body">
               {forgotPasswordError && (
@@ -1509,6 +1494,8 @@ function Login({ onLogin }) {
 
                       if (response.data.success) {
                         setForgotPasswordCodeSent(true);
+                        setForgotPasswordCodeSentTime(Date.now());
+                        setCanResendForgotPasswordCode(false);
                         setForgotPasswordStep('verify');
                         setForgotPasswordError('');
                       } else {
@@ -1623,8 +1610,8 @@ function Login({ onLogin }) {
                           setForgotPasswordConfirmPassword('');
                           setForgotPasswordError('');
                           setForgotPasswordCodeSent(false);
-                    setForgotPasswordCodeSentTime(null);
-                    setCanResendForgotPasswordCode(false);
+                          setForgotPasswordCodeSentTime(null);
+                          setCanResendForgotPasswordCode(false);
                           alert('Se envió un email a tu dirección con un link para cambiar tu contraseña. Revisá tu bandeja de entrada.');
                         } else {
                           // Éxito - contraseña actualizada directamente
@@ -1636,8 +1623,8 @@ function Login({ onLogin }) {
                           setForgotPasswordConfirmPassword('');
                           setForgotPasswordError('');
                           setForgotPasswordCodeSent(false);
-                    setForgotPasswordCodeSentTime(null);
-                    setCanResendForgotPasswordCode(false);
+                          setForgotPasswordCodeSentTime(null);
+                          setCanResendForgotPasswordCode(false);
                           alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
                         }
                       } else {
