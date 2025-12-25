@@ -1331,10 +1331,11 @@ function Login({ onLogin }) {
                       borderRadius: '8px', 
                       padding: '12px', 
                       marginBottom: '20px',
-                      color: '#155724',
-                      position: 'relative'
+                      color: '#155724'
                     }}>
-                      ✓ Código enviado a {forgotPasswordEmail}. Revisá tu bandeja de entrada.
+                      <div style={{ marginBottom: '8px' }}>
+                        ✓ Código enviado a {forgotPasswordEmail}. Revisá tu bandeja de entrada.
+                      </div>
                       <button
                         type="button"
                         onClick={() => {
@@ -1346,16 +1347,13 @@ function Login({ onLogin }) {
                           setCanResendCode(false);
                         }}
                         style={{
-                          position: 'absolute',
-                          top: '8px',
-                          right: '8px',
                           background: 'none',
                           border: 'none',
                           color: '#155724',
                           cursor: 'pointer',
-                          fontSize: '11px',
+                          fontSize: '12px',
                           textDecoration: 'underline',
-                          padding: '4px 8px',
+                          padding: 0,
                           opacity: 0.8
                         }}
                         title="Cambiar email"
@@ -1684,6 +1682,11 @@ function Login({ onLogin }) {
                       return;
                     }
 
+                    if (!forgotPasswordCode || forgotPasswordCode.length !== 6) {
+                      setForgotPasswordError('El código de verificación es requerido');
+                      return;
+                    }
+
                     setForgotPasswordLoading(true);
                     setForgotPasswordError('');
 
@@ -1744,16 +1747,17 @@ function Login({ onLogin }) {
                           }
                         } else {
                           setForgotPasswordError(resetResponse.data.message || 'Error al actualizar la contraseña');
+                          setForgotPasswordLoading(false);
                         }
                       }
                     } catch (error) {
-                      const errorMsg = error.response?.data?.detail || error.message || 'Error al cambiar la contraseña';
+                      console.error('Error actualizando contraseña:', error);
+                      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Error al cambiar la contraseña';
                       setForgotPasswordError(errorMsg);
-                    } finally {
                       setForgotPasswordLoading(false);
                     }
                   }}
-                  disabled={forgotPasswordLoading}
+                  disabled={forgotPasswordLoading || !forgotPasswordCode || forgotPasswordCode.length !== 6}
                 >
                   {forgotPasswordLoading ? 'Guardando...' : 'Guardar contraseña'}
                 </button>

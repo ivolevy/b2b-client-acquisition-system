@@ -175,8 +175,9 @@ function UserProfile() {
       return;
     }
 
-    if (!user?.email) {
-      setPasswordError('No se encontró el email del usuario');
+    const emailToUse = passwordChangeEmail || user?.email;
+    if (!emailToUse) {
+      setPasswordError('No se encontró el email');
       return;
     }
 
@@ -185,7 +186,7 @@ function UserProfile() {
 
     try {
       const response = await axios.post(`${API_URL}/auth/validar-codigo-cambio-password`, {
-        email: user.email,
+        email: emailToUse,
         codigo: verificationCode
       });
 
@@ -314,7 +315,7 @@ function UserProfile() {
       }
     } catch (error) {
       console.error('Error en handleChangePassword:', error);
-      const errorMsg = error.response?.data?.detail || error.message || 'Error al cambiar la contraseña';
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Error al cambiar la contraseña';
       setPasswordError(errorMsg);
       setPasswordLoading(false);
     }
@@ -655,10 +656,11 @@ function UserProfile() {
                       borderRadius: '8px', 
                       padding: '12px', 
                       marginBottom: '20px',
-                      color: '#155724',
-                      position: 'relative'
+                      color: '#155724'
                     }}>
-                      ✓ Código enviado a {passwordChangeEmail || user?.email}. Revisá tu bandeja de entrada.
+                      <div style={{ marginBottom: '8px' }}>
+                        ✓ Código enviado a {passwordChangeEmail || user?.email}. Revisá tu bandeja de entrada.
+                      </div>
                       <button
                         type="button"
                         onClick={() => {
@@ -670,16 +672,13 @@ function UserProfile() {
                           setCanResendCode(false);
                         }}
                         style={{
-                          position: 'absolute',
-                          top: '8px',
-                          right: '8px',
                           background: 'none',
                           border: 'none',
                           color: '#155724',
                           cursor: 'pointer',
-                          fontSize: '11px',
+                          fontSize: '12px',
                           textDecoration: 'underline',
-                          padding: '4px 8px',
+                          padding: 0,
                           opacity: 0.8
                         }}
                         title="Cambiar email"

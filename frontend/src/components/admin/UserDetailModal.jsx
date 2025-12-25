@@ -5,12 +5,10 @@ import './UserDetailModal.css';
 
 function UserDetailModal({ userId, onClose, onUpdate }) {
   const [user, setUser] = useState(null);
-  const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [activeTab, setActiveTab] = useState('edit');
   
   const [editForm, setEditForm] = useState({
     email: '',
@@ -41,9 +39,6 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
       const { data: userData, error: userError } = await adminService.getUserById(userId);
       if (userError) throw userError;
       setUser(userData);
-
-      const { data: activityData } = await adminService.getUserActivity(userId);
-      setActivity(activityData);
 
       if (userData) {
         setEditForm({
@@ -179,27 +174,9 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="modal-tabs">
-          <button
-            className={`tab-btn ${activeTab === 'edit' ? 'active' : ''}`}
-            onClick={() => setActiveTab('edit')}
-          >
-            Editar
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'activity' ? 'active' : ''}`}
-            onClick={() => setActiveTab('activity')}
-          >
-            Actividad
-          </button>
-        </div>
-
         {/* Content */}
         <div className="modal-content">
-          {/* Tab: Editar */}
-          {activeTab === 'edit' && (
-            <div className="tab-content">
+          <div className="tab-content">
               <div className="form-section">
                 <h3>Información Personal</h3>
                 <div className="form-grid">
@@ -272,81 +249,20 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* Tab: Actividad */}
-          {activeTab === 'activity' && activity && (
-            <div className="tab-content">
-              <div className="activity-section">
-                <h3>Búsquedas ({activity.searches?.length || 0})</h3>
-                <div className="activity-list">
-                  {activity.searches && activity.searches.length > 0 ? (
-                    activity.searches.slice(0, 10).map((search) => (
-                      <div key={search.id} className="activity-item">
-                        <div className="activity-header">
-                          <strong>{search.rubro}</strong>
-                          <span className="activity-date">
-                            {new Date(search.created_at).toLocaleDateString('es-ES')}
-                          </span>
-                        </div>
-                        <div className="activity-details">
-                          {search.ubicacion_nombre && (
-                            <span>📍 {search.ubicacion_nombre}</span>
-                          )}
-                          <span>🔍 {search.empresas_encontradas} empresas</span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="no-data">No hay búsquedas registradas</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="activity-section">
-                <h3>Empresas Guardadas ({activity.companies?.length || 0})</h3>
-                <div className="activity-list">
-                  {activity.companies && activity.companies.length > 0 ? (
-                    activity.companies.slice(0, 10).map((company) => (
-                      <div key={company.id} className="activity-item">
-                        <div className="activity-header">
-                          <strong>{company.empresa_data?.nombre || 'Sin nombre'}</strong>
-                          <span className="activity-date">
-                            {new Date(company.created_at).toLocaleDateString('es-ES')}
-                          </span>
-                        </div>
-                        <div className="activity-details">
-                          <span className={`status-pill ${company.estado}`}>
-                            {company.estado}
-                          </span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="no-data">No hay empresas guardadas</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Footer */}
         <div className="modal-footer">
-          {activeTab === 'edit' && (
-            <>
-              <button
-                className="btn-primary"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? 'Guardando...' : 'Guardar'}
-              </button>
-              <button className="btn-export" onClick={handleExport}>
-                Exportar
-              </button>
-            </>
-          )}
+          <button
+            className="btn-primary"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? 'Guardando...' : 'Guardar'}
+          </button>
+          <button className="btn-export" onClick={handleExport}>
+            Exportar
+          </button>
           <button className="btn-secondary" onClick={onClose}>
             Cerrar
           </button>
