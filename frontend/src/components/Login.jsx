@@ -1331,9 +1331,37 @@ function Login({ onLogin }) {
                       borderRadius: '8px', 
                       padding: '12px', 
                       marginBottom: '20px',
-                      color: '#155724'
+                      color: '#155724',
+                      position: 'relative'
                     }}>
                       ✓ Código enviado a {forgotPasswordEmail}. Revisá tu bandeja de entrada.
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setForgotPasswordStep('request');
+                          setForgotPasswordCode('');
+                          setForgotPasswordCodeSent(false);
+                          setForgotPasswordError('');
+                          setResendCountdown(0);
+                          setCanResendCode(false);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                          background: 'none',
+                          border: 'none',
+                          color: '#155724',
+                          cursor: 'pointer',
+                          fontSize: '11px',
+                          textDecoration: 'underline',
+                          padding: '4px 8px',
+                          opacity: 0.8
+                        }}
+                        title="Cambiar email"
+                      >
+                        Email equivocado?
+                      </button>
                     </div>
                   )}
                   <div className="forgot-password-input-group">

@@ -31,6 +31,7 @@ function UserProfile() {
   const [codeSent, setCodeSent] = useState(false);
   const [resendCountdown, setResendCountdown] = useState(0); // Countdown en segundos
   const [canResendCode, setCanResendCode] = useState(false);
+  const [passwordChangeEmail, setPasswordChangeEmail] = useState('');
   const [showCancelPlanModal, setShowCancelPlanModal] = useState(false);
   const [showCancelPlanSuccessModal, setShowCancelPlanSuccessModal] = useState(false);
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
@@ -128,8 +129,17 @@ function UserProfile() {
   };
 
   const handleRequestCode = async () => {
-    if (!user?.email) {
-      setPasswordError('No se encontró el email del usuario');
+    const emailToUse = passwordChangeEmail || user?.email;
+    
+    if (!emailToUse) {
+      setPasswordError('Por favor, ingresá un email');
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailToUse)) {
+      setPasswordError('Por favor, ingresá un email válido');
       return;
     }
 
@@ -138,7 +148,7 @@ function UserProfile() {
 
     try {
       const response = await axios.post(`${API_URL}/auth/solicitar-codigo-cambio-password`, {
-        email: user.email,
+        email: emailToUse,
         user_id: user.id
       });
 
@@ -214,62 +224,98 @@ function UserProfile() {
       return;
     }
 
+    if (!verificationCode || verificationCode.length !== 6) {
+      setPasswordError('El código de verificación es requerido');
+      return;
+    }
+
+    const emailToUse = passwordChangeEmail || user?.email;
+    if (!emailToUse) {
+      setPasswordError('No se encontró el email');
+      return;
+    }
+
     setPasswordLoading(true);
     setPasswordError('');
 
     try {
-      if (useSupabase) {
-        // Verificar que haya una sesión activa
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error('Error obteniendo sesión:', sessionError);
-          setPasswordError('Error al verificar la sesión: ' + sessionError.message);
-          setPasswordLoading(false);
-          return;
-        }
+      // Validar el código y actualizar la contraseña en un solo paso usando el endpoint del backend
+      const resetResponse = await axios.post(`${API_URL}/auth/actualizar-password-reset`, {
+        email: emailToUse,
+        codigo: verificationCode,
+        new_password: passwordForm.newPassword
+      });
 
-        if (!session) {
-          setPasswordError('No hay una sesión activa. Por favor, iniciá sesión nuevamente.');
-          setPasswordLoading(false);
-          return;
-        }
-
-        // Actualizar la contraseña directamente sin Promise.race
-        const { data, error: updateError } = await supabase.auth.updateUser({
-          password: passwordForm.newPassword
-        });
-
-        if (updateError) {
-          console.error('Error actualizando contraseña:', updateError);
-          setPasswordError('Error al actualizar la contraseña: ' + updateError.message);
-          setPasswordLoading(false);
-          return;
-        }
-
-        // Verificar que la actualización fue exitosa
-        if (!data || !data.user) {
-          setPasswordError('No se pudo actualizar la contraseña. Por favor, intentá nuevamente.');
-          setPasswordLoading(false);
-          return;
-        }
-
-        // Éxito
+      if (resetResponse.data.success) {
+        // Éxito - contraseña actualizada directamente por el backend
         setShowPasswordModal(false);
         setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
         setPasswordStep('request');
+        setPasswordChangeEmail(user?.email || '');
         setVerificationCode('');
         setCodeSent(false);
         setResendCountdown(0);
         setCanResendCode(false);
-        alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
+        alert(resetResponse.data.message || 'Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
       } else {
-        setPasswordError('Cambio de contraseña no disponible en modo demo');
+        // Si falla, verificar si requiere reset desde el frontend
+        if (resetResponse.data.requires_frontend_reset) {
+          // Intentar usar el método de Supabase como último recurso
+          try {
+            if (useSupabase) {
+              // Verificar que haya una sesión activa
+              const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+              
+              if (sessionError || !session) {
+                setPasswordError('No hay una sesión activa. Por favor, iniciá sesión nuevamente.');
+                setPasswordLoading(false);
+                return;
+              }
+
+              // Actualizar la contraseña directamente
+              const { data, error: updateError } = await supabase.auth.updateUser({
+                password: passwordForm.newPassword
+              });
+
+              if (updateError) {
+                setPasswordError('Error al actualizar la contraseña: ' + updateError.message);
+                setPasswordLoading(false);
+                return;
+              }
+
+              if (!data || !data.user) {
+                setPasswordError('No se pudo actualizar la contraseña. Por favor, intentá nuevamente.');
+                setPasswordLoading(false);
+                return;
+              }
+
+              // Éxito
+              setShowPasswordModal(false);
+              setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+              setPasswordStep('request');
+              setPasswordChangeEmail(user?.email || '');
+              setVerificationCode('');
+              setCodeSent(false);
+              setResendCountdown(0);
+              setCanResendCode(false);
+              alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
+            } else {
+              setPasswordError('Cambio de contraseña no disponible en modo demo');
+              setPasswordLoading(false);
+            }
+          } catch (frontendError) {
+            setPasswordError('Error al actualizar la contraseña. Por favor, intentá nuevamente.');
+            setPasswordLoading(false);
+          }
+        } else {
+          setPasswordError(resetResponse.data.message || 'Error al actualizar la contraseña');
+          setPasswordLoading(false);
+        }
       }
-      setPasswordLoading(false);
     } catch (error) {
       console.error('Error en handleChangePassword:', error);
-      setPasswordError('Error al cambiar la contraseña: ' + (error.message || 'Error desconocido'));
+      const errorMsg = error.response?.data?.detail || error.message || 'Error al cambiar la contraseña';
+      setPasswordError(errorMsg);
       setPasswordLoading(false);
     }
   };
@@ -441,6 +487,7 @@ function UserProfile() {
                   onClick={() => {
                     setShowPasswordModal(true);
                     setPasswordStep('request');
+                    setPasswordChangeEmail(user?.email || '');
                     setVerificationCode('');
                     setCodeSent(false);
                     setPasswordError('');
@@ -589,9 +636,11 @@ function UserProfile() {
                     <label>Email</label>
                 <input
                       type="email"
-                      value={user?.email || ''}
-                      disabled
-                      style={{ background: '#f5f5f5', cursor: 'not-allowed' }}
+                      value={passwordChangeEmail || user?.email || ''}
+                      onChange={(e) => setPasswordChangeEmail(e.target.value)}
+                      placeholder="Ingresá tu email"
+                      disabled={codeLoading}
+                      autoFocus
                 />
               </div>
                 </>
@@ -606,9 +655,37 @@ function UserProfile() {
                       borderRadius: '8px', 
                       padding: '12px', 
                       marginBottom: '20px',
-                      color: '#155724'
+                      color: '#155724',
+                      position: 'relative'
                     }}>
-                      ✓ Código enviado a {user?.email}. Revisá tu bandeja de entrada.
+                      ✓ Código enviado a {passwordChangeEmail || user?.email}. Revisá tu bandeja de entrada.
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPasswordStep('request');
+                          setVerificationCode('');
+                          setCodeSent(false);
+                          setPasswordError('');
+                          setResendCountdown(0);
+                          setCanResendCode(false);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                          background: 'none',
+                          border: 'none',
+                          color: '#155724',
+                          cursor: 'pointer',
+                          fontSize: '11px',
+                          textDecoration: 'underline',
+                          padding: '4px 8px',
+                          opacity: 0.8
+                        }}
+                        title="Cambiar email"
+                      >
+                        Email equivocado?
+                      </button>
                     </div>
                   )}
                   <div className="password-input-group">
@@ -699,8 +776,15 @@ function UserProfile() {
                             setCanResendCode(false);
 
                             try {
+                              const emailToUse = passwordChangeEmail || user?.email;
+                              if (!emailToUse) {
+                                setPasswordError('Por favor, ingresá un email');
+                                setCodeLoading(false);
+                                return;
+                              }
+
                               const response = await axios.post(`${API_URL}/auth/solicitar-codigo-cambio-password`, {
-                                email: user.email,
+                                email: emailToUse,
                                 user_id: user.id
                               });
 

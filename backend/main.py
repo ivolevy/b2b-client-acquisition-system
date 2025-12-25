@@ -1467,8 +1467,8 @@ async def validar_codigo_cambio_password(request: ValidarCodigoRequest):
         if codigo_data['codigo'] != request.codigo:
             raise HTTPException(status_code=400, detail="Código de validación incorrecto")
         
-        # Código válido - eliminar de memoria (solo se puede usar una vez)
-        del _memoria_codigos_validacion[email]
+        # Código válido - NO eliminar de memoria aquí, se eliminará cuando se actualice la contraseña
+        # Esto permite usar el código para validar y luego actualizar la contraseña
         
         logger.info(f"Código de validación verificado correctamente para {email}")
         
@@ -1651,8 +1651,9 @@ async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
         
         codigo_data = _memoria_codigos_validacion[email]
         
-        # Verificar que sea un código de reset de contraseña
-        if codigo_data.get('type') != 'reset_password':
+        # Verificar que sea un código de reset de contraseña o cambio de contraseña (sin tipo específico)
+        codigo_type = codigo_data.get('type')
+        if codigo_type and codigo_type != 'reset_password':
             raise HTTPException(status_code=400, detail="Este código no es válido para recuperación de contraseña")
         
         # Verificar expiración

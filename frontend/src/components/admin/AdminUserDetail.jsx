@@ -8,12 +8,10 @@ function AdminUserDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [activeTab, setActiveTab] = useState('edit'); // 'edit', 'activity', 'email'
   
   const [editForm, setEditForm] = useState({
     email: '',
@@ -22,12 +20,6 @@ function AdminUserDetail() {
     plan: 'free',
     role: 'user',
     plan_expires_at: ''
-  });
-
-  const [emailForm, setEmailForm] = useState({
-    subject: '',
-    body: '',
-    isHtml: false
   });
 
   useEffect(() => {
@@ -43,11 +35,6 @@ function AdminUserDetail() {
       const { data: userData, error: userError } = await adminService.getUserById(id);
       if (userError) throw userError;
       setUser(userData);
-
-      // Cargar actividad
-      const { data: activityData, error: activityError } = await adminService.getUserActivity(id);
-      if (activityError) throw activityError;
-      setActivity(activityData);
 
       // Llenar formulario de edición
       if (userData) {
@@ -100,35 +87,6 @@ function AdminUserDetail() {
     } catch (err) {
       console.error('Error updating user:', err);
       setError('Error al actualizar usuario: ' + err.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSendEmail = async () => {
-    if (!emailForm.subject || !emailForm.body) {
-      setError('El asunto y el cuerpo del email son requeridos');
-      return;
-    }
-
-    setSaving(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      const { data, error: emailError } = await adminService.sendEmailToUser(
-        id,
-        emailForm.subject,
-        emailForm.body,
-        emailForm.isHtml
-      );
-      if (emailError) throw emailError;
-
-      setSuccess('Email enviado exitosamente (requiere configuración de servicio)');
-      setEmailForm({ subject: '', body: '', isHtml: false });
-    } catch (err) {
-      console.error('Error sending email:', err);
-      setError('Error al enviar email: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -212,31 +170,8 @@ function AdminUserDetail() {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="detail-tabs">
-        <button
-          className={`tab-btn ${activeTab === 'edit' ? 'active' : ''}`}
-          onClick={() => setActiveTab('edit')}
-        >
-          ✏️ Editar
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'activity' ? 'active' : ''}`}
-          onClick={() => setActiveTab('activity')}
-        >
-          📊 Actividad
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'email' ? 'active' : ''}`}
-          onClick={() => setActiveTab('email')}
-        >
-          ✉️ Enviar Email
-        </button>
-      </div>
-
-      {/* Tab: Editar */}
-      {activeTab === 'edit' && (
-        <div className="detail-content">
+      {/* Formulario de Edición */}
+      <div className="detail-content">
           <div className="form-section">
             <h2>Información Personal</h2>
             <div className="form-grid">
@@ -325,133 +260,6 @@ function AdminUserDetail() {
             </button>
           </div>
         </div>
-      )}
-
-      {/* Tab: Actividad */}
-      {activeTab === 'activity' && activity && (
-        <div className="detail-content">
-          <div className="activity-section">
-            <h2>Búsquedas ({activity.searches?.length || 0})</h2>
-            <div className="activity-list">
-              {activity.searches && activity.searches.length > 0 ? (
-                activity.searches.map((search) => (
-                  <div key={search.id} className="activity-item">
-                    <div className="activity-header">
-                      <strong>{search.rubro}</strong>
-                      <span className="activity-date">
-                        {new Date(search.created_at).toLocaleString('es-ES')}
-                      </span>
-                    </div>
-                    <div className="activity-details">
-                      <span>Ubicación: {search.ubicacion_nombre || 'Personalizada'}</span>
-                      <span>Empresas encontradas: {search.empresas_encontradas}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="no-data">No hay búsquedas registradas</p>
-              )}
-            </div>
-          </div>
-
-          <div className="activity-section">
-            <h2>Empresas Guardadas ({activity.companies?.length || 0})</h2>
-            <div className="activity-list">
-              {activity.companies && activity.companies.length > 0 ? (
-                activity.companies.map((company) => (
-                  <div key={company.id} className="activity-item">
-                    <div className="activity-header">
-                      <strong>{company.empresa_data?.nombre || 'Sin nombre'}</strong>
-                      <span className="activity-date">
-                        {new Date(company.created_at).toLocaleString('es-ES')}
-                      </span>
-                    </div>
-                    <div className="activity-details">
-                      <span>Estado: {company.estado}</span>
-                      {company.notas && <span>Notas: {company.notas}</span>}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="no-data">No hay empresas guardadas</p>
-              )}
-            </div>
-          </div>
-
-          <div className="activity-section">
-            <h2>Suscripciones ({activity.subscriptions?.length || 0})</h2>
-            <div className="activity-list">
-              {activity.subscriptions && activity.subscriptions.length > 0 ? (
-                activity.subscriptions.map((sub) => (
-                  <div key={sub.id} className="activity-item">
-                    <div className="activity-header">
-                      <strong>Plan {sub.plan.toUpperCase()}</strong>
-                      <span className={`status-badge ${sub.status}`}>
-                        {sub.status}
-                      </span>
-                    </div>
-                    <div className="activity-details">
-                      <span>Inicio: {new Date(sub.starts_at).toLocaleDateString('es-ES')}</span>
-                      <span>Expira: {new Date(sub.expires_at).toLocaleDateString('es-ES')}</span>
-                      <span>Método: {sub.payment_method}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="no-data">No hay suscripciones registradas</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tab: Enviar Email */}
-      {activeTab === 'email' && (
-        <div className="detail-content">
-          <div className="form-section">
-            <h2>Enviar Email a {user.email}</h2>
-            <div className="form-group">
-              <label>Asunto</label>
-              <input
-                type="text"
-                value={emailForm.subject}
-                onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
-                className="form-input"
-                placeholder="Asunto del email"
-              />
-            </div>
-            <div className="form-group">
-              <label>Mensaje</label>
-              <textarea
-                value={emailForm.body}
-                onChange={(e) => setEmailForm({ ...emailForm, body: e.target.value })}
-                className="form-textarea"
-                rows="10"
-                placeholder="Cuerpo del email"
-              />
-            </div>
-            <div className="form-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={emailForm.isHtml}
-                  onChange={(e) => setEmailForm({ ...emailForm, isHtml: e.target.checked })}
-                />
-                Formato HTML
-              </label>
-            </div>
-            <div className="form-actions">
-              <button
-                className="btn-primary"
-                onClick={handleSendEmail}
-                disabled={saving || !emailForm.subject || !emailForm.body}
-              >
-                {saving ? 'Enviando...' : 'Enviar Email'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
