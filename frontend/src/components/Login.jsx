@@ -742,7 +742,7 @@ function Login({ onLogin }) {
               <p style={{ fontSize: '13px', opacity: 0.8, marginBottom: '20px' }}>
                 {useSupabase 
                   ? 'Acceso rápido sin crear cuenta'
-                  : 'Usa estos botones para acceder'}
+                  : 'Usa este botón para acceder'}
               </p>
               <div className="demo-buttons">
                 <button
@@ -756,23 +756,6 @@ function Login({ onLogin }) {
                     <div className="demo-button-text">
                       <span className="demo-button-title">Administrador</span>
                       <span className="demo-button-subtitle">Acceso completo</span>
-                    </div>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="9,18 15,12 9,6"/>
-                    </svg>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  className="demo-button demo-button-free"
-                  onClick={() => handleDemoClick(DEMO_USERS[1])}
-                  disabled={loading}
-                >
-                  <div className="demo-button-content">
-                    <span className="demo-button-badge free">FREE</span>
-                    <div className="demo-button-text">
-                      <span className="demo-button-title">Usuario</span>
-                      <span className="demo-button-subtitle">Plan básico</span>
                     </div>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="9,18 15,12 9,6"/>

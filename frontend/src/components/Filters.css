@@ -899,35 +899,20 @@ select.filter-input {
   }
   
   .select-rubro-compact {
-    width: 100%;
-    height: 48px;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: 48px !important;
     box-sizing: border-box;
-    font-size: 0.9rem;
-    padding: 12px 16px;
-    padding-right: 3rem;
-    text-align: center;
-    border: 2px solid var(--primary);
-    border-radius: 12px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    box-shadow: 0 2px 8px rgba(129, 212, 250, 0.15);
-    font-weight: 500;
-    color: var(--gray-900);
+    font-size: 1rem !important;
+    padding: 12px 16px !important;
+    padding-right: 3rem !important;
   }
   
-  .select-rubro-compact:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(129, 212, 250, 0.2);
-    outline: none;
-  }
-  
-  .form-row-compact > .rubro-inline label {
-    text-align: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
+  .form-row-compact > .rubro-inline {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
   }
   
   /* Integrar search-row dentro de form-row-compact - en columna en mobile */
@@ -1103,47 +1088,26 @@ select.filter-input {
   }
   
   .select-rubro-compact {
-    font-size: 0.85rem;
-    padding: 10px 14px;
-    padding-right: 2.8rem;
+    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
     width: 100%;
     min-width: 100%;
-    height: 44px;
-    text-align: center;
-    border: 2px solid var(--primary);
-    border-radius: 10px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    box-shadow: 0 2px 6px rgba(129, 212, 250, 0.15);
-    font-weight: 500;
-    color: var(--gray-900);
-  }
-  
-  .select-rubro-compact:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(129, 212, 250, 0.2);
-    outline: none;
-  }
-  
-  .form-row-compact > .rubro-inline {
-    align-items: center;
-    padding: var(--spacing-sm) 0;
-  }
-  
-  .form-row-compact > .rubro-inline label {
-    text-align: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 6px;
-    letter-spacing: 0.5px;
-    width: 100%;
+    height: 38px;
   }
   
   .form-row-compact > .form-group-compact,
   .form-row-compact > .rubro-inline {
     flex: 1;
-    width: 100%;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .select-rubro-compact {
+    font-size: 1rem !important;
+    padding: 12px 16px !important;
+    padding-right: 3rem !important;
+    height: 48px !important;
   }
   
   .form-row-compact .radius-control {
