@@ -204,6 +204,8 @@ function Login({ onLogin }) {
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const [forgotPasswordError, setForgotPasswordError] = useState('');
   const [forgotPasswordCodeSent, setForgotPasswordCodeSent] = useState(false);
+  const [forgotPasswordCodeSentTime, setForgotPasswordCodeSentTime] = useState(null);
+  const [canResendForgotPasswordCode, setCanResendForgotPasswordCode] = useState(false);
   
   // Estados de validación por campo
   const [emailError, setEmailError] = useState('');
@@ -583,6 +585,19 @@ function Login({ onLogin }) {
     setTouched({ email: false, phone: false, password: false, name: false });
     // No limpiar pendingEmail al cambiar de modo para mantener el estado
   };
+
+  // Timer para permitir reenvío de código después de 1 minuto
+  useEffect(() => {
+    if (forgotPasswordCodeSentTime && forgotPasswordStep === 'verify') {
+      const timer = setTimeout(() => {
+        setCanResendForgotPasswordCode(true);
+      }, 60000); // 1 minuto
+
+      return () => clearTimeout(timer);
+    } else {
+      setCanResendForgotPasswordCode(false);
+    }
+  }, [forgotPasswordCodeSentTime, forgotPasswordStep]);
 
   // Limpiar email pendiente cuando el usuario inicia sesión exitosamente
   useEffect(() => {
@@ -1109,6 +1124,8 @@ function Login({ onLogin }) {
                       setForgotPasswordConfirmPassword('');
                       setForgotPasswordError('');
                       setForgotPasswordCodeSent(false);
+                    setForgotPasswordCodeSentTime(null);
+                    setCanResendForgotPasswordCode(false);
                     }}
                   >
                     ¿Olvidaste tu contraseña?
@@ -1239,6 +1256,8 @@ function Login({ onLogin }) {
             setForgotPasswordConfirmPassword('');
             setForgotPasswordError('');
             setForgotPasswordCodeSent(false);
+            setForgotPasswordCodeSentTime(null);
+            setCanResendForgotPasswordCode(false);
           }
         }}>
           <div className="forgot-password-modal" onClick={(e) => e.stopPropagation()}>
@@ -1256,6 +1275,8 @@ function Login({ onLogin }) {
                     setForgotPasswordConfirmPassword('');
                     setForgotPasswordError('');
                     setForgotPasswordCodeSent(false);
+                    setForgotPasswordCodeSentTime(null);
+                    setCanResendForgotPasswordCode(false);
                   }
                 }}
                 disabled={forgotPasswordLoading}
@@ -1313,7 +1334,7 @@ function Login({ onLogin }) {
                         const value = e.target.value.replace(/\D/g, '').slice(0, 6);
                         setForgotPasswordCode(value);
                       }}
-                      placeholder="Ingresá el código de 6 dígitos"
+                      placeholder="Ingresá el código"
                       disabled={forgotPasswordLoading}
                       autoFocus
                       maxLength={6}
@@ -1324,9 +1345,58 @@ function Login({ onLogin }) {
                         fontFamily: 'monospace'
                       }}
                     />
-                    <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
-                      El código expira en 10 minutos
-                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                      <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>
+                        El código expira en 10 minutos
+                      </p>
+                      {canResendForgotPasswordCode && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!forgotPasswordEmail) {
+                              setForgotPasswordError('Ingresá tu email');
+                              return;
+                            }
+
+                            setForgotPasswordLoading(true);
+                            setForgotPasswordError('');
+
+                            try {
+                              const response = await axios.post(`${API_URL}/auth/solicitar-codigo-reset-password`, {
+                                email: forgotPasswordEmail
+                              });
+
+                              if (response.data.success) {
+                                setForgotPasswordCodeSent(true);
+                                setForgotPasswordCodeSentTime(Date.now());
+                                setCanResendForgotPasswordCode(false);
+                                setForgotPasswordError('');
+                              } else {
+                                setForgotPasswordError(response.data.message || 'Error al solicitar el código');
+                              }
+                            } catch (error) {
+                              const errorMsg = error.response?.data?.detail || error.message || 'Error al solicitar el código';
+                              setForgotPasswordError(errorMsg);
+                            } finally {
+                              setForgotPasswordLoading(false);
+                            }
+                          }}
+                          disabled={forgotPasswordLoading}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#81D4FA',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            textDecoration: 'underline',
+                            padding: 0,
+                            margin: 0
+                          }}
+                        >
+                          Reenviar código
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </>
               )}
@@ -1412,6 +1482,8 @@ function Login({ onLogin }) {
                     setForgotPasswordConfirmPassword('');
                     setForgotPasswordError('');
                     setForgotPasswordCodeSent(false);
+                    setForgotPasswordCodeSentTime(null);
+                    setCanResendForgotPasswordCode(false);
                   }
                 }}
                 disabled={forgotPasswordLoading}
@@ -1551,6 +1623,8 @@ function Login({ onLogin }) {
                           setForgotPasswordConfirmPassword('');
                           setForgotPasswordError('');
                           setForgotPasswordCodeSent(false);
+                    setForgotPasswordCodeSentTime(null);
+                    setCanResendForgotPasswordCode(false);
                           alert('Se envió un email a tu dirección con un link para cambiar tu contraseña. Revisá tu bandeja de entrada.');
                         } else {
                           // Éxito - contraseña actualizada directamente
@@ -1562,6 +1636,8 @@ function Login({ onLogin }) {
                           setForgotPasswordConfirmPassword('');
                           setForgotPasswordError('');
                           setForgotPasswordCodeSent(false);
+                    setForgotPasswordCodeSentTime(null);
+                    setCanResendForgotPasswordCode(false);
                           alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
                         }
                       } else {
