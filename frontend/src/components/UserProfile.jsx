@@ -457,52 +457,50 @@ function UserProfile() {
           <div className="profile-divider"></div>
 
           {/* Columna derecha */}
-          <div className="profile-column">
-            <h3 className="profile-section-title">Información de cuenta</h3>
-            <div className="account-info-card">
-              <div className="account-plan-section">
-                <div className="account-plan-label">Plan actual</div>
-                <div className="account-plan-content">
-                  <span className={`plan-badge-large ${user?.plan || 'free'}`}>
-                    {user?.plan === 'pro' ? 'PRO' : 'Free'}
-                  </span>
-                </div>
-                <div className="account-plan-actions">
-                  {user?.plan !== 'pro' ? (
-                    <button 
-                      className="account-upgrade-btn"
-                      onClick={() => setShowUpgradeModal(true)}
-                    >
-                      Actualizar a PRO
-                    </button>
-                  ) : (
-                    user?.role !== 'admin' && (
-                    <button 
-                      className="account-change-plan-btn"
+          {user?.role !== 'admin' && (
+            <div className="profile-column">
+              <h3 className="profile-section-title">Información de cuenta</h3>
+              <div className="account-info-card">
+                <div className="account-plan-section">
+                  <div className="account-plan-label">Plan actual</div>
+                  <div className="account-plan-content">
+                    <span className={`plan-badge-large ${user?.plan || 'free'}`}>
+                      {user?.plan === 'pro' ? 'PRO' : 'Free'}
+                    </span>
+                  </div>
+                  <div className="account-plan-actions">
+                    {user?.plan !== 'pro' ? (
+                      <button 
+                        className="account-upgrade-btn"
+                        onClick={() => setShowUpgradeModal(true)}
+                      >
+                        Actualizar a PRO
+                      </button>
+                    ) : (
+                      <button 
+                        className="account-change-plan-btn"
                         onClick={() => setShowCancelPlanModal(true)}
-                    >
+                      >
                         Cancelar plan
-                    </button>
-                    )
-                  )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="account-danger-section">
+                <div className="account-danger-label">Zona de peligro</div>
+                <div className="account-danger-content">
+                  <p className="account-danger-text">Esta acción es permanente y no se puede deshacer.</p>
+                  <button 
+                    className="btn-delete-account"
+                    onClick={() => setShowDeleteModal(true)}
+                  >
+                    Eliminar cuenta
+                  </button>
                 </div>
               </div>
             </div>
-            {user?.role !== 'admin' && (
-            <div className="account-danger-section">
-              <div className="account-danger-label">Zona de peligro</div>
-              <div className="account-danger-content">
-                <p className="account-danger-text">Esta acción es permanente y no se puede deshacer.</p>
-                <button 
-                  className="btn-delete-account"
-                  onClick={() => setShowDeleteModal(true)}
-                >
-                  Eliminar cuenta
-                </button>
-              </div>
-            </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
 

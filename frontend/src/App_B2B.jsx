@@ -30,15 +30,21 @@ function AppB2B() {
   
   // Sincronizar vista con la ruta cuando cambia
   useEffect(() => {
+    // Limpiar estados de carga inmediatamente al cambiar de ruta (incluyendo admin)
+    setLoading(false);
+    setBlockingLoading(false);
+    
+    // Si está en admin o backoffice, no hacer nada más
+    if (location.pathname.startsWith('/backoffice') || location.pathname.startsWith('/admin')) {
+      return;
+    }
+    
     if (location.pathname === '/profile') {
       setView('profile');
     } else if (view === 'profile') {
       setView('table');
     }
-    // Limpiar estados de carga al cambiar de sección
-    setLoading(false);
-    setBlockingLoading(false);
-  }, [location.pathname]);
+  }, [location.pathname, view]);
   const [stats, setStats] = useState(null);
   const [rubros, setRubros] = useState({});
   const [showEmailSender, setShowEmailSender] = useState(false);

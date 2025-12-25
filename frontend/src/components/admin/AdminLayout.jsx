@@ -18,6 +18,8 @@ function AdminLayout() {
   }, [user]);
 
   const checkAdminStatus = async () => {
+    setLoading(true);
+    
     if (!user) {
       setIsAdmin(false);
       setLoading(false);
@@ -33,7 +35,16 @@ function AdminLayout() {
 
     // Si no tiene role admin en el contexto, verificar en la base de datos
     try {
-      const adminStatus = await adminService.isAdmin();
+      // Agregar timeout para evitar que se quede colgado
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout verificando admin')), 10000);
+      });
+      
+      const adminStatus = await Promise.race([
+        adminService.isAdmin(),
+        timeoutPromise
+      ]);
+      
       setIsAdmin(adminStatus);
       
       // Si es admin en la BD pero no en el contexto, recargar la página para actualizar
@@ -44,6 +55,7 @@ function AdminLayout() {
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
+      // Si hay error, asumir que no es admin para evitar pantalla gris
     } finally {
       setLoading(false);
     }

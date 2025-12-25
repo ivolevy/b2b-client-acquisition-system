@@ -214,6 +214,27 @@ function TableViewB2B({
 
       {/* Filtros inline instantáneos */}
       <div className="filters-inline-bar">
+        {/* Checkboxes de email y teléfono a la izquierda */}
+        <div className="filter-checkboxes-group" style={{ marginRight: 'auto' }}>
+          <label className="filter-checkbox-inline">
+            <input
+              type="checkbox"
+              checked={filtroConEmail}
+              onChange={(e) => setFiltroConEmail(e.target.checked)}
+            />
+            <span>Email</span>
+          </label>
+
+          <label className="filter-checkbox-inline">
+            <input
+              type="checkbox"
+              checked={filtroConTelefono}
+              onChange={(e) => setFiltroConTelefono(e.target.checked)}
+            />
+            <span>Teléfono</span>
+          </label>
+        </div>
+
         {/* Dropdown de rubros con buscador */}
         <div className="rubro-dropdown" ref={rubroDropdownRef}>
           <button 
@@ -335,25 +356,37 @@ function TableViewB2B({
           <option value="sin">Sin redes</option>
         </select>
 
-        <div className="filter-checkboxes-and-actions">
-          <div className="filter-checkboxes-group">
-        <label className="filter-checkbox-inline">
-          <input
-            type="checkbox"
-            checked={filtroConEmail}
-            onChange={(e) => setFiltroConEmail(e.target.checked)}
-          />
-          <span>Email</span>
-        </label>
+        {/* Selector de ordenamiento */}
+        <select 
+          value={sortColumn && sortBy ? `${sortColumn}-${sortBy}` : ''}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value) {
+              const [column, order] = value.split('-');
+              setSortColumn(column);
+              setSortBy(order);
+            } else {
+              setSortColumn(null);
+              setSortBy(null);
+            }
+          }}
+          className="filter-inline-input"
+          style={{ minWidth: '180px' }}
+        >
+          <option value="">Ordenar por...</option>
+          <option value="distancia-asc">Distancia: Más cercano</option>
+          <option value="distancia-desc">Distancia: Más lejano</option>
+          <option value="nombre-asc">Nombre: A-Z</option>
+          <option value="nombre-desc">Nombre: Z-A</option>
+          {isPro && (
+            <>
+              <option value="rubro-asc">Rubro: A-Z</option>
+              <option value="rubro-desc">Rubro: Z-A</option>
+            </>
+          )}
+        </select>
 
-        <label className="filter-checkbox-inline">
-          <input
-            type="checkbox"
-            checked={filtroConTelefono}
-            onChange={(e) => setFiltroConTelefono(e.target.checked)}
-          />
-          <span>Tel</span>
-        </label>
+        <div className="filter-checkboxes-and-actions">
 
         {hayFiltrosActivos && (
           <button 
