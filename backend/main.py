@@ -65,12 +65,12 @@ def insertar_empresa(empresa: Dict) -> bool:
     
     try:
         with insertar_empresa._lock:
-    _empresa_counter += 1
-    empresa['id'] = _empresa_counter
-    empresa['created_at'] = datetime.now().isoformat()
-    _memoria_empresas.append(empresa.copy())
+            _empresa_counter += 1
+            empresa['id'] = _empresa_counter
+            empresa['created_at'] = datetime.now().isoformat()
+            _memoria_empresas.append(empresa.copy())
             logger.debug(f" Empresa guardada en memoria: {empresa.get('nombre')} (ID: {_empresa_counter})")
-    return True
+        return True
     except Exception as e:
         logger.error(f"Error insertando empresa: {e}")
         return False
@@ -443,6 +443,13 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # CORS - Permitir todos los orígenes
 app.add_middleware(
     CORSMiddleware,
@@ -451,6 +458,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Exception handler global para asegurar que CORS siempre se incluya
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Maneja todas las excepciones y asegura que CORS siempre se incluya"""
+    import traceback
+    logger.error(f"Error no manejado: {exc}", exc_info=True)
+    logger.error(f"Traceback: {traceback.format_exc()}")
+    
+    # Crear respuesta con headers CORS
+    response = JSONResponse(
+        status_code=500,
+        content={"detail": "Error interno del servidor", "error": str(exc)}
+    )
+    
+    # Agregar headers CORS manualmente
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
 
 # Modelos
 class BusquedaRubroRequest(BaseModel):
@@ -1435,7 +1463,7 @@ async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
         _memoria_codigos_validacion[email] = {
             'codigo': codigo,
             'expires_at': expires_at.isoformat(),
-            'user_id': request.user_id,
+            'user_id': getattr(request, 'user_id', None),  # user_id es opcional para reset
             'created_at': datetime.now().isoformat(),
             'type': 'reset_password'  # Marcar como reset de contraseña
         }
