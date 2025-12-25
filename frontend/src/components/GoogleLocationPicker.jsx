@@ -30,10 +30,12 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   const [map, setMap] = useState(null);
   const mapRef = useRef(null); // Ref para evitar stale closures
   const autocompleteInputRef = useRef(null);
-  const autocompleteRef = useRef(null);
   const [initialLocationApplied, setInitialLocationApplied] = useState(false);
-  const boundsUpdateTimeoutRef = useRef(null); // Para debounce de bounds
   const { success, error, warning, info, removeToast } = useToast();
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const autocompleteServiceRef = useRef(null);
+  const placesServiceRef = useRef(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
@@ -124,99 +126,143 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     }
   };
 
-  // Inicializar Autocomplete de Google Places
+  // Usar AutocompleteService para sugerencias (aún disponible)
+  // Pero NO usar Autocomplete tradicional que ya no está disponible para nuevos clientes
   useEffect(() => {
-    if (isLoaded && autocompleteInputRef.current && window.google?.maps?.places) {
-      if (!autocompleteRef.current) {
-        // Establecer bounds de Argentina para priorizar resultados de allí
-        const argentinaBounds = new window.google.maps.LatLngBounds(
-          new window.google.maps.LatLng(-55.0, -73.6), // Sudoeste (Tierra del Fuego)
-          new window.google.maps.LatLng(-21.8, -53.6)  // Noreste (Misiones)
-        );
-        
-        autocompleteRef.current = new window.google.maps.places.Autocomplete(
-          autocompleteInputRef.current,
-          {
-            bounds: argentinaBounds,
-            fields: ['formatted_address', 'geometry', 'name']
-          }
-        );
-        
-        autocompleteRef.current.addListener('place_changed', () => {
-          try {
-            const place = autocompleteRef.current.getPlace();
-            
-            // Validar que place y geometry existan
-            if (!place || !place.geometry || !place.geometry.location) {
-              console.warn('Place selection invalid:', place);
-              return;
-            }
-            
-            // Manejar tanto location como función como objeto
-            let lat, lng;
-            const locationObj = place.geometry.location;
-            
-            if (typeof locationObj.lat === 'function') {
-              lat = locationObj.lat();
-              lng = locationObj.lng();
-            } else if (typeof locationObj.lat === 'number' && typeof locationObj.lng === 'number') {
-              lat = locationObj.lat;
-              lng = locationObj.lng;
-            } else {
-              console.error('Invalid location format:', locationObj);
-              return;
-            }
-            
-            // Validar que lat y lng sean números válidos
-            if (isNaN(lat) || isNaN(lng) || !isFinite(lat) || !isFinite(lng)) {
-              console.error('Invalid coordinates:', { lat, lng });
-              return;
-            }
-            
-            const nombre = place.formatted_address || place.name || '';
-            const location = { lat, lng };
-            
-            setSearchQuery(nombre);
-            setMapCenter(location);
-            setSelectedLocation(location);
-            
-            // Mover el mapa usando el ref para evitar stale closure
-            const currentMap = mapRef.current;
-            if (currentMap) {
-              currentMap.panTo(location);
-              currentMap.setZoom(15);
-            } else {
-              // Si el mapa no está listo, esperar un poco y volver a intentar
-              setTimeout(() => {
-                const retryMap = mapRef.current;
-                if (retryMap) {
-                  retryMap.panTo(location);
-                  retryMap.setZoom(15);
-                }
-              }, 100);
-            }
-            
-            handleLocationSelect(lat, lng, nombre);
-        } catch (error) {
-            console.error('Error handling place selection:', error);
-            error(
-              <>
-                <strong>Error al seleccionar ubicación</strong>
-                <p>Hubo un problema al procesar la dirección seleccionada. Intenta nuevamente.</p>
-              </>
-            );
-          }
-        });
+    if (isLoaded && window.google?.maps?.places) {
+      // Inicializar AutocompleteService para sugerencias (esto sí funciona)
+      if (!autocompleteServiceRef.current) {
+        autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+      }
+      if (!placesServiceRef.current) {
+        placesServiceRef.current = new window.google.maps.places.PlacesService(document.createElement('div'));
       }
     }
-    
-    return () => {
-      if (autocompleteRef.current) {
-        window.google?.maps?.event?.clearInstanceListeners?.(autocompleteRef.current);
-        autocompleteRef.current = null;
+  }, [isLoaded]);
+
+  // Generar sugerencias mientras el usuario escribe
+  useEffect(() => {
+    if (!searchQuery || searchQuery.trim().length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    if (isLoaded && autocompleteServiceRef.current) {
+      const timeoutId = setTimeout(() => {
+        autocompleteServiceRef.current.getPlacePredictions(
+          {
+            input: searchQuery,
+            types: ['geocode'],
+            componentRestrictions: { country: 'ar' } // Priorizar Argentina
+          },
+          (predictions, status) => {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+              setSuggestions(predictions);
+              setShowSuggestions(true);
+            } else {
+              setSuggestions([]);
+              setShowSuggestions(false);
+            }
+          }
+        );
+      }, 300);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchQuery, isLoaded]);
+
+  // Manejar selección de sugerencia
+  const handleSuggestionSelect = useCallback((prediction) => {
+    if (!placesServiceRef.current || !prediction.place_id) {
+      // Si no hay place_id, usar geocoding directo
+      handleManualGeocode();
+      return;
+    }
+
+    placesServiceRef.current.getDetails(
+      {
+        placeId: prediction.place_id,
+        fields: ['formatted_address', 'geometry', 'name']
+      },
+      (place, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
+          const location = place.geometry.location;
+          const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
+          const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
+          const nombre = place.formatted_address || place.name || searchQuery;
+          
+          setSearchQuery(nombre);
+          setMapCenter({ lat, lng });
+          setSelectedLocation({ lat, lng });
+          setShowSuggestions(false);
+          
+          if (mapRef.current) {
+            mapRef.current.panTo({ lat, lng });
+            mapRef.current.setZoom(15);
+          }
+          
+          handleLocationSelect(lat, lng, nombre);
+        } else {
+          // Fallback a geocoding manual
+          handleManualGeocode();
+        }
       }
-    };
-  }, [isLoaded, handleLocationSelect, error]);
+    );
+  }, [handleLocationSelect, searchQuery, handleManualGeocode]);
+
+  const handleManualGeocode = useCallback(() => {
+    if (!searchQuery || searchQuery.trim().length < 3) {
+      warning(
+        <>
+          <strong>Búsqueda muy corta</strong>
+          <p>Escribe al menos 3 caracteres para buscar una dirección.</p>
+        </>
+      );
+      return;
+    }
+
+    if (!window.google?.maps?.Geocoder) {
+      error(
+        <>
+          <strong>Error</strong>
+          <p>Google Maps no está disponible. Intenta recargar la página.</p>
+        </>
+      );
+      return;
+    }
+
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ address: searchQuery }, (results, status) => {
+      if (status === 'OK' && results && results[0]) {
+        const location = results[0].geometry.location;
+        const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
+        const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
+        const nombre = results[0].formatted_address;
+        setSearchQuery(nombre);
+        setMapCenter({ lat, lng });
+        setSelectedLocation({ lat, lng });
+        if (mapRef.current) {
+          mapRef.current.panTo({ lat, lng });
+          mapRef.current.setZoom(15);
+        }
+        handleLocationSelect(lat, lng, nombre);
+        success(
+          <>
+            <strong>Dirección encontrada</strong>
+            <p>Se ha establecido la ubicación en el mapa.</p>
+          </>
+        );
+      } else {
+        error(
+          <>
+            <strong>No se encontró la dirección</strong>
+            <p>No se pudo encontrar esa dirección. Intenta con otra búsqueda.</p>
+          </>
+        );
+      }
+    });
+  }, [searchQuery, handleLocationSelect, warning, error, success]);
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -301,70 +347,16 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     }
   }, [isLoaded, mapCenter, selectedLocation]);
 
-  // Actualizar bounds del autocomplete cuando el mapa cambie (con debounce para evitar loops)
+  // Cerrar sugerencias al hacer clic fuera
   useEffect(() => {
-    if (isLoaded && mapRef.current && autocompleteRef.current) {
-      const updateBounds = () => {
-        // Limpiar timeout anterior
-        if (boundsUpdateTimeoutRef.current) {
-          clearTimeout(boundsUpdateTimeoutRef.current);
-        }
-        
-        // Debounce para evitar actualizaciones excesivas
-        boundsUpdateTimeoutRef.current = setTimeout(() => {
-          const currentMap = mapRef.current;
-          const currentAutocomplete = autocompleteRef.current;
-          
-          if (currentMap && currentAutocomplete) {
-            try {
-              const bounds = currentMap.getBounds();
-              if (bounds && bounds.isValid && bounds.isValid()) {
-                currentAutocomplete.setBounds(bounds);
-              }
-            } catch (error) {
-              console.warn('Error updating autocomplete bounds:', error);
-            }
-          }
-        }, 300); // 300ms de debounce
-      };
-      
-      const boundsListener = mapRef.current.addListener('bounds_changed', updateBounds);
-      const centerListener = mapRef.current.addListener('center_changed', updateBounds);
-      
-      return () => {
-        if (boundsUpdateTimeoutRef.current) {
-          clearTimeout(boundsUpdateTimeoutRef.current);
-          boundsUpdateTimeoutRef.current = null;
-        }
-        if (mapRef.current) {
-          try {
-            window.google?.maps?.event?.removeListener?.(boundsListener);
-            window.google?.maps?.event?.removeListener?.(centerListener);
-          } catch (error) {
-            console.warn('Error removing map listeners:', error);
-          }
-        }
-      };
-    }
-  }, [isLoaded]);
-  
-  // Cleanup general al desmontar el componente
-  useEffect(() => {
-    return () => {
-      if (boundsUpdateTimeoutRef.current) {
-        clearTimeout(boundsUpdateTimeoutRef.current);
-        boundsUpdateTimeoutRef.current = null;
+    const handleClickOutside = (event) => {
+      if (autocompleteInputRef.current && !autocompleteInputRef.current.contains(event.target)) {
+        setShowSuggestions(false);
       }
-      if (autocompleteRef.current) {
-        try {
-          window.google?.maps?.event?.clearInstanceListeners?.(autocompleteRef.current);
-        } catch (error) {
-          console.warn('Error clearing autocomplete listeners:', error);
-        }
-        autocompleteRef.current = null;
-      }
-      mapRef.current = null;
     };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   if (!GOOGLE_API_KEY) {
@@ -414,11 +406,10 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         </select>
       </div>
 
-      <div className="address-search">
+      <div className="address-search" style={{ position: 'relative' }}>
         <label htmlFor="address-input">Buscar dirección</label>
-        <div className="address-input-wrapper">
+        <div className="address-input-wrapper" ref={autocompleteInputRef}>
             <input
-              ref={autocompleteInputRef}
               id="address-input"
               type="text"
               className="address-input"
@@ -426,44 +417,74 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => {
+                if (suggestions.length > 0) {
+                  setShowSuggestions(true);
+                }
               }}
               onKeyDown={(e) => {
-                // Permitir que el autocomplete maneje Enter, pero también permitir escribir
+                // Manejar Enter para buscar dirección
                 if (e.key === 'Enter') {
                   e.preventDefault();
-                  // Si hay un lugar seleccionado, el autocomplete lo manejará
-                  // Si no, intentar buscar manualmente
-                  if (autocompleteRef.current && autocompleteInputRef.current) {
-                    const place = autocompleteRef.current.getPlace();
-                    if (!place || !place.geometry) {
-                      // Si no hay lugar seleccionado, disparar búsqueda manual
-                      const geocoder = new window.google.maps.Geocoder();
-                      geocoder.geocode({ address: searchQuery }, (results, status) => {
-                        if (status === 'OK' && results && results[0]) {
-                          const location = results[0].geometry.location;
-                          const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
-                          const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
-                          const nombre = results[0].formatted_address;
-                          setSearchQuery(nombre);
-                          setMapCenter({ lat, lng });
-                          setSelectedLocation({ lat, lng });
-                          if (mapRef.current) {
-                            mapRef.current.panTo({ lat, lng });
-                            mapRef.current.setZoom(15);
-                          }
-                          handleLocationSelect(lat, lng, nombre);
-                        }
-                      });
-                    }
+                  e.stopPropagation();
+                  if (suggestions.length > 0 && showSuggestions) {
+                    handleSuggestionSelect(suggestions[0]);
+                  } else {
+                    handleManualGeocode();
                   }
+                } else if (e.key === 'Escape') {
+                  setShowSuggestions(false);
                 }
               }}
               autoComplete="off"
           />
+          <button 
+            type="button" 
+            className="btn-search-address"
+            onClick={(e) => {
+              e.preventDefault();
+              if (suggestions.length > 0 && showSuggestions) {
+                handleSuggestionSelect(suggestions[0]);
+              } else {
+                handleManualGeocode();
+              }
+            }}
+            disabled={!searchQuery || searchQuery.trim().length < 3}
+            title="Buscar dirección"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
           <span className="location-text">
             <span>o</span> <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>
           </span>
         </div>
+        {showSuggestions && suggestions.length > 0 && (
+          <ul className="address-suggestions" style={{ position: 'absolute', zIndex: 1000, background: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', marginTop: '4px', maxHeight: '200px', overflowY: 'auto', width: '100%', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', listStyle: 'none', padding: 0, margin: 0 }}>
+            {suggestions.map((prediction) => (
+              <li 
+                key={prediction.place_id} 
+                onClick={() => handleSuggestionSelect(prediction)}
+                style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #f3f4f6' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+              >
+                <div style={{ fontWeight: 500, fontSize: '0.875rem', color: '#374151' }}>
+                  {prediction.structured_formatting?.main_text || prediction.description}
+                </div>
+                {prediction.structured_formatting?.secondary_text && (
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+                    {prediction.structured_formatting.secondary_text}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

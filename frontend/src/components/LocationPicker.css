@@ -181,6 +181,42 @@
 
 .address-input-wrapper {
   display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-search-address {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.btn-search-address:hover:not(:disabled) {
+  background: var(--primary-dark, #4f46e5);
+  transform: scale(1.05);
+}
+
+.btn-search-address:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.btn-search-address:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.address-input-wrapper {
+  display: flex;
   gap: 0;
   align-items: center;
 }
