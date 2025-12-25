@@ -12,13 +12,14 @@
 }
 
 .navbar-container {
-  display: flex;
+  display: flex !important;
   justify-content: space-between;
   align-items: center;
   gap: var(--spacing-lg);
   flex-wrap: wrap;
   position: relative;
   overflow: visible;
+  width: 100%;
 }
 
 
@@ -817,18 +818,26 @@
 
 @media (max-width: 768px) {
   .navbar {
-    width: 90%;
-    margin: 0.5rem auto;
-    padding: 0.5rem 1rem;
+    width: 90% !important;
+    margin: 0.5rem auto !important;
+    padding: 0.5rem 1rem !important;
     border-radius: var(--radius-lg);
     overflow: visible;
+    position: sticky !important;
+    top: 0.5rem !important;
+    z-index: 1000 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .navbar-container {
-    flex-direction: row;
+    flex-direction: row !important;
     align-items: center;
     gap: var(--spacing-sm);
     overflow: visible;
+    display: flex !important;
+    width: 100%;
   }
   
   .navbar-brand h1 {
@@ -923,10 +932,16 @@
 
 @media (max-width: 480px) {
   .navbar {
-    margin: 0.25rem auto;
-    padding: 0.4rem 0.75rem;
-    width: 90%;
+    margin: 0.25rem auto !important;
+    padding: 0.4rem 0.75rem !important;
+    width: 90% !important;
     overflow: visible;
+    position: sticky !important;
+    top: 0.25rem !important;
+    z-index: 1000 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .navbar-brand h1 {

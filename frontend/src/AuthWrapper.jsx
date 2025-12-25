@@ -266,22 +266,22 @@ function AuthWrapper() {
   const handleLogout = useCallback(() => {
     console.log('handleLogout ejecutándose');
     try {
-      // Limpiar todo inmediatamente usando servicio centralizado
-      authStorage.clearAll();
-      sessionStorage.clear();
+    // Limpiar todo inmediatamente usando servicio centralizado
+    authStorage.clearAll();
+    sessionStorage.clear();
       localStorage.clear();
-      
-      // Logout de Supabase en background (no esperamos)
-      if (useSupabase) {
+    
+    // Logout de Supabase en background (no esperamos)
+    if (useSupabase) {
         authService.signOut().catch((err) => {
           console.error('Error en signOut:', err);
         });
-      }
+    }
       
       // Limpiar estado del usuario
       setUser(null);
-      
-      // Redirigir inmediatamente
+    
+    // Redirigir inmediatamente
       window.location.href = '/';
     } catch (error) {
       console.error('Error en handleLogout:', error);

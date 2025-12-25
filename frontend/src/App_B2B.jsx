@@ -93,15 +93,15 @@ function AppB2B() {
       // Solo mostrar error si se solicita explícitamente (por ejemplo, después de una búsqueda)
       // No mostrar error si simplemente no hay empresas en memoria
       if (showError) {
-        const errorMsg = err.response?.data?.detail || err.message;
+      const errorMsg = err.response?.data?.detail || err.message;
         // Solo mostrar error si es un error de red real, no si simplemente no hay empresas
         if (err.code === 'ERR_NETWORK' || err.response?.status >= 500) {
-          toastError(
-            <>
-              <strong>No se pudieron cargar las empresas</strong>
-              <p>{errorMsg}</p>
-            </>
-          );
+      toastError(
+        <>
+          <strong>No se pudieron cargar las empresas</strong>
+          <p>{errorMsg}</p>
+        </>
+      );
         }
       }
     } finally {

@@ -459,6 +459,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Handler para peticiones OPTIONS (preflight)
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    """Maneja peticiones OPTIONS (preflight) para CORS"""
+    from fastapi.responses import Response
+    response = Response()
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Max-Age"] = "3600"
+    return response
+
+# Exception handler para HTTPException (asegura CORS en errores HTTP)
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Maneja HTTPException y asegura que CORS siempre se incluya"""
+    response = JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
+    
+    # Agregar headers CORS manualmente
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
 # Exception handler global para asegurar que CORS siempre se incluya
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
