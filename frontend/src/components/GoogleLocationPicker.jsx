@@ -34,6 +34,19 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   const [initialLocationApplied, setInitialLocationApplied] = useState(false);
   // Renombrar warning para evitar conflictos y asegurar que se use
   const { success, error, warning: toastWarning, info, removeToast, toasts } = useToast();
+  
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const autocompleteServiceRef = useRef(null);
+  const placesServiceRef = useRef(null);
+  const handleManualGeocodeRef = useRef(null);
+  const suggestionsRef = useRef(null);
+
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: GOOGLE_API_KEY || '',
+    libraries,
+  });
 
   const handleManualGeocode = useCallback(() => {
     const query = searchQuery?.trim();
