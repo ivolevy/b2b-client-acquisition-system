@@ -42,6 +42,47 @@ def get_supabase() -> Optional[Client]:
         logger.error(f"Error conectando a Supabase: {e}")
         return None
 
+# Intentar obtener Service Role Key para operaciones administrativas
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+
+def get_supabase_admin() -> Optional[Client]:
+    """Obtiene cliente con privilegios de admin (Service Role)"""
+    if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
+        logger.warning("Falta SUPABASE_SERVICE_ROLE_KEY. Operaciones administrativas limitadas.")
+        return None
+        
+    try:
+        return create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    except Exception as e:
+        logger.error(f"Error creando cliente admin: {e}")
+        return None
+
+def crear_usuario_admin(email: str, password: str, user_metadata: Dict) -> Dict:
+    """Crea un usuario usando la API de administración de Supabase"""
+    admin_client = get_supabase_admin()
+    
+    if not admin_client:
+        return {"error": "Servidor no configurado para creación de usuarios (falta SERVICE_ROLE_KEY)"}
+
+    try:
+        # Usa auth.admin.create_user
+        response = admin_client.auth.admin.create_user({
+            "email": email,
+            "password": password,
+            "user_metadata": user_metadata,
+            "email_confirm": True
+        })
+        
+        # response suele ser un objeto User o similar en la librería python
+        # Dependiendo de la versión, puede devolver un objeto con .user o ser el user directamente
+        # Probaremos asumiendo la estructura estándar de gotrue-py
+        
+        return {"data": response, "error": None}
+        
+    except Exception as e:
+        logger.error(f"Error creando usuario admin: {e}")
+        return {"error": str(e)}
+
 def init_db_b2b() -> bool:
     """Verifica conexión a Supabase"""
     client = get_supabase()

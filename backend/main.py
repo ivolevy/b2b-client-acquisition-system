@@ -26,7 +26,7 @@ try:
     from .social_scraper import enriquecer_con_redes_sociales
     from .scraper_parallel import enriquecer_empresas_paralelo
     from .validators import validar_empresa
-    from .db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b
+    from .db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b, crear_usuario_admin
 except ImportError:
     # Fallback for direct execution
     from overpass_client import (
@@ -39,7 +39,7 @@ except ImportError:
     from social_scraper import enriquecer_con_redes_sociales
     from scraper_parallel import enriquecer_empresas_paralelo
     from validators import validar_empresa
-    from db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b
+    from db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b, crear_usuario_admin
 # Todas las funciones trabajan con datos en memoria durante la sesión
 
 import math
@@ -1707,6 +1707,47 @@ async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
         raise
     except Exception as e:
         logger.error(f"Error actualizando contraseña: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# NUEVA FUNCIONALIDAD ADMIN
+
+class AdminCreateUserRequest(BaseModel):
+    email: str
+    password: str
+    name: str
+    phone: Optional[str] = None
+    plan: Optional[str] = 'free'
+    role: Optional[str] = 'user'
+
+@app.post("/admin/create-user")
+async def admin_create_user(user_data: AdminCreateUserRequest):
+    """
+    Endpoint administrativo para crear usuarios directamente en Supabase Auth
+    """
+    try:
+        # Construir user_metadata
+        metadata = {
+            "name": user_data.name,
+            "phone": user_data.phone,
+            "plan": user_data.plan,
+            "role": user_data.role
+        }
+        
+        result = crear_usuario_admin(user_data.email, user_data.password, metadata)
+        
+        if result.get("error"):
+            # Si el error es "Falta SERVICE_ROLE_KEY", enviamos 501 Not Implemented o 500
+            if "SERVICE_ROLE_KEY" in result["error"]:
+                 raise HTTPException(status_code=500, detail="Configuración de servidor incompleta: falta SERVICE_ROLE_KEY")
+            raise HTTPException(status_code=400, detail=result["error"])
+            
+        return {"success": True, "data": result.get("data")}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error en /admin/create-user: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

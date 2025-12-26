@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { adminService } from '../../lib/supabase';
 import UserDetailModal from './UserDetailModal';
+import CreateUserModal from './CreateUserModal';
 import './AdminUsers.css';
 import './AdminLayout.css';
 
@@ -16,6 +17,7 @@ function AdminUsers() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const searchTimeoutRef = useRef(null);
 
@@ -145,6 +147,15 @@ function AdminUsers() {
         </div>
       </div>
 
+      <div className="users-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+        <button 
+          className="btn-primary"
+          onClick={() => setShowCreateModal(true)}
+        >
+          + Crear Usuario
+        </button>
+      </div>
+
       {error && (
         <div className="admin-error">
           <p>{error}</p>
@@ -224,6 +235,17 @@ function AdminUsers() {
             setSelectedUser(null);
           }}
           onUpdate={() => loadUsers(true)}
+        />
+      )}
+
+      {/* Modal de creación de usuario */}
+      {showCreateModal && (
+        <CreateUserModal
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={() => {
+            setShowCreateModal(false);
+            loadUsers(true);
+          }}
         />
       )}
 
