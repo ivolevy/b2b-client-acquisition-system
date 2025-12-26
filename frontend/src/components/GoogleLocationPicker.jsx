@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { GoogleMap, Marker, Circle, useJsApiLoader } from '@react-google-maps/api';
 import { useToast } from '../hooks/useToast';
+import ToastContainer from './ToastContainer';
 import './LocationPicker.css';
 
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -31,159 +32,13 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   const mapRef = useRef(null); // Ref para evitar stale closures
   const autocompleteInputRef = useRef(null);
   const [initialLocationApplied, setInitialLocationApplied] = useState(false);
-  const { success, error, warning, info, removeToast } = useToast();
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const autocompleteServiceRef = useRef(null);
-  const placesServiceRef = useRef(null);
-  const handleManualGeocodeRef = useRef(null);
-  const suggestionsRef = useRef(null);
-
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: GOOGLE_API_KEY || '',
-    libraries,
-  });
-  
-  // Efecto para aplicar ubicación inicial desde historial
-  useEffect(() => {
-    if (initialLocation && !initialLocationApplied && mapRef.current && isLoaded) {
-      const { lat, lng, name, radius: initialRadius } = initialLocation;
-      const location = { lat, lng };
-      const finalRadius = initialRadius || radius;
-      
-      if (initialRadius) {
-        setRadius(initialRadius);
-      }
-      
-      setSelectedLocation(location);
-      setMapCenter(location);
-      setSearchQuery(name || '');
-      
-      if (mapRef.current) {
-        mapRef.current.panTo(location);
-        mapRef.current.setZoom(15);
-      }
-      
-      const bbox = calculateBoundingBox(lat, lng, finalRadius);
-      onLocationChange({
-        center: location,
-        radius: finalRadius,
-        bbox: bbox,
-        ubicacion_nombre: name || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
-      });
-      
-      setInitialLocationApplied(true);
-    }
-  }, [initialLocation, initialLocationApplied, isLoaded, radius, onLocationChange]);
-  
-  // Reset initialLocationApplied cuando cambia initialLocation
-  useEffect(() => {
-    if (initialLocation) {
-      setInitialLocationApplied(false);
-    } else {
-      setInitialLocationApplied(false);
-    }
-  }, [initialLocation]);
-
-  const handleLocationSelect = useCallback((lat, lng, ubicacionNombre = null) => {
-    const location = { lat, lng };
-    setSelectedLocation(location);
-    
-    const bbox = calculateBoundingBox(lat, lng, radius);
-    
-    onLocationChange({
-      center: location,
-      radius: radius,
-      bbox: bbox,
-      ubicacion_nombre: ubicacionNombre || searchQuery || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
-    });
-  }, [radius, searchQuery, onLocationChange]);
-
-  const handleMapClick = useCallback((e) => {
-    if (e.latLng) {
-      const lat = e.latLng.lat();
-      const lng = e.latLng.lng();
-      const location = { lat, lng };
-      
-      // Actualizar searchQuery con coordenadas cuando se hace click
-      setSearchQuery(`Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
-      setMapCenter(location);
-      setSelectedLocation(location);
-      
-      handleLocationSelect(lat, lng, `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
-    }
-  }, [handleLocationSelect]);
-
-  const handleRadiusChange = (newRadius) => {
-    setRadius(newRadius);
-    
-    if (selectedLocation) {
-      const bbox = calculateBoundingBox(selectedLocation.lat, selectedLocation.lng, newRadius);
-      onLocationChange({
-        center: selectedLocation,
-        radius: newRadius,
-        bbox: bbox
-      });
-    }
-  };
-
-  // Usar AutocompleteService para sugerencias (aún disponible)
-  // Pero NO usar Autocomplete tradicional que ya no está disponible para nuevos clientes
-  useEffect(() => {
-    if (isLoaded && window.google?.maps?.places) {
-      // Inicializar AutocompleteService para sugerencias (esto sí funciona)
-      if (!autocompleteServiceRef.current) {
-        autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-      }
-      if (!placesServiceRef.current) {
-        placesServiceRef.current = new window.google.maps.places.PlacesService(document.createElement('div'));
-      }
-    }
-  }, [isLoaded]);
-
-  // Generar sugerencias mientras el usuario escribe
-  useEffect(() => {
-    if (!searchQuery || searchQuery.trim().length < 3) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    if (isLoaded && window.google?.maps?.places && autocompleteServiceRef.current) {
-      const timeoutId = setTimeout(() => {
-        if (autocompleteServiceRef.current) {
-        autocompleteServiceRef.current.getPlacePredictions(
-          {
-            input: searchQuery,
-            types: ['geocode'],
-            componentRestrictions: { country: 'ar' }
-          },
-            (predictions, status) => {
-              if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-                setSuggestions(predictions);
-                setShowSuggestions(true);
-              } else {
-                setSuggestions([]);
-                setShowSuggestions(false);
-              }
-            }
-          );
-        }
-      }, 300);
-
-      return () => clearTimeout(timeoutId);
-    } else if (!isLoaded) {
-      // Si Google Maps no está cargado, usar geocoding directo cuando se presiona Enter
-      setSuggestions([]);
-      setShowSuggestions(false);
-    }
-  }, [searchQuery, isLoaded]);
+  // Renombrar warning para evitar conflictos y asegurar que se use
+  const { success, error, warning: toastWarning, info, removeToast, toasts } = useToast();
 
   const handleManualGeocode = useCallback(() => {
     const query = searchQuery?.trim();
     if (!query || query.length < 3) {
-      warning(
+      toastWarning(
         <>
           <strong>Búsqueda muy corta</strong>
           <p>Escribe al menos 3 caracteres para buscar una dirección.</p>
@@ -204,12 +59,12 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
 
     const geocoder = new window.google.maps.Geocoder();
     // Priorizar Argentina en la búsqueda
-    let searchQuery = query;
+    let searchQueryStr = query;
     if (!query.toLowerCase().includes('argentina') && !query.toLowerCase().includes('buenos aires')) {
-      searchQuery = `${query}, Buenos Aires, Argentina`;
+      searchQueryStr = `${query}, Buenos Aires, Argentina`;
     }
     geocoder.geocode({ 
-      address: searchQuery,
+      address: searchQueryStr,
       componentRestrictions: { country: 'ar' }
     }, (results, status) => {
       if (status === 'OK' && results && results[0]) {
@@ -239,9 +94,9 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             <p>No se pudo encontrar esa dirección. Intenta con otra búsqueda.</p>
           </>
         );
-    }
+      }
     });
-  }, [searchQuery, isLoaded, handleLocationSelect, warning, error, success]);
+  }, [searchQuery, isLoaded, handleLocationSelect, toastWarning, error, success]);
 
   // Actualizar ref cuando cambia la función
   useEffect(() => {
@@ -285,7 +140,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           // Fallback a geocoding manual
           if (handleManualGeocodeRef.current) {
             handleManualGeocodeRef.current();
-      }
+          }
         }
       }
     );
@@ -520,6 +375,8 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     </div>
   );
 
+
+
   return (
     <>
       <div className="form-row form-row-compact">
@@ -569,6 +426,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             )}
           </GoogleMap>
         </div>
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>
     </>
   );
