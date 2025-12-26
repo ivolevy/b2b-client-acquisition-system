@@ -1373,28 +1373,72 @@ function Login({ onLogin }) {
                           maxLength={1}
                           value={forgotPasswordCode[index] || ''}
                           onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, '');
-                            if (value) {
-                              const newCode = forgotPasswordCode.split('');
-                              newCode[index] = value;
-                              const updatedCode = newCode.join('').slice(0, 6);
-                              setForgotPasswordCode(updatedCode);
+                            const inputValue = e.target.value;
+                            const numericValue = inputValue.replace(/\D/g, '');
+                            
+                            // Crear array de 6 elementos
+                            const codeArray = forgotPasswordCode.split('');
+                            while (codeArray.length < 6) {
+                              codeArray.push('');
+                            }
+                            
+                            if (numericValue.length > 0) {
+                              // Si hay un valor numérico, actualizar solo el último dígito ingresado
+                              codeArray[index] = numericValue.slice(-1);
+                              setForgotPasswordCode(codeArray.join(''));
                               
-                              // Mover al siguiente input si hay valor
-                              if (index < 5 && value) {
-                                const nextInput = e.target.parentElement?.children[index + 1];
-                                if (nextInput) {
-                                  nextInput.focus();
-                                }
+                              // Mover al siguiente input si hay valor y no es el último
+                              if (index < 5) {
+                                setTimeout(() => {
+                                  const nextInput = e.target.parentElement?.children[index + 1];
+                                  if (nextInput) {
+                                    nextInput.focus();
+                                  }
+                                }, 0);
                               }
+                            } else {
+                              // Si está vacío, borrar este dígito
+                              codeArray[index] = '';
+                              setForgotPasswordCode(codeArray.join(''));
                             }
                           }}
                           onKeyDown={(e) => {
-                            if (e.key === 'Backspace' && !forgotPasswordCode[index] && index > 0) {
-                              const prevInput = e.target.parentElement?.children[index - 1];
-                              if (prevInput) {
-                                prevInput.focus();
+                            if (e.key === 'Backspace') {
+                              e.preventDefault();
+                              
+                              // Crear array de 6 elementos
+                              const codeArray = forgotPasswordCode.split('');
+                              while (codeArray.length < 6) {
+                                codeArray.push('');
                               }
+                              
+                              if (codeArray[index] && codeArray[index] !== '') {
+                                // Si hay un valor en el campo actual, borrarlo
+                                codeArray[index] = '';
+                                setForgotPasswordCode(codeArray.join(''));
+                                // Mantener el foco en el mismo campo
+                              } else if (index > 0) {
+                                // Si el campo está vacío, ir al anterior y borrarlo
+                                codeArray[index - 1] = '';
+                                setForgotPasswordCode(codeArray.join(''));
+                                
+                                setTimeout(() => {
+                                  const prevInput = e.target.parentElement?.children[index - 1];
+                                  if (prevInput) {
+                                    prevInput.focus();
+                                    // Seleccionar el contenido para que se pueda borrar fácilmente
+                                    prevInput.select();
+                                  }
+                                }, 0);
+                              }
+                            } else if (e.key === 'Delete') {
+                              e.preventDefault();
+                              const codeArray = forgotPasswordCode.split('');
+                              while (codeArray.length < 6) {
+                                codeArray.push('');
+                              }
+                              codeArray[index] = '';
+                              setForgotPasswordCode(codeArray.join(''));
                             }
                           }}
                           onPaste={(e) => {

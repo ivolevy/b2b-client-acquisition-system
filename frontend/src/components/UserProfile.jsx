@@ -715,10 +715,22 @@ function UserProfile() {
                             }
                           }}
                           onKeyDown={(e) => {
-                            if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
-                              const prevInput = e.target.parentElement?.children[index - 1];
-                              if (prevInput) {
-                                prevInput.focus();
+                            if (e.key === 'Backspace') {
+                              e.preventDefault();
+                              const newCode = verificationCode.split('');
+                              
+                              if (newCode[index]) {
+                                // Si hay un valor en el campo actual, borrarlo
+                                newCode[index] = '';
+                                setVerificationCode(newCode.join(''));
+                              } else if (index > 0) {
+                                // Si el campo está vacío, ir al anterior y borrarlo
+                                newCode[index - 1] = '';
+                                setVerificationCode(newCode.join(''));
+                                const prevInput = e.target.parentElement?.children[index - 1];
+                                if (prevInput) {
+                                  prevInput.focus();
+                                }
                               }
                             }
                           }}

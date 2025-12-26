@@ -1692,25 +1692,78 @@ async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
         
         if supabase_service_key and supabase_url:
             try:
-                from supabase import create_client, Client
-                supabase_admin: Client = create_client(supabase_url, supabase_service_key)
-                
-                # Buscar el usuario por email
-                users_response = supabase_admin.auth.admin.list_users()
-                user = None
-                for u in users_response.users:
-                    if u.email == email:
-                        user = u
-                        break
-                
-                if user:
-                    # Actualizar la contraseña del usuario
-                    update_response = supabase_admin.auth.admin.update_user_by_id(
-                        user.id,
-                        {"password": request.new_password}
-                    )
+                # Intentar usar el módulo supabase primero
+                try:
+                    from supabase import create_client, Client
+                    supabase_admin: Client = create_client(supabase_url, supabase_service_key)
                     
-                    if update_response.user:
+                    # Buscar el usuario por email
+                    users_response = supabase_admin.auth.admin.list_users()
+                    user = None
+                    for u in users_response.users:
+                        if u.email == email:
+                            user = u
+                            break
+                    
+                    if user:
+                        # Actualizar la contraseña del usuario
+                        update_response = supabase_admin.auth.admin.update_user_by_id(
+                            user.id,
+                            {"password": request.new_password}
+                        )
+                        
+                        if update_response.user:
+                            logger.info(f"Contraseña actualizada exitosamente para {email}")
+                            return {
+                                "success": True,
+                                "message": "Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.",
+                                "email": email,
+                                "requires_frontend_reset": False
+                            }
+                except ImportError:
+                    # Si el módulo supabase no está disponible, usar API REST directamente
+                    logger.info("Módulo supabase no disponible, usando API REST directamente")
+                    import requests as http_requests
+                    
+                    # Usar la API REST de Supabase directamente
+                    headers = {
+                        "apikey": supabase_service_key,
+                        "Authorization": f"Bearer {supabase_service_key}",
+                        "Content-Type": "application/json"
+                    }
+                    
+                    # Listar usuarios
+                    list_url = f"{supabase_url}/auth/v1/admin/users"
+                    list_response = http_requests.get(list_url, headers=headers)
+                    
+                    if list_response.status_code != 200:
+                        raise Exception(f"Error al listar usuarios: {list_response.status_code} - {list_response.text}")
+                    
+                    users_data = list_response.json()
+                    users_list = users_data.get('users', []) if isinstance(users_data, dict) else users_data
+                    
+                    if not isinstance(users_list, list):
+                        raise Exception("Error al parsear la lista de usuarios")
+                    
+                    # Buscar el usuario por email
+                    user = None
+                    user_id = None
+                    for u in users_list:
+                        user_email = u.get('email') if isinstance(u, dict) else (u.email if hasattr(u, 'email') else None)
+                        if user_email == email:
+                            user = u
+                            user_id = u.get('id') if isinstance(u, dict) else (u.id if hasattr(u, 'id') else None)
+                            break
+                    
+                    if not user or not user_id:
+                        raise Exception("Usuario no encontrado")
+                    
+                    # Actualizar la contraseña usando la API REST
+                    update_url = f"{supabase_url}/auth/v1/admin/users/{user_id}"
+                    update_payload = {"password": request.new_password}
+                    update_response = http_requests.put(update_url, json=update_payload, headers=headers)
+                    
+                    if update_response.status_code in [200, 201]:
                         logger.info(f"Contraseña actualizada exitosamente para {email}")
                         return {
                             "success": True,
@@ -1719,19 +1772,8 @@ async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
                             "requires_frontend_reset": False
                         }
                     else:
-                        logger.error(f"Error al actualizar contraseña: No se recibió el usuario actualizado")
-                        return {
-                            "success": False,
-                            "message": "Error al actualizar la contraseña. Por favor, intentá nuevamente.",
-                            "requires_frontend_reset": True
-                        }
-                else:
-                    logger.error(f"Usuario no encontrado para {email}")
-                    return {
-                        "success": False,
-                        "message": "Usuario no encontrado. Por favor, verificá tu email.",
-                        "requires_frontend_reset": True
-                    }
+                        raise Exception(f"Error al actualizar contraseña: {update_response.status_code} - {update_response.text}")
+                
             except Exception as e:
                 logger.error(f"Error actualizando contraseña con Supabase Admin API: {e}", exc_info=True)
                 # Si falla, retornar que requiere reset desde el frontend
