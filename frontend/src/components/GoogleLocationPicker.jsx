@@ -48,6 +48,29 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     libraries,
   });
 
+  // Reset initialLocationApplied cuando cambia initialLocation
+  useEffect(() => {
+    if (initialLocation) {
+      setInitialLocationApplied(false);
+    } else {
+      setInitialLocationApplied(false);
+    }
+  }, [initialLocation]);
+
+  const handleLocationSelect = useCallback((lat, lng, ubicacionNombre = null) => {
+    const location = { lat, lng };
+    setSelectedLocation(location);
+    
+    const bbox = calculateBoundingBox(lat, lng, radius);
+    
+    onLocationChange({
+      center: location,
+      radius: radius,
+      bbox: bbox,
+      ubicacion_nombre: ubicacionNombre || searchQuery || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
+    });
+  }, [radius, searchQuery, onLocationChange]);
+
   const handleManualGeocode = useCallback(() => {
     const query = searchQuery?.trim();
     if (!query || query.length < 3) {
@@ -110,6 +133,27 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       }
     });
   }, [searchQuery, isLoaded, handleLocationSelect, toastWarning, error, success]);
+
+  const handleMapClick = useCallback((event) => {
+    if (event.latLng) {
+      const lat = event.latLng.lat();
+      const lng = event.latLng.lng();
+      handleLocationSelect(lat, lng, null);
+    }
+  }, [handleLocationSelect]);
+
+  const handleRadiusChange = (newRadius) => {
+    setRadius(newRadius);
+    if (selectedLocation) {
+      const bbox = calculateBoundingBox(selectedLocation.lat, selectedLocation.lng, newRadius);
+      onLocationChange({
+        center: selectedLocation,
+        radius: newRadius,
+        bbox: bbox,
+        ubicacion_nombre: searchQuery
+      });
+    }
+  };
 
   // Actualizar ref cuando cambia la función
   useEffect(() => {
