@@ -1,0 +1,239 @@
+"""
+Módulo de base de datos conectado a Supabase
+Reemplaza la implementación local de SQLite
+"""
+
+import os
+import logging
+from typing import List, Dict, Optional, Any
+from datetime import datetime
+import json
+from supabase import create_client, Client
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Configuración de Supabase
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY") or os.getenv("VITE_SUPABASE_ANON_KEY")
+
+# Cliente global
+_supabase_client: Optional[Client] = None
+
+def get_supabase() -> Optional[Client]:
+    """Obtiene o inicializa el cliente de Supabase"""
+    global _supabase_client
+    
+    if _supabase_client:
+        return _supabase_client
+        
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        logger.error("Faltan credenciales de Supabase (SUPABASE_URL o SUPABASE_KEY)")
+        return None
+        
+    try:
+        _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        return _supabase_client
+    except Exception as e:
+        logger.error(f"Error conectando a Supabase: {e}")
+        return None
+
+def init_db_b2b() -> bool:
+    """Verifica conexión a Supabase"""
+    client = get_supabase()
+    if not client:
+        return False
+    
+    logger.info(" Conexión a Supabase inicializada correctamente")
+    return True
+
+def insertar_empresa(empresa: Dict) -> bool:
+    """Inserta o actualiza una empresa en Supabase"""
+    client = get_supabase()
+    if not client:
+        return False
+        
+    try:
+        # Preparar datos para Supabase
+        # Aseguramos que los campos coincidan con el esquema de la tabla 'empresas'
+        data_to_insert = {
+            'nombre': empresa.get('nombre'),
+            'rubro': empresa.get('rubro'),
+            'rubro_key': empresa.get('rubro_key'),
+            'email': empresa.get('email', ''),
+            'telefono': empresa.get('telefono', ''),
+            'website': empresa.get('website', ''),
+            'direccion': empresa.get('direccion', ''),
+            'ciudad': empresa.get('ciudad', ''),
+            'pais': empresa.get('pais', ''),
+            'codigo_postal': empresa.get('codigo_postal', ''),
+            # Coordenadas
+            'latitud': empresa.get('latitud'),
+            'longitud': empresa.get('longitud'),
+            # Redes sociales
+            'linkedin': empresa.get('linkedin', ''),
+            'facebook': empresa.get('facebook', ''),
+            'twitter': empresa.get('twitter', ''),
+            'instagram': empresa.get('instagram', ''),
+            # Metadata
+            'descripcion': empresa.get('descripcion', ''),
+            'osm_id': empresa.get('osm_id'),
+            # Validación
+            'validada': empresa.get('validada', False),
+            'email_valido': empresa.get('email_valido', False),
+            'telefono_valido': empresa.get('telefono_valido', False),
+            'website_valido': empresa.get('website_valido', False),
+            # Búsqueda origen
+            'busqueda_ubicacion_nombre': empresa.get('busqueda_ubicacion_nombre'),
+            # Timestamps
+            'updated_at': datetime.now().isoformat()
+        }
+        
+        # Limpiar claves con valor None para evitar errores si la columna no permite NULL
+        # aunque Supabase suele manejarlo, es mejor limpiar
+        data_to_insert = {k: v for k, v in data_to_insert.items() if v is not None}
+
+        # Upsert basado en osm_id si existe, o email como fallback
+        # Nota: La tabla en Supabase debería tener una constraint UNIQUE o Primary Key
+        # Idealmente osm_id es único.
+        
+        response = client.table('empresas').upsert(data_to_insert, on_conflict='osm_id').execute()
+        
+        if response.data:
+            logger.debug(f" Empresa guardada en Supabase: {empresa.get('nombre')}")
+            return True
+        return False
+        
+    except Exception as e:
+        logger.error(f"Error insertando empresa en Supabase: {e}")
+        return False
+
+def buscar_empresas(
+    rubro: Optional[str] = None,
+    ciudad: Optional[str] = None,
+    solo_validas: bool = False,
+    con_email: bool = False,
+    con_telefono: bool = False
+) -> List[Dict]:
+    """Busca empresas en Supabase con filtros"""
+    client = get_supabase()
+    if not client:
+        return []
+
+    try:
+        query = client.table('empresas').select('*')
+        
+        if rubro:
+            # Buscar coincidencia parcial o exacta
+            # Supabase usa ilike para case-insensitive search
+            query = query.ilike('rubro_key', f'%{rubro}%')
+        
+        if ciudad:
+            query = query.ilike('ciudad', f'%{ciudad}%')
+            
+        if solo_validas:
+            query = query.eq('validada', True)
+            
+        if con_email:
+            query = query.eq('email_valido', True)
+            
+        if con_telefono:
+            query = query.eq('telefono_valido', True)
+            
+        # Ordenar por fecha de creación descendente
+        query = query.order('created_at', desc=True)
+        
+        response = query.execute()
+        return response.data
+        
+    except Exception as e:
+        logger.error(f"Error buscando empresas en Supabase: {e}")
+        return []
+
+def obtener_estadisticas() -> Dict:
+    """Obtiene estadísticas básicas desde Supabase"""
+    client = get_supabase()
+    if not client:
+        return {}
+        
+    try:
+        # Nota: Supabase API no tiene un endpoint de agregación directo simple sin usar RPC
+        # Para mantenerlo simple, haremos queries con count='exact' y head=True
+        
+        total = client.table('empresas').select('*', count='exact', head=True).execute().count
+        
+        con_email = client.table('empresas').select('*', count='exact', head=True)\
+            .eq('email_valido', True).execute().count
+            
+        validas = client.table('empresas').select('*', count='exact', head=True)\
+            .eq('validada', True).execute().count
+
+        return {
+            'total': total,
+            'validas': validas,
+            'con_email': con_email,
+            # Estadísticas más complejas (por rubro/ciudad) requieren RPC o traer más datos
+            # Por ahora devolvemos lo básico para no sobrecargar
+        }
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo estadísticas de Supabase: {e}")
+        return {'total': 0}
+
+def exportar_a_csv(rubro: Optional[str] = None, solo_validas: bool = True) -> Optional[str]:
+    """Exporta datos de Supabase a CSV local"""
+    import csv
+    
+    empresas = buscar_empresas(rubro=rubro, solo_validas=solo_validas)
+    
+    if not empresas:
+        return None
+        
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"empresas_b2b_supabase_{rubro or 'todas'}_{timestamp}.csv"
+    # Guardar en carpeta data (subir un nivel desde backend)
+    output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', filename)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    try:
+        with open(output_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
+            if not empresas:
+                return None
+                
+            # Usar las claves del primer elemento como headers
+            campos = list(empresas[0].keys())
+            writer = csv.DictWriter(csvfile, fieldnames=campos, extrasaction='ignore')
+            writer.writeheader()
+            writer.writerows(empresas)
+            
+        logger.info(f" Exportado a CSV: {output_path}")
+        return output_path
+    except Exception as e:
+        logger.error(f"Error escribiendo CSV: {e}")
+        return None
+
+def exportar_a_json(rubro: Optional[str] = None, solo_validas: bool = True) -> Optional[str]:
+    """Exporta datos de Supabase a JSON local"""
+    empresas = buscar_empresas(rubro=rubro, solo_validas=solo_validas)
+    
+    if not empresas:
+        return None
+        
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"empresas_b2b_supabase_{rubro or 'todas'}_{timestamp}.json"
+    output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', filename)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    try:
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(empresas, f, indent=2, ensure_ascii=False, default=str)
+            
+        logger.info(f" Exportado a JSON: {output_path}")
+        return output_path
+    except Exception as e:
+        logger.error(f"Error escribiendo JSON: {e}")
+        return None

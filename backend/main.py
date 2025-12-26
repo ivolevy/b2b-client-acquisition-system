@@ -25,22 +25,15 @@ from scraper import enriquecer_empresa_b2b
 from social_scraper import enriquecer_con_redes_sociales
 from scraper_parallel import enriquecer_empresas_paralelo
 from validators import validar_empresa
-# Almacenamiento en memoria (sin base de datos)
+from validators import validar_empresa
+from db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b
 # Todas las funciones trabajan con datos en memoria durante la sesión
 
 import math
 from typing import Dict, List, Optional
 
-# Almacenamiento en memoria
-_memoria_empresas: List[Dict] = []
-_memoria_templates: List[Dict] = []
-_memoria_email_history: List[Dict] = []
-_template_counter = 0
-_empresa_counter = 0
-# Almacenamiento de códigos de validación para cambio de contraseña
-_memoria_codigos_validacion: Dict[str, Dict] = {}  # email -> {codigo, expires_at, user_id}
-
-def calcular_distancia_km(lat1, lon1, lat2, lon2):
+# Inicializar conexión a BD
+init_db_b2b()
     """Calcula distancia entre dos puntos geográficos"""
     if not all(isinstance(coord, (int, float)) and not math.isnan(coord) for coord in [lat1, lon1, lat2, lon2]):
         return None
@@ -55,161 +48,15 @@ def calcular_distancia_km(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return round(R * c, 2)
 
-def insertar_empresa(empresa: Dict) -> bool:
-    """Guarda empresa en memoria (no persiste)"""
-    import threading
-    global _empresa_counter, _memoria_empresas
-    
-    # Lock para evitar race conditions
-    if not hasattr(insertar_empresa, '_lock'):
-        insertar_empresa._lock = threading.Lock()
-    
-    try:
-        with insertar_empresa._lock:
-            _empresa_counter += 1
-            empresa['id'] = _empresa_counter
-            empresa['created_at'] = datetime.now().isoformat()
-            _memoria_empresas.append(empresa.copy())
-            logger.debug(f" Empresa guardada en memoria: {empresa.get('nombre')} (ID: {_empresa_counter})")
-        return True
-    except Exception as e:
-        logger.error(f"Error insertando empresa: {e}")
-        return False
+# Función obtener_estadisticas importada de db_supabase
 
-def obtener_todas_empresas() -> List[Dict]:
-    """Obtiene todas las empresas de memoria"""
-    return _memoria_empresas.copy()
-
-def buscar_empresas(rubro: Optional[str] = None, ciudad: Optional[str] = None,
-                   solo_validas: bool = False, con_email: bool = False,
-                   con_telefono: bool = False) -> List[Dict]:
-    """Busca empresas en memoria con filtros"""
-    # Validar que _memoria_empresas existe y es una lista
-    if not isinstance(_memoria_empresas, list):
-        logger.error("_memoria_empresas no es una lista válida")
-        return []
-    
-    resultado = _memoria_empresas.copy()
-    
-    if rubro:
-        # Buscar tanto por rubro_key como por rubro (nombre)
-        resultado = [e for e in resultado 
-                    if (isinstance(e, dict) and 
-                        (e.get('rubro_key') == rubro or e.get('rubro') == rubro or 
-                         (isinstance(e.get('rubro'), str) and rubro.lower() in e.get('rubro', '').lower())))]
-    
-    if ciudad:
-        # Búsqueda más precisa: coincidencia exacta o contiene (case insensitive)
-        ciudad_lower = ciudad.lower().strip()
-        resultado = [e for e in resultado 
-                    if (isinstance(e, dict) and e.get('ciudad') and 
-                        (ciudad_lower == e.get('ciudad', '').lower().strip() or 
-                         ciudad_lower in e.get('ciudad', '').lower()))]
-    
-    if solo_validas:
-        resultado = [e for e in resultado if e.get('email_valido') or e.get('telefono_valido')]
-    
-    if con_email:
-        resultado = [e for e in resultado if e.get('email_valido')]
-    
-    if con_telefono:
-        resultado = [e for e in resultado if e.get('telefono_valido')]
-    
-    return resultado
-
-def obtener_estadisticas() -> Dict:
-    """Obtiene estadísticas de empresas en memoria"""
-    # Validar que _memoria_empresas existe y es una lista
-    if not isinstance(_memoria_empresas, list):
-        logger.error("_memoria_empresas no es una lista válida")
-        return {
-            'total': 0,
-            'con_email': 0,
-            'con_telefono': 0,
-            'con_website': 0,
-            'por_rubro': {},
-            'por_ciudad': {}
-        }
-    
-    total = len(_memoria_empresas)
-    con_email = sum(1 for e in _memoria_empresas if isinstance(e, dict) and e.get('email') and e.get('email_valido'))
-    con_telefono = sum(1 for e in _memoria_empresas if isinstance(e, dict) and e.get('telefono') and e.get('telefono_valido'))
-    con_website = sum(1 for e in _memoria_empresas if isinstance(e, dict) and e.get('website') and e.get('website_valido'))
-    
-    # Por rubro
-    por_rubro = {}
-    for e in _memoria_empresas:
-        if isinstance(e, dict):
-            rubro = e.get('rubro', 'Sin rubro')
-            por_rubro[rubro] = por_rubro.get(rubro, 0) + 1
-    
-    # Por ciudad
-    por_ciudad = {}
-    for e in _memoria_empresas:
-        if isinstance(e, dict):
-            ciudad = e.get('ciudad', '')
-            if ciudad:
-                por_ciudad[ciudad] = por_ciudad.get(ciudad, 0) + 1
-    
-    return {
-        'total': total,
-        'con_email': con_email,
-        'con_telefono': con_telefono,
-        'con_website': con_website,
-        'por_rubro': por_rubro,
-        'por_ciudad': dict(list(sorted(por_ciudad.items(), key=lambda x: x[1], reverse=True))[:10])
-    }
-
-def exportar_a_csv(rubro: Optional[str] = None, solo_validas: bool = True) -> Optional[str]:
-    """Exporta empresas a CSV desde memoria"""
-    import csv
-    empresas = buscar_empresas(rubro=rubro, solo_validas=solo_validas)
-    
-    if not empresas:
-        return None
-    
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"empresas_b2b_{rubro or 'todas'}_{timestamp}.csv"
-    output_path = os.path.join(os.path.dirname(__file__), '..', 'data', filename)
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    
-    with open(output_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
-        campos = ['id', 'nombre', 'rubro', 'email', 'telefono', 'website', 'direccion', 'ciudad', 'pais', 
-                 'busqueda_ubicacion_nombre', 'distancia_km', 'created_at']
-        writer = csv.DictWriter(csvfile, fieldnames=campos, extrasaction='ignore')
-        writer.writeheader()
-        writer.writerows(empresas)
-    
-    logger.info(f" CSV exportado: {output_path} ({len(empresas)} registros)")
-    return output_path
-
-def exportar_a_json(rubro: Optional[str] = None, solo_validas: bool = True) -> Optional[str]:
-    """Exporta empresas a JSON desde memoria"""
-    import json
-    empresas = buscar_empresas(rubro=rubro, solo_validas=solo_validas)
-    
-    if not empresas:
-        return None
-    
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"empresas_b2b_{rubro or 'todas'}_{timestamp}.json"
-    output_path = os.path.join(os.path.dirname(__file__), '..', 'data', filename)
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    
-    with open(output_path, 'w', encoding='utf-8') as jsonfile:
-        json.dump(empresas, jsonfile, indent=2, ensure_ascii=False, default=str)
-    
-    logger.info(f" JSON exportado: {output_path} ({len(empresas)} registros)")
-    return output_path
+# Funciones exportar_a_csv y exportar_a_json importadas de db_supabase
 
 def limpiar_base_datos() -> bool:
-    """Limpia todas las empresas de memoria"""
-    global _memoria_empresas, _empresa_counter
-    count = len(_memoria_empresas)
-    _memoria_empresas = []
-    _empresa_counter = 0
-    logger.info(f" Memoria limpiada: {count} empresas eliminadas")
-    return True
+    """No implementado en Supabase por seguridad"""
+    # En Supabase no permitimos borrar toda la DB desde un endpoint público
+    logger.warning("Intento de limpiar base de datos bloqueado en modo Supabase")
+    return False
 
 def obtener_templates() -> List[Dict]:
     """Obtiene todos los templates de memoria"""
@@ -602,7 +449,10 @@ class EnviarEmailMasivoRequest(BaseModel):
 async def startup():
     logger.info(" Iniciando API B2B...")
     _init_default_templates()
-    logger.info(" Sistema B2B listo (almacenamiento en memoria - sin persistencia)")
+    if init_db_b2b():
+        logger.info(" Sistema B2B listo (Conectado a Supabase)")
+    else:
+        logger.error(" ERROR: No se pudo conectar a Supabase. Verifique credenciales.")
 
 @app.get("/")
 async def root():

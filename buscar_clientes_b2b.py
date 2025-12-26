@@ -10,10 +10,10 @@ import os
 # Agregar backend al path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
 
-from b2b_client import buscar_empresas_por_rubro, listar_rubros_disponibles
-from scraper_b2b import enriquecer_empresa_b2b
+from overpass_client import buscar_empresas_por_rubro, listar_rubros_disponibles
+from scraper import enriquecer_empresa_b2b
 from validators import filtrar_empresas_validas
-from db_b2b import init_db_b2b, insertar_empresa, exportar_a_csv, exportar_a_json
+from db_supabase import init_db_b2b, insertar_empresa, exportar_a_csv, exportar_a_json
 import json
 
 def mostrar_menu():
