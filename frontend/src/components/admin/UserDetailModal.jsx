@@ -176,7 +176,7 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
 
         {/* Content */}
         <div className="modal-content">
-          <div className="tab-content">
+            <div className="tab-content">
               <div className="form-section">
                 <h3>Información Personal</h3>
                 <div className="form-grid">
@@ -253,16 +253,16 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
 
         {/* Footer */}
         <div className="modal-footer">
-          <button
-            className="btn-primary"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saving ? 'Guardando...' : 'Guardar'}
-          </button>
-          <button className="btn-export" onClick={handleExport}>
-            Exportar
-          </button>
+              <button
+                className="btn-primary"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? 'Guardando...' : 'Guardar'}
+              </button>
+              <button className="btn-export" onClick={handleExport}>
+                Exportar
+              </button>
           <button className="btn-secondary" onClick={onClose}>
             Cerrar
           </button>

@@ -455,25 +455,25 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
                   const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
                   const nombreUbicacion = results2[0].formatted_address;
                   setSearchQuery(nombreUbicacion);
-                  setMapCenter([lat, lng]);
-                  handleLocationSelect({ lat, lng }, nombreUbicacion);
-                  if (window.google?.maps?.places) {
-                    sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
-                  }
-                  setSuggestions([]);
+          setMapCenter([lat, lng]);
+          handleLocationSelect({ lat, lng }, nombreUbicacion);
+          if (window.google?.maps?.places) {
+            sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
+          }
+          setSuggestions([]);
                   success(
                     <>
                       <strong>Dirección encontrada</strong>
                       <p>Se ha establecido la ubicación en el mapa.</p>
                     </>
                   );
-                } else {
+        } else {
                   // Fallback a Nominatim
                   searchWithNominatim(query).catch(err => {
                     console.error('Error con Nominatim:', err);
                     setIsSearching(false);
                     error(
-                      <>
+            <>
                         <strong>No se encontró la dirección</strong>
                         <p>No se pudo encontrar esa dirección. Intenta con otra búsqueda.</p>
                       </>
@@ -491,10 +491,10 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
                 <>
                   <strong>No se encontró la dirección</strong>
                   <p>No se pudo encontrar esa dirección. Intenta con otra búsqueda.</p>
-                </>
-              );
+            </>
+          );
             });
-          }
+        }
         });
         return;
       }

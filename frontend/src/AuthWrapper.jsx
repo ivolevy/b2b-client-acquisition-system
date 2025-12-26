@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext, lazy, Suspense, useMemo, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase, authService, userService, adminService } from './lib/supabase';
-import { authStorage } from './utils/storage';
+import { authStorage, storage } from './utils/storage';
 import { handleError } from './utils/errorHandler';
 
 // Lazy loading de componentes pesados
@@ -110,28 +110,19 @@ function AuthWrapper() {
           
           if (type === 'signup' && accessToken && refreshToken) {
             // El usuario viene de confirmar su email
-            const { data: { session }, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            });
+            // NO loguear automáticamente, solo limpiar la URL y redirigir a login
+            window.history.replaceState({}, document.title, window.location.pathname);
             
-            if (session?.user) {
-              // Limpiar la URL
-              window.history.replaceState({}, document.title, window.location.pathname);
-              
-              // Limpiar email pendiente de confirmación ya que el usuario acaba de confirmar
-              authStorage.removePendingEmail();
-              authStorage.removeDismissedPendingEmail();
-              
-              const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
-              
-              if (!profileError && profile) {
-                const userData = authService.buildUserData(session.user, profile);
-                setUser(userData);
-                setLoading(false);
-                return;
-              }
-            }
+            // Limpiar email pendiente de confirmación ya que el usuario acaba de confirmar
+            authStorage.removePendingEmail();
+            authStorage.removeDismissedPendingEmail();
+            
+            // Guardar un flag para mostrar mensaje de éxito en Login
+            storage.setItem('email_confirmed', 'true');
+            
+            // NO establecer sesión, dejar que el usuario inicie sesión manualmente
+            setLoading(false);
+            return;
           }
           
           const { data: { session } } = await supabase.auth.getSession();
@@ -245,22 +236,22 @@ function AuthWrapper() {
   const handleLogout = useCallback(() => {
     console.log('handleLogout ejecutándose');
     try {
-      // Limpiar todo inmediatamente usando servicio centralizado
-      authStorage.clearAll();
-      sessionStorage.clear();
+    // Limpiar todo inmediatamente usando servicio centralizado
+    authStorage.clearAll();
+    sessionStorage.clear();
       localStorage.clear();
-      
-      // Logout de Supabase en background (no esperamos)
-      if (useSupabase) {
+    
+    // Logout de Supabase en background (no esperamos)
+    if (useSupabase) {
         authService.signOut().catch((err) => {
           console.error('Error en signOut:', err);
         });
-      }
+    }
       
       // Limpiar estado del usuario
       setUser(null);
-      
-      // Redirigir inmediatamente
+    
+    // Redirigir inmediatamente
       window.location.href = '/';
     } catch (error) {
       console.error('Error en handleLogout:', error);

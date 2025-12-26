@@ -239,7 +239,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             <p>No se pudo encontrar esa dirección. Intenta con otra búsqueda.</p>
           </>
         );
-      }
+    }
     });
   }, [searchQuery, isLoaded, handleLocationSelect, warning, error, success]);
 
@@ -285,7 +285,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           // Fallback a geocoding manual
           if (handleManualGeocodeRef.current) {
             handleManualGeocodeRef.current();
-          }
+      }
         }
       }
     );

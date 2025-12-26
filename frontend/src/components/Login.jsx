@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import './Login.css';
 import { authService, supabase } from '../lib/supabase';
-import { authStorage } from '../utils/storage';
+import { authStorage, storage } from '../utils/storage';
 import { rateLimiter, debounce } from '../utils/rateLimiter';
 import { handleError } from '../utils/errorHandler';
 import { API_URL } from '../config';
@@ -267,6 +267,18 @@ function Login({ onLogin }) {
     
     checkSession();
   }, [useSupabase, pendingEmail]); // Incluir dependencias correctas
+  
+  // Verificar si el email fue confirmado recientemente
+  useEffect(() => {
+    const emailConfirmed = storage.getItem('email_confirmed');
+    if (emailConfirmed === 'true') {
+      // Cambiar a modo login y mostrar mensaje de éxito
+      setMode('login');
+      setSuccess('¡Email confirmado exitosamente! Ahora podés iniciar sesión con tu cuenta.');
+      // Limpiar el flag
+      storage.removeItem('email_confirmed');
+    }
+  }, []);
   
   // Validar formulario completo (función simple, sin memoizar para evitar problemas)
   const isFormValid = () => {
@@ -1753,7 +1765,7 @@ function Login({ onLogin }) {
 
                       if (response.data && response.data.success === true) {
                         // Éxito - contraseña actualizada
-                        alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
+                        setSuccess('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
                         
                         // Limpiar todo
                         setShowForgotPasswordModal(false);
@@ -1766,6 +1778,7 @@ function Login({ onLogin }) {
                         setForgotPasswordCodeSent(false);
                         setResendCountdown(0);
                         setCanResendCode(false);
+                        setForgotPasswordLoading(false);
                       } else {
                         // Error del servidor
                         const errorMsg = response.data?.message || 'Error al actualizar la contraseña';

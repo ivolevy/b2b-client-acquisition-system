@@ -266,23 +266,23 @@ function UserProfile() {
             if (useSupabase) {
               // Verificar que haya una sesión activa
               const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-              
+
               if (sessionError || !session) {
                 setPasswordError('No hay una sesión activa. Por favor, iniciá sesión nuevamente.');
-                setPasswordLoading(false);
-                return;
-              }
+          setPasswordLoading(false);
+          return;
+        }
 
               // Actualizar la contraseña directamente
               const { data, error: updateError } = await supabase.auth.updateUser({
-                password: passwordForm.newPassword
-              });
+          password: passwordForm.newPassword
+        });
 
-              if (updateError) {
-                setPasswordError('Error al actualizar la contraseña: ' + updateError.message);
-                setPasswordLoading(false);
-                return;
-              }
+        if (updateError) {
+          setPasswordError('Error al actualizar la contraseña: ' + updateError.message);
+          setPasswordLoading(false);
+          return;
+        }
 
               if (!data || !data.user) {
                 setPasswordError('No se pudo actualizar la contraseña. Por favor, intentá nuevamente.');
@@ -290,9 +290,9 @@ function UserProfile() {
                 return;
               }
 
-              // Éxito
-              setShowPasswordModal(false);
-              setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        // Éxito
+        setShowPasswordModal(false);
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
               setPasswordStep('request');
               setPasswordChangeEmail(user?.email || '');
               setVerificationCode('');
@@ -300,8 +300,8 @@ function UserProfile() {
               setResendCountdown(0);
               setCanResendCode(false);
               alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
-            } else {
-              setPasswordError('Cambio de contraseña no disponible en modo demo');
+      } else {
+        setPasswordError('Cambio de contraseña no disponible en modo demo');
               setPasswordLoading(false);
             }
           } catch (frontendError) {
@@ -310,7 +310,7 @@ function UserProfile() {
           }
         } else {
           setPasswordError(resetResponse.data.message || 'Error al actualizar la contraseña');
-          setPasswordLoading(false);
+      setPasswordLoading(false);
         }
       }
     } catch (error) {
@@ -506,48 +506,48 @@ function UserProfile() {
 
           {/* Columna derecha */}
           {user?.role !== 'admin' && (
-            <div className="profile-column">
-              <h3 className="profile-section-title">Información de cuenta</h3>
-              <div className="account-info-card">
-                <div className="account-plan-section">
-                  <div className="account-plan-label">Plan actual</div>
-                  <div className="account-plan-content">
-                    <span className={`plan-badge-large ${user?.plan || 'free'}`}>
-                      {user?.plan === 'pro' ? 'PRO' : 'Free'}
-                    </span>
-                  </div>
-                  <div className="account-plan-actions">
-                    {user?.plan !== 'pro' ? (
-                      <button 
-                        className="account-upgrade-btn"
-                        onClick={() => setShowUpgradeModal(true)}
-                      >
-                        Actualizar a PRO
-                      </button>
-                    ) : (
-                      <button 
-                        className="account-change-plan-btn"
-                        onClick={() => setShowCancelPlanModal(true)}
-                      >
-                        Cancelar plan
-                      </button>
-                    )}
-                  </div>
+          <div className="profile-column">
+            <h3 className="profile-section-title">Información de cuenta</h3>
+            <div className="account-info-card">
+              <div className="account-plan-section">
+                <div className="account-plan-label">Plan actual</div>
+                <div className="account-plan-content">
+                  <span className={`plan-badge-large ${user?.plan || 'free'}`}>
+                    {user?.plan === 'pro' ? 'PRO' : 'Free'}
+                  </span>
                 </div>
-              </div>
-              <div className="account-danger-section">
-                <div className="account-danger-label">Zona de peligro</div>
-                <div className="account-danger-content">
-                  <p className="account-danger-text">Esta acción es permanente y no se puede deshacer.</p>
-                  <button 
-                    className="btn-delete-account"
-                    onClick={() => setShowDeleteModal(true)}
-                  >
-                    Eliminar cuenta
-                  </button>
+                <div className="account-plan-actions">
+                  {user?.plan !== 'pro' ? (
+                    <button 
+                      className="account-upgrade-btn"
+                      onClick={() => setShowUpgradeModal(true)}
+                    >
+                      Actualizar a PRO
+                    </button>
+                  ) : (
+                    <button 
+                      className="account-change-plan-btn"
+                        onClick={() => setShowCancelPlanModal(true)}
+                    >
+                        Cancelar plan
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
+            <div className="account-danger-section">
+              <div className="account-danger-label">Zona de peligro</div>
+              <div className="account-danger-content">
+                <p className="account-danger-text">Esta acción es permanente y no se puede deshacer.</p>
+                <button 
+                  className="btn-delete-account"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  Eliminar cuenta
+                </button>
+              </div>
+            </div>
+          </div>
           )}
         </div>
       </div>
@@ -641,7 +641,7 @@ function UserProfile() {
                       onChange={(e) => setPasswordChangeEmail(e.target.value)}
                       placeholder="Ingresá tu email"
                       disabled={codeLoading}
-                      autoFocus
+                  autoFocus
                 />
               </div>
                 </>

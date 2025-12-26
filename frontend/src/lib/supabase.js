@@ -219,16 +219,16 @@ export const authService = {
 
       // PASO 1: Eliminar datos del usuario de las tablas relacionadas (con timeout)
       const deleteDataPromise = (async () => {
-        const tables = ['search_history', 'saved_companies', 'email_templates', 'email_history'];
-        
-        for (const table of tables) {
+      const tables = ['search_history', 'saved_companies', 'email_templates', 'email_history'];
+      
+      for (const table of tables) {
           try {
-            const { error } = await supabase.from(table).delete().eq('user_id', userId);
-            if (error) {
-              console.warn(`[DeleteAccount] Error eliminando ${table}:`, error.message);
-            } else {
-              console.log(`[DeleteAccount] ${table} eliminado`);
-            }
+        const { error } = await supabase.from(table).delete().eq('user_id', userId);
+        if (error) {
+          console.warn(`[DeleteAccount] Error eliminando ${table}:`, error.message);
+        } else {
+          console.log(`[DeleteAccount] ${table} eliminado`);
+        }
           } catch (err) {
             console.warn(`[DeleteAccount] Error en ${table}:`, err);
           }
@@ -247,9 +247,9 @@ export const authService = {
       // Verificar resultado del perfil
       if (results && Array.isArray(results) && results[1]) {
         const { error: userError } = results[1];
-        if (userError) {
-          console.error('[DeleteAccount] Error eliminando perfil:', userError);
-          throw new Error(`Error eliminando perfil: ${userError.message}`);
+      if (userError) {
+        console.error('[DeleteAccount] Error eliminando perfil:', userError);
+        throw new Error(`Error eliminando perfil: ${userError.message}`);
         }
       } else {
         // Si no hay resultado, verificar directamente

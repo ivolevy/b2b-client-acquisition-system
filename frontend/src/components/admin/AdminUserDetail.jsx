@@ -171,7 +171,7 @@ function AdminUserDetail() {
       )}
 
       {/* Formulario de Edición */}
-      <div className="detail-content">
+        <div className="detail-content">
           <div className="form-section">
             <h2>Información Personal</h2>
             <div className="form-grid">
