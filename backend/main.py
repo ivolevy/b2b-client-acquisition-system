@@ -15,18 +15,31 @@ import random
 import string
 from datetime import datetime, timedelta
 
-from overpass_client import (
-    buscar_empresas_por_rubro, 
-    listar_rubros_disponibles,
-    buscar_empresas_multiples_rubros,
-    query_by_bbox
-)
-from scraper import enriquecer_empresa_b2b
-from social_scraper import enriquecer_con_redes_sociales
-from scraper_parallel import enriquecer_empresas_paralelo
-from validators import validar_empresa
-
-from db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b
+try:
+    from .overpass_client import (
+        buscar_empresas_por_rubro, 
+        listar_rubros_disponibles,
+        buscar_empresas_multiples_rubros,
+        query_by_bbox
+    )
+    from .scraper import enriquecer_empresa_b2b
+    from .social_scraper import enriquecer_con_redes_sociales
+    from .scraper_parallel import enriquecer_empresas_paralelo
+    from .validators import validar_empresa
+    from .db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b
+except ImportError:
+    # Fallback for direct execution
+    from overpass_client import (
+        buscar_empresas_por_rubro, 
+        listar_rubros_disponibles,
+        buscar_empresas_multiples_rubros,
+        query_by_bbox
+    )
+    from scraper import enriquecer_empresa_b2b
+    from social_scraper import enriquecer_con_redes_sociales
+    from scraper_parallel import enriquecer_empresas_paralelo
+    from validators import validar_empresa
+    from db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b
 # Todas las funciones trabajan con datos en memoria durante la sesión
 
 import math
