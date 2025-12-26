@@ -25,15 +25,15 @@ from scraper import enriquecer_empresa_b2b
 from social_scraper import enriquecer_con_redes_sociales
 from scraper_parallel import enriquecer_empresas_paralelo
 from validators import validar_empresa
-from validators import validar_empresa
+
 from db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b
 # Todas las funciones trabajan con datos en memoria durante la sesión
 
 import math
 from typing import Dict, List, Optional
 
-# Inicializar conexión a BD
-init_db_b2b()
+
+def calcular_distancia_km(lat1, lon1, lat2, lon2):
     """Calcula distancia entre dos puntos geográficos"""
     if not all(isinstance(coord, (int, float)) and not math.isnan(coord) for coord in [lat1, lon1, lat2, lon2]):
         return None
