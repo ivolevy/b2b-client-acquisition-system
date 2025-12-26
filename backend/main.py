@@ -444,43 +444,52 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
-# CORS - Permitir todos los orígenes
+# CORS - Configuración completa para deshabilitar políticas restrictivas
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
     allow_headers=["*"],
     expose_headers=["*"],
+    max_age=3600,
 )
 
-# Middleware adicional para asegurar CORS en todas las respuestas
+# Middleware que maneja CORS ANTES que cualquier otra cosa
 @app.middleware("http")
 async def cors_middleware(request: Request, call_next):
-    """Middleware que asegura CORS en todas las respuestas"""
+    """Middleware que asegura CORS en todas las respuestas, especialmente preflight"""
+    # Manejar preflight requests primero
     if request.method == "OPTIONS":
         response = Response(status_code=200)
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "*"
+        origin = request.headers.get("origin", "*")
+        response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
         response.headers["Access-Control-Max-Age"] = "3600"
+        response.headers["Access-Control-Allow-Credentials"] = "false"
         return response
     
+    # Para todas las demás peticiones, agregar headers CORS
     response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
+    origin = request.headers.get("origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    response.headers["Access-Control-Allow-Credentials"] = "false"
     return response
 
-# Handler explícito para peticiones OPTIONS (preflight)
+# Handler explícito para TODAS las rutas OPTIONS (preflight) - debe estar antes de otras rutas
 @app.options("/{full_path:path}")
 async def options_handler(request: Request, full_path: str):
-    """Maneja peticiones OPTIONS (preflight) para CORS"""
+    """Maneja TODAS las peticiones OPTIONS (preflight) para CORS"""
+    origin = request.headers.get("origin", "*")
     response = Response(status_code=200)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
     response.headers["Access-Control-Max-Age"] = "3600"
+    response.headers["Access-Control-Allow-Credentials"] = "false"
     return response
 
 # Exception handler para HTTPException (asegura CORS en errores HTTP)
@@ -493,9 +502,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     )
     
     # Agregar headers CORS manualmente
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
+    origin = request.headers.get("origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    response.headers["Access-Control-Allow-Credentials"] = "false"
     
     return response
 
@@ -514,9 +525,11 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
     
     # Agregar headers CORS manualmente
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
+    origin = request.headers.get("origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    response.headers["Access-Control-Allow-Credentials"] = "false"
     
     return response
 
