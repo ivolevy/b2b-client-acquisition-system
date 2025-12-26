@@ -14,9 +14,12 @@ from threading import Lock
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
-from scraper import enriquecer_empresa_b2b
-from social_scraper import enriquecer_con_redes_sociales
-# SQLite removido - preparando para migración a base de datos compatible con Vercel
+try:
+    from .scraper import enriquecer_empresa_b2b
+    from .social_scraper import enriquecer_con_redes_sociales
+except ImportError:
+    from scraper import enriquecer_empresa_b2b
+    from social_scraper import enriquecer_con_redes_sociales
 # from db import guardar_cache_scraping, obtener_cache_scraping, insertar_empresa
 
 # Stubs temporales

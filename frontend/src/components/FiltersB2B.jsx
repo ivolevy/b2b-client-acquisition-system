@@ -257,9 +257,27 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                 <button 
                   type="button"
                   className={`mode-btn ${modoBusqueda === 'agregar' ? 'active' : ''}`}
-                  onClick={() => setModoBusqueda('agregar')}
+                  onClick={() => {
+                    // Verificar si es PRO (o admin)
+                    if (user?.plan === 'pro' || user?.role === 'admin') {
+                      setModoBusqueda('agregar');
+                    } else {
+                      toastWarning(
+                        <>
+                          <strong>Función PRO</strong>
+                          <p>Acumular resultados en el mapa es exclusivo para usuarios PRO.</p>
+                        </>
+                      );
+                    }
+                  }}
                   disabled={loading}
+                  style={{ 
+                    opacity: (user?.plan === 'pro' || user?.role === 'admin') ? 1 : 0.6, 
+                    cursor: (user?.plan === 'pro' || user?.role === 'admin') ? 'pointer' : 'not-allowed' 
+                  }}
                 >
+                  {/* Candado para users no PRO */}
+                  {!(user?.plan === 'pro' || user?.role === 'admin') && <span style={{ marginRight: '5px' }}>🔒</span>}
                   Agregar resultados
                 </button>
               </div>
