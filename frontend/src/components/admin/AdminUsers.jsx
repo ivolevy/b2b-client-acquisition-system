@@ -151,6 +151,7 @@ function AdminUsers() {
         <button 
           className="btn-primary"
           onClick={() => setShowCreateModal(true)}
+          style={{ padding: '8px 16px', fontSize: '14px' }}
         >
           + Crear Usuario
         </button>
