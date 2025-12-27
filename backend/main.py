@@ -1785,49 +1785,7 @@ async def activate_pro(request: ActivateProRequest):
     except Exception as e:
         logger.error(f"Error activando plan PRO: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-                        raise Exception("Usuario no encontrado")
-                    
-                    # Actualizar la contraseña usando la API REST
-                    update_url = f"{supabase_url}/auth/v1/admin/users/{user_id}"
-                    update_payload = {"password": request.new_password}
-                    update_response = http_requests.put(update_url, json=update_payload, headers=headers)
-                    
-                    if update_response.status_code in [200, 201]:
-                        logger.info(f"Contraseña actualizada exitosamente para {email}")
-                        return {
-                            "success": True,
-                            "message": "Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.",
-                            "email": email,
-                            "requires_frontend_reset": False
-                        }
-                    else:
-                        raise Exception(f"Error al actualizar contraseña: {update_response.status_code} - {update_response.text}")
-                
-            except Exception as e:
-                logger.error(f"Error actualizando contraseña con Supabase Admin API: {e}", exc_info=True)
-                # Si falla, retornar que requiere reset desde el frontend
-                return {
-                    "success": False,
-                    "message": f"Error al actualizar la contraseña: {str(e)}",
-                    "requires_frontend_reset": True
-                }
-        else:
-            # Si no hay credenciales de Supabase Admin, retornar que requiere reset desde el frontend
-            logger.warning("SUPABASE_SERVICE_ROLE_KEY no configurada, se requiere reset desde el frontend")
-            return {
-                "success": False,
-                "message": "Configuración de Supabase incompleta. Por favor, contactá al administrador.",
-                "requires_frontend_reset": True
-            }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error actualizando contraseña: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
 
-
-# NUEVA FUNCIONALIDAD ADMIN
 
 class AdminCreateUserRequest(BaseModel):
     email: str
