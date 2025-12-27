@@ -69,6 +69,10 @@ const COUNTRIES = [
 
 function CreateUserModal({ onClose, onSuccess }) {
 
+  useEffect(() => {
+    console.log('CreateUserModal mounted. Countries loaded:', COUNTRIES.length);
+  }, []);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -341,6 +345,7 @@ function CreateUserModal({ onClose, onSuccess }) {
     </div>
   );
 
+  // Render using Portal
   return createPortal(modalContent, document.body);
 }
 
