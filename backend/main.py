@@ -715,7 +715,6 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             
             try:
                 # Agregar ID temporal si no tiene
-                global _empresa_counter
                 if 'id' not in empresa_validada:
                     _empresa_counter += 1
                     empresa_validada['id'] = _empresa_counter
