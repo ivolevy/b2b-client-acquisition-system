@@ -1785,19 +1785,6 @@ async def activate_pro(request: ActivateProRequest):
     except Exception as e:
         logger.error(f"Error activando plan PRO: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-                        raise Exception("Error al parsear la lista de usuarios")
-                    
-                    # Buscar el usuario por email
-                    user = None
-                    user_id = None
-                    for u in users_list:
-                        user_email = u.get('email') if isinstance(u, dict) else (u.email if hasattr(u, 'email') else None)
-                        if user_email == email:
-                            user = u
-                            user_id = u.get('id') if isinstance(u, dict) else (u.id if hasattr(u, 'id') else None)
-                            break
-                    
-                    if not user or not user_id:
                         raise Exception("Usuario no encontrado")
                     
                     # Actualizar la contraseña usando la API REST
