@@ -45,6 +45,14 @@ except ImportError:
 import math
 from typing import Dict, List, Optional
 
+# Inicialización de variables en memoria
+_memoria_empresas = []
+_empresa_counter = 0
+_memoria_templates = []
+_template_counter = 0
+_memoria_email_history = []
+_memoria_codigos_validacion = {}
+
 
 def calcular_distancia_km(lat1, lon1, lat2, lon2):
     """Calcula distancia entre dos puntos geográficos"""
