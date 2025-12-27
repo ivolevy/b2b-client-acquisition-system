@@ -26,7 +26,16 @@ try:
     from .social_scraper import enriquecer_con_redes_sociales
     from .scraper_parallel import enriquecer_empresas_paralelo
     from .validators import validar_empresa
-    from .db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b, crear_usuario_admin
+    from .db_supabase import (
+        insertar_empresa, 
+        buscar_empresas, 
+        obtener_estadisticas, 
+        exportar_a_csv, 
+        exportar_a_json, 
+        init_db_b2b, 
+        crear_usuario_admin,
+        obtener_todas_empresas
+    )
 except ImportError:
     # Fallback for direct execution
     from overpass_client import (
@@ -39,7 +48,16 @@ except ImportError:
     from social_scraper import enriquecer_con_redes_sociales
     from scraper_parallel import enriquecer_empresas_paralelo
     from validators import validar_empresa
-    from db_supabase import insertar_empresa, buscar_empresas, obtener_estadisticas, exportar_a_csv, exportar_a_json, init_db_b2b, crear_usuario_admin
+    from db_supabase import (
+        insertar_empresa, 
+        buscar_empresas, 
+        obtener_estadisticas, 
+        exportar_a_csv, 
+        exportar_a_json, 
+        init_db_b2b, 
+        crear_usuario_admin,
+        obtener_todas_empresas
+    )
 # Todas las funciones trabajan con datos en memoria durante la sesión
 
 import math

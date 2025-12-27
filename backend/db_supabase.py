@@ -195,6 +195,21 @@ def buscar_empresas(
         logger.error(f"Error buscando empresas en Supabase: {e}")
         return []
 
+def obtener_todas_empresas() -> List[Dict]:
+    """Obtiene todas las empresas almacenadas en Supabase (con límite por defecto)"""
+    client = get_supabase()
+    if not client:
+        return []
+        
+    try:
+        # Por defecto Supabase limita a 1000 rows.
+        # Ordenamos por created_at para ver las más recientes.
+        response = client.table('empresas').select('*').order('created_at', desc=True).limit(1000).execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Error obteniendo todas las empresas: {e}")
+        return []
+
 def obtener_estadisticas() -> Dict:
     """Obtiene estadísticas básicas desde Supabase"""
     client = get_supabase()
