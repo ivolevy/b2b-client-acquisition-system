@@ -93,37 +93,39 @@ function UserProfile() {
         return;
       }
 
-      // Usar la función RPC para activar suscripción con código
-      const { data, error: rpcError } = await supabase.rpc('activate_subscription_with_code', {
-        p_user_id: user.id,
-        p_code: proTokenInput.trim().toUpperCase()
+      // Usar endpoint del backend en lugar de RPC directo
+      const response = await axios.post(`${API_URL}/admin/activate-pro`, {
+        user_id: user.id,
+        code: proTokenInput.trim().toUpperCase()
       });
 
-      if (rpcError) {
-        setUpgradeError(rpcError.message || 'Código promocional inválido o expirado.');
-        setUpgradeLoading(false);
-        return;
-      }
-
-      if (!data || !data.success) {
-        setUpgradeError(data?.error || 'Código promocional inválido o expirado.');
-        setUpgradeLoading(false);
-        return;
+      if (!response.data || !response.data.success) {
+        throw new Error(response.data?.error || 'Error al activar el plan.');
       }
 
       // Actualizar localStorage
       const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
       authData.plan = 'pro';
-      authData.plan_expires_at = data.expires_at;
+      authData.plan_expires_at = response.data.expires_at;
       localStorage.setItem('b2b_auth', JSON.stringify(authData));
 
-      // Cerrar modal y recargar para aplicar cambios
+      // Forzar actualización del perfil en el cliente si es posible
+      if (user) {
+         user.plan = 'pro';
+      }
+
+      // Cerrar modal y mostrar éxito (o recargar)
       setShowUpgradeModal(false);
       setProTokenInput('');
+      
+      // Mostrar mensaje de éxito antes de recargar
+      alert('¡Plan PRO activado exitosamente!');
       window.location.reload();
+      
     } catch (error) {
       console.error('Error upgrading to PRO:', error);
-      setUpgradeError('Error al procesar el upgrade: ' + (error.message || 'Error desconocido'));
+      const errorMsg = error.response?.data?.detail || error.message || 'Error desconocido al activar.';
+      setUpgradeError(errorMsg);
       setUpgradeLoading(false);
     }
   };

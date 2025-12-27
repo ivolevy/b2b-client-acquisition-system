@@ -46,12 +46,24 @@ import math
 from typing import Dict, List, Optional
 
 # Inicialización de variables en memoria
+# IMPORTANTE: Estas variables deben ser accesibles globalmente
+global _memoria_empresas
+global _empresa_counter
+global _memoria_templates
+global _template_counter
+global _memoria_email_history
+global _memoria_codigos_validacion
+
 _memoria_empresas = []
 _empresa_counter = 0
 _memoria_templates = []
 _template_counter = 0
 _memoria_email_history = []
 _memoria_codigos_validacion = {}
+
+def get_memoria_codigos():
+    global _memoria_codigos_validacion
+    return _memoria_codigos_validacion
 
 
 def calcular_distancia_km(lat1, lon1, lat2, lon2):
@@ -1251,6 +1263,10 @@ async def solicitar_codigo_cambio_password(request: SolicitarCodigoRequest):
         
         # Guardar código en memoria con expiración de 10 minutos
         expires_at = datetime.now() + timedelta(minutes=10)
+        
+        # Asegurar acceso a la variable global
+        global _memoria_codigos_validacion
+        
         _memoria_codigos_validacion[email] = {
             'codigo': codigo,
             'expires_at': expires_at.isoformat(),
@@ -1384,6 +1400,10 @@ async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
         
         # Guardar código en memoria con expiración de 10 minutos
         expires_at = datetime.now() + timedelta(minutes=10)
+        
+        # Asegurar acceso a la variable global
+        global _memoria_codigos_validacion
+        
         _memoria_codigos_validacion[email] = {
             'codigo': codigo,
             'expires_at': expires_at.isoformat(),
