@@ -342,20 +342,12 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
-# Definir orígenes permitidos explícitamente para permitir credentials
-origins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://b2b-client-acquisition-system.vercel.app",
-    "https://b2b-client-acquisition-system-4u9f.vercel.app",
-    "*" # Fallback para desarrollo, aunque con credentials=True el * se comporta diferente en algunos navegadores
-]
-
-# CORS - Configuración estándar de FastAPI
+# CORS - Configuración completa para deshabilitar políticas restrictivas
+# IMPORTANTE: Deshabilitamos credenciales y permitimos TODO (*) para evitar problemas en Vercel
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
@@ -366,15 +358,21 @@ app.add_middleware(
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     """Maneja HTTPException"""
-    return JSONResponse(
+    # Asegurar headers CORS incluso en error
+    response = JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail}
     )
+    # Forzar headers CORS por si acaso el middleware falló antes
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 
 # Exception handler global para asegurar que CORS siempre se incluya
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Maneja todas las excepciones y asegura que CORS siempre se incluya"""
+    """Maneja cualquier error no controlado"""
     import traceback
     logger.error(f"Error no manejado: {exc}", exc_info=True)
     logger.error(f"Traceback: {traceback.format_exc()}")
