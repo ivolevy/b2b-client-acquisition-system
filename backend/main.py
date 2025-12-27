@@ -342,71 +342,34 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
-# CORS - Configuración completa para deshabilitar políticas restrictivas
+# Definir orígenes permitidos explícitamente para permitir credentials
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://b2b-client-acquisition-system.vercel.app",
+    "https://b2b-client-acquisition-system-4u9f.vercel.app",
+    "*" # Fallback para desarrollo, aunque con credentials=True el * se comporta diferente en algunos navegadores
+]
+
+# CORS - Configuración estándar de FastAPI
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
     max_age=3600,
 )
 
-# Middleware que maneja CORS ANTES que cualquier otra cosa
-@app.middleware("http")
-async def cors_middleware(request: Request, call_next):
-    """Middleware que asegura CORS en todas las respuestas, especialmente preflight"""
-    # Manejar preflight requests primero
-    if request.method == "OPTIONS":
-        response = Response(status_code=200)
-        origin = request.headers.get("origin", "*")
-        response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-        response.headers["Access-Control-Max-Age"] = "3600"
-        response.headers["Access-Control-Allow-Credentials"] = "false"
-        return response
-    
-    # Para todas las demás peticiones, agregar headers CORS
-    response = await call_next(request)
-    origin = request.headers.get("origin", "*")
-    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-    response.headers["Access-Control-Allow-Credentials"] = "false"
-    return response
-
-# Handler explícito para TODAS las rutas OPTIONS (preflight) - debe estar antes de otras rutas
-@app.options("/{full_path:path}")
-async def options_handler(request: Request, full_path: str):
-    """Maneja TODAS las peticiones OPTIONS (preflight) para CORS"""
-    origin = request.headers.get("origin", "*")
-    response = Response(status_code=200)
-    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-    response.headers["Access-Control-Max-Age"] = "3600"
-    response.headers["Access-Control-Allow-Credentials"] = "false"
-    return response
-
-# Exception handler para HTTPException (asegura CORS en errores HTTP)
+# Exception handler para HTTPException limpio
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
-    """Maneja HTTPException y asegura que CORS siempre se incluya"""
-    response = JSONResponse(
+    """Maneja HTTPException"""
+    return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail}
     )
-    
-    # Agregar headers CORS manualmente
-    origin = request.headers.get("origin", "*")
-    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-    response.headers["Access-Control-Allow-Credentials"] = "false"
-    
-    return response
 
 # Exception handler global para asegurar que CORS siempre se incluya
 @app.exception_handler(Exception)
