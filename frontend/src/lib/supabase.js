@@ -23,7 +23,7 @@ export const authService = {
       // Obtener la URL base de la aplicación para la redirección después de confirmar email
       // Supabase redirigirá aquí después de que el usuario confirme su email
       const redirectTo = `${window.location.origin}`;
-      
+
       // 1. Crear usuario en Supabase Auth
       // La contraseña se hashea automáticamente antes de guardarse en auth.users
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -53,7 +53,7 @@ export const authService = {
       // 3. Verificar si el email de confirmación fue enviado
       // Si el usuario no tiene email_confirmed_at, significa que necesita confirmar
       const needsConfirmation = authData.user && !authData.user.email_confirmed_at;
-      
+
       // Verificar si Supabase tiene configurado el servicio de email
       // Si session es null después del signUp, puede indicar que el email no se envió
       if (needsConfirmation && !authData.session) {
@@ -61,8 +61,8 @@ export const authService = {
         console.log('[Auth] Usuario creado, email de confirmación debería haberse enviado');
       }
 
-      return { 
-        data: authData, 
+      return {
+        data: authData,
         error: null,
         needsConfirmation: needsConfirmation
       };
@@ -94,7 +94,7 @@ export const authService = {
         }
         throw error;
       }
-      
+
       return { data, error: null };
     } catch (error) {
       console.error('[Auth] Error reenviando email:', error);
@@ -134,12 +134,12 @@ export const authService = {
           .update({ last_login_at: new Date().toISOString() })
           .eq('id', data.user.id);
 
-        return { 
-          data: { 
-            ...data, 
-            profile 
-          }, 
-          error: null 
+        return {
+          data: {
+            ...data,
+            profile
+          },
+          error: null
         };
       }
 
@@ -164,17 +164,17 @@ export const authService = {
   // Obtener usuario actual con perfil
   async getCurrentUser() {
     const { data: { user }, error } = await supabase.auth.getUser();
-    
+
     if (user) {
       const { data: profile } = await supabase
         .from('users')
         .select('*')
         .eq('id', user.id)
         .single();
-      
+
       return { user: { ...user, profile }, error };
     }
-    
+
     return { user: null, error };
   },
 
@@ -187,7 +187,7 @@ export const authService = {
   // Siempre usa role del perfil, nunca deriva del plan
   buildUserData(user, profile) {
     if (!user) return null;
-    
+
     return {
       id: user.id,
       email: user.email,
@@ -204,7 +204,7 @@ export const authService = {
   async deleteAccount() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         throw new Error('No hay usuario autenticado');
       }
@@ -219,16 +219,16 @@ export const authService = {
 
       // PASO 1: Eliminar datos del usuario de las tablas relacionadas (con timeout)
       const deleteDataPromise = (async () => {
-      const tables = ['search_history', 'saved_companies', 'email_templates', 'email_history'];
-      
-      for (const table of tables) {
+        const tables = ['search_history', 'saved_companies', 'email_templates', 'email_history'];
+
+        for (const table of tables) {
           try {
-        const { error } = await supabase.from(table).delete().eq('user_id', userId);
-        if (error) {
-          console.warn(`[DeleteAccount] Error eliminando ${table}:`, error.message);
-        } else {
-          console.log(`[DeleteAccount] ${table} eliminado`);
-        }
+            const { error } = await supabase.from(table).delete().eq('user_id', userId);
+            if (error) {
+              console.warn(`[DeleteAccount] Error eliminando ${table}:`, error.message);
+            } else {
+              console.log(`[DeleteAccount] ${table} eliminado`);
+            }
           } catch (err) {
             console.warn(`[DeleteAccount] Error en ${table}:`, err);
           }
@@ -247,9 +247,9 @@ export const authService = {
       // Verificar resultado del perfil
       if (results && Array.isArray(results) && results[1]) {
         const { error: userError } = results[1];
-      if (userError) {
-        console.error('[DeleteAccount] Error eliminando perfil:', userError);
-        throw new Error(`Error eliminando perfil: ${userError.message}`);
+        if (userError) {
+          console.error('[DeleteAccount] Error eliminando perfil:', userError);
+          throw new Error(`Error eliminando perfil: ${userError.message}`);
         }
       } else {
         // Si no hay resultado, verificar directamente
@@ -264,22 +264,22 @@ export const authService = {
       // PASO 3: Cerrar sesión inmediatamente (con timeout)
       const signOutPromise = supabase.auth.signOut();
       await Promise.race([signOutPromise, timeoutPromise]);
-      
+
       // PASO 4: Limpiar todas las sesiones y tokens locales
       localStorage.removeItem('b2b_auth');
       localStorage.removeItem('b2b_token');
       sessionStorage.clear();
-      
+
       // Limpiar cookies de Supabase
       document.cookie.split(";").forEach((c) => {
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
-      
+
       console.log('[DeleteAccount] Cuenta eliminada exitosamente');
       return { success: true, error: null };
     } catch (error) {
       console.error('[DeleteAccount] Error:', error);
-      
+
       // Aún así, intentar cerrar sesión y limpiar datos locales
       try {
         const signOutPromise = supabase.auth.signOut();
@@ -287,7 +287,7 @@ export const authService = {
       } catch (signOutErr) {
         console.warn('[DeleteAccount] Error al cerrar sesión:', signOutErr);
       }
-      
+
       try {
         localStorage.removeItem('b2b_auth');
         localStorage.removeItem('b2b_token');
@@ -295,7 +295,7 @@ export const authService = {
       } catch (cleanupError) {
         console.warn('[DeleteAccount] Error en limpieza:', cleanupError);
       }
-      
+
       return { success: false, error };
     }
   }
@@ -313,7 +313,7 @@ export const userService = {
       .select('*')
       .eq('id', userId)
       .single();
-    
+
     return { data, error };
   },
 
@@ -325,7 +325,7 @@ export const userService = {
       .eq('id', userId)
       .select()
       .single();
-    
+
     return { data, error };
   },
 
@@ -335,13 +335,13 @@ export const userService = {
       .from('plan_features')
       .select('*')
       .eq('plan', plan);
-    
+
     // Convertir a objeto
     const features = {};
     data?.forEach(f => {
       features[f.feature_key] = f.feature_value;
     });
-    
+
     return { data: features, error };
   },
 
@@ -372,9 +372,9 @@ export const userService = {
 
     const limit = 5; // FREE limit
     const canSearch = user.searches_today < limit;
-    
-    return { 
-      canSearch, 
+
+    return {
+      canSearch,
       remaining: limit - user.searches_today,
       limit
     };
@@ -395,7 +395,7 @@ export const searchHistoryService = {
   // Guardar búsqueda
   async saveSearch(userId, searchData) {
     console.log('[SearchHistory] Guardando búsqueda:', { userId, searchData });
-    
+
     const insertData = {
       user_id: userId,
       rubro: searchData.rubro,
@@ -407,15 +407,15 @@ export const searchHistoryService = {
       empresas_encontradas: searchData.empresas_encontradas || 0,
       empresas_validas: searchData.empresas_validas || 0
     };
-    
+
     console.log('[SearchHistory] Datos a insertar:', insertData);
-    
+
     const { data, error } = await supabase
       .from('search_history')
       .insert(insertData)
       .select()
       .single();
-    
+
     if (error) {
       console.error('[SearchHistory] Error al guardar:', error);
       console.error('[SearchHistory] Código:', error.code);
@@ -424,7 +424,7 @@ export const searchHistoryService = {
     } else {
       console.log('[SearchHistory] Guardado exitosamente:', data);
     }
-    
+
     return { data, error };
   },
 
@@ -436,7 +436,7 @@ export const searchHistoryService = {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(limit);
-    
+
     return { data, error };
   },
 
@@ -446,7 +446,7 @@ export const searchHistoryService = {
       .from('search_history')
       .delete()
       .eq('id', searchId);
-    
+
     return { error };
   }
 };
@@ -468,7 +468,7 @@ export const savedCompaniesService = {
       })
       .select()
       .single();
-    
+
     return { data, error };
   },
 
@@ -479,7 +479,7 @@ export const savedCompaniesService = {
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
-    
+
     return { data, error };
   },
 
@@ -491,7 +491,7 @@ export const savedCompaniesService = {
       .eq('id', companyId)
       .select()
       .single();
-    
+
     return { data, error };
   },
 
@@ -501,7 +501,7 @@ export const savedCompaniesService = {
       .from('saved_companies')
       .delete()
       .eq('id', companyId);
-    
+
     return { error };
   },
 
@@ -513,7 +513,7 @@ export const savedCompaniesService = {
       .eq('user_id', userId)
       .eq('empresa_data->>email', empresaEmail)
       .single();
-    
+
     return { isSaved: !!data, data, error };
   }
 };
@@ -531,26 +531,26 @@ export const adminService = {
         console.log('[Admin] No user found');
         return false;
       }
-      
+
       const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('role, email')
         .eq('id', user.id)
         .single();
-      
+
       if (profileError) {
         console.error('[Admin] Error fetching profile:', profileError);
         return false;
       }
-      
+
       if (!profile) {
         console.log('[Admin] No profile found for user:', user.id);
         return false;
       }
-      
+
       const isAdminUser = profile.role === 'admin';
       console.log('[Admin] User role check:', { email: profile.email, role: profile.role, isAdmin: isAdminUser });
-      
+
       return isAdminUser;
     } catch (error) {
       console.error('[Admin] Error checking admin status:', error);
@@ -639,7 +639,7 @@ export const adminService = {
         .select('*')
         .eq('id', userId)
         .single();
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
@@ -693,13 +693,25 @@ export const adminService = {
 
   async createUser(userData) {
     try {
-      // Primero crear usuario en auth.users (requiere función edge o admin)
-      // Por ahora, retornamos error indicando que se debe crear desde Supabase Dashboard
-      // O implementar función edge para crear usuarios
-      return {
-        data: null,
-        error: new Error('Crear usuarios requiere función edge. Usa Supabase Dashboard por ahora.')
-      };
+      console.log('[Admin] Creating user via backend:', userData);
+
+      const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
+
+      const response = await fetch(`${API_URL}/admin/create-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || data.error || 'Error al crear usuario');
+      }
+
+      return { data, error: null };
     } catch (error) {
       console.error('[Admin] Error creating user:', error);
       return { data: null, error };
@@ -725,7 +737,7 @@ export const adminService = {
         if (updates.plan === 'pro') {
           // Si no hay fecha de expiración, establecer una por defecto (1 año)
           const expiresAt = updates.plan_expires_at || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
-          
+
           // Primero buscar si existe una suscripción activa para este usuario
           const { data: existingSub } = await supabase
             .from('subscriptions')
@@ -733,7 +745,7 @@ export const adminService = {
             .eq('user_id', userId)
             .eq('status', 'active')
             .maybeSingle();
-          
+
           if (existingSub) {
             // Actualizar suscripción existente
             const { error: updateSubError } = await supabase
@@ -747,7 +759,7 @@ export const adminService = {
                 updated_at: new Date().toISOString()
               })
               .eq('id', existingSub.id);
-            
+
             if (updateSubError) {
               console.error('[Admin] Error updating subscription:', updateSubError);
               throw updateSubError;
@@ -765,13 +777,13 @@ export const adminService = {
                 expires_at: expiresAt,
                 starts_at: new Date().toISOString()
               });
-            
+
             if (insertSubError) {
               console.error('[Admin] Error creating subscription:', insertSubError);
               throw insertSubError;
             }
           }
-          
+
           // Asegurar que plan_expires_at esté en updates si no estaba
           if (!updates.plan_expires_at) {
             updates.plan_expires_at = expiresAt;
@@ -780,13 +792,13 @@ export const adminService = {
           // Cancelar suscripciones activas
           const { error: cancelSubError } = await supabase
             .from('subscriptions')
-            .update({ 
+            .update({
               status: 'cancelled',
               updated_at: new Date().toISOString()
             })
             .eq('user_id', userId)
             .eq('status', 'active');
-          
+
           if (cancelSubError) {
             console.error('[Admin] Error cancelling subscriptions:', cancelSubError);
             throw cancelSubError;
@@ -813,7 +825,7 @@ export const adminService = {
 
       // También eliminar de auth.users (requiere función edge)
       // Por ahora solo eliminamos de public.users
-      
+
       return { data: { success: true }, error: null };
     } catch (error) {
       console.error('[Admin] Error deleting user:', error);
@@ -872,7 +884,7 @@ export const adminService = {
   async createPromoCode(codeData) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       const { data, error } = await supabase
         .from('promo_codes')
         .insert({
