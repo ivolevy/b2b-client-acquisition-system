@@ -1,15 +1,63 @@
+/* Reusing styles similar to UserDetailModal */
 .create-user-modal {
-  max-width: 500px;
+  background: white;
   width: 90%;
-  padding: 30px;
-  margin: 40px auto;
-  /* Ensure centered separation */
+  max-width: 500px;
   border-radius: 16px;
-  /* Rounded corners */
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  /* Enhance depth */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: modal-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.create-user-modal .modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fafb;
+  border-radius: 16px 16px 0 0;
+}
+
+.create-user-modal .modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #111827;
+  font-weight: 600;
+}
+
+.create-user-modal .modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.create-user-modal .modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: #f9fafb;
+  border-radius: 0 0 16px 16px;
+}
+
+/* Animations */
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Form Styles */
 .create-user-modal .form-group {
   margin-bottom: 20px;
 }
@@ -18,46 +66,49 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #333;
-  font-size: 14px;
+  color: #374151;
+  font-size: 0.875rem;
 }
 
 .create-user-modal .form-input,
 .create-user-modal .form-select {
   width: 100%;
   padding: 10px 14px;
-  border: 2px solid #e0e0e0;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  font-size: 14px;
-  transition: border-color 0.2s;
+  font-size: 0.875rem;
+  transition: all 0.2s;
   font-family: inherit;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .create-user-modal .form-input:focus,
 .create-user-modal .form-select:focus {
   outline: none;
   border-color: #81D4FA;
+  box-shadow: 0 0 0 3px rgba(129, 212, 250, 0.2);
 }
 
+/* Alerts */
 .create-user-modal .alert {
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 20px;
+  font-size: 0.875rem;
 }
 
 .create-user-modal .alert-error {
-  background: #fee2e2;
+  background: #fef2f2;
   color: #991b1b;
   border: 1px solid #fecaca;
 }
 
 .create-user-modal .alert-success {
-  background: #d1fae5;
+  background: #ecfdf5;
   color: #065f46;
   border: 1px solid #a7f3d0;
 }
 
 .create-user-modal .alert p {
   margin: 0;
-  font-size: 14px;
 }
