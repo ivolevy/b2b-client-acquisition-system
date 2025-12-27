@@ -725,26 +725,42 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             # Verificar si tiene contacto válido (email O teléfono)
             tiene_contacto_valido = email_valido or tel_valido
             
+            # Asegurar campos requeridos para DB
+            empresa_validada['rubro'] = request.rubro
+            # Generar rubro_key simple si no existe
+            if not empresa_validada.get('rubro_key'):
+                empresa_validada['rubro_key'] = request.rubro.lower().replace(' ', '_')
+                
             # Log detallado para debugging
             logger.debug(f" Empresa: {nombre}, Email válido: {email_valido}, Teléfono válido: {tel_valido}, Tiene contacto: {tiene_contacto_valido}, Solo válidas: {request.solo_validadas}")
             
-            if tiene_contacto_valido:
-                # Empresa con contacto válido - siempre se guarda
-                empresa_validada['validada'] = True
-                empresas_validadas.append(empresa_validada)
-                insertar_empresa(empresa_validada)
-                mensaje = "Email y teléfono válidos" if (email_valido and tel_valido) else ("Email válido" if email_valido else "Teléfono válido")
-                logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - {mensaje}")
-            elif not solo_validadas:
-                # Empresa sin contacto válido pero con nombre válido - solo se guarda si no se requiere solo válidas
-                empresa_validada['validada'] = False
-                empresas_sin_contacto.append(empresa_validada)
-                insertar_empresa(empresa_validada)
-                logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - Sin contacto válido (solo_validadas=False)")
-            else:
-                # Empresa sin contacto válido y se requiere solo válidas - NO se guarda
-                empresas_rechazadas.append(empresa)
-                logger.warning(f" {empresa.get('nombre', 'Sin nombre')}: RECHAZADA - Sin contacto válido (email_valido={email_valido}, tel_valido={tel_valido}, solo_validadas={solo_validadas})")
+            try:
+                if tiene_contacto_valido:
+                    # Empresa con contacto válido - siempre se guarda
+                    empresa_validada['validada'] = True
+                    empresas_validadas.append(empresa_validada)
+                    if insertar_empresa(empresa_validada):
+                        mensaje = "Email y teléfono válidos" if (email_valido and tel_valido) else ("Email válido" if email_valido else "Teléfono válido")
+                        logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - {mensaje}")
+                    else:
+                         logger.warning(f" {empresa.get('nombre', 'Sin nombre')}: Falló inserción en DB")
+
+                elif not solo_validadas:
+                    # Empresa sin contacto válido pero con nombre válido - solo se guarda si no se requiere solo válidas
+                    empresa_validada['validada'] = False
+                    empresas_sin_contacto.append(empresa_validada)
+                    if insertar_empresa(empresa_validada):
+                        logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - Sin contacto válido (solo_validadas=False)")
+                    else:
+                         logger.warning(f" {empresa.get('nombre', 'Sin nombre')}: Falló inserción en DB")
+                else:
+                    # Empresa sin contacto válido y se requiere solo válidas - NO se guarda
+                    empresas_rechazadas.append(empresa)
+                    logger.warning(f" {empresa.get('nombre', 'Sin nombre')}: RECHAZADA - Sin contacto válido (email_valido={email_valido}, tel_valido={tel_valido}, solo_validadas={solo_validadas})")
+            except Exception as e_insert:
+                logger.error(f" Error insertando empresa {nombre}: {e_insert}")
+                # No detener el proceso por una falla de inserción
+
         
         # Calcular empresas válidas (con email válido O teléfono válido)
         validas = len(empresas_validadas)
