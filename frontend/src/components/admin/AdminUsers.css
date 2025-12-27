@@ -284,9 +284,10 @@
 .users-actions {
   display: flex !important;
   justify-content: flex-end !important;
+  margin-top: 40px !important;
+  /* Increased separation */
   margin-bottom: 20px;
   padding: 0 20px;
-  /* Align with filters */
 }
 
 .btn-create {
