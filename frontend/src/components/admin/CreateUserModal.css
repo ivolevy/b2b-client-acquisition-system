@@ -2,7 +2,12 @@
   max-width: 500px;
   width: 90%;
   padding: 30px;
-  margin: 20px;
+  margin: 40px auto;
+  /* Ensure centered separation */
+  border-radius: 16px;
+  /* Rounded corners */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  /* Enhance depth */
 }
 
 .create-user-modal .form-group {
@@ -56,4 +61,3 @@
   margin: 0;
   font-size: 14px;
 }
-
