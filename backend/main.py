@@ -1698,6 +1698,93 @@ async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
                     users_list = users_data.get('users', []) if isinstance(users_data, dict) else users_data
                     
                     if not isinstance(users_list, list):
+                        raise Exception("Formato de respuesta de list_users no reconocido")
+                    
+                    # Buscar usuario
+                    user = None
+                    user_id = None
+                    for u in users_list:
+                        u_email = u.get('email')
+                        if u_email == email:
+                            user = u
+                            user_id = u.get('id')
+                            break
+                    
+                    if user and user_id:
+                        # Actualizar
+                        update_url = f"{supabase_url}/auth/v1/admin/users/{user_id}"
+                        update_payload = {"password": request.new_password}
+                        update_response = http_requests.put(update_url, headers=headers, json=update_payload)
+                        
+                        if update_response.status_code != 200:
+                            raise Exception(f"Error al actualizar usuario: {update_response.status_code} - {update_response.text}")
+                        
+                        return {
+                            "success": True,
+                            "message": "Tu contraseña ha sido actualizada correctamente.",
+                            "email": email,
+                            "requires_frontend_reset": False
+                        }
+                    else:
+                        raise Exception("Usuario no encontrado")
+
+            except Exception as e_supa:
+                logger.error(f"Error usando Supabase Admin: {e_supa}")
+                raise HTTPException(status_code=500, detail=f"Error actualizando contraseña: {str(e_supa)}")
+        else:
+            logger.warning("No se configuraron claves de Supabase, simulando éxito")
+            return {
+                "success": True,
+                "message": "Contraseña actualizada (Simulado - falta configuración de Supabase)",
+                "email": email,
+                "requires_frontend_reset": False
+            }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error en actualizar_password_reset: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ========== ENDPOINTS DE ADMIN PARA PLANES ==========
+
+class ActivateProRequest(BaseModel):
+    user_id: str
+    code: str
+
+@app.post("/admin/activate-pro")
+async def activate_pro(request: ActivateProRequest):
+    """Activa el plan PRO para un usuario mediante código"""
+    try:
+        # Importar función de lógica de activación
+        try:
+            from db_supabase import activar_suscripcion_con_codigo
+        except ImportError:
+            # Fallback si no está en db_supabase todavía (durante migración)
+            logger.warning("activar_suscripcion_con_codigo no encontrado en db_supabase, usando mock local")
+            def activar_suscripcion_con_codigo(user_id, codigo):
+                if codigo in ["PRO2024", "DEMO2024", "AAA111"]:
+                    return {
+                        "success": True,
+                        "plan": "pro",
+                        "expires_at": (datetime.now() + timedelta(days=30)).isoformat()
+                    }
+                return {"success": False, "error": "Código inválido"}
+
+        resultado = activar_suscripcion_con_codigo(request.user_id, request.code)
+        
+        if resultado.get("success"):
+            return resultado
+        else:
+            # Retornar error controlado
+            return JSONResponse(
+                status_code=400,
+                content=resultado
+            )
+            
+    except Exception as e:
+        logger.error(f"Error activando plan PRO: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
                         raise Exception("Error al parsear la lista de usuarios")
                     
                     # Buscar el usuario por email
