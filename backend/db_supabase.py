@@ -391,9 +391,13 @@ def activar_suscripcion_con_codigo(user_id: str, codigo: str) -> dict:
     Activa una suscripción PRO usando un código promocional.
     Valida el código en la tabla 'promo_codes' y actualiza el usuario.
     """
-    if not supabase_service_key:
+    if not SUPABASE_SERVICE_ROLE_KEY:
         return {"success": False, "error": "Error de configuración del servidor (faita service key)"}
     
+    admin_client = get_supabase_admin()
+    if not admin_client:
+        return {"success": False, "error": "Error conectando a Supabase Admin"}
+
     try:
         # 1. Buscar el código
         # Nota: Asumimos que la tabla promo_codes existe. Si no, debería fallar y lo capturaremos.
