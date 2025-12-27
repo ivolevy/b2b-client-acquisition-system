@@ -250,33 +250,39 @@ function AdminUsers() {
       )}
 
       {/* Modal de confirmación de eliminación */}
-      {showDeleteModal && selectedUser && (
-        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Confirmar Eliminación</h2>
-            <p>
-              ¿Estás seguro de que quieres eliminar al usuario <strong>{selectedUser.email}</strong>?
-            </p>
-            <p className="warning-text">
-              Esta acción es permanente y no se puede deshacer. Se eliminarán todos los datos del usuario.
-            </p>
-            <div className="modal-actions">
-              <button
-                className="btn-secondary"
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setSelectedUser(null);
-                }}
-                disabled={deleteLoading}
+      {showDeleteConfirm && (
+        <div className="modal-overlay" onClick={() => setShowDeleteConfirm(null)}>
+          <div className="delete-confirm-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Confirmar Eliminación</h3>
+              <button 
+                className="btn-close-icon" 
+                onClick={() => setShowDeleteConfirm(null)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <p>¿Estás seguro de que quieres eliminar al usuario <strong>{showDeleteConfirm.email}</strong>?</p>
+              <div className="alert alert-error">
+                <span className="warning-icon">⚠️</span>
+                Esta acción es permanente y no se puede deshacer. Se eliminarán todos los datos del usuario.
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button 
+                className="btn-secondary" 
+                onClick={() => setShowDeleteConfirm(null)}
               >
                 Cancelar
               </button>
-              <button
-                className="btn-danger"
-                onClick={handleDelete}
-                disabled={deleteLoading}
+              <button 
+                className="btn-danger" 
+                onClick={handleDeleteUser}
               >
-                {deleteLoading ? 'Eliminando...' : 'Eliminar'}
+                Eliminar Usuario
               </button>
             </div>
           </div>
