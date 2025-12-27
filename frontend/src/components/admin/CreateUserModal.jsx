@@ -151,7 +151,7 @@ function CreateUserModal({ onClose, onSuccess }) {
       const { data, error: createError } = await adminService.createUser(submissionData);
       if (createError) throw createError;
 
-      setSuccess('Usuario creado exitosamente. El usuario debe confirmar su email.');
+      setSuccess('Usuario creado exitosamente. Ya puede iniciar sesión.');
       setTimeout(() => {
         onSuccess();
       }, 2000);
