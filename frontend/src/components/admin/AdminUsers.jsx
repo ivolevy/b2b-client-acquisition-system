@@ -147,11 +147,10 @@ function AdminUsers() {
         </div>
       </div>
 
-      <div className="users-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+      <div className="users-actions">
         <button 
-          className="btn-primary"
+          className="btn-primary btn-create"
           onClick={() => setShowCreateModal(true)}
-          style={{ width: 'auto', padding: '10px 20px' }} 
         >
           + Crear Usuario
         </button>
