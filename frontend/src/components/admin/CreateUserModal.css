@@ -1,5 +1,8 @@
 .create-user-modal {
   max-width: 500px;
+  width: 90%;
+  padding: 30px;
+  margin: 20px;
 }
 
 .create-user-modal .form-group {
