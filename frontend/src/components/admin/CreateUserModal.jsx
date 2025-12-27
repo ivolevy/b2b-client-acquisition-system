@@ -19,6 +19,38 @@ function CreateUserModal({ onClose, onSuccess }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const validateForm = () => {
+    // Validate Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      throw new Error('El formato del email no es válido');
+    }
+
+    // Validate Phone (optional but if present must be valid)
+    if (formData.phone) {
+      if (formData.phone.length > 20) {
+        throw new Error('El número de teléfono es demasiado largo (máx 20 caracteres)');
+      }
+      const phoneRegex = /^[+]?[\d\s-]*$/;
+      if (!phoneRegex.test(formData.phone)) {
+        throw new Error('El teléfono solo puede contener números, espacios, guiones y +');
+      }
+    }
+
+    // Validate Name
+    if (formData.name.length < 2) {
+      throw new Error('El nombre es muy corto');
+    }
+    if (formData.name.length > 100) {
+      throw new Error('El nombre es demasiado largo');
+    }
+    
+    // Validate Password
+    if (formData.password.length < 6) {
+      throw new Error('La contraseña debe tener al menos 6 caracteres');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -26,6 +58,7 @@ function CreateUserModal({ onClose, onSuccess }) {
     setSuccess('');
 
     try {
+      validateForm();
       const { data, error: createError } = await adminService.createUser(formData);
       if (createError) throw createError;
 
