@@ -6,9 +6,40 @@ import { createPortal } from 'react-dom';
 // ... imports
 
 function CreateUserModal({ onClose, onSuccess }) {
-  // ... state
 
-  // ... handleSubmit logic ...
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    phone: '',
+    plan: 'free',
+    role: 'user'
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const { data, error: createError } = await adminService.createUser(formData);
+      if (createError) throw createError;
+
+      setSuccess('Usuario creado exitosamente. El usuario debe confirmar su email.');
+      setTimeout(() => {
+        onSuccess();
+      }, 2000);
+    } catch (err) {
+      console.error('Error creating user:', err);
+      setError(err.message || 'Error al crear usuario');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const modalContent = (
     <div className="modal-overlay" onClick={onClose}>
