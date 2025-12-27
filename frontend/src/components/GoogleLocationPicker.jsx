@@ -160,6 +160,61 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     handleManualGeocodeRef.current = handleManualGeocode;
   }, [handleManualGeocode]);
 
+  // Inicializar servicios cuando la API de Google Maps esté cargada
+  useEffect(() => {
+    if (isLoaded && window.google?.maps?.places) {
+      if (!autocompleteServiceRef.current) {
+        autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+      }
+      // PlacesService requiere un elemento mapa o nodo HTML. 
+      // Lo inicializaremos mejor cuando el mapa cargue si es posible, o usaremos un div oculto.
+      // Pero como ya tenemos onMapLoad, podemos confiar en que se inicialice ahí o aquí si el mapa ya existe.
+      if (mapRef.current && !placesServiceRef.current) {
+        placesServiceRef.current = new window.google.maps.places.PlacesService(mapRef.current);
+      }
+    }
+  }, [isLoaded]);
+
+  // Efecto para buscar sugerencias
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!searchQuery || searchQuery.length < 3 || !autocompleteServiceRef.current) {
+        setSuggestions([]);
+        return;
+      }
+
+      try {
+        const request = {
+          input: searchQuery,
+          componentRestrictions: { country: 'ar' }, // Priorizar Argentina
+          // types: ['address'] // Opcional
+        };
+
+        autocompleteServiceRef.current.getPlacePredictions(request, (results, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+            setSuggestions(results);
+          } else {
+            setSuggestions([]);
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+        setSuggestions([]);
+      }
+    };
+
+    // Debounce simple
+    const timeoutId = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, isLoaded]);
+
+  // Actualizar PlacesService cuando el mapa carga
+  useEffect(() => {
+    if (map && isLoaded && window.google?.maps?.places) {
+        placesServiceRef.current = new window.google.maps.places.PlacesService(map);
+    }
+  }, [map, isLoaded]);
+
   // Manejar selección de sugerencia (usa ref para evitar dependencia circular)
   const handleSuggestionSelect = useCallback((prediction) => {
     if (!placesServiceRef.current || !prediction.place_id) {
