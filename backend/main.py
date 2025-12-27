@@ -753,10 +753,17 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             logger.debug(f" Empresa: {nombre}, Email válido: {email_valido}, Teléfono válido: {tel_valido}, Tiene contacto: {tiene_contacto_valido}, Solo válidas: {request.solo_validadas}")
             
             try:
+                # Agregar ID temporal si no tiene
+                global _empresa_counter
+                if 'id' not in empresa_validada:
+                    _empresa_counter += 1
+                    empresa_validada['id'] = _empresa_counter
+
                 if tiene_contacto_valido:
                     # Empresa con contacto válido - siempre se guarda
                     empresa_validada['validada'] = True
                     empresas_validadas.append(empresa_validada)
+                    _memoria_empresas.append(empresa_validada)
                     
                     try:
                         if insertar_empresa(empresa_validada):
@@ -771,16 +778,15 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     # Empresa sin contacto válido pero con nombre válido - solo se guarda si no se requiere solo válidas
                     empresa_validada['validada'] = False
                     empresas_sin_contacto.append(empresa_validada)
+                    _memoria_empresas.append(empresa_validada)
                     
                     try:
                         if insertar_empresa(empresa_validada):
                             logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - Sin contacto válido (solo_validadas=False)")
                         else:
-                             # NO LOGGEAR WARNING AQUÍ PARA NO ALARMAR AL USUARIO SI ES SOLO UN TEMA DE CONEXIÓN
-                             # A MENOS QUE SEA IMPORTANTE
                              pass 
                     except Exception:
-                        pass # Ignorar errores en empresas sin contacto para no llenar log
+                        pass 
                 else:
                     # Empresa sin contacto válido y se requiere solo válidas - NO se guarda
                     empresas_rechazadas.append(empresa)
@@ -868,14 +874,19 @@ async def buscar_multiples_rubros(request: BusquedaMultipleRequest):
 
 @app.get("/empresas")
 async def listar_empresas():
-    """Lista todas las empresas almacenadas"""
+    """Lista todas las empresas almacenadas en memoria (resultado de última búsqueda)"""
     try:
-        empresas = obtener_todas_empresas()
+        global _memoria_empresas
+        # Si la memoria está vacía, intentar cargar de DB como fallback
+        if not _memoria_empresas:
+             db_empresas = obtener_todas_empresas()
+             if db_empresas:
+                 _memoria_empresas = db_empresas
         
         return {
             "success": True,
-            "total": len(empresas),
-            "data": empresas
+            "total": len(_memoria_empresas),
+            "data": _memoria_empresas
         }
         
     except Exception as e:
