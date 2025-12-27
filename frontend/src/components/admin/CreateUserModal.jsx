@@ -1,11 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { adminService } from '../../lib/supabase';
 import './CreateUserModal.css';
-
 import { createPortal } from 'react-dom';
-// ... imports
-
-function CreateUserModal({ onClose, onSuccess }) {
 
 // Lista de países con prefijos telefónicos
 const COUNTRIES = [
@@ -70,7 +66,7 @@ const COUNTRIES = [
 function CreateUserModal({ onClose, onSuccess }) {
 
   useEffect(() => {
-    console.log('CreateUserModal mounted. Countries loaded:', COUNTRIES.length);
+    console.log('CreateUserModal mounted');
   }, []);
 
   const [formData, setFormData] = useState({
@@ -345,9 +341,7 @@ function CreateUserModal({ onClose, onSuccess }) {
     </div>
   );
 
-  // Render using Portal
   return createPortal(modalContent, document.body);
 }
 
 export default CreateUserModal;
-
