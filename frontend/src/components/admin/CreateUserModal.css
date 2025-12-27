@@ -109,6 +109,122 @@
   border: 1px solid #a7f3d0;
 }
 
-.create-user-modal .alert p {
-  margin: 0;
+
+/* Phone Country Selector Styles */
+.create-user-modal .phone-country-selector {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.create-user-modal .country-selector-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.create-user-modal .country-selector-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  min-width: 90px;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.create-user-modal .country-selector-button:hover {
+  border-color: #81D4FA;
+}
+
+.create-user-modal .country-flag {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.create-user-modal .country-prefix {
+  font-weight: 500;
+  color: #374151;
+}
+
+.create-user-modal .dropdown-arrow {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.create-user-modal .country-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 280px;
+  max-height: 300px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.create-user-modal .country-dropdown-search {
+  padding: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.create-user-modal .country-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.create-user-modal .country-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.create-user-modal .country-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.create-user-modal .country-option:hover {
+  background: #f3f4f6;
+}
+
+.create-user-modal .country-option.selected {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.create-user-modal .country-option .country-name {
+  flex: 1;
+  color: #374151;
+}
+
+.create-user-modal .phone-input-field {
+  flex: 1;
+}
+
+.create-user-modal .country-no-results {
+  padding: 12px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
 }

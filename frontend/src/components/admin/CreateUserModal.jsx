@@ -7,6 +7,68 @@ import { createPortal } from 'react-dom';
 
 function CreateUserModal({ onClose, onSuccess }) {
 
+// Lista de países con prefijos telefónicos
+const COUNTRIES = [
+  { code: 'AR', name: 'Argentina', flag: '🇦🇷', prefix: '+54' },
+  { code: 'MX', name: 'México', flag: '🇲🇽', prefix: '+52' },
+  { code: 'ES', name: 'España', flag: '🇪🇸', prefix: '+34' },
+  { code: 'CO', name: 'Colombia', flag: '🇨🇴', prefix: '+57' },
+  { code: 'CL', name: 'Chile', flag: '🇨🇱', prefix: '+56' },
+  { code: 'PE', name: 'Perú', flag: '🇵🇪', prefix: '+51' },
+  { code: 'VE', name: 'Venezuela', flag: '🇻🇪', prefix: '+58' },
+  { code: 'EC', name: 'Ecuador', flag: '🇪🇨', prefix: '+593' },
+  { code: 'GT', name: 'Guatemala', flag: '🇬🇹', prefix: '+502' },
+  { code: 'CU', name: 'Cuba', flag: '🇨🇺', prefix: '+53' },
+  { code: 'BO', name: 'Bolivia', flag: '🇧🇴', prefix: '+591' },
+  { code: 'DO', name: 'República Dominicana', flag: '🇩🇴', prefix: '+1' },
+  { code: 'HN', name: 'Honduras', flag: '🇭🇳', prefix: '+504' },
+  { code: 'PY', name: 'Paraguay', flag: '🇵🇾', prefix: '+595' },
+  { code: 'SV', name: 'El Salvador', flag: '🇸🇻', prefix: '+503' },
+  { code: 'NI', name: 'Nicaragua', flag: '🇳🇮', prefix: '+505' },
+  { code: 'CR', name: 'Costa Rica', flag: '🇨🇷', prefix: '+506' },
+  { code: 'PA', name: 'Panamá', flag: '🇵🇦', prefix: '+507' },
+  { code: 'UY', name: 'Uruguay', flag: '🇺🇾', prefix: '+598' },
+  { code: 'US', name: 'Estados Unidos', flag: '🇺🇸', prefix: '+1' },
+  { code: 'BR', name: 'Brasil', flag: '🇧🇷', prefix: '+55' },
+  { code: 'FR', name: 'Francia', flag: '🇫🇷', prefix: '+33' },
+  { code: 'DE', name: 'Alemania', flag: '🇩🇪', prefix: '+49' },
+  { code: 'IT', name: 'Italia', flag: '🇮🇹', prefix: '+39' },
+  { code: 'GB', name: 'Reino Unido', flag: '🇬🇧', prefix: '+44' },
+  { code: 'CA', name: 'Canadá', flag: '🇨🇦', prefix: '+1' },
+  { code: 'AU', name: 'Australia', flag: '🇦🇺', prefix: '+61' },
+  { code: 'NZ', name: 'Nueva Zelanda', flag: '🇳🇿', prefix: '+64' },
+  { code: 'JP', name: 'Japón', flag: '🇯🇵', prefix: '+81' },
+  { code: 'CN', name: 'China', flag: '🇨🇳', prefix: '+86' },
+  { code: 'IN', name: 'India', flag: '🇮🇳', prefix: '+91' },
+  { code: 'RU', name: 'Rusia', flag: '🇷🇺', prefix: '+7' },
+  { code: 'KR', name: 'Corea del Sur', flag: '🇰🇷', prefix: '+82' },
+  { code: 'PT', name: 'Portugal', flag: '🇵🇹', prefix: '+351' },
+  { code: 'NL', name: 'Países Bajos', flag: '🇳🇱', prefix: '+31' },
+  { code: 'BE', name: 'Bélgica', flag: '🇧🇪', prefix: '+32' },
+  { code: 'CH', name: 'Suiza', flag: '🇨🇭', prefix: '+41' },
+  { code: 'AT', name: 'Austria', flag: '🇦🇹', prefix: '+43' },
+  { code: 'SE', name: 'Suecia', flag: '🇸🇪', prefix: '+46' },
+  { code: 'NO', name: 'Noruega', flag: '🇳🇴', prefix: '+47' },
+  { code: 'DK', name: 'Dinamarca', flag: '🇩🇰', prefix: '+45' },
+  { code: 'FI', name: 'Finlandia', flag: '🇫🇮', prefix: '+358' },
+  { code: 'PL', name: 'Polonia', flag: '🇵🇱', prefix: '+48' },
+  { code: 'GR', name: 'Grecia', flag: '🇬🇷', prefix: '+30' },
+  { code: 'TR', name: 'Turquía', flag: '🇹🇷', prefix: '+90' },
+  { code: 'SA', name: 'Arabia Saudí', flag: '🇸🇦', prefix: '+966' },
+  { code: 'AE', name: 'Emiratos Árabes', flag: '🇦🇪', prefix: '+971' },
+  { code: 'ZA', name: 'Sudáfrica', flag: '🇿🇦', prefix: '+27' },
+  { code: 'EG', name: 'Egipto', flag: '🇪🇬', prefix: '+20' },
+  { code: 'IL', name: 'Israel', flag: '🇮🇱', prefix: '+972' },
+  { code: 'SG', name: 'Singapur', flag: '🇸🇬', prefix: '+65' },
+  { code: 'MY', name: 'Malasia', flag: '🇲🇾', prefix: '+60' },
+  { code: 'TH', name: 'Tailandia', flag: '🇹🇭', prefix: '+66' },
+  { code: 'PH', name: 'Filipinas', flag: '🇵🇭', prefix: '+63' },
+  { code: 'ID', name: 'Indonesia', flag: '🇮🇩', prefix: '+62' },
+  { code: 'VN', name: 'Vietnam', flag: '🇻🇳', prefix: '+84' },
+];
+
+function CreateUserModal({ onClose, onSuccess }) {
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -18,38 +80,61 @@ function CreateUserModal({ onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  
+  // Phone components state
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]); // Argentina default
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
+
+  // Validations matched to Login.jsx
+  const validateEmail = (email) => {
+    if (!email || email.trim() === '') return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) throw new Error('El formato del email no es válido');
+    if (email.length > 255) throw new Error('El email es demasiado largo');
+    return true;
+  };
+
+  const validateName = (name) => {
+    if (!name || name.trim() === '') throw new Error('El nombre es requerido');
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2) throw new Error('El nombre debe tener al menos 2 caracteres');
+    if (trimmedName.length > 20) throw new Error('El nombre es demasiado largo (máximo 20 caracteres)');
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/;
+    if (!nameRegex.test(trimmedName)) throw new Error('El nombre solo puede contener letras, espacios y guiones');
+    return true;
+  };
+
+  const validatePhone = (phone) => {
+    if (!phone) return true; // Optional
+    const cleanPhone = phone.replace(/[^\d]/g, '');
+    if (cleanPhone.length > 0) {
+      if (cleanPhone.length < 8) throw new Error('El número debe tener al menos 8 dígitos');
+      if (cleanPhone.length > 12) throw new Error('El número es demasiado largo (máx 12 dígitos)');
+    }
+    return true;
+  };
+
+  const validatePassword = (password) => {
+    if (!password || password.length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres');
+    if (!/[a-zA-Z]/.test(password)) throw new Error('Al menos una letra');
+    if (!/\d/.test(password)) throw new Error('Al menos un número');
+    return true;
+  };
 
   const validateForm = () => {
-    // Validate Email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      throw new Error('El formato del email no es válido');
-    }
-
-    // Validate Phone (optional but if present must be valid)
-    if (formData.phone) {
-      if (formData.phone.length > 20) {
-        throw new Error('El número de teléfono es demasiado largo (máx 20 caracteres)');
-      }
-      const phoneRegex = /^[+]?[\d\s-]*$/;
-      if (!phoneRegex.test(formData.phone)) {
-        throw new Error('El teléfono solo puede contener números, espacios, guiones y +');
-      }
-    }
-
-    // Validate Name
-    if (formData.name.length < 2) {
-      throw new Error('El nombre es muy corto');
-    }
-    if (formData.name.length > 100) {
-      throw new Error('El nombre es demasiado largo');
-    }
-    
-    // Validate Password
-    if (formData.password.length < 6) {
-      throw new Error('La contraseña debe tener al menos 6 caracteres');
-    }
+    validateEmail(formData.email);
+    validatePhone(formData.phone);
+    validateName(formData.name);
+    validatePassword(formData.password);
   };
+  
+  // Filter countries
+  const filteredCountries = COUNTRIES.filter(country => 
+    country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+    country.prefix.includes(countrySearch) ||
+    country.code.toLowerCase().includes(countrySearch.toLowerCase())
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,7 +144,11 @@ function CreateUserModal({ onClose, onSuccess }) {
 
     try {
       validateForm();
-      const { data, error: createError } = await adminService.createUser(formData);
+      // Combine prefix and phone for submission
+      const fullPhone = formData.phone ? `${selectedCountry.prefix}${formData.phone}` : '';
+      const submissionData = { ...formData, phone: fullPhone };
+      
+      const { data, error: createError } = await adminService.createUser(submissionData);
       if (createError) throw createError;
 
       setSuccess('Usuario creado exitosamente. El usuario debe confirmar su email.');
@@ -120,8 +209,8 @@ function CreateUserModal({ onClose, onSuccess }) {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="form-input"
                 required
-                minLength={6}
-                placeholder="Mínimo 6 caracteres"
+                minLength={8}
+                placeholder="Mínimo 8 caracteres, letra y número"
               />
             </div>
 
@@ -139,13 +228,67 @@ function CreateUserModal({ onClose, onSuccess }) {
 
             <div className="form-group">
               <label>Teléfono</label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="form-input"
-                placeholder="+54 11 1234-5678"
-              />
+              <div className="input-wrapper phone-country-selector">
+                <div className="country-selector-wrapper">
+                  <button
+                    type="button"
+                    className="country-selector-button"
+                    onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                    disabled={loading}
+                  >
+                    <span className="country-flag">{selectedCountry.flag}</span>
+                    <span className="country-prefix">{selectedCountry.prefix}</span>
+                    <span className="dropdown-arrow">▼</span>
+                  </button>
+                  {showCountryDropdown && (
+                    <div className="country-dropdown">
+                      <div className="country-dropdown-search">
+                        <input
+                          type="text"
+                          placeholder="Buscar país..."
+                          className="country-search-input"
+                          value={countrySearch}
+                          onChange={(e) => setCountrySearch(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      <div className="country-list">
+                        {filteredCountries.length > 0 ? (
+                          filteredCountries.map((country) => (
+                            <button
+                              key={country.code}
+                              type="button"
+                              className={`country-option ${selectedCountry.code === country.code ? 'selected' : ''}`}
+                              onClick={() => {
+                                setSelectedCountry(country);
+                                setShowCountryDropdown(false);
+                                setCountrySearch('');
+                              }}
+                            >
+                              <span className="country-flag">{country.flag}</span>
+                              <span className="country-name">{country.name}</span>
+                              <span className="country-prefix">{country.prefix}</span>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="country-no-results">No se encontraron países</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^\d]/g, '');
+                    setFormData({ ...formData, phone: val });
+                  }}
+                  className="form-input phone-input-field"
+                  placeholder="1112345678"
+                  maxLength={12}
+                />
+              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
