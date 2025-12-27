@@ -15,7 +15,7 @@ function AdminUsers() {
     search: ''
   });
   const [selectedUser, setSelectedUser] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null); // Changed from showDeleteModal (bool) to showDeleteConfirm (user object)
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -34,7 +34,6 @@ function AdminUsers() {
       }
       
       console.log('[AdminUsers] Loading users with filters:', activeFilters);
-      // Si es refresh forzado, hacer una pequeña pausa para asegurar que la BD se actualizó
       if (forceRefresh) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
@@ -61,13 +60,11 @@ function AdminUsers() {
       clearTimeout(searchTimeoutRef.current);
     }
     
-    // Si hay búsqueda, esperar 300ms
     if (filters.search) {
       searchTimeoutRef.current = setTimeout(() => {
         loadUsers();
       }, 300);
     } else {
-      // Si no hay búsqueda, cargar inmediatamente
       loadUsers();
     }
     
@@ -79,16 +76,15 @@ function AdminUsers() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.plan, filters.role, filters.search]);
 
-  const handleDelete = async () => {
-    if (!selectedUser) return;
+  const handleDeleteUser = async () => {
+    if (!showDeleteConfirm) return;
     
     setDeleteLoading(true);
     try {
-      const { error: deleteError } = await adminService.deleteUser(selectedUser.id);
+      const { error: deleteError } = await adminService.deleteUser(showDeleteConfirm.id);
       if (deleteError) throw deleteError;
       
-      setShowDeleteModal(false);
-      setSelectedUser(null);
+      setShowDeleteConfirm(null);
       loadUsers();
     } catch (err) {
       console.error('Error deleting user:', err);
@@ -210,10 +206,7 @@ function AdminUsers() {
                       </button>
                       <button
                         className="btn-action btn-delete"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setShowDeleteModal(true);
-                        }}
+                        onClick={() => setShowDeleteConfirm(user)}
                       >
                         Eliminar
                       </button>
