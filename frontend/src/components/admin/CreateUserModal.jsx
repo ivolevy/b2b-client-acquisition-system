@@ -157,7 +157,12 @@ function CreateUserModal({ onClose, onSuccess }) {
       }, 2000);
     } catch (err) {
       console.error('Error creating user:', err);
-      setError(err.message || 'Error al crear usuario');
+      // Translate common backend errors
+      let errorMessage = err.message || 'Error al crear usuario';
+      if (errorMessage.includes('already been registered') || errorMessage.includes('already exists')) {
+        errorMessage = 'Este email ya está registrado.';
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
