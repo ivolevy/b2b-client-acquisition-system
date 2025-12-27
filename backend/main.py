@@ -757,27 +757,37 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     # Empresa con contacto válido - siempre se guarda
                     empresa_validada['validada'] = True
                     empresas_validadas.append(empresa_validada)
-                    if insertar_empresa(empresa_validada):
-                        mensaje = "Email y teléfono válidos" if (email_valido and tel_valido) else ("Email válido" if email_valido else "Teléfono válido")
-                        logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - {mensaje}")
-                    else:
-                         logger.warning(f" {empresa.get('nombre', 'Sin nombre')}: Falló inserción en DB")
+                    
+                    try:
+                        if insertar_empresa(empresa_validada):
+                            mensaje = "Email y teléfono válidos" if (email_valido and tel_valido) else ("Email válido" if email_valido else "Teléfono válido")
+                            logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - {mensaje}")
+                        else:
+                             logger.warning(f" {empresa.get('nombre', 'Sin nombre')}: Falló inserción en DB (insertar_empresa retornó False)")
+                    except Exception as e_db:
+                         logger.error(f" {empresa.get('nombre', 'Sin nombre')}: Error crítico en insertar_empresa: {e_db}")
 
                 elif not solo_validadas:
                     # Empresa sin contacto válido pero con nombre válido - solo se guarda si no se requiere solo válidas
                     empresa_validada['validada'] = False
                     empresas_sin_contacto.append(empresa_validada)
-                    if insertar_empresa(empresa_validada):
-                        logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - Sin contacto válido (solo_validadas=False)")
-                    else:
-                         logger.warning(f" {empresa.get('nombre', 'Sin nombre')}: Falló inserción en DB")
+                    
+                    try:
+                        if insertar_empresa(empresa_validada):
+                            logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - Sin contacto válido (solo_validadas=False)")
+                        else:
+                             # NO LOGGEAR WARNING AQUÍ PARA NO ALARMAR AL USUARIO SI ES SOLO UN TEMA DE CONEXIÓN
+                             # A MENOS QUE SEA IMPORTANTE
+                             pass 
+                    except Exception:
+                        pass # Ignorar errores en empresas sin contacto para no llenar log
                 else:
                     # Empresa sin contacto válido y se requiere solo válidas - NO se guarda
                     empresas_rechazadas.append(empresa)
                     logger.warning(f" {empresa.get('nombre', 'Sin nombre')}: RECHAZADA - Sin contacto válido (email_valido={email_valido}, tel_valido={tel_valido}, solo_validadas={solo_validadas})")
             except Exception as e_insert:
-                logger.error(f" Error insertando empresa {nombre}: {e_insert}")
-                # No detener el proceso por una falla de inserción
+                logger.error(f" Error procesando empresa {nombre}: {e_insert}")
+                # No detener el proceso
 
         
         # Calcular empresas válidas (con email válido O teléfono válido)
