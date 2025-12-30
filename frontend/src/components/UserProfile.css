@@ -745,7 +745,21 @@
   animation: scaleIn 0.3s ease;
 }
 
-.cancel-plan-success-icon svg {
+.upgrade-success-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  animation: scaleIn 0.3s ease;
+  box-shadow: 0 10px 25px rgba(233, 30, 99, 0.3);
+}
+
+.cancel-plan-success-icon svg,
+.upgrade-success-icon svg {
   width: 40px;
   height: 40px;
   stroke: white;
@@ -813,6 +827,7 @@
     transform: scale(0);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -823,6 +838,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -833,6 +849,7 @@
     transform: translateY(-20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -900,6 +917,3 @@
     margin-bottom: 1.5rem;
   }
 }
-
-
-

@@ -38,10 +38,11 @@ function UserProfile() {
   const [cancelPlanLoading, setCancelPlanLoading] = useState(false);
   const [cancelPlanError, setCancelPlanError] = useState('');
   const [cancelConfirmText, setCancelConfirmText] = useState('');
+  const [showUpgradeSuccessModal, setShowUpgradeSuccessModal] = useState(false);
 
   // Bloquear scroll del body cuando cualquier modal está abierto
   useEffect(() => {
-    const hasModalOpen = showDeleteModal || showUpgradeModal || showPasswordModal || showCancelPlanModal || showCancelPlanSuccessModal || showDeleteSuccessModal;
+    const hasModalOpen = showDeleteModal || showUpgradeModal || showPasswordModal || showCancelPlanModal || showCancelPlanSuccessModal || showDeleteSuccessModal || showUpgradeSuccessModal;
     
     if (hasModalOpen) {
       // Guardar el scroll actual
@@ -118,9 +119,8 @@ function UserProfile() {
       setShowUpgradeModal(false);
       setProTokenInput('');
       
-      // Mostrar mensaje de éxito antes de recargar
-      alert('¡Plan PRO activado exitosamente!');
-      window.location.reload();
+      // Mostrar modal de éxito
+      setShowUpgradeSuccessModal(true);
       
     } catch (error) {
       console.error('Error upgrading to PRO:', error);
@@ -1142,6 +1142,44 @@ function UserProfile() {
                 }}
               >
                 Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de éxito al activar PRO */}
+      {showUpgradeSuccessModal && (
+        <div className="cancel-plan-success-modal-overlay">
+          <div className="cancel-plan-success-modal">
+            <div className="cancel-plan-success-modal-header">
+              <div className="upgrade-success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              </div>
+              <h3>¡Plan PRO Activado!</h3>
+            </div>
+            
+            <div className="cancel-plan-success-modal-body">
+              <p className="cancel-plan-success-message">
+                Has activado tu suscripción PRO correctamente.
+              </p>
+              <p className="cancel-plan-success-submessage">
+                Ahora tenés acceso ilimitado a todas las herramientas premium. ¡Disfrutalo!
+              </p>
+            </div>
+            
+            <div className="cancel-plan-success-modal-footer">
+              <button 
+                className="cancel-plan-success-btn"
+                style={{ background: 'linear-gradient(135deg, #e91e63 0%, #c2185b 100%)' }}
+                onClick={() => {
+                  setShowUpgradeSuccessModal(false);
+                  window.location.reload();
+                }}
+              >
+                Comenzar
               </button>
             </div>
           </div>
