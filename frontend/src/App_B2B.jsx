@@ -291,32 +291,62 @@ function AppB2B() {
       return stringValue;
     };
 
+    const formatDate = (dateString) => {
+      if (!dateString) return '';
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', {
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return dateString;
+      }
+    };
+
+    // Encabezados más estéticos y ordenados
     const headers = [
-      'ID', 'Nombre', 'Rubro', 'Email', 'Email Válido', 
-      'Teléfono', 'Teléfono Válido', 'Dirección', 'Ciudad', 'País', 'Código Postal',
-      'Sitio Web', 'LinkedIn', 'Estado',
-      'Ubicación de Búsqueda', 'Distancia (km)',
-      'Fecha Creación'
+      'Nombre Empresa',
+      'Rubro',
+      'Sitio Web',
+      'Email',
+      'Teléfono',
+      'Dirección',
+      'Ciudad',
+      'Código Postal',
+      'País',
+      'Instagram',
+      'Facebook',
+      'LinkedIn',
+      'Twitter',
+      'YouTube',
+      'TikTok',
+      'Estado',
+      'Fecha Captura'
     ];
 
     const rows = empresasToExport.map(e => [
-      e.id || '',
       e.nombre || '',
-      e.rubro || '',
+      // Intentar usar nombre del rubro del diccionario si existe y si e.rubro es una key
+      (rubros && rubros[e.rubro]) ? rubros[e.rubro] : (e.rubro || ''),
+      e.sitio_web || e.website || '',
       e.email || '',
-      e.email_valido ? 'Sí' : 'No',
       e.telefono || '',
-      e.telefono_valido ? 'Sí' : 'No',
       e.direccion || '',
       e.ciudad || '',
-      e.pais || '',
       e.codigo_postal || '',
-      e.sitio_web || e.website || '',
+      e.pais || '',
+      e.instagram || '',
+      e.facebook || '',
       e.linkedin || '',
-      e.validada ? 'Válida' : 'Pendiente',
-      e.busqueda_ubicacion_nombre || '',
-      e.distancia_km !== null && e.distancia_km !== undefined ? e.distancia_km.toFixed(2) : '',
-      e.created_at || e.fecha_creacion || ''
+      e.twitter || '',
+      e.youtube || '',
+      e.tiktok || '',
+      e.validada ? 'Validada' : 'Pendiente',
+      formatDate(e.created_at || e.fecha_creacion)
     ]);
 
     const csvContent = [
@@ -329,9 +359,11 @@ function AppB2B() {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+    // Nombre de archivo con fecha legible
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     link.setAttribute('href', url);
-    link.setAttribute('download', `empresas_b2b_${timestamp}.csv`);
+    link.setAttribute('download', `Resultados_B2B_${timestamp}.csv`);
     link.style.visibility = 'hidden';
     
     document.body.appendChild(link);
@@ -343,7 +375,7 @@ function AppB2B() {
     success(
       <>
         <strong>Exportación completada</strong>
-        <p>Se exportaron {empresasToExport.length} empresas a CSV</p>
+        <p>Se exportaron {empresasToExport.length} empresas con el nuevo formato.</p>
       </>
     );
   };
