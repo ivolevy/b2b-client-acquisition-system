@@ -299,6 +299,8 @@ def activar_suscripcion_con_codigo(user_id: str, codigo: str) -> dict:
     Activa una suscripción PRO usando un código promocional.
     Valida el código en la tabla 'promo_codes' y actualiza el usuario.
     """
+    from datetime import timedelta  # Fix: Import timedelta explicitly
+
     if not SUPABASE_SERVICE_ROLE_KEY:
         return {"success": False, "error": "Error de configuración del servidor (falta service key)"}
     
