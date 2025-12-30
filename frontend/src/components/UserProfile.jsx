@@ -1173,7 +1173,7 @@ function UserProfile() {
             <div className="cancel-plan-success-modal-footer">
               <button 
                 className="cancel-plan-success-btn"
-                style={{ background: 'linear-gradient(135deg, #e91e63 0%, #c2185b 100%)' }}
+                style={{ background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' }}
                 onClick={() => {
                   setShowUpgradeSuccessModal(false);
                   window.location.reload();

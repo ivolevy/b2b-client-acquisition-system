@@ -736,7 +736,7 @@
 .cancel-plan-success-icon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -748,14 +748,14 @@
 .upgrade-success-icon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px;
   animation: scaleIn 0.3s ease;
-  box-shadow: 0 10px 25px rgba(233, 30, 99, 0.3);
+  box-shadow: 0 10px 25px rgba(33, 150, 243, 0.3);
 }
 
 .cancel-plan-success-icon svg,
@@ -805,7 +805,7 @@
 
 .cancel-plan-success-btn {
   padding: 12px 32px;
-  background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: white;
   border: none;
   border-radius: 10px;
