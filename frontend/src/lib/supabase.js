@@ -432,7 +432,8 @@ export const searchHistoryService = {
   async getHistory(userId, limit = 20) {
     const { data, error } = await supabase
       .from('search_history')
-      .select('*')
+      // Seleccionar columnas específicas para reducir payload
+      .select('id, rubro, ubicacion_nombre, centro_lat, centro_lng, radio_km, bbox, empresas_encontradas, empresas_validas, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(limit);
