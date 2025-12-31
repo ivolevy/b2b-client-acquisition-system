@@ -40,9 +40,9 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
     setLoading(true);
     setError(null);
     try {
-      // Timeout reducido para mejor UX
+      // Timeout aumentado para evitar errores en conexiones lentas
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout: La solicitud tardó demasiado')), 5000)
+        setTimeout(() => reject(new Error('Timeout: La solicitud tardó demasiado. Por favor, verificá tu conexión.')), 15000)
       );
 
       const fetchPromise = searchHistoryService.getHistory(user.id, 20);

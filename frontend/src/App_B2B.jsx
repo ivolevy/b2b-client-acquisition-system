@@ -307,6 +307,12 @@ function AppB2B() {
       }
     };
 
+    // Formatear como link de Excel
+    const formatLink = (url) => {
+      if (!url) return '';
+      return `=HYPERLINK("${url}", "${url}")`;
+    };
+
     // Encabezados más estéticos y ordenados
     const headers = [
       'Nombre Empresa',
@@ -332,19 +338,19 @@ function AppB2B() {
       e.nombre || '',
       // Intentar usar nombre del rubro del diccionario si existe y si e.rubro es una key
       (rubros && rubros[e.rubro]) ? rubros[e.rubro] : (e.rubro || ''),
-      e.sitio_web || e.website || '',
+      formatLink(e.sitio_web || e.website),
       e.email || '',
       e.telefono || '',
       e.direccion || '',
       e.ciudad || '',
       e.codigo_postal || '',
       e.pais || '',
-      e.instagram || '',
-      e.facebook || '',
-      e.linkedin || '',
-      e.twitter || '',
-      e.youtube || '',
-      e.tiktok || '',
+      formatLink(e.instagram),
+      formatLink(e.facebook),
+      formatLink(e.linkedin),
+      formatLink(e.twitter),
+      formatLink(e.youtube),
+      formatLink(e.tiktok),
       e.validada ? 'Validada' : 'Pendiente',
       formatDate(e.created_at || e.fecha_creacion)
     ]);
