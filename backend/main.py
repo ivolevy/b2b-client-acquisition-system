@@ -271,28 +271,23 @@ def _init_default_templates():
     """Inicializa templates por defecto en memoria"""
     try:
         if len(_memoria_templates) == 0:
+            # Template por defecto: Primer contacto (Simple y Profesional)
             template_id = crear_template(
             nombre='Primer contacto (Ejemplo)',
-            subject='Hola equipo de {nombre_empresa} - Oportunidad de colaboración',
+            subject='Contacto: {nombre_empresa} - Posible colaboración',
             body_html='''<html>
 <body style="font-family: Arial, sans-serif; line-height: 1.8; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: #ffffff; border-radius: 8px; padding: 30px;">
-        <p style="font-size: 16px; margin-bottom: 20px;">Hola equipo de <strong>{nombre_empresa}</strong>, ¿cómo están?</p>
+        <p style="font-size: 16px; margin-bottom: 20px;">Hola, espero que estén muy bien.</p>
         
-        <p style="font-size: 16px; margin-bottom: 20px;">Hola, espero que estés bien. Me pongo en contacto contigo para presentarte nuestra propuesta de servicios.</p>
+        <p style="font-size: 16px; margin-bottom: 20px;">Nos ponemos en contacto con ustedes porque vimos su trabajo en el rubro <strong>{rubro}</strong> y nos pareció muy interesante.</p>
         
-        <p style="font-size: 16px; margin-bottom: 20px;">Estuvimos analizando <strong>{rubro}</strong> y realmente nos pareció muy innovador — creemos que están ofreciendo una propuesta con gran potencial en el sector.</p>
+        <p style="font-size: 16px; margin-bottom: 20px;">Creemos que tienen un gran potencial para seguir creciendo y nos gustaría charlar brevemente para explorar cómo podríamos colaborar y aportar valor a su negocio.</p>
         
-        <p style="font-size: 16px; margin-bottom: 20px;">Queremos ofrecerles nuestros servicios, nos dedicamos a resolver soluciones digitales, sean sitios webs, sistemas de gestión, análisis de datos, automatizaciones y demás.</p>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">Nos encantaría coordinar una breve charla para mostrarles el enfoque y ver cómo podríamos trabajar codo a codo en este proyecto.</p>
+        <p style="font-size: 16px; margin-bottom: 20px;">Quedo a la espera de su respuesta.</p>
         
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-            <p style="font-size: 16px; margin-bottom: 5px;">Un saludo,</p>
-            <p style="font-size: 16px; margin-bottom: 5px;">Saludos,</p>
-            <p style="font-size: 14px; margin-bottom: 5px;">
-                <a href="#" style="color: #2563eb; text-decoration: none;">[Tu Sitio Web o LinkedIn]</a>
-            </p>
+            <p style="font-size: 16px; margin-bottom: 5px;">Saludos cordiales,</p>
             <p style="font-size: 14px; margin-bottom: 0;">
                 <a href="https://www.dotasolutions.agency/" style="color: #2563eb; text-decoration: none;">Sitio web: https://www.dotasolutions.agency/</a>
             </p>
@@ -300,20 +295,17 @@ def _init_default_templates():
     </div>
 </body>
 </html>''',
-            body_text='''Hola equipo de {nombre_empresa}, ¿cómo están?
+            body_text='''Hola, espero que estén muy bien.
 
-Hola, espero que estés bien. Me pongo en contacto contigo para presentarte nuestra propuesta de servicios.
+Nos ponemos en contacto con ustedes porque vimos su trabajo en el rubro {rubro} y nos pareció muy interesante.
 
-Estuvimos analizando {rubro} y realmente nos pareció muy innovador — creemos que están ofreciendo una propuesta con gran potencial en el sector.
+Creemos que tienen un gran potencial para seguir creciendo y nos gustaría charlar brevemente para explorar cómo podríamos colaborar y aportar valor a su negocio.
 
-Queremos ofrecerles nuestros servicios, nos dedicamos a resolver soluciones digitales, sean sitios webs, sistemas de gestión, análisis de datos, automatizaciones y demás.
+Quedo a la espera de su respuesta.
 
-Nos encantaría coordinar una breve charla para mostrarles el enfoque y ver cómo podríamos trabajar codo a codo en este proyecto.
+Saludos cordiales.
 
-Un saludo,
-[Tu nombre]
-
-Sitio web: [Tu sitio web]'''
+Sitio web: https://www.dotasolutions.agency/'''
         )
     except Exception as e:
         logger.error(f"Error inicializando templates por defecto: {e}")

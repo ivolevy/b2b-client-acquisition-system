@@ -842,8 +842,10 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
             onChange={(e) => setSubject(e.target.value)}
             disabled={saving}
           />
-          <div className="variable-chips-container">
-            {variables.map(v => (
+          <div className="variables-section" style={{ marginTop: '8px' }}>
+            <small style={{ color: '#64748b', display: 'block', marginBottom: '4px' }}>Variables disponibles (click para copiar):</small>
+            <div className="variable-chips-container" style={{ marginTop: '0' }}>
+              {variables.map(v => (
               <button
                 key={v}
                 type="button"
@@ -854,6 +856,7 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
                 {copiedVar === v ? '¡Copiado!' : v}
               </button>
             ))}
+            </div>
           </div>
         </div>
 
