@@ -153,7 +153,6 @@ function TemplateEditor({ templateId, onClose, onSave }) {
                   type="text"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  placeholder="Ej: Saludo inicial"
                   disabled={loading}
                 />
               </div>
@@ -164,7 +163,6 @@ function TemplateEditor({ templateId, onClose, onSave }) {
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Ej: Hola {nombre_empresa}..."
                   disabled={loading}
                 />
               </div>
@@ -190,7 +188,6 @@ function TemplateEditor({ templateId, onClose, onSave }) {
                 value={bodyText}
                 onChange={(e) => setBodyText(e.target.value)}
                 rows={12}
-                placeholder="Escribe el contenido de tu email..."
                 disabled={loading}
               />
               <p className="editor-hint">
