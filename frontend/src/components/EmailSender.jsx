@@ -843,7 +843,9 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
             disabled={saving}
           />
           <div className="variables-section" style={{ marginTop: '8px' }}>
-            <small style={{ color: '#64748b', display: 'block', marginBottom: '4px' }}>Variables disponibles (click para copiar):</small>
+            <small style={{ color: '#64748b', display: 'block', marginBottom: '4px' }}>
+              Variables disponibles (se reemplazan automáticamente con los datos de cada empresa):
+            </small>
             <div className="variable-chips-container" style={{ marginTop: '0' }}>
               {variables.map(v => (
               <button

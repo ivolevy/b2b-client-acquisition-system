@@ -289,7 +289,7 @@ def _init_default_templates():
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
             <p style="font-size: 16px; margin-bottom: 5px;">Saludos cordiales,</p>
             <p style="font-size: 14px; margin-bottom: 0;">
-                <a href="https://www.dotasolutions.agency/" style="color: #2563eb; text-decoration: none;">Sitio web: https://www.dotasolutions.agency/</a>
+                <a href="#" style="color: #2563eb; text-decoration: none;">[Tu Sitio Web]</a>
             </p>
         </div>
     </div>
@@ -305,7 +305,7 @@ Quedo a la espera de su respuesta.
 
 Saludos cordiales.
 
-Sitio web: https://www.dotasolutions.agency/'''
+Sitio web: [Tu Sitio Web]'''
         )
     except Exception as e:
         logger.error(f"Error inicializando templates por defecto: {e}")
