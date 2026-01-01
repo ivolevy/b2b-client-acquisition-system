@@ -33,6 +33,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [delaySegundos, setDelaySegundos] = useState(1.0);
   const [activeTab, setActiveTab] = useState('enviar'); // 'enviar' o 'templates'
   const [editingTemplate, setEditingTemplate] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [gmailStatus, setGmailStatus] = useState({ connected: false, loading: true });
   const { user } = useAuth();
   const { toasts, success, error: toastError, warning, removeToast } = useToast();
@@ -281,10 +282,12 @@ function EmailSender({ empresas, onClose, embedded = false }) {
       }
     }
 
-    if (!window.confirm(`¿Enviar email${selectedEmpresas.length > 1 ? 's' : ''} a ${selectedEmpresas.length} empresa${selectedEmpresas.length > 1 ? 's' : ''}?`)) {
-      return;
-    }
+    // Abrir modal de confirmación en lugar de window.confirm
+    setShowConfirmModal(true);
+  };
 
+  const confirmSend = async () => {
+    setShowConfirmModal(false);
     setLoading(true);
 
     try {
@@ -508,7 +511,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
                   onClick={handleEnviar}
                   disabled={loading || !selectedTemplate || selectedEmpresas.length === 0}
                 >
-                  {loading ? 'Enviando...' : `Enviar${selectedEmpresas.length > 1 ? ` (${selectedEmpresas.length})` : ''}`}
+                  {loading ? 'Enviando...' : `Enviar${selectedEmpresas.length > 0 ? ` (${selectedEmpresas.length})` : ''}`}
                 </button>
               </div>
             </div>
@@ -538,7 +541,14 @@ function EmailSender({ empresas, onClose, embedded = false }) {
                 <div className="empresas-list-with-preview">
                   {empresasConEmail.length === 0 ? (
                     <div className="empty-state">
-                      <p>No hay empresas con email disponible</p>
+                      {empresas.length > 0 ? (
+                        <>
+                          <p>Ninguna de las {empresas.length} empresas tiene email</p>
+                          <small>Intenta exportar o editar los datos.</small>
+                        </>
+                      ) : (
+                        <p>No hay empresas cargadas</p>
+                      )}
                     </div>
                   ) : (
                     empresasConEmail.map(empresa => {
@@ -653,6 +663,36 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           </div>
         )}
       </div>
+
+        {/* Modal Personalizado de Confirmación */}
+        {showConfirmModal && (
+          <div className="custom-modal-overlay">
+            <div className="custom-modal">
+              <div className="custom-modal-header">
+                <h3>¿Confirmar envío?</h3>
+                <button className="close-modal-btn" onClick={() => setShowConfirmModal(false)}>×</button>
+              </div>
+              <div className="custom-modal-body">
+                <div className="modal-icon">📨</div>
+                <p>
+                  Estás a punto de enviar <strong>{selectedEmpresas.length} email{selectedEmpresas.length !== 1 ? 's' : ''}</strong>.
+                </p>
+                {selectedEmpresas.length > 0 && modo === 'individual' && (
+                  <p className="recipient-preview">Para: <strong>{selectedEmpresas[0].nombre}</strong> ({selectedEmpresas[0].email})</p>
+                )}
+                {modo === 'masivo' && (
+                  <p className="mass-warning">Recuerda que el envío masivo tiene un delay de seguridad entre correos.</p>
+                )}
+              </div>
+              <div className="custom-modal-footer">
+                <button className="btn-cancel" onClick={() => setShowConfirmModal(false)}>Cancelar</button>
+                <button className="btn-confirm-send" onClick={confirmSend}>
+                  {loading ? 'Enviando...' : 'Sí, Enviar Emails'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </>
   );
 

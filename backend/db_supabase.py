@@ -455,3 +455,22 @@ def delete_user_oauth_token(user_id: str, provider: str = 'google') -> bool:
     except Exception as e:
         logger.error(f"Error eliminando token OAuth para {user_id}: {e}")
         return False
+
+def obtener_perfil_usuario(user_id: str) -> Optional[Dict]:
+    """Obtiene el perfil de usuario (nombre, plan, etc) de Supabase"""
+    # Usar admin client para asegurar acceso
+    client = get_supabase_admin() or get_supabase()
+    if not client or not user_id:
+        return None
+        
+    try:
+        # Intentar obtener de la tabla 'users' (perfiles públicos)
+        response = client.table('users').select('*').eq('id', user_id).execute()
+        
+        if response.data and len(response.data) > 0:
+            return response.data[0]
+            
+        return None
+    except Exception as e:
+        logger.error(f"Error obteniendo perfil de usuario {user_id}: {e}")
+        return None

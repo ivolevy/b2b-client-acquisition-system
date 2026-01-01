@@ -15,10 +15,10 @@ import socket
 import re
 
 try:
-    from .db_supabase import get_user_oauth_token, save_user_oauth_token
+    from .db_supabase import get_user_oauth_token, save_user_oauth_token, obtener_perfil_usuario
     from .auth_google import send_gmail_api
 except ImportError:
-    from db_supabase import get_user_oauth_token, save_user_oauth_token
+    from db_supabase import get_user_oauth_token, save_user_oauth_token, obtener_perfil_usuario
     from auth_google import send_gmail_api
 
 # Cargar variables de entorno desde .env.local o .env (busca en el directorio del backend)
@@ -208,6 +208,30 @@ def enviar_email(
             'error': 'UNKNOWN_ERROR'
         }
 
+def wrap_premium_template(content: str, sender_name: str, sender_email: str) -> str:
+    """Envuelve el contenido en el diseño premium"""
+    formatted_content = content.replace('\n', '<br/>')
+    
+    return f"""
+      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.8; color: #1e293b; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+        <div style="background-color: #0f172a; padding: 32px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Propuesta Comercial</h1>
+        </div>
+        <div style="padding: 40px 32px;">
+          <div style="font-size: 16px; color: #334155;">
+            {formatted_content}
+          </div>
+          <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid #f1f5f9;">
+            <p style="margin: 0; font-weight: 700; color: #0f172a; font-size: 16px;">{sender_name}</p>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">{sender_email}</p>
+          </div>
+        </div>
+        <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #f1f5f9;">
+          <p style="margin: 0; color: #94a3b8; font-size: 12px;">Enviado a través de Smart Leads</p>
+        </div>
+      </div>
+    """
+
 def enviar_email_empresa(
     empresa: Dict,
     template: Dict,
@@ -229,6 +253,18 @@ def enviar_email_empresa(
             'error': 'NO_EMAIL'
         }
     
+    # Obtener datos del usuario para personalización
+    sender_name = 'Representante'
+    sender_email = ''
+    if user_id:
+        try:
+            profile = obtener_perfil_usuario(user_id)
+            if profile:
+                sender_name = profile.get('name', 'Representante')
+                sender_email = profile.get('email', '')
+        except Exception as e:
+            logger.error(f"Error obteniendo perfil para email: {e}")
+    
     # Preparar variables para el template
     variables = {
         'nombre_empresa': empresa.get('nombre'),
@@ -245,9 +281,24 @@ def enviar_email_empresa(
     }
     
     # Renderizar template
+    # IMPORTANTE: Como los templates ahora se guardan como texto plano en body_html,
+    # debemos usar renderizar_template sobre body_text (o body_html como fallback)
+    # y luego aplicar el wrapper premium.
+    
+    raw_content = template.get('body_text') or template.get('body_html', '')
+    # Quitar tags HTML si existen (legacy support)
+    raw_content = re.sub(r'<[^>]*>', '', raw_content)
+    
+    rendered_content = renderizar_template(raw_content, variables)
+    
+    # Aplicar Premium Wrapper
+    cuerpo_html = wrap_premium_template(rendered_content, sender_name, sender_email)
+    
+    # Asunto
     asunto = asunto_personalizado or renderizar_template(template.get('subject', ''), variables)
-    cuerpo_html = renderizar_template(template.get('body_html', ''), variables)
-    cuerpo_texto = renderizar_template(template.get('body_text', ''), variables) if template.get('body_text') else None
+    
+    # Cuerpo texto (versión simple)
+    cuerpo_texto = rendered_content
     
     # Enviar
     resultado = enviar_email(
