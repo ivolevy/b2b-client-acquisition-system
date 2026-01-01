@@ -50,8 +50,18 @@ function TemplateEditor({ templateId, onClose, onSave }) {
       const template = response.data.data;
       setNombre(template.nombre);
       setSubject(template.subject);
-      // Usamos body_text si existe, sino limpiamos el HTML del body_html
-      setBodyText(template.body_text || template.body_html?.replace(/<[^>]*>/g, '') || '');
+      
+      // Limpieza agresiva de HTML para mostrar solo texto plano
+      let cleanBody = template.body_text || '';
+      
+      // Si body_text está vacío o parece HTML (contiene tags), intentar limpiar body_html
+      if (!cleanBody || cleanBody.trim().startsWith('<') || cleanBody.includes('</div>')) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = template.body_html || template.body_text || '';
+        cleanBody = tempDiv.textContent || tempDiv.innerText || '';
+      }
+      
+      setBodyText(cleanBody.trim());
     } catch (error) {
       console.error('Error cargando template:', error);
       toastError(
