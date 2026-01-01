@@ -48,6 +48,20 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     libraries,
   });
 
+  const handleLocationSelect = useCallback((lat, lng, ubicacionNombre = null) => {
+    const location = { lat, lng };
+    setSelectedLocation(location);
+    
+    const bbox = calculateBoundingBox(lat, lng, radius);
+    
+    onLocationChange({
+      center: location,
+      radius: radius,
+      bbox: bbox,
+      ubicacion_nombre: ubicacionNombre || searchQuery || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
+    });
+  }, [radius, searchQuery, onLocationChange]);
+
   // Reset initialLocationApplied cuando cambia initialLocation
   useEffect(() => {
     if (initialLocation && initialLocation.lat && initialLocation.lng) {
@@ -58,14 +72,6 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       setSelectedLocation({ lat, lng });
       
       if (initialLocation.radius) {
-        setRadius(initialLocation.radius / 1000); // viene en metros del filtro pero en el state es metros... wait.
-        // FiltersB2B sends radius in METERS.
-        // setRadius state relies on METERS? No.
-        // Let's check handleRadiusChange. It receives value from select.
-        // Select values are 1000, 5000 etc (meters).
-        // setRadius(newRadius). 
-        // InitialLocation needs to provide METERS.
-        // FiltersB2B: radius: historySearchData.radio_km ? historySearchData.radio_km * 1000 : 5000
         setRadius(initialLocation.radius); 
       }
       
@@ -82,20 +88,6 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       handleLocationSelect(lat, lng, initialLocation.name);
     }
   }, [initialLocation, handleLocationSelect]);
-
-  const handleLocationSelect = useCallback((lat, lng, ubicacionNombre = null) => {
-    const location = { lat, lng };
-    setSelectedLocation(location);
-    
-    const bbox = calculateBoundingBox(lat, lng, radius);
-    
-    onLocationChange({
-      center: location,
-      radius: radius,
-      bbox: bbox,
-      ubicacion_nombre: ubicacionNombre || searchQuery || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
-    });
-  }, [radius, searchQuery, onLocationChange]);
 
   const handleManualGeocode = useCallback(() => {
     const query = searchQuery?.trim();
