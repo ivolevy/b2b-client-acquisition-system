@@ -628,31 +628,14 @@ function EmailSender({ empresas, onClose, embedded = false }) {
             <button className="close-btn" onClick={onClose}>×</button>
           </div>
         )}
-        <div className="gmail-gate-container" style={{
-          padding: '40px 20px',
-          textAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '300px'
-        }}>
-          <div style={{ 
-            width: '64px', 
-            height: '64px', 
-            background: 'rgba(234, 67, 53, 0.1)', 
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '20px'
-          }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="#ea4335">
+        <div className="gmail-gate-container">
+          <div className="gmail-gate-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
             </svg>
           </div>
-          <h2 style={{ color: 'white', marginBottom: '10px' }}>Conecta tu Gmail</h2>
-          <p style={{ color: 'rgba(255, 255, 255, 0.6)', maxWidth: '400px', marginBottom: '30px', fontSize: '1rem' }}>
+          <h2>Conecta tu Gmail</h2>
+          <p>
             Para poder enviar campañas de email personalizadas, primero necesitás vincular tu cuenta de Google.
           </p>
           
@@ -660,9 +643,10 @@ function EmailSender({ empresas, onClose, embedded = false }) {
             user={user} 
             onSuccess={() => checkGmailStatus()} 
             onError={(err) => toastError(err)} 
+            variant="simple"
           />
           
-          <div style={{ marginTop: '30px', fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.4)' }}>
+          <div className="gmail-gate-footer">
             Tus datos están protegidos y solo usaremos el permiso para enviar los correos que vos selecciones.
           </div>
         </div>

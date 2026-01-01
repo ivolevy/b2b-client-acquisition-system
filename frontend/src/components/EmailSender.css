@@ -825,40 +825,102 @@
   background: #94a3b8;
 }
 
-/* Gmail Gate */
+/* Gmail Gate - Rediseño Premium */
 .gmail-gate-container {
-  background: var(--gray-900);
-  margin: 24px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 40px;
+  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+  margin: 32px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5);
   position: relative;
   overflow: hidden;
+  min-height: 450px;
 }
 
 .gmail-gate-container::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 200px;
-  background: radial-gradient(circle at top, rgba(234, 67, 53, 0.15) 0%, transparent 70%);
+  top: -20%;
+  left: -10%;
+  right: -10%;
+  height: 300px;
+  background: radial-gradient(ellipse at center, rgba(234, 67, 53, 0.12) 0%, transparent 70%);
   z-index: 0;
+  pointer-events: none;
 }
 
-.gmail-gate-container>* {
+.gmail-gate-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #ea4335 0%, #c5221f 100%);
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  color: white;
+  box-shadow: 0 15px 30px rgba(234, 67, 53, 0.35);
   position: relative;
   z-index: 1;
 }
 
 .gmail-gate-container h2 {
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 800;
-  background: linear-gradient(to bottom, #ffffff 0%, #cbd5e1 100%);
+  margin: 0 0 16px 0;
+  background: linear-gradient(to bottom, #ffffff 0%, #94a3b8 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+}
+
+.gmail-gate-container p {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  max-width: 480px;
+  margin-bottom: 40px;
+}
+
+.gmail-gate-footer {
+  margin-top: 40px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.3);
+  max-width: 400px;
+}
+
+/* Botón Premium para conectar */
+.gmail-connect-btn-premium {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  background: white;
+  color: #0f172a;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.gmail-connect-btn-premium:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  background: #f8fafc;
+}
+
+.gmail-connect-btn-premium svg {
+  color: #ea4335;
 }
 
 .email-sender-modal .gmail-connection-card {
