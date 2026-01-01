@@ -52,6 +52,29 @@
   color: white;
 }
 
+.header-title-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.gmail-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.gmail-status-badge svg {
+  opacity: 0.8;
+}
+
 .close-btn {
   background: rgba(255, 255, 255, 0.18);
   border: none;
