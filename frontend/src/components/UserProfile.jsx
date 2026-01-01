@@ -4,7 +4,6 @@ import { useAuth } from '../AuthWrapper';
 import { authService, supabase } from '../lib/supabase';
 import { API_URL } from '../config';
 import axios from 'axios';
-import GmailConnection from './GmailConnection';
 import './UserProfile.css';
 
 function UserProfile() {
@@ -68,21 +67,6 @@ function UserProfile() {
     };
   }, [showDeleteModal, showUpgradeModal, showPasswordModal, showCancelPlanModal, showCancelPlanSuccessModal, showDeleteSuccessModal, showUpgradeSuccessModal]);
 
-  // Manejar parámetros de la URL para Gmail OAuth
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const gmailStatus = params.get('gmail');
-    
-    if (gmailStatus === 'success') {
-      alert('✓ Tu cuenta de Gmail ha sido conectada correctamente.');
-      // Limpiar URL
-      navigate('/profile', { replace: true });
-    } else if (gmailStatus === 'error') {
-      const reason = params.get('reason');
-      alert(`✗ Error al conectar con Gmail: ${reason || 'Error desconocido'}`);
-      navigate('/profile', { replace: true });
-    }
-  }, [location.search, navigate]);
 
   // Countdown para reenviar código de cambio de contraseña
   useEffect(() => {
@@ -556,12 +540,6 @@ function UserProfile() {
               </div>
             </div>
 
-            {/* Configuración de Gmail OAuth2 */}
-            <GmailConnection 
-              user={user} 
-              onSuccess={(msg) => alert(msg)} 
-              onError={(err) => alert(err)} 
-            />
 
             <div className="account-danger-section">
               <div className="account-danger-label">Zona de peligro</div>
