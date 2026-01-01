@@ -37,7 +37,6 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const { user } = useAuth();
   const { toasts, success, error: toastError, warning, removeToast } = useToast();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pendingAction, setPendingAction] = useState(null);
 
   useEffect(() => {
     loadTemplates();
@@ -283,7 +282,6 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     }
 
     // Usar modal de confirmación en lugar de alert
-    setPendingAction(() => executeSend);
     setShowConfirmModal(true);
   };
 
@@ -715,7 +713,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
       
       {showConfirmModal && (
         <ConfirmSendModal 
-          onConfirm={pendingAction} 
+          onConfirm={executeSend} 
           onCancel={() => setShowConfirmModal(false)} 
           count={selectedEmpresas.length}
         />

@@ -271,53 +271,20 @@ def _init_default_templates():
     """Inicializa templates por defecto en memoria"""
     try:
         if len(_memoria_templates) == 0:
-            template_id = crear_template(
-            nombre='Presentación Dota Solutions',
-            subject='Hola equipo de {nombre_empresa} - Oportunidad de colaboración',
-            body_html='''<html>
-<body style="font-family: Arial, sans-serif; line-height: 1.8; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: #ffffff; border-radius: 8px; padding: 30px;">
-        <p style="font-size: 16px; margin-bottom: 20px;">Hola equipo de <strong>{nombre_empresa}</strong>, ¿cómo están?</p>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">Mi nombre es <strong>Ivan Levy</strong>, CTO de <strong>Dota Solutions</strong>, somos una agencia que desarrolla soluciones de software a medida.</p>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">Estuvimos analizando <strong>{rubro}</strong> y realmente nos pareció muy innovador — creemos que están ofreciendo una propuesta con gran potencial en el sector.</p>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">Queremos ofrecerles nuestros servicios, nos dedicamos a resolver soluciones digitales, sean sitios webs, sistemas de gestión, análisis de datos, automatizaciones y demás.</p>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">Nos encantaría coordinar una breve charla para mostrarles el enfoque y ver cómo podríamos trabajar codo a codo en este proyecto.</p>
-        
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-            <p style="font-size: 16px; margin-bottom: 5px;">Un saludo,</p>
-            <p style="font-size: 16px; margin-bottom: 5px;"><strong>Ivan Levy</strong></p>
-            <p style="font-size: 14px; color: #6b7280; margin-bottom: 5px;">CTO – Dota Solutions</p>
-            <p style="font-size: 14px; margin-bottom: 5px;">
-                <a href="https://www.linkedin.com/in/ivan-levy/" style="color: #2563eb; text-decoration: none;">LinkedIn: https://www.linkedin.com/in/ivan-levy/</a>
-            </p>
-            <p style="font-size: 14px; margin-bottom: 0;">
-                <a href="https://www.dotasolutions.agency/" style="color: #2563eb; text-decoration: none;">Sitio web: https://www.dotasolutions.agency/</a>
-            </p>
-        </div>
-    </div>
-</body>
-</html>''',
-            body_text='''Hola equipo de {nombre_empresa}, ¿cómo están?
+            crear_template(
+                nombre='Template de Ejemplo',
+                subject='Contacto para {nombre_empresa}',
+                body_html='''Hola equipo de {nombre_empresa},
 
-Mi nombre es Ivan Levy, CTO de Dota Solutions, somos una agencia que desarrolla soluciones de software a medida.
+[Escribe aquí tu mensaje personalizado para la empresa. Podés usar variables como {rubro}, {ciudad} o {sitio_web}].
 
-Estuvimos analizando {rubro} y realmente nos pareció muy innovador — creemos que están ofreciendo una propuesta con gran potencial en el sector.
+Este es un template de ejemplo que podés editar o borrar desde la pestaña de Templates.''',
+                body_text='''Hola equipo de {nombre_empresa},
 
-Queremos ofrecerles nuestros servicios, nos dedicamos a resolver soluciones digitales, sean sitios webs, sistemas de gestión, análisis de datos, automatizaciones y demás.
+[Escribe aquí tu mensaje personalizado para la empresa. Podés usar variables como {rubro}, {ciudad} o {sitio_web}].
 
-Nos encantaría coordinar una breve charla para mostrarles el enfoque y ver cómo podríamos trabajar codo a codo en este proyecto.
-
-Un saludo,
-Ivan Levy
-CTO – Dota Solutions
-
-LinkedIn: https://www.linkedin.com/in/ivan-levy/
-Sitio web: https://www.dotasolutions.agency/'''
-        )
+Este es un template de ejemplo que podés editar o borrar desde la pestaña de Templates.'''
+            )
     except Exception as e:
         logger.error(f"Error inicializando templates por defecto: {e}")
 
