@@ -271,20 +271,50 @@ def _init_default_templates():
     """Inicializa templates por defecto en memoria"""
     try:
         if len(_memoria_templates) == 0:
-            crear_template(
-                nombre='Template de Ejemplo',
-                subject='Contacto para {nombre_empresa}',
-                body_html='''Hola equipo de {nombre_empresa},
+            template_id = crear_template(
+            nombre='Primer contacto (Ejemplo)',
+            subject='Hola equipo de {nombre_empresa} - Oportunidad de colaboración',
+            body_html='''<html>
+<body style="font-family: Arial, sans-serif; line-height: 1.8; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 8px; padding: 30px;">
+        <p style="font-size: 16px; margin-bottom: 20px;">Hola equipo de <strong>{nombre_empresa}</strong>, ¿cómo están?</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">Hola, espero que estés bien. Me pongo en contacto contigo para presentarte nuestra propuesta de servicios.</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">Estuvimos analizando <strong>{rubro}</strong> y realmente nos pareció muy innovador — creemos que están ofreciendo una propuesta con gran potencial en el sector.</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">Queremos ofrecerles nuestros servicios, nos dedicamos a resolver soluciones digitales, sean sitios webs, sistemas de gestión, análisis de datos, automatizaciones y demás.</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">Nos encantaría coordinar una breve charla para mostrarles el enfoque y ver cómo podríamos trabajar codo a codo en este proyecto.</p>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <p style="font-size: 16px; margin-bottom: 5px;">Un saludo,</p>
+            <p style="font-size: 16px; margin-bottom: 5px;">Saludos,</p>
+            <p style="font-size: 14px; margin-bottom: 5px;">
+                <a href="#" style="color: #2563eb; text-decoration: none;">[Tu Sitio Web o LinkedIn]</a>
+            </p>
+            <p style="font-size: 14px; margin-bottom: 0;">
+                <a href="https://www.dotasolutions.agency/" style="color: #2563eb; text-decoration: none;">Sitio web: https://www.dotasolutions.agency/</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>''',
+            body_text='''Hola equipo de {nombre_empresa}, ¿cómo están?
 
-[Escribe aquí tu mensaje personalizado para la empresa. Podés usar variables como {rubro}, {ciudad} o {sitio_web}].
+Hola, espero que estés bien. Me pongo en contacto contigo para presentarte nuestra propuesta de servicios.
 
-Este es un template de ejemplo que podés editar o borrar desde la pestaña de Templates.''',
-                body_text='''Hola equipo de {nombre_empresa},
+Estuvimos analizando {rubro} y realmente nos pareció muy innovador — creemos que están ofreciendo una propuesta con gran potencial en el sector.
 
-[Escribe aquí tu mensaje personalizado para la empresa. Podés usar variables como {rubro}, {ciudad} o {sitio_web}].
+Queremos ofrecerles nuestros servicios, nos dedicamos a resolver soluciones digitales, sean sitios webs, sistemas de gestión, análisis de datos, automatizaciones y demás.
 
-Este es un template de ejemplo que podés editar o borrar desde la pestaña de Templates.'''
-            )
+Nos encantaría coordinar una breve charla para mostrarles el enfoque y ver cómo podríamos trabajar codo a codo en este proyecto.
+
+Un saludo,
+[Tu nombre]
+
+Sitio web: [Tu sitio web]'''
+        )
     except Exception as e:
         logger.error(f"Error inicializando templates por defecto: {e}")
 
@@ -1384,7 +1414,7 @@ async def solicitar_codigo_cambio_password(request: SolicitarCodigoRequest):
                 </div>
                 <div class="footer">
                     <p>Este es un email automático, por favor no respondas.</p>
-                    <p>© 2024 Smart Leads - Dota Solutions</p>
+                    <p>© 2024 Smart Leads</p>
                 </div>
             </div>
         </body>

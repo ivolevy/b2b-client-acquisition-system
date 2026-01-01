@@ -1,54 +1,19 @@
-import httpx
-import asyncio
+"""
+Web Scraper enfocado en extracción B2B de datos de contacto empresarial
+Mejorado para encontrar emails y teléfonos corporativos
+"""
+
+import requests
 from bs4 import BeautifulSoup
 import re
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List
 from urllib.parse import urlparse, urljoin
 import time
 from urllib.robotparser import RobotFileParser
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Cache para robots.txt
-_robots_cache = {}
-_robots_cache_lock = asyncio.Lock()
-
-async def check_robots_txt_async(url: str, client: httpx.AsyncClient) -> bool:
-    """Verifica robots.txt de forma asincrónica con cache"""
-    try:
-        parsed = urlparse(url)
-        if not parsed.netloc:
-            return False
-        
-        domain = parsed.netloc
-        robots_url = f"{parsed.scheme}://{domain}/robots.txt"
-        
-        async with _robots_cache_lock:
-            if domain in _robots_cache:
-                return _robots_cache[domain].can_fetch("B2BDataCollectorBot/1.0", url)
-        
-        try:
-            response = await client.get(robots_url, timeout=5.0)
-            rp = RobotFileParser()
-            if response.status_code == 200:
-                rp.parse(response.text.splitlines())
-            else:
-                # Si no hay robots.txt, asumimos permitido
-                rp.allow_all = True
-        except Exception:
-            # Error de red o timeout, asumimos permitido por simplicidad
-            rp = RobotFileParser()
-            rp.allow_all = True
-            
-        async with _robots_cache_lock:
-            _robots_cache[domain] = rp
-            
-        return rp.can_fetch("B2BDataCollectorBot/1.0", url)
-    except Exception as e:
-        logger.warning(f"Error verificando robots.txt para {url}: {e}")
-        return True
 
 def check_robots_txt(url: str) -> bool:
     """Verifica robots.txt"""
@@ -135,8 +100,8 @@ def extraer_telefonos_b2b(soup: BeautifulSoup, text: str) -> List[str]:
     
     return telefonos_validos[:3]
 
-async def buscar_en_pagina_contacto_async(base_url: str, soup: BeautifulSoup, client: httpx.AsyncClient) -> Dict:
-    """Busca página de contacto y extrae información (Async)"""
+def buscar_en_pagina_contacto(base_url: str, soup: BeautifulSoup) -> Dict:
+    """Busca página de contacto y extrae información"""
     contacto_urls = []
     
     # Buscar enlaces a páginas de contacto
@@ -152,11 +117,12 @@ async def buscar_en_pagina_contacto_async(base_url: str, soup: BeautifulSoup, cl
     # Visitar primera página de contacto encontrada
     if contacto_urls:
         try:
-            # Usar un pequeño delay si es necesario, pero httpx maneja concurrencia mejor
-            response = await client.get(
+            time.sleep(1)
+            response = requests.get(
                 contacto_urls[0], 
-                timeout=10,
-                follow_redirects=True
+                timeout=15,  # Aumentado de 10 a 15 para consistencia
+                headers={'User-Agent': 'B2BDataCollectorBot/1.0'},
+                allow_redirects=True
             )
             
             if response.status_code == 200:
@@ -167,90 +133,137 @@ async def buscar_en_pagina_contacto_async(base_url: str, soup: BeautifulSoup, cl
                     'emails': extraer_emails_b2b(soup_contacto, text_contacto),
                     'telefonos': extraer_telefonos_b2b(soup_contacto, text_contacto)
                 }
-        except Exception:
+        except:
             pass
     
     return {'emails': [], 'telefonos': []}
 
-async def scrapear_empresa_b2b_async(url: str, client: Optional[httpx.AsyncClient] = None) -> Dict:
+def scrapear_empresa_b2b(url: str) -> Dict:
     """
-    Scrapea sitio web empresarial para extraer datos de contacto B2B (Async)
+    Scrapea sitio web empresarial para extraer datos de contacto B2B
+    
+    Returns:
+        Dict con emails, telefonos, redes sociales
     """
     resultado = {
-        'emails': [], 'telefonos': [], 'linkedin': '', 'facebook': '',
-        'twitter': '', 'instagram': '', 'exito': False
+        'emails': [],
+        'telefonos': [],
+        'linkedin': '',
+        'facebook': '',
+        'twitter': '',
+        'instagram': '',
+        'exito': False
     }
     
-    if not url: return resultado
-    if not url.startswith('http'): url = 'https://' + url
+    if not url:
+        return resultado
     
-    # Si no nos pasan un cliente, creamos uno (aunque lo ideal es reusarlo)
-    manage_client = client is None
-    if manage_client:
-        client = httpx.AsyncClient(timeout=10, follow_redirects=True, headers={'User-Agent': 'Mozilla/5.0 (compatible; B2BDataCollectorBot/1.0)'})
-
+    # Normalizar URL
+    if not url.startswith('http'):
+        url = 'https://' + url
+    
     try:
         # Verificar robots.txt
-        if not await check_robots_txt_async(url, client):
+        if not check_robots_txt(url):
+            logger.warning(f"Bloqueado por robots.txt: {url}")
             return resultado
         
-        response = await client.get(url)
+        # Delay respetuoso - REMOVED for performance optimization as scraper_parallel handles rate limiting
+        # time.sleep(1.5) 
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (compatible; B2BDataCollectorBot/1.0)',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        }
+        
+        logger.info(f"Scrapeando empresa: {url}")
+        
+        response = requests.get(url, headers=headers, timeout=10, allow_redirects=True)
         
         if response.status_code == 200:
             soup = BeautifulSoup(response.content, 'html.parser')
             text = soup.get_text()
             
+            # Extraer de página principal
             resultado['emails'] = extraer_emails_b2b(soup, text)
             resultado['telefonos'] = extraer_telefonos_b2b(soup, text)
             
+            # Si no encontró suficiente info, buscar en página de contacto
             if len(resultado['emails']) == 0 or len(resultado['telefonos']) == 0:
-                datos_contacto = await buscar_en_pagina_contacto_async(url, soup, client)
+                datos_contacto = buscar_en_pagina_contacto(url, soup)
                 resultado['emails'].extend(datos_contacto['emails'])
                 resultado['telefonos'].extend(datos_contacto['telefonos'])
             
             # Extraer redes sociales
             for link in soup.find_all('a', href=True):
                 href = link['href']
-                if 'linkedin.com' in href: resultado['linkedin'] = href
-                elif 'facebook.com' in href: resultado['facebook'] = href
-                elif 'twitter.com' in href or 'x.com' in href: resultado['twitter'] = href
-                elif 'instagram.com' in href: resultado['instagram'] = href
+                if 'linkedin.com' in href:
+                    resultado['linkedin'] = href
+                elif 'facebook.com' in href:
+                    resultado['facebook'] = href
+                elif 'twitter.com' in href or 'x.com' in href:
+                    resultado['twitter'] = href
+                elif 'instagram.com' in href:
+                    resultado['instagram'] = href
             
+            # Eliminar duplicados
             resultado['emails'] = list(set(resultado['emails']))[:3]
             resultado['telefonos'] = list(set(resultado['telefonos']))[:3]
+            
             resultado['exito'] = True
             
+            logger.info(f" Scraped: {len(resultado['emails'])} emails, {len(resultado['telefonos'])} teléfonos")
+        else:
+            logger.warning(f"HTTP {response.status_code}: {url}")
+            
+    except requests.exceptions.Timeout:
+        logger.warning(f"Timeout: {url}")
     except Exception as e:
-        logger.debug(f"Error scraping {url}: {e}")
-    finally:
-        if manage_client:
-            await client.aclose()
+        logger.error(f"Error scraping {url}: {e}")
     
     return resultado
 
-async def enriquecer_empresa_b2b_async(empresa: Dict, client: Optional[httpx.AsyncClient] = None) -> Dict:
-    """Enriquece datos de empresa con web scraping async"""
-    if not empresa or not isinstance(empresa, dict): return {}
+def enriquecer_empresa_b2b(empresa: Dict) -> Dict:
+    """
+    Enriquece datos de empresa con web scraping si tiene sitio web
+    """
+    if not empresa or not isinstance(empresa, dict):
+        logger.error("Empresa inválida en enriquecer_empresa_b2b")
+        return empresa or {}
     
     website = empresa.get('website')
     if not website or not isinstance(website, str) or not website.strip():
         return empresa
     
-    if empresa.get('email') and empresa.get('telefono'):
+    # Validar que website sea una URL válida básica
+    try:
+        parsed = urlparse(website if website.startswith('http') else f'https://{website}')
+        if not parsed.netloc:
+            logger.warning(f"Website inválido: {website}")
+            return empresa
+    except Exception as e:
+        logger.warning(f"Error validando website {website}: {e}")
         return empresa
     
-    datos_scraped = await scrapear_empresa_b2b_async(website, client)
+    # Si ya tiene email y teléfono, podemos saltarlo para ser más rápidos
+    if empresa.get('email') and empresa.get('telefono'):
+        logger.info(f" {empresa.get('nombre')} ya tiene contacto completo")
+        return empresa
     
+    # Scrapear sitio web
+    datos_scraped = scrapear_empresa_b2b(website)
+    
+    # Actualizar solo si están vacíos
     if not empresa.get('email') and datos_scraped['emails']:
         empresa['email'] = datos_scraped['emails'][0]
     
     if not empresa.get('telefono') and datos_scraped['telefonos']:
         empresa['telefono'] = datos_scraped['telefonos'][0]
     
-    # Redes sociales
-    for field in ['linkedin', 'facebook', 'twitter']:
-        if not empresa.get(field) and datos_scraped.get(field):
-            empresa[field] = datos_scraped[field]
-            
+    # Agregar redes sociales
+    empresa['linkedin'] = datos_scraped.get('linkedin', '')
+    empresa['facebook'] = datos_scraped.get('facebook', '')
+    empresa['twitter'] = datos_scraped.get('twitter', '')
+    
     return empresa
 

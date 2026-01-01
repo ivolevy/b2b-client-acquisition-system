@@ -36,7 +36,6 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [gmailStatus, setGmailStatus] = useState({ connected: false, loading: true });
   const { user } = useAuth();
   const { toasts, success, error: toastError, warning, removeToast } = useToast();
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
     loadTemplates();
@@ -62,7 +61,9 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     try {
       const response = await axios.get(`${API_URL}/templates`);
       setTemplates(response.data.data || []);
-      // Eliminamos la selección automática del primer template
+      if (response.data.data && response.data.data.length > 0 && !selectedTemplate) {
+        setSelectedTemplate(response.data.data[0].id);
+      }
     } catch (err) {
       console.error('Error cargando templates:', err);
       toastError(
@@ -75,28 +76,27 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   };
 
   const wrapInPremiumTemplate = (content, empresa) => {
-    // Escapar variables básicas
-    const escape = (text) => text?.replace(/[&<>"']/g, (m) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[m])) || '';
+    const senderName = user?.name || 'Representante';
+    const senderEmail = user?.email || '';
 
     const formattedContent = content.replace(/\n/g, '<br/>');
-    const senderName = user?.name || user?.email?.split('@')[0] || 'Un profesional';
-    const senderEmail = user?.email || '';
 
     return `
       <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.8; color: #1e293b; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+        <div style="background-color: #0f172a; padding: 32px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Propuesta Comercial</h1>
+        </div>
         <div style="padding: 40px 32px;">
           <div style="font-size: 16px; color: #334155;">
             ${formattedContent}
           </div>
           <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid #f1f5f9;">
-            <p style="margin: 0; font-weight: 700; color: #0f172a; font-size: 16px;">${escape(senderName)}</p>
-            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">${escape(senderEmail)}</p>
+            <p style="margin: 0; font-weight: 700; color: #0f172a; font-size: 16px;">${senderName}</p>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">${senderEmail}</p>
           </div>
         </div>
         <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #f1f5f9;">
-          <p style="margin: 0; color: #94a3b8; font-size: 12px;">Email enviado de forma segura.</p>
+          <p style="margin: 0; color: #94a3b8; font-size: 12px;">Enviado a través de Smart Leads</p>
         </div>
       </div>
     `;
@@ -153,12 +153,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     }
 
     if (modo === 'individual') {
-      const isSelected = selectedEmpresas.some(e => e.id === empresa.id);
-      if (isSelected) {
-        setSelectedEmpresas([]);
-      } else {
-        setSelectedEmpresas([empresa]);
-      }
+      setSelectedEmpresas([empresa]);
     } else {
       const exists = selectedEmpresas.find(e => e.id === empresa.id);
       if (exists) {
@@ -247,116 +242,125 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     }
   };
 
-  const executeSend = async () => {
-    if (loading) return;
-    
-    // Validaciones de seguridad antes de empezar
-    if (!selectedTemplate) {
-      toastError("No se ha seleccionado ningún template.");
-      return;
-    }
-    if (selectedEmpresas.length === 0) {
-      toastError("No hay empresas seleccionadas para enviar.");
+  const handleEnviar = async () => {
+    if (!selectedTemplate || selectedEmpresas.length === 0) {
+      warning(
+        <>
+          <strong>Selecciona template y empresas</strong>
+          <p>Necesitas elegir un template y al menos una empresa con email.</p>
+        </>
+      );
       return;
     }
 
-    console.log("🚀 Iniciando envío. Modo:", modo, "Total:", selectedEmpresas.length);
+    // Validar que el template existe
+    const template = templates.find(t => t.id === selectedTemplate);
+    if (!template) {
+      toastError(
+        <>
+          <strong>Template no encontrado</strong>
+          <p>El template seleccionado ya no existe. Por favor, selecciona otro.</p>
+        </>
+      );
+      return;
+    }
+
+    // Validar que todas las empresas tienen email
+    const empresasSinEmail = selectedEmpresas.filter(e => !e.email || !e.email.trim());
+    if (empresasSinEmail.length > 0) {
+      warning(
+        <>
+          <strong>Algunas empresas no tienen email</strong>
+          <p>{empresasSinEmail.length} empresa(s) no tienen email válido. Serán excluidas del envío.</p>
+        </>
+      );
+      // Filtrar empresas sin email
+      setSelectedEmpresas(selectedEmpresas.filter(e => e.email && e.email.trim()));
+      if (selectedEmpresas.length === 0) {
+        return;
+      }
+    }
+
+    if (!window.confirm(`¿Enviar email${selectedEmpresas.length > 1 ? 's' : ''} a ${selectedEmpresas.length} empresa${selectedEmpresas.length > 1 ? 's' : ''}?`)) {
+      return;
+    }
+
     setLoading(true);
-    setShowConfirmModal(false);
 
     try {
-      const templateIdNum = parseInt(selectedTemplate);
-      
       if (modo === 'individual' || selectedEmpresas.length === 1) {
-        const targetEmpresa = selectedEmpresas[0];
-        if (!targetEmpresa?.id) throw new Error("Datos de empresa insuficientes (falta ID)");
-
-        const payload = {
-          empresa_id: targetEmpresa.id,
-          template_id: templateIdNum,
+        const response = await axios.post(`${API_URL}/email/enviar`, {
+          empresa_id: selectedEmpresas[0].id,
+          template_id: selectedTemplate,
           asunto_personalizado: asuntoPersonalizado || null,
           user_id: user?.id || null
-        };
-        
-        console.log("Enviando individual:", payload);
-        const response = await axios.post(`${API_URL}/email/enviar`, payload);
+        });
 
         if (response.data.success) {
           success(
-            <>
-              <strong>¡Email enviado!</strong>
-              <p>Se envió correctamente a {targetEmpresa.nombre}</p>
-            </>
+            <div className="personalized-toast">
+              <div className="toast-icon">🚀</div>
+              <div className="toast-body">
+                <strong>¡Email enviado con éxito!</strong>
+                <p>Tu mensaje para <strong>{selectedEmpresas[0].nombre}</strong> está en camino.</p>
+              </div>
+            </div>
           );
+          // NO cerrar (stay in view)
+          setLoading(false);
+          // Opcional: limpiar selección si es individual
           if (modo === 'individual') setSelectedEmpresas([]);
         }
       } else {
-        const MAX_BATCH = 100;
-        const batch = selectedEmpresas.slice(0, MAX_BATCH);
-        
-        const payload = {
-          empresa_ids: batch.map(e => e.id),
-          template_id: templateIdNum,
-          asunto_personalizado: asuntoPersonalizado || null,
-          delay_segundos: parseFloat(delaySegundos) || 1.0,
-          user_id: user?.id || null
-        };
-
-        console.log("Enviando masivo:", payload);
-        const response = await axios.post(`${API_URL}/email/enviar-masivo`, payload);
-
-        if (response.data.success) {
-          const count = response.data.sent_count || (response.data.data && response.data.data.exitosos) || batch.length;
-          success(
+        // Limitar cantidad de emails para evitar rate limiting
+        const MAX_EMAILS_MASIVOS = 100;
+        const empresasAEnviar = selectedEmpresas.slice(0, MAX_EMAILS_MASIVOS);
+        if (selectedEmpresas.length > MAX_EMAILS_MASIVOS) {
+          warning(
             <>
-              <strong>¡Envío completado!</strong>
-              <p>Se enviaron {count} correos exitosamente.</p>
+              <strong>Límite de envío masivo</strong>
+              <p>Se enviarán solo las primeras {MAX_EMAILS_MASIVOS} empresas de {selectedEmpresas.length} seleccionadas.</p>
             </>
           );
-          setSelectedEmpresas([]);
+        }
+
+        const response = await axios.post(`${API_URL}/email/enviar-masivo`, {
+          empresa_ids: empresasAEnviar.map(e => e.id),
+          template_id: selectedTemplate,
+          asunto_personalizado: asuntoPersonalizado || null,
+          delay_segundos: 3.0,
+          user_id: user?.id || null
+        });
+
+        if (response.data.success) {
+          const { exitosos, fallidos, sin_email } = response.data.data;
+          success(
+            <>
+              <strong>Envío completado</strong>
+              <ul>
+                <li><strong>{exitosos}</strong> exitosos</li>
+                <li><strong>{fallidos}</strong> fallidos</li>
+                <li><strong>{sin_email}</strong> sin email</li>
+              </ul>
+            </>
+          );
+          // NO cerrar (stay in view)
+          setLoading(false);
+          setSelectedEmpresas([]); // Limpiar selección tras envío masivo
         }
       }
-    } catch (error) {
-      console.error('❌ Error en executeSend:', error);
-      const msg = error.response?.data?.detail || error.message || "Error desconocido en el servidor";
+    } catch (err) {
+      console.error('Error enviando email:', err);
+      const errorMsg = err.response?.data?.detail || err.message;
       toastError(
         <>
-          <strong>Error en el proceso</strong>
-          <p>{typeof msg === 'string' ? msg : "Hubo un problema al procesar el envío."}</p>
+          <strong>Error al enviar</strong>
+          <p>{errorMsg}</p>
         </>
       );
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleEnviar = () => {
-    if (loading) return;
-
-    if (!selectedTemplate) {
-      warning("Primero seleccioná un template de la lista.");
-      return;
-    }
-
-    if (selectedEmpresas.length === 0) {
-      warning("Seleccioná al menos una empresa de la lista.");
-      return;
-    }
-
-    // Filtrar empresas sin email de forma inmediata (local)
-    const validas = selectedEmpresas.filter(e => e.email && e.email.trim());
-    
-    if (validas.length === 0) {
-      toastError("Ninguna de las empresas seleccionadas tiene un email válido.");
-      return;
-    }
-
-    if (validas.length < selectedEmpresas.length) {
-      warning(`${selectedEmpresas.length - validas.length} empresas fueron descartadas por no tener email.`);
-      setSelectedEmpresas(validas); // Actualizar para que la UI refleje el cambio
-    }
-
-    setShowConfirmModal(true);
   };
 
   const empresasConEmail = empresas.filter(e => e.email);
@@ -707,49 +711,8 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           {content}
         </div>
       </div>
-      
-      {showConfirmModal && (
-        <ConfirmSendModal 
-          onConfirm={executeSend} 
-          onCancel={() => setShowConfirmModal(false)} 
-          count={selectedEmpresas.length}
-        />
-      )}
-      
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </>
-  );
-}
-
-// Modal de confirmación personalizado
-function ConfirmSendModal({ onConfirm, onCancel, count }) {
-  return (
-    <div className="confirm-modal-overlay" onClick={onCancel}>
-      <div className="confirm-modal" onClick={e => e.stopPropagation()}>
-        <div className="confirm-modal-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-          </svg>
-        </div>
-        <h3>¿Confirmar envío?</h3>
-        <p>
-          Estás por enviar <strong>{count}</strong> {count === 1 ? 'email' : 'emails'}.
-          Esta acción no se puede deshacer.
-        </p>
-        <div className="confirm-modal-actions">
-          <button type="button" className="confirm-btn-cancel" onClick={onCancel}>
-            Cancelar
-          </button>
-          <button type="button" className="confirm-btn-send" onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onConfirm();
-          }}>
-            Enviar ahora
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -757,24 +720,16 @@ function ConfirmSendModal({ onConfirm, onCancel, count }) {
 function TemplateEditorInline({ template, onSave, onCancel, embedded = false, toastWarning }) {
   const [nombre, setNombre] = useState(template.nombre || '');
   const [subject, setSubject] = useState(template.subject || '');
-  const [bodyText, setBodyText] = useState(template.body_text || template.body_html?.replace(/<[^>]*>/g, '') || '');
+  const [bodyHtml, setBodyHtml] = useState(template.body_html || '');
+  const [bodyText, setBodyText] = useState(template.body_text || '');
   const [saving, setSaving] = useState(false);
 
-  const variables = [
-    { label: 'Nombre Empresa', value: '{nombre_empresa}' },
-    { label: 'Rubro', value: '{rubro}' },
-    { label: 'Ciudad', value: '{ciudad}' },
-    { label: 'Dirección', value: '{direccion}' },
-    { label: 'Website', value: '{website}' },
-    { label: 'Fecha', value: '{fecha}' },
-  ];
-
   const handleSave = async () => {
-    if (!nombre || !subject || !bodyText) {
+    if (!nombre || !subject || !bodyHtml) {
       toastWarning?.(
         <>
           <strong>Campos obligatorios</strong>
-          <p>Completa nombre, asunto y cuerpo del mensaje antes de guardar.</p>
+          <p>Completa nombre, asunto y cuerpo HTML antes de guardar.</p>
         </>
       );
       return;
@@ -785,84 +740,66 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
       await onSave({
         nombre,
         subject,
-        body_html: bodyText, // El backend lo recibirá como texto pero el sender lo envolverá
-        body_text: bodyText
+        body_html: bodyHtml,
+        body_text: bodyText || null
       });
     } finally {
       setSaving(false);
     }
   };
 
-  const insertVariable = (variable) => {
-    setBodyText(prev => prev + ' ' + variable + ' ');
-  };
-
   return (
     <div className={`template-editor-inline ${embedded ? 'embedded' : ''}`}>
       <div className="template-editor-inline-header">
-        <div className="header-icon-small">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
-        </div>
         <h3>{template.id ? 'Editar Template' : 'Nuevo Template'}</h3>
         <button className="close-btn" onClick={onCancel}>×</button>
       </div>
       <div className="template-editor-inline-content">
-        <div className="form-grid">
-          <div className="form-group">
-            <label>Nombre del Template *</label>
-            <input
-              type="text"
-              className="editor-input"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder="Ej: Presentación Inicial"
-              disabled={saving}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Asunto del Email *</label>
-            <input
-              type="text"
-              className="editor-input"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Ej: Hola {nombre_empresa}..."
-              disabled={saving}
-            />
-          </div>
+        <div className="form-group">
+          <label>Nombre del Template *</label>
+          <input
+            type="text"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Ej: Presentación Inicial"
+            disabled={saving}
+          />
         </div>
 
         <div className="form-group">
-          <div className="label-with-actions-inline">
-            <label>Cuerpo del Mensaje *</label>
-            <div className="variable-buttons-inline">
-              {variables.map(v => (
-                <button 
-                  key={v.value} 
-                  className="variable-btn-inline"
-                  onClick={() => insertVariable(v.value)}
-                  type="button"
-                >
-                  + {v.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <label>Asunto *</label>
+          <input
+            type="text"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Ej: Hola {nombre_empresa} - Oportunidad"
+            disabled={saving}
+          />
+          <small className="hint">Variables disponibles: {`{nombre_empresa}`}, {`{rubro}`}, {`{ciudad}`}, {`{direccion}`}, {`{website}`}, {`{fecha}`}</small>
+        </div>
+
+        <div className="form-group">
+          <label>Cuerpo HTML *</label>
+          <textarea
+            value={bodyHtml}
+            onChange={(e) => setBodyHtml(e.target.value)}
+            rows={15}
+            placeholder="<html>...</html>"
+            disabled={saving}
+            className="template-textarea"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Cuerpo Texto Plano (opcional)</label>
           <textarea
             value={bodyText}
             onChange={(e) => setBodyText(e.target.value)}
-            rows={12}
-            placeholder="Escribe tu mensaje aquí..."
+            rows={10}
+            placeholder="Versión texto plano del email"
             disabled={saving}
-            className="template-textarea-inline"
+            className="template-textarea"
           />
-          <p className="editor-hint">
-            El sistema aplicará automáticamente un formato profesional a este texto antes de enviarlo.
-          </p>
         </div>
 
         <div className="template-editor-actions">
@@ -878,7 +815,7 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
             onClick={handleSave}
             disabled={saving}
           >
-            {saving ? 'Guardando...' : template.id ? 'Guardar Cambios' : 'Crear Template'}
+            {saving ? 'Guardando...' : 'Guardar'}
           </button>
         </div>
       </div>
