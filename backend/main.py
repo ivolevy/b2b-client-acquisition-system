@@ -1179,16 +1179,15 @@ async def google_callback(code: str, state: str):
         success = save_user_oauth_token(user_id, token_data)
         
         if not success:
-            return Response(status_code=302, headers={"Location": "/profile?gmail=error&reason=save_failed"})
+            return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=error&reason=save_failed"})
             
         # Redirigir de vuelta al frontend (ajustar URL según sea necesario)
-        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-        return Response(status_code=302, headers={"Location": f"{frontend_url}/profile?gmail=success"})
+        return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=success"})
         
     except Exception as e:
         logger.error(f"Error en callback de Google Auth: {e}")
         frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-        return Response(status_code=302, headers={"Location": f"{frontend_url}/profile?gmail=error&reason={str(e)}"})
+        return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=error&reason={str(e)}"})
 
 @app.get("/auth/google/status/{user_id}")
 async def google_status(user_id: str):

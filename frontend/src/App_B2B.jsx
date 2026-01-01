@@ -58,6 +58,22 @@ function AppB2B() {
   const [showAllResults, setShowAllResults] = useState(false);
   const [isFromHistory, setIsFromHistory] = useState(false);
 
+  // Manejar feedback de Gmail OAuth redirect
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const gmailStatus = params.get('gmail');
+    
+    if (gmailStatus === 'success') {
+      success("✓ Gmail conectado correctamente. Ya podés enviar correos.");
+      // Limpiar parámetros de la URL
+      navigate('/', { replace: true });
+    } else if (gmailStatus === 'error') {
+      const reason = params.get('reason');
+      error(`✗ Error al conectar con Gmail: ${reason || 'Error desconocido'}`);
+      navigate('/', { replace: true });
+    }
+  }, [location.search, navigate, success, error]);
+
   useEffect(() => {
     // No cargar empresas automáticamente - solo cuando el usuario hace una búsqueda
     loadStats();

@@ -75,6 +75,39 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     }
   };
 
+  const wrapInPremiumTemplate = (content, empresa) => {
+    // Escapar variables básicas
+    const escape = (text) => text?.replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m])) || '';
+
+    const formattedContent = content.replace(/\n/g, '<br/>');
+
+    return `
+      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.8; color: #1e293b; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+        <div style="background-color: #0f172a; padding: 32px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.02em;">Dota Solutions</h1>
+        </div>
+        <div style="padding: 40px 32px;">
+          <div style="font-size: 16px; color: #334155;">
+            ${formattedContent}
+          </div>
+          <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid #f1f5f9;">
+            <p style="margin: 0; font-weight: 700; color: #0f172a; font-size: 16px;">Ivan Levy</p>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">CTO – Dota Solutions</p>
+            <div style="margin-top: 20px;">
+              <a href="https://www.linkedin.com/in/ivan-levy/" style="display: inline-block; margin-right: 16px; color: #2563eb; text-decoration: none; font-size: 14px; font-weight: 500;">LinkedIn</a>
+              <a href="https://www.dotasolutions.agency/" style="display: inline-block; color: #2563eb; text-decoration: none; font-size: 14px; font-weight: 500;">Sitio web</a>
+            </div>
+          </div>
+        </div>
+        <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #f1f5f9;">
+          <p style="margin: 0; color: #94a3b8; font-size: 12px;">© 2025 Dota Solutions. Todos los derechos reservados.</p>
+        </div>
+      </div>
+    `;
+  };
+
   const generatePreview = (empresa) => {
     if (!selectedTemplate) return null;
     
@@ -94,19 +127,22 @@ function EmailSender({ empresas, onClose, embedded = false }) {
       rubro: escapeHtml(empresa.rubro || ''),
       ciudad: escapeHtml(empresa.ciudad || ''),
       direccion: escapeHtml(empresa.direccion || ''),
-      website: escapeHtml(empresa.website || '')
+      website: escapeHtml(empresa.website || ''),
+      fecha: new Date().toLocaleDateString()
     };
 
     let subject = asuntoPersonalizado || template.subject || '';
-    let body = template.body_html || '';
+    let bodyPlainText = template.body_text || template.body_html || '';
 
-    // Reemplazar variables, manejando casos donde no existan
+    // Reemplazar variables
     Object.keys(variables).forEach(key => {
       const value = variables[key] || '';
       const regex = new RegExp(`\\{${key}\\}`, 'g');
       subject = subject.replace(regex, value);
-      body = body.replace(regex, value);
+      bodyPlainText = bodyPlainText.replace(regex, value);
     });
+
+    const body = wrapInPremiumTemplate(bodyPlainText, empresa);
 
     return { subject, body };
   };
@@ -273,7 +309,10 @@ function EmailSender({ empresas, onClose, embedded = false }) {
               <p>a {selectedEmpresas[0].nombre}</p>
             </>
           );
-          onClose();
+          // NO cerrar (stay in view)
+          setLoading(false);
+          // Opcional: limpiar selección si es individual
+          if (modo === 'individual') setSelectedEmpresas([]);
         }
       } else {
         // Limitar cantidad de emails para evitar rate limiting
@@ -308,7 +347,9 @@ function EmailSender({ empresas, onClose, embedded = false }) {
               </ul>
             </>
           );
-          onClose();
+          // NO cerrar (stay in view)
+          setLoading(false);
+          setSelectedEmpresas([]); // Limpiar selección tras envío masivo
         }
       }
     } catch (err) {
