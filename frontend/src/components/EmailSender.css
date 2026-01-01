@@ -1206,6 +1206,7 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(59, 130, 246, 0.4);
 }
+
 .personalized-toast {
   display: flex;
   align-items: center;
@@ -1226,7 +1227,9 @@
 
 .toast-body strong {
   font-size: 1.1rem;
-  color: #f8fafc;
+  /* Slightly larger for emphasis */
+  color: #0f172a;
+  /* Slate-900: Dark text for visibility on white background */
 }
 
 .toast-body p {
@@ -1236,9 +1239,19 @@
 }
 
 @keyframes toastBounce {
-  0% { transform: scale(0.5); opacity: 0; }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Modal Personalizado de Confirmación */
@@ -1384,11 +1397,25 @@
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }

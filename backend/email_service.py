@@ -209,25 +209,25 @@ def enviar_email(
         }
 
 def wrap_premium_template(content: str, sender_name: str, sender_email: str) -> str:
-    """Envuelve el contenido en el diseño premium"""
+    """Envuelve el contenido en un diseño natural y minimalista (estilo carta profesional)"""
     formatted_content = content.replace('\n', '<br/>')
     
     return f"""
-      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.8; color: #1e293b; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-        <div style="background-color: #0f172a; padding: 32px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em;">Propuesta Comercial</h1>
-        </div>
-        <div style="padding: 40px 32px;">
-          <div style="font-size: 16px; color: #334155;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto;">
+        
+        <div style="padding: 20px 0;">
+          <div style="font-size: 16px; color: #333333;">
             {formatted_content}
           </div>
-          <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid #f1f5f9;">
-            <p style="margin: 0; font-weight: 700; color: #0f172a; font-size: 16px;">{sender_name}</p>
-            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">{sender_email}</p>
+          
+          <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #eaeaea;">
+            <p style="margin: 0; font-weight: 600; color: #111111; font-size: 15px;">{sender_name}</p>
+            <p style="margin: 2px 0 0 0; color: #666666; font-size: 14px;">{sender_email}</p>
           </div>
         </div>
-        <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #f1f5f9;">
-          <p style="margin: 0; color: #94a3b8; font-size: 12px;">Enviado a través de Smart Leads</p>
+
+        <div style="padding-top: 20px; text-align: left;">
+          <p style="margin: 0; color: #999999; font-size: 11px;">Enviado a través de Smart Leads</p>
         </div>
       </div>
     """
