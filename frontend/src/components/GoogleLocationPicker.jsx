@@ -50,12 +50,38 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
 
   // Reset initialLocationApplied cuando cambia initialLocation
   useEffect(() => {
-    if (initialLocation) {
+    if (initialLocation && initialLocation.lat && initialLocation.lng) {
       setInitialLocationApplied(false);
-    } else {
-      setInitialLocationApplied(false);
+      
+      const { lat, lng } = initialLocation;
+      setMapCenter({ lat, lng });
+      setSelectedLocation({ lat, lng });
+      
+      if (initialLocation.radius) {
+        setRadius(initialLocation.radius / 1000); // viene en metros del filtro pero en el state es metros... wait.
+        // FiltersB2B sends radius in METERS.
+        // setRadius state relies on METERS? No.
+        // Let's check handleRadiusChange. It receives value from select.
+        // Select values are 1000, 5000 etc (meters).
+        // setRadius(newRadius). 
+        // InitialLocation needs to provide METERS.
+        // FiltersB2B: radius: historySearchData.radio_km ? historySearchData.radio_km * 1000 : 5000
+        setRadius(initialLocation.radius); 
+      }
+      
+      if (initialLocation.name) {
+        setSearchQuery(initialLocation.name);
+      }
+
+      if (mapRef.current) {
+        mapRef.current.panTo({ lat, lng });
+        mapRef.current.setZoom(15);
+      }
+      
+      // Trigger update
+      handleLocationSelect(lat, lng, initialLocation.name);
     }
-  }, [initialLocation]);
+  }, [initialLocation, handleLocationSelect]);
 
   const handleLocationSelect = useCallback((lat, lng, ubicacionNombre = null) => {
     const location = { lat, lng };
