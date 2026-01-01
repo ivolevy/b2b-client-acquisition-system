@@ -153,7 +153,12 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     }
 
     if (modo === 'individual') {
-      setSelectedEmpresas([empresa]);
+      const isSelected = selectedEmpresas.some(e => e.id === empresa.id);
+      if (isSelected) {
+        setSelectedEmpresas([]);
+      } else {
+        setSelectedEmpresas([empresa]);
+      }
     } else {
       const exists = selectedEmpresas.find(e => e.id === empresa.id);
       if (exists) {
