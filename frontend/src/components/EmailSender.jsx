@@ -33,6 +33,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [delaySegundos, setDelaySegundos] = useState(1.0);
   const [activeTab, setActiveTab] = useState('enviar'); // 'enviar' o 'templates'
   const [editingTemplate, setEditingTemplate] = useState(null);
+  const [gmailStatus, setGmailStatus] = useState({ connected: false, loading: true });
   const { user } = useAuth();
   const { toasts, success, error: toastError, warning, removeToast } = useToast();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
