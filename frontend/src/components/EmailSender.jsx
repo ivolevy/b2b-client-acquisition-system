@@ -781,6 +781,15 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
   const [bodyHtml, setBodyHtml] = useState(getCleanBody());
   // bodyText ya no se usa independiente, se deriva del mismo input
   
+  const [copiedVar, setCopiedVar] = useState(null);
+  const variables = ['{nombre_empresa}', '{rubro}', '{ciudad}', '{direccion}', '{website}', '{fecha}'];
+
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedVar(text);
+    setTimeout(() => setCopiedVar(null), 1500);
+  };
+  
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -833,7 +842,19 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
             onChange={(e) => setSubject(e.target.value)}
             disabled={saving}
           />
-          <small className="hint">Variables disponibles: {`{nombre_empresa}`}, {`{rubro}`}, {`{ciudad}`}, {`{direccion}`}, {`{website}`}, {`{fecha}`}</small>
+          <div className="variable-chips-container">
+            {variables.map(v => (
+              <button
+                key={v}
+                type="button"
+                className={`variable-chip ${copiedVar === v ? 'copied' : ''}`}
+                onClick={() => handleCopy(v)}
+                title="Click para copiar"
+              >
+                {copiedVar === v ? '¡Copiado!' : v}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="form-group">

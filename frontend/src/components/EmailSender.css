@@ -1419,3 +1419,38 @@
     transform: translateY(-10px);
   }
 }
+
+.variable-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.variable-chip {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #3b82f6;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.variable-chip:hover {
+  background: #dbeafe;
+  transform: translateY(-1px);
+}
+
+.variable-chip:active {
+  transform: translateY(0);
+}
+
+.variable-chip.copied {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+}
