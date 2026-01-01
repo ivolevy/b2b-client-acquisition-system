@@ -59,7 +59,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
           bbox: historySearchData.bbox,
           scrapear_websites: scrapearWebsites,
           solo_validadas: soloValidadas,
-          limpiar_anterior: true,
+          limpiar_anterior: false,
           busqueda_ubicacion_nombre: historySearchData.ubicacion_nombre || null,
           busqueda_centro_lat: historySearchData.centro_lat || null,
           busqueda_centro_lng: historySearchData.centro_lng || null,
