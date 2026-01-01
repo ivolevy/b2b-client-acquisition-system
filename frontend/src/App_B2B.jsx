@@ -69,10 +69,10 @@ function AppB2B() {
       navigate('/', { replace: true });
     } else if (gmailStatus === 'error') {
       const reason = params.get('reason');
-      error(`✗ Error al conectar con Gmail: ${reason || 'Error desconocido'}`);
+      toastError(`✗ Error al conectar con Gmail: ${reason || 'Error desconocido'}`);
       navigate('/', { replace: true });
     }
-  }, [location.search, navigate, success, error]);
+  }, [location.search, navigate, success, toastError]);
 
   useEffect(() => {
     // No cargar empresas automáticamente - solo cuando el usuario hace una búsqueda
