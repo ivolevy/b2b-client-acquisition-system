@@ -249,79 +249,80 @@ function EmailSender({ empresas, onClose, embedded = false }) {
 
   const executeSend = async () => {
     if (loading) return;
-    console.log("Iniciando executeSend. Modo:", modo, "Empresas:", selectedEmpresas.length, "Template:", selectedTemplate);
     
+    // Validaciones de seguridad antes de empezar
+    if (!selectedTemplate) {
+      toastError("No se ha seleccionado ningún template.");
+      return;
+    }
+    if (selectedEmpresas.length === 0) {
+      toastError("No hay empresas seleccionadas para enviar.");
+      return;
+    }
+
+    console.log("🚀 Iniciando envío. Modo:", modo, "Total:", selectedEmpresas.length);
     setLoading(true);
     setShowConfirmModal(false);
 
     try {
+      const templateIdNum = parseInt(selectedTemplate);
+      
       if (modo === 'individual' || selectedEmpresas.length === 1) {
-        if (!selectedEmpresas[0]) throw new Error("No hay empresa seleccionada");
-        
-        const response = await axios.post(`${API_URL}/email/enviar`, {
-          empresa_id: selectedEmpresas[0].id,
-          template_id: parseInt(selectedTemplate),
+        const targetEmpresa = selectedEmpresas[0];
+        if (!targetEmpresa?.id) throw new Error("Datos de empresa insuficientes (falta ID)");
+
+        const payload = {
+          empresa_id: targetEmpresa.id,
+          template_id: templateIdNum,
           asunto_personalizado: asuntoPersonalizado || null,
           user_id: user?.id || null
-        });
+        };
+        
+        console.log("Enviando individual:", payload);
+        const response = await axios.post(`${API_URL}/email/enviar`, payload);
 
         if (response.data.success) {
           success(
             <>
-              <strong>Email enviado exitosamente</strong>
-              <p>a {selectedEmpresas[0].nombre}</p>
+              <strong>¡Email enviado!</strong>
+              <p>Se envió correctamente a {targetEmpresa.nombre}</p>
             </>
           );
           if (modo === 'individual') setSelectedEmpresas([]);
         }
       } else {
-        // Limitar cantidad de emails para evitar rate limiting
-        const MAX_EMAILS_MASIVOS = 100;
-        const empresasAEnviar = selectedEmpresas.slice(0, MAX_EMAILS_MASIVOS);
+        const MAX_BATCH = 100;
+        const batch = selectedEmpresas.slice(0, MAX_BATCH);
         
-        console.log("Enviando masivo a:", empresasAEnviar.length, "empresas");
-
-        const response = await axios.post(`${API_URL}/email/enviar-masivo`, {
-          empresa_ids: empresasAEnviar.map(e => e.id),
-          template_id: parseInt(selectedTemplate),
+        const payload = {
+          empresa_ids: batch.map(e => e.id),
+          template_id: templateIdNum,
           asunto_personalizado: asuntoPersonalizado || null,
           delay_segundos: parseFloat(delaySegundos) || 1.0,
           user_id: user?.id || null
-        });
+        };
+
+        console.log("Enviando masivo:", payload);
+        const response = await axios.post(`${API_URL}/email/enviar-masivo`, payload);
 
         if (response.data.success) {
-          const sentCount = response.data.sent_count || 
-                           (response.data.data && response.data.data.exitosos) || 
-                           empresasAEnviar.length;
-
-          if (response.data.warnings && response.data.warnings.length > 0) {
-            warning(
-              <>
-                <strong>Envío completado con advertencias</strong>
-                <p>{sentCount} enviados, {response.data.warnings.length} fallidos.</p>
-              </>
-            );
-          } else {
-            success(
-              <>
-                <strong>¡Misión cumplida!</strong>
-                <p>Se enviaron {sentCount} correos correctamente.</p>
-              </>
-            );
-          }
-          setSelectedEmpresas([]); // Limpiar lista tras envío masivo
+          const count = response.data.sent_count || (response.data.data && response.data.data.exitosos) || batch.length;
+          success(
+            <>
+              <strong>¡Envío completado!</strong>
+              <p>Se enviaron {count} correos exitosamente.</p>
+            </>
+          );
+          setSelectedEmpresas([]);
         }
       }
     } catch (error) {
-      console.error('Error detallado enviando email:', error);
-      const errorDetail = error.response?.data?.detail;
-      const errorMsg = typeof errorDetail === 'string' ? errorDetail : 
-                       (errorDetail?.message || error.message || "Hubo un problema al conectar con el servidor.");
-      
+      console.error('❌ Error en executeSend:', error);
+      const msg = error.response?.data?.detail || error.message || "Error desconocido en el servidor";
       toastError(
         <>
-          <strong>Error en el envío</strong>
-          <p>{errorMsg}</p>
+          <strong>Error en el proceso</strong>
+          <p>{typeof msg === 'string' ? msg : "Hubo un problema al procesar el envío."}</p>
         </>
       );
     } finally {
@@ -330,45 +331,31 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   };
 
   const handleEnviar = () => {
-    if (!selectedTemplate || selectedEmpresas.length === 0) {
-      warning(
-        <>
-          <strong>Selecciona template y empresas</strong>
-          <p>Necesitas elegir un template y al menos una empresa con email.</p>
-        </>
-      );
+    if (loading) return;
+
+    if (!selectedTemplate) {
+      warning("Primero seleccioná un template de la lista.");
       return;
     }
 
-    // Validar que el template existe
-    const template = templates.find(t => t.id === selectedTemplate);
-    if (!template) {
-      toastError(
-        <>
-          <strong>Template no encontrado</strong>
-          <p>El template seleccionado ya no existe. Por favor, selecciona otro.</p>
-        </>
-      );
+    if (selectedEmpresas.length === 0) {
+      warning("Seleccioná al menos una empresa de la lista.");
       return;
     }
 
-    // Validar que todas las empresas tienen email
-    const empresasSinEmail = selectedEmpresas.filter(e => !e.email || !e.email.trim());
-    if (empresasSinEmail.length > 0) {
-      warning(
-        <>
-          <strong>Algunas empresas no tienen email</strong>
-          <p>{empresasSinEmail.length} empresa(s) no tienen email válido. Serán excluidas del envío.</p>
-        </>
-      );
-      // Filtrar empresas sin email
-      setSelectedEmpresas(selectedEmpresas.filter(e => e.email && e.email.trim()));
-      if (selectedEmpresas.length === 0) {
-        return;
-      }
+    // Filtrar empresas sin email de forma inmediata (local)
+    const validas = selectedEmpresas.filter(e => e.email && e.email.trim());
+    
+    if (validas.length === 0) {
+      toastError("Ninguna de las empresas seleccionadas tiene un email válido.");
+      return;
     }
 
-    // Usar modal de confirmación en lugar de alert
+    if (validas.length < selectedEmpresas.length) {
+      warning(`${selectedEmpresas.length - validas.length} empresas fueron descartadas por no tener email.`);
+      setSelectedEmpresas(validas); // Actualizar para que la UI refleje el cambio
+    }
+
     setShowConfirmModal(true);
   };
 
@@ -750,10 +737,14 @@ function ConfirmSendModal({ onConfirm, onCancel, count }) {
           Esta acción no se puede deshacer.
         </p>
         <div className="confirm-modal-actions">
-          <button className="confirm-btn-cancel" onClick={onCancel}>
+          <button type="button" className="confirm-btn-cancel" onClick={onCancel}>
             Cancelar
           </button>
-          <button className="confirm-btn-send" onClick={onConfirm}>
+          <button type="button" className="confirm-btn-send" onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onConfirm();
+          }}>
             Enviar ahora
           </button>
         </div>
