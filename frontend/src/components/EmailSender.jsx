@@ -765,8 +765,22 @@ function EmailSender({ empresas, onClose, embedded = false }) {
 function TemplateEditorInline({ template, onSave, onCancel, embedded = false, toastWarning }) {
   const [nombre, setNombre] = useState(template.nombre || '');
   const [subject, setSubject] = useState(template.subject || '');
-  const [bodyHtml, setBodyHtml] = useState(template.body_html || '');
-  const [bodyText, setBodyText] = useState(template.body_text || '');
+  
+  // Limpieza agresiva de HTML al cargar (igual que en TemplateEditor.jsx)
+  const getCleanBody = () => {
+    let clean = template.body_text || '';
+    if (!clean || clean.trim().startsWith('<') || clean.includes('</div>')) {
+      // Intentar extraer texto del HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = template.body_html || template.body_text || '';
+      clean = tempDiv.textContent || tempDiv.innerText || '';
+    }
+    return clean.trim();
+  };
+
+  const [bodyHtml, setBodyHtml] = useState(getCleanBody());
+  // bodyText ya no se usa independiente, se deriva del mismo input
+  
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -774,7 +788,7 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
       toastWarning?.(
         <>
           <strong>Campos obligatorios</strong>
-          <p>Completa nombre, asunto y cuerpo HTML antes de guardar.</p>
+          <p>Completa nombre, asunto y cuerpo del mensaje antes de guardar.</p>
         </>
       );
       return;
@@ -785,8 +799,8 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
       await onSave({
         nombre,
         subject,
-        body_html: bodyHtml,
-        body_text: bodyText || null
+        body_html: bodyHtml, // Enviamos el texto plano aquí
+        body_text: bodyHtml  // Y aquí también
       });
     } finally {
       setSaving(false);
@@ -817,34 +831,21 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder="Ej: Hola {nombre_empresa} - Oportunidad"
             disabled={saving}
           />
           <small className="hint">Variables disponibles: {`{nombre_empresa}`}, {`{rubro}`}, {`{ciudad}`}, {`{direccion}`}, {`{website}`}, {`{fecha}`}</small>
         </div>
 
         <div className="form-group">
-          <label>Cuerpo HTML *</label>
+          <label>Cuerpo del Mensaje *</label>
           <textarea
             value={bodyHtml}
             onChange={(e) => setBodyHtml(e.target.value)}
             rows={15}
-            placeholder="<html>...</html>"
             disabled={saving}
             className="template-textarea"
           />
-        </div>
-
-        <div className="form-group">
-          <label>Cuerpo Texto Plano (opcional)</label>
-          <textarea
-            value={bodyText}
-            onChange={(e) => setBodyText(e.target.value)}
-            rows={10}
-            placeholder="Versión texto plano del email"
-            disabled={saving}
-            className="template-textarea"
-          />
+          <p className="hint">El sistema aplicará formato profesional automáticamente.</p>
         </div>
 
         <div className="template-editor-actions">
