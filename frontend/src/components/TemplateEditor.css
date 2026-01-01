@@ -95,11 +95,22 @@
 
 .form-group input,
 .form-group textarea {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 14px 16px;
-  color: white;
+  color: #0f172a;
+  font-size: 1rem;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #64748b;
+  /* Slate-500, visible but distinct from text */
+  opacity: 1;
+
   font-size: 1rem;
   transition: all 0.2s;
   width: 100%;
@@ -134,15 +145,24 @@
 }
 
 .variable-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 0.7rem;
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.variable-btn::before {
+  content: '+';
+  font-weight: bold;
+
 }
 
 .variable-btn:hover {

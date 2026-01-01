@@ -154,7 +154,12 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     }
 
     if (modo === 'individual') {
-      setSelectedEmpresas([empresa]);
+      const isAlreadySelected = selectedEmpresas.length === 1 && selectedEmpresas[0].id === empresa.id;
+      if (isAlreadySelected) {
+        setSelectedEmpresas([]);
+      } else {
+        setSelectedEmpresas([empresa]);
+      }
     } else {
       const exists = selectedEmpresas.find(e => e.id === empresa.id);
       if (exists) {

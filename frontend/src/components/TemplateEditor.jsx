@@ -181,7 +181,7 @@ function TemplateEditor({ templateId, onClose, onSave }) {
                       onClick={() => insertVariable(v.value)}
                       title={`Insertar ${v.label}`}
                     >
-                      + {v.label}
+                      {v.label}
                     </button>
                   ))}
                 </div>
@@ -190,11 +190,11 @@ function TemplateEditor({ templateId, onClose, onSave }) {
                 value={bodyText}
                 onChange={(e) => setBodyText(e.target.value)}
                 rows={12}
-                placeholder="Escribe tu mensaje aquí..."
+                placeholder="Escribe el contenido de tu email..."
                 disabled={loading}
               />
               <p className="editor-hint">
-                El sistema aplicará automáticamente un formato profesional a este texto antes de enviarlo.
+                Se aplicará formato profesional automáticamente.
               </p>
             </div>
 
