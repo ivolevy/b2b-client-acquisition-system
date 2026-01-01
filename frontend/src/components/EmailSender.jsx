@@ -249,14 +249,18 @@ function EmailSender({ empresas, onClose, embedded = false }) {
 
   const executeSend = async () => {
     if (loading) return;
+    console.log("Iniciando executeSend. Modo:", modo, "Empresas:", selectedEmpresas.length, "Template:", selectedTemplate);
+    
     setLoading(true);
     setShowConfirmModal(false);
 
     try {
       if (modo === 'individual' || selectedEmpresas.length === 1) {
+        if (!selectedEmpresas[0]) throw new Error("No hay empresa seleccionada");
+        
         const response = await axios.post(`${API_URL}/email/enviar`, {
           empresa_id: selectedEmpresas[0].id,
-          template_id: selectedTemplate,
+          template_id: parseInt(selectedTemplate),
           asunto_personalizado: asuntoPersonalizado || null,
           user_id: user?.id || null
         });
@@ -268,7 +272,6 @@ function EmailSender({ empresas, onClose, embedded = false }) {
               <p>a {selectedEmpresas[0].nombre}</p>
             </>
           );
-          setLoading(false);
           if (modo === 'individual') setSelectedEmpresas([]);
         }
       } else {
@@ -276,46 +279,52 @@ function EmailSender({ empresas, onClose, embedded = false }) {
         const MAX_EMAILS_MASIVOS = 100;
         const empresasAEnviar = selectedEmpresas.slice(0, MAX_EMAILS_MASIVOS);
         
+        console.log("Enviando masivo a:", empresasAEnviar.length, "empresas");
+
         const response = await axios.post(`${API_URL}/email/enviar-masivo`, {
-          empresas: empresasAEnviar.map(e => ({
-            id: e.id,
-            email: e.email,
-            nombre: e.nombre,
-            rubro: e.rubro
-          })),
-          template_id: selectedTemplate,
-          delay_segundos: delaySegundos,
+          empresa_ids: empresasAEnviar.map(e => e.id),
+          template_id: parseInt(selectedTemplate),
+          asunto_personalizado: asuntoPersonalizado || null,
+          delay_segundos: parseFloat(delaySegundos) || 1.0,
           user_id: user?.id || null
         });
 
         if (response.data.success) {
+          const sentCount = response.data.sent_count || 
+                           (response.data.data && response.data.data.exitosos) || 
+                           empresasAEnviar.length;
+
           if (response.data.warnings && response.data.warnings.length > 0) {
             warning(
               <>
                 <strong>Envío completado con advertencias</strong>
-                <p>{response.data.sent_count} enviados, {response.data.warnings.length} fallidos.</p>
+                <p>{sentCount} enviados, {response.data.warnings.length} fallidos.</p>
               </>
             );
           } else {
             success(
               <>
                 <strong>¡Misión cumplida!</strong>
-                <p>Se enviaron {response.data.sent_count} correos correctamente.</p>
+                <p>Se enviaron {sentCount} correos correctamente.</p>
               </>
             );
           }
-          setLoading(false);
           setSelectedEmpresas([]); // Limpiar lista tras envío masivo
         }
       }
     } catch (error) {
-      console.error('Error enviando email:', error);
+      console.error('Error detallado enviando email:', error);
+      const errorDetail = error.response?.data?.detail;
+      const errorMsg = typeof errorDetail === 'string' ? errorDetail : 
+                       (errorDetail?.message || error.message || "Hubo un problema al conectar con el servidor.");
+      
       toastError(
         <>
           <strong>Error en el envío</strong>
-          <p>{error.response?.data?.detail || "Hubo un problema al conectar con el servidor de correos."}</p>
+          <p>{errorMsg}</p>
         </>
       );
+    } finally {
       setLoading(false);
     }
   };
