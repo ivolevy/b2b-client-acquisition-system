@@ -45,7 +45,7 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
         setTimeout(() => reject(new Error('Timeout: La solicitud tardó demasiado (30s). Por favor, verificá tu conexión.')), 30000)
       );
 
-      const fetchPromise = searchHistoryService.getHistory(user.id, 20);
+      const fetchPromise = searchHistoryService.getHistory(user.id, 5);
       const result = await Promise.race([fetchPromise, timeoutPromise]);
       const { data, error: fetchError } = result || { data: null, error: new Error('No se recibió respuesta') };
       
