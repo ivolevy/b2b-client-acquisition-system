@@ -538,7 +538,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     // Mostrar mensaje de carga
     const loadingToast = info('Obteniendo tu ubicación...');
 
-    // Primero intentar con opciones más permisivas (permite usar caché)
+    // Función recursiva con reintentos
     const tryGetLocation = (options, attempt = 1) => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -557,16 +557,19 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           );
         },
         (err) => {
-          // Si falla con opciones permisivas y es el primer intento, intentar con high accuracy
-          if (attempt === 1 && !options.enableHighAccuracy) {
+          // Si es un timeout y es el primer intento, reintentar con un tiempo más largo
+          if (attempt === 1) {
             removeToast(loadingToast);
-            const retryToast = info('Intentando con mayor precisión...');
+            const retryToast = info('La primera vez puede tardar un poco más, reintentando...');
+            
+            // Reintentar con opciones más relajadas o más precisas según sea el caso
             tryGetLocation({
-              enableHighAccuracy: true,
-              timeout: 15000,
-              maximumAge: 60000 // Permitir caché de hasta 1 minuto
-            }, 2);
-            setTimeout(() => removeToast(retryToast), 2000);
+              enableHighAccuracy: attempt === 1 ? true : options.enableHighAccuracy,
+              timeout: 20000, // Aumentar a 20 segundos
+              maximumAge: 60000
+            }, attempt + 1);
+            
+            setTimeout(() => removeToast(retryToast), 3000);
             return;
           }
 
@@ -577,18 +580,18 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           switch (err.code) {
             case err.PERMISSION_DENIED:
               errorMessage = 'Permiso de ubicación denegado';
-              errorDetails = 'Por favor, permite el acceso a tu ubicación en la configuración del navegador. En Chrome/Edge: Configuración > Privacidad y seguridad > Ubicación. En Firefox: Configuración > Privacidad y seguridad > Permisos > Ubicación.';
+              errorDetails = 'Por favor, permite el acceso a tu ubicación en la configuración del navegador.';
               break;
             case err.POSITION_UNAVAILABLE:
               errorMessage = 'Ubicación no disponible';
-              errorDetails = 'Tu ubicación no está disponible. Verifica que el GPS esté activado y que tengas señal. También puedes buscar una dirección manualmente.';
+              errorDetails = 'Tu ubicación no está disponible actualmente. Verifica que el GPS esté activado.';
               break;
             case err.TIMEOUT:
               errorMessage = 'Tiempo de espera agotado';
-              errorDetails = 'La solicitud de ubicación tardó demasiado. Verifica tu conexión y que el GPS esté activado, o busca una dirección manualmente.';
+              errorDetails = 'La solicitud de ubicación tardó demasiado. Intentá de nuevo o buscá una dirección manualmente.';
               break;
             default:
-              errorDetails = err.message || 'Error desconocido. Intenta buscar una dirección manualmente.';
+              errorDetails = err.message || 'Error desconocido.';
               break;
           }
 
@@ -603,11 +606,11 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       );
     };
 
-    // Intentar primero con opciones más permisivas
+    // Intentar primero con opciones rápidas
     tryGetLocation({
       enableHighAccuracy: false,
-      timeout: 15000,
-      maximumAge: 300000 // Permitir caché de hasta 5 minutos
+      timeout: 10000, 
+      maximumAge: 300000 // 5 mins caché
     });
   };
 

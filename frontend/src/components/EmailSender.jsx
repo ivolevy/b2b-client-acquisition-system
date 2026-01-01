@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ToastContainer from './ToastContainer';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../AuthWrapper';
 import { API_URL } from '../config';
 import './EmailSender.css';
 

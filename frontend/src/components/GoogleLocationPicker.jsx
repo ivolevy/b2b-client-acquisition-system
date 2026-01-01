@@ -289,53 +289,74 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
 
     const loadingToast = info('Obteniendo tu ubicación...');
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        removeToast(loadingToast);
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const location = { lat, lng };
-        
-        setMapCenter(location);
-        setSelectedLocation(location);
-        setSearchQuery('Mi ubicación actual');
-        
-        if (mapRef.current) {
-          mapRef.current.panTo(location);
-          mapRef.current.setZoom(15);
-        }
-        
-        handleLocationSelect(lat, lng, 'Mi ubicación actual');
-        success(
-          <>
-            <strong>Ubicación obtenida</strong>
-            <p>Se ha establecido tu ubicación actual en el mapa.</p>
-          </>
-        );
-      },
-      (err) => {
-        removeToast(loadingToast);
-        let errorMsg = 'No se pudo obtener tu ubicación.';
-        if (err.code === 1) {
-          errorMsg = 'Permiso de ubicación denegado. Por favor, permite el acceso en la configuración de tu navegador.';
-        } else if (err.code === 2) {
-          errorMsg = 'Ubicación no disponible. Verifica tu conexión GPS.';
-        } else if (err.code === 3) {
-          errorMsg = 'Tiempo de espera agotado. Intenta nuevamente.';
-        }
-        error(
-          <>
-            <strong>Error al obtener ubicación</strong>
-            <p>{errorMsg}</p>
-          </>
-        );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-    );
+    // Función recursiva con reintentos
+    const tryGetLocation = (options, attempt = 1) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          removeToast(loadingToast);
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const location = { lat, lng };
+          
+          setMapCenter(location);
+          setSelectedLocation(location);
+          setSearchQuery('Mi ubicación actual');
+          
+          if (mapRef.current) {
+            mapRef.current.panTo(location);
+            mapRef.current.setZoom(15);
+          }
+          
+          handleLocationSelect(lat, lng, 'Mi ubicación actual');
+          success(
+            <>
+              <strong>Ubicación obtenida</strong>
+              <p>Se ha establecido tu ubicación actual en el mapa.</p>
+            </>
+          );
+        },
+        (err) => {
+          // Si es un timeout y es el primer intento, reintentar con un tiempo más largo
+          if (attempt === 1) {
+            removeToast(loadingToast);
+            const retryToast = info('La primera vez puede tardar un poco más, reintentando...');
+            
+            tryGetLocation({
+              enableHighAccuracy: true,
+              timeout: 20000, // Aumentar a 20 segundos
+              maximumAge: 60000
+            }, attempt + 1);
+            
+            setTimeout(() => removeToast(retryToast), 3000);
+            return;
+          }
+
+          removeToast(loadingToast);
+          let errorMsg = 'No se pudo obtener tu ubicación.';
+          if (err.code === 1) {
+            errorMsg = 'Permiso de ubicación denegado. Por favor, permite el acceso en la configuración de tu navegador.';
+          } else if (err.code === 2) {
+            errorMsg = 'Ubicación no disponible. Verifica tu conexión GPS.';
+          } else if (err.code === 3) {
+            errorMsg = 'Tiempo de espera agotado. Intentá de nuevo o buscá una dirección manualmente.';
+          }
+          error(
+            <>
+              <strong>Error al obtener ubicación</strong>
+              <p>{errorMsg}</p>
+            </>
+          );
+        },
+        options
+      );
+    };
+
+    // Intentar primero con opciones rápidas (permitiendo caché)
+    tryGetLocation({
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 300000 // 5 mins caché
+    });
   };
 
   // Actualizar mapa cuando cambia mapCenter (optimizado para evitar movimientos innecesarios)
