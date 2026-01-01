@@ -67,7 +67,8 @@ def _resolver_max_workers(candidatos: int, max_workers: Optional[int]) -> int:
         return ENV_MAX_WORKERS
     
     cpu_count = os.cpu_count() or 4
-    calculado = min(12, max(4, cpu_count * 2))
+    # Optimization: Increased from max 12 to max 30 for I/O bound tasks
+    calculado = min(30, max(10, cpu_count * 5))
     return min(calculado, max(1, candidatos))
 
 

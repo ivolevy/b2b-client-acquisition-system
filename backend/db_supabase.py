@@ -388,3 +388,70 @@ def activar_suscripcion_con_codigo(user_id: str, codigo: str) -> dict:
     except Exception as e:
         print(f"Error activando suscripción: {e}")
         return {"success": False, "error": f"Error al procesar activación: {str(e)}"}
+
+# --- GMAIL OAUTH FUNCTIONS ---
+
+def save_user_oauth_token(user_id: str, token_data: Dict, provider: str = 'google') -> bool:
+    """Guarda o actualiza tokens OAuth de un usuario"""
+    admin_client = get_supabase_admin()
+    if not admin_client:
+        return False
+        
+    try:
+        data = {
+            'user_id': user_id,
+            'provider': provider,
+            'access_token': token_data.get('access_token'),
+            'refresh_token': token_data.get('refresh_token'),
+            'token_expiry': token_data.get('expiry'), # ISO string from google-auth
+            'scope': token_data.get('scope'),
+            'token_type': token_data.get('token_type', 'Bearer'),
+            'account_email': token_data.get('account_email'),
+            'updated_at': datetime.now().isoformat()
+        }
+        
+        # Eliminar nulos
+        data = {k: v for k, v in data.items() if v is not None}
+        
+        response = admin_client.table('user_oauth_tokens').upsert(data, on_conflict='user_id,provider').execute()
+        return bool(response.data)
+    except Exception as e:
+        logger.error(f"Error guardando token OAuth para {user_id}: {e}")
+        return False
+
+def get_user_oauth_token(user_id: str, provider: str = 'google') -> Optional[Dict]:
+    """Recupera los tokens OAuth de un usuario"""
+    admin_client = get_supabase_admin()
+    if not admin_client:
+        return None
+        
+    try:
+        response = admin_client.table('user_oauth_tokens')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .eq('provider', provider)\
+            .execute()
+            
+        if response.data:
+            return response.data[0]
+        return None
+    except Exception as e:
+        logger.error(f"Error obteniendo token OAuth para {user_id}: {e}")
+        return None
+
+def delete_user_oauth_token(user_id: str, provider: str = 'google') -> bool:
+    """Elimina la conexión OAuth de un usuario"""
+    admin_client = get_supabase_admin()
+    if not admin_client:
+        return False
+        
+    try:
+        response = admin_client.table('user_oauth_tokens')\
+            .delete()\
+            .eq('user_id', user_id)\
+            .eq('provider', provider)\
+            .execute()
+        return True
+    except Exception as e:
+        logger.error(f"Error eliminando token OAuth para {user_id}: {e}")
+        return False

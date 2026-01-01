@@ -31,6 +31,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [delaySegundos, setDelaySegundos] = useState(1.0);
   const [activeTab, setActiveTab] = useState('enviar'); // 'enviar' o 'templates'
   const [editingTemplate, setEditingTemplate] = useState(null);
+  const { user } = useAuth();
   const { toasts, success, error: toastError, warning, removeToast } = useToast();
 
   useEffect(() => {
@@ -242,7 +243,8 @@ function EmailSender({ empresas, onClose, embedded = false }) {
         const response = await axios.post(`${API_URL}/email/enviar`, {
           empresa_id: selectedEmpresas[0].id,
           template_id: selectedTemplate,
-          asunto_personalizado: asuntoPersonalizado || null
+          asunto_personalizado: asuntoPersonalizado || null,
+          user_id: user?.id || null
         });
 
         if (response.data.success) {
@@ -271,7 +273,8 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           empresa_ids: empresasAEnviar.map(e => e.id),
           template_id: selectedTemplate,
           asunto_personalizado: asuntoPersonalizado || null,
-          delay_segundos: 3.0  // Delay automático: 3 segundos (óptimo para evitar spam y rate limiting)
+          delay_segundos: 3.0,
+          user_id: user?.id || null
         });
 
         if (response.data.success) {

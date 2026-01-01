@@ -168,8 +168,8 @@ def scrapear_empresa_b2b(url: str) -> Dict:
             logger.warning(f"Bloqueado por robots.txt: {url}")
             return resultado
         
-        # Delay respetuoso
-        time.sleep(1.5)
+        # Delay respetuoso - REMOVED for performance optimization as scraper_parallel handles rate limiting
+        # time.sleep(1.5) 
         
         headers = {
             'User-Agent': 'Mozilla/5.0 (compatible; B2BDataCollectorBot/1.0)',
@@ -178,7 +178,7 @@ def scrapear_empresa_b2b(url: str) -> Dict:
         
         logger.info(f"Scrapeando empresa: {url}")
         
-        response = requests.get(url, headers=headers, timeout=15, allow_redirects=True)
+        response = requests.get(url, headers=headers, timeout=10, allow_redirects=True)
         
         if response.status_code == 200:
             soup = BeautifulSoup(response.content, 'html.parser')

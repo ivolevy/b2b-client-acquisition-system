@@ -14,6 +14,13 @@ from dotenv import load_dotenv
 import socket
 import re
 
+try:
+    from .db_supabase import get_user_oauth_token, save_user_oauth_token
+    from .auth_google import send_gmail_api
+except ImportError:
+    from db_supabase import get_user_oauth_token, save_user_oauth_token
+    from auth_google import send_gmail_api
+
 # Cargar variables de entorno desde .env.local o .env (busca en el directorio del backend)
 env_local_path = os.path.join(os.path.dirname(__file__), '.env.local')
 env_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -77,10 +84,11 @@ def enviar_email(
     destinatario: str,
     asunto: str,
     cuerpo_html: str,
-    cuerpo_texto: Optional[str] = None
+    cuerpo_texto: Optional[str] = None,
+    user_id: Optional[str] = None
 ) -> Dict:
     """
-    Envía un email individual
+    Envía un email individual. Prioriza Gmail API si el usuario está conectado.
     
     Returns:
         Dict con success, message, error
@@ -95,7 +103,41 @@ def enviar_email(
             'error': 'INVALID_EMAIL'
         }
     destinatario = email_limpio
-    
+
+    # 1. Intentar enviar vía Gmail API si tenemos user_id
+    if user_id:
+        token_data = get_user_oauth_token(user_id)
+        if token_data:
+            logger.info(f" Intentando enviar vía Gmail API para usuario {user_id}")
+            success_gmail, new_creds = send_gmail_api(
+                token_data=token_data,
+                to=destinatario,
+                subject=asunto,
+                body_html=cuerpo_html
+            )
+            
+            # Si se refrescó el token, guardarlo
+            if new_creds:
+                logger.info(f" Actualizando token refrescado para usuario {user_id}")
+                save_user_oauth_token(user_id, {
+                    'access_token': new_creds.token,
+                    'refresh_token': new_creds.refresh_token,
+                    'expiry': new_creds.expiry.isoformat() if new_creds.expiry else None,
+                    'scope': new_creds.scopes,
+                    'account_email': token_data.get('account_email')
+                })
+
+            if success_gmail:
+                return {
+                    'success': True,
+                    'message': f'Email enviado vía Gmail API a {destinatario}',
+                    'error': None,
+                    'via': 'gmail_api'
+                }
+            else:
+                logger.warning(f" Falló envío vía Gmail API, reintentando con SMTP global...")
+
+    # 2. Fallback a SMTP Global
     if not SMTP_PASSWORD or SMTP_PASSWORD.strip() == '':
         env_file_path = os.path.join(os.path.dirname(__file__), '.env.local')
         return {
@@ -169,7 +211,8 @@ def enviar_email(
 def enviar_email_empresa(
     empresa: Dict,
     template: Dict,
-    asunto_personalizado: Optional[str] = None
+    asunto_personalizado: Optional[str] = None,
+    user_id: Optional[str] = None
 ) -> Dict:
     """
     Envía email a una empresa usando un template
@@ -211,7 +254,8 @@ def enviar_email_empresa(
         destinatario=empresa['email'],
         asunto=asunto,
         cuerpo_html=cuerpo_html,
-        cuerpo_texto=cuerpo_texto
+        cuerpo_texto=cuerpo_texto,
+        user_id=user_id
     )
     
     # Agregar info de la empresa al resultado
@@ -225,7 +269,8 @@ def enviar_emails_masivo(
     empresas: List[Dict],
     template: Dict,
     asunto_personalizado: Optional[str] = None,
-    delay_segundos: float = 3.0  # Delay automático: 3 segundos (óptimo para evitar spam y rate limiting)
+    delay_segundos: float = 3.0,
+    user_id: Optional[str] = None
 ) -> Dict:
     """
     Envía emails a múltiples empresas
@@ -283,7 +328,7 @@ def enviar_emails_masivo(
             })
             continue
         
-        resultado = enviar_email_empresa(empresa, template, asunto_personalizado)
+        resultado = enviar_email_empresa(empresa, template, asunto_personalizado, user_id=user_id)
         
         if resultado['success']:
             resultados['exitosos'] += 1

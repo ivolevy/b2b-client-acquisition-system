@@ -34,8 +34,12 @@ try:
         exportar_a_json, 
         init_db_b2b, 
         crear_usuario_admin,
-        obtener_todas_empresas
+        obtener_todas_empresas,
+        get_user_oauth_token,
+        save_user_oauth_token,
+        delete_user_oauth_token
     )
+    from .auth_google import get_google_auth_url, exchange_code_for_token
 except ImportError:
     # Fallback for direct execution
     from overpass_client import (
@@ -48,6 +52,20 @@ except ImportError:
     from social_scraper import enriquecer_con_redes_sociales
     from scraper_parallel import enriquecer_empresas_paralelo
     from validators import validar_empresa
+    from db_supabase import (
+        insertar_empresa, 
+        buscar_empresas, 
+        obtener_estadisticas, 
+        exportar_a_csv, 
+        exportar_a_json, 
+        init_db_b2b, 
+        crear_usuario_admin,
+        obtener_todas_empresas,
+        get_user_oauth_token,
+        save_user_oauth_token,
+        delete_user_oauth_token
+    )
+    from auth_google import get_google_auth_url, exchange_code_for_token
     from db_supabase import (
         insertar_empresa, 
         buscar_empresas, 
@@ -449,12 +467,22 @@ class EnviarEmailRequest(BaseModel):
     empresa_id: int
     template_id: int
     asunto_personalizado: Optional[str] = None
+    user_id: Optional[str] = None
 
 class EnviarEmailMasivoRequest(BaseModel):
     empresa_ids: List[int]
     template_id: int
     asunto_personalizado: Optional[str] = None
-    delay_segundos: float = 3.0  # Delay automático: 3 segundos (óptimo para evitar spam y rate limiting)
+    delay_segundos: float = 3.0
+    user_id: Optional[str] = None
+
+# Modelos Gmail OAuth
+class GoogleAuthURLRequest(BaseModel):
+    state: str
+
+class GoogleCallbackRequest(BaseModel):
+    code: str
+    user_id: str
 
 # Inicializar sistema en memoria
 @app.on_event("startup")
@@ -1124,6 +1152,70 @@ async def eliminar_template_endpoint(template_id: int):
         logger.error(f"Error eliminando template: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ========== GMAIL OAUTH ENDPOINTS ==========
+
+@app.post("/auth/google/url")
+async def google_auth_url(request: GoogleAuthURLRequest):
+    """Obtiene la URL para iniciar el flujo de Google OAuth"""
+    try:
+        url = get_google_auth_url(state=request.state)
+        return {"success": True, "url": url}
+    except Exception as e:
+        logger.error(f"Error generando URL de Google Auth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/auth/google/callback")
+async def google_callback(code: str, state: str):
+    """Maneja el callback de Google OAuth e intercambia el código por tokens"""
+    try:
+        # Extraer user_id del state (pasado como string o json)
+        # Por simplicidad, asumimos que el state ES el user_id o contiene el user_id
+        user_id = state
+        
+        # Intercambiar código por tokens
+        token_data = exchange_code_for_token(code)
+        
+        # Guardar tokens en la base de datos
+        success = save_user_oauth_token(user_id, token_data)
+        
+        if not success:
+            return Response(status_code=302, headers={"Location": "/profile?gmail=error&reason=save_failed"})
+            
+        # Redirigir de vuelta al frontend (ajustar URL según sea necesario)
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+        return Response(status_code=302, headers={"Location": f"{frontend_url}/profile?gmail=success"})
+        
+    except Exception as e:
+        logger.error(f"Error en callback de Google Auth: {e}")
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+        return Response(status_code=302, headers={"Location": f"{frontend_url}/profile?gmail=error&reason={str(e)}"})
+
+@app.get("/auth/google/status/{user_id}")
+async def google_status(user_id: str):
+    """Verifica si el usuario tiene una cuenta de Gmail conectada"""
+    try:
+        token_data = get_user_oauth_token(user_id)
+        if token_data:
+            return {
+                "success": True,
+                "connected": True,
+                "account_email": token_data.get("account_email")
+            }
+        return {"success": True, "connected": False}
+    except Exception as e:
+        logger.error(f"Error obteniendo estado de Google Auth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/auth/google/disconnect/{user_id}")
+async def google_disconnect(user_id: str):
+    """Elimina la conexión con Google Gmail"""
+    try:
+        success = delete_user_oauth_token(user_id)
+        return {"success": success, "message": "Cuenta desconectada exitosamente"}
+    except Exception as e:
+        logger.error(f"Error desconectando Google Auth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ========== ENDPOINTS DE ENVÍO DE EMAILS ==========
 
 @app.post("/email/enviar")
@@ -1149,7 +1241,8 @@ async def enviar_email_individual(request: EnviarEmailRequest):
         resultado = enviar_email_empresa(
             empresa=empresa,
             template=template,
-            asunto_personalizado=request.asunto_personalizado
+            asunto_personalizado=request.asunto_personalizado,
+            user_id=request.user_id
         )
         
         # Guardar en historial
@@ -1205,7 +1298,8 @@ async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
             empresas=empresas,
             template=template,
             asunto_personalizado=request.asunto_personalizado,
-            delay_segundos=request.delay_segundos
+            delay_segundos=request.delay_segundos,
+            user_id=request.user_id
         )
         
         # Guardar en historial
