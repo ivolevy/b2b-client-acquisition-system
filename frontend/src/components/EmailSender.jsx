@@ -33,9 +33,10 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [delaySegundos, setDelaySegundos] = useState(1.0);
   const [activeTab, setActiveTab] = useState('enviar'); // 'enviar' o 'templates'
   const [editingTemplate, setEditingTemplate] = useState(null);
-  const [gmailStatus, setGmailStatus] = useState({ connected: false, loading: true });
   const { user } = useAuth();
   const { toasts, success, error: toastError, warning, removeToast } = useToast();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
 
   useEffect(() => {
     loadTemplates();
@@ -61,9 +62,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     try {
       const response = await axios.get(`${API_URL}/templates`);
       setTemplates(response.data.data || []);
-      if (response.data.data && response.data.data.length > 0 && !selectedTemplate) {
-        setSelectedTemplate(response.data.data[0].id);
-      }
+      // Eliminamos la selección automática del primer template
     } catch (err) {
       console.error('Error cargando templates:', err);
       toastError(
@@ -82,27 +81,22 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     }[m])) || '';
 
     const formattedContent = content.replace(/\n/g, '<br/>');
+    const senderName = user?.name || user?.email?.split('@')[0] || 'Un profesional';
+    const senderEmail = user?.email || '';
 
     return `
       <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.8; color: #1e293b; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-        <div style="background-color: #0f172a; padding: 32px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.02em;">Dota Solutions</h1>
-        </div>
         <div style="padding: 40px 32px;">
           <div style="font-size: 16px; color: #334155;">
             ${formattedContent}
           </div>
           <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid #f1f5f9;">
-            <p style="margin: 0; font-weight: 700; color: #0f172a; font-size: 16px;">Ivan Levy</p>
-            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">CTO – Dota Solutions</p>
-            <div style="margin-top: 20px;">
-              <a href="https://www.linkedin.com/in/ivan-levy/" style="display: inline-block; margin-right: 16px; color: #2563eb; text-decoration: none; font-size: 14px; font-weight: 500;">LinkedIn</a>
-              <a href="https://www.dotasolutions.agency/" style="display: inline-block; color: #2563eb; text-decoration: none; font-size: 14px; font-weight: 500;">Sitio web</a>
-            </div>
+            <p style="margin: 0; font-weight: 700; color: #0f172a; font-size: 16px;">${escape(senderName)}</p>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">${escape(senderEmail)}</p>
           </div>
         </div>
         <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #f1f5f9;">
-          <p style="margin: 0; color: #94a3b8; font-size: 12px;">© 2025 Dota Solutions. Todos los derechos reservados.</p>
+          <p style="margin: 0; color: #94a3b8; font-size: 12px;">Email enviado de forma segura.</p>
         </div>
       </div>
     `;
@@ -287,11 +281,14 @@ function EmailSender({ empresas, onClose, embedded = false }) {
       }
     }
 
-    if (!window.confirm(`¿Enviar email${selectedEmpresas.length > 1 ? 's' : ''} a ${selectedEmpresas.length} empresa${selectedEmpresas.length > 1 ? 's' : ''}?`)) {
-      return;
-    }
+    // Usar modal de confirmación en lugar de alert
+    setPendingAction(() => executeSend);
+    setShowConfirmModal(true);
+  };
 
+  const executeSend = async () => {
     setLoading(true);
+    setShowConfirmModal(false);
 
     try {
       if (modo === 'individual' || selectedEmpresas.length === 1) {
@@ -714,8 +711,45 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           {content}
         </div>
       </div>
+      
+      {showConfirmModal && (
+        <ConfirmSendModal 
+          onConfirm={pendingAction} 
+          onCancel={() => setShowConfirmModal(false)} 
+          count={selectedEmpresas.length}
+        />
+      )}
+      
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </>
+  );
+}
+
+// Modal de confirmación personalizado
+function ConfirmSendModal({ onConfirm, onCancel, count }) {
+  return (
+    <div className="confirm-modal-overlay" onClick={onCancel}>
+      <div className="confirm-modal" onClick={e => e.stopPropagation()}>
+        <div className="confirm-modal-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+          </svg>
+        </div>
+        <h3>¿Confirmar envío?</h3>
+        <p>
+          Estás por enviar <strong>{count}</strong> {count === 1 ? 'email' : 'emails'}.
+          Esta acción no se puede deshacer.
+        </p>
+        <div className="confirm-modal-actions">
+          <button className="confirm-btn-cancel" onClick={onCancel}>
+            Cancelar
+          </button>
+          <button className="confirm-btn-send" onClick={onConfirm}>
+            Enviar ahora
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
