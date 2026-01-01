@@ -4,6 +4,7 @@ import ToastContainer from './ToastContainer';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../AuthWrapper';
 import { API_URL } from '../config';
+import GmailConnection from './GmailConnection';
 import './EmailSender.css';
 
 function EmailSender({ empresas, onClose, embedded = false }) {
@@ -32,12 +33,29 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [delaySegundos, setDelaySegundos] = useState(1.0);
   const [activeTab, setActiveTab] = useState('enviar'); // 'enviar' o 'templates'
   const [editingTemplate, setEditingTemplate] = useState(null);
+  const [gmailStatus, setGmailStatus] = useState({ connected: false, loading: true });
   const { user } = useAuth();
   const { toasts, success, error: toastError, warning, removeToast } = useToast();
 
   useEffect(() => {
     loadTemplates();
-  }, []);
+    checkGmailStatus();
+  }, [user]);
+
+  const checkGmailStatus = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await axios.get(`${API_URL}/auth/google/status/${user.id}`);
+      setGmailStatus({ 
+        connected: response.data.connected, 
+        loading: false,
+        email: response.data.account_email 
+      });
+    } catch (error) {
+      console.error("Error checking Gmail status:", error);
+      setGmailStatus(prev => ({ ...prev, loading: false }));
+    }
+  };
 
   const loadTemplates = async () => {
     try {
@@ -589,6 +607,59 @@ function EmailSender({ empresas, onClose, embedded = false }) {
       </div>
     </>
   );
+
+  // Pantalla de conexión si no está conectado
+  if (!gmailStatus.loading && !gmailStatus.connected && activeTab === 'enviar') {
+    return (
+      <div className={embedded ? "email-sender-embedded" : "email-sender-modal"}>
+        {!embedded && (
+          <div className="email-sender-header">
+            <h2>Enviar Emails</h2>
+            <button className="close-btn" onClick={onClose}>×</button>
+          </div>
+        )}
+        <div className="gmail-gate-container" style={{
+          padding: '40px 20px',
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '300px'
+        }}>
+          <div style={{ 
+            width: '64px', 
+            height: '64px', 
+            background: 'rgba(234, 67, 53, 0.1)', 
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '20px'
+          }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="#ea4335">
+              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
+          </div>
+          <h2 style={{ color: 'white', marginBottom: '10px' }}>Conecta tu Gmail</h2>
+          <p style={{ color: 'rgba(255, 255, 255, 0.6)', maxWidth: '400px', marginBottom: '30px', fontSize: '1rem' }}>
+            Para poder enviar campañas de email personalizadas, primero necesitás vincular tu cuenta de Google.
+          </p>
+          
+          <GmailConnection 
+            user={user} 
+            onSuccess={() => checkGmailStatus()} 
+            onError={(err) => toastError(err)} 
+          />
+          
+          <div style={{ marginTop: '30px', fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.4)' }}>
+            Tus datos están protegidos y solo usaremos el permiso para enviar los correos que vos selecciones.
+          </div>
+        </div>
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
+      </div>
+    );
+  }
 
   if (embedded) {
     return (
