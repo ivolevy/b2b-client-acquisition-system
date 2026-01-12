@@ -1002,6 +1002,15 @@ function Login({ onLogin }) {
                 {emailError && <span className="field-error">{emailError}</span>}
               </div>
 
+              {/* Fix placeholder color for Name input */}
+              <style>{`
+                #name::placeholder {
+                  color: #9ca3af !important;
+                  opacity: 1 !important;
+                }
+              `}</style>
+
+
               {mode === 'register' && (
                 <div className="form-group">
                   <label htmlFor="phone">
