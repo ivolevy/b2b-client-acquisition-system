@@ -76,18 +76,31 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(30px, -30px) scale(1.05); }
-  50% { transform: translate(-20px, 20px) scale(0.95); }
-  75% { transform: translate(20px, 30px) scale(1.02); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  25% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+
+  50% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+
+  75% {
+    transform: translate(20px, 30px) scale(1.02);
+  }
 }
 
 .grid-overlay {
   position: absolute;
   inset: 0;
-  background-image: 
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   background-size: 60px 60px;
   opacity: 0.5;
 }
@@ -101,7 +114,7 @@
   margin: 20px;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 
+  box-shadow:
     0 20px 40px -12px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.08);
   position: relative;
@@ -323,8 +336,10 @@
 }
 
 .input-wrapper input::placeholder {
-  color: #9ca3af !important; /* Gris claro para placeholder */
-  opacity: 1 !important; /* Asegurar que el color se aplique correctamente */
+  color: #9ca3af !important;
+  /* Gris claro para placeholder */
+  opacity: 1 !important;
+  /* Asegurar que el color se aplique correctamente */
 }
 
 .input-wrapper input::-webkit-input-placeholder {
@@ -372,10 +387,29 @@
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
 }
 
+/* Specific fix for Name input placeholder */
+#name::placeholder,
+#name::-webkit-input-placeholder,
+#name::-moz-placeholder,
+#name:-ms-input-placeholder,
+input#name::placeholder {
+  color: #9ca3af !important;
+  -webkit-text-fill-color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
 @keyframes inputErrorPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.01); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.01);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Selector de país para teléfono */
@@ -464,6 +498,7 @@
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -572,12 +607,12 @@
     width: 100%;
     max-width: 280px;
   }
-  
+
   .country-selector-button {
     min-width: 90px;
     padding: 12px 10px;
   }
-  
+
   .country-prefix {
     font-size: 0.85rem;
   }
@@ -621,6 +656,7 @@
     opacity: 0;
     transform: translateX(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -751,12 +787,12 @@
   transition: all 0.2s ease;
 }
 
-.remember-me input:checked + .checkmark {
+.remember-me input:checked+.checkmark {
   background: var(--login-primary);
   border-color: var(--login-primary);
 }
 
-.remember-me input:checked + .checkmark::after {
+.remember-me input:checked+.checkmark::after {
   content: '';
   width: 6px;
   height: 10px;
@@ -1043,9 +1079,26 @@
 }
 
 @keyframes shakeError {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-  20%, 40%, 60%, 80% { transform: translateX(4px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
 }
 
 /* Footer del formulario */
@@ -1128,7 +1181,7 @@
     padding: 0;
     align-items: flex-start;
   }
-  
+
   .login-container {
     margin: 0;
     border-radius: 0;
@@ -1145,12 +1198,12 @@
   .logo-container {
     margin-bottom: 16px;
   }
-  
+
   .logo-icon {
     width: 44px;
     height: 44px;
   }
-  
+
   .logo-text {
     font-size: 1.2rem;
   }
@@ -1168,11 +1221,11 @@
     font-size: 0.85rem;
     line-height: 1.5;
   }
-  
+
   .branding-footer {
     padding-top: 16px;
   }
-  
+
   .branding-footer p {
     font-size: 0.8rem;
   }
@@ -1180,7 +1233,7 @@
   .login-form-panel {
     padding: 24px 20px;
   }
-  
+
   .form-container {
     max-width: 100%;
   }
@@ -1192,18 +1245,19 @@
   .form-header h2 {
     font-size: 1.4rem;
   }
-  
+
   .form-header p {
     font-size: 0.85rem;
   }
-  
+
   .login-form {
     gap: 16px;
   }
-  
+
   .input-wrapper input {
     padding: 12px 44px 12px 14px;
-    font-size: 16px; /* Previene zoom en iOS */
+    font-size: 16px;
+    /* Previene zoom en iOS */
   }
 
   .form-options {
@@ -1211,25 +1265,25 @@
     gap: 12px;
     align-items: flex-start;
   }
-  
+
   .login-button {
     padding: 14px 20px;
     font-size: 0.95rem;
   }
-  
+
   .form-footer {
     margin-top: 24px;
     padding-top: 20px;
   }
-  
+
   .security-badge {
     margin-top: 16px;
   }
-  
+
   .auth-tabs {
     margin-bottom: 20px;
   }
-  
+
   .auth-tab {
     padding: 10px 12px;
     font-size: 0.9rem;
@@ -1242,6 +1296,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1618,6 +1673,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -1628,6 +1684,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1639,6 +1696,7 @@
     opacity: 0;
     transform: scale(0.8);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -2027,8 +2085,8 @@
   pointer-events: none;
 }
 
-.pro-token-group input:focus + .pro-icon-input,
-.pro-token-group input:not(:placeholder-shown) + .pro-icon-input {
+.pro-token-group input:focus+.pro-icon-input,
+.pro-token-group input:not(:placeholder-shown)+.pro-icon-input {
   opacity: 1;
 }
 
@@ -2080,4 +2138,3 @@
     text-align: center;
   }
 }
-
