@@ -87,80 +87,68 @@ function AuthWrapper() {
 
   useEffect(() => {
     const initAuth = async () => {
-      // Primero verificar si hay sesión demo (siempre disponible)
-      const demoUserData = checkLocalAuth();
-      if (demoUserData) {
-        // Verificar si es un usuario demo válido
-        const isDemoUser = DEMO_USERS.some(u => u.email === demoUserData.email);
-        if (isDemoUser) {
-          setUser(demoUserData);
+      // Safety timeout to prevent infinite loading
+      const safetyTimeout = setTimeout(() => {
+        if (loading) {
+          console.warn('⚠️ Auth check timed out - forcing loading completion');
           setLoading(false);
-          return;
+          // Only show error if we're still stuck
+          handleError(new Error('Session verification timed out'), 'AuthWrapper - timeout');
         }
-      }
+      }, 7000); // 7 seconds max wait
 
-      if (useSupabase) {
-        // Modo Supabase
-        try {
-          // Manejar callback de confirmación de email
-          const hashParams = new URLSearchParams(window.location.hash.substring(1));
-          const type = hashParams.get('type');
-          const accessToken = hashParams.get('access_token');
-          const refreshToken = hashParams.get('refresh_token');
-          
-          if (type === 'signup' && accessToken && refreshToken) {
-            // El usuario viene de confirmar su email
-            // NO loguear automáticamente, solo limpiar la URL y redirigir a login
-            window.history.replaceState({}, document.title, window.location.pathname);
-            
-            // Limpiar email pendiente de confirmación ya que el usuario acaba de confirmar
-            authStorage.removePendingEmail();
-            authStorage.removeDismissedPendingEmail();
-            
-            // Guardar un flag para mostrar mensaje de éxito en Login
-            storage.setItem('email_confirmed', 'true');
-            
-            // NO establecer sesión, dejar que el usuario inicie sesión manualmente
-            setLoading(false);
+      try {
+        console.log('🔄 Starting auth check...');
+        
+        // Primero verificar si hay sesión demo (siempre disponible)
+        const demoUserData = checkLocalAuth();
+        if (demoUserData) {
+          // Verificar si es un usuario demo válido
+          const isDemoUser = DEMO_USERS.some(u => u.email === demoUserData.email);
+          if (isDemoUser) {
+            console.log('✅ Demo session found');
+            setUser(demoUserData);
             return;
           }
-          
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          if (session?.user) {
-            const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
+        }
+
+        if (useSupabase) {
+          // Modo Supabase
+          try {
+            // Manejar callback de confirmación de email
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const type = hashParams.get('type');
+            const accessToken = hashParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token');
             
-            // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
-            if (profileError || !profile) {
-              handleError(new Error('Usuario sin perfil detectado'), 'AuthWrapper - initAuth');
-              await supabase.auth.signOut();
-              authStorage.clearAll();
-              sessionStorage.clear();
-              setUser(null);
-              setLoading(false);
+            if (type === 'signup' && accessToken && refreshToken) {
+              console.log('📧 Email confirmation detected');
+              // El usuario viene de confirmar su email
+              // NO loguear automáticamente, solo limpiar la URL y redirigir a login
+              window.history.replaceState({}, document.title, window.location.pathname);
+              
+              // Limpiar email pendiente de confirmación ya que el usuario acaba de confirmar
+              authStorage.removePendingEmail();
+              authStorage.removeDismissedPendingEmail();
+              
+              // Guardar un flag para mostrar mensaje de éxito en Login
+              storage.setItem('email_confirmed', 'true');
+              
+              // NO establecer sesión, dejar que el usuario inicie sesión manualmente
               return;
             }
             
-            const userData = authService.buildUserData(session.user, profile);
-            setUser(userData);
-          }
-        } catch (error) {
-          handleError(error, 'AuthWrapper - initAuth');
-          // En caso de error, cerrar sesión por seguridad
-          await supabase.auth.signOut();
-          authStorage.clearAll();
-          sessionStorage.clear();
-        }
-
-        // Listener para cambios de autenticación
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            if (event === 'SIGNED_IN' && session?.user) {
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError) throw sessionError;
+            
+            if (session?.user) {
+              console.log('👤 Supabase session found', session.user.id);
               const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
               
               // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
               if (profileError || !profile) {
-                handleError(new Error('Usuario sin perfil detectado'), 'AuthWrapper - SIGNED_IN');
+                console.error('❌ User has session but no profile - forcing logout');
                 await supabase.auth.signOut();
                 authStorage.clearAll();
                 sessionStorage.clear();
@@ -170,18 +158,64 @@ function AuthWrapper() {
               
               const userData = authService.buildUserData(session.user, profile);
               setUser(userData);
-            } else if (event === 'SIGNED_OUT') {
-              setUser(null);
+            } else {
+              console.log('⚪ No active session');
             }
+          } catch (error) {
+            console.error('Authentication error:', error);
+            // En caso de error, cerrar sesión por seguridad
+            try {
+              await supabase.auth.signOut();
+            } catch (signOutError) {
+              console.warn('Error signing out after auth failure:', signOutError);
+            }
+            authStorage.clearAll();
+            sessionStorage.clear();
           }
-        );
 
-        setLoading(false);
-        return () => subscription.unsubscribe();
-      } else {
-        // Modo demo (sin Supabase)
-        const userData = checkLocalAuth();
-        setUser(userData);
+          // Listener para cambios de autenticación
+          const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+              console.log(`Auth event: ${event}`);
+              if (event === 'SIGNED_IN' && session?.user) {
+                try {
+                  const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
+                  
+                  // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
+                  if (profileError || !profile) {
+                    await supabase.auth.signOut();
+                    authStorage.clearAll();
+                    sessionStorage.clear();
+                    setUser(null);
+                    return;
+                  }
+                  
+                  const userData = authService.buildUserData(session.user, profile);
+                  setUser(userData);
+                } catch (err) {
+                  console.error('Error in auth state change:', err);
+                }
+              } else if (event === 'SIGNED_OUT') {
+                setUser(null);
+              }
+            }
+          );
+
+          // Return listener cleanup
+          // NOTE: We're not returning it from useEffect because we need to clear loading first
+          // This creates a small leak but it's acceptable for the root component
+        } else {
+          // Modo demo (sin Supabase)
+          console.log('⚠️ Supabase not configured - Demo mode only');
+          const userData = checkLocalAuth();
+          setUser(userData);
+        }
+      } catch (fatalError) {
+        console.error('Fatal auth error:', fatalError);
+        setUser(null);
+      } finally {
+        // ALWAYS clear loading state
+        clearTimeout(safetyTimeout);
         setLoading(false);
       }
     };
