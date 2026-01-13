@@ -1,11 +1,5 @@
 <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="40" height="40" rx="12" fill="url(#logo-gradient)"/>
-  <path d="M12 20L18 14L24 20L18 26L12 20Z" fill="white" fillOpacity="0.9"/>
-  <path d="M16 20L22 14L28 20L22 26L16 20Z" fill="white" fillOpacity="0.6"/>
-  <defs>
-    <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40">
-      <stop stopColor="#81D4FA"/>
-      <stop offset="1" stopColor="#4FC3F7"/>
-    </linearGradient>
-  </defs>
+  <rect width="40" height="40" fill="#4FC3F7"/>
+  <path d="M8 20L18 10L28 20L18 30L8 20Z" fill="white" fill-opacity="0.9"/>
+  <path d="M14 20L24 10L34 20L24 30L14 20Z" fill="white" fill-opacity="0.6"/>
 </svg>
