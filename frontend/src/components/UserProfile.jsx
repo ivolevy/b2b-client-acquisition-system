@@ -578,6 +578,20 @@ function UserProfile() {
                   <li>Todos tus datos</li>
                 </ul>
               </div>
+
+              {deleteError && (
+                <div style={{ 
+                  backgroundColor: '#fee2e2', 
+                  color: '#991b1b', 
+                  padding: '12px', 
+                  borderRadius: '6px', 
+                  marginBottom: '16px',
+                  fontSize: '14px',
+                  border: '1px solid #fca5a5'
+                }}>
+                  {deleteError}
+                </div>
+              )}
               
               <div className="confirm-input">
                 <label>Escribe <strong>ELIMINAR</strong> para confirmar:</label>

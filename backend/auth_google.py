@@ -16,6 +16,9 @@ CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback")
 
+# Permitir que los scopes cambien sin lanzar error (necesario si el usuario modifica permisos o google devuelve diferente orden)
+os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+
 # Scopes necesarios para enviar correos y ver el perfil
 SCOPES = [
     'https://www.googleapis.com/auth/gmail.send',

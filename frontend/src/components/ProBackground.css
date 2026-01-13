@@ -48,16 +48,21 @@
 }
 
 @keyframes proFloat {
-  0%, 100% { 
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
-  25% { 
+
+  25% {
     transform: translate(40px, -40px) scale(1.05);
   }
-  50% { 
+
+  50% {
     transform: translate(-30px, 30px) scale(0.95);
   }
-  75% { 
+
+  75% {
     transform: translate(30px, 40px) scale(1.02);
   }
 }
@@ -65,7 +70,7 @@
 .pro-grid-overlay {
   position: absolute;
   inset: 0;
-  background-image: 
+  background-image:
     linear-gradient(rgba(129, 212, 250, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(129, 212, 250, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
@@ -73,8 +78,13 @@
 }
 
 @keyframes gridShift {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(60px, 60px); }
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(60px, 60px);
+  }
 }
 
 /* Ajustes para que el contenido sea legible */
@@ -121,18 +131,18 @@
 /* Badge PRO flotante */
 .pro-floating-badge {
   position: fixed;
-  bottom: 80px;
+  bottom: 24px;
   left: 24px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 6px 12px;
   background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%);
   border-radius: 50px;
   color: white;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  box-shadow: 
+  box-shadow:
     0 4px 20px rgba(129, 212, 250, 0.4),
     0 0 40px rgba(255, 20, 147, 0.2);
   z-index: 1000;
@@ -140,17 +150,20 @@
 }
 
 .pro-floating-badge .pro-icon {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
 }
 
 @keyframes badgeGlow {
-  0%, 100% { 
-    box-shadow: 
+
+  0%,
+  100% {
+    box-shadow:
       0 4px 20px rgba(129, 212, 250, 0.4),
       0 0 40px rgba(255, 20, 147, 0.2);
   }
-  50% { 
-    box-shadow: 
+
+  50% {
+    box-shadow:
       0 4px 30px rgba(129, 212, 250, 0.6),
       0 0 60px rgba(255, 20, 147, 0.3);
   }
@@ -162,25 +175,21 @@
     width: 400px;
     height: 400px;
   }
-  
+
   .pro-sphere-2 {
     width: 350px;
     height: 350px;
   }
-  
+
   .pro-sphere-3 {
     width: 300px;
     height: 300px;
   }
-  
+
   .pro-floating-badge {
-    bottom: 70px;
+    bottom: 20px;
     left: 16px;
-    padding: 8px 12px;
-    font-size: 0.75rem;
+    padding: 5px 10px;
+    font-size: 0.7rem;
   }
 }
-
-
-
-
