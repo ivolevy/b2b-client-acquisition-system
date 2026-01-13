@@ -37,7 +37,9 @@ try:
         obtener_todas_empresas,
         get_user_oauth_token,
         save_user_oauth_token,
-        delete_user_oauth_token
+        delete_user_oauth_token,
+        admin_update_user,
+        eliminar_usuario_totalmente
     )
     from .auth_google import get_google_auth_url, exchange_code_for_token
 except ImportError:
