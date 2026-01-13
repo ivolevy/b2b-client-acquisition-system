@@ -129,7 +129,7 @@ def admin_update_user(user_id: str, updates: Dict) -> Dict:
                      'user_id': user_id,
                      'plan': 'pro',
                      'status': 'active',
-                     'payment_method': 'admin_manual',
+                     'payment_method': 'manual',
                      'expires_at': expires_at
                  }).execute()
              else:
