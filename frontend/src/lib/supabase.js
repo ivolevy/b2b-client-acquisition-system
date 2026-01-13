@@ -662,90 +662,25 @@ export const adminService = {
 
   async updateUser(userId, updates) {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
+      console.log('[Admin] Updating user via backend:', userId, updates);
+
+      const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
+
+      const response = await fetch(`${API_URL}/admin/update-user`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          updates: updates
         })
-        .eq('id', userId)
-        .select()
-        .single();
+      });
 
-      if (error) throw error;
+      const data = await response.json();
 
-      // Si se cambió el plan, actualizar suscripciones
-      if (updates.plan) {
-        if (updates.plan === 'pro') {
-          // Si no hay fecha de expiración, establecer una por defecto (1 año)
-          const expiresAt = updates.plan_expires_at || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
-
-          // Primero buscar si existe una suscripción activa para este usuario
-          const { data: existingSub } = await supabase
-            .from('subscriptions')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('status', 'active')
-            .maybeSingle();
-
-          if (existingSub) {
-            // Actualizar suscripción existente
-            const { error: updateSubError } = await supabase
-              .from('subscriptions')
-              .update({
-                plan: 'pro',
-                status: 'active',
-                payment_method: 'manual',
-                payment_reference: 'Admin update',
-                expires_at: expiresAt,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', existingSub.id);
-
-            if (updateSubError) {
-              console.error('[Admin] Error updating subscription:', updateSubError);
-              throw updateSubError;
-            }
-          } else {
-            // Crear nueva suscripción
-            const { error: insertSubError } = await supabase
-              .from('subscriptions')
-              .insert({
-                user_id: userId,
-                plan: 'pro',
-                status: 'active',
-                payment_method: 'manual',
-                payment_reference: 'Admin update',
-                expires_at: expiresAt,
-                starts_at: new Date().toISOString()
-              });
-
-            if (insertSubError) {
-              console.error('[Admin] Error creating subscription:', insertSubError);
-              throw insertSubError;
-            }
-          }
-
-          // Asegurar que plan_expires_at esté en updates si no estaba
-          if (!updates.plan_expires_at) {
-            updates.plan_expires_at = expiresAt;
-          }
-        } else if (updates.plan === 'free') {
-          // Cancelar suscripciones activas
-          const { error: cancelSubError } = await supabase
-            .from('subscriptions')
-            .update({
-              status: 'cancelled',
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', userId)
-            .eq('status', 'active');
-
-          if (cancelSubError) {
-            console.error('[Admin] Error cancelling subscriptions:', cancelSubError);
-            throw cancelSubError;
-          }
-        }
+      if (!response.ok) {
+        throw new Error(data.detail || data.error || 'Error al actualizar usuario');
       }
 
       return { data, error: null };
@@ -754,6 +689,7 @@ export const adminService = {
       return { data: null, error };
     }
   },
+
 
   async deleteUser(userId) {
     try {

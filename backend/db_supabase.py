@@ -83,6 +83,77 @@ def crear_usuario_admin(email: str, password: str, user_metadata: Dict) -> Dict:
         logger.error(f"Error creando usuario admin: {e}")
         return {"error": str(e)}
 
+def admin_update_user(user_id: str, updates: Dict) -> Dict:
+    """Actualiza un usuario usando privilegios de admin (bypassing RLS)"""
+    admin_client = get_supabase_admin()
+    if not admin_client:
+        return {"error": "Servidor no configurado para admin (falta SERVICE_ROLE_KEY)"}
+        
+    try:
+        # 1. Separar actualizaciones de Auth vs Public
+        auth_updates = {}
+        public_updates = {}
+        subscription_updates = {}
+        
+        # Mapear campos
+        if 'email' in updates: auth_updates['email'] = updates['email']
+        if 'password' in updates: auth_updates['password'] = updates['password']
+        
+        # Campos para public.users
+        if 'plan' in updates: public_updates['plan'] = updates['plan']
+        if 'role' in updates: public_updates['role'] = updates['role']
+        if 'name' in updates: public_updates['name'] = updates['name']
+        if 'phone' in updates: public_updates['phone'] = updates['phone']
+        if 'plan_expires_at' in updates: public_updates['plan_expires_at'] = updates['plan_expires_at']
+        
+        # 2. Actualizar Auth si es necesario
+        if auth_updates:
+            admin_client.auth.admin.update_user_by_id(user_id, auth_updates)
+            
+        # 3. Actualizar Public Profile
+        if public_updates:
+            public_updates['updated_at'] = datetime.now().isoformat()
+            admin_client.table('users').update(public_updates).eq('id', user_id).execute()
+            
+        # 4. Manejar Suscripciones si cambió el plan
+        # Si cambiamos a PRO, asegurarnos de que exista una suscripción activa
+        if updates.get('plan') == 'pro':
+             # Verificar si ya tiene suscripción
+             current_sub = admin_client.table('subscriptions').select('*').eq('user_id', user_id).eq('status', 'active').execute()
+             
+             expires_at = updates.get('plan_expires_at') or (datetime.now() + 365*24*3600).isoformat() # Default 1 año si no se especifica
+             
+             if not current_sub.data:
+                 # Crear nueva suscripción
+                 admin_client.table('subscriptions').insert({
+                     'user_id': user_id,
+                     'plan': 'pro',
+                     'status': 'active',
+                     'payment_method': 'admin_manual',
+                     'expires_at': expires_at
+                 }).execute()
+             else:
+                 # Actualizar existente
+                 sub_id = current_sub.data[0]['id']
+                 admin_client.table('subscriptions').update({
+                     'plan': 'pro',
+                     'status': 'active',
+                     'expires_at': expires_at
+                 }).eq('id', sub_id).execute()
+                 
+        elif updates.get('plan') == 'free':
+             # Cancelar suscripciones activas
+             admin_client.table('subscriptions').update({
+                 'status': 'canceled',
+                 'check_cancel_at_period_end': True
+             }).eq('user_id', user_id).eq('status', 'active').execute()
+            
+        return {"success": True, "message": "Usuario actualizado correctamente"}
+        
+    except Exception as e:
+        logger.error(f"Error actualizando usuario admin {user_id}: {e}")
+        return {"error": str(e)}
+
 def init_db_b2b() -> bool:
     """Verifica conexión a Supabase"""
     client = get_supabase()
@@ -500,7 +571,10 @@ def eliminar_usuario_totalmente(user_id: str) -> Dict:
         
         for table in tables_to_clean:
             try:
-                admin_client.table(table).delete().eq('user_id', user_id).execute()
+                # La tabla 'users' usa 'id' como PK, el resto usa 'user_id' como FK
+                column_name = 'id' if table == 'users' else 'user_id'
+                
+                admin_client.table(table).delete().eq(column_name, user_id).execute()
                 logger.info(f"Datos eliminados de {table} para {user_id}")
             except Exception as e_table:
                 # Loggear pero continuar, ya que auth.users delete debería hacer cascade si está configurado

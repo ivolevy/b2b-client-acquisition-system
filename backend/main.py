@@ -1895,31 +1895,32 @@ async def delete_account(request: Request):
         token = auth_header.split(' ')[1]
         user_id = None
         
-        # Debug: Verificar entorno
+        # Debug: Verificar entorno (respetando Vercel)
         import os
-        from dotenv import load_dotenv
         
         # Intentar conectar con Supabase
         try:
-             # Asegurar que las variables de entorno estén cargadas
-             load_dotenv()
+             # En Vercel las variables ya están en el entorno, no cargamos .env local
+             
+             # Diagnóstico para Vercel Logs
+             url_env = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
+             key_env = os.getenv("SUPABASE_KEY") or os.getenv("VITE_SUPABASE_ANON_KEY")
+             service_key_env = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+             
+             logger.info(f"🔍 Vercel Env Check: URL={'OK' if url_env else 'MISSING'}, KEY={'OK' if key_env else 'MISSING'}, SERVICE_KEY={'OK' if service_key_env else 'MISSING'}")
              
              from db_supabase import get_supabase
              supabase = get_supabase()
              
              if not supabase:
-                 # Intento de recuperación manual si get_supabase falla
-                 logger.warning("⚠️ delete_account: get_supabase() devolvió None. Intentando crear cliente manualmente...")
-                 url = os.getenv("SUPABASE_URL")
-                 key = os.getenv("SUPABASE_KEY")
-                 if url and key:
+                 # Si db_supabase falla, intentamos inicializar directo con lo que hayamos encontrado
+                 if url_env and key_env:
+                     logger.warning("⚠️ get_supabase() falló. Intentando inicializar manual con variables encontradas.")
                      from supabase import create_client
-                     supabase = create_client(url, key)
-                 else:
-                     logger.error(f"❌ delete_account: Faltan credenciales. URL={bool(url)}, KEY={bool(key)}")
+                     supabase = create_client(url_env, key_env)
              
              if not supabase:
-                 raise HTTPException(status_code=500, detail="Error interno: No se pudo conectar a la base de datos de autenticación.")
+                 raise HTTPException(status_code=500, detail="Error interno: No se pudo conectar a Supabase. Revisa las Variables de Entorno en Vercel.")
 
              logger.info(f"🔄 delete_account: Verificando token con Supabase...")
              user_response = supabase.auth.get_user(token)
@@ -2004,6 +2005,27 @@ async def admin_create_user(user_data: AdminCreateUserRequest):
         raise
     except Exception as e:
         logger.error(f"Error en /admin/create-user: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+class AdminUpdateUserRequest(BaseModel):
+    user_id: str
+    updates: Dict[str, Any]
+
+@app.put("/admin/update-user")
+async def admin_update_user_endpoint(request: AdminUpdateUserRequest):
+    """Endpoint para actualizar usuario vía admin (bypassing RLS)"""
+    try:
+        result = admin_update_user(request.user_id, request.updates)
+        
+        if result.get("error"):
+             raise HTTPException(status_code=400, detail=result["error"])
+             
+        return {"success": True, "message": "Usuario actualizado"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error en /admin/update-user: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
