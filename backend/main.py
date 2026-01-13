@@ -1895,6 +1895,9 @@ async def delete_account(request: Request):
             
         token = auth_header.split(' ')[1]
         
+        # Inicializar user_id para evitar UnboundLocalError
+        user_id = None
+        
         # Opcional: Validar token con Supabase (por ahora confiamos en que el frontend envía el correcto)
         # Idealmente deberíamos decodificar el JWT y extraer el user_id para asegurar que coincide
         # o usar supabase.auth.get_user(token)
