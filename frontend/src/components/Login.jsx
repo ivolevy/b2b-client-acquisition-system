@@ -184,7 +184,9 @@ function Login({ onLogin }) {
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
   const [error, setError] = useState('');
+
   const [success, setSuccess] = useState('');
+  const [loginMessage, setLoginMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [pendingEmail, setPendingEmail] = useState(() => {
@@ -871,6 +873,19 @@ function Login({ onLogin }) {
             )}
 
             <form onSubmit={handleSubmit} className="login-form">
+              {loginMessage && (
+                <div className="error-message" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', borderColor: '#10b981', color: '#10b981' }}>
+                  <div className="error-icon-wrapper" style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#10b981' }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                  </div>
+                  <div className="error-content">
+                    <strong style={{ color: '#10b981' }}>¡Éxito!</strong>
+                    <span style={{ color: '#10b981' }}>{loginMessage}</span>
+                  </div>
+                </div>
+              )}
               {error && (
                 <div className="error-message">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -1766,7 +1781,8 @@ function Login({ onLogin }) {
 
                       if (response.data && response.data.success === true) {
                         // Éxito - contraseña actualizada
-                        setSuccess('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
+                        setSuccess(''); // No mostrar pantalla de éxito de creación de cuenta
+                        setLoginMessage('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
                         setMode('login'); // Asegurar redirección al login
                         setPassword(''); // Limpiar contraseña anterior del formulario
                         
