@@ -155,8 +155,8 @@ const validatePassword = (password, mode) => {
   if (!password || password.trim() === '') {
     return { isValid: false, message: 'La contraseña es requerida' };
   }
-  // Validar longitud mínima según el modo (register requiere más caracteres)
-  const minLength = mode === 'register' ? 8 : 6;
+  // Validar longitud mínima según el modo (ambos requieren 8 caracteres ahora)
+  const minLength = 8;
   if (password.length < minLength) {
     return { isValid: false, message: `La contraseña debe tener al menos ${minLength} caracteres` };
   }
