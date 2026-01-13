@@ -296,7 +296,13 @@ function AdminPromoCodes() {
       loadCodes();
     } catch (err) {
       console.error('Error creating promo code:', err);
-      setError('Error al crear código: ' + err.message);
+      let errorMessage = err.message;
+      
+      if (err.code === '23505' || err.message?.includes('duplicate key') || err.message?.includes('promo_codes_code_key')) {
+        errorMessage = 'Este código promocional ya existe. Por favor elige otro.';
+      }
+      
+      setError(errorMessage, 'error');
     }
   };
 
@@ -525,14 +531,13 @@ function AdminPromoCodes() {
             </div>
             <div className="form-group">
               <label>Plan</label>
-              <select
-                value={newCode.plan}
-                onChange={(e) => setNewCode({ ...newCode, plan: e.target.value })}
-                className="form-select"
-              >
-                <option value="free">Free</option>
-                <option value="pro">PRO</option>
-              </select>
+              <input
+                type="text"
+                value="PRO"
+                readOnly
+                className="form-input"
+                style={{ background: '#f5f5f5', color: '#666', cursor: 'not-allowed' }}
+              />
             </div>
             <div className="form-group">
               <label>Duración (de 1 a 365 dias) *</label>
