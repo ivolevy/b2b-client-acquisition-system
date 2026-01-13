@@ -478,7 +478,9 @@ function UserProfile() {
             </div>
             <div className="profile-field">
               <label className="profile-field-label">Teléfono</label>
-              <div className="profile-field-value">{user?.phone || 'No especificado'}</div>
+              <div className="profile-field-value">
+                {user?.phone && user.phone.length > 6 ? user.phone : <span style={{ color: '#999' }}>NaN</span>}
+              </div>
             </div>
             <div className="profile-field">
               <label className="profile-field-label">Email</label>

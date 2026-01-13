@@ -1767,6 +1767,8 @@ function Login({ onLogin }) {
                       if (response.data && response.data.success === true) {
                         // Éxito - contraseña actualizada
                         setSuccess('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
+                        setMode('login'); // Asegurar redirección al login
+                        setPassword(''); // Limpiar contraseña anterior del formulario
                         
                         // Limpiar todo
                         setShowForgotPasswordModal(false);
