@@ -21,7 +21,6 @@ const USER_FRIENDLY_MESSAGES = {
   'Invalid login': 'Credenciales incorrectas. Verifica tu email y contraseña.',
   'Email not confirmed': 'Debes confirmar tu email antes de iniciar sesión.',
   'already registered': 'Este email ya está registrado. Intenta iniciar sesión.',
-  'Este email ya está registrado': 'Este email ya está registrado. Intenta iniciar sesión o recuperar tu contraseña.',
   'already exists': 'Este email ya está registrado.',
   'Invalid email': 'El formato del email no es válido.',
   'Password should be at least': 'La contraseña es demasiado corta.',

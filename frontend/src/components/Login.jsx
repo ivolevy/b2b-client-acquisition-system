@@ -1002,8 +1002,6 @@ function Login({ onLogin }) {
                 {emailError && <span className="field-error">{emailError}</span>}
               </div>
 
-
-
               {mode === 'register' && (
                 <div className="form-group">
                   <label htmlFor="phone">

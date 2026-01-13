@@ -387,17 +387,6 @@
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
 }
 
-/* Specific fix for Name input placeholder */
-#name::placeholder,
-#name::-webkit-input-placeholder,
-#name::-moz-placeholder,
-#name:-ms-input-placeholder,
-input#name::placeholder {
-  color: #9ca3af !important;
-  -webkit-text-fill-color: #9ca3af !important;
-  opacity: 1 !important;
-}
-
 @keyframes inputErrorPulse {
   0% {
     transform: scale(1);
