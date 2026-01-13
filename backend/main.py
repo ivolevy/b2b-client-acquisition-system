@@ -1156,6 +1156,7 @@ async def google_auth_url(request: GoogleAuthURLRequest):
 @app.get("/auth/google/callback")
 async def google_callback(code: str, state: str):
     """Maneja el callback de Google OAuth e intercambia el código por tokens"""
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     try:
         # Extraer user_id del state (pasado como string o json)
         # Por simplicidad, asumimos que el state ES el user_id o contiene el user_id
@@ -1168,14 +1169,15 @@ async def google_callback(code: str, state: str):
         success = save_user_oauth_token(user_id, token_data)
         
         if not success:
+            logger.error(f"Error guardando token OAuth para usuario {user_id}")
             return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=error&reason=save_failed"})
             
         # Redirigir de vuelta al frontend (ajustar URL según sea necesario)
+        logger.info(f"Gmail conectado exitosamente para usuario {user_id}")
         return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=success"})
         
     except Exception as e:
         logger.error(f"Error en callback de Google Auth: {e}")
-        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
         return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=error&reason={str(e)}"})
 
 @app.get("/auth/google/status/{user_id}")

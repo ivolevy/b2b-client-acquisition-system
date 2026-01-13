@@ -300,31 +300,31 @@
   .table-container {
     border-radius: var(--radius-lg);
   }
-  
+
   .table-header {
     padding: var(--spacing-md);
   }
-  
+
   .table-header h2 {
     font-size: 1.1rem;
   }
-  
+
   .table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .properties-table {
     font-size: 0.75rem;
     min-width: 600px;
   }
-  
+
   .properties-table th,
   .properties-table td {
     padding: 0.5rem 0.4rem;
     white-space: nowrap;
   }
-  
+
   .properties-table th:first-child,
   .properties-table td:first-child {
     position: sticky;
@@ -332,53 +332,53 @@
     background: white;
     z-index: 1;
   }
-  
+
   .properties-table tbody tr:hover td:first-child {
     background: var(--gray-50);
   }
-  
+
   .name-cell {
     max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+
   .pagination {
     padding: var(--spacing-md);
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  
+
   .pagination-btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.8rem;
   }
-  
+
   .pagination-info {
     font-size: 0.8rem;
     width: 100%;
     text-align: center;
     order: -1;
   }
-  
+
   .action-btn {
     padding: 4px 6px;
     font-size: 9px;
   }
-  
+
   .category-badge {
     font-size: 0.65rem;
     padding: 0.15rem 0.5rem;
   }
-  
+
   .empty-state {
     padding: var(--spacing-xl);
   }
-  
+
   .empty-state h3 {
     font-size: 1rem;
   }
-  
+
   .empty-state p {
     font-size: 0.85rem;
   }
@@ -388,20 +388,20 @@
   .table-header {
     padding: var(--spacing-sm);
   }
-  
+
   .table-header h2 {
     font-size: 1rem;
   }
-  
+
   .properties-table {
     font-size: 0.7rem;
   }
-  
+
   .properties-table th,
   .properties-table td {
     padding: 0.4rem 0.3rem;
   }
-  
+
   .pagination {
     padding: var(--spacing-sm);
   }
@@ -867,33 +867,33 @@
     gap: 0.75rem;
     align-items: flex-start;
   }
-  
+
   .filters-inline-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-sm);
     padding: var(--spacing-md);
   }
-  
+
   .filter-checkboxes-and-actions {
     width: 100%;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
   }
-  
+
   .filter-inline-input {
     font-size: 0.75rem;
     padding: 5px 8px;
     width: 100%;
     min-width: 100%;
   }
-  
+
   .filter-city {
     width: 100%;
     min-width: 100%;
   }
-  
+
   .filter-distance-group {
     width: 100%;
     min-width: 100%;
@@ -901,34 +901,34 @@
     align-items: center;
     gap: 0;
   }
-  
+
   .filter-distance-toggle {
     flex: 1;
     min-width: 0;
   }
-  
+
   .filter-km {
     width: 80px;
     min-width: 80px;
     flex-shrink: 0;
   }
-  
+
   .rubro-dropdown {
     width: 100%;
     min-width: 100%;
   }
-  
+
   .rubro-dropdown-trigger {
     width: 100%;
     min-width: 100%;
   }
-  
+
   .filter-checkbox-inline {
     width: 100%;
     min-width: 100%;
     justify-content: flex-start;
   }
-  
+
   .filter-actions-right {
     width: 100%;
     justify-content: flex-start;
@@ -943,34 +943,34 @@
     align-items: flex-start;
     gap: 0.25rem;
   }
-  
+
   .results-title-section h2 {
     font-size: 1.1rem;
   }
-  
+
   .view-toggle-inline button {
     padding: 5px 8px;
     font-size: 0.75rem;
   }
-  
+
   .filters-inline-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm);
   }
-  
+
   .filter-checkboxes-and-actions {
     width: 100%;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
   }
-  
+
   .filter-checkbox-inline span {
     display: inline;
   }
-  
+
   .filter-city,
   .filter-distance-group,
   .filter-inline-input,
@@ -979,24 +979,24 @@
     width: 100%;
     min-width: 100%;
   }
-  
+
   .filter-distance-group {
     flex-direction: row;
     align-items: center;
     gap: 0;
   }
-  
+
   .filter-distance-toggle {
     flex: 1;
     min-width: 0;
   }
-  
+
   .filter-km {
     width: 80px;
     min-width: 80px;
     flex-shrink: 0;
   }
-  
+
   .filter-actions-right {
     width: 100%;
     justify-content: flex-start;
@@ -1084,6 +1084,7 @@
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1188,7 +1189,7 @@
     padding: 10px 14px !important;
     font-size: 0.95rem !important;
   }
-  
+
   .rubro-dropdown-menu {
     position: fixed !important;
     left: 0 !important;
@@ -1199,7 +1200,7 @@
     border-radius: 16px 16px 0 0;
     max-height: 70vh;
   }
-  
+
   .rubro-text {
     font-size: 0.95rem !important;
   }
@@ -1210,7 +1211,7 @@
     width: 100%;
     min-width: 100%;
   }
-  
+
   .filter-city,
   .filter-distance-group,
   .filter-inline-input,
@@ -1219,34 +1220,34 @@
     width: 100%;
     min-width: 100%;
   }
-  
+
   .rubro-text {
     max-width: none;
   }
-  
+
   .filter-distance-group {
     flex-direction: row;
     align-items: center;
     gap: 0;
   }
-  
+
   .filter-distance-toggle {
     flex: 1;
     min-width: 0;
   }
-  
+
   .filter-km {
     width: 80px;
     min-width: 80px;
     flex-shrink: 0;
   }
-  
+
   .filter-actions-right {
     width: 100%;
     justify-content: flex-start;
     margin-left: 0;
   }
-  
+
   .rubro-dropdown-menu {
     position: fixed !important;
     top: auto !important;
@@ -1260,11 +1261,11 @@
     max-height: 70vh;
     transform: none !important;
   }
-  
+
   .rubro-options-list {
     max-height: 50vh;
   }
-  
+
   .rubro-dropdown-trigger {
     width: 100% !important;
     min-width: 100% !important;
@@ -1272,8 +1273,184 @@
     font-size: 1rem !important;
     padding: 12px 16px !important;
   }
-  
+
   .rubro-text {
     font-size: 1rem !important;
   }
+}
+
+/* ============================================
+   RUBRO DROPDOWN SEARCH (FIXED)
+   ============================================ */
+
+.rubro-dropdown {
+  position: relative;
+  display: inline-block;
+  font-family: 'Inter', sans-serif;
+  z-index: 100;
+}
+
+.rubro-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+  justify-content: space-between;
+}
+
+.rubro-dropdown-trigger:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+}
+
+.rubro-dropdown-trigger.has-value {
+  color: #e91e63;
+  border-color: #fce7f3;
+  background: #fdf2f8;
+  font-weight: 500;
+}
+
+.rubro-icon {
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.rubro-text {
+  flex-grow: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rubro-chevron {
+  color: var(--gray-400);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.rubro-chevron.open {
+  transform: rotate(180deg);
+}
+
+.rubro-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 280px;
+  margin-top: 6px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  /* Ensure it stays on top */
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rubro-search-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--gray-100);
+  background: var(--gray-50);
+}
+
+.rubro-search-container svg {
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.rubro-search-input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+  outline: none;
+}
+
+.rubro-search-input::placeholder {
+  color: var(--gray-400);
+}
+
+.rubro-options-list {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+/* Custom Scrollbar for list */
+.rubro-options-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rubro-options-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rubro-options-list::-webkit-scrollbar-thumb {
+  background-color: var(--gray-300);
+  border-radius: 20px;
+}
+
+.rubro-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.rubro-option:hover {
+  background: var(--gray-50);
+  color: var(--gray-900);
+}
+
+.rubro-option.selected {
+  background: #fdf2f8;
+  color: #e91e63;
+  font-weight: 500;
+}
+
+.option-icon {
+  font-size: 1.1rem;
+}
+
+.rubro-no-results {
+  padding: 12px;
+  text-align: center;
+  color: var(--gray-500);
+  font-size: 0.85rem;
+  font-style: italic;
 }
