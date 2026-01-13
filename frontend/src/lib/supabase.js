@@ -435,7 +435,7 @@ export const searchHistoryService = {
       // Seleccionar columnas específicas para reducir payload
       .select('id, rubro, ubicacion_nombre, centro_lat, centro_lng, radio_km, bbox, empresas_encontradas, empresas_validas, created_at')
       .eq('user_id', userId)
-      .order('id', { ascending: false }) // Optimización: Usar ID (indexado) en lugar de created_at para evitar timeouts
+      .order('created_at', { ascending: false }) // Corregido: Usar created_at para orden cronológico real y aprovechar el índice
       .limit(limit);
 
     return { data, error };

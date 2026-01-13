@@ -301,7 +301,8 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           empresa_id: selectedEmpresas[0].id,
           template_id: selectedTemplate,
           asunto_personalizado: asuntoPersonalizado || null,
-          user_id: user?.id || null
+          user_id: user?.id || null,
+          empresa_data: selectedEmpresas[0]
         });
 
         if (response.data.success) {

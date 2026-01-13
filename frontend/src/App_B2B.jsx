@@ -402,35 +402,16 @@ function AppB2B() {
     );
   };
 
-  const handleDeleteResults = async () => {
-    try {
-      setLoading(true);
-      setBlockingLoading(true);
-      const response = await axios.delete(`${API_URL}/clear`);
-
-      if (response.data.success) {
-        success(
-          <>
-            <strong>Resultados eliminados</strong>
-            <p>Se borraron todas las empresas almacenadas.</p>
-          </>
-        );
-        setEmpresas([]);
-        setStats({ total: 0, validadas: 0 });
-      }
-    } catch (err) {
-      console.error('Error al borrar resultados:', err);
-      const errorMsg = err.response?.data?.detail || err.message;
-      toastError(
-        <>
-          <strong>No se pudieron borrar</strong>
-          <p>{errorMsg}</p>
-        </>
-      );
-    } finally {
-      setLoading(false);
-      setBlockingLoading(false);
-    }
+  const handleDeleteResults = () => {
+    // Solo limpiar estado local, no borrar de la BD
+    setEmpresas([]);
+    setStats({ total: 0, validadas: 0 });
+    success(
+      <>
+        <strong>Resultados limpiados</strong>
+        <p>Tu vista ha sido reiniciada.</p>
+      </>
+    );
   };
 
   return (

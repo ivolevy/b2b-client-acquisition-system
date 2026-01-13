@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 import logging
 import os
 import random
@@ -457,6 +457,7 @@ class EnviarEmailRequest(BaseModel):
     template_id: int
     asunto_personalizado: Optional[str] = None
     user_id: Optional[str] = None
+    empresa_data: Optional[Dict[str, Any]] = None
 
 class EnviarEmailMasivoRequest(BaseModel):
     empresa_ids: List[int]
@@ -1212,15 +1213,23 @@ async def google_disconnect(user_id: str):
 async def enviar_email_individual(request: EnviarEmailRequest):
     """Envía un email individual a una empresa"""
     try:
-        # Buscar empresa en memoria
+        # Buscar empresa: Primero en la solicitud, luego en memoria
         empresa = None
-        for e in _memoria_empresas:
-            if e.get('id') == request.empresa_id:
-                empresa = e.copy()
-                break
+        
+        if request.empresa_data:
+            empresa = request.empresa_data.copy()
+            # Asegurar que el ID coincida (o usar el del payload)
+            if 'id' not in empresa:
+                empresa['id'] = request.empresa_id
+        else:
+            # Fallback a memoria
+            for e in _memoria_empresas:
+                if e.get('id') == request.empresa_id:
+                    empresa = e.copy()
+                    break
         
         if not empresa:
-            raise HTTPException(status_code=404, detail="Empresa no encontrada en memoria")
+            raise HTTPException(status_code=404, detail="Empresa no encontrada en memoria ni en la solicitud")
         
         # Obtener template
         template = obtener_template(request.template_id)
