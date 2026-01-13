@@ -174,13 +174,9 @@ RUBROS_DISPONIBLES = {
             '["shop"="appliance"]'
         ]
     },
-    "turismo_gastronomia": {
-        "nombre": "Turismo y Gastronomía",
+    "gastronomia": {
+        "nombre": "Gastronomía",
         "tags": [
-            '["tourism"="hotel"]',
-            '["amenity"="hotel"]',
-            '["shop"="travel_agency"]',
-            '["office"="travel_agent"]',
             '["amenity"="restaurant"]',
             '["amenity"="bar"]',
             '["amenity"="cafe"]',
@@ -202,12 +198,10 @@ RUBROS_DISPONIBLES = {
         ]
     },
     "mantenimiento_seguridad": {
-        "nombre": "Mantenimiento, Jardinería y Seguridad",
+        "nombre": "Mantenimiento y Seguridad",
         "tags": [
             '["office"="cleaning"]',
             '["craft"="cleaner"]',
-            '["craft"="gardener"]',
-            '["office"="landscaping"]',
             '["office"="security"]',
             '["office"="security_services"]'
         ]
