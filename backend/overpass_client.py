@@ -34,421 +34,189 @@ def _construir_direccion_completa(calle: str, numero: str) -> str:
     
     return calle
 
-# Mapeo de rubros a tags de OpenStreetMap
+# RUBROS UNIFICADOS Y NUEVOS
 RUBROS_DISPONIBLES = {
-    # CONSTRUCCIÓN E INMOBILIARIA
-    "desarrolladoras_inmobiliarias": {
-        "nombre": "Desarrolladoras Inmobiliarias",
+    # NUEVOS RUBROS CLAVE
+    "colegios": {
+        "nombre": "Colegios e Instituciones Educativas",
+        "tags": [
+            '["amenity"="school"]',
+            '["amenity"="university"]',
+            '["amenity"="college"]',
+            '["amenity"="kindergarten"]',
+            '["amenity"="language_school"]',
+            '["amenity"="training"]',
+            '["office"="education"]'
+        ]
+    },
+    "metalurgicas": {
+        "nombre": "Metalúrgicas e Industria del Metal",
+        "tags": [
+            '["craft"="metal_construction"]',
+            '["craft"="blacksmith"]',
+            '["craft"="sawmill"]', # Algunas metalúrgicas grandes integran procesos
+            '["industrial"="metal_working"]',
+            '["industrial"="foundry"]',
+            '["industrial"="steel_works"]',
+            '["shop"="metal_working"]',
+            '["craft"="welder"]',
+            '["craft"="precision_mechanic"]'
+        ]
+    },
+    "madereras": {
+        "nombre": "Madereras y Carpinterías",
+        "tags": [
+            '["craft"="carpenter"]',
+            '["industrial"="sawmill"]',
+            '["shop"="doityourself"]',
+            '["shop"="lumber"]',
+            '["industrial"="wood"]',
+            '["craft"="furniture_maker"]',
+            '["shop"="furniture"]'
+        ]
+    },
+    "fabricas": {
+        "nombre": "Fábricas e Industrias Generales",
+        "tags": [
+            '["industrial"="factory"]',
+            '["industrial"="manufacturing"]',
+            '["industrial"="food"]',
+            '["industrial"="textile"]',
+            '["industrial"="chemical"]',
+            '["industrial"="electronics"]',
+            '["industrial"="packaging"]'
+        ]
+    },
+    
+    # CATEGORÍAS UNIFICADAS
+    "construccion_arquitectura": {
+        "nombre": "Construcción y Arquitectura",
         "tags": [
             '["office"="developer"]',
             '["office"="estate_agent"]',
-            '["office"="property_developer"]'
-        ]
-    },
-    "constructoras": {
-        "nombre": "Empresas Constructoras",
-        "tags": [
+            '["office"="property_developer"]',
             '["office"="construction"]',
             '["craft"="builder"]',
-            '["industrial"="construction"]'
-        ]
-    },
-    "arquitectura": {
-        "nombre": "Estudios de Arquitectura",
-        "tags": [
+            '["industrial"="construction"]',
             '["office"="architect"]',
-            '["office"="architectural"]'
-        ]
-    },
-    "diseño_interiores": {
-        "nombre": "Diseño de Interiores",
-        "tags": [
+            '["office"="architectural"]',
             '["office"="interior_design"]',
-            '["craft"="interior_designer"]'
-        ]
-    },
-    "reformas": {
-        "nombre": "Empresas de Reformas",
-        "tags": [
-            '["craft"="carpenter"]',
+            '["craft"="interior_designer"]',
             '["craft"="plumber"]',
             '["craft"="electrician"]',
             '["craft"="painter"]'
         ]
     },
-    
-    # SERVICIOS PROFESIONALES
-    "ingenieria": {
-        "nombre": "Empresas de Ingeniería",
+    "servicios_profesionales": {
+        "nombre": "Servicios Profesionales (Legal/Contable)",
         "tags": [
-            '["office"="engineer"]',
-            '["office"="engineering"]',
-            '["office"="civil_engineering"]'
-        ]
-    },
-    "consultoria": {
-        "nombre": "Consultorías",
-        "tags": [
+            '["office"="lawyer"]',
+            '["office"="legal"]',
+            '["amenity"="law_firm"]',
+            '["office"="accountant"]',
+            '["office"="tax_advisor"]',
+            '["office"="auditor"]',
+            '["office"="employment_agency"]',
+            '["office"="recruiter"]',
             '["office"="consulting"]',
             '["office"="consultant"]'
         ]
     },
-    "legal": {
-        "nombre": "Despachos Legales",
-        "tags": [
-            '["office"="lawyer"]',
-            '["office"="legal"]',
-            '["amenity"="law_firm"]'
-        ]
-    },
-    "contabilidad": {
-        "nombre": "Servicios Contables",
-        "tags": [
-            '["office"="accountant"]',
-            '["office"="tax_advisor"]'
-        ]
-    },
-    "auditoria": {
-        "nombre": "Servicios de Auditoría",
-        "tags": [
-            '["office"="auditor"]'
-        ]
-    },
-    "recursos_humanos": {
-        "nombre": "Recursos Humanos",
-        "tags": [
-            '["office"="employment_agency"]',
-            '["office"="recruiter"]'
-        ]
-    },
-    
-    # TECNOLOGÍA Y MARKETING
-    "tecnologia": {
-        "nombre": "Empresas de Tecnología",
+    "tecnologia_marketing": {
+        "nombre": "Tecnología, Marketing y Diseño",
         "tags": [
             '["office"="it"]',
             '["office"="technology"]',
-            '["office"="software"]'
-        ]
-    },
-    "marketing": {
-        "nombre": "Agencias de Marketing",
-        "tags": [
+            '["office"="software"]',
             '["office"="advertising"]',
             '["office"="marketing"]',
-            '["shop"="advertising_agency"]'
-        ]
-    },
-    "diseño_grafico": {
-        "nombre": "Diseño Gráfico",
-        "tags": [
+            '["shop"="advertising_agency"]',
             '["office"="graphic_design"]',
-            '["craft"="graphic_designer"]'
-        ]
-    },
-    "comunicacion": {
-        "nombre": "Agencias de Comunicación",
-        "tags": [
+            '["craft"="graphic_designer"]',
             '["office"="public_relations"]',
-            '["office"="communication"]'
-        ]
-    },
-    "desarrollo_web": {
-        "nombre": "Desarrollo Web",
-        "tags": [
+            '["office"="communication"]',
             '["office"="web_design"]',
             '["office"="web_development"]'
         ]
     },
-    
-    # FINANZAS Y SEGUROS
-    "financiero": {
-        "nombre": "Servicios Financieros",
-        "tags": [
-            '["office"="financial"]',
-            '["office"="financial_advisor"]',
-            '["amenity"="bank"]'
-        ]
-    },
-    "seguros": {
-        "nombre": "Compañías de Seguros",
-        "tags": [
-            '["office"="insurance"]',
-            '["office"="insurance_agent"]'
-        ]
-    },
-    "inversiones": {
-        "nombre": "Gestión de Inversiones",
-        "tags": [
-            '["office"="investment"]',
-            '["office"="asset_management"]'
-        ]
-    },
-    
-    # SALUD Y BIENESTAR
-    "salud": {
-        "nombre": "Servicios de Salud",
+    "salud_bienestar": {
+        "nombre": "Salud y Bienestar",
         "tags": [
             '["amenity"="clinic"]',
             '["amenity"="hospital"]',
-            '["healthcare"="yes"]'
-        ]
-    },
-    "fisioterapia": {
-        "nombre": "Fisioterapia",
-        "tags": [
+            '["healthcare"="yes"]',
             '["amenity"="physiotherapist"]',
-            '["healthcare"="physiotherapist"]'
-        ]
-    },
-    "odontologia": {
-        "nombre": "Clínicas Dentales",
-        "tags": [
+            '["healthcare"="physiotherapist"]',
             '["amenity"="dentist"]',
-            '["healthcare"="dentist"]'
-        ]
-    },
-    "bienestar": {
-        "nombre": "Centros de Bienestar",
-        "tags": [
+            '["healthcare"="dentist"]',
             '["amenity"="beauty_salon"]',
             '["amenity"="spa"]',
             '["leisure"="fitness_center"]'
         ]
     },
-    
-    # EDUCACIÓN
-    "educacion": {
-        "nombre": "Centros Educativos",
-        "tags": [
-            '["amenity"="school"]',
-            '["amenity"="university"]',
-            '["amenity"="college"]'
-        ]
-    },
-    "formacion": {
-        "nombre": "Centros de Formación",
-        "tags": [
-            '["amenity"="training"]',
-            '["office"="education"]'
-        ]
-    },
-    "idiomas": {
-        "nombre": "Academias de Idiomas",
-        "tags": [
-            '["amenity"="language_school"]'
-        ]
-    },
-    
-    # HOSTELERÍA Y TURISMO
-    "restaurantes": {
-        "nombre": "Restaurantes",
-        "tags": [
-            '["amenity"="restaurant"]'
-        ]
-    },
-    "hoteles": {
-        "nombre": "Hoteles",
-        "tags": [
-            '["tourism"="hotel"]',
-            '["amenity"="hotel"]'
-        ]
-    },
-    "bares": {
-        "nombre": "Bares y Cafeterías",
-        "tags": [
-            '["amenity"="bar"]',
-            '["amenity"="cafe"]',
-            '["amenity"="pub"]'
-        ]
-    },
-    "turismo": {
-        "nombre": "Agencias de Viajes",
-        "tags": [
-            '["shop"="travel_agency"]',
-            '["office"="travel_agent"]'
-        ]
-    },
-    "eventos": {
-        "nombre": "Organización de Eventos",
-        "tags": [
-            '["office"="event_management"]',
-            '["amenity"="events_venue"]'
-        ]
-    },
-    
-    # RETAIL Y COMERCIO
-    "retail": {
-        "nombre": "Tiendas Retail",
+    "comercio_retail": {
+        "nombre": "Comercio y Retail",
         "tags": [
             '["shop"="supermarket"]',
             '["shop"="department_store"]',
             '["shop"="mall"]',
-            '["shop"="convenience"]'
-        ]
-    },
-    "moda": {
-        "nombre": "Tiendas de Moda",
-        "tags": [
+            '["shop"="convenience"]',
             '["shop"="clothes"]',
             '["shop"="fashion"]',
-            '["shop"="shoes"]'
-        ]
-    },
-    "decoracion": {
-        "nombre": "Tiendas de Decoración",
-        "tags": [
+            '["shop"="shoes"]',
             '["shop"="interior_decoration"]',
             '["shop"="furniture"]',
-            '["shop"="houseware"]'
-        ]
-    },
-    "automocion": {
-        "nombre": "Concesionarios y Talleres",
-        "tags": [
+            '["shop"="houseware"]',
             '["shop"="car"]',
             '["shop"="car_repair"]',
-            '["amenity"="car_dealership"]'
-        ]
-    },
-    "electrodomesticos": {
-        "nombre": "Tiendas de Electrodomésticos",
-        "tags": [
+            '["amenity"="car_dealership"]',
             '["shop"="electronics"]',
             '["shop"="appliance"]'
         ]
     },
-    
-    # TRANSPORTE Y LOGÍSTICA
-    "transporte": {
-        "nombre": "Empresas de Transporte",
+    "turismo_gastronomia": {
+        "nombre": "Turismo y Gastronomía",
+        "tags": [
+            '["tourism"="hotel"]',
+            '["amenity"="hotel"]',
+            '["shop"="travel_agency"]',
+            '["office"="travel_agent"]',
+            '["amenity"="restaurant"]',
+            '["amenity"="bar"]',
+            '["amenity"="cafe"]',
+            '["amenity"="pub"]',
+            '["office"="event_management"]',
+            '["amenity"="events_venue"]'
+        ]
+    },
+    "logistica_transporte": {
+        "nombre": "Logística y Transporte",
         "tags": [
             '["office"="logistics"]',
             '["office"="transport"]',
-            '["amenity"="taxi"]'
-        ]
-    },
-    "mensajeria": {
-        "nombre": "Servicios de Mensajería",
-        "tags": [
+            '["amenity"="taxi"]',
             '["office"="courier"]',
-            '["office"="delivery"]'
-        ]
-    },
-    "almacenamiento": {
-        "nombre": "Almacenes y Depósitos",
-        "tags": [
+            '["office"="delivery"]',
             '["landuse"="warehouse"]',
             '["industrial"="warehouse"]'
         ]
     },
-    
-    # MANUFACTURA E INDUSTRIA
-    "manufactura": {
-        "nombre": "Manufactura",
+    "mantenimiento_seguridad": {
+        "nombre": "Mantenimiento, Jardinería y Seguridad",
         "tags": [
-            '["industrial"="factory"]',
-            '["industrial"="manufacturing"]',
-            '["craft"="pottery"]',
-            '["craft"="metal_construction"]',
-            '["craft"="carpenter"]'
-        ]
-    },
-    "alimentacion": {
-        "nombre": "Industria Alimentaria",
-        "tags": [
-            '["industrial"="food"]',
-            '["craft"="confectionery"]',
-            '["craft"="bakery"]'
-        ]
-    },
-    "textil": {
-        "nombre": "Industria Textil",
-        "tags": [
-            '["craft"="tailor"]',
-            '["industrial"="textile"]'
-        ]
-    },
-    
-    # SERVICIOS PERSONALES
-    "peluqueria": {
-        "nombre": "Peluquerías",
-        "tags": [
-            '["shop"="hairdresser"]',
-            '["amenity"="hairdresser"]'
-        ]
-    },
-    "fotografia": {
-        "nombre": "Fotografía",
-        "tags": [
-            '["shop"="photo"]',
-            '["craft"="photographer"]'
-        ]
-    },
-    "veterinaria": {
-        "nombre": "Clínicas Veterinarias",
-        "tags": [
-            '["amenity"="veterinary"]',
-            '["healthcare"="veterinary"]'
-        ]
-    },
-    
-    # ENTRETENIMIENTO Y OCIO
-    "gimnasios": {
-        "nombre": "Gimnasios",
-        "tags": [
-            '["leisure"="fitness_center"]',
-            '["leisure"="sports_centre"]'
-        ]
-    },
-    "entretenimiento": {
-        "nombre": "Entretenimiento",
-        "tags": [
-            '["amenity"="cinema"]',
-            '["amenity"="theatre"]',
-            '["leisure"="amusement_arcade"]'
-        ]
-    },
-    "deportes": {
-        "nombre": "Centros Deportivos",
-        "tags": [
-            '["leisure"="sports_centre"]',
-            '["leisure"="stadium"]'
-        ]
-    },
-    
-    # SERVICIOS ESPECIALIZADOS
-    "seguridad": {
-        "nombre": "Empresas de Seguridad",
-        "tags": [
+            '["office"="cleaning"]',
+            '["craft"="cleaner"]',
+            '["craft"="gardener"]',
+            '["office"="landscaping"]',
             '["office"="security"]',
             '["office"="security_services"]'
         ]
     },
-    "limpieza": {
-        "nombre": "Servicios de Limpieza",
-        "tags": [
-            '["office"="cleaning"]',
-            '["craft"="cleaner"]'
-        ]
-    },
-    "jardineria": {
-        "nombre": "Jardinería y Paisajismo",
-        "tags": [
-            '["craft"="gardener"]',
-            '["office"="landscaping"]'
-        ]
-    },
-    "energia": {
-        "nombre": "Energía y Servicios Públicos",
+    "energia_medioambiente": {
+        "nombre": "Energía y Medio Ambiente",
         "tags": [
             '["office"="energy"]',
-            '["office"="utility"]'
-        ]
-    },
-    "medio_ambiente": {
-        "nombre": "Medio Ambiente",
-        "tags": [
+            '["office"="utility"]',
             '["office"="environmental"]',
             '["office"="waste_management"]'
         ]

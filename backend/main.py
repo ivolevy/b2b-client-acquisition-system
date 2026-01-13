@@ -520,7 +520,7 @@ def obtener_rubros():
         "total": len(rubros),
         "rubros": rubros,
         "ejemplo_uso": {
-            "rubro": "desarrolladoras_inmobiliarias",
+            "rubro": "construccion_arquitectura",
             "pais": "España",
             "ciudad": "Madrid"
         }
