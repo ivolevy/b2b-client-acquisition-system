@@ -495,11 +495,11 @@ function AdminPromoCodes() {
 
       {/* Modal de crear código */}
       {showCreateModal && createPortal(
-        <div className="modal-overlay" onClick={() => {
+        <div className="promo-modal-overlay" onClick={() => {
           setShowCreateModal(false);
           setValidationErrors({});
         }}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="promo-modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Crear Código Promocional</h2>
             <div className="form-group">
               <label>Código * (6 caracteres, solo letras y números)</label>
@@ -599,8 +599,8 @@ function AdminPromoCodes() {
                 </span>
               )}
             </div>
-            <div className="form-group">
-              <label>
+            <div className="form-group checkbox-group">
+              <label className="checkbox-label">
                 <input
                   type="checkbox"
                   checked={newCode.is_active}
@@ -609,7 +609,7 @@ function AdminPromoCodes() {
                 Activo
               </label>
             </div>
-            <div className="modal-actions">
+            <div className="promo-modal-actions">
               <button
                 className="btn-secondary"
                 onClick={() => {
@@ -628,16 +628,9 @@ function AdminPromoCodes() {
                 Cancelar
               </button>
               <button
-                className={`btn-primary ${isFormValid() ? 'enabled' : 'disabled'}`}
+                className="btn-create-promo"
                 onClick={handleCreate}
                 disabled={!isFormValid()}
-                style={{
-                  opacity: isFormValid() ? 1 : 0.5,
-                  cursor: isFormValid() ? 'pointer' : 'not-allowed',
-                  background: isFormValid() 
-                    ? 'linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%)' 
-                    : '#ccc'
-                }}
               >
                 Crear Código
               </button>
@@ -649,8 +642,8 @@ function AdminPromoCodes() {
 
       {/* Modal de confirmación de eliminación */}
       {showDeleteModal && selectedCode && createPortal(
-        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="promo-modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="promo-modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Confirmar Eliminación</h2>
             <p>
               ¿Estás seguro de que quieres eliminar el código <strong>{selectedCode.code}</strong>?
@@ -658,7 +651,7 @@ function AdminPromoCodes() {
             <p className="warning-text">
               Esta acción es permanente. Se eliminará el código y su historial de usos.
             </p>
-            <div className="modal-actions">
+            <div className="promo-modal-actions">
               <button
                 className="btn-secondary"
                 onClick={() => {
