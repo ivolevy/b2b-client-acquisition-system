@@ -568,16 +568,17 @@ function Login({ onLogin }) {
         } else {
           // Registro - Las validaciones ya se hicieron al inicio del handleSubmit
           // Rate limiting para registro
-          const rateLimitKey = `signup_${emailLimpio}`;
-          const rateCheck = rateLimiter.isAllowed(rateLimitKey, 3, 300000); // 3 intentos por 5 minutos
+          // Rate limiting para registro (Desactivado a pedido del usuario)
+          // const rateLimitKey = `signup_${emailLimpio}`;
+          // const rateCheck = rateLimiter.isAllowed(rateLimitKey, 10, 60000); // Aumentado a 10 por minuto y reducido tiempo
           
-          if (!rateCheck.allowed) {
-            setError(rateCheck.message);
-            setLoading(false);
-            return;
-          }
+          // if (!rateCheck.allowed) {
+          //   setError(rateCheck.message);
+          //   setLoading(false);
+          //   return;
+          // }
 
-          rateLimiter.recordAttempt(rateLimitKey);
+          // rateLimiter.recordAttempt(rateLimitKey);
           const { data, error, needsConfirmation } = await authService.signUp(emailLimpio, passwordLimpio, name.trim(), fullPhone);
           
           if (error) {
