@@ -147,9 +147,15 @@ function AuthWrapper() {
         } catch (error) {
           handleError(error, 'AuthWrapper - initAuth');
           // En caso de error, cerrar sesión por seguridad
-          await supabase.auth.signOut();
-          authStorage.clearAll();
-          sessionStorage.clear();
+          try {
+            await supabase.auth.signOut();
+            authStorage.clearAll();
+            sessionStorage.clear();
+          } catch (signOutError) {
+            console.error('Error during signOut on init failure:', signOutError);
+          }
+          setLoading(false);
+          return;
         }
 
         // Listener para cambios de autenticación
@@ -186,7 +192,19 @@ function AuthWrapper() {
       }
     };
 
+    // Seguridad: Timeout de 10 segundos para la carga inicial
+    const safetyTimeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Auth initialization timed out, forcing loading=false');
+        setLoading(false);
+      }
+    }, 10000);
+
     initAuth();
+
+    return () => {
+      clearTimeout(safetyTimeout);
+    };
   }, [useSupabase]);
 
   // Login con Supabase
