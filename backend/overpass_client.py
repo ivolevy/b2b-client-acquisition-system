@@ -36,7 +36,7 @@ def _construir_direccion_completa(calle: str, numero: str) -> str:
 
 # RUBROS UNIFICADOS Y NUEVOS
 RUBROS_DISPONIBLES = {
-    # NUEVOS RUBROS CLAVE
+    # NUEVOS RUBROS CLAVE (FASE 2 - EXPANDIDOS)
     "colegios": {
         "nombre": "Colegios e Instituciones Educativas",
         "tags": [
@@ -46,7 +46,10 @@ RUBROS_DISPONIBLES = {
             '["amenity"="kindergarten"]',
             '["amenity"="language_school"]',
             '["amenity"="training"]',
-            '["office"="education"]'
+            '["office"="education"]',
+            '["amenity"="club"]',
+            '["amenity"="music_school"]',
+            '["amenity"="arts_centre"]'
         ]
     },
     "metalurgicas": {
@@ -54,14 +57,18 @@ RUBROS_DISPONIBLES = {
         "tags": [
             '["craft"="metal_construction"]',
             '["craft"="blacksmith"]',
-            '["craft"="sawmill"]', # Algunas metalúrgicas grandes integran procesos
+            '["craft"="sawmill"]',
             '["industrial"="metal_working"]',
             '["industrial"="foundry"]',
             '["industrial"="steel_works"]',
             '["shop"="metal_working"]',
             '["craft"="welder"]',
-            '["craft"="precision_mechanic"]'
-        ]
+            '["craft"="precision_mechanic"]',
+            '["shop"="hardware"]',
+            '["industrial"="machine_shop"]',
+            '["industrial"="steel"]'
+        ],
+        "keywords": ["Inox", "Hierros", "Corte Laser", "Metálica", "Metalúrgica", "Fundición"]
     },
     "madereras": {
         "nombre": "Madereras y Carpinterías",
@@ -72,8 +79,10 @@ RUBROS_DISPONIBLES = {
             '["shop"="lumber"]',
             '["industrial"="wood"]',
             '["craft"="furniture_maker"]',
-            '["shop"="furniture"]'
-        ]
+            '["shop"="furniture"]',
+            '["shop"="hardware"]'
+        ],
+        "keywords": ["Maderera", "Carpintería", "Aserradero", "Herrajes"]
     },
     "fabricas": {
         "nombre": "Fábricas e Industrias Generales",
@@ -84,8 +93,10 @@ RUBROS_DISPONIBLES = {
             '["industrial"="textile"]',
             '["industrial"="chemical"]',
             '["industrial"="electronics"]',
-            '["industrial"="packaging"]'
-        ]
+            '["industrial"="packaging"]',
+            '["industrial"="plastics"]'
+        ],
+        "keywords": ["Fábrica", "Planta Industrial", "Manufactura", "Industrial"]
     },
     
     # CATEGORÍAS UNIFICADAS
@@ -267,6 +278,13 @@ def buscar_empresas_por_rubro(
         query_parts.append(f'node{tag}{area_suffix};')
         query_parts.append(f'way{tag}{area_suffix};')
     
+    # Agregar búsqueda por keywords en el nombre si existen
+    keywords = rubro_info.get("keywords", [])
+    if keywords:
+        for kw in keywords:
+            query_parts.append(f'node[name~"{kw}", i]{area_suffix};')
+            query_parts.append(f'way[name~"{kw}", i]{area_suffix};')
+    
     query = f"""
     [out:json][timeout:30];
     {area_filter}
@@ -378,6 +396,13 @@ def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limi
     for tag in tags:
         query_parts.append(f'node{tag}({bbox});')
         query_parts.append(f'way{tag}({bbox});')
+
+    # Agregar búsqueda por keywords en el nombre si existen
+    keywords_list = rubro_info.get("keywords", [])
+    if keywords_list:
+        for kw in keywords_list:
+            query_parts.append(f'node[name~"{kw}", i]({bbox});')
+            query_parts.append(f'way[name~"{kw}", i]({bbox});')
     
     query = f"""
     [out:json][timeout:60];
