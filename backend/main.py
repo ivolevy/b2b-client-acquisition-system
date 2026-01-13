@@ -1906,7 +1906,12 @@ async def delete_account(request: Request):
         try:
              from db_supabase import get_supabase
              supabase = get_supabase()
+             
+             if not supabase:
+                 logger.error("❌ delete_account: No se pudo obtener cliente Supabase (falta config?)")
+             
              if supabase:
+                 logger.info(f"🔄 delete_account: Verificando token...")  # No loguear el token por seguridad
                  user_response = supabase.auth.get_user(token)
                  
                  # Ajustar según la estructura de respuesta de la librería
