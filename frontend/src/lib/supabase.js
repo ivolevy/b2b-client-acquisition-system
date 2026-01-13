@@ -203,99 +203,40 @@ export const authService = {
   // Eliminar cuenta del usuario
   async deleteAccount() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      if (!user) {
-        throw new Error('No hay usuario autenticado');
+      if (sessionError || !session) {
+        throw new Error('No hay sesión activa');
       }
 
-      const userId = user.id;
-      console.log('[DeleteAccount] Eliminando datos del usuario:', userId);
+      const token = session.access_token;
 
-      // Crear timeout para evitar que se quede colgado
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout: La operación tardó demasiado')), 30000);
+      // Obtener URL de API desde config o environment
+      const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
+
+      // Llamar al endpoint del backend
+      const response = await fetch(`${API_URL}/auth/delete-account`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      // PASO 1: Eliminar datos del usuario de las tablas relacionadas (con timeout)
-      const deleteDataPromise = (async () => {
-        const tables = ['search_history', 'saved_companies', 'email_templates', 'email_history'];
+      const data = await response.json();
 
-        for (const table of tables) {
-          try {
-            const { error } = await supabase.from(table).delete().eq('user_id', userId);
-            if (error) {
-              console.warn(`[DeleteAccount] Error eliminando ${table}:`, error.message);
-            } else {
-              console.log(`[DeleteAccount] ${table} eliminado`);
-            }
-          } catch (err) {
-            console.warn(`[DeleteAccount] Error en ${table}:`, err);
-          }
-        }
-      })();
-
-      // PASO 2: Eliminar perfil de usuario (CRÍTICO - esto previene que el usuario inicie sesión)
-      const deleteProfilePromise = supabase.from('users').delete().eq('id', userId);
-
-      // Ejecutar ambas operaciones con timeout
-      const results = await Promise.race([
-        Promise.all([deleteDataPromise, deleteProfilePromise]),
-        timeoutPromise
-      ]);
-
-      // Verificar resultado del perfil
-      if (results && Array.isArray(results) && results[1]) {
-        const { error: userError } = results[1];
-        if (userError) {
-          console.error('[DeleteAccount] Error eliminando perfil:', userError);
-          throw new Error(`Error eliminando perfil: ${userError.message}`);
-        }
-      } else {
-        // Si no hay resultado, verificar directamente
-        const { error: userError } = await deleteProfilePromise;
-        if (userError) {
-          console.error('[DeleteAccount] Error eliminando perfil:', userError);
-          throw new Error(`Error eliminando perfil: ${userError.message}`);
-        }
+      if (!response.ok) {
+        throw new Error(data.detail || data.message || 'Error al eliminar la cuenta');
       }
-      console.log('[DeleteAccount] Perfil eliminado exitosamente');
 
-      // PASO 3: Cerrar sesión inmediatamente (con timeout)
-      const signOutPromise = supabase.auth.signOut();
-      await Promise.race([signOutPromise, timeoutPromise]);
+      console.log('[DeleteAccount] Cuenta eliminada exitosamente en backend');
 
-      // PASO 4: Limpiar todas las sesiones y tokens locales
-      localStorage.removeItem('b2b_auth');
-      localStorage.removeItem('b2b_token');
-      sessionStorage.clear();
+      // Limpiar sesión local
+      await supabase.auth.signOut();
 
-      // Limpiar cookies de Supabase
-      document.cookie.split(";").forEach((c) => {
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
-
-      console.log('[DeleteAccount] Cuenta eliminada exitosamente');
       return { success: true, error: null };
     } catch (error) {
       console.error('[DeleteAccount] Error:', error);
-
-      // Aún así, intentar cerrar sesión y limpiar datos locales
-      try {
-        const signOutPromise = supabase.auth.signOut();
-        await Promise.race([signOutPromise, new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))]);
-      } catch (signOutErr) {
-        console.warn('[DeleteAccount] Error al cerrar sesión:', signOutErr);
-      }
-
-      try {
-        localStorage.removeItem('b2b_auth');
-        localStorage.removeItem('b2b_token');
-        sessionStorage.clear();
-      } catch (cleanupError) {
-        console.warn('[DeleteAccount] Error en limpieza:', cleanupError);
-      }
-
       return { success: false, error };
     }
   }

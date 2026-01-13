@@ -74,7 +74,8 @@ except ImportError:
         exportar_a_json, 
         init_db_b2b, 
         crear_usuario_admin,
-        obtener_todas_empresas
+        obtener_todas_empresas,
+        eliminar_usuario_totalmente
     )
 # Todas las funciones trabajan con datos en memoria durante la sesión
 
@@ -1877,6 +1878,74 @@ async def activate_pro(request: ActivateProRequest):
             
     except Exception as e:
         logger.error(f"Error activando plan PRO: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/auth/delete-account")
+async def delete_account(request: Request):
+    """
+    Endpoint para eliminar cuenta del usuario actual.
+    Requiere token Bearer en el header Authorization.
+    """
+    try:
+        # Verificar autorización
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            raise HTTPException(status_code=401, detail="Token no proporcionado o inválido")
+            
+        token = auth_header.split(' ')[1]
+        
+        # Opcional: Validar token con Supabase (por ahora confiamos en que el frontend envía el correcto)
+        # Idealmente deberíamos decodificar el JWT y extraer el user_id para asegurar que coincide
+        # o usar supabase.auth.get_user(token)
+        
+        # Intentar obtener el usuario desde el token usando Supabase Client
+        try:
+             from db_supabase import get_supabase
+             supabase = get_supabase()
+             if supabase:
+                 user_response = supabase.auth.get_user(token)
+                 
+                 # Ajustar según la estructura de respuesta de la librería
+                 user = None
+                 if user_response and hasattr(user_response, 'user'):
+                    user = user_response.user
+                 elif user_response and hasattr(user_response, 'data') and hasattr(user_response.data, 'user'):
+                    user = user_response.data.user
+                 # Fallback para diccionarios
+                 elif isinstance(user_response, dict) and 'user' in user_response:
+                    user = user_response['user']
+
+                 if not user:
+                     raise HTTPException(status_code=401, detail="Token inválido o expirado")
+                     
+                 user_id = user.id if hasattr(user, 'id') else user['id']
+                 
+        except Exception as e_verify:
+            logger.warning(f"No se pudo verificar token con Supabase, intentando decodificar localmente o fallando: {e_verify}")
+            # Si no podemos verificar el token, es arriesgado proceder.
+            # Sin embargo, si supabase py client falla por alguna razón de red pero el backend tiene acceso admin,
+            # podríamos intentar decodificar el JWT si tuviéramos la clave secreta.
+            # Por seguridad, si falla la verificación, rechazamos.
+            raise HTTPException(status_code=401, detail="Error verificando sesión")
+
+        if not user_id:
+            raise HTTPException(status_code=400, detail="No se pudo identificar al usuario")
+            
+        result = eliminar_usuario_totalmente(user_id)
+        
+        if result.get("success"):
+            return {
+                "success": True, 
+                "message": "Cuenta eliminada correctamente"
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result.get("error", "Error desconocido al eliminar cuenta"))
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error en delete_account: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

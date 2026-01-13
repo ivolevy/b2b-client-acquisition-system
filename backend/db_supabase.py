@@ -474,3 +474,47 @@ def obtener_perfil_usuario(user_id: str) -> Optional[Dict]:
     except Exception as e:
         logger.error(f"Error obteniendo perfil de usuario {user_id}: {e}")
         return None
+def eliminar_usuario_totalmente(user_id: str) -> Dict:
+    """
+    Elimina un usuario y todos sus datos relacionados usando privilegios de admin.
+    Esto es necesario para bypassar las políticas RLS y asegurar limpieza total.
+    """
+    admin_client = get_supabase_admin()
+    
+    if not admin_client:
+        return {"success": False, "error": "Servidor no configurado para eliminación (falta SERVICE_ROLE_KEY)"}
+
+    try:
+        logger.info(f"Iniciando eliminación total de usuario {user_id}")
+        
+        # 1. Eliminar datos relacionados manualmente (redundancia por si falta CASCADE)
+        tables_to_clean = [
+            'search_history', 
+            'saved_companies', 
+            'email_templates', 
+            'email_history',
+            'subscriptions',
+            'user_oauth_tokens',
+            'users' # Perfil público en tabla users
+        ]
+        
+        for table in tables_to_clean:
+            try:
+                admin_client.table(table).delete().eq('user_id', user_id).execute()
+                logger.info(f"Datos eliminados de {table} para {user_id}")
+            except Exception as e_table:
+                # Loggear pero continuar, ya que auth.users delete debería hacer cascade si está configurado
+                logger.warning(f"Error limpiando tabla {table}: {e_table}")
+
+        # 2. Eliminar usuario de Auth (esto debería disparar CASCADE si la DB está bien configurada)
+        # Nota: Usamos delete_user del admin api
+        try:
+            admin_client.auth.admin.delete_user(user_id)
+            return {"success": True, "message": "Usuario eliminado permanentemente"}
+        except Exception as e_auth:
+            logger.error(f"Error eliminando de Auth: {e_auth}")
+            return {"success": False, "error": f"Error al eliminar usuario de Auth: {str(e_auth)}"}
+            
+    except Exception as e:
+        logger.error(f"Error crítico eliminando usuario {user_id}: {e}")
+        return {"success": False, "error": str(e)}
