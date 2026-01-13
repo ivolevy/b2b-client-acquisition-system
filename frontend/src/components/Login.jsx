@@ -586,7 +586,7 @@ function Login({ onLogin }) {
             setLoading(false);
             } else {
             // Limpiar rate limit en éxito
-            rateLimiter.clear(rateLimitKey);
+            // rateLimiter.clear(rateLimitKey);
             
             // Verificar si el email fue enviado
             if (needsConfirmation || (data?.user && !data.user.email_confirmed_at)) {
