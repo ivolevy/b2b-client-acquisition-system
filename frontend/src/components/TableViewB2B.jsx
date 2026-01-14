@@ -12,7 +12,7 @@ function TableViewB2B({
   onExportCSV,
   onExportPDF,
   onDeleteResults,
-  onDeleteResults,
+
   loading,
   toastWarning
 }) {
