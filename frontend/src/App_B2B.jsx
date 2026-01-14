@@ -472,7 +472,9 @@ function AppB2B() {
           
           {blockingLoading && (
             <div className="loading-overlay">
-              <div className="spinner"></div>
+              <div className="progress-container">
+                <div className="progress-bar"></div>
+              </div>
               <p>Buscando y validando empresas...</p>
             </div>
           )}
