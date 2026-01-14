@@ -587,7 +587,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 42px;
+  min-width: 36px;
   height: 32px;
   box-sizing: border-box;
   border-right: 1px solid var(--gray-200);
@@ -619,7 +619,7 @@
 }
 
 .filter-operator {
-  width: 50px;
+  width: 45px;
   padding: 6px;
   text-align: center;
   border-radius: 6px 0 0 6px;
@@ -627,7 +627,7 @@
 }
 
 .filter-km {
-  width: 50px;
+  width: 45px;
   border-radius: 0 6px 6px 0;
   border: none;
   border-left: 1px solid var(--gray-200);

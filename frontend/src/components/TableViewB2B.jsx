@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './TableView.css';
-import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok, FaMapMarkerAlt } from 'react-icons/fa6';
+import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok, FaLocationDot } from 'react-icons/fa6';
 import { useAuth } from '../AuthWrapper';
 
 function TableViewB2B({ 
@@ -631,7 +631,7 @@ function TableViewB2B({
                         textDecoration: 'none'
                       }}
                           >
-                            <FaMapMarkerAlt style={{ color: '#EA4335', fontSize: '18px' }} />
+                            <FaLocationDot style={{ color: '#EA4335', fontSize: '18px' }} />
                           </a>
                         )}
                   {!empresa.direccion && !empresa.ciudad && !empresa.latitud && !empresa.longitud && (
