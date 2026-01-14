@@ -253,7 +253,7 @@ function TableViewB2B({
             {isPro ? (
               <button 
                 type="button" 
-                className="btn-action-inline btn-export"
+                className="btn-action-inline btn-export-pdf"
                 onClick={() => onExportPDF(empresasFiltradas)}
                 disabled={empresasFiltradas.length === 0}
                 style={{ height: '32px', padding: '0 12px' }}

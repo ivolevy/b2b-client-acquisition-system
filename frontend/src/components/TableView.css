@@ -732,6 +732,16 @@
   color: var(--gray-500);
 }
 
+.btn-export-pdf {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.btn-export-pdf:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.3);
+}
+
 .btn-delete {
   background: var(--gray-100);
   color: var(--gray-500);
