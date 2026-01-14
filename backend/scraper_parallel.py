@@ -313,14 +313,19 @@ def enriquecer_empresas_paralelo(
                 logger.error(f" Error procesando {nombre_empresa}: {e}")
                 errores += 1
             
+            # Actualizar progreso en CADA item para evitar saltos bruscos
+            porcentaje = (completadas / len(sincronas)) * 100
+            # logger.debug(f" Progreso: {completadas}/{len(sincronas)} ({porcentaje:.1f}%)")
+            
+            if progress_callback:
+                try:
+                    progress_callback(completadas, len(sincronas))
+                except Exception as e:
+                    logger.error(f"Error en progress_callback: {e}")
+            
+            # Loguear solo cada 10 para no spammear la consola
             if completadas % 10 == 0 or completadas == 1 or completadas == len(sincronas):
-                porcentaje = (completadas / len(sincronas)) * 100
                 logger.info(f" Progreso: {completadas}/{len(sincronas)} ({porcentaje:.1f}%) empresas sincronas")
-                if progress_callback:
-                    try:
-                        progress_callback(completadas, len(sincronas))
-                    except Exception as e:
-                        logger.error(f"Error en progress_callback: {e}")
     
     elapsed_time = time.time() - start_time
     exitosas = len(sincronas) - errores
