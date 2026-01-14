@@ -752,7 +752,16 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         empresas_rechazadas = []
         empresas_sin_contacto = []
         
-        for empresa in empresas:
+        for i, empresa in enumerate(empresas):
+            # Actualizar progreso cada 2 empresas para que sea fluido
+            if request.task_id and i % 2 == 0:
+                # Mapear progreso del 10% al 90%
+                percent = 10 + int((i / len(empresas)) * 80)
+                SEARCH_PROGRESS[request.task_id] = {
+                    "progress": percent,
+                     "message": f"Validando empresas ({i+1}/{len(empresas)})..."
+                }
+
             # Validar nombre primero
             nombre = empresa.get('nombre', '').strip() if empresa.get('nombre') else ''
             if not nombre or nombre == '' or nombre == 'Sin nombre' or len(nombre) < 2:
