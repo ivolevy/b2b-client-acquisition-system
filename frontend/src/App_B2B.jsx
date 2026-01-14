@@ -100,11 +100,16 @@ function AppB2B() {
         if (Math.abs(target - prev) < 0.5) return target;
         
         // Calcular paso inicial
-        let step = (target - prev) * 0.1;
+        // Si el target es 100 (finalizado), acelerar drásticamente para "dispararse"
+        let speedFactor = target === 100 ? 0.5 : 0.1;
+        let step = (target - prev) * speedFactor;
         
-        // Limitar la velocidad máxima para que se vean los números pasar uno a uno (efecto contador)
-        // Máximo 1.5% cada 50ms = 30% por segundo.
-        if (step > 1.5) step = 1.5;
+        // Limitar la velocidad máxima
+        // Si es 100, permitimos saltos grandes (ej: 10% por frame) para terminar rápido
+        // Si no, mantenemos el efecto contador lento (1.5%)
+        let maxStep = target === 100 ? 10.0 : 1.5;
+        
+        if (step > maxStep) step = maxStep;
         
         // Mínimo avance para que no sea eterno
         if (step < 0.2) step = 0.2;
