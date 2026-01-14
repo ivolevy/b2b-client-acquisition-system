@@ -376,10 +376,19 @@ app = FastAPI(
 
 # CORS - Configuración completa para deshabilitar políticas restrictivas
 # IMPORTANTE: Deshabilitamos credenciales y permitimos TODO (*) para evitar problemas en Vercel
+# Definir orígenes permitidos explícitamente para soportar credenciales
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://b2b-client-acquisition-system.vercel.app",
+    "https://b2b-client-acquisition-system-git-main-ivolevy.vercel.app",
+    "https://b2b-client-acquisition-system-ivolevy.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
@@ -395,10 +404,6 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code,
         content={"detail": exc.detail}
     )
-    # Forzar headers CORS por si acaso el middleware falló antes
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
 # Exception handler global para asegurar que CORS siempre se incluya
@@ -415,12 +420,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "Error interno del servidor", "error": str(exc)}
     )
     
-    # Agregar headers CORS manualmente
-    origin = request.headers.get("origin", "*")
-    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-    response.headers["Access-Control-Allow-Credentials"] = "false"
+
     
     return response
 
