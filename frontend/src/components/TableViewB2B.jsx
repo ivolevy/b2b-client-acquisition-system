@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './TableView.css';
-import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok, FaLocationDot } from 'react-icons/fa6';
+import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok, FaLocationDot, FaFilePdf } from 'react-icons/fa6';
 import { useAuth } from '../AuthWrapper';
 
 function TableViewB2B({ 
@@ -10,6 +10,8 @@ function TableViewB2B({
   view,
   setView,
   onExportCSV,
+  onExportPDF,
+  onDeleteResults,
   onDeleteResults,
   loading,
   toastWarning
@@ -244,6 +246,36 @@ function TableViewB2B({
                   <polyline points="7 10 12 15 17 10"/>
                   <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
+                🔒
+              </button>
+            )}
+
+            {isPro ? (
+              <button 
+                type="button" 
+                className="btn-action-inline btn-export"
+                onClick={() => onExportPDF(empresasFiltradas)}
+                disabled={empresasFiltradas.length === 0}
+                style={{ height: '32px', padding: '0 12px' }}
+                title="Exportar a PDF"
+              >
+                <FaFilePdf style={{ marginRight: '6px' }} />
+                PDF
+              </button>
+            ) : (
+               <button 
+                type="button" 
+                className="btn-action-inline btn-export locked"
+                onClick={() => toastWarning?.(
+                  <>
+                    <strong>Función PRO</strong>
+                    <p>Exportar a PDF es exclusivo del plan PRO.</p>
+                  </>
+                )}
+                title="Exportar PDF (solo PRO)"
+                style={{ height: '32px', padding: '0 12px' }}
+              >
+                <FaFilePdf style={{ marginRight: '6px' }} />
                 🔒
               </button>
             )}

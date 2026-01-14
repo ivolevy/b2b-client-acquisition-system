@@ -10,6 +10,10 @@ import TemplateManager from './components/TemplateManager';
 import UserProfile from './components/UserProfile';
 import ToastContainer from './components/ToastContainer';
 import ProBackground from './components/ProBackground';
+import { ToastContainer as ReactToastifyContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import { useToast } from './hooks/useToast';
 import { useAuth } from './AuthWrapper';
 import { searchHistoryService } from './lib/supabase';
@@ -555,7 +559,7 @@ function AppB2B() {
     const now = new Date();
     const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     link.setAttribute('href', url);
-    link.setAttribute('download', `Resultados_B2B_${timestamp}.csv`);
+    link.setAttribute('download', `Smart_Leads_${timestamp}.csv`);
     link.style.visibility = 'hidden';
     
     document.body.appendChild(link);
@@ -570,6 +574,73 @@ function AppB2B() {
         <p>Se exportaron {empresasToExport.length} empresas con el nuevo formato.</p>
       </>
     );
+  };
+
+  const handleExportPDF = (empresasToExport = empresas) => {
+    if (empresasToExport.length === 0) {
+      warning(
+        <>
+          <strong>No hay datos para exportar</strong>
+          <p>Realiza una búsqueda o quita filtros antes de exportar.</p>
+        </>
+      );
+      return;
+    }
+
+    try {
+      const doc = new jsPDF();
+      
+      const now = new Date();
+      const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      const filename = `Smart_Leads_${timestamp}.pdf`;
+
+      // Título
+      doc.setFontSize(18);
+      doc.text('Reporte de Smart Leads', 14, 22);
+      
+      doc.setFontSize(11);
+      doc.setTextColor(100);
+      doc.text(`Generado el: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 14, 30);
+      doc.text(`Total empresas: ${empresasToExport.length}`, 14, 36);
+
+      // Columnas para PDF (menos columnas que CSV para que entre)
+      const tableColumn = ["Nombre", "Rubro", "Teléfono", "Email", "Ciudad", "Estado"];
+      
+      const tableRows = empresasToExport.map(empresa => [
+        empresa.nombre || '',
+        (rubros && rubros[empresa.rubro]) ? rubros[empresa.rubro] : (empresa.rubro || ''),
+        empresa.telefono || '',
+        empresa.email || '',
+        empresa.ciudad || '',
+        empresa.validada ? 'Validada' : 'Pendiente'
+      ]);
+
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 45,
+        theme: 'grid',
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [102, 126, 234] } // #667eea
+      });
+
+      doc.save(filename);
+
+      success(
+        <>
+          <strong>Exportación PDF completada</strong>
+          <p>Se generó el archivo {filename}</p>
+        </>
+      );
+    } catch (err) {
+      console.error('Error generando PDF:', err);
+       toastError(
+        <>
+          <strong>Error al generar PDF</strong>
+          <p>{err.message}</p>
+        </>
+      );
+    }
   };
 
   const handleDeleteResults = () => {
@@ -681,6 +752,7 @@ function AppB2B() {
               view={view}
               setView={setView}
               onExportCSV={exportToCSVFrontend}
+              onExportPDF={handleExportPDF}
               onDeleteResults={handleDeleteResults}
               loading={loading}
               toastWarning={warning}
