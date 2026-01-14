@@ -75,11 +75,47 @@ function AppB2B() {
   }, [location.search, navigate, success, toastError]);
 
   useEffect(() => {
-    // No cargar empresas automáticamente - solo cuando el usuario hace una búsqueda
-    loadStats();
+    // Intentar recuperar estado del localStorage al montar
+    const cachedEmpresas = localStorage.getItem('b2b_empresas_cache');
+    const cachedStats = localStorage.getItem('b2b_stats_cache');
+    
+    if (cachedEmpresas) {
+      try {
+        setEmpresas(JSON.parse(cachedEmpresas));
+      } catch (e) {
+        console.error('Error parsing cached empresas', e);
+      }
+    }
+    
+    if (cachedStats) {
+      try {
+        setStats(JSON.parse(cachedStats));
+      } catch (e) {
+        console.error('Error parsing cached stats', e);
+      }
+    }
+
+    // No cargar empresas automáticamente de la API si ya recuperamos del cache o si no es necesario
+    // Solo cargar estadísticas frescas si no hay cacheadas o para actualizar
+    if (!cachedStats) {
+      loadStats();
+    }
     loadRubros();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar una vez al montar
+
+  // Persistir estado en localStorage cuando cambia
+  useEffect(() => {
+    if (empresas.length > 0) {
+      localStorage.setItem('b2b_empresas_cache', JSON.stringify(empresas));
+    }
+  }, [empresas]);
+
+  useEffect(() => {
+    if (stats) {
+      localStorage.setItem('b2b_stats_cache', JSON.stringify(stats));
+    }
+  }, [stats]);
   
   // Manejar selección desde historial de búsquedas
   const handleSelectFromHistory = (searchData) => {
@@ -406,6 +442,9 @@ function AppB2B() {
     // Solo limpiar estado local, no borrar de la BD
     setEmpresas([]);
     setStats({ total: 0, validadas: 0 });
+    // Limpiar también localStorage
+    localStorage.removeItem('b2b_empresas_cache');
+    localStorage.removeItem('b2b_stats_cache');
     success(
       <>
         <strong>Resultados limpiados</strong>
