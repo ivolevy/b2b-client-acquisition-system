@@ -207,7 +207,7 @@ function AppB2B() {
         } catch (e) {
           console.warn('Error polling progress:', e);
         }
-      }, 1000);
+      }, 200);
 
       const paramsWithTask = { ...params, task_id: taskId };
       const response = await axios.post(`${API_URL}/buscar`, paramsWithTask);

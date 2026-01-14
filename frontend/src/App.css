@@ -59,7 +59,7 @@
   height: 100%;
   background: var(--primary);
   border-radius: 99px;
-  transition: width 0.4s ease-out;
+  transition: width 0.2s linear;
   box-shadow: 0 0 10px rgba(233, 30, 99, 0.5);
 }
 
