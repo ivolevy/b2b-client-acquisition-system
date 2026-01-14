@@ -753,8 +753,8 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         empresas_sin_contacto = []
         
         for i, empresa in enumerate(empresas):
-            # Actualizar progreso cada 2 empresas para que sea fluido
-            if request.task_id and i % 2 == 0:
+            # Actualizar progreso en CADA empresa para máxima fluidez, especialmente en lotes pequeños
+            if request.task_id:
                 # Mapear progreso del 10% al 90%
                 percent = 10 + int((i / len(empresas)) * 80)
                 SEARCH_PROGRESS[request.task_id] = {

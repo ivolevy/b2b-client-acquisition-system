@@ -87,14 +87,13 @@ function AppB2B() {
     const target = searchProgress.percent;
     const interval = setInterval(() => {
       setDisplayProgress(prev => {
-        // Definir un objetivo efectivo para evitar que se quede "trabada" visualmente
-        // Si el backend dice X%, nosotros apuntamos a un poco más (fake movement) 
-        // para que siempre haya sensación de progreso, topeado en 90%
+        // Definir un objetivo efectivo
+        // Si estamos en fase inicial (buscando en OSM, <= 15%), aplicamos "creep" para dar feedback visual
+        // Si ya estamos validando (> 15%), confiamos en el backend que ahora es granular
         let effectiveTarget = target;
-        if (target < 100) {
-           // Apuntamos siempre a un 15% más de lo actual, con tope en 90%
-           // Si el dato real (target) es mayor, usamos el real.
-           effectiveTarget = Math.max(target, Math.min(prev + 15, 90));
+        if (target <= 15) {
+           // Fase inicial: simulamos avance hasta 45% mientras busca
+           effectiveTarget = Math.max(target, Math.min(prev + 0.5, 45));
         }
 
         // Si ya llegamos al target real y es 100, fin.
