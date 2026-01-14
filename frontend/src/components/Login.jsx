@@ -768,7 +768,7 @@ function Login({ onLogin }) {
                     <polyline points="22,4 12,14.01 9,11.01"/>
                   </svg>
                 </div>
-                <span>Validación automática</span>
+                <span>Validación automática de empresas</span>
               </div>
               <div className="feature-item">
                 <div className="feature-icon">
@@ -777,7 +777,7 @@ function Login({ onLogin }) {
                     <polyline points="22,6 12,13 2,6"/>
                   </svg>
                 </div>
-                <span>Envío masivo de emails</span>
+                <span>Email Marketing</span>
               </div>
             </div>
 
