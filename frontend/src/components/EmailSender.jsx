@@ -28,7 +28,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedEmpresas, setSelectedEmpresas] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [asuntoPersonalizado, setAsuntoPersonalizado] = useState('');
+
   const [modo, setModo] = useState('individual');
   const [delaySegundos, setDelaySegundos] = useState(1.0);
   const [activeTab, setActiveTab] = useState('enviar'); // 'enviar' o 'templates'
@@ -126,7 +126,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
       fecha: new Date().toLocaleDateString()
     };
 
-    let subject = asuntoPersonalizado || template.subject || '';
+    let subject = template.subject || '';
     let bodyPlainText = template.body_text || template.body_html || '';
 
     // Reemplazar variables
@@ -300,7 +300,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
         const response = await axios.post(`${API_URL}/email/enviar`, {
           empresa_id: selectedEmpresas[0].id,
           template_id: selectedTemplate,
-          asunto_personalizado: asuntoPersonalizado || null,
+          asunto_personalizado: null,
           user_id: user?.id || null,
           empresa_data: selectedEmpresas[0]
         });
@@ -336,7 +336,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
         const response = await axios.post(`${API_URL}/email/enviar-masivo`, {
           empresa_ids: empresasAEnviar.map(e => e.id),
           template_id: selectedTemplate,
-          asunto_personalizado: asuntoPersonalizado || null,
+          asunto_personalizado: null,
           delay_segundos: 3.0,
           user_id: user?.id || null
         });
@@ -487,17 +487,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
                   </select>
                 </div>
 
-                {/* Asunto personalizado */}
-                <div className="form-group">
-                  <label>Asunto personalizado (opcional)</label>
-                  <input
-                    type="text"
-                    value={asuntoPersonalizado}
-                    onChange={(e) => setAsuntoPersonalizado(e.target.value)}
-                    placeholder="Deja vacío para usar el asunto del template"
-                    disabled={loading}
-                  />
-                </div>
+
 
                 {/* Resumen */}
                 <div className="summary-box">
