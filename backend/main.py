@@ -1412,6 +1412,49 @@ async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
             "message": f"Proceso completado: {resultados['exitosos']} exitosos, {resultados['fallidos']} fallidos",
             "data": resultados
         }
+
+@app.delete("/admin/users/{user_id}")
+async def eliminar_usuario_admin(user_id: str, current_user: dict = Depends(get_current_user)):
+    """
+    Elimina un usuario y todos sus datos (incluyendo Auth)
+    Requiere ser admin
+    """
+    # Verificar rol de admin
+    is_admin = False
+    
+    # 1. Verificar en metadata del token (si existe)
+    if current_user.get('user_metadata', {}).get('role') == 'admin':
+        is_admin = True
+    
+    # 2. Verificar en perfil público (más seguro)
+    if not is_admin:
+        # Intentar obtener rol de la DB
+        try:
+             # Nota: current_user viene de get_current_user que valida el token
+             # pero a veces no trae todo el perfil.
+             # Si current_user tiene 'role', usarlo.
+             if current_user.get('role') == 'admin':
+                 is_admin = True
+        except:
+             pass
+
+    if not is_admin:
+        # Consulta directa a DB como último recurso
+        perfil = obtener_perfil_usuario(current_user['id'])
+        if perfil and perfil.get('role') == 'admin':
+            is_admin = True
+
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
+    
+    # Ejecutar eliminación total
+    from db_supabase import eliminar_usuario_totalmente
+    result = eliminar_usuario_totalmente(user_id)
+    
+    if not result['success']:
+        raise HTTPException(status_code=400, detail=result.get('error', 'Error al eliminar usuario'))
+        
+    return result
         
     except HTTPException:
         raise

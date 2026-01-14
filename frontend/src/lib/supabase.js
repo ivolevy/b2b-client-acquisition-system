@@ -693,16 +693,26 @@ export const adminService = {
 
   async deleteUser(userId) {
     try {
-      // Eliminar usuario (el CASCADE eliminará sus datos relacionados)
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId);
+      console.log('[Admin] Deleting user via backend:', userId);
 
-      if (error) throw error;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No hay sesión activa');
 
-      // También eliminar de auth.users (requiere función edge)
-      // Por ahora solo eliminamos de public.users
+      const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
+
+      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || data.error || 'Error al eliminar usuario');
+      }
 
       return { data: { success: true }, error: null };
     } catch (error) {
