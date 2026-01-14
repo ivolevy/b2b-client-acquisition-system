@@ -223,6 +223,33 @@ function AppB2B() {
     }
   };
 
+  /* ----------------------------------------------------------------------------------
+   * REF PARA SEGUIR EL PROGRESO VISUAL DENTRO DE FUNCIONES ASÍNCRONAS
+   * ---------------------------------------------------------------------------------- */
+  const displayProgressRef = useRef(0);
+
+  // Mantener el ref sincronizado con el estado visual
+  useEffect(() => {
+    displayProgressRef.current = displayProgress;
+  }, [displayProgress]);
+
+  // Función para esperar a que la barra llegue visualmente al 100%
+  const waitForVisualCompletion = async () => {
+    // Esperar hasta que la barra esté casi llena (>99%)
+    // Timeout de seguridad de 5s por si acaso
+    let attempts = 0;
+    while (displayProgressRef.current < 99 && attempts < 50) {
+      await new Promise(r => setTimeout(r, 100)); // Chequear cada 100ms
+      attempts++;
+    }
+    // Una vez que llegó al 100%, esperar 1 segundo extra para que el usuario lo registre
+    await new Promise(r => setTimeout(r, 1000));
+  };
+
+
+  /* ----------------------------------------------------------------------------------
+   * MANEJO DE BUSQUEDA
+   * ---------------------------------------------------------------------------------- */
   const handleBuscar = async (params) => {
     try {
       setLoading(true);
@@ -274,8 +301,8 @@ function AppB2B() {
       }
       setSearchProgress({ percent: 100, message: '¡Listo!' });
       
-      // PEQUEÑO RETRASO ARTIFICIAL PARA QUE EL USUARIO VEA EL 100%
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // ESPERAR A QUE LA BARRA LLEGUE VISUALMENTE AL 100% + RETRASO
+      await waitForVisualCompletion();
       
       if (response.data.success) {
         const validas = response.data.validas || 0;
