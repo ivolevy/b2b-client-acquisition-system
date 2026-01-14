@@ -617,7 +617,10 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         if request.bbox and bbox_valido:
             # Búsqueda por bounding box (ubicación en mapa)
             logger.info(f" Búsqueda por bbox: {request.bbox}")
-            empresas = query_by_bbox(
+            # Ejecutar en thread separado
+            import asyncio
+            empresas = await asyncio.to_thread(
+                query_by_bbox,
                 bbox=request.bbox,
                 rubro=request.rubro
             )
@@ -629,7 +632,11 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             # Búsqueda por ciudad/país (método antiguo)
             if request.bbox and not bbox_valido:
                 logger.warning(f"Bbox inválido, usando búsqueda por ciudad/país")
-            empresas = buscar_empresas_por_rubro(
+            
+            # Ejecutar en thread separado
+            import asyncio
+            empresas = await asyncio.to_thread(
+                buscar_empresas_por_rubro,
                 rubro=request.rubro,
                 pais=request.pais,
                 ciudad=request.ciudad
@@ -668,11 +675,15 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         if request.scrapear_websites:
             logger.info(" Iniciando enriquecimiento paralelo de empresas...")
             try:
-                empresas_enriquecidas = enriquecer_empresas_paralelo(
-                empresas=empresas,
-                timeout_por_empresa=20,
-                progress_callback=lambda current, total: update_search_progress(request.task_id, current, total)
-            )
+                import asyncio
+                # Ejecutar scraping en un thread separado para no bloquear el event loop
+                empresas_enriquecidas = await asyncio.to_thread(
+                    enriquecer_empresas_paralelo,
+                    empresas=empresas,
+                    timeout_por_empresa=20,
+                    progress_callback=lambda current, total: update_search_progress(request.task_id, current, total)
+                )
+                
                 # Validar que retornó una lista válida
                 if isinstance(empresas_enriquecidas, list):
                     empresas = empresas_enriquecidas
