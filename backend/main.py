@@ -376,19 +376,10 @@ app = FastAPI(
 
 # CORS - Configuración completa para deshabilitar políticas restrictivas
 # IMPORTANTE: Deshabilitamos credenciales y permitimos TODO (*) para evitar problemas en Vercel
-# Definir orígenes permitidos explícitamente para soportar credenciales
-origins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://b2b-client-acquisition-system.vercel.app",
-    "https://b2b-client-acquisition-system-git-main-ivolevy.vercel.app",
-    "https://b2b-client-acquisition-system-ivolevy.vercel.app",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
@@ -404,6 +395,10 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code,
         content={"detail": exc.detail}
     )
+    # Forzar headers CORS por si acaso el middleware falló antes
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
 # Exception handler global para asegurar que CORS siempre se incluya
@@ -420,18 +415,12 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "Error interno del servidor", "error": str(exc)}
     )
     
-
-    
-    # Agregar headers CORS manualmente para asegurar visibilidad del error
-    origin = request.headers.get("origin")
-    if origin:
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-    else:
-        response.headers["Access-Control-Allow-Origin"] = "*"
-    
+    # Agregar headers CORS manualmente
+    origin = request.headers.get("origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    response.headers["Access-Control-Allow-Credentials"] = "false"
     
     return response
 
@@ -1423,55 +1412,12 @@ async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
             "message": f"Proceso completado: {resultados['exitosos']} exitosos, {resultados['fallidos']} fallidos",
             "data": resultados
         }
-
+        
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error enviando emails masivos: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/admin/users/{user_id}")
-async def eliminar_usuario_admin(user_id: str, current_user: dict = Depends(get_current_user)):
-    """
-    Elimina un usuario y todos sus datos (incluyendo Auth)
-    Requiere ser admin
-    """
-    # Verificar rol de admin
-    is_admin = False
-    
-    # 1. Verificar en metadata del token (si existe)
-    if current_user.get('user_metadata', {}).get('role') == 'admin':
-        is_admin = True
-    
-    # 2. Verificar en perfil público (más seguro)
-    if not is_admin:
-        # Intentar obtener rol de la DB
-        try:
-             # Nota: current_user viene de get_current_user que valida el token
-             # pero a veces no trae todo el perfil.
-             # Si current_user tiene 'role', usarlo.
-             if current_user.get('role') == 'admin':
-                 is_admin = True
-        except:
-             pass
-
-    if not is_admin:
-        # Consulta directa a DB como último recurso
-        perfil = obtener_perfil_usuario(current_user['id'])
-        if perfil and perfil.get('role') == 'admin':
-            is_admin = True
-
-    if not is_admin:
-        raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
-    
-    # Ejecutar eliminación total
-    from db_supabase import eliminar_usuario_totalmente
-    result = eliminar_usuario_totalmente(user_id)
-    
-    if not result['success']:
-        raise HTTPException(status_code=400, detail=result.get('error', 'Error al eliminar usuario'))
-        
-    return result
 
 @app.get("/email/historial")
 async def obtener_historial_email(empresa_id: Optional[int] = None, template_id: Optional[int] = None, limit: int = 100):
@@ -2123,22 +2069,10 @@ class AdminCreateUserRequest(BaseModel):
     role: Optional[str] = 'user'
 
 @app.post("/admin/create-user")
-async def admin_create_user(user_data: AdminCreateUserRequest, current_user: dict = Depends(get_current_user)):
+async def admin_create_user(user_data: AdminCreateUserRequest):
     """
     Endpoint administrativo para crear usuarios directamente en Supabase Auth
     """
-    # Verificar rol de admin
-    is_admin = False
-    if current_user.get('user_metadata', {}).get('role') == 'admin': is_admin = True
-    elif current_user.get('role') == 'admin': is_admin = True
-    
-    if not is_admin:
-        # Fallback DB check
-        perfil = obtener_perfil_usuario(current_user['id'])
-        if perfil and perfil.get('role') == 'admin': is_admin = True
-        
-    if not is_admin:
-        raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
     try:
         # Construir user_metadata
         metadata = {
@@ -2169,19 +2103,8 @@ class AdminUpdateUserRequest(BaseModel):
     updates: Dict[str, Any]
 
 @app.put("/admin/update-user")
-async def admin_update_user_endpoint(request: AdminUpdateUserRequest, current_user: dict = Depends(get_current_user)):
+async def admin_update_user_endpoint(request: AdminUpdateUserRequest):
     """Endpoint para actualizar usuario vía admin (bypassing RLS)"""
-    # Verificar rol de admin
-    is_admin = False
-    if current_user.get('user_metadata', {}).get('role') == 'admin': is_admin = True
-    elif current_user.get('role') == 'admin': is_admin = True
-    
-    if not is_admin:
-        perfil = obtener_perfil_usuario(current_user['id'])
-        if perfil and perfil.get('role') == 'admin': is_admin = True
-        
-    if not is_admin:
-        raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
     try:
         result = admin_update_user(request.user_id, request.updates)
         

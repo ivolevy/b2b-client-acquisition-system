@@ -637,15 +637,11 @@ export const adminService = {
     try {
       console.log('[Admin] Creating user via backend:', userData);
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No hay sesión activa');
-
       const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
 
       const response = await fetch(`${API_URL}/admin/create-user`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(userData)
@@ -668,15 +664,11 @@ export const adminService = {
     try {
       console.log('[Admin] Updating user via backend:', userId, updates);
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No hay sesión activa');
-
       const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
 
       const response = await fetch(`${API_URL}/admin/update-user`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -701,26 +693,16 @@ export const adminService = {
 
   async deleteUser(userId) {
     try {
-      console.log('[Admin] Deleting user via backend:', userId);
+      // Eliminar usuario (el CASCADE eliminará sus datos relacionados)
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No hay sesión activa');
+      if (error) throw error;
 
-      const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
-
-      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || data.error || 'Error al eliminar usuario');
-      }
+      // También eliminar de auth.users (requiere función edge)
+      // Por ahora solo eliminamos de public.users
 
       return { data: { success: true }, error: null };
     } catch (error) {
