@@ -24,6 +24,7 @@ function AppB2B() {
   const [loading, setLoading] = useState(false);
   const [blockingLoading, setBlockingLoading] = useState(false);
   const [searchProgress, setSearchProgress] = useState({ percent: 0, message: '' });
+  const [displayProgress, setDisplayProgress] = useState(0); // Para animación suave
   const loadingIntervalRef = useRef(null);
   
   // Determinar la vista basada en la ruta
@@ -75,6 +76,38 @@ function AppB2B() {
       navigate('/', { replace: true });
     }
   }, [location.search, navigate, success, toastError]);
+
+  // Efecto para interpolar el progreso visual suavemente
+  useEffect(() => {
+    if (!blockingLoading) {
+      setDisplayProgress(0);
+      return;
+    }
+
+    const target = searchProgress.percent;
+    const interval = setInterval(() => {
+      setDisplayProgress(prev => {
+        // Si ya llegamos, mantener
+        if (prev >= target && target === 100) return 100;
+        
+        // Logica de "creep" (avance falso lento) si el backend está en fase inicial (<10%)
+        // para que el usuario sienta que algo pasa
+        if (target < 10 && prev < 30) {
+           return prev + 0.2; // Avance muy lento automático
+        }
+
+        // Interpolación normal hacia el target
+        if (Math.abs(target - prev) < 0.5) return target;
+        
+        // Velocidad de alcance
+        const step = (target - prev) * 0.1;
+        // Mínimo avance para que no sea eterno
+        return prev + (step > 0.5 ? step : 0.5); 
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [searchProgress.percent, blockingLoading]);
 
   useEffect(() => {
     // Intentar recuperar estado del sessionStorage al montar
@@ -188,6 +221,7 @@ function AppB2B() {
       setLoading(true);
       setBlockingLoading(true);
       setSearchProgress({ percent: 0, message: 'Iniciando búsqueda...' });
+      setDisplayProgress(0);
       
       // Generar Task ID único para tracking
       const taskId = `search_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -515,12 +549,12 @@ function AppB2B() {
               <div className="loading-progress-container">
                 <div className="progress-info">
                   <span>Buscando prospectos...</span>
-                  <span className="progress-percentage">{searchProgress.percent}%</span>
+                  <span className="progress-percentage">{Math.round(displayProgress)}%</span>
                 </div>
                 <div className="progress-bar-bg">
                   <div 
                     className="progress-bar-fill" 
-                    style={{ width: `${searchProgress.percent}%` }}
+                    style={{ width: `${Math.min(displayProgress, 100)}%` }}
                   ></div>
                 </div>
                 <p className="loading-message">{searchProgress.message}</p>
