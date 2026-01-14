@@ -637,11 +637,15 @@ export const adminService = {
     try {
       console.log('[Admin] Creating user via backend:', userData);
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No hay sesión activa');
+
       const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
 
       const response = await fetch(`${API_URL}/admin/create-user`, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(userData)
@@ -664,11 +668,15 @@ export const adminService = {
     try {
       console.log('[Admin] Updating user via backend:', userId, updates);
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No hay sesión activa');
+
       const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
 
       const response = await fetch(`${API_URL}/admin/update-user`, {
         method: 'PUT',
         headers: {
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

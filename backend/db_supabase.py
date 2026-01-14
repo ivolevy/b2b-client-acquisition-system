@@ -77,7 +77,14 @@ def crear_usuario_admin(email: str, password: str, user_metadata: Dict) -> Dict:
         # Dependiendo de la versión, puede devolver un objeto con .user o ser el user directamente
         # Probaremos asumiendo la estructura estándar de gotrue-py
         
-        return {"data": response, "error": None}
+        return {
+            "data": {
+                "id": getattr(response.user, 'id', None) if hasattr(response, 'user') else getattr(response, 'id', None),
+                "email": getattr(response.user, 'email', None) if hasattr(response, 'user') else getattr(response, 'email', None),
+                # Add other safe fields if needed, but avoid full object dump
+            }, 
+            "error": None
+        }
         
     except Exception as e:
         logger.error(f"Error creando usuario admin: {e}")

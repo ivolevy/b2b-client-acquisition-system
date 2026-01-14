@@ -2112,10 +2112,22 @@ class AdminCreateUserRequest(BaseModel):
     role: Optional[str] = 'user'
 
 @app.post("/admin/create-user")
-async def admin_create_user(user_data: AdminCreateUserRequest):
+async def admin_create_user(user_data: AdminCreateUserRequest, current_user: dict = Depends(get_current_user)):
     """
     Endpoint administrativo para crear usuarios directamente en Supabase Auth
     """
+    # Verificar rol de admin
+    is_admin = False
+    if current_user.get('user_metadata', {}).get('role') == 'admin': is_admin = True
+    elif current_user.get('role') == 'admin': is_admin = True
+    
+    if not is_admin:
+        # Fallback DB check
+        perfil = obtener_perfil_usuario(current_user['id'])
+        if perfil and perfil.get('role') == 'admin': is_admin = True
+        
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
     try:
         # Construir user_metadata
         metadata = {
@@ -2146,8 +2158,19 @@ class AdminUpdateUserRequest(BaseModel):
     updates: Dict[str, Any]
 
 @app.put("/admin/update-user")
-async def admin_update_user_endpoint(request: AdminUpdateUserRequest):
+async def admin_update_user_endpoint(request: AdminUpdateUserRequest, current_user: dict = Depends(get_current_user)):
     """Endpoint para actualizar usuario vía admin (bypassing RLS)"""
+    # Verificar rol de admin
+    is_admin = False
+    if current_user.get('user_metadata', {}).get('role') == 'admin': is_admin = True
+    elif current_user.get('role') == 'admin': is_admin = True
+    
+    if not is_admin:
+        perfil = obtener_perfil_usuario(current_user['id'])
+        if perfil and perfil.get('role') == 'admin': is_admin = True
+        
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
     try:
         result = admin_update_user(request.user_id, request.updates)
         
