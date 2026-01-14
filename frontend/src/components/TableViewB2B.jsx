@@ -636,7 +636,7 @@ function TableViewB2B({
                         textDecoration: 'none'
                       }}
                           >
-                            🚗
+                            <img src="https://www.gstatic.com/images/branding/product/1x/maps_2020_48dp.png" alt="Maps" style={{ width: '20px', height: '20px' }} />
                           </a>
                         )}
                   {!empresa.direccion && !empresa.ciudad && !empresa.latitud && !empresa.longitud && (
