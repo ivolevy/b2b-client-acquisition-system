@@ -239,6 +239,11 @@ function AppB2B() {
       loadingIntervalRef.current = setInterval(async () => {
         try {
           const progressRes = await axios.get(`${API_URL}/buscar/progreso/${taskId}`);
+          
+          // Si el intervalo ya fue limpiado (la búsqueda terminó), ignorar este resultado
+          // para evitar sobrescribir el 100% con un resultado viejo o 0
+          if (!loadingIntervalRef.current) return;
+
           if (progressRes.data) {
             setSearchProgress({
               percent: progressRes.data.progress || 0,
