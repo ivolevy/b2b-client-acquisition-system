@@ -114,7 +114,7 @@ function AppB2B() {
         // Mínimo avance para que no sea eterno
         if (step < 0.2) step = 0.2;
         
-        return Math.min(prev + step, target); 
+        return Math.max(prev, Math.min(prev + step, target)); 
       });
     }, 50);
 
@@ -238,6 +238,9 @@ function AppB2B() {
     displayProgressRef.current = displayProgress;
   }, [displayProgress]);
 
+  // Ref para trackear el taskId actual y evitar race conditions
+  const currentTaskIdRef = useRef(null);
+  
   // Función para esperar a que la barra llegue visualmente al 100%
   const waitForVisualCompletion = async () => {
     // Esperar hasta que la barra esté casi llena (>99%)
@@ -268,12 +271,15 @@ function AppB2B() {
       // Iniciar polling de progreso
       if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
       
+      // Ref para trackear el taskId actual y evitar race conditions
+      currentTaskIdRef.current = taskId;
+      
       loadingIntervalRef.current = setInterval(async () => {
         try {
           const progressRes = await axios.get(`${API_URL}/buscar/progreso/${taskId}`);
           
-          // Si el intervalo ya fue limpiado (la búsqueda terminó), ignorar este resultado
-          // para evitar sobrescribir el 100% con un resultado viejo o 0
+          // Verificar si seguimos en la misma tarea
+          if (currentTaskIdRef.current !== taskId) return;
           if (!loadingIntervalRef.current) return;
 
           if (progressRes.data) {
