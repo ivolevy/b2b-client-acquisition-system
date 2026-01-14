@@ -247,7 +247,7 @@
 }
 
 .sort-indicator {
-  color: #4FC3F7;
+  color: var(--primary);
   font-weight: 700;
   margin-left: 4px;
 }
