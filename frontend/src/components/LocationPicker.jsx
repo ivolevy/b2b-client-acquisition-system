@@ -619,12 +619,14 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       <div className="radius-control">
         <label className="radius-label">Radio de búsqueda</label>
         <select value={radius} onChange={(e) => handleRadiusChange(parseInt(e.target.value))}>
-          <option value="1000">1 km</option>
-          <option value="2000">2 km</option>
-          <option value="5000">5 km</option>
-          <option value="10000">10 km</option>
-          <option value="20000">20 km</option>
-          <option value="50000">50 km</option>
+          {[...Array(15)].map((_, i) => {
+            const km = i + 1;
+            return (
+              <option key={km} value={km * 1000}>
+                {km} km
+              </option>
+            );
+          })}
         </select>
       </div>
 

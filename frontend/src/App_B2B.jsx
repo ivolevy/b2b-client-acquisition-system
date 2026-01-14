@@ -265,6 +265,9 @@ function AppB2B() {
       }
       setSearchProgress({ percent: 100, message: '¡Listo!' });
       
+      // PEQUEÑO RETRASO ARTIFICIAL PARA QUE EL USUARIO VEA EL 100%
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       if (response.data.success) {
         const validas = response.data.validas || 0;
         const total = response.data.total_encontradas || 0;
@@ -364,16 +367,10 @@ function AppB2B() {
           <p>{errorMsg}</p>
         </>
       );
-      // Asegurar que se limpien los estados incluso si hay error
-      setLoading(false);
-      setBlockingLoading(false);
-      if (loadingIntervalRef.current) {
-        clearInterval(loadingIntervalRef.current);
-        loadingIntervalRef.current = null;
-      }
     } finally {
-      setLoading(false);
+      // Limpiar estados y polling
       setBlockingLoading(false);
+      setLoading(false);
       if (loadingIntervalRef.current) {
         clearInterval(loadingIntervalRef.current);
         loadingIntervalRef.current = null;
