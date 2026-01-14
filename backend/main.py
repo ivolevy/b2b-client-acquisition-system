@@ -422,6 +422,17 @@ async def global_exception_handler(request: Request, exc: Exception):
     
 
     
+    # Agregar headers CORS manualmente para asegurar visibilidad del error
+    origin = request.headers.get("origin")
+    if origin:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+    else:
+        response.headers["Access-Control-Allow-Origin"] = "*"
+    
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    
     return response
 
 # Modelos
@@ -1413,6 +1424,12 @@ async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
             "data": resultados
         }
 
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error enviando emails masivos: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.delete("/admin/users/{user_id}")
 async def eliminar_usuario_admin(user_id: str, current_user: dict = Depends(get_current_user)):
     """
@@ -1455,12 +1472,6 @@ async def eliminar_usuario_admin(user_id: str, current_user: dict = Depends(get_
         raise HTTPException(status_code=400, detail=result.get('error', 'Error al eliminar usuario'))
         
     return result
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error enviando emails masivos: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/email/historial")
 async def obtener_historial_email(empresa_id: Optional[int] = None, template_id: Optional[int] = None, limit: int = 100):
