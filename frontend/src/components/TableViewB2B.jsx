@@ -526,11 +526,7 @@ function TableViewB2B({
                     </td>
                 <td className="name-cell">
                   {empresa.nombre || 'Sin nombre'}
-                  {(empresa.direccion) && (
-                        <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
-                      {empresa.direccion}
-                    </div>
-                  )}
+
                 </td>
                 <td>
                   <span className="category-badge">{empresa.rubro || 'N/A'}</span>
