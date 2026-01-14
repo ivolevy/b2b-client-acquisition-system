@@ -23,6 +23,8 @@ function AppB2B() {
   const [empresas, setEmpresas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [blockingLoading, setBlockingLoading] = useState(false);
+  const [searchProgress, setSearchProgress] = useState({ percent: 0, message: '' });
+  const loadingIntervalRef = useRef(null);
   
   // Determinar la vista basada en la ruta
   const isProfilePage = location.pathname === '/profile';
@@ -185,7 +187,37 @@ function AppB2B() {
     try {
       setLoading(true);
       setBlockingLoading(true);
-      const response = await axios.post(`${API_URL}/buscar`, params);
+      setSearchProgress({ percent: 0, message: 'Iniciando búsqueda...' });
+      
+      // Generar Task ID único para tracking
+      const taskId = `search_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Iniciar polling de progreso
+      if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
+      
+      loadingIntervalRef.current = setInterval(async () => {
+        try {
+          const progressRes = await axios.get(`${API_URL}/buscar/progreso/${taskId}`);
+          if (progressRes.data) {
+            setSearchProgress({
+              percent: progressRes.data.progress || 0,
+              message: progressRes.data.message || 'Procesando...'
+            });
+          }
+        } catch (e) {
+          console.warn('Error polling progress:', e);
+        }
+      }, 1000);
+
+      const paramsWithTask = { ...params, task_id: taskId };
+      const response = await axios.post(`${API_URL}/buscar`, paramsWithTask);
+      
+      // Detener polling
+      if (loadingIntervalRef.current) {
+        clearInterval(loadingIntervalRef.current);
+        loadingIntervalRef.current = null;
+      }
+      setSearchProgress({ percent: 100, message: '¡Listo!' });
       
       if (response.data.success) {
         const validas = response.data.validas || 0;
@@ -289,9 +321,17 @@ function AppB2B() {
       // Asegurar que se limpien los estados incluso si hay error
       setLoading(false);
       setBlockingLoading(false);
+      if (loadingIntervalRef.current) {
+        clearInterval(loadingIntervalRef.current);
+        loadingIntervalRef.current = null;
+      }
     } finally {
       setLoading(false);
       setBlockingLoading(false);
+      if (loadingIntervalRef.current) {
+        clearInterval(loadingIntervalRef.current);
+        loadingIntervalRef.current = null;
+      }
     }
   };
 
@@ -472,10 +512,19 @@ function AppB2B() {
           
           {blockingLoading && (
             <div className="loading-overlay">
-              <div className="progress-container">
-                <div className="progress-bar"></div>
+              <div className="loading-progress-container">
+                <div className="progress-info">
+                  <span>Buscando prospectos...</span>
+                  <span className="progress-percentage">{searchProgress.percent}%</span>
+                </div>
+                <div className="progress-bar-bg">
+                  <div 
+                    className="progress-bar-fill" 
+                    style={{ width: `${searchProgress.percent}%` }}
+                  ></div>
+                </div>
+                <p className="loading-message">{searchProgress.message}</p>
               </div>
-              <p>Buscando y validando empresas...</p>
             </div>
           )}
 

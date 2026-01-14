@@ -248,7 +248,8 @@ def _enriquecer_empresa_individual(
 def enriquecer_empresas_paralelo(
     empresas: List[Dict],
     max_workers: Optional[int] = None,
-    timeout_por_empresa: int = 20
+    timeout_por_empresa: int = 20,
+    progress_callback=None
 ) -> List[Dict]:
     """
     Enriquece múltiples empresas con paralelismo optimizado y enriquecimiento diferido.
@@ -312,9 +313,14 @@ def enriquecer_empresas_paralelo(
                 logger.error(f" Error procesando {nombre_empresa}: {e}")
                 errores += 1
             
-            if completadas % 10 == 0 or completadas == 1:
+            if completadas % 10 == 0 or completadas == 1 or completadas == len(sincronas):
                 porcentaje = (completadas / len(sincronas)) * 100
                 logger.info(f" Progreso: {completadas}/{len(sincronas)} ({porcentaje:.1f}%) empresas sincronas")
+                if progress_callback:
+                    try:
+                        progress_callback(completadas, len(sincronas))
+                    except Exception as e:
+                        logger.error(f"Error en progress_callback: {e}")
     
     elapsed_time = time.time() - start_time
     exitosas = len(sincronas) - errores

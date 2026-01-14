@@ -101,10 +101,29 @@ _memoria_templates = []
 _template_counter = 0
 _memoria_email_history = []
 _memoria_codigos_validacion = {}
+SEARCH_PROGRESS = {}  # Diccionario global para guardar el progreso de las búsquedas: {task_id: {progress: int, message: str}}
 
 def get_memoria_codigos():
     global _memoria_codigos_validacion
     return _memoria_codigos_validacion
+
+def update_search_progress(task_id, current, total):
+    """Actualiza el progreso de una búsqueda globalmente"""
+    if not task_id:
+        return
+        
+    global SEARCH_PROGRESS
+    
+    # Calcular porcentaje (validación toma 80% del tiempo total, búsqueda y otros 20%)
+    # Aquí estamos en la fase de scraping/validación
+    # Mapeamos 0-100 del scraping a 10-90 del proceso total
+    
+    percent = int((current / total) * 80) + 10
+    
+    SEARCH_PROGRESS[task_id] = {
+        "progress": percent,
+        "message": f"Validando empresas ({current}/{total})..."
+    }
 
 
 def calcular_distancia_km(lat1, lon1, lat2, lon2):
@@ -418,6 +437,7 @@ class BusquedaRubroRequest(BaseModel):
     busqueda_centro_lat: Optional[float] = None
     busqueda_centro_lng: Optional[float] = None
     busqueda_radio_km: Optional[float] = None
+    task_id: Optional[str] = None  # ID único de la tarea para tracking de progreso
 
 class BusquedaMultipleRequest(BaseModel):
     rubros: List[str]
@@ -507,6 +527,25 @@ async def root():
         }
     }
 
+@app.get("/buscar/progreso/{task_id}")
+async def obtener_progreso_busqueda(task_id: str):
+    """
+    Obtiene el progreso actual de una búsqueda específica
+    """
+    global SEARCH_PROGRESS
+    
+    if not task_id:
+        return {"progress": 0, "message": "ID de tarea inválido"}
+        
+    progreso = SEARCH_PROGRESS.get(task_id)
+    
+    if not progreso:
+        # Si no existe, puede ser que ya terminó o nunca empezó
+        # Asumimos 0 si es muy reciente, o verificamos si hay resultados
+        return {"progress": 0, "message": "Iniciando..."}
+        
+    return progreso
+
 @app.get("/rubros")
 def obtener_rubros():
     """Lista todos los rubros disponibles para búsqueda"""
@@ -547,6 +586,14 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 logger.info(f" Nueva búsqueda: limpiando {count_anterior} empresas anteriores")
         else:
             logger.info(f" Agregando a resultados existentes ({len(_memoria_empresas)} empresas)")
+        
+        # Inicializar progreso si hay task_id
+        if request.task_id:
+            global SEARCH_PROGRESS
+            SEARCH_PROGRESS[request.task_id] = {
+                "progress": 5,
+                "message": "Buscando en OpenStreetMap..."
+            }
         
         logger.info(f" Búsqueda B2B - Rubro: {request.rubro}, Solo válidas: {solo_validadas}, Limpiar anterior: {limpiar_anterior}")
         
@@ -605,6 +652,13 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 "data": []
             }
         
+        # Actualizar progreso: Encontradas
+        if request.task_id:
+            SEARCH_PROGRESS[request.task_id] = {
+                "progress": 10,
+                "message": f"Encontradas {len(empresas)} empresas. Iniciando validación..."
+            }
+
         logger.info(f" Encontradas {len(empresas)} empresas en OSM")
         
         # Guardar el número total encontrado ANTES de cualquier filtro
@@ -616,7 +670,8 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             try:
                 empresas_enriquecidas = enriquecer_empresas_paralelo(
                 empresas=empresas,
-                timeout_por_empresa=20
+                timeout_por_empresa=20,
+                progress_callback=lambda current, total: update_search_progress(request.task_id, current, total)
             )
                 # Validar que retornó una lista válida
                 if isinstance(empresas_enriquecidas, list):
@@ -814,6 +869,13 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         logger.info(f" Proceso completado: {total_guardadas} empresas guardadas de {total_encontradas_original} encontradas ({validas} con contacto válido)")
         
+        # Limpiar progreso
+        if request.task_id and request.task_id in SEARCH_PROGRESS:
+            try:
+                del SEARCH_PROGRESS[request.task_id]
+            except Exception:
+                pass
+
         return {
             "success": True,
             "total_encontradas": total_encontradas_original,
