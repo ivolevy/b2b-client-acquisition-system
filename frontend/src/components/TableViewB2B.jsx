@@ -209,6 +209,59 @@ function TableViewB2B({
             {hayFiltrosActivos && <span className="count-total">{empresas.length}</span>}
             <span className="count-label">empresas</span>
           </div>
+
+          <div className="header-actions" style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {isPro ? (
+              <button 
+                type="button" 
+                className="btn-action-inline btn-export"
+                onClick={() => onExportCSV(empresasFiltradas)}
+                disabled={empresasFiltradas.length === 0}
+                style={{ height: '32px', padding: '0 12px' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                CSV
+              </button>
+            ) : (
+              <button 
+                type="button" 
+                className="btn-action-inline btn-export locked"
+                onClick={() => toastWarning?.(
+                  <>
+                    <strong>Función PRO</strong>
+                    <p>Exportar a CSV es exclusivo del plan PRO.</p>
+                  </>
+                )}
+                title="Exportar CSV (solo PRO)"
+                style={{ height: '32px', padding: '0 12px' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                🔒
+              </button>
+            )}
+
+            <button
+              type="button"
+              className="btn-action-inline btn-delete"
+              onClick={onDeleteResults}
+              disabled={loading || empresas.length === 0}
+              title="Borrar todos los resultados"
+              style={{ height: '32px', width: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -400,55 +453,7 @@ function TableViewB2B({
           </button>
         )}
 
-        <div className="filter-actions-right">
-          {isPro ? (
-            <button 
-              type="button" 
-              className="btn-action-inline btn-export"
-              onClick={() => onExportCSV(empresasFiltradas)}
-              disabled={empresasFiltradas.length === 0}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              CSV
-            </button>
-          ) : (
-            <button 
-              type="button" 
-              className="btn-action-inline btn-export locked"
-              onClick={() => toastWarning?.(
-                <>
-                  <strong>Función PRO</strong>
-                  <p>Exportar a CSV es exclusivo del plan PRO.</p>
-                </>
-              )}
-              title="Exportar CSV (solo PRO)"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              🔒
-            </button>
-          )}
 
-          <button
-            type="button"
-            className="btn-action-inline btn-delete"
-            onClick={onDeleteResults}
-            disabled={loading || empresas.length === 0}
-            title="Borrar todos los resultados"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            </svg>
-          </button>
-        </div>
       </div>
 
       {/* Contenido: Tabla o Empty State */}
@@ -515,7 +520,7 @@ function TableViewB2B({
               <th>Teléfono</th>
                   <th>Web</th>
               <th>Redes</th>
-              <th style={{ width: '60px', textAlign: 'center' }}>Ir</th>
+              <th style={{ width: '80px', textAlign: 'center' }}>Ir</th>
             </tr>
           </thead>
           <tbody>
