@@ -99,10 +99,17 @@ function AppB2B() {
         // Interpolación normal hacia el target
         if (Math.abs(target - prev) < 0.5) return target;
         
-        // Velocidad de alcance
-        const step = (target - prev) * 0.1;
+        // Calcular paso inicial
+        let step = (target - prev) * 0.1;
+        
+        // Limitar la velocidad máxima para que se vean los números pasar uno a uno (efecto contador)
+        // Máximo 1.5% cada 50ms = 30% por segundo.
+        if (step > 1.5) step = 1.5;
+        
         // Mínimo avance para que no sea eterno
-        return prev + (step > 0.5 ? step : 0.5); 
+        if (step < 0.2) step = 0.2;
+        
+        return Math.min(prev + step, target); 
       });
     }, 50);
 
