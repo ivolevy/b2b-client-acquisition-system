@@ -87,47 +87,39 @@ function AppB2B() {
     const target = searchProgress.percent;
     const interval = setInterval(() => {
       setDisplayProgress(prev => {
-        // Si ya llegamos, mantener
-        // Si ya llegamos al 100%, asegurar e impedir sobrepaso
-        if (prev >= 100 || (target === 100 && prev >= 99)) return 100;
-
-        // --- LÓGICA DE "ALIVE CREEP" (Efecto "vivo") ---
-        // Si ya alcanzamos el target reportado por el backend, pero NO estamos en 100%,
-        // seguimos avanzando muy lentamente para que el usuario no piense que se colgó.
-        // Permitimos avanzar hasta un 15% más allá del target real, con un tope de 90%.
-        if (prev >= target && prev < 90) {
-           // Solo avanzar si no nos pasamos demasiado del target real (ej: +15%)
-           // Esto evita que si se corta internet lleguemos a 90% artificialmente muy rápido.
-           if (prev < target + 15) {
-             return prev + 0.05; // ~1% por segundo
-           }
-           return prev; // Esperar al backend
+        // Definir un objetivo efectivo para evitar que se quede "trabada" visualmente
+        // Si el backend dice X%, nosotros apuntamos a un poco más (fake movement) 
+        // para que siempre haya sensación de progreso, topeado en 90%
+        let effectiveTarget = target;
+        if (target < 100) {
+           // Apuntamos siempre a un 15% más de lo actual, con tope en 90%
+           // Si el dato real (target) es mayor, usamos el real.
+           effectiveTarget = Math.max(target, Math.min(prev + 15, 90));
         }
 
-        // --- INTERPOLACIÓN HACIA EL TARGET ---
-        // Si estamos atrás, correr para alcanzarlo
-        
-        // Si la diferencia es muy pequeña, asumen que llegamos (y entraría el creep en el próx tick)
-        if (Math.abs(target - prev) < 0.1) return prev;
+        // Si ya llegamos al target real y es 100, fin.
+        if (prev >= 100) return 100;
         
         // Calcular velocidad
-        // Si el target es 100 (finalizado), acelerar drásticamente para "dispararse"
-        let speedFactor = target === 100 ? 0.5 : 0.1;
+        // Si es final (100%), disparo rápido
+        let speedFactor = target === 100 ? 0.3 : 0.05;
+        let step = (effectiveTarget - prev) * speedFactor;
         
-        let step = (target - prev) * speedFactor;
-        
-        // Limitar la velocidad máxima
-        // Si es 100, permitimos saltos grandes (ej: 10% por frame) para terminar rápido
-        // Si no, mantenemos el efecto contador lento pero fluido (1.0% = 20%/seg)
-        let maxStep = target === 100 ? 10.0 : 1.0;
-        
-        if (step > maxStep) step = maxStep;
-        
-        // Mínimo avance para que no sea eterno (si hay que avanzar)
-        if (step < 0.1) step = 0.1;
-        
-        // Forzar monotonicidad: nunca disminuir
-        return Math.max(prev, Math.min(prev + step, target)); 
+        // Ajustes finos de velocidad
+        if (target === 100) {
+            // Modo disparo: mínimo avance grande
+            if (step < 1.0) step = 1.0; 
+            // Máximo muy grande
+            if (step > 15.0) step = 15.0;
+        } else {
+            // Modo normal/creep
+            // Mínimo muy pequeño para movimiento sutil continuo
+            if (step < 0.05) step = 0.05;
+            // Máximo moderado para que no salte de golpe si el backend actualiza
+            if (step > 2.0) step = 2.0; 
+        }
+
+        return Math.max(prev, Math.min(prev + step, effectiveTarget)); 
       });
     }, 50);
 
