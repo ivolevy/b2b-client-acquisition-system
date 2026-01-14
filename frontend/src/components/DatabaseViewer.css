@@ -82,10 +82,25 @@
   border: 1px solid var(--gray-200);
 }
 
-.stat-card.green { border-color: #10b981; background: #f0fdf4; }
-.stat-card.orange { border-color: #f59e0b; background: #fffbeb; }
-.stat-card.blue { border-color: #3b82f6; background: #eff6ff; }
-.stat-card.purple { border-color: #8b5cf6; background: #f5f3ff; }
+.stat-card.green {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.stat-card.orange {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.stat-card.blue {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.stat-card.purple {
+  border-color: #8b5cf6;
+  background: #f5f3ff;
+}
 
 .stat-icon {
   font-size: 32px;
@@ -102,11 +117,13 @@
   color: #64748b;
 }
 
-.db-info, .db-preview {
+.db-info,
+.db-preview {
   margin-bottom: 30px;
 }
 
-.db-info h3, .db-preview h3 {
+.db-info h3,
+.db-preview h3 {
   margin-bottom: 15px;
   color: #1e293b;
   font-size: 18px;
@@ -328,7 +345,7 @@
   max-width: 250px;
 }
 
-.empresa-nombre > div:first-child {
+.empresa-nombre>div:first-child {
   font-weight: 500;
   color: #1e293b;
 }
@@ -487,7 +504,7 @@ tr.expanded {
   font-size: 14px;
   font-weight: 700;
   transition: background-color 0.2s ease;
-  box-shadow: var(--shadow-#81D4FA);
+  box-shadow: var(--shadow-81D4FA);
 }
 
 .btn-close:hover {
@@ -499,17 +516,16 @@ tr.expanded {
   .filters-row {
     flex-direction: column;
   }
-  
+
   .filter-select {
     min-width: 100%;
   }
-  
+
   .detail-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .pagination {
     flex-wrap: wrap;
   }
 }
-

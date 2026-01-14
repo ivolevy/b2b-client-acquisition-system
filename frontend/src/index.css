@@ -100,7 +100,7 @@ html {
   --shadow-md: 0 4px 16px 0 rgb(0 0 0 / 0.12);
   --shadow-lg: 0 8px 24px 0 rgb(0 0 0 / 0.15);
   --shadow-xl: 0 16px 40px 0 rgb(0 0 0 / 0.18);
-  --shadow-#81D4FA: 0 8px 24px 0 rgb(255 105 180 / 0.25);
+  --shadow-81D4FA: 0 8px 24px 0 rgb(255 105 180 / 0.25);
 }
 
 /* Tema Oscuro */

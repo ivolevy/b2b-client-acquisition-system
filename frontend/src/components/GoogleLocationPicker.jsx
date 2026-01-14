@@ -530,6 +530,23 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
 
 
 
+  // Memoize options to prevent re-renders and flickering controls
+  const mapOptions = React.useMemo(() => ({
+    disableDefaultUI: false,
+    zoomControl: true,
+    streetViewControl: false,
+    mapTypeControl: true,
+    fullscreenControl: true,
+  }), []);
+
+  const circleOptions = React.useMemo(() => ({
+    fillColor: '#667eea',
+    fillOpacity: 0.2,
+    strokeColor: '#667eea',
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+  }), []);
+
   return (
     <>
       <div className="form-row form-row-compact">
@@ -553,13 +570,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
               setMap(mapInstance);
               mapRef.current = mapInstance; // Actualizar ref también
             }}
-            options={{
-              disableDefaultUI: false,
-              zoomControl: true,
-              streetViewControl: false,
-              mapTypeControl: true,
-              fullscreenControl: true,
-            }}
+            options={mapOptions}
           >
             {selectedLocation && (
               <>
@@ -567,13 +578,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
                 <Circle
                   center={selectedLocation}
                   radius={radius}
-                  options={{
-                    fillColor: '#667eea',
-                    fillOpacity: 0.2,
-                    strokeColor: '#667eea',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                  }}
+                  options={circleOptions}
                 />
               </>
             )}

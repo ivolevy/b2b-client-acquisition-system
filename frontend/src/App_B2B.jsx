@@ -88,32 +88,45 @@ function AppB2B() {
     const interval = setInterval(() => {
       setDisplayProgress(prev => {
         // Si ya llegamos, mantener
-        if (prev >= target && target === 100) return 100;
-        
-        // Logica de "creep" (avance falso lento) si el backend está en fase inicial (<10%)
-        // para que el usuario sienta que algo pasa
-        if (target < 10 && prev < 30) {
-           return prev + 0.2; // Avance muy lento automático
+        // Si ya llegamos al 100%, asegurar e impedir sobrepaso
+        if (prev >= 100 || (target === 100 && prev >= 99)) return 100;
+
+        // --- LÓGICA DE "ALIVE CREEP" (Efecto "vivo") ---
+        // Si ya alcanzamos el target reportado por el backend, pero NO estamos en 100%,
+        // seguimos avanzando muy lentamente para que el usuario no piense que se colgó.
+        // Permitimos avanzar hasta un 15% más allá del target real, con un tope de 90%.
+        if (prev >= target && prev < 90) {
+           // Solo avanzar si no nos pasamos demasiado del target real (ej: +15%)
+           // Esto evita que si se corta internet lleguemos a 90% artificialmente muy rápido.
+           if (prev < target + 15) {
+             return prev + 0.05; // ~1% por segundo
+           }
+           return prev; // Esperar al backend
         }
 
-        // Interpolación normal hacia el target
-        if (Math.abs(target - prev) < 0.5) return target;
+        // --- INTERPOLACIÓN HACIA EL TARGET ---
+        // Si estamos atrás, correr para alcanzarlo
         
-        // Calcular paso inicial
+        // Si la diferencia es muy pequeña, asumen que llegamos (y entraría el creep en el próx tick)
+        if (Math.abs(target - prev) < 0.1) return prev;
+        
+        // Calcular velocidad
         // Si el target es 100 (finalizado), acelerar drásticamente para "dispararse"
         let speedFactor = target === 100 ? 0.5 : 0.1;
+        
         let step = (target - prev) * speedFactor;
         
         // Limitar la velocidad máxima
         // Si es 100, permitimos saltos grandes (ej: 10% por frame) para terminar rápido
-        // Si no, mantenemos el efecto contador lento (1.5%)
-        let maxStep = target === 100 ? 10.0 : 1.5;
+        // Si no, mantenemos el efecto contador lento pero fluido (1.0% = 20%/seg)
+        let maxStep = target === 100 ? 10.0 : 1.0;
         
         if (step > maxStep) step = maxStep;
         
-        // Mínimo avance para que no sea eterno
-        if (step < 0.2) step = 0.2;
+        // Mínimo avance para que no sea eterno (si hay que avanzar)
+        if (step < 0.1) step = 0.1;
         
+        // Forzar monotonicidad: nunca disminuir
         return Math.max(prev, Math.min(prev + step, target)); 
       });
     }, 50);
