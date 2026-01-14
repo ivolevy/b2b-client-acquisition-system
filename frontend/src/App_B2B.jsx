@@ -245,9 +245,18 @@ function AppB2B() {
           if (!loadingIntervalRef.current) return;
 
           if (progressRes.data) {
-            setSearchProgress({
-              percent: progressRes.data.progress || 0,
-              message: progressRes.data.message || 'Procesando...'
+            setSearchProgress(prev => {
+              const newPercent = progressRes.data.progress || 0;
+              // Evitar retrocesos: solo actualizar si es mayor o igual, 
+              // a menos que sea 0 y el anterior sea muy alto (lo cual sería raro en misma task)
+              // Mejor estrategia: Nunca bajar del máximo alcanzado en esta sesión de polling
+              if (newPercent < prev.percent) {
+                return prev; 
+              }
+              return {
+                percent: newPercent,
+                message: progressRes.data.message || 'Procesando...'
+              };
             });
           }
         } catch (e) {
