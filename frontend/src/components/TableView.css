@@ -579,16 +579,16 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: 6px 8px;
+  padding: 4px 6px;
   border: none;
   background: white;
   color: var(--gray-600);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 50px;
-  height: 36px;
+  min-width: 42px;
+  height: 32px;
   box-sizing: border-box;
   border-right: 1px solid var(--gray-200);
 }
@@ -627,11 +627,11 @@
 }
 
 .filter-km {
-  width: 60px;
+  width: 50px;
   border-radius: 0 6px 6px 0;
   border: none;
   border-left: 1px solid var(--gray-200);
-  height: 36px;
+  height: 32px;
   box-sizing: border-box;
   flex-shrink: 0;
   padding: 6px 8px;

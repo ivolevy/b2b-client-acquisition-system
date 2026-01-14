@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './TableView.css';
-import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok } from 'react-icons/fa6';
+import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok, FaMapMarkerAlt } from 'react-icons/fa6';
 import { useAuth } from '../AuthWrapper';
 
 function TableViewB2B({ 
@@ -526,14 +526,9 @@ function TableViewB2B({
                     </td>
                 <td className="name-cell">
                   {empresa.nombre || 'Sin nombre'}
-                  {(empresa.direccion || empresa.ciudad || empresa.codigo_postal || empresa.pais) && (
+                  {(empresa.direccion) && (
                         <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
-                      {[
-                        empresa.direccion,
-                        empresa.ciudad,
-                        empresa.codigo_postal,
-                        empresa.pais
-                      ].filter(Boolean).join(', ')}
+                      {empresa.direccion}
                     </div>
                   )}
                 </td>
@@ -636,7 +631,7 @@ function TableViewB2B({
                         textDecoration: 'none'
                       }}
                           >
-                            <img src="https://www.gstatic.com/images/branding/product/1x/maps_2020_48dp.png" alt="Maps" style={{ width: '20px', height: '20px' }} />
+                            <FaMapMarkerAlt style={{ color: '#EA4335', fontSize: '18px' }} />
                           </a>
                         )}
                   {!empresa.direccion && !empresa.ciudad && !empresa.latitud && !empresa.longitud && (
