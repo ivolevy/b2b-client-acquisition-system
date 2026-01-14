@@ -42,6 +42,23 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   const handleManualGeocodeRef = useRef(null);
   const suggestionsRef = useRef(null);
 
+  // Memoize options to prevent re-renders and flickering controls
+  const mapOptions = React.useMemo(() => ({
+    disableDefaultUI: false,
+    zoomControl: true,
+    streetViewControl: false,
+    mapTypeControl: true,
+    fullscreenControl: true,
+  }), []);
+
+  const circleOptions = React.useMemo(() => ({
+    fillColor: '#667eea',
+    fillOpacity: 0.2,
+    strokeColor: '#667eea',
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+  }), []);
+
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: GOOGLE_API_KEY || '',
@@ -530,22 +547,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
 
 
 
-  // Memoize options to prevent re-renders and flickering controls
-  const mapOptions = React.useMemo(() => ({
-    disableDefaultUI: false,
-    zoomControl: true,
-    streetViewControl: false,
-    mapTypeControl: true,
-    fullscreenControl: true,
-  }), []);
 
-  const circleOptions = React.useMemo(() => ({
-    fillColor: '#667eea',
-    fillOpacity: 0.2,
-    strokeColor: '#667eea',
-    strokeOpacity: 0.8,
-    strokeWeight: 2,
-  }), []);
 
   return (
     <>
