@@ -815,7 +815,7 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
       </div>
       <div className="template-editor-inline-content">
         <div className="form-group">
-          <label>Nombre del Template *</label>
+          <label>Nombre del Template (Interno) *</label>
           <input
             type="text"
             value={nombre}
@@ -826,7 +826,7 @@ function TemplateEditorInline({ template, onSave, onCancel, embedded = false, to
         </div>
 
         <div className="form-group">
-          <label>Asunto *</label>
+          <label>Asunto del Email (Visible para el cliente) *</label>
           <input
             type="text"
             value={subject}
