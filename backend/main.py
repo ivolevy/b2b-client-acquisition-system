@@ -880,12 +880,25 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         logger.info(f" Proceso completado: {total_guardadas} empresas guardadas de {total_encontradas_original} encontradas ({validas} con contacto válido)")
         
-        # Limpiar progreso
-        if request.task_id and request.task_id in SEARCH_PROGRESS:
+        # Marcar como completado pero NO borrar inmediatamente para que el frontend pueda leer el 100%
+        if request.task_id:
+            SEARCH_PROGRESS[request.task_id] = {
+                "progress": 100,
+                "message": "¡Búsqueda completada!",
+                "timestamp": time.time()
+            }
+            
+            # Limpieza lazy de tareas viejas (más de 5 minutos)
             try:
-                del SEARCH_PROGRESS[request.task_id]
-            except Exception:
-                pass
+                now = time.time()
+                keys_to_delete = [
+                    k for k, v in SEARCH_PROGRESS.items() 
+                    if isinstance(v, dict) and v.get('timestamp') and (now - v.get('timestamp') > 300)
+                ]
+                for k in keys_to_delete:
+                    del SEARCH_PROGRESS[k]
+            except Exception as e:
+                logger.warning(f"Error en limpieza lazy de tareas: {e}")
 
         return {
             "success": True,
