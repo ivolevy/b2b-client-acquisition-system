@@ -75,9 +75,9 @@ function AppB2B() {
   }, [location.search, navigate, success, toastError]);
 
   useEffect(() => {
-    // Intentar recuperar estado del localStorage al montar
-    const cachedEmpresas = localStorage.getItem('b2b_empresas_cache');
-    const cachedStats = localStorage.getItem('b2b_stats_cache');
+    // Intentar recuperar estado del sessionStorage al montar
+    const cachedEmpresas = sessionStorage.getItem('b2b_empresas_cache');
+    const cachedStats = sessionStorage.getItem('b2b_stats_cache');
     
     if (cachedEmpresas) {
       try {
@@ -104,16 +104,16 @@ function AppB2B() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar una vez al montar
 
-  // Persistir estado en localStorage cuando cambia
+  // Persistir estado en sessionStorage cuando cambia
   useEffect(() => {
     if (empresas.length > 0) {
-      localStorage.setItem('b2b_empresas_cache', JSON.stringify(empresas));
+      sessionStorage.setItem('b2b_empresas_cache', JSON.stringify(empresas));
     }
   }, [empresas]);
 
   useEffect(() => {
     if (stats) {
-      localStorage.setItem('b2b_stats_cache', JSON.stringify(stats));
+      sessionStorage.setItem('b2b_stats_cache', JSON.stringify(stats));
     }
   }, [stats]);
   
@@ -442,9 +442,9 @@ function AppB2B() {
     // Solo limpiar estado local, no borrar de la BD
     setEmpresas([]);
     setStats({ total: 0, validadas: 0 });
-    // Limpiar también localStorage
-    localStorage.removeItem('b2b_empresas_cache');
-    localStorage.removeItem('b2b_stats_cache');
+    // Limpiar también sessionStorage
+    sessionStorage.removeItem('b2b_empresas_cache');
+    sessionStorage.removeItem('b2b_stats_cache');
     success(
       <>
         <strong>Resultados limpiados</strong>
