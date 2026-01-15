@@ -245,10 +245,10 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                   ? 'Limpia resultados anteriores antes de buscar.' 
                   : 'Agrega los nuevos resultados a los existentes.'}
               </div>
-              <div className="filter-mode-toggle">
+              <div className="mode-toggle">
                 <button 
                   type="button"
-                  className={`filter-mode-btn ${modoBusqueda === 'nueva' ? 'active' : ''}`}
+                  className={`mode-btn ${modoBusqueda === 'nueva' ? 'active' : ''}`}
                   onClick={() => setModoBusqueda('nueva')}
                   disabled={loading}
                 >
@@ -256,7 +256,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                 </button>
                 <button 
                   type="button"
-                  className={`filter-mode-btn ${modoBusqueda === 'agregar' ? 'active' : ''}`}
+                  className={`mode-btn ${modoBusqueda === 'agregar' ? 'active' : ''}`}
                   onClick={() => {
                     // Verificar si es PRO (o admin)
                     if (user?.plan === 'pro' || user?.role === 'admin') {

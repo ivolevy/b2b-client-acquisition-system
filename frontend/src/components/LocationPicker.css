@@ -312,45 +312,39 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: #1e1e1e;
-  /* Dark theme compatible */
-  border: 1px solid #333;
-  border-radius: 0 0 12px 12px;
-  margin-top: 2px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  margin-top: var(--spacing-xs);
   list-style: none;
-  padding: 8px 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  padding: 0.25rem 0;
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
   max-height: 240px;
   overflow-y: auto;
 }
 
 .address-suggestions li {
-  padding: 10px 16px;
+  padding: 0.65rem 0.9rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid #2a2a2a;
-}
-
-.address-suggestions li:last-child {
-  border-bottom: none;
+  transition: background 0.2s ease;
 }
 
 .address-suggestions li:hover {
-  background: #2d2d2d;
+  background: #e0e7ff;
 }
 
 .suggestion-title {
   display: block;
-  font-weight: 500;
-  color: #fff;
+  font-weight: 600;
+  color: var(--gray-900);
   font-size: 0.9rem;
 }
 
 .suggestion-subtitle {
   display: block;
-  font-size: 0.75rem;
-  color: #888;
+  font-size: 0.78rem;
+  color: var(--gray-600);
   margin-top: 2px;
 }
 
@@ -519,32 +513,4 @@
   .suggestion-subtitle {
     font-size: 0.7rem;
   }
-}
-
-/* Botón de ubicación actual inline redesign */
-.btn-location-inline {
-  background: transparent;
-  border: none;
-  color: #f472b6;
-  /* Pink accent */
-  font-size: 0.85rem;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-  font-weight: 500;
-  margin-left: 4px;
-  transition: color 0.2s;
-}
-
-.btn-location-inline:hover {
-  color: #f68ac2;
-}
-
-.location-text {
-  display: flex;
-  align-items: center;
-  font-size: 0.85rem;
-  color: #888;
-  white-space: nowrap;
-  margin-left: 8px;
 }

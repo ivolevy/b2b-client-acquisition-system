@@ -459,20 +459,14 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       </div>
 
       <div className="address-search" style={{ position: 'relative' }}>
-        <label htmlFor="address-input">Ubicación a analizar</label>
-        <div className="address-input-wrapper modern-input-wrapper">
-            <div className="input-icon-left">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" color="#f472b6">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-            </div>
+        <label htmlFor="address-input">Buscar dirección</label>
+        <div className="address-input-wrapper">
             <input
               ref={autocompleteInputRef}
               id="address-input"
               type="text"
-              className="address-input modern-input"
-              placeholder="Ej: Buenos Aires, Argentina"
+              className="address-input"
+              placeholder="Ej: Plaza de Mayo, Buenos Aires"
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -526,17 +520,20 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           </span>
         </div>
         {showSuggestions && suggestions.length > 0 && (
-          <ul ref={suggestionsRef} className="address-suggestions">
+          <ul ref={suggestionsRef} className="address-suggestions" style={{ position: 'absolute', zIndex: 1000, background: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', marginTop: '4px', maxHeight: '200px', overflowY: 'auto', width: '100%', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', listStyle: 'none', padding: 0, margin: 0 }}>
             {suggestions.map((prediction) => (
               <li 
                 key={prediction.place_id} 
                 onClick={() => handleSuggestionSelect(prediction)}
+                style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #f3f4f6' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
               >
-                <div className="suggestion-title">
+                <div style={{ fontWeight: 500, fontSize: '0.875rem', color: '#374151' }}>
                   {prediction.structured_formatting?.main_text || prediction.description}
                 </div>
                 {prediction.structured_formatting?.secondary_text && (
-                  <div className="suggestion-subtitle">
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
                     {prediction.structured_formatting.secondary_text}
                   </div>
                 )}

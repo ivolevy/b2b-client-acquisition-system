@@ -10,15 +10,18 @@ from typing import List, Dict, Optional
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-OVERPASS_SERVERS = [
-    "https://overpass-api.de/api/interpreter",
-    "https://overpass.kumi.systems/api/interpreter",
-    "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
-]
+OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 
 def _construir_direccion_completa(calle: str, numero: str) -> str:
     """
     Construye la dirección completa combinando calle y número.
+    
+    Args:
+        calle: Nombre de la calle (addr:street)
+        numero: Número de casa/edificio (addr:housenumber)
+    
+    Returns:
+        Dirección completa (ej: "Loyola 202" o solo "Loyola" si no hay número)
     """
     calle = (calle or '').strip()
     numero = (numero or '').strip()
@@ -33,6 +36,7 @@ def _construir_direccion_completa(calle: str, numero: str) -> str:
 
 # RUBROS UNIFICADOS Y NUEVOS
 RUBROS_DISPONIBLES = {
+    # NUEVOS RUBROS CLAVE (FASE 2 - EXPANDIDOS)
     "colegios": {
         "nombre": "Colegios e Instituciones Educativas",
         "tags": [
@@ -94,6 +98,8 @@ RUBROS_DISPONIBLES = {
         ],
         "keywords": ["Fábrica", "Planta Industrial", "Manufactura", "Industrial"]
     },
+    
+    # CATEGORÍAS UNIFICADAS
     "construccion_arquitectura": {
         "nombre": "Construcción y Arquitectura",
         "tags": [
@@ -229,38 +235,6 @@ def listar_rubros_disponibles() -> Dict:
         for key, info in RUBROS_DISPONIBLES.items()
     }
 
-
-def _make_overpass_request(query: str, timeout: int = 60):
-    """Helper to make requests with failover"""
-    for server in OVERPASS_SERVERS:
-        try:
-            logger.info(f"Consultando servidor Overpass: {server}")
-            response = requests.post(
-                server,
-                data=query,
-                headers={
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'User-Agent': 'B2BClientAcquisition/2.0'
-                },
-                timeout=timeout
-            )
-            
-            if response.status_code == 200:
-                return response
-            
-            if response.status_code in [429, 502, 504]:
-                logger.warning(f"Error {response.status_code} en {server}, intentando siguiente...")
-                continue
-                
-            logger.error(f"Error {response.status_code} en {server}")
-            
-        except requests.exceptions.Timeout:
-            logger.warning(f"Timeout en {server}, intentando siguiente...")
-        except Exception as e:
-            logger.warning(f"Error conectando a {server}: {e}")
-            
-    return None
-
 def buscar_empresas_por_rubro(
     rubro: str, 
     pais: Optional[str] = None,
@@ -312,7 +286,7 @@ def buscar_empresas_por_rubro(
             query_parts.append(f'way[name~"{kw}", i]{area_suffix};')
     
     query = f"""
-    [out:json][timeout:{60}];
+    [out:json][timeout:30];
     {area_filter}
     (
       {' '.join(query_parts)}
@@ -322,15 +296,25 @@ def buscar_empresas_por_rubro(
     
     try:
         logger.info(f"Buscando empresas del rubro: {rubro_info['nombre']}")
+        if ciudad:
+            logger.info(f"Área de búsqueda: {ciudad}")
+        elif pais:
+            logger.info(f"Área de búsqueda: {pais}")
+        else:
+            logger.info("Búsqueda global (sin filtro geográfico)")
         
-        response = _make_overpass_request(query)
+        response = requests.post(
+            OVERPASS_URL,
+            data=query,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            timeout=60
+        )
         
-        if not response:
-            logger.error("Todos los servidores Overpass fallaron")
+        if response.status_code != 200:
+            logger.error(f"Error en Overpass API: {response.status_code}")
             return []
         
         data = response.json()
-
         elements = data.get('elements', [])
         
         logger.info(f"Se encontraron {len(elements)} empresas")
@@ -432,10 +416,15 @@ def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limi
         logger.info(f" Búsqueda por bbox: {bbox}")
         logger.info(f" Rubro: {rubro_info['nombre']}")
         
-        response = _make_overpass_request(query)
+        response = requests.post(
+            OVERPASS_URL,
+            data=query,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            timeout=60
+        )
         
-        if not response:
-            logger.error("Todos los servidores Overpass fallaron en búsqueda por bbox")
+        if response.status_code != 200:
+            logger.error(f"Error en Overpass API: {response.status_code}")
             return []
         
         data = response.json()

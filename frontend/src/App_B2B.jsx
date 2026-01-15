@@ -281,13 +281,6 @@ function AppB2B() {
       
       // Ref para trackear el taskId actual y evitar race conditions
       currentTaskIdRef.current = taskId;
-
-      // SI ES BUSQUEDA NUEVA (limpiar_anterior = true), limpiamos datos viejos visualmente
-      // pero mantenemos el loading true
-      if (params.limpiar_anterior) {
-          setEmpresas([]); 
-          sessionStorage.removeItem('b2b_empresas_cache');
-      }
       
       loadingIntervalRef.current = setInterval(async () => {
         try {
@@ -330,7 +323,7 @@ function AppB2B() {
       // ESPERAR A QUE LA BARRA LLEGUE VISUALMENTE AL 100% + RETRASO
       await waitForVisualCompletion();
       
-        if (response.data.success) {
+      if (response.data.success) {
         const validas = response.data.validas || 0;
         const total = response.data.total_encontradas || 0;
         const guardadas = response.data.guardadas || 0;
@@ -355,18 +348,7 @@ function AppB2B() {
           }).catch(e => console.warn('Error historial:', e));
         }
         
-        // ACTUALIZAR ESTADO DE EMPRESAS
-        // Si params.limpiar_anterior es true, reemplazamos. Si es false, acumulamos.
-        setEmpresas(prev => {
-            if (params.limpiar_anterior) {
-                return empresasEncontradas;
-            } else {
-                // Modo acumulativo: evitar duplicados por ID o nombre+dirección
-                const existingIds = new Set(prev.map(e => e.id || `${e.nombre}-${e.direccion}`));
-                const newUnique = empresasEncontradas.filter(e => !existingIds.has(e.id || `${e.nombre}-${e.direccion}`));
-                return [...prev, ...newUnique];
-            }
-        });        // Resetear flag después de la búsqueda
+        // Resetear flag después de la búsqueda
         if (isFromHistory) {
           setIsFromHistory(false);
         }

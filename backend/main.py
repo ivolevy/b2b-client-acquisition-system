@@ -43,8 +43,6 @@ try:
         eliminar_usuario_totalmente
     )
     from .auth_google import get_google_auth_url, exchange_code_for_token
-    from .google_places_client import google_client
-    from .quota_manager import quota_manager
 except ImportError:
     # Fallback for direct execution
     from overpass_client import (
@@ -84,8 +82,6 @@ except ImportError:
         obtener_todas_empresas,
         eliminar_usuario_totalmente
     )
-    from google_places_client import google_client
-    from quota_manager import quota_manager
 # Todas las funciones trabajan con datos en memoria durante la sesión
 
 import math
@@ -378,19 +374,12 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
-# CORS - Configuración para producción y desarrollo
-origins = [
-    "http://localhost:5173",
-    "http://localhost:8000",
-    "https://b2b-smart-leads.vercel.app", # Frontend Production
-    "https://b2b-client-acquisition-system-4u9f.vercel.app", # Backend Production
-    "https://b2b-client-acquisition-system.vercel.app" # Alias potential
-]
-
+# CORS - Configuración completa para deshabilitar políticas restrictivas
+# IMPORTANTE: Deshabilitamos credenciales y permitimos TODO (*) para evitar problemas en Vercel
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
@@ -406,22 +395,13 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code,
         content={"detail": exc.detail}
     )
-    # Reflejar origen si está permitido
-    origin = request.headers.get("origin")
-    if origin in origins:
-       response.headers["Access-Control-Allow-Origin"] = origin
-       response.headers["Access-Control-Allow-Credentials"] = "true"
-    else:
-       response.headers["Access-Control-Allow-Origin"] = "*"
-       
+    # Forzar headers CORS por si acaso el middleware falló antes
+    response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
-# Forzar headers CORS por si acaso el middleware falló antes
-# (Esto se aplica en el return del handler, redundante pero seguro)
-
-# Exception handler global
+# Exception handler global para asegurar que CORS siempre se incluya
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Maneja cualquier error no controlado"""
@@ -436,15 +416,11 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
     
     # Agregar headers CORS manualmente
-    origin = request.headers.get("origin")
-    if origin in origins:
-       response.headers["Access-Control-Allow-Origin"] = origin
-       response.headers["Access-Control-Allow-Credentials"] = "true"
-    else:
-       response.headers["Access-Control-Allow-Origin"] = "*"
-
+    origin = request.headers.get("origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    response.headers["Access-Control-Allow-Credentials"] = "false"
     
     return response
 
@@ -552,19 +528,6 @@ async def root():
         }
     }
 
-@app.get("/admin/quota")
-async def get_quota_status():
-    """Obtiene el estado actual de la cuota de Google Places API"""
-    return quota_manager.get_status()
-
-@app.post("/admin/quota/mode")
-async def set_quota_mode(request: Request):
-    """Cambia el modo de operación (Forzar OSM o Auto)"""
-    body = await request.json()
-    force_osm = body.get("force_osm", False)
-    quota_manager.set_force_osm(force_osm)
-    return {"success": True, "mode": "OpenStreetMap" if force_osm else "Google Places (Auto)"}
-
 @app.get("/buscar/progreso/{task_id}")
 async def obtener_progreso_busqueda(task_id: str):
     """
@@ -606,8 +569,8 @@ def obtener_rubros():
 @app.post("/buscar")
 async def buscar_por_rubro(request: BusquedaRubroRequest):
     """
-    Busca empresas de un rubro específico.
-    Usa Google Places API (si hay cuota) con fallback a OpenStreetMap.
+    Busca empresas de un rubro específico con validación de contactos
+    Puede buscar por bbox (bounding box) o por ciudad/país
     """
     try:
         # Verificar que el parámetro se recibe correctamente
@@ -625,114 +588,69 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         else:
             logger.info(f" Agregando a resultados existentes ({len(_memoria_empresas)} empresas)")
         
-        # Inicializar progreso
+        # Inicializar progreso si hay task_id
         if request.task_id:
             global SEARCH_PROGRESS
             SEARCH_PROGRESS[request.task_id] = {
                 "progress": 5,
-                "message": "Iniciando búsqueda inteligente..."
+                "message": "Buscando en OpenStreetMap..."
             }
         
-        logger.info(f" Búsqueda B2B - Rubro: {request.rubro}, Bbox: {request.bbox}")
+        logger.info(f" Búsqueda B2B - Rubro: {request.rubro}, Solo válidas: {solo_validadas}, Limpiar anterior: {limpiar_anterior}")
         
-        empresas = []
-        source_used = "osm" # osm o google
-
-        # 1. INTENTAR BUSCAR EN GOOGLE PLACES (SCORING ALTO)
-        if quota_manager.can_use_google() and request.rubro:
-            logger.info(" Usando Google Places API para la búsqueda...")
-            source_used = "google"
-            
-            # Construir query (Ej: "Colegios escuelas en Belgrano, Buenos Aires")
-            query_text = request.rubro.replace("_", " ") # "colegios" -> "colegios"
-            
-            # Contexto geográfico
-            location_bias = None
-            if request.busqueda_centro_lat and request.busqueda_centro_lng and request.busqueda_radio_km:
-                location_bias = {
-                    "circle": {
-                        "center": {
-                            "latitude": request.busqueda_centro_lat,
-                            "longitude": request.busqueda_centro_lng
-                        },
-                        "radius": request.busqueda_radio_km * 1000 # a metros
-                    }
-                }
-                # Refinar query con ubicación textual si tenemos el nombre
-                if request.busqueda_ubicacion_nombre:
-                     query_text += f" en {request.busqueda_ubicacion_nombre}"
-            elif request.bbox:
-                # Si solo tenemos bbox, intentar usarlo (aunque google prefiere circle)
-                # Parsear bbox center aprox
-                pass 
-                
-            # Si no hay ubicación específica en query, agregar ciudad/pais del request
-            if not " en " in query_text and (request.ciudad or request.pais):
-                 ubicacion = f"{request.ciudad or ''} {request.pais or ''}".strip()
-                 if ubicacion:
-                     query_text += f" en {ubicacion}"
-
-            # Ejecutar búsqueda Google
+        # Validar bbox si se proporciona
+        bbox_valido = False
+        if request.bbox:
+            try:
+                # Validar formato: debe ser "south,west,north,east" con 4 números
+                partes = request.bbox.split(',')
+                if len(partes) == 4:
+                    coords = [float(p.strip()) for p in partes]
+                    # Validar rangos: latitud -90 a 90, longitud -180 a 180
+                    if (-90 <= coords[0] <= 90 and -90 <= coords[2] <= 90 and
+                        -180 <= coords[1] <= 180 and -180 <= coords[3] <= 180 and
+                        coords[0] < coords[2] and coords[1] < coords[3]):
+                        bbox_valido = True
+            except (ValueError, AttributeError) as e:
+                logger.warning(f"Bbox inválido: {request.bbox}, error: {e}")
+        
+        # Buscar en OpenStreetMap
+        if request.bbox and bbox_valido:
+            # Búsqueda por bounding box (ubicación en mapa)
+            logger.info(f" Búsqueda por bbox: {request.bbox}")
+            # Ejecutar en thread separado
             import asyncio
             empresas = await asyncio.to_thread(
-                google_client.search_places_corrected,
-                query=query_text,
-                location_bias=location_bias
+                query_by_bbox,
+                bbox=request.bbox,
+                rubro=request.rubro
             )
+            # Validar que query_by_bbox retornó una lista válida
+            if empresas is None:
+                logger.error("query_by_bbox retornó None")
+                empresas = []
+        else:
+            # Búsqueda por ciudad/país (método antiguo)
+            if request.bbox and not bbox_valido:
+                logger.warning(f"Bbox inválido, usando búsqueda por ciudad/país")
             
-            # Mapear campos que falten para compatibilidad con frontend
-            for emp in empresas:
-                emp['rubro'] = request.rubro
-                # Convertir lista de types a string si es necesario, o frontend lo maneja
-                
-        
-        # 2. FALLBACK A OPENSTREETMAP (Si Google falló, no trajo nada, o sin cuota)
-        if not empresas:
-            if source_used == "google":
-                 logger.warning(" Google no devolvió resultados o falló. Usando Fallback OSM.")
-            else:
-                 logger.info(" Usando OpenStreetMap (Modo Ahorro / Forzado).")
-            
-            source_used = "osm"
-            
-            # Validar bbox
-            bbox_valido = False
-            if request.bbox:
-                try:
-                    # Validar formato: debe ser "south,west,north,east" con 4 números
-                    partes = request.bbox.split(',')
-                    if len(partes) == 4:
-                        coords = [float(p.strip()) for p in partes]
-                        if (-90 <= coords[0] <= 90 and -90 <= coords[2] <= 90 and
-                            -180 <= coords[1] <= 180 and -180 <= coords[3] <= 180 and
-                            coords[0] < coords[2] and coords[1] < coords[3]):
-                            bbox_valido = True
-                except (ValueError, AttributeError) as e:
-                    logger.warning(f"Bbox inválido: {request.bbox}, error: {e}")
-
-            # Ejecutar OSM
+            # Ejecutar en thread separado
             import asyncio
-            if request.bbox and bbox_valido:
-                empresas = await asyncio.to_thread(
-                    query_by_bbox, 
-                    bbox=request.bbox, 
-                    rubro=request.rubro
-                )
-            else:
-                empresas = await asyncio.to_thread(
-                    buscar_empresas_por_rubro,
-                    rubro=request.rubro,
-                    pais=request.pais,
-                    ciudad=request.ciudad
-                )
-
-        # Asegurar lista
+            empresas = await asyncio.to_thread(
+                buscar_empresas_por_rubro,
+                rubro=request.rubro,
+                pais=request.pais,
+                ciudad=request.ciudad
+            )
+            # Validar que buscar_empresas_por_rubro retornó una lista válida
+            if empresas is None:
+                logger.error("buscar_empresas_por_rubro retornó None")
+                empresas = []
+        
+        # Asegurar que empresas es una lista
         if not isinstance(empresas, list):
+            logger.error(f"Empresas no es una lista: {type(empresas)}")
             empresas = []
-
-        # ... (Resto del flujo igual: validación, enrichment, etc.)
-        # NOTA: Para Google, el enriquecimiento (email) a veces requiere ir al website.
-        # Google Places devuelve websiteUri. El scraper paralelo puede usarse igual.
         
         if not empresas:
             return {
@@ -749,7 +667,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 "message": f"Encontradas {len(empresas)} empresas. Iniciando validación..."
             }
 
-        logger.info(f" Encontradas {len(empresas)} empresas en {source_used.upper()}")
+        logger.info(f" Encontradas {len(empresas)} empresas en OSM")
         
         # Guardar el número total encontrado ANTES de cualquier filtro
         total_encontradas_original = len(empresas)

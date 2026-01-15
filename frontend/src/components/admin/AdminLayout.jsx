@@ -92,7 +92,6 @@ function AdminLayout() {
 
   const isUsersPage = location.pathname.includes('/users');
   const isPromoCodesPage = location.pathname.includes('/promo-codes');
-  const isQuotaPage = location.pathname.includes('/quota');
 
   return (
     <>
@@ -113,7 +112,7 @@ function AdminLayout() {
               </button>
               <h2 className="admin-header-title">Panel de Administración</h2>
             </div>
-          {(isUsersPage || isPromoCodesPage || isQuotaPage) && (
+          {(isUsersPage || isPromoCodesPage) && (
             <div className="admin-nav">
               <button 
                 className={`admin-nav-btn ${isUsersPage ? 'active' : ''}`}
@@ -125,13 +124,7 @@ function AdminLayout() {
                 className={`admin-nav-btn ${isPromoCodesPage ? 'active' : ''}`}
                 onClick={() => navigate('/backoffice/promo-codes')}
               >
-                Códigos Promo
-              </button>
-               <button 
-                className={`admin-nav-btn ${isQuotaPage ? 'active' : ''}`}
-                onClick={() => navigate('/backoffice/quota')}
-              >
-                Control de Cuota
+                Códigos Promocionales
               </button>
             </div>
           )}
