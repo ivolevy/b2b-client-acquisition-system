@@ -393,6 +393,7 @@ function AuthWrapper() {
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="users/:id" element={<AdminUserDetail />} />
                 <Route path="promo-codes" element={<AdminPromoCodes />} />
+                <Route path="quota" element={<AdminApiDashboard />} />
               </Route>
             <Route path="/*" element={<AppB2B />} />
           </Routes>

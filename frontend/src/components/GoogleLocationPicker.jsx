@@ -520,20 +520,17 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
           </span>
         </div>
         {showSuggestions && suggestions.length > 0 && (
-          <ul ref={suggestionsRef} className="address-suggestions" style={{ position: 'absolute', zIndex: 1000, background: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', marginTop: '4px', maxHeight: '200px', overflowY: 'auto', width: '100%', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', listStyle: 'none', padding: 0, margin: 0 }}>
+          <ul ref={suggestionsRef} className="address-suggestions">
             {suggestions.map((prediction) => (
               <li 
                 key={prediction.place_id} 
                 onClick={() => handleSuggestionSelect(prediction)}
-                style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #f3f4f6' }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
               >
-                <div style={{ fontWeight: 500, fontSize: '0.875rem', color: '#374151' }}>
+                <div className="suggestion-title">
                   {prediction.structured_formatting?.main_text || prediction.description}
                 </div>
                 {prediction.structured_formatting?.secondary_text && (
-                  <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+                  <div className="suggestion-subtitle">
                     {prediction.structured_formatting.secondary_text}
                   </div>
                 )}

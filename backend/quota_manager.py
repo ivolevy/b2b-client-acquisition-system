@@ -5,10 +5,29 @@ import logging
 from datetime import datetime
 from typing import Dict, Optional
 
-# Configuración de costos aproximados (en USD)
-COST_TEXT_SEARCH = 0.032  # Por Request (Text Search ID Only) - Aprox
-COST_PLACE_DETAILS = 0.017 # Por Request (Contact Data + Basic) - Aprox
-MONTHLY_BUDGET_LIMIT = 190.0 # USD (Buffer de seguridad para los $200 gratuitos)
+# Configuración de costos PRECISOS (según Google Places New Pricing)
+# Text Search (New): Se usa el SKU "Text Search (ID Only)" + "Basic Data" + "Contact Data"
+# - Text Search (ID Only): Gratis (o muy barato).
+# - Basic Data: Gratis/Barato ($0.00).
+# - Contact Data (Website, Phone): ~$0.012 - $0.030 dependiendo del volumen.
+# - Advanced Data (Rating, Opening Hours): ~$0.020.
+#
+# Para simplificar y asegurar no pasarnos, usaremos el costo "Worst Case" de una query rica:
+# search + details = ~$0.032 - $0.040 por EMPRESA (si pedimos todo).
+#
+# PERO: La llamada "Text Search" inicial devuelve una LISTA. 
+# Google cobra POR FIELD MASK y POR RESULTADO devuelto si usas la API v1 places:searchText.
+# Si la API devuelve 20 resultados con campos de contacto, cobra 20 x Costo.
+# OJO: Text Search (New) cobra diferente.
+# Pro Pricing: $32.00 / 1000 requests -> $0.032 por cada llamada a la API (independiente de resultados? NO, es por request si usas field mask alta).
+#
+# Ajuste fino: $0.032 por cada llamada a "search_places" (Text Search Pro SKU), ya que pedimos website/phone para los 20 resultados.
+
+COST_TEXT_SEARCH = 0.032  # USD por petición a la API (devuelve hasta 20 empresas)
+COST_PLACE_DETAILS = 0.017 # USD por petición de detalles adicionales (si se usa)
+MONTHLY_BUDGET_LIMIT = 190.0 # USD
+
+# ... (resto de la clase igual)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

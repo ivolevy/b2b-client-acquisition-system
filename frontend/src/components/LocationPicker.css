@@ -312,39 +312,45 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  margin-top: var(--spacing-xs);
+  background: #1e1e1e;
+  /* Dark theme compatible */
+  border: 1px solid #333;
+  border-radius: 0 0 12px 12px;
+  margin-top: 2px;
   list-style: none;
-  padding: 0.25rem 0;
-  box-shadow: var(--shadow-lg);
-  z-index: 10;
+  padding: 8px 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
   max-height: 240px;
   overflow-y: auto;
 }
 
 .address-suggestions li {
-  padding: 0.65rem 0.9rem;
+  padding: 10px 16px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.address-suggestions li:last-child {
+  border-bottom: none;
 }
 
 .address-suggestions li:hover {
-  background: #e0e7ff;
+  background: #2d2d2d;
 }
 
 .suggestion-title {
   display: block;
-  font-weight: 600;
-  color: var(--gray-900);
+  font-weight: 500;
+  color: #fff;
   font-size: 0.9rem;
 }
 
 .suggestion-subtitle {
   display: block;
-  font-size: 0.78rem;
-  color: var(--gray-600);
+  font-size: 0.75rem;
+  color: #888;
   margin-top: 2px;
 }
 
@@ -363,7 +369,7 @@
   .location-picker {
     margin-bottom: var(--spacing-md);
   }
-  
+
   .search-row {
     flex-direction: row;
     align-items: flex-end;
@@ -375,35 +381,36 @@
     -webkit-overflow-scrolling: touch;
     flex-wrap: nowrap;
   }
-  
+
   .radius-control {
     flex: 0 0 auto;
     min-width: 120px;
   }
-  
+
   .radius-label {
     font-size: 0.75rem;
   }
-  
+
   .radius-control select {
     width: 100%;
     font-size: 0.8rem;
     padding: 0.6rem 2rem 0.6rem 0.6rem;
     height: 40px;
   }
-  
+
   .address-search {
     flex: 1;
     min-width: 180px;
   }
-  
+
   .address-search label {
     font-size: 0.75rem;
   }
-  
+
   .address-input {
     width: 100%;
-    font-size: 16px; /* Previene zoom en iOS */
+    font-size: 16px;
+    /* Previene zoom en iOS */
     height: 40px;
     padding: 0.6rem 0.8rem;
     background: white !important;
@@ -418,20 +425,20 @@
     font-size: 0.8rem;
     white-space: nowrap;
   }
-  
+
   .location-map {
     height: 300px;
     border-radius: var(--radius-lg);
     margin-top: var(--spacing-md);
   }
-  
+
   .map-instruction {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: 0.8rem;
     margin-bottom: var(--spacing-md);
     margin-top: var(--spacing-md);
   }
-  
+
   .address-suggestions {
     max-height: 200px;
   }
@@ -441,37 +448,37 @@
   .location-picker {
     margin-bottom: var(--spacing-sm);
   }
-  
+
   .search-row {
     padding: var(--spacing-sm);
     gap: var(--spacing-xs);
     flex-wrap: nowrap;
   }
-  
+
   .radius-control {
     flex: 0 0 auto;
     min-width: 100px;
   }
-  
+
   .radius-label {
     font-size: 0.7rem;
   }
-  
+
   .radius-control select {
     font-size: 0.75rem;
     padding: 0.5rem 1.8rem 0.5rem 0.5rem;
     height: 38px;
   }
-  
+
   .address-search {
     flex: 1;
     min-width: 150px;
   }
-  
+
   .address-search label {
     font-size: 0.7rem;
   }
-  
+
   .btn-location {
     flex: 0 0 auto;
     min-width: 120px;
@@ -479,36 +486,65 @@
     padding: 0.5rem 0.7rem;
     font-size: 0.75rem;
   }
-  
+
   .address-input {
     height: 38px;
-    font-size: 16px; /* Previene zoom en iOS */
+    font-size: 16px;
+    /* Previene zoom en iOS */
     padding: 0.5rem 0.7rem;
     background: white !important;
     color: #1a1a1a !important;
   }
-  
+
   .location-map {
     height: 250px;
     border-radius: var(--radius-md);
   }
-  
+
   .map-instruction {
     font-size: 0.75rem;
     padding: var(--spacing-sm);
     margin-top: var(--spacing-sm);
     margin-bottom: var(--spacing-sm);
   }
-  
+
   .address-suggestions {
     max-height: 180px;
   }
-  
+
   .suggestion-title {
     font-size: 0.85rem;
   }
-  
+
   .suggestion-subtitle {
     font-size: 0.7rem;
   }
+}
+
+/* Botón de ubicación actual inline redesign */
+.btn-location-inline {
+  background: transparent;
+  border: none;
+  color: #f472b6;
+  /* Pink accent */
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  font-weight: 500;
+  margin-left: 4px;
+  transition: color 0.2s;
+}
+
+.btn-location-inline:hover {
+  color: #f68ac2;
+}
+
+.location-text {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #888;
+  white-space: nowrap;
+  margin-left: 8px;
 }

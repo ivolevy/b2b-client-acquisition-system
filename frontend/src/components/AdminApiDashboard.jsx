@@ -77,19 +77,19 @@ const AdminApiDashboard = () => {
           ></div>
         </div>
         <div className="quota-text">
-          <span>Gastado: <strong>${stats.used.toFixed(2)}</strong></span>
+          <span>Gastado: <strong>${stats.used.toFixed(4)}</strong></span>
           <span>Límite: <strong>${stats.limit.toFixed(2)}</strong></span>
         </div>
       </div>
 
       <div className="dashboard-stats">
         <div className="stat-item">
-            <span className="stat-label">Requests Mes</span>
+            <span className="stat-label">Requests API</span>
             <span className="stat-value">{stats.requests}</span>
         </div>
         <div className="stat-item">
-            <span className="stat-label">Restante</span>
-            <span className="stat-value">${(stats.limit - stats.used).toFixed(2)}</span>
+            <span className="stat-label">Costo Promedio</span>
+            <span className="stat-value">${(stats.used / (stats.requests || 1)).toFixed(4)}</span>
         </div>
       </div>
 
