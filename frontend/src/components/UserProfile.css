@@ -129,7 +129,9 @@ body.profile-page-active {
 
 /* Sidebar Styles */
 .profile-sidebar {
-  width: 240px;
+  width: 30%;
+  /* Set to 30% as requested */
+  min-width: 240px;
   background: #f9fafb;
   border-right: 1px solid var(--gray-200);
   display: flex;
@@ -275,8 +277,8 @@ body.profile-page-active {
   font-size: 0.9375rem;
   font-weight: 500;
   color: var(--gray-500);
-  flex: 0 0 auto;
-  min-width: 140px;
+  flex: 0 0 30%;
+  /* Exactly 30% */
 }
 
 .profile-field-value {
@@ -287,7 +289,8 @@ body.profile-page-active {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: 1;
+  flex: 0 0 70%;
+  /* Exactly 70% */
   justify-content: flex-end;
 }
 
@@ -1204,18 +1207,18 @@ body.profile-page-active {
 
 /* Account Plan Card */
 .account-plan-card-new {
-  margin-top: 1.5rem;
-  padding: 0.75rem 1.25rem;
-  background: linear-gradient(135deg, #fff5f8 0%, #ffffff 100%);
+  margin-top: 3.5rem;
+  padding: 1.25rem 2rem;
+  background: white;
   border: 1px solid #fce4ec;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
-  justify-content: center;
-  /* Center horizontally if width-fit */
-  gap: 1.25rem;
-  box-shadow: 0 2px 8px rgba(233, 30, 99, 0.04);
-  width: fit-content;
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: 0 4px 15px rgba(233, 30, 99, 0.05);
+  width: 100%;
+  max-width: 650px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -1335,6 +1338,7 @@ body.profile-page-active {
 .text-muted {
   color: var(--gray-400);
 }
+
 @media (max-width: 1200px) {
   .user-profile-container {
     width: 98%;
@@ -1348,14 +1352,18 @@ body.profile-page-active {
     width: 100%;
     border-radius: 0;
   }
-  
+
   .user-profile-layout {
     flex-direction: column;
   }
-  
+
   .profile-sidebar {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--gray-200);
   }
+}
+.btn-save-rubros-modern.saved {
+  background: #10b981 !important;
+  border-color: #10b981 !important;
 }

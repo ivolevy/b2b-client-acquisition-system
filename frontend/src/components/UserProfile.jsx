@@ -36,6 +36,7 @@ function UserProfile() {
   });
   const [passwordStep, setPasswordStep] = useState('request'); // 'request', 'verify', 'change'
   const { success: toastSuccess, error: toastError, warning: toastWarning, removeToast, toasts } = useToast();
+  const [rubrosSaved, setRubrosSaved] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
@@ -137,7 +138,8 @@ function UserProfile() {
         rubro_keys: selectedRubros
       });
       if (response.data.success) {
-        toastSuccess('Preferencias de rubros guardadas correctamente.');
+        setRubrosSaved(true);
+        setTimeout(() => setRubrosSaved(false), 3000);
       }
     } catch (err) {
       console.error('Error saving rubros:', err);
@@ -686,11 +688,11 @@ function UserProfile() {
                   
                   <div className="rubros-sticky-footer">
                     <button 
-                      className="btn-save-rubros-modern" 
+                      className={`btn-save-rubros-modern ${rubrosSaved ? 'saved' : ''}`} 
                       onClick={handleSaveRubros}
                       disabled={savingRubros}
                     >
-                      {savingRubros ? 'Guardando...' : 'Guardar Preferencias'}
+                      {savingRubros ? 'Guardando...' : rubrosSaved ? '✓ Guardado' : 'Guardar Preferencias'}
                     </button>
                   </div>
                 </div>

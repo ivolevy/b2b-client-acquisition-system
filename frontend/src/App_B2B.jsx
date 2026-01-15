@@ -203,14 +203,12 @@ function AppB2B() {
               }
             });
             setRubros(filteredRubros);
-          } else if (selected_rubros && selected_rubros.length === 0) {
-              // Si guardó explícitamente vacío, o no tiene nada, decidimos qué mostrar.
-              // Para que el buscador no quede roto, si es [] mostramos todos PERO 
-              // el problema del usuario es que "deselecciona y se sigue mostrando".
-              // Así que si deseccionó ALGUNOS, el length será > 0.
-              // El único caso problemático es cuando deselecciona TODOS.
-              setRubros(all_rubros || {});
+          } else if (selected_rubros && Array.isArray(selected_rubros)) {
+            // Si la lista existe pero está vacía, el usuario deseleccionó TODO.
+            // En este caso, mostramos un objeto vacío para que no aparezca nada en el dropdown.
+            setRubros({});
           } else {
+            // Si es null o undefined (primera vez), mostrar todos.
             setRubros(all_rubros || {});
           }
           return;
@@ -429,8 +427,11 @@ function AppB2B() {
           }
         }
         
-        // Cargar todas las empresas de la base de datos para actualizar la vista completa
-        await loadEmpresas();
+        // Actualizar la vista con los resultados encontrados inmediatamente
+        setEmpresas(empresasEncontradas);
+        
+        // Refrescar también de la base de datos para asegurar consistencia
+        await loadEmpresas(false);
         await loadStats();
       }
     } catch (err) {
