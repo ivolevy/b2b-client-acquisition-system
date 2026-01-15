@@ -475,7 +475,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
 
 
       {previewEmpresa && (
-        <div className="email-sender-overlay" style={{zIndex: 30000}} onClick={() => setPreviewEmpresa(null)}>
+        <div className="email-sender-overlay" style={{zIndex: 50000}} onClick={() => setPreviewEmpresa(null)}>
            <div className="email-sender-modal" style={{maxWidth:'700px', height:'auto', maxHeight:'90vh'}} onClick={e => e.stopPropagation()}>
               <div className="email-sender-header">
                  <h2>Vista Previa: {previewEmpresa.nombre}</h2>

@@ -12,6 +12,7 @@ function UserProfile() {
   const { user, logout, useSupabase } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('info'); // 'info', 'rubros', 'danger'
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [upgradeLoading, setUpgradeLoading] = useState(false);
@@ -100,8 +101,16 @@ function UserProfile() {
     try {
       const response = await axios.get(`${API_URL}/users/${user.id}/rubros`);
       if (response.data.success) {
-        setAvailableRubros(response.data.all_rubros || {});
-        setSelectedRubros(response.data.selected_rubros || []);
+        const all = response.data.all_rubros || {};
+        const selected = response.data.selected_rubros || [];
+        setAvailableRubros(all);
+        
+        // Si no hay nada guardado, por defecto seleccionamos todos
+        if (selected.length === 0 && Object.keys(all).length > 0) {
+          setSelectedRubros(Object.keys(all));
+        } else {
+          setSelectedRubros(selected);
+        }
       }
     } catch (err) {
       console.error('Error fetching user rubros:', err);
@@ -521,139 +530,188 @@ function UserProfile() {
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
           </button>
-        <h2>Mi Perfil</h2>
+          <h2>Configuración de Perfil</h2>
         </div>
       </div>
 
-      <div className="user-profile-content">
-        <div className="profile-content-grid">
-          {/* Columna izquierda */}
-          <div className="profile-column">
-            <h3 className="profile-section-title">Información básica</h3>
-            <div className="profile-field">
-              <label className="profile-field-label">Nombre</label>
-              <div className="profile-field-value">{user?.name || 'Usuario'}</div>
-            </div>
-            <div className="profile-field">
-              <label className="profile-field-label">Teléfono</label>
-              <div className="profile-field-value">
-                {user?.phone && user.phone.length > 6 ? user.phone : <span style={{ color: '#999' }}>NaN</span>}
-              </div>
-            </div>
-            <div className="profile-field">
-              <label className="profile-field-label">Email</label>
-              <div className="profile-field-value">{user?.email}</div>
-            </div>
-            <div className="profile-field">
-              <label className="profile-field-label">Contraseña</label>
-              <div className="profile-field-value">
-                <button 
-                  className="profile-change-password-btn"
-                  onClick={() => {
-                    setShowPasswordModal(true);
-                    setPasswordStep('request');
-                    setPasswordChangeEmail(user?.email || '');
-                    setVerificationCode('');
-                    setCodeSent(false);
-                    setPasswordError('');
-                    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                  }}
-                >
-                  Cambiar contraseña
-                </button>
-              </div>
-            </div>
+      <div className="user-profile-layout">
+        {/* Sidebar */}
+        <aside className="profile-sidebar">
+          <nav className="profile-nav">
+            <button 
+              className={`profile-nav-item ${activeTab === 'info' ? 'active' : ''}`}
+              onClick={() => setActiveTab('info')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span>Información básica</span>
+            </button>
+            <button 
+              className={`profile-nav-item ${activeTab === 'rubros' ? 'active' : ''}`}
+              onClick={() => setActiveTab('rubros')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span>Mis Rubros</span>
+            </button>
+            <button 
+              className={`profile-nav-item danger ${activeTab === 'danger' ? 'active' : ''}`}
+              onClick={() => setActiveTab('danger')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              <span>Zona de Peligro</span>
+            </button>
+          </nav>
+
+          <div className="profile-sidebar-footer">
+            <button className="profile-logout-btn" onClick={logout}>
+              Cerrar sesión
+            </button>
           </div>
+        </aside>
 
-          {/* Línea divisoria */}
-          <div className="profile-divider"></div>
-
-          {/* Columna derecha */}
-          {user?.role !== 'admin' && (
-          <div className="profile-column">
-            <h3 className="profile-section-title">Información de cuenta</h3>
-            <div className="account-info-card">
-              <div className="account-plan-section">
-                <div className="account-plan-label">Plan actual</div>
-                <div className="account-plan-content">
-                  <span className={`plan-badge-large ${user?.plan || 'free'}`}>
-                    {user?.plan === 'pro' ? 'PRO' : 'Free'}
-                  </span>
+        {/* Contenido Principal */}
+        <main className="profile-main-content">
+          {activeTab === 'info' && (
+            <div className="profile-section-fade-in">
+              <h3 className="profile-section-title">Información de la cuenta</h3>
+              <div className="profile-info-grid">
+                <div className="profile-field">
+                  <label className="profile-field-label">Nombre</label>
+                  <div className="profile-field-value">{user?.name || 'Usuario'}</div>
                 </div>
-                <div className="account-plan-actions">
-                  {user?.plan !== 'pro' ? (
+                <div className="profile-field">
+                  <label className="profile-field-label">Email</label>
+                  <div className="profile-field-value">{user?.email}</div>
+                </div>
+                <div className="profile-field">
+                  <label className="profile-field-label">Teléfono</label>
+                  <div className="profile-field-value">
+                    {user?.phone && user.phone.length > 6 ? user.phone : <span className="text-muted">No especificado</span>}
+                  </div>
+                </div>
+                <div className="profile-field">
+                  <label className="profile-field-label">Contraseña</label>
+                  <div className="profile-field-value">
                     <button 
-                      className="account-upgrade-btn"
-                      onClick={() => setShowUpgradeModal(true)}
+                      className="profile-inline-link"
+                      onClick={() => {
+                        setShowPasswordModal(true);
+                        setPasswordStep('request');
+                        setPasswordChangeEmail(user?.email || '');
+                        setVerificationCode('');
+                        setCodeSent(false);
+                        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                      }}
                     >
-                      Actualizar a PRO
+                      Cambiar contraseña
                     </button>
-                  ) : (
-                    <button 
-                      className="account-change-plan-btn"
+                  </div>
+                </div>
+              </div>
+
+              {user?.role !== 'admin' && (
+                <div className="account-plan-card-new">
+                  <div className="plan-card-header">
+                    <span className="plan-card-subtitle">Plan actual</span>
+                    <div className="plan-card-title-row">
+                      <span className={`plan-badge-large ${user?.plan || 'free'}`}>
+                        {user?.plan === 'pro' ? 'PRO' : 'Free'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="plan-card-actions">
+                    {user?.plan !== 'pro' ? (
+                      <button 
+                        className="btn-upgrade-pro"
+                        onClick={() => setShowUpgradeModal(true)}
+                      >
+                        Pasar a PRO
+                      </button>
+                    ) : (
+                      <button 
+                        className="btn-cancel-plan"
                         onClick={() => setShowCancelPlanModal(true)}
+                      >
+                        Gestionar suscripción
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'rubros' && (
+            <div className="profile-section-fade-in">
+              <h3 className="profile-section-title">Mis Rubros Preferidos</h3>
+              <p className="profile-section-subtitle">Seleccioná los rubros que querés que aparezcan en tu buscador. Por defecto todos están activos.</p>
+              
+              {rubrosError && <div className="rubros-error-msg">{rubrosError}</div>}
+              
+              {rubrosLoading ? (
+                <div className="rubros-loading-spinner">
+                  <div className="spinner"></div>
+                  <span>Cargando tus preferencias...</span>
+                </div>
+              ) : (
+                <div className="rubros-selection-wrapper">
+                  <div className="rubros-modern-grid">
+                    {Object.entries(availableRubros).map(([key, info]) => (
+                      <div 
+                        key={key} 
+                        className={`rubro-selection-card ${selectedRubros.includes(key) ? 'selected' : ''}`}
+                        onClick={() => toggleRubro(key)}
+                      >
+                        <div className="rubro-card-checkbox">
+                          {selectedRubros.includes(key) && (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          )}
+                        </div>
+                        <span className="rubro-card-name">{info.nombre}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="rubros-sticky-footer">
+                    <button 
+                      className="btn-save-rubros-modern" 
+                      onClick={handleSaveRubros}
+                      disabled={savingRubros}
                     >
-                        Cancelar plan
+                      {savingRubros ? 'Guardando...' : 'Guardar Preferencias'}
                     </button>
-                  )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'danger' && (
+            <div className="profile-section-fade-in">
+              <h3 className="profile-section-title text-danger">Zona de Peligro</h3>
+              <div className="danger-zone-card">
+                <div className="danger-card-content">
+                  <h4>¿Deseas eliminar tu cuenta?</h4>
+                  <p>Al eliminar tu cuenta, perderás el acceso a todas tus búsquedas guardadas, plantillas y configuraciones. Esta acción es irreversible.</p>
+                  <button 
+                    className="btn-delete-account-modern"
+                    onClick={() => setShowDeleteModal(true)}
+                  >
+                    Eliminar mi cuenta permanentemente
+                  </button>
                 </div>
               </div>
             </div>
-
-
-            <div className="account-danger-section">
-              <div className="account-danger-label">Zona de peligro</div>
-              <div className="account-danger-content">
-                <p className="account-danger-text">Esta acción es permanente y no se puede deshacer.</p>
-                <button 
-                  className="btn-delete-account"
-                  onClick={() => setShowDeleteModal(true)}
-                >
-                  Eliminar cuenta
-                </button>
-              </div>
-            </div>
-          </div>
           )}
-        </div>
-
-        {/* Nueva sección de Rubros */}
-        <div className="profile-rubros-section">
-          <h3 className="profile-section-title">Mis Rubros Preferidos</h3>
-          <p className="profile-section-subtitle">Seleccioná los rubros que querés que aparezcan en tu buscador principal.</p>
-          
-          {rubrosError && <div className="rubros-error-msg">{rubrosError}</div>}
-          
-          {rubrosLoading ? (
-            <div className="rubros-loading">Cargando rubros...</div>
-          ) : (
-            <div className="rubros-selection-container">
-              <div className="rubros-grid">
-                {Object.entries(availableRubros).map(([key, info]) => (
-                  <label key={key} className={`rubro-checkbox-card ${selectedRubros.includes(key) ? 'selected' : ''}`}>
-                    <input 
-                      type="checkbox" 
-                      checked={selectedRubros.includes(key)}
-                      onChange={() => toggleRubro(key)}
-                      style={{ display: 'none' }}
-                    />
-                    <span className="rubro-checkbox-name">{info.nombre}</span>
-                  </label>
-                ))}
-              </div>
-              
-              <div className="rubros-actions">
-                <button 
-                  className="btn-save-rubros" 
-                  onClick={handleSaveRubros}
-                  disabled={savingRubros}
-                >
-                  {savingRubros ? 'Guardando...' : 'Guardar Preferencias'}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        </main>
       </div>
 
       {/* Modal de confirmación para eliminar cuenta */}
