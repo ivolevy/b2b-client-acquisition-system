@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaMapMarkedAlt, FaPaperPlane, FaSearch, FaCheckCircle, FaRocket } from 'react-icons/fa';
+import { FaMapMarkedAlt, FaPaperPlane, FaSearch, FaCheckCircle, FaRocket, FaCheck } from 'react-icons/fa';
 import './LandingPage.css';
 
 function LandingPage() {
@@ -8,16 +8,16 @@ function LandingPage() {
 
   return (
     <div className="landing-page">
-      {/* Navbar */}
+      {/* Navbar Floating Pill */}
       <nav className="landing-nav">
         <div className="landing-logo">
           <FaRocket /> Smart Leads
         </div>
         <div className="landing-nav-links">
           <span className="nav-link" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>Características</span>
-          <span className="nav-link" onClick={() => document.getElementById('how-it-works').scrollIntoView({behavior: 'smooth'})}>Cómo funciona</span>
+          <span className="nav-link" onClick={() => document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})}>Precios</span>
         </div>
-        <button className="btn-login" onClick={() => navigate('/')}>
+        <button className="btn-login-nav" onClick={() => navigate('/')}>
           Iniciar Sesión
         </button>
       </nav>
@@ -25,17 +25,17 @@ function LandingPage() {
       {/* Hero */}
       <header className="landing-hero">
         <div className="hero-content">
-          <span className="hero-badge">B2B Client Acquisition System</span>
+          <span className="hero-badge">Sistema B2B de Adquisición de Clientes</span>
           <h1 className="hero-title">
-            Convierte Google Maps en tu <br/>
-            <span>Base de Datos de Clientes</span>
+            Linkea empresas y contáctalas <br/>
+            <span>Masivamente para vender más</span>
           </h1>
           <p className="hero-subtitle">
-            Encuentra empresas en cualquier zona, extrae sus datos de contacto verificados y envíales propuestas comerciales en piloto automático.
+            Transforma Google Maps en tu base de datos. Extrae contactos verificados y automatiza tu alcance en frío con un solo clic.
           </p>
           <div className="hero-cta-group">
             <button className="btn-cta-primary" onClick={() => navigate('/')}>
-              Comenzar Ahora
+              Comenzar Prueba Gratis
             </button>
             <button className="btn-cta-secondary" onClick={() => document.getElementById('how-it-works').scrollIntoView({behavior: 'smooth'})}>
               Ver Demo
@@ -47,16 +47,16 @@ function LandingPage() {
       {/* Features */}
       <section id="features" className="landing-features">
         <div className="section-header">
-          <h2 className="section-title">Todo lo que necesitas para vender más</h2>
-          <p className="section-desc">Una suite completa de prospección y ventas B2B.</p>
+          <h2 className="section-title">Potencia tu equipo de ventas</h2>
+          <p className="section-desc">Todo lo que necesitas para escalar tu prospección outbound.</p>
         </div>
 
         <div className="features-grid">
           <div className="feature-card">
             <div className="feature-icon"><FaMapMarkedAlt /></div>
-            <h3 className="feature-title">Búsqueda Geolocalizada</h3>
+            <h3 className="feature-title">Geolocalización Precisa</h3>
             <p className="feature-text">
-              Dibuja un radio en el mapa y detecta todas las empresas de un rubro específico. Accede a negocios que no sabías que existían.
+              Dibuja un radio en el mapa y detecta todas las empresas de tu nicho. Accede a negocios locales que no sabías que existían.
             </p>
           </div>
 
@@ -64,80 +64,76 @@ function LandingPage() {
             <div className="feature-icon"><FaSearch /></div>
             <h3 className="feature-title">Enriquecimiento de Datos</h3>
             <p className="feature-text">
-              Automáticamente buscamos emails, teléfonos, Instagram, Facebook y LinkedIn de cada empresa detectada.
+              Obtén emails, teléfonos, Instagram, Facebook y LinkedIn de cada empresa. Datos frescos y actualizados al instante.
             </p>
           </div>
 
           <div className="feature-card">
             <div className="feature-icon"><FaCheckCircle /></div>
-            <h3 className="feature-title">Contactos Verificados</h3>
+            <h3 className="feature-title">Validación de Emails</h3>
             <p className="feature-text">
-              Nuestro sistema valida la existencia de los emails para asegurar una alta tasa de entregabilidad y evitar rebotes.
+              Filtramos automáticamente correos inválidos para proteger tu reputación de dominio y asegurar entregabilidad.
             </p>
           </div>
 
           <div className="feature-card">
             <div className="feature-icon"><FaPaperPlane /></div>
-            <h3 className="feature-title">Email Marketing Integrado</h3>
+            <h3 className="feature-title">Campañas Masivas</h3>
             <p className="feature-text">
-              Envía correos personalizados masivos desde tu propia cuenta de Gmail. Usa plantillas profesionales y trackea los resultados.
+              Envía correos personalizados a cientos de prospectos simultáneamente usando plantillas pre-definidas.
             </p>
           </div>
         </div>
       </section>
 
-      {/* How it Works */}
-      <section id="how-it-works" className="landing-steps">
-        <div className="section-header">
-          <h2 className="section-title">Cómo funciona</h2>
+      {/* Pricing Section */}
+      <section id="pricing" className="landing-pricing">
+        <div className="pricing-header">
+           <h2 className="section-title">Planes Simples</h2>
+           <p className="section-desc">Comienza gratis y escala cuando lo necesites.</p>
         </div>
 
-        <div className="steps-container">
-          <div className="step-row">
-            <div className="step-image">
-               {/* Placeholder for screenshot */}
-               <div style={{color: '#94a3b8'}}>Mapa Interactivo</div>
+        <div className="pricing-grid">
+          {/* Free Plan */}
+          <div className="pricing-card">
+            <div className="pricing-header">
+              <h3 className="pricing-title">Free Trial</h3>
+              <div className="pricing-price">$0</div>
+              <p className="pricing-period">Para siempre (limitado)</p>
             </div>
-            <div className="step-content">
-              <div className="step-number">01</div>
-              <h3 className="step-title">Elige tu zona y rubro</h3>
-              <p className="step-desc">
-                Selecciona una ubicación en el mapa, define un radio de búsqueda (ej. 5km) y el tipo de negocio que buscas (ej. "Arquitectos").
-              </p>
-            </div>
+            <ul className="pricing-features">
+              <li className="pricing-feature"><FaCheck className="pricing-check" /> 5 Búsquedas diarias</li>
+              <li className="pricing-feature"><FaCheck className="pricing-check" /> 50 Leads por búsqueda</li>
+              <li className="pricing-feature"><FaCheck className="pricing-check" /> Validación básica</li>
+              <li className="pricing-feature"><FaCheck className="pricing-check" /> Envío de emails manual</li>
+            </ul>
+            <button className="btn-pricing outline" onClick={() => navigate('/')}>Empezar Gratis</button>
           </div>
 
-          <div className="step-row reverse">
-            <div className="step-image">
-               <div style={{color: '#94a3b8'}}>Tabla de Resultados</div>
+          {/* Pro Plan */}
+          <div className="pricing-card pro">
+            <span className="pricing-badge">Recomendado</span>
+            <div className="pricing-header">
+              <h3 className="pricing-title">Pro System</h3>
+              <div className="pricing-price">$49<span style={{fontSize: '1rem', color: '#94a3b8'}}>/mo</span></div>
+              <p className="pricing-period">Facturado anualmente</p>
             </div>
-            <div className="step-content">
-              <div className="step-number">02</div>
-              <h3 className="step-title">Obtén los datos</h3>
-              <p className="step-desc">
-                El sistema escaneará la zona en segundos, entregándote una lista limpia con nombres, direcciones, emails y redes sociales.
-              </p>
-            </div>
-          </div>
-
-          <div className="step-row">
-            <div className="step-image">
-               <div style={{color: '#94a3b8'}}>Módulo de Email</div>
-            </div>
-            <div className="step-content">
-              <div className="step-number">03</div>
-              <h3 className="step-title">Contacta y Vende</h3>
-              <p className="step-desc">
-                Selecciona los prospectos que te interesan, elige una plantilla de correo persuasiva y lanza tu campaña con un solo clic.
-              </p>
-            </div>
+            <ul className="pricing-features">
+              <li className="pricing-feature"><FaCheck className="pricing-check" /> Búsquedas Ilimitadas</li>
+              <li className="pricing-feature"><FaCheck className="pricing-check" /> Leads Ilimitados</li>
+              <li className="pricing-feature"><FaCheck className="pricing-check" /> Enriquecimiento de Redes Sociales</li>
+              <li className="pricing-feature"><FaCheck className="pricing-check" /> Validación avanzada de emails</li>
+              <li className="pricing-feature"><FaCheck className="pricing-check" /> Envíos Masivos (Bulk Sender)</li>
+              <li className="pricing-feature"><FaCheck className="pricing-check" /> Soporte Prioritario</li>
+            </ul>
+            <button className="btn-pricing solid" onClick={() => window.location.href = 'mailto:admin@smartleads.com'}>Contactar Ventas</button>
           </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="landing-footer">
-        <p>© 2024 Smart Leads. Todos los derechos reservados.</p>
+        <p>© 2026 Smart Leads. Todos los derechos reservados.</p>
       </footer>
     </div>
   );
