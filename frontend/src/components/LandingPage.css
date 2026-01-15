@@ -21,45 +21,58 @@
     overflow-x: hidden;
 }
 
-/* Navbar */
+/* Improved Navbar matching Navbar.jsx structure */
 .landing-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px 48px;
+    height: 64px;
+    padding: 0 32px;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     z-index: 50;
-    max-width: 1400px;
-    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.landing-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: white;
+.landing-nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.landing-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
-    letter-spacing: -0.02em;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.landing-brand h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    letter-spacing: -0.01em;
 }
 
 .landing-nav-links {
     display: flex;
-    gap: 40px;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    gap: 32px;
 }
 
 .nav-link {
     color: var(--lp-text-muted);
     text-decoration: none;
+    font-size: 0.9rem;
     font-weight: 500;
-    font-size: 0.95rem;
     transition: color 0.2s;
     cursor: pointer;
 }
@@ -97,7 +110,46 @@
     justify-content: center;
 }
 
-/* Pink glow effect behind hero code/content */
+/* Visual Elements (Squares/Images) */
+.visual-square {
+    position: absolute;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    z-index: 1;
+}
+
+.square-1 {
+    width: 300px;
+    height: 300px;
+    top: 15%;
+    left: 5%;
+    transform: rotate(-15deg);
+    animation: float 8s ease-in-out infinite;
+}
+
+.square-2 {
+    width: 200px;
+    height: 200px;
+    top: 20%;
+    right: 10%;
+    transform: rotate(10deg);
+    animation: float 10s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(var(--rot, 0deg));
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(var(--rot, 0deg));
+    }
+}
+
 .landing-hero::before {
     content: '';
     position: absolute;

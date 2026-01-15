@@ -459,14 +459,20 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       </div>
 
       <div className="address-search" style={{ position: 'relative' }}>
-        <label htmlFor="address-input">Buscar dirección</label>
-        <div className="address-input-wrapper">
+        <label htmlFor="address-input">Ubicación a analizar</label>
+        <div className="address-input-wrapper modern-input-wrapper">
+            <div className="input-icon-left">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" color="#f472b6">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </div>
             <input
               ref={autocompleteInputRef}
               id="address-input"
               type="text"
-              className="address-input"
-              placeholder="Ej: Plaza de Mayo, Buenos Aires"
+              className="address-input modern-input"
+              placeholder="Ej: Buenos Aires, Argentina"
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);

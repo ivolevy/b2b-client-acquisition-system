@@ -138,8 +138,43 @@
 .form-row-compact .address-input:focus {
   outline: none;
   border-color: #f472b6;
-  /* Pink accent matching landing page/dota theme vibe if desired, or var(--primary) */
   box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2);
+}
+
+/* Modern Input Styles */
+.modern-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-icon-left {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
+  display: flex;
+}
+
+.modern-input {
+  padding-left: 38px !important;
+  /* Space for icon */
+  height: 44px !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--gray-300);
+  background: white;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.modern-input:focus {
+  border-color: #f472b6;
+  box-shadow: 0 0 0 4px rgba(244, 114, 182, 0.15);
+  outline: none;
 }
 
 /* Secondary Row (Toggles + Action) */
@@ -198,7 +233,8 @@
 }
 
 /* Mode Toggle - better stacking */
-.mode-toggle {
+/* Mode Toggle - better stacking */
+.filter-mode-toggle {
   display: flex;
   background: #e2e8f0;
   border-radius: 18px;
@@ -206,14 +242,16 @@
   gap: 2px;
   align-self: flex-start;
   /* Align left */
+  flex-wrap: wrap;
+  /* allow wrapping if very small */
 }
 
-.mode-btn {
+.filter-mode-btn {
   height: 28px;
-  padding: 0 12px;
+  padding: 0 10px;
   border-radius: 16px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 0.7rem;
+  font-weight: 600;
   border: none;
   background: transparent;
   color: var(--gray-600);
@@ -224,7 +262,7 @@
   white-space: nowrap;
 }
 
-.mode-btn.active {
+.filter-mode-btn.active {
   background: white;
   color: var(--primary);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -261,8 +299,12 @@
 
 /* Location text helpers */
 .location-text {
-  display: none !important;
-  /* Hide "o usar ubicación actual" to clean up UI, or make it an icon */
+  display: flex !important;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin-left: 8px;
+  white-space: nowrap;
 }
 
 .btn-search-address {

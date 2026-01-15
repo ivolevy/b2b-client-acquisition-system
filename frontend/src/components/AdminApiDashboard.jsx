@@ -102,6 +102,44 @@ const AdminApiDashboard = () => {
           {stats.forced_osm ? '⚡ Reactivar Google' : '🛡️ Forzar Modo Ahorro (OSM)'}
         </button>
       </div>
+
+      {stats.history && stats.history.length > 0 && (
+        <div className="usage-table-container">
+            <h4>Historial de Uso (Últimas peticiones)</h4>
+            <table className="usage-table">
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Tipo</th>
+                        <th>Detalle</th>
+                        <th>Costo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {stats.history.slice(0, 50).map((item, idx) => (
+                        <tr key={idx}>
+                            <td>{new Date(item.timestamp).toLocaleTimeString()}</td>
+                            <td>
+                                <span style={{
+                                    padding: '2px 6px', 
+                                    borderRadius: '4px', 
+                                    background: item.type === 'Text Search' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                                    color: item.type === 'Text Search' ? '#60a5fa' : '#34d399',
+                                    fontSize: '0.75rem'
+                                }}>
+                                    {item.type}
+                                </span>
+                            </td>
+                            <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.details}>
+                                {item.details}
+                            </td>
+                            <td className="cost-cell">${item.cost.toFixed(4)}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+      )}
     </div>
   );
 };

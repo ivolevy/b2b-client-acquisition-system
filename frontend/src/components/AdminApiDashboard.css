@@ -135,3 +135,55 @@
 .btn-enable:hover {
     background: rgba(16, 185, 129, 0.2);
 }
+
+/* Usage Table Styles */
+.usage-table-container {
+    background: #252525;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 24px;
+    overflow-x: auto;
+}
+
+.usage-table-container h4 {
+    margin: 0 0 16px 0;
+    color: #e0e0e0;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
+}
+
+.usage-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    color: #cccccc;
+}
+
+.usage-table th {
+    text-align: left;
+    padding: 8px 12px;
+    color: #888;
+    font-weight: 600;
+    border-bottom: 1px solid #444;
+}
+
+.usage-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #333;
+}
+
+.usage-table tr:last-child td {
+    border-bottom: none;
+}
+
+.cost-cell {
+    font-family: monospace;
+    font-weight: 600;
+    color: #eab308;
+    /* Yellow-ish */
+}
+
+.usage-table tr:hover {
+    background: #2a2a2a;
+}

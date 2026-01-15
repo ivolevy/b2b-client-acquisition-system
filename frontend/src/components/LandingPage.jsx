@@ -9,19 +9,30 @@ function LandingPage() {
   return (
     <div className="landing-page">
       {/* Navbar */}
+      {/* Navbar */}
       <nav className="landing-nav">
-        <div className="landing-logo">
-          <FaRocket style={{marginRight: '10px'}}/> Smart Leads
+        <div className="landing-nav-container">
+            <div className="landing-brand" onClick={() => navigate('/')}>
+               {/* Rocket Icon same as Navbar.jsx logic via CSS/SVG if needed, currently using FaRocket consistent with App */}
+               <FaRocket style={{color: 'white', fontSize: '1.2rem'}}/> 
+               <h1>Smart Leads</h1>
+            </div>
+
+            <div className="landing-nav-links">
+                <span className="nav-link" onClick={() => navigate('/')}>Inicio</span>
+                <span className="nav-link" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>Características</span>
+                <span className="nav-link" onClick={() => document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})}>Precios</span>
+            </div>
+
+            <button className="btn-login" onClick={() => navigate('/')}>
+               Iniciar Sesión
+            </button>
         </div>
-        <div className="landing-nav-links">
-          <span className="nav-link" onClick={() => navigate('/')}>Inicio</span>
-          <span className="nav-link" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>Características</span>
-          <span className="nav-link" onClick={() => document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})}>Precios</span>
-        </div>
-        <button className="btn-login" onClick={() => navigate('/')}>
-          Iniciar Sesión
-        </button>
       </nav>
+
+      {/* Visual Squares (Background Elements) */}
+      <div className="visual-square square-1" style={{'--rot': '-15deg'}}></div>
+      <div className="visual-square square-2" style={{'--rot': '10deg'}}></div>
 
       {/* Hero */}
       <header className="landing-hero">

@@ -57,12 +57,12 @@ class QuotaManager:
         # Verificar reset mensual
         self._check_monthly_reset()
 
-    def _init_usage_structure(self):
         return {
             "month": datetime.now().strftime("%Y-%m"),
             "total_cost": 0.0,
             "requests_count": 0,
-            "force_osm": False # Interruptor manual
+            "force_osm": False, # Interruptor manual
+            "history": [] # Lista de eventos {timestamp, type, cost, details}
         }
 
     def _check_monthly_reset(self):
@@ -73,7 +73,8 @@ class QuotaManager:
                 "month": current_month,
                 "total_cost": 0.0,
                 "requests_count": 0,
-                "force_osm": False
+                "force_osm": False,
+                "history": []
             }
             self._save_usage()
 
@@ -84,20 +85,33 @@ class QuotaManager:
         except Exception as e:
             logger.error(f"Error guardando quota usage: {e}")
 
-    def track_search(self, num_results: int = 20):
-        """Registra el costo de una búsqueda (Text Search)"""
-        # Google cobra por request de search (que devuelve hasta 20 results)
-        # Asumimos 1 request de search.
-        # Si luego pedimos detalles para CADA resultado, eso es aparte.
-        
-        self.usage_data["total_cost"] += COST_TEXT_SEARCH
-        self.usage_data["requests_count"] += 1
+    def _log_event(self, type_name: str, cost: float, details: str = ""):
+        """Registra un evento en el historial"""
+        event = {
+            "timestamp": datetime.now().isoformat(),
+            "type": type_name,
+            "cost": cost,
+            "details": details
+        }
+        # Mantener historial manejable (ej. ultimos 1000 eventos)
+        if "history" not in self.usage_data:
+            self.usage_data["history"] = []
+            
+        self.usage_data["history"].insert(0, event) # Cargar al principio (más reciente)
+        self.usage_data["history"] = self.usage_data["history"][:500] 
         self._save_usage()
 
-    def track_details(self, count: int = 1):
+    def track_search(self, query: str = "", num_results: int = 0):
+        """Registra el costo de una búsqueda (Text Search)"""
+        self.usage_data["total_cost"] += COST_TEXT_SEARCH
+        self.usage_data["requests_count"] += 1
+        self._log_event("Text Search", COST_TEXT_SEARCH, f"Query: {query} ({num_results} results)")
+
+    def track_details(self, count: int = 1, context: str = ""):
         """Registra el costo de obtener detalles (Place Details)"""
         cost = count * COST_PLACE_DETAILS
         self.usage_data["total_cost"] += cost
+        self._log_event("Place Details", cost, f"Fetched details for {count} places. {context}")
         self.usage_data["requests_count"] += count
         self._save_usage()
 
@@ -118,7 +132,8 @@ class QuotaManager:
             "limit": MONTHLY_BUDGET_LIMIT,
             "requests": self.usage_data["requests_count"],
             "mode": "OpenStreetMap" if not self.can_use_google() else "Google Places",
-            "forced_osm": self.usage_data.get("force_osm", False)
+            "forced_osm": self.usage_data.get("force_osm", False),
+            "history": self.usage_data.get("history", [])
         }
 
     def set_force_osm(self, enabled: bool):
