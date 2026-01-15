@@ -125,8 +125,9 @@
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: var(--gray-50);
-  border-color: var(--gray-400);
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger-dark);
   transform: translateY(-1px);
 }
 

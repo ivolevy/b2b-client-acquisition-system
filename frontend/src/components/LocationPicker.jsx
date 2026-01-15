@@ -583,12 +583,12 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
               errorDetails = 'Por favor, permite el acceso a tu ubicación en la configuración del navegador.';
               break;
             case err.POSITION_UNAVAILABLE:
-              errorMessage = 'Ubicación no disponible';
-              errorDetails = 'Tu ubicación no está disponible actualmente. Verifica que el GPS esté activado.';
+              errorMessage = 'Error al obtener ubicación';
+              errorDetails = 'Ubicación no disponible. Verifica tu conexión GPS.';
               break;
             case err.TIMEOUT:
-              errorMessage = 'Tiempo de espera agotado';
-              errorDetails = 'La solicitud de ubicación tardó demasiado. Intentá de nuevo o buscá una dirección manualmente.';
+              errorMessage = 'Error al obtener ubicación';
+              errorDetails = 'Ubicación no disponible. Verifica tu conexión GPS.';
               break;
             default:
               errorDetails = err.message || 'Error desconocido.';
@@ -597,7 +597,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
 
           error(
             <>
-              <strong>{errorMessage}</strong>
+              <strong>{errorMessage || 'Error al obtener ubicación'}</strong>
               {errorDetails && <p>{errorDetails}</p>}
             </>
           );
@@ -637,7 +637,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             id="address-input"
             type="text"
             className="address-input"
-            placeholder="Ej: Paseo de la Castellana 100, Madrid"
+            placeholder="Ej: Plaza de Mayo, Buenos Aires"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -668,9 +668,10 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
           </button>
-          <span className="location-text">
-            <span>o</span> <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>
-          </span>
+          <div className="location-inline-container">
+            <span className="or-text">o</span>
+            <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>
+          </div>
         </div>
         {isSearching && <div className="address-status">Buscando coincidencias...</div>}
 

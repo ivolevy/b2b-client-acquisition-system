@@ -499,7 +499,8 @@
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--gray-900);
+  background: var(--danger);
+  color: white;
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
@@ -511,8 +512,9 @@
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: var(--gray-900);
+  background: var(--danger);
   color: white;
+  border-color: var(--danger);
   transform: translateY(-2px);
 }
 
@@ -1250,7 +1252,7 @@ select.filter-input {
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1rem;
-  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: var(--radius-pill);

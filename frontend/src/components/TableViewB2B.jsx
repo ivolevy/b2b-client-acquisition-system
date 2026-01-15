@@ -27,7 +27,6 @@ function TableViewB2B({
 
   // Filtros instantáneos
   const [filtroRubro, setFiltroRubro] = useState('');
-  const [filtroCiudad, setFiltroCiudad] = useState('');
   const [filtroConEmail, setFiltroConEmail] = useState(false);
   const [filtroConTelefono, setFiltroConTelefono] = useState(false);
   const [filtroDistancia, setFiltroDistancia] = useState('');
@@ -74,12 +73,6 @@ function TableViewB2B({
       filtered = filtered.filter(e => e.rubro_key === filtroRubro);
     }
 
-    if (filtroCiudad) {
-      filtered = filtered.filter(e => 
-        e.ciudad && e.ciudad.toLowerCase().includes(filtroCiudad.toLowerCase())
-      );
-    }
-
     if (filtroConEmail) {
       filtered = filtered.filter(e => e.email && e.email.trim() !== '');
     }
@@ -118,7 +111,7 @@ function TableViewB2B({
     }
 
     return filtered;
-  }, [empresas, filtroRubro, filtroCiudad, filtroConEmail, filtroConTelefono, filtroDistancia, filtroDistanciaOperador, filtroConRedes]);
+  }, [empresas, filtroRubro, filtroConEmail, filtroConTelefono, filtroDistancia, filtroDistanciaOperador, filtroConRedes]);
 
   // Ordenamiento
   const empresasOrdenadas = useMemo(() => {
@@ -161,7 +154,7 @@ function TableViewB2B({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [empresas, sortBy, filtroRubro, filtroCiudad, filtroConEmail, filtroConTelefono, filtroDistancia, filtroDistanciaOperador, filtroConRedes]);
+  }, [empresas, sortBy, filtroRubro, filtroConEmail, filtroConTelefono, filtroDistancia, filtroDistanciaOperador, filtroConRedes]);
 
   const handleSort = (column) => {
     // Permitir ordenar por distancia a todos los usuarios
@@ -189,7 +182,6 @@ function TableViewB2B({
 
   const handleLimpiarFiltros = () => {
     setFiltroRubro('');
-    setFiltroCiudad('');
     setFiltroConEmail(false);
     setFiltroConTelefono(false);
     setFiltroDistancia('');
@@ -197,7 +189,7 @@ function TableViewB2B({
     setFiltroConRedes('todas');
   };
 
-  const hayFiltrosActivos = filtroRubro || filtroCiudad || filtroConEmail || filtroConTelefono || filtroDistancia || filtroConRedes !== 'todas';
+  const hayFiltrosActivos = filtroRubro || filtroConEmail || filtroConTelefono || filtroDistancia || filtroConRedes !== 'todas';
 
     return (
     <div className="unified-results-module" ref={tableContainerRef}>
@@ -385,13 +377,7 @@ function TableViewB2B({
           )}
         </div>
         
-        <input
-          type="text"
-          placeholder="Ciudad..."
-          value={filtroCiudad}
-          onChange={(e) => setFiltroCiudad(e.target.value)}
-          className="filter-inline-input filter-city"
-        />
+        {/* El filtro por ciudad ha sido eliminado según requerimiento */}
 
         <div className="filter-distance-group">
           <div className="filter-distance-toggle">

@@ -514,3 +514,33 @@
     font-size: 0.7rem;
   }
 }
+.location-inline-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  gap: 2px;
+}
+
+.or-text {
+  font-size: 0.7rem;
+  color: var(--gray-500);
+  line-height: 1;
+}
+
+.btn-location-inline {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+  text-decoration: underline;
+}
+
+.btn-location-inline:hover {
+  color: var(--primary-dark);
+}
