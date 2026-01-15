@@ -290,9 +290,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
             </div>
           </div>
 
-          <div className="hint-row">
-            <span> Busca empresas, valida email/teléfono y extrae redes (Instagram, Facebook, LinkedIn, etc.).</span>
-          </div>
+
         </form>
       </div>
 

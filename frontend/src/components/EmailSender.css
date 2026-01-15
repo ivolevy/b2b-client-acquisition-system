@@ -24,7 +24,7 @@
   bottom: 0;
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(4px);
-  z-index: 9999;
+  z-index: 100001;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -38,7 +38,7 @@
   height: 85vh;
   /* Reduced vertical space */
   background: var(--es-surface);
-  border-radius: 12px;
+  border-radius: 0 0 12px 12px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
@@ -67,8 +67,8 @@
   justify-content: space-between;
   border-bottom: 1px solid var(--es-border);
   background: var(--es-surface);
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .email-sender-header h2 {

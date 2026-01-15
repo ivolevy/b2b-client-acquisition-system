@@ -2069,6 +2069,38 @@ async def delete_account(request: Request):
         raise HTTPException(status_code=500, detail=f"Error del servidor: {str(e)}")
 
 
+class AdminDeleteUserRequest(BaseModel):
+    user_id: str
+
+@app.post("/admin/delete-user")
+async def admin_delete_user(request: AdminDeleteUserRequest):
+    """
+    Endpoint administrativo para eliminar usuarios TOTALMENTE (Auth + DB)
+    Esto permite reutilizar el email.
+    """
+    try:
+        if not request.user_id:
+             raise HTTPException(status_code=400, detail="ID de usuario requerido")
+
+        # Ejecutar eliminación total (DB + Auth)
+        result = eliminar_usuario_totalmente(request.user_id)
+        
+        if result.get("success"):
+            return {
+                "success": True, 
+                "message": "Usuario eliminado permanentemente (Auth + Datos)"
+            }
+        else:
+            # Si falla, devolvemos error 500
+            raise HTTPException(status_code=500, detail=result.get("error", "Error desconocido"))
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error en /admin/delete-user: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 class AdminCreateUserRequest(BaseModel):
     email: str
     password: str
