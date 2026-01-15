@@ -57,6 +57,7 @@ class QuotaManager:
         # Verificar reset mensual
         self._check_monthly_reset()
 
+    def _init_usage_structure(self):
         return {
             "month": datetime.now().strftime("%Y-%m"),
             "total_cost": 0.0,
