@@ -16,6 +16,7 @@ const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
 const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'));
 const AdminPromoCodes = lazy(() => import('./components/admin/AdminPromoCodes'));
+const AdminApiDashboard = lazy(() => import('./components/AdminApiDashboard'));
 const LandingPage = lazy(() => import('./components/LandingPage'));
 
 // Contexto de autenticación

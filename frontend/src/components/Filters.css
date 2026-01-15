@@ -146,7 +146,8 @@
 .filters-row-compact {
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: stretch;
+  /* Stretch cards to equal height */
   flex-wrap: wrap;
   padding-top: 16px;
   border-top: 1px solid var(--gray-100);
@@ -154,142 +155,108 @@
 
 /* Option Cards (Toggles) - simplified */
 .option-card {
-  flex: 1 1 200px;
+  flex: 1 1 240px;
+  /* Increased min-width to prevent squishing */
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  /* Stack header and control */
+  justify-content: center;
+  gap: 8px;
+  /* Space between title and switch */
   background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: 8px;
-  padding: 8px 12px;
-  min-width: 200px;
-  height: 42px;
-  /* Match inputs if possible, or auto */
+  padding: 10px 14px;
+  min-height: 52px;
+  /* Sufficient height */
+  height: auto;
 }
 
 .option-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .option-title {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--gray-700);
-}
-
-.status-badge {
-  display: none;
-  /* Hide badges for cleaner look, or style minimally */
-}
-
-.option-desc {
-  display: none;
-  /* Hide description for compact look */
-}
-
-/* Switches */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 36px;
-  height: 20px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #cbd5e1;
-  transition: .4s;
-  border-radius: 34px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked+.slider {
-  background-color: #f472b6;
-  /* Pink accent */
-}
-
-input:checked+.slider:before {
-  transform: translateX(16px);
-}
-
-/* Action Button */
-.option-actions {
-  margin-left: auto;
-}
-
-.btn-cta {
-  height: 42px;
-  padding: 0 24px;
-  border-radius: 21px;
-  /* Pill shape */
-  font-weight: 600;
-  background: #f472b6;
-  /* Pink */
-  color: white;
-  border: none;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   white-space: nowrap;
-  box-shadow: 0 4px 6px -1px rgba(244, 114, 182, 0.3);
 }
 
-.btn-cta:hover:not(:disabled) {
-  background: #ec4899;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 8px -1px rgba(244, 114, 182, 0.4);
+/* Hide or restyle badge to avoid clutter */
+.status-badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: #64758b;
+  display: inline-block;
+  /* Show it if clean */
 }
 
-.btn-cta:disabled {
-  background: var(--gray-300);
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
-/* Mode Toggle */
+/* Mode Toggle - better stacking */
 .mode-toggle {
-  background: transparent;
-  border: none;
-  padding: 0;
-  gap: 4px;
+  display: flex;
+  background: #e2e8f0;
+  border-radius: 18px;
+  padding: 2px;
+  gap: 2px;
+  align-self: flex-start;
+  /* Align left */
 }
 
 .mode-btn {
-  height: 32px;
+  height: 28px;
   padding: 0 12px;
   border-radius: 16px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .mode-btn.active {
-  background: var(--gray-900);
-  color: white;
+  background: white;
+  color: var(--primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Action Button Container */
+.option-actions {
+  flex: 0 0 auto;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+/* Fix for mobile/tablet where it might still look squashed */
+@media (max-width: 1024px) {
+  .filters-row-compact {
+    justify-content: stretch;
+  }
+
+  .option-card {
+    flex: 1 1 45%;
+    /* 2 per row */
+  }
+
+  .option-actions {
+    flex: 1 1 100%;
+    margin-top: 8px;
+  }
+
+  .btn-cta {
+    width: 100%;
+  }
 }
 
 /* Location text helpers */
