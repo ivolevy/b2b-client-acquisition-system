@@ -1,10 +1,329 @@
+/* Modern Filter Styles */
 .filters-container {
   margin-bottom: var(--spacing-xl);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
   width: 100%;
 }
+
+.filter-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--gray-100);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section-header-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header-with-action h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+/* Layout Principal */
+.form-row-compact {
+  display: flex;
+  align-items: stretch;
+  /* Stretch to match heights */
+  gap: 12px;
+  /* Uniform gap */
+  flex-wrap: wrap;
+  border: none;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  margin-bottom: 16px;
+}
+
+/* Make rubro and controls sit side by side cleanly */
+.form-row-compact>.form-group-compact,
+.form-row-compact>.rubro-inline {
+  flex: 1 1 200px;
+  /* Grow and shrink, basis 200px */
+  padding: 0;
+  border: none;
+  background: transparent;
+  min-width: 200px;
+}
+
+.form-row-compact>.form-group-compact::after,
+.form-row-compact>.rubro-inline::after {
+  display: none;
+  /* Remove ugly separators */
+}
+
+/* Search Row Integration (Radius + Address) */
+.search-row {
+  display: contents;
+  /* Let children participate in the main grid/flex */
+}
+
+.form-row-compact .search-row {
+  flex: 2 1 400px;
+  display: flex;
+  gap: 12px;
+}
+
+.radius-control {
+  flex: 0 0 140px;
+  /* Fixed width for radius */
+  padding: 0;
+  margin: 0;
+}
+
+.radius-control::after {
+  display: none;
+}
+
+.address-search {
+  flex: 1 1 300px;
+  /* Address takes remaining space */
+  padding: 0;
+  margin: 0;
+  min-width: 250px;
+}
+
+/* Labels */
+.form-group-compact label,
+.rubro-inline label,
+.radius-label,
+.address-search label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  margin-bottom: 6px;
+  height: auto;
+}
+
+/* Unified Input Styles */
+.select-rubro-compact,
+.form-row-compact .radius-control select,
+.form-row-compact .address-input {
+  width: 100%;
+  height: 42px !important;
+  /* Unified Height */
+  padding: 0 12px;
+  font-size: 0.9rem;
+  line-height: normal;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  /* Consistent Radius */
+  background-color: white !important;
+  color: var(--gray-900) !important;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.form-row-compact .address-input {
+  /* Fix specific overrides from previous CSS */
+  background-image: none !important;
+  margin: 0;
+}
+
+/* Focus States */
+.select-rubro-compact:focus,
+.form-row-compact .radius-control select:focus,
+.form-row-compact .address-input:focus {
+  outline: none;
+  border-color: #f472b6;
+  /* Pink accent matching landing page/dota theme vibe if desired, or var(--primary) */
+  box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2);
+}
+
+/* Secondary Row (Toggles + Action) */
+.filters-row-compact {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-100);
+}
+
+/* Option Cards (Toggles) - simplified */
+.option-card {
+  flex: 1 1 200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 200px;
+  height: 42px;
+  /* Match inputs if possible, or auto */
+}
+
+.option-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.option-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.status-badge {
+  display: none;
+  /* Hide badges for cleaner look, or style minimally */
+}
+
+.option-desc {
+  display: none;
+  /* Hide description for compact look */
+}
+
+/* Switches */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked+.slider {
+  background-color: #f472b6;
+  /* Pink accent */
+}
+
+input:checked+.slider:before {
+  transform: translateX(16px);
+}
+
+/* Action Button */
+.option-actions {
+  margin-left: auto;
+}
+
+.btn-cta {
+  height: 42px;
+  padding: 0 24px;
+  border-radius: 21px;
+  /* Pill shape */
+  font-weight: 600;
+  background: #f472b6;
+  /* Pink */
+  color: white;
+  border: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-shadow: 0 4px 6px -1px rgba(244, 114, 182, 0.3);
+}
+
+.btn-cta:hover:not(:disabled) {
+  background: #ec4899;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px rgba(244, 114, 182, 0.4);
+}
+
+.btn-cta:disabled {
+  background: var(--gray-300);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Mode Toggle */
+.mode-toggle {
+  background: transparent;
+  border: none;
+  padding: 0;
+  gap: 4px;
+}
+
+.mode-btn {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+}
+
+.mode-btn.active {
+  background: var(--gray-900);
+  color: white;
+}
+
+/* Location text helpers */
+.location-text {
+  display: none !important;
+  /* Hide "o usar ubicación actual" to clean up UI, or make it an icon */
+}
+
+.btn-search-address {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-search-address:hover {
+  color: var(--primary);
+}
+
+/* Checkbox group from old css just in case */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 
 .filter-section {
   background: white;

@@ -11,15 +11,15 @@ function LandingPage() {
       {/* Navbar */}
       <nav className="landing-nav">
         <div className="landing-logo">
-          dôta
+          <FaRocket style={{marginRight: '10px'}}/> Smart Leads
         </div>
         <div className="landing-nav-links">
-          <span className="nav-link" onClick={() => navigate('/')}>Home</span>
-          <span className="nav-link" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>Services</span>
-          <span className="nav-link" onClick={() => document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})}>Contact</span>
+          <span className="nav-link" onClick={() => navigate('/')}>Inicio</span>
+          <span className="nav-link" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>Características</span>
+          <span className="nav-link" onClick={() => document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})}>Precios</span>
         </div>
         <button className="btn-login" onClick={() => navigate('/')}>
-          Let's work together
+          Iniciar Sesión
         </button>
       </nav>
 
@@ -27,35 +27,38 @@ function LandingPage() {
       <header className="landing-hero">
         <div className="hero-content">
           <h1 className="hero-title">
-            Building scalable <br/>
-            <em>digital solutions</em>
+            Convierte Google Maps en tu <br/>
+            <em>Base de Datos</em>
           </h1>
           <p className="hero-subtitle">
-            Custom software that cuts costs, boosts revenue, and automates workflows. See measurable ROI in weeks, not years.
+            Encuentra empresas en cualquier zona, extrae sus datos de contacto verificados y envíales propuestas comerciales en piloto automático.
           </p>
           
           <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '10px'}}>
-             <span style={{color: '#f472b6', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'}} onClick={() => navigate('/')}>
-                Work with Dota <FaArrowRight size={12}/>
+             <button className="btn-cta-primary" onClick={() => navigate('/')}>
+                Comenzar Ahora <FaArrowRight />
+             </button>
+             <span style={{color: '#f472b6', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px'}} onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>
+                Ver cómo funciona <FaArrowRight size={12}/>
              </span>
           </div>
 
           <div className="stats-row">
              <div className="stat-card">
-                <div className="stat-number">+19</div>
-                <div className="stat-label">Projects delivered</div>
+                <div className="stat-number">+1M</div>
+                <div className="stat-label">Empresas Indexadas</div>
              </div>
              <div className="stat-card">
-                <div className="stat-number">+2</div>
-                <div className="stat-label">Years of experience</div>
+                <div className="stat-number">98%</div>
+                <div className="stat-label">Precisión de Datos</div>
              </div>
              <div className="stat-card">
-                <div className="stat-number">24/7</div>
-                <div className="stat-label">Technical support</div>
+                <div className="stat-number">10x</div>
+                <div className="stat-label">Más Ventas</div>
              </div>
              <div className="stat-card">
-                 <div className="stat-number">+3</div>
-                 <div className="stat-label">Countries reached</div>
+                 <div className="stat-number">24/7</div>
+                 <div className="stat-label">Prospección Auto</div>
              </div>
           </div>
         </div>
@@ -64,29 +67,29 @@ function LandingPage() {
       {/* Features */}
       <section id="features" className="landing-features">
         <div className="section-header">
-           <h2 className="section-title">AI-powered throughout the entire process</h2>
-           <p className="section-desc">We leverage artificial intelligence at every stage of development to deliver smarter, faster, and more efficient solutions.</p>
+           <h2 className="section-title">Todo lo que necesitas para vender más</h2>
+           <p className="section-desc">Una suite completa de inteligencia comercial y automatización de ventas B2B.</p>
         </div>
 
         <div className="features-grid">
           <div className="feature-card">
-            <h3 className="feature-title">Reduce operational costs</h3>
+            <h3 className="feature-title"><FaMapMarkedAlt style={{color: '#f472b6', marginRight: '8px'}}/> Búsqueda Geolocalizada</h3>
             <p className="feature-text">
-              Automate repetitive tasks and eliminate manual processes. Cut overhead by up to 60% while improving accuracy and speed.
+              Dibuja un radio en el mapa y detecta todas las empresas de un rubro específico. Accede a negocios que no sabías que existían en tu zona objetivo.
             </p>
           </div>
 
           <div className="feature-card">
-            <h3 className="feature-title">Increase revenue</h3>
+             <h3 className="feature-title"><FaSearch style={{color: '#f472b6', marginRight: '8px'}}/> Enriquecimiento de Datos</h3>
             <p className="feature-text">
-              Streamline sales processes, improve customer experience, and unlock new revenue streams. See measurable growth in your bottom line.
+              Automáticamente buscamos emails, teléfonos, Instagram, Facebook y LinkedIn de cada empresa detectada para que tengas múltiples puntos de contacto.
             </p>
           </div>
 
           <div className="feature-card">
-            <h3 className="feature-title">Fast ROI</h3>
+             <h3 className="feature-title"><FaPaperPlane style={{color: '#f472b6', marginRight: '8px'}}/> Email Marketing</h3>
             <p className="feature-text">
-              Our solutions pay for themselves quickly. Most clients see positive ROI within the first quarter, with ongoing savings year after year.
+              Envía correos personalizados masivos desde tu propia cuenta de Gmail. Usa plantillas profesionales y trackea aperturas y respuestas.
             </p>
           </div>
         </div>
@@ -95,15 +98,15 @@ function LandingPage() {
       {/* Pricing / Contact */}
       <section id="pricing" className="pricing-section">
          <div className="pricing-box">
-             <h2 className="section-title" style={{fontSize: '2.5rem', marginBottom: '20px'}}>Ready to scale?</h2>
+             <h2 className="section-title" style={{fontSize: '2.5rem', marginBottom: '20px'}}>¿Listo para escalar?</h2>
              <p className="pricing-cta-text">
-                 Stop wasting time on manual outreach. Start automating your client acquisition today.
+                 Deja de perder tiempo buscando clientes manualmente. Automatiza tu adquisición hoy mismo.
                  <br/><br/>
-                 Contact an administrator to get your <strong>Free Trial</strong> account.
+                 Contacta a un administrador para activar tu <strong>Prueba Gratuita</strong>.
              </p>
              
              <button className="btn-cta-primary" onClick={() => window.location.href = 'mailto:admin@smartleads.com'}>
-                 Let's work together <FaArrowRight />
+                 Solicitar Cuenta <FaArrowRight />
              </button>
          </div>
       </section>
@@ -111,14 +114,16 @@ function LandingPage() {
       {/* Footer */}
       <footer className="footer-dota">
          <div style={{marginBottom: '40px'}}>
-             <h2 style={{fontSize: '2rem', fontFamily: 'Playfair Display', marginBottom: '20px'}}>dôta</h2>
+             <h2 style={{fontSize: '2rem', fontFamily: 'Playfair Display', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'}}>
+                <FaRocket color="#f472b6"/> Smart Leads
+             </h2>
              <div style={{display: 'flex', justifyContent: 'center', gap: '20px'}}>
-                 <span style={{cursor: 'pointer'}}>Legal Notice</span>
-                 <span style={{cursor: 'pointer'}}>Privacy Policy</span>
-                 <span style={{cursor: 'pointer'}}>Cookies</span>
+                 <span style={{cursor: 'pointer'}}>Términos</span>
+                 <span style={{cursor: 'pointer'}}>Privacidad</span>
+                 <span style={{cursor: 'pointer'}}>Soporte</span>
              </div>
          </div>
-        <p>© 2026 dota solutions. All rights reserved.</p>
+        <p>© 2026 Smart Leads. Todos los derechos reservados.</p>
       </footer>
     </div>
   );
