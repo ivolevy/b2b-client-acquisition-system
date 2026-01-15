@@ -7,6 +7,9 @@
   overflow: hidden;
   max-width: 1200px;
   margin: 2rem auto;
+  overscroll-behavior: none;
+  touch-action: pan-y;
+  /* Prevent horizontal swipe/drag */
 }
 
 .user-profile-header {
@@ -1185,96 +1188,91 @@
 
 /* Account Plan Card */
 .account-plan-card-new {
-  margin-top: 2rem;
-  padding: 2.5rem;
-  background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%);
-  border: 1px solid #fbcfe8;
-  border-radius: var(--radius-xl);
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #fff5f8 0%, #ffffff 100%);
+  border: 1px solid #fce4ec;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  box-shadow: 0 4px 15px rgba(233, 30, 99, 0.05);
-}
-
-.plan-card-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  justify-content: center;
+  /* Center horizontally if width-fit */
+  gap: 1.25rem;
+  box-shadow: 0 2px 8px rgba(233, 30, 99, 0.04);
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .plan-card-subtitle {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #db2777;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #e91e63;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.25rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  opacity: 0.8;
 }
 
-.plan-card-title-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.plan-badge-large {
+.plan-badge-small {
   display: inline-flex;
   align-items: center;
-  padding: 0.6rem 1.75rem;
+  padding: 0.35rem 0.85rem;
   border-radius: var(--radius-pill);
   font-weight: 800;
-  font-size: 1.25rem;
+  font-size: 0.75rem;
   letter-spacing: 0.02em;
 }
 
-.plan-badge-large.pro {
+.plan-badge-small.pro {
   background: #e91e63;
   color: white;
-  box-shadow: 0 8px 20px rgba(233, 30, 99, 0.3);
 }
 
-.plan-badge-large.free {
+.plan-badge-small.free {
   background: var(--gray-200);
   color: var(--gray-600);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.btn-upgrade-pro {
+.plan-card-actions {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+}
+
+.btn-upgrade-pro-compact {
   background: #e91e63;
   color: white;
   border: none;
-  padding: 1rem 2rem;
-  border-radius: var(--radius-lg);
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 25px rgba(233, 30, 99, 0.3);
-}
-
-.btn-upgrade-pro:hover {
-  background: #c2185b;
-  transform: translateY(-3px);
-  box-shadow: 0 15px 30px rgba(233, 30, 99, 0.4);
-}
-
-.btn-cancel-plan {
-  background: white;
-  color: var(--gray-700);
-  border: 1px solid var(--gray-300);
-  padding: 1rem 2rem;
-  border-radius: var(--radius-lg);
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.8125rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.btn-cancel-plan:hover {
+.btn-upgrade-pro-compact:hover {
+  background: #c2185b;
+  transform: translateY(-1px);
+}
+
+.btn-cancel-plan-compact {
+  background: white;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-300);
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel-plan-compact:hover {
   background: var(--gray-50);
-  border-color: var(--gray-400);
   color: var(--gray-900);
+  border-color: var(--gray-400);
 }
 
 .profile-inline-link {

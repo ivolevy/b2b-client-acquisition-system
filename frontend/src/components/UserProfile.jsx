@@ -4,6 +4,7 @@ import { useAuth } from '../AuthWrapper';
 import { authService, supabase } from '../lib/supabase';
 import { API_URL } from '../config';
 import axios from 'axios';
+import { useToast } from '../hooks/useToast';
 import './UserProfile.css';
 
 function UserProfile() {
@@ -28,6 +29,7 @@ function UserProfile() {
     confirmPassword: ''
   });
   const [passwordStep, setPasswordStep] = useState('request'); // 'request', 'verify', 'change'
+  const { success: toastSuccess, error: toastError, warning: toastWarning } = useToast();
   const [verificationCode, setVerificationCode] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
@@ -129,7 +131,7 @@ function UserProfile() {
         rubro_keys: selectedRubros
       });
       if (response.data.success) {
-        alert('Preferencias de rubros guardadas correctamente.');
+        toastSuccess('Preferencias de rubros guardadas correctamente.');
       }
     } catch (err) {
       console.error('Error saving rubros:', err);
@@ -617,25 +619,21 @@ function UserProfile() {
 
               {user?.role !== 'admin' && (
                 <div className="account-plan-card-new">
-                  <div className="plan-card-header">
-                    <span className="plan-card-subtitle">Plan actual</span>
-                    <div className="plan-card-title-row">
-                      <span className={`plan-badge-large ${user?.plan || 'free'}`}>
-                        {user?.plan === 'pro' ? 'PRO' : 'Free'}
-                      </span>
-                    </div>
-                  </div>
+                  <span className="plan-card-subtitle">Plan actual</span>
+                  <span className={`plan-badge-small ${user?.plan || 'free'}`}>
+                    {user?.plan === 'pro' ? 'PRO' : 'Free'}
+                  </span>
                   <div className="plan-card-actions">
                     {user?.plan !== 'pro' ? (
                       <button 
-                        className="btn-upgrade-pro"
+                        className="btn-upgrade-pro-compact"
                         onClick={() => setShowUpgradeModal(true)}
                       >
                         Pasar a PRO
                       </button>
                     ) : (
                       <button 
-                        className="btn-cancel-plan"
+                        className="btn-cancel-plan-compact"
                         onClick={() => setShowCancelPlanModal(true)}
                       >
                         Gestionar suscripción

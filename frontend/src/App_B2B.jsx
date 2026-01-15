@@ -157,7 +157,7 @@ function AppB2B() {
     }
     loadRubros();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Solo ejecutar una vez al montar
+  }, [user?.id]); // Ejecutar al montar y cuando el usuario esté listo
 
   // Persistir estado en sessionStorage cuando cambia
   useEffect(() => {
