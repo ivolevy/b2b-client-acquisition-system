@@ -617,8 +617,8 @@ function AppB2B() {
 
       autoTable(doc, {
         head: [['Empresa', 'Rubro', 'Teléfono', 'Email', 'Ciudad', 'Estado']],
-        body: tableData,
-        startY: 30,
+        body: tableRows,
+        startY: 45,
         styles: { fontSize: 8, cellPadding: 2 },
         headStyles: { fillColor: [233, 30, 99] }, // Pink color matching theme
         alternateRowStyles: { fillColor: [245, 245, 245] },

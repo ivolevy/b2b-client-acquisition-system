@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FaEye, FaTimes } from 'react-icons/fa';
 import ToastContainer from './ToastContainer';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../AuthWrapper';
@@ -28,8 +29,10 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [loading, setLoading] = useState(false);
   const [modo, setModo] = useState('individual'); // 'individual' | 'masivo'
   const [activeTab, setActiveTab] = useState('enviar'); // 'enviar' | 'templates'
+
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [previewEmpresa, setPreviewEmpresa] = useState(null);
   const [gmailStatus, setGmailStatus] = useState({ connected: false, loading: true });
   
   const { user } = useAuth();
@@ -371,11 +374,19 @@ function EmailSender({ empresas, onClose, embedded = false }) {
                        checked={isSelected}
                        readOnly
                      />
-                     <div className="row-info">
+                       <div className="row-info">
                        <span className="row-name">{emp.nombre}</span>
                        <span className="row-email">{emp.email}</span>
                        <span className="row-badge">{emp.rubro}</span>
                      </div>
+                     <button 
+                       className="preview-btn-icon"
+                       style={{background:'none', border:'none', cursor:'pointer', color:'#94a3b8', padding:'4px', marginLeft:'auto'}}
+                       onClick={(e) => { e.stopPropagation(); setPreviewEmpresa(emp); }}
+                       title="Ver vista previa"
+                     >
+                        <FaEye />
+                     </button>
                    </div>
                  );
                })}
@@ -423,6 +434,46 @@ function EmailSender({ empresas, onClose, embedded = false }) {
               <div style={{display:'flex', gap:'12px', marginTop:'24px'}}>
                  <button className="btn-primary-block" style={{background:'#f1f5f9', color:'#475569'}} onClick={() => setShowConfirmModal(false)}>Cancelar</button>
                  <button className="btn-primary-block" onClick={confirmSend}>Confirmar</button>
+              </div>
+           </div>
+        </div>
+      )}
+
+
+
+      {previewEmpresa && (
+        <div className="email-sender-overlay" style={{zIndex: 1200}} onClick={() => setPreviewEmpresa(null)}>
+           <div className="email-sender-modal" style={{maxWidth:'700px', height:'auto', maxHeight:'90vh'}} onClick={e => e.stopPropagation()}>
+              <div className="email-sender-header">
+                 <h2>Vista Previa: {previewEmpresa.nombre}</h2>
+                 <button className="close-btn" onClick={() => setPreviewEmpresa(null)}>×</button>
+              </div>
+              <div style={{padding:'24px', overflowY:'auto'}}>
+                 {!selectedTemplate ? (
+                    <div style={{textAlign:'center', color:'#64748b', padding:'40px'}}>
+                       Selecciona un template para ver la vista previa.
+                    </div>
+                 ) : (
+                    (() => {
+                       const preview = generatePreview(previewEmpresa);
+                       if (!preview) return null;
+                       return (
+                          <div>
+                             <div style={{marginBottom:'16px', borderBottom:'1px solid #e2e8f0', paddingBottom:'12px'}}>
+                                <div style={{fontSize:'13px', color:'#64748b', marginBottom:'4px'}}>Asunto:</div>
+                                <div style={{fontWeight:'600', fontSize:'15px'}}>{preview.subject}</div>
+                             </div>
+                             <div 
+                               style={{background:'#f8fafc', padding:'24px', borderRadius:'8px', border:'1px solid #e2e8f0'}}
+                               dangerouslySetInnerHTML={{__html: preview.body}} 
+                             />
+                          </div>
+                       );
+                    })()
+                 )}
+              </div>
+              <div style={{padding:'16px 24px', borderTop:'1px solid #e2e8f0', display:'flex', justifyContent:'flex-end'}}>
+                 <button className="btn-secondary" onClick={() => setPreviewEmpresa(null)}>Cerrar</button>
               </div>
            </div>
         </div>
