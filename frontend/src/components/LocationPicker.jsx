@@ -255,6 +255,33 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleMapClickFromMap = async (latlng) => {
+    try {
+      // Notificar selección inmediata de coordenadas
+      handleLocationSelect(latlng, null);
+      
+      // Intentar obtener nombre de la dirección (Reverse Geocoding)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&addressdetails=1`,
+        {
+          headers: {
+            'Accept-Language': 'es',
+            'User-Agent': 'b2b-client-acquisition-system/1.0'
+          }
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        const nombre = data.display_name || `Ubicación (${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)})`;
+        setSearchQuery(nombre);
+        handleLocationSelect(latlng, nombre);
+      }
+    } catch (error) {
+      console.error('Error en reverse geocoding:', error);
+    }
+  };
+
   const handleLocationSelect = (latlng, ubicacionNombre = null) => {
     setSelectedLocation(latlng);
     
@@ -720,7 +747,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           
           <MapUpdater center={mapCenter} zoom={selectedLocation ? 15 : 12} />
           
-          <MapClickHandler onLocationSelect={handleLocationSelect} />
+          <MapClickHandler onLocationSelect={handleMapClickFromMap} />
           
           {selectedLocation && (
             <>

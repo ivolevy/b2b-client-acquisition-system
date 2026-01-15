@@ -662,7 +662,7 @@ function UserProfile() {
               ) : (
                 <div className="rubros-selection-wrapper">
                   <div className="rubros-modern-grid">
-                    {Object.entries(availableRubros).map(([key, info]) => (
+                    {Object.entries(availableRubros).map(([key, nombre]) => (
                       <div 
                         key={key} 
                         className={`rubro-selection-card ${selectedRubros.includes(key) ? 'selected' : ''}`}
@@ -675,7 +675,7 @@ function UserProfile() {
                             </svg>
                           )}
                         </div>
-                        <span className="rubro-card-name">{info.nombre}</span>
+                        <span className="rubro-card-name">{nombre}</span>
                       </div>
                     ))}
                   </div>

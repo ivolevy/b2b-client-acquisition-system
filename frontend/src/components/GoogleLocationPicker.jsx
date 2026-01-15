@@ -173,9 +173,24 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     if (event.latLng) {
       const lat = event.latLng.lat();
       const lng = event.latLng.lng();
-      handleLocationSelect(lat, lng, null);
+      
+      // Intentar obtener dirección por reverse geocoding
+      if (isLoaded && window.google?.maps?.Geocoder) {
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            const nombre = results[0].formatted_address;
+            setSearchQuery(nombre);
+            handleLocationSelect(lat, lng, nombre);
+          } else {
+            handleLocationSelect(lat, lng, null);
+          }
+        });
+      } else {
+        handleLocationSelect(lat, lng, null);
+      }
     }
-  }, [handleLocationSelect]);
+  }, [handleLocationSelect, isLoaded]);
 
   const handleRadiusChange = (newRadius) => {
     setRadius(newRadius);
