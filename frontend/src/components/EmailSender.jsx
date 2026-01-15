@@ -29,6 +29,8 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [loading, setLoading] = useState(false);
   const [modo, setModo] = useState('individual'); // 'individual' | 'masivo'
   const [activeTab, setActiveTab] = useState('enviar'); // 'enviar' | 'templates'
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -332,7 +334,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
               </select>
             </div>
             
-            <div className="config-group" style={{marginTop: 'auto'}}>
+            <div className="config-group">
                <div className="selection-info" style={{marginBottom: '10px'}}>
                  Seleccionadas: <strong>{selectedEmpresas.length}</strong>
                </div>
@@ -359,37 +361,68 @@ function EmailSender({ empresas, onClose, embedded = false }) {
              
              <div className="recipients-list">
                {empresas.length === 0 && <div className="empty-placeholder">No hay empresas en la lista.</div>}
-               {empresas.map(emp => {
-                 if (!emp.email) return null; // Solo mostrar con email
-                 const isSelected = selectedEmpresas.some(e => e.id === emp.id);
+               {(() => {
+                 const validEmpresas = empresas.filter(e => e.email);
+                 const totalPages = Math.ceil(validEmpresas.length / itemsPerPage);
+                 const currentData = validEmpresas.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
                  return (
-                   <div 
-                     key={emp.id} 
-                     className={`recipient-row ${isSelected ? 'selected' : ''}`}
-                     onClick={() => handleToggleEmpresa(emp)}
-                   >
-                     <input 
-                       type="checkbox" 
-                       className="row-check"
-                       checked={isSelected}
-                       readOnly
-                     />
-                       <div className="row-info">
-                       <span className="row-name">{emp.nombre}</span>
-                       <span className="row-email">{emp.email}</span>
-                       <span className="row-badge">{emp.rubro}</span>
-                     </div>
-                     <button 
-                       className="preview-btn-icon"
-                       style={{background:'none', border:'none', cursor:'pointer', color:'#94a3b8', padding:'4px', marginLeft:'auto'}}
-                       onClick={(e) => { e.stopPropagation(); setPreviewEmpresa(emp); }}
-                       title="Ver vista previa"
-                     >
-                        <FaEye />
-                     </button>
-                   </div>
+                    <>
+                       {currentData.map(emp => {
+                         const isSelected = selectedEmpresas.some(e => e.id === emp.id);
+                         return (
+                           <div 
+                             key={emp.id} 
+                             className={`recipient-row ${isSelected ? 'selected' : ''}`}
+                             onClick={() => handleToggleEmpresa(emp)}
+                           >
+                             <input 
+                               type="checkbox" 
+                               className="row-check"
+                               checked={isSelected}
+                               readOnly
+                             />
+                               <div className="row-info">
+                               <span className="row-name">{emp.nombre}</span>
+                               <span className="row-email">{emp.email}</span>
+                               <span className="row-badge">{emp.rubro}</span>
+                             </div>
+                             <button 
+                               className="preview-btn-icon"
+                               style={{background:'none', border:'none', cursor:'pointer', color:'#94a3b8', padding:'4px', marginLeft:'auto'}}
+                               onClick={(e) => { e.stopPropagation(); setPreviewEmpresa(emp); }}
+                               title="Ver vista previa"
+                             >
+                                <FaEye />
+                             </button>
+                           </div>
+                         );
+                       })}
+                       
+                       {totalPages > 1 && (
+                          <div style={{display:'flex', justifyContent:'center', padding:'16px', gap:'12px', borderTop:'1px solid #e2e8f0'}}>
+                             <button 
+                                className="btn-secondary" 
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                             >
+                                Anterior
+                             </button>
+                             <span style={{fontSize:'14px', alignSelf:'center'}}>
+                                Página {currentPage} de {totalPages}
+                             </span>
+                             <button 
+                                className="btn-secondary" 
+                                disabled={currentPage === totalPages}
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                             >
+                                Siguiente
+                             </button>
+                          </div>
+                       )}
+                    </>
                  );
-               })}
+               })()}
              </div>
           </div>
         </div>
@@ -516,9 +549,9 @@ function TemplateEditor({ template, onSave, onCancel, embedded = false }) {
   const variables = ['{nombre_empresa}', '{rubro}', '{ciudad}', '{direccion}', '{website}'];
 
   return (
-    <div className={embedded ? "email-sender-embedded" : "email-sender-overlay"} style={{alignItems:'flex-start', paddingTop: embedded?0:'40px'}}>
-       <div className="email-sender-modal" style={{height: embedded?'100%':'auto', maxHeight:'90vh', width:'100%', maxWidth: '1000px'}} onClick={e => e.stopPropagation()}>
-          <div className="email-sender-header" style={{gap:'16px', justifyContent:'flex-start'}}>
+    <div className={embedded ? "email-sender-embedded" : "email-sender-overlay"} style={{alignItems:'flex-start', padding: embedded?0:0, background: embedded?'transparent':'#f8fafc', zIndex: 99999}}>
+       <div className="email-sender-modal" style={{height: '100%', maxHeight:'none', width:'100%', maxWidth: 'none', borderRadius: 0, border: 'none', display:'flex', flexDirection:'column'}} onClick={e => e.stopPropagation()}>
+          <div className="email-sender-header" style={{gap:'16px', justifyContent:'flex-start', borderRadius: 0}}>
              <button className="btn-text" onClick={onCancel} style={{fontSize:'16px', display:'flex', alignItems:'center', color:'#64748b'}}>
                 <FaArrowLeft />
              </button>
