@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaMapMarkedAlt, FaPaperPlane, FaSearch, FaCheckCircle, FaRocket, FaCheck } from 'react-icons/fa';
+import { FaMapMarkedAlt, FaPlane, FaSearch, FaCheckCircle, FaRocket, FaCheck, FaDatabase, FaBolt, FaGlobeAmericas } from 'react-icons/fa';
 import './LandingPage.css';
 
 function LandingPage() {
@@ -11,76 +11,100 @@ function LandingPage() {
       {/* Navbar Floating Pill */}
       <nav className="landing-nav">
         <div className="landing-logo">
-          <FaRocket /> Smart Leads
+          <FaBolt /> Smart Leads
         </div>
         <div className="landing-nav-links">
-          <span className="nav-link" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>Características</span>
-          <span className="nav-link" onClick={() => document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})}>Precios</span>
+          <span className="nav-link" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>Features</span>
+          <span className="nav-link" onClick={() => document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})}>Pricing</span>
+          <span className="nav-link" onClick={() => window.location.href = 'mailto:support@smartleads.com'}>Support</span>
         </div>
         <button className="btn-login-nav" onClick={() => navigate('/')}>
-          Iniciar Sesión
+          Login
         </button>
       </nav>
 
-      {/* Hero */}
+      {/* Hero Section */}
       <header className="landing-hero">
         <div className="hero-content">
-          <span className="hero-badge">Sistema B2B de Adquisición de Clientes</span>
+          <div className="hero-badge">
+            <span className="badge-dot"></span>
+            v2.0 Now Available
+          </div>
           <h1 className="hero-title">
-            Linkea empresas y contáctalas <br/>
-            <span>Masivamente para vender más</span>
+            Turn Google Maps into your<br/>
+            <span>Client Database</span>
           </h1>
           <p className="hero-subtitle">
-            Transforma Google Maps en tu base de datos. Extrae contactos verificados y automatiza tu alcance en frío con un solo clic.
+            Extract verified B2B leads, enrich data with social profiles, and automate your cold outreach—all from a single, beautiful interface.
           </p>
           <div className="hero-cta-group">
             <button className="btn-cta-primary" onClick={() => navigate('/')}>
-              Comenzar Prueba Gratis
+              Start for free
             </button>
-            <button className="btn-cta-secondary" onClick={() => document.getElementById('how-it-works').scrollIntoView({behavior: 'smooth'})}>
-              Ver Demo
+            <button className="btn-cta-secondary" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>
+              How it works
             </button>
           </div>
         </div>
       </header>
 
-      {/* Features */}
+      {/* Bento Grid Features */}
       <section id="features" className="landing-features">
         <div className="section-header">
-          <h2 className="section-title">Potencia tu equipo de ventas</h2>
-          <p className="section-desc">Todo lo que necesitas para escalar tu prospección outbound.</p>
+          <h2 className="section-title">Everything you need to grow</h2>
+          <p className="section-desc">Powerful tools designed for modern sales teams.</p>
         </div>
 
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon"><FaMapMarkedAlt /></div>
-            <h3 className="feature-title">Geolocalización Precisa</h3>
-            <p className="feature-text">
-              Dibuja un radio en el mapa y detecta todas las empresas de tu nicho. Accede a negocios locales que no sabías que existían.
+        <div className="bento-grid">
+          {/* Main Feature - Wide */}
+          <div className="bento-card wide">
+            <div className="card-icon"><FaGlobeAmericas /></div>
+            <h3 className="card-title">Global Geolocation Search</h3>
+            <p className="card-text">
+              Draw a radius anywhere in the world and identify every business in your niche. 
+              Our integration with Google Places ensures 99.9% accuracy for local businesses.
             </p>
           </div>
 
-          <div className="feature-card">
-            <div className="feature-icon"><FaSearch /></div>
-            <h3 className="feature-title">Enriquecimiento de Datos</h3>
-            <p className="feature-text">
-              Obtén emails, teléfonos, Instagram, Facebook y LinkedIn de cada empresa. Datos frescos y actualizados al instante.
+          {/* Feature - Vertical */}
+          <div className="bento-card tall">
+            <div className="card-icon"><FaDatabase /></div>
+            <h3 className="card-title">Data Enrichment</h3>
+            <p className="card-text">
+              We don't just find names. We find:
+              <br/><br/>
+              • Direct Emails<br/>
+              • Phone Numbers<br/>
+              • LinkedIn Profiles<br/>
+              • Instagram Handles<br/>
+              • Website Technology
             </p>
           </div>
 
-          <div className="feature-card">
-            <div className="feature-icon"><FaCheckCircle /></div>
-            <h3 className="feature-title">Validación de Emails</h3>
-            <p className="feature-text">
-              Filtramos automáticamente correos inválidos para proteger tu reputación de dominio y asegurar entregabilidad.
+          {/* Feature - Standard */}
+          <div className="bento-card">
+            <div className="card-icon"><FaCheckCircle /></div>
+            <h3 className="card-title">Verified Contacts</h3>
+            <p className="card-text">
+              Stop bouncing. Our real-time validation engine tests every email before you send.
             </p>
           </div>
 
-          <div className="feature-card">
-            <div className="feature-icon"><FaPaperPlane /></div>
-            <h3 className="feature-title">Campañas Masivas</h3>
-            <p className="feature-text">
-              Envía correos personalizados a cientos de prospectos simultáneamente usando plantillas pre-definidas.
+          {/* Feature - Standard */}
+          <div className="bento-card">
+            <div className="card-icon"><FaRocket /></div>
+            <h3 className="card-title">Bulk Sender</h3>
+            <p className="card-text">
+              Launch campaigns to 1,000+ prospects with persistent personalized templates.
+            </p>
+          </div>
+
+          {/* Feature - Wide */}
+          <div className="bento-card wide">
+            <div className="card-icon"><FaBolt /></div>
+            <h3 className="card-title">Instant Export</h3>
+             <p className="card-text">
+              Push your leads directly to your CRM or download as CSV/Excel compatible with Apollo, Instantly, and more.
             </p>
           </div>
         </div>
@@ -88,52 +112,60 @@ function LandingPage() {
 
       {/* Pricing Section */}
       <section id="pricing" className="landing-pricing">
-        <div className="pricing-header">
-           <h2 className="section-title">Planes Simples</h2>
-           <p className="section-desc">Comienza gratis y escala cuando lo necesites.</p>
-        </div>
-
         <div className="pricing-grid">
           {/* Free Plan */}
-          <div className="pricing-card">
+          <div className="pricing-card starter">
             <div className="pricing-header">
-              <h3 className="pricing-title">Free Trial</h3>
-              <div className="pricing-price">$0</div>
-              <p className="pricing-period">Para siempre (limitado)</p>
+              <h3 className="plan-name">Starter</h3>
+              <div className="price-container">
+                <span className="price">$0</span>
+                <span className="period">/mo</span>
+              </div>
+              <p className="period">Perfect for testing the waters</p>
             </div>
             <ul className="pricing-features">
-              <li className="pricing-feature"><FaCheck className="pricing-check" /> 5 Búsquedas diarias</li>
-              <li className="pricing-feature"><FaCheck className="pricing-check" /> 50 Leads por búsqueda</li>
-              <li className="pricing-feature"><FaCheck className="pricing-check" /> Validación básica</li>
-              <li className="pricing-feature"><FaCheck className="pricing-check" /> Envío de emails manual</li>
+              <li className="pricing-feature"><FaCheck /> 5 Daily Searches</li>
+              <li className="pricing-feature"><FaCheck /> 50 Leads per search</li>
+              <li className="pricing-feature"><FaCheck /> Basic Validation</li>
+              <li className="pricing-feature"><FaCheck /> Manual Email Support</li>
             </ul>
-            <button className="btn-pricing outline" onClick={() => navigate('/')}>Empezar Gratis</button>
+            <button className="btn-pricing outline" onClick={() => navigate('/')}>Get Started</button>
           </div>
 
           {/* Pro Plan */}
           <div className="pricing-card pro">
-            <span className="pricing-badge">Recomendado</span>
             <div className="pricing-header">
-              <h3 className="pricing-title">Pro System</h3>
-              <div className="pricing-price">$49<span style={{fontSize: '1rem', color: '#94a3b8'}}>/mo</span></div>
-              <p className="pricing-period">Facturado anualmente</p>
+              <h3 className="plan-name" style={{color: '#60A5FA'}}>Pro System</h3>
+              <div className="price-container">
+                <span className="price">$49</span>
+                <span className="period">/mo</span>
+              </div>
+              <p className="period">billed annually</p>
             </div>
             <ul className="pricing-features">
-              <li className="pricing-feature"><FaCheck className="pricing-check" /> Búsquedas Ilimitadas</li>
-              <li className="pricing-feature"><FaCheck className="pricing-check" /> Leads Ilimitados</li>
-              <li className="pricing-feature"><FaCheck className="pricing-check" /> Enriquecimiento de Redes Sociales</li>
-              <li className="pricing-feature"><FaCheck className="pricing-check" /> Validación avanzada de emails</li>
-              <li className="pricing-feature"><FaCheck className="pricing-check" /> Envíos Masivos (Bulk Sender)</li>
-              <li className="pricing-feature"><FaCheck className="pricing-check" /> Soporte Prioritario</li>
+              <li className="pricing-feature"><FaCheck /> Unlimited Searches</li>
+              <li className="pricing-feature"><FaCheck /> Unlimited Leads</li>
+              <li className="pricing-feature"><FaCheck /> Social Media Enrichment</li>
+              <li className="pricing-feature"><FaCheck /> Advanced Email Validation</li>
+              <li className="pricing-feature"><FaCheck /> Automated Bulk Sending</li>
+              <li className="pricing-feature"><FaCheck /> Priority Support</li>
             </ul>
-            <button className="btn-pricing solid" onClick={() => window.location.href = 'mailto:admin@smartleads.com'}>Contactar Ventas</button>
+            <button className="btn-pricing glow" onClick={() => window.location.href = 'mailto:sales@smartleads.com'}>Contact Sales</button>
           </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="landing-footer">
-        <p>© 2026 Smart Leads. Todos los derechos reservados.</p>
+        <div className="footer-content">
+          <div>
+            <div className="footer-logo">Smart Leads</div>
+            <p className="footer-copy">© 2026 Smart Leads Inc.</p>
+          </div>
+          <div className="footer-copy">
+            Privacy Policy • Terms of Service
+          </div>
+        </div>
       </footer>
     </div>
   );
