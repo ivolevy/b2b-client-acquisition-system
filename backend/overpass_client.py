@@ -5,12 +5,29 @@ Enfocado en captación de clientes, no en propiedades por zona
 
 import requests
 import logging
+import time
 from typing import List, Dict, Optional
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+TIMEOUT_SECONDS = 90  # Aumentado a 90s
+MAX_RETRIES = 3
+
+def _get_session_with_retries():
+    """Configura una sesión de requests con lógica de reintento"""
+    session = requests.Session()
+    retries = Retry(
+        total=MAX_RETRIES,
+        backoff_factor=2,  # Espera exponencial: 2s, 4s, 8s...
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["POST"]
+    )
+    session.mount('https://', HTTPAdapter(max_retries=retries))
+    return session
 
 def _construir_direccion_completa(calle: str, numero: str) -> str:
     """
@@ -286,7 +303,7 @@ def buscar_empresas_por_rubro(
             query_parts.append(f'way[name~"{kw}", i]{area_suffix};')
     
     query = f"""
-    [out:json][timeout:30];
+    [out:json][timeout:{TIMEOUT_SECONDS}];
     {area_filter}
     (
       {' '.join(query_parts)}
@@ -303,15 +320,18 @@ def buscar_empresas_por_rubro(
         else:
             logger.info("Búsqueda global (sin filtro geográfico)")
         
-        response = requests.post(
+        session = _get_session_with_retries()
+        
+        response = session.post(
             OVERPASS_URL,
             data=query,
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            timeout=60
+            timeout=TIMEOUT_SECONDS
         )
         
         if response.status_code != 200:
             logger.error(f"Error en Overpass API: {response.status_code}")
+            logger.error(f"Respuesta: {response.text[:500]}") # Loguear primeros 500 chars del error
             return []
         
         data = response.json()
@@ -319,6 +339,9 @@ def buscar_empresas_por_rubro(
         
         logger.info(f"Se encontraron {len(elements)} empresas")
         
+        if len(elements) == 0:
+            logger.warning(f"Consulta sin resultados. Query enviada:\n{query}")
+
         empresas = []
         for element in elements:
             tags_elem = element.get('tags', {})
@@ -361,10 +384,12 @@ def buscar_empresas_por_rubro(
         return empresas
         
     except requests.exceptions.Timeout:
-        logger.error("Timeout en consulta a Overpass API")
+        logger.error(f"Timeout ({TIMEOUT_SECONDS}s) en consulta a Overpass API después de {MAX_RETRIES} intentos")
         return []
     except Exception as e:
         logger.error(f"Error en búsqueda de empresas: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         return []
 
 def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limite: int = 100) -> List[Dict]:
@@ -405,7 +430,7 @@ def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limi
             query_parts.append(f'way[name~"{kw}", i]({bbox});')
     
     query = f"""
-    [out:json][timeout:60];
+    [out:json][timeout:{TIMEOUT_SECONDS}];
     (
       {' '.join(query_parts)}
     );
@@ -416,15 +441,18 @@ def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limi
         logger.info(f" Búsqueda por bbox: {bbox}")
         logger.info(f" Rubro: {rubro_info['nombre']}")
         
-        response = requests.post(
+        session = _get_session_with_retries()
+        
+        response = session.post(
             OVERPASS_URL,
             data=query,
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            timeout=60
+            timeout=TIMEOUT_SECONDS
         )
         
         if response.status_code != 200:
             logger.error(f"Error en Overpass API: {response.status_code}")
+            logger.error(f"Respuesta: {response.text[:500]}")
             return []
         
         data = response.json()
@@ -432,6 +460,9 @@ def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limi
         
         logger.info(f" Se encontraron {len(elements)} empresas en el área")
         
+        if len(elements) == 0:
+            logger.warning(f"Consulta bbox sin resultados. Query:\n{query}")
+
         empresas = []
         for element in elements:
             tags_elem = element.get('tags', {})
@@ -474,10 +505,12 @@ def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limi
         return empresas
         
     except requests.exceptions.Timeout:
-        logger.error("Timeout en consulta a Overpass API")
+        logger.error(f"Timeout en consulta por bbox después de {MAX_RETRIES} intentos")
         return []
     except Exception as e:
         logger.error(f"Error en búsqueda por bbox: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         return []
 
 def buscar_empresas_multiples_rubros(
