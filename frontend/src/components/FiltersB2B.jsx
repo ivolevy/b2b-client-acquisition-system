@@ -195,13 +195,15 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
 
           <div className="filters-row-compact">
             <div className="option-card">
-              <div className="option-head">
-                <div className="option-title">Extraer redes sociales</div>
-                <div className={`status-badge ${scrapearWebsites ? 'success' : 'off'}`}>
-                  {scrapearWebsites ? 'Activo' : 'Inactivo'}
+                <div className="option-info">
+                  <div className="option-head">
+                    <div className="option-title">Extraer redes sociales</div>
+                    <div className={`status-badge ${scrapearWebsites ? 'success' : 'off'}`}>
+                      {scrapearWebsites ? 'Activo' : 'Inactivo'}
+                    </div>
+                  </div>
+                  <div className="option-desc">Si la empresa tiene sitio web, intentaremos obtener Instagram, LinkedIn, etc.</div>
                 </div>
-              </div>
-              <div className="option-desc">Si la empresa tiene sitio web, intentaremos obtener Instagram, LinkedIn, etc.</div>
               <label className="switch">
                 <input
                   type="checkbox"
@@ -214,13 +216,15 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
             </div>
 
             <div className="option-card">
-              <div className="option-head">
-                <div className="option-title">Solo con contacto válido</div>
-                <div className={`status-badge ${soloValidadas ? 'warn' : 'info'}`}>
-                  {soloValidadas ? 'Menos resultados' : 'Más resultados'}
+                <div className="option-info">
+                  <div className="option-head">
+                    <div className="option-title">Solo con contacto válido</div>
+                    <div className={`status-badge ${soloValidadas ? 'warn' : 'info'}`}>
+                      {soloValidadas ? 'Menos resultados' : 'Más resultados'}
+                    </div>
+                  </div>
+                  <div className="option-desc">Filtra los resultados a empresas con email o teléfono válido.</div>
                 </div>
-              </div>
-              <div className="option-desc">Filtra los resultados a empresas con email o teléfono válido.</div>
               <label className="switch">
                 <input
                   type="checkbox"
@@ -234,17 +238,19 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
 
             {/* Selector de modo de búsqueda */}
             <div className="option-card">
-              <div className="option-head">
-                <div className="option-title">Modo de búsqueda</div>
-                <div className={`status-badge ${modoBusqueda === 'nueva' ? 'info' : 'success'}`}>
-                  {modoBusqueda === 'nueva' ? 'Reemplazar' : 'Acumular'}
+                <div className="option-info">
+                  <div className="option-head">
+                    <div className="option-title">Modo de búsqueda</div>
+                    <div className={`status-badge ${modoBusqueda === 'nueva' ? 'info' : 'success'}`}>
+                      {modoBusqueda === 'nueva' ? 'Reemplazar' : 'Acumular'}
+                    </div>
+                  </div>
+                  <div className="option-desc">
+                    {modoBusqueda === 'nueva' 
+                      ? 'Limpia resultados anteriores antes de buscar.' 
+                      : 'Agrega los nuevos resultados a los existentes.'}
+                  </div>
                 </div>
-              </div>
-              <div className="option-desc">
-                {modoBusqueda === 'nueva' 
-                  ? 'Limpia resultados anteriores antes de buscar.' 
-                  : 'Agrega los nuevos resultados a los existentes.'}
-              </div>
               <div className="mode-toggle">
                 <button 
                   type="button"

@@ -203,12 +203,10 @@ function AppB2B() {
               }
             });
             setRubros(filteredRubros);
-          } else if (selected_rubros && Array.isArray(selected_rubros)) {
-            // Si la lista existe pero está vacía, el usuario deseleccionó TODO.
-            // En este caso, mostramos un objeto vacío para que no aparezca nada en el dropdown.
-            setRubros({});
           } else {
-            // Si es null o undefined (primera vez), mostrar todos.
+            // Si selected_rubros es null, undefined o una lista VACÍA [],
+            // mostramos todos los rubros. Esto soluciona el problema de los
+            // nuevos usuarios que veían la lista vacía.
             setRubros(all_rubros || {});
           }
           return;
