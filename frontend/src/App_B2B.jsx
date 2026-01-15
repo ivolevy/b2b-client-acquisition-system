@@ -13,7 +13,7 @@ import ProBackground from './components/ProBackground';
 import { ToastContainer as ReactToastifyContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { useToast } from './hooks/useToast';
 import { useAuth } from './AuthWrapper';
 import { searchHistoryService } from './lib/supabase';
@@ -615,13 +615,14 @@ function AppB2B() {
         empresa.validada ? 'Validada' : 'Pendiente'
       ]);
 
-      doc.autoTable({
-        head: [tableColumn],
-        body: tableRows,
-        startY: 45,
-        theme: 'grid',
+      autoTable(doc, {
+        head: [['Empresa', 'Rubro', 'Teléfono', 'Email', 'Ciudad', 'Estado']],
+        body: tableData,
+        startY: 30,
         styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [102, 126, 234] } // #667eea
+        headStyles: { fillColor: [233, 30, 99] }, // Pink color matching theme
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        theme: 'grid'
       });
 
       doc.save(filename);
