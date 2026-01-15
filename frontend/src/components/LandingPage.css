@@ -1,14 +1,16 @@
-/* Landing Page Styles */
+/* Landing Page Styles - Dota Inspired */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
 :root {
-    --lp-bg-dark: #0f172a;
-    --lp-bg-card: #1e293b;
-    --lp-primary: #3b82f6;
-    /* Blue-500 */
-    --lp-accent: #f43f5e;
-    /* Rose-500 */
-    --lp-text-main: #f8fafc;
-    --lp-text-muted: #94a3b8;
-    --lp-gradient-hero: linear-gradient(135deg, #0f172a 0%, #172554 100%);
+    --lp-bg-dark: #000000;
+    --lp-bg-card: #0a0a0a;
+    --lp-primary: #f472b6;
+    /* Pink-400 */
+    --lp-primary-hover: #ec4899;
+    /* Pink-500 */
+    --lp-text-main: #ffffff;
+    --lp-text-muted: #9ca3af;
+    --lp-gradient-hero: radial-gradient(circle at 50% 0%, #1a0510 0%, #000000 60%);
 }
 
 .landing-page {
@@ -29,30 +31,35 @@
     top: 0;
     left: 0;
     right: 0;
-    z-index: 10;
+    z-index: 50;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .landing-logo {
-    font-size: 1.5rem;
-    font-weight: 800;
-    background: linear-gradient(to right, #60a5fa, #a78bfa);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: white;
     display: flex;
     align-items: center;
     gap: 10px;
+    letter-spacing: -0.02em;
 }
 
 .landing-nav-links {
     display: flex;
-    gap: 32px;
+    gap: 40px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .nav-link {
     color: var(--lp-text-muted);
     text-decoration: none;
     font-weight: 500;
+    font-size: 0.95rem;
     transition: color 0.2s;
     cursor: pointer;
 }
@@ -64,267 +71,247 @@
 .btn-login {
     padding: 10px 24px;
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 99px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
     color: white;
     text-decoration: none;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 500;
     transition: all 0.2s;
 }
 
 .btn-login:hover {
     background: white;
-    color: var(--lp-bg-dark);
+    color: black;
 }
 
 /* Hero Section */
 .landing-hero {
-    padding: 160px 24px 100px;
+    padding: 200px 24px 120px;
     text-align: center;
     background: var(--lp-gradient-hero);
     position: relative;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Pink glow effect behind hero code/content */
+.landing-hero::before {
+    content: '';
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(244, 114, 182, 0.15) 0%, transparent 70%);
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .hero-content {
-    max-width: 1000px;
+    max-width: 800px;
     margin: 0 auto;
     position: relative;
     z-index: 2;
 }
 
-.hero-badge {
-    display: inline-block;
-    padding: 6px 16px;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 99px;
-    color: #60a5fa;
-    font-size: 0.875rem;
-    font-weight: 500;
-    margin-bottom: 32px;
-}
-
 .hero-title {
-    font-size: 4.5rem;
-    line-height: 1.1;
-    font-weight: 800;
-    margin-bottom: 24px;
-    letter-spacing: -0.02em;
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    line-height: 1;
+    font-weight: 400;
+    margin-bottom: 32px;
+    letter-spacing: -0.03em;
 }
 
-.hero-title span {
-    color: #60a5fa;
+.hero-title em {
+    font-style: italic;
+    font-weight: 400;
 }
 
 .hero-subtitle {
     font-size: 1.25rem;
     color: var(--lp-text-muted);
     max-width: 600px;
-    margin: 0 auto 48px;
+    margin: 0 auto 56px;
     line-height: 1.6;
-}
-
-.hero-cta-group {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
+    font-weight: 300;
 }
 
 .btn-cta-primary {
-    padding: 16px 32px;
-    background: #3b82f6;
-    color: white;
+    padding: 16px 40px;
+    background: var(--lp-primary);
+    color: black;
+    /* Contrast on pink */
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 999px;
     font-weight: 600;
-    font-size: 1.125rem;
-    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn-cta-primary:hover {
-    background: #2563eb;
+    background: var(--lp-primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 10px 30px -10px rgba(244, 114, 182, 0.4);
 }
 
-.btn-cta-secondary {
-    padding: 16px 32px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1.125rem;
-    transition: background 0.2s;
-}
-
-.btn-cta-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* Features Section */
+/* Features/Services Section */
 .landing-features {
-    padding: 100px 24px;
-    background: #0b1120;
-}
-
-.section-header {
-    text-align: center;
-    margin-bottom: 80px;
+    padding: 120px 24px;
+    background: #000;
 }
 
 .section-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 16px;
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 400;
+    margin-bottom: 24px;
+    text-align: center;
 }
 
 .section-desc {
     color: var(--lp-text-muted);
     font-size: 1.125rem;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 80px;
 }
 
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 32px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .feature-card {
-    background: var(--lp-bg-card);
-    padding: 40px;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: transform 0.3s;
+    background: #0a0a0a;
+    padding: 48px 32px;
+    border-radius: 8px;
+    border: 1px solid #222;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
 }
 
 .feature-card:hover {
+    border-color: #333;
     transform: translateY(-5px);
-    border-color: rgba(59, 130, 246, 0.3);
-}
-
-.feature-icon {
-    width: 56px;
-    height: 56px;
-    background: rgba(59, 130, 246, 0.1);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #60a5fa;
-    font-size: 1.5rem;
-    margin-bottom: 24px;
 }
 
 .feature-title {
     font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 12px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    font-family: 'Inter', sans-serif;
 }
 
 .feature-text {
-    color: var(--lp-text-muted);
-    line-height: 1.6;
+    color: #888;
+    line-height: 1.7;
+    font-size: 1rem;
 }
 
-/* How it Works */
-.landing-steps {
-    padding: 100px 24px;
-    background: var(--lp-bg-dark);
-}
-
-.steps-container {
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-.step-row {
+/* Stats Row */
+.stats-row {
     display: flex;
-    align-items: center;
-    gap: 60px;
-    margin-bottom: 80px;
-}
-
-.step-row.reverse {
-    flex-direction: row-reverse;
-}
-
-.step-image {
-    flex: 1;
-    background: var(--lp-bg-card);
-    border-radius: 16px;
-    height: 300px;
-    /* Placeholder for screenshot */
-    display: flex;
-    align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    overflow: hidden;
-    position: relative;
+    gap: 24px;
+    margin-top: 80px;
+    flex-wrap: wrap;
 }
 
-.step-content {
+.stat-card {
+    background: linear-gradient(135deg, #f9a8d4 0%, #f472b6 100%);
+    padding: 40px 30px;
+    border-radius: 12px;
+    text-align: center;
+    color: black;
+    min-width: 200px;
     flex: 1;
+    max-width: 280px;
 }
 
-.step-number {
-    font-size: 4rem;
-    font-weight: 800;
-    color: rgba(255, 255, 255, 0.05);
+.stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-style: italic;
+    margin-bottom: 8px;
     line-height: 1;
-    margin-bottom: 16px;
 }
 
-.step-title {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 16px;
+.stat-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
 }
 
-.step-desc {
-    color: var(--lp-text-muted);
-    font-size: 1.125rem;
+/* Pricing / CTA Section */
+.pricing-section {
+    padding: 120px 24px;
+    text-align: center;
+    background: #000;
+    border-top: 1px solid #111;
+}
+
+.pricing-box {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #0a0a0a;
+    border: 1px solid #222;
+    padding: 60px;
+    border-radius: 20px;
+}
+
+.pricing-cta-text {
+    font-size: 1.25rem;
+    color: #ccc;
+    margin-bottom: 40px;
     line-height: 1.6;
 }
 
-/* Footer */
-.landing-footer {
+.footer-dota {
     padding: 60px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
     text-align: center;
-    color: var(--lp-text-muted);
+    border-top: 1px solid #111;
+    color: #444;
+    font-size: 0.9rem;
 }
 
-/* Utilities */
-.text-gradient {
-    background: linear-gradient(to right, #60a5fa, #a78bfa);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-@media (max-width: 768px) {
-    .hero-title {
-        font-size: 3rem;
-    }
-
-    .step-row,
-    .step-row.reverse {
-        flex-direction: column;
-        text-align: center;
-        gap: 32px;
-    }
-
-    .landing-nav {
-        padding: 24px;
-    }
-
+/* Mobile */
+@media (max-width: 860px) {
     .landing-nav-links {
         display: none;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-card {
+        width: 100%;
+        max-width: 100%;
     }
 }
