@@ -378,12 +378,19 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
-# CORS - Configuración completa para deshabilitar políticas restrictivas
-# IMPORTANTE: Deshabilitamos credenciales y permitimos TODO (*) para evitar problemas en Vercel
+# CORS - Configuración para producción y desarrollo
+origins = [
+    "http://localhost:5173",
+    "http://localhost:8000",
+    "https://b2b-smart-leads.vercel.app", # Frontend Production
+    "https://b2b-client-acquisition-system-4u9f.vercel.app", # Backend Production
+    "https://b2b-client-acquisition-system.vercel.app" # Alias potential
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
@@ -399,13 +406,22 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code,
         content={"detail": exc.detail}
     )
-    # Forzar headers CORS por si acaso el middleware falló antes
-    response.headers["Access-Control-Allow-Origin"] = "*"
+    # Reflejar origen si está permitido
+    origin = request.headers.get("origin")
+    if origin in origins:
+       response.headers["Access-Control-Allow-Origin"] = origin
+       response.headers["Access-Control-Allow-Credentials"] = "true"
+    else:
+       response.headers["Access-Control-Allow-Origin"] = "*"
+       
     response.headers["Access-Control-Allow-Methods"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
-# Exception handler global para asegurar que CORS siempre se incluya
+# Forzar headers CORS por si acaso el middleware falló antes
+# (Esto se aplica en el return del handler, redundante pero seguro)
+
+# Exception handler global
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Maneja cualquier error no controlado"""
@@ -420,11 +436,15 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
     
     # Agregar headers CORS manualmente
-    origin = request.headers.get("origin", "*")
-    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
+    origin = request.headers.get("origin")
+    if origin in origins:
+       response.headers["Access-Control-Allow-Origin"] = origin
+       response.headers["Access-Control-Allow-Credentials"] = "true"
+    else:
+       response.headers["Access-Control-Allow-Origin"] = "*"
+
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-    response.headers["Access-Control-Allow-Credentials"] = "false"
     
     return response
 
