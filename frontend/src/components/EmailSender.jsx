@@ -454,7 +454,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
       )}
 
       {showConfirmModal && (
-        <div className="email-sender-overlay" style={{zIndex: 1100}}>
+        <div className="email-sender-overlay" style={{zIndex: 20000}}>
            <div style={{background:'white', padding:'32px', borderRadius:'12px', width:'400px'}}>
               <h3 style={{margin:'0 0 16px 0'}}>Confirmar Envío</h3>
               <p>Vas a enviar <strong>{selectedEmpresas.length}</strong> correos.</p>
@@ -475,7 +475,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
 
 
       {previewEmpresa && (
-        <div className="email-sender-overlay" style={{zIndex: 1200}} onClick={() => setPreviewEmpresa(null)}>
+        <div className="email-sender-overlay" style={{zIndex: 30000}} onClick={() => setPreviewEmpresa(null)}>
            <div className="email-sender-modal" style={{maxWidth:'700px', height:'auto', maxHeight:'90vh'}} onClick={e => e.stopPropagation()}>
               <div className="email-sender-header">
                  <h2>Vista Previa: {previewEmpresa.nombre}</h2>
@@ -549,7 +549,7 @@ function TemplateEditor({ template, onSave, onCancel, embedded = false }) {
   const variables = ['{nombre_empresa}', '{rubro}', '{ciudad}', '{direccion}', '{website}'];
 
   return (
-    <div className={embedded ? "email-sender-embedded" : "email-sender-overlay"} style={{alignItems:'flex-start', padding: embedded?0:0, background: embedded?'transparent':'#f8fafc', zIndex: 99999}}>
+    <div className={embedded ? "email-sender-embedded" : "email-sender-overlay"} style={{alignItems:'flex-start', padding: embedded?0:0, background: embedded?'transparent':'#f8fafc', zIndex: 40000}}>
        <div className="email-sender-modal" style={{height: '100%', maxHeight:'none', width:'100%', maxWidth: 'none', borderRadius: 0, border: 'none', display:'flex', flexDirection:'column'}} onClick={e => e.stopPropagation()}>
           <div className="email-sender-header" style={{gap:'16px', justifyContent:'flex-start', borderRadius: 0}}>
              <button className="btn-text" onClick={onCancel} style={{fontSize:'16px', display:'flex', alignItems:'center', color:'#64748b'}}>

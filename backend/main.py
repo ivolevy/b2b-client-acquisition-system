@@ -108,22 +108,35 @@ def get_memoria_codigos():
     global _memoria_codigos_validacion
     return _memoria_codigos_validacion
 
-def update_search_progress(task_id, current, total):
-    """Actualiza el progreso de una búsqueda globalmente"""
+def update_search_progress(task_id, current, total, phase="scraping"):
+    """
+    Actualiza el progreso de una búsqueda globalmente con soporte de fases
+    Phases:
+      - searching: 0 - 15%
+      - scraping: 15 - 85%
+      - finalizing: 85 - 100%
+    """
     if not task_id:
         return
         
     global SEARCH_PROGRESS
     
-    # Calcular porcentaje (validación toma 80% del tiempo total, búsqueda y otros 20%)
-    # Aquí estamos en la fase de scraping/validación
-    # Mapeamos 0-100 del scraping a 10-90 del proceso total
+    if phase == "searching":
+        percent = int((current / (total or 1)) * 15)
+        msg = "Buscando prospectos en el área..."
+    elif phase == "scraping":
+        percent = 15 + int((current / (total or 1)) * 70)
+        msg = f"Rastreando sitios web ({current}/{total})..."
+    else: # finalizing
+        percent = 85 + int((current / (total or 1)) * 15)
+        msg = f"Finalizando y validando ({current}/{total})..."
     
-    percent = int((current / total) * 80) + 10
+    # Asegurar que no pasamos de 100 ni bajamos de 0
+    percent = max(0, min(100, percent))
     
     SEARCH_PROGRESS[task_id] = {
         "progress": percent,
-        "message": f"Validando empresas ({current}/{total})..."
+        "message": msg
     }
 
 
@@ -662,10 +675,8 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         # Actualizar progreso: Encontradas
         if request.task_id:
-            SEARCH_PROGRESS[request.task_id] = {
-                "progress": 10,
-                "message": f"Encontradas {len(empresas)} empresas. Iniciando validación..."
-            }
+            update_search_progress(request.task_id, 1, 1, phase="searching")
+            SEARCH_PROGRESS[request.task_id]["message"] = f"Encontradas {len(empresas)} empresas. Iniciando enriquecimiento..."
 
         logger.info(f" Encontradas {len(empresas)} empresas en OSM")
         
@@ -682,7 +693,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     enriquecer_empresas_paralelo,
                     empresas=empresas,
                     timeout_por_empresa=20,
-                    progress_callback=lambda current, total: update_search_progress(request.task_id, current, total)
+                    progress_callback=lambda current, total: update_search_progress(request.task_id, current, total, phase="scraping")
                 )
                 
                 # Validar que retornó una lista válida
@@ -755,12 +766,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         for i, empresa in enumerate(empresas):
             # Actualizar progreso en CADA empresa para máxima fluidez, especialmente en lotes pequeños
             if request.task_id:
-                # Mapear progreso del 10% al 90%
-                percent = 10 + int((i / len(empresas)) * 80)
-                SEARCH_PROGRESS[request.task_id] = {
-                    "progress": percent,
-                     "message": f"Validando empresas ({i+1}/{len(empresas)})..."
-                }
+                update_search_progress(request.task_id, i + 1, len(empresas), phase="finalizing")
 
             # Validar nombre primero
             nombre = empresa.get('nombre', '').strip() if empresa.get('nombre') else ''

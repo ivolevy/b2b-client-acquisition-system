@@ -361,7 +361,7 @@ def buscar_empresas_por_rubro(
                 'nombre': tags_elem.get('name', 'Sin nombre'),
                 'rubro': rubro_info['nombre'],
                 'rubro_key': rubro,
-                'website': tags_elem.get('website', tags_elem.get('contact:website', '')),
+                'website': tags_elem.get('website', tags_elem.get('url', tags_elem.get('contact:website', tags_elem.get('official_site', '')))),
                 'email': tags_elem.get('email', tags_elem.get('contact:email', '')),
                 'telefono': tags_elem.get('phone', tags_elem.get('contact:phone', '')),
                 'direccion': _construir_direccion_completa(
@@ -482,7 +482,7 @@ def query_by_bbox(bbox: str, rubro: str = None, keywords: List[str] = None, limi
                 'nombre': tags_elem.get('name', 'Sin nombre'),
                 'rubro': rubro_info['nombre'],
                 'rubro_key': rubro,
-                'website': tags_elem.get('website', tags_elem.get('contact:website', '')),
+                'website': tags_elem.get('website', tags_elem.get('url', tags_elem.get('contact:website', tags_elem.get('official_site', '')))),
                 'email': tags_elem.get('email', tags_elem.get('contact:email', '')),
                 'telefono': tags_elem.get('phone', tags_elem.get('contact:phone', '')),
                 'direccion': _construir_direccion_completa(

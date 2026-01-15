@@ -111,15 +111,13 @@ function AppB2B() {
         // Ajustes finos de velocidad
         if (target === 100) {
             // Modo disparo: mínimo avance grande
-            if (step < 1.0) step = 1.0; 
+            if (step < 1.0) step = 1.2; 
             // Máximo muy grande
             if (step > 15.0) step = 15.0;
         } else {
-            // Modo normal/creep
-            // Mínimo muy pequeño para movimiento sutil continuo
-            if (step < 0.05) step = 0.05;
-            // Máximo moderado para que no salte de golpe si el backend actualiza
-            if (step > 2.0) step = 2.0; 
+            // Modo normal/creep - Reducido para que sea menos agresivo
+            if (step < 0.02) step = 0.02;
+            if (step > 1.5) step = 1.5; 
         }
 
         return Math.max(prev, Math.min(prev + step, effectiveTarget)); 
@@ -537,6 +535,8 @@ function AppB2B() {
     ]);
 
     const csvContent = [
+      'Para más información contactar a Ivan Levy - CTO de Dota | LinkedIn: https://www.linkedin.com/in/ivan-levy/ | Email: ivo.levy03@gmail.com',
+      '',
       headers.map(escapeCSV).join(','),
       ...rows.map(row => row.map(escapeCSV).join(','))
     ].join('\n');
@@ -592,7 +592,15 @@ function AppB2B() {
       doc.setFontSize(11);
       doc.setTextColor(100);
       doc.text(`Generado el: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 14, 30);
-      doc.text(`Total empresas: ${empresasToExport.length}`, 14, 36);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(233, 30, 99); // Color pink del tema
+      doc.text('Para más información contactar a Ivan Levy - CTO de Dota', 14, 37);
+      doc.text('LinkedIn: https://www.linkedin.com/in/ivan-levy/ | Email: ivo.levy03@gmail.com', 14, 43);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Total empresas: ${empresasToExport.length}`, 14, 50);
 
       // Columnas para PDF (menos columnas que CSV para que entre)
       const tableColumn = ["Nombre", "Rubro", "Teléfono", "Email", "Ciudad", "Estado"];
@@ -609,7 +617,7 @@ function AppB2B() {
       autoTable(doc, {
         head: [['Empresa', 'Rubro', 'Teléfono', 'Email', 'Ciudad', 'Estado']],
         body: tableRows,
-        startY: 45,
+        startY: 55,
         styles: { fontSize: 8, cellPadding: 2 },
         headStyles: { fillColor: [233, 30, 99] }, // Pink color matching theme
         alternateRowStyles: { fillColor: [245, 245, 245] },
