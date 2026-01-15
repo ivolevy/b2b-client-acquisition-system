@@ -5,6 +5,7 @@ import { authService, supabase } from '../lib/supabase';
 import { API_URL } from '../config';
 import axios from 'axios';
 import { useToast } from '../hooks/useToast';
+import ToastContainer from './ToastContainer';
 import './UserProfile.css';
 
 function UserProfile() {
@@ -12,6 +13,11 @@ function UserProfile() {
   const location = useLocation();
   const { user, logout, useSupabase } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.add('profile-page-active');
+    return () => document.body.classList.remove('profile-page-active');
+  }, []);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [activeTab, setActiveTab] = useState('info'); // 'info', 'rubros', 'danger'
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -29,7 +35,7 @@ function UserProfile() {
     confirmPassword: ''
   });
   const [passwordStep, setPasswordStep] = useState('request'); // 'request', 'verify', 'change'
-  const { success: toastSuccess, error: toastError, warning: toastWarning } = useToast();
+  const { success: toastSuccess, error: toastError, warning: toastWarning, removeToast, toasts } = useToast();
   const [verificationCode, setVerificationCode] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
@@ -101,7 +107,7 @@ function UserProfile() {
     setRubrosLoading(true);
     setRubrosError('');
     try {
-      const response = await axios.get(`${API_URL}/users/${user.id}/rubros`);
+      const response = await axios.get(`${API_URL}/users/${user.id}/rubros?t=${Date.now()}`);
       if (response.data.success) {
         const all = response.data.all_rubros || {};
         const selected = response.data.selected_rubros || [];
@@ -1357,6 +1363,7 @@ function UserProfile() {
           </div>
         </div>
       )}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

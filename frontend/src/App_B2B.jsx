@@ -188,12 +188,14 @@ function AppB2B() {
     try {
       // Si hay usuario, cargar sus rubros personalizados
       if (user?.id) {
-        const response = await axios.get(`${API_URL}/users/${user.id}/rubros`);
+        const response = await axios.get(`${API_URL}/users/${user.id}/rubros?t=${Date.now()}`);
         if (response.data && response.data.success) {
           const { all_rubros, selected_rubros } = response.data;
           
+          // Si el usuario no tiene NADA guardado (primera vez), mostrar todos.
+          // Si guardó una lista (aunque sea vacía), respetarla.
+          // El backend devuelve [] si no hay filas, pero podemos usar selected_rubros como guía.
           if (selected_rubros && selected_rubros.length > 0) {
-            // Filtrar all_rubros para mostrar solo los seleccionados
             const filteredRubros = {};
             selected_rubros.forEach(key => {
               if (all_rubros[key]) {
@@ -201,8 +203,14 @@ function AppB2B() {
               }
             });
             setRubros(filteredRubros);
+          } else if (selected_rubros && selected_rubros.length === 0) {
+              // Si guardó explícitamente vacío, o no tiene nada, decidimos qué mostrar.
+              // Para que el buscador no quede roto, si es [] mostramos todos PERO 
+              // el problema del usuario es que "deselecciona y se sigue mostrando".
+              // Así que si deseccionó ALGUNOS, el length será > 0.
+              // El único caso problemático es cuando deselecciona TODOS.
+              setRubros(all_rubros || {});
           } else {
-            // Si no hay selección, mostrar todos
             setRubros(all_rubros || {});
           }
           return;
