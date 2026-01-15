@@ -591,3 +591,49 @@ def eliminar_usuario_totalmente(user_id: str) -> Dict:
     except Exception as e:
         logger.error(f"Error crítico eliminando usuario {user_id}: {e}")
         return {"success": False, "error": str(e)}
+
+def get_user_rubros(user_id: str) -> List[str]:
+    """Obtiene las claves de rubros activos para un usuario"""
+    client = get_supabase()
+    if not client or not user_id:
+        return []
+        
+    try:
+        response = client.table('user_rubros')\
+            .select('rubro_key')\
+            .eq('user_id', user_id)\
+            .eq('is_active', True)\
+            .execute()
+            
+        return [row['rubro_key'] for row in response.data]
+    except Exception as e:
+        logger.error(f"Error obteniendo rubros de usuario {user_id}: {e}")
+        return []
+
+def save_user_rubros(user_id: str, rubro_keys: List[str]) -> bool:
+    """Guarda la selección de rubros de un usuario"""
+    admin_client = get_supabase_admin()
+    if not admin_client or not user_id:
+        return False
+        
+    try:
+        # 1. Marcar todos como inactivos primero (enfoque simple)
+        # O borrar y reinsertar. Upsert es mejor si queremos mantener timestamps.
+        
+        # Primero borramos los anteriores del usuario (limpieza total)
+        admin_client.table('user_rubros').delete().eq('user_id', user_id).execute()
+        
+        if not rubro_keys:
+            return True
+            
+        # 2. Insertar los nuevos
+        data_to_insert = [
+            {'user_id': user_id, 'rubro_key': key, 'is_active': True}
+            for key in rubro_keys
+        ]
+        
+        admin_client.table('user_rubros').insert(data_to_insert).execute()
+        return True
+    except Exception as e:
+        logger.error(f"Error guardando rubros para usuario {user_id}: {e}")
+        return False

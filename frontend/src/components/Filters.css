@@ -569,7 +569,7 @@
 .filters-row-compact {
   display: flex;
   gap: var(--spacing-sm);
-  align-items: center;
+  align-items: stretch;
   flex-wrap: wrap;
 }
 
@@ -578,8 +578,11 @@
   border: 1px solid var(--gray-100);
   border-radius: var(--radius-lg);
   padding: 0.5rem 0.75rem;
-  min-width: 220px;
+  flex: 1;
+  min-width: 250px;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
 }
 
 .option-head {
@@ -605,9 +608,8 @@
   position: relative;
   display: inline-block;
   width: 28px;
-  /* cuadrado */
   height: 28px;
-  /* cuadrado */
+  margin-top: auto;
 }
 
 .switch input {
@@ -647,6 +649,7 @@
   background: var(--gray-100);
   border-radius: var(--radius-lg);
   padding: 0.2rem;
+  margin-top: auto;
 }
 
 .mode-btn {

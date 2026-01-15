@@ -50,6 +50,8 @@ function AppB2B() {
       setView('profile');
     } else if (view === 'profile') {
       setView('table');
+      // Refrescar rubros al volver del perfil por si hubo cambios
+      loadRubros();
     }
   }, [location.pathname, view]);
   const [stats, setStats] = useState(null);
@@ -184,13 +186,34 @@ function AppB2B() {
 
   const loadRubros = async () => {
     try {
+      // Si hay usuario, cargar sus rubros personalizados
+      if (user?.id) {
+        const response = await axios.get(`${API_URL}/users/${user.id}/rubros`);
+        if (response.data && response.data.success) {
+          const { all_rubros, selected_rubros } = response.data;
+          
+          if (selected_rubros && selected_rubros.length > 0) {
+            // Filtrar all_rubros para mostrar solo los seleccionados
+            const filteredRubros = {};
+            selected_rubros.forEach(key => {
+              if (all_rubros[key]) {
+                filteredRubros[key] = all_rubros[key];
+              }
+            });
+            setRubros(filteredRubros);
+          } else {
+            // Si no hay selección, mostrar todos
+            setRubros(all_rubros || {});
+          }
+          return;
+        }
+      }
+
+      // Fallback a rubros generales
       const response = await axios.get(`${API_URL}/rubros`);
-      console.log('Respuesta de rubros:', response.data);
       if (response.data && response.data.rubros) {
         setRubros(response.data.rubros);
-        console.log('Rubros cargados:', Object.keys(response.data.rubros).length);
       } else {
-        console.error('No se encontraron rubros en la respuesta:', response.data);
         setRubros({});
       }
     } catch (error) {

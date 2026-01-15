@@ -40,7 +40,9 @@ try:
         save_user_oauth_token,
         delete_user_oauth_token,
         admin_update_user,
-        eliminar_usuario_totalmente
+        eliminar_usuario_totalmente,
+        get_user_rubros,
+        save_user_rubros
     )
     from .auth_google import get_google_auth_url, exchange_code_for_token
 except ImportError:
@@ -68,7 +70,9 @@ except ImportError:
         save_user_oauth_token,
         delete_user_oauth_token,
         admin_update_user,
-        eliminar_usuario_totalmente
+        eliminar_usuario_totalmente,
+        get_user_rubros,
+        save_user_rubros
     )
     from auth_google import get_google_auth_url, exchange_code_for_token
     from db_supabase import (
@@ -513,6 +517,10 @@ class GoogleCallbackRequest(BaseModel):
     code: str
     user_id: str
 
+class UserRubrosRequest(BaseModel):
+    user_id: str
+    rubro_keys: List[str]
+
 # Inicializar sistema en memoria
 @app.on_event("startup")
 async def startup():
@@ -577,6 +585,33 @@ def obtener_rubros():
             "pais": "España",
             "ciudad": "Madrid"
         }
+    }
+
+@app.get("/users/{user_id}/rubros")
+async def api_get_user_rubros(user_id: str):
+    """Obtiene los rubros personalizados de un usuario"""
+    user_rubros = get_user_rubros(user_id)
+    all_rubros = listar_rubros_disponibles()
+    
+    # Si el usuario no tiene rubros personalizados, devolver todos por defecto
+    # o indicar cuáles son los preferidos
+    return {
+        "success": True,
+        "user_id": user_id,
+        "selected_rubros": user_rubros,
+        "all_rubros": all_rubros
+    }
+
+@app.post("/users/rubros")
+async def api_save_user_rubros(request: UserRubrosRequest):
+    """Guarda los rubros personalizados de un usuario"""
+    success = save_user_rubros(request.user_id, request.rubro_keys)
+    if not success:
+        raise HTTPException(status_code=500, detail="Error al guardar preferencias de rubros")
+    
+    return {
+        "success": True,
+        "message": "Preferencias de rubros guardadas correctamente"
     }
 
 @app.post("/buscar")

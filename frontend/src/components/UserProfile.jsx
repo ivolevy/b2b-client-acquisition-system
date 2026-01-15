@@ -40,6 +40,13 @@ function UserProfile() {
   const [cancelPlanError, setCancelPlanError] = useState('');
   const [cancelConfirmText, setCancelConfirmText] = useState('');
   const [showUpgradeSuccessModal, setShowUpgradeSuccessModal] = useState(false);
+  
+  // Custom Rubros State
+  const [availableRubros, setAvailableRubros] = useState({});
+  const [selectedRubros, setSelectedRubros] = useState([]);
+  const [rubrosLoading, setRubrosLoading] = useState(false);
+  const [savingRubros, setSavingRubros] = useState(false);
+  const [rubrosError, setRubrosError] = useState('');
 
   // Bloquear scroll del body cuando cualquier modal está abierto
   useEffect(() => {
@@ -79,6 +86,57 @@ function UserProfile() {
       setCanResendCode(true);
     }
   }, [resendCountdown, codeSent]);
+
+  // Fetch rubros del usuario
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserRubros();
+    }
+  }, [user?.id]);
+
+  const fetchUserRubros = async () => {
+    setRubrosLoading(true);
+    setRubrosError('');
+    try {
+      const response = await axios.get(`${API_URL}/users/${user.id}/rubros`);
+      if (response.data.success) {
+        setAvailableRubros(response.data.all_rubros || {});
+        setSelectedRubros(response.data.selected_rubros || []);
+      }
+    } catch (err) {
+      console.error('Error fetching user rubros:', err);
+      setRubrosError('No se pudieron cargar tus rubros preferidos.');
+    } finally {
+      setRubrosLoading(false);
+    }
+  };
+
+  const handleSaveRubros = async () => {
+    setSavingRubros(true);
+    setRubrosError('');
+    try {
+      const response = await axios.post(`${API_URL}/users/rubros`, {
+        user_id: user.id,
+        rubro_keys: selectedRubros
+      });
+      if (response.data.success) {
+        alert('Preferencias de rubros guardadas correctamente.');
+      }
+    } catch (err) {
+      console.error('Error saving rubros:', err);
+      setRubrosError('Error al guardar tus preferencias.');
+    } finally {
+      setSavingRubros(false);
+    }
+  };
+
+  const toggleRubro = (key) => {
+    setSelectedRubros(prev => 
+      prev.includes(key) 
+        ? prev.filter(k => k !== key) 
+        : [...prev, key]
+    );
+  };
 
   const handleUpgradeToPro = async () => {
     if (!proTokenInput.trim()) {
@@ -556,6 +614,44 @@ function UserProfile() {
               </div>
             </div>
           </div>
+          )}
+        </div>
+
+        {/* Nueva sección de Rubros */}
+        <div className="profile-rubros-section">
+          <h3 className="profile-section-title">Mis Rubros Preferidos</h3>
+          <p className="profile-section-subtitle">Seleccioná los rubros que querés que aparezcan en tu buscador principal.</p>
+          
+          {rubrosError && <div className="rubros-error-msg">{rubrosError}</div>}
+          
+          {rubrosLoading ? (
+            <div className="rubros-loading">Cargando rubros...</div>
+          ) : (
+            <div className="rubros-selection-container">
+              <div className="rubros-grid">
+                {Object.entries(availableRubros).map(([key, info]) => (
+                  <label key={key} className={`rubro-checkbox-card ${selectedRubros.includes(key) ? 'selected' : ''}`}>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedRubros.includes(key)}
+                      onChange={() => toggleRubro(key)}
+                      style={{ display: 'none' }}
+                    />
+                    <span className="rubro-checkbox-name">{info.nombre}</span>
+                  </label>
+                ))}
+              </div>
+              
+              <div className="rubros-actions">
+                <button 
+                  className="btn-save-rubros" 
+                  onClick={handleSaveRubros}
+                  disabled={savingRubros}
+                >
+                  {savingRubros ? 'Guardando...' : 'Guardar Preferencias'}
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
