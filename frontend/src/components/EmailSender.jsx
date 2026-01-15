@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaEye, FaTimes } from 'react-icons/fa';
+import { FaEye, FaTimes, FaArrowLeft } from 'react-icons/fa';
 import ToastContainer from './ToastContainer';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../AuthWrapper';
@@ -501,15 +501,27 @@ function TemplateEditor({ template, onSave, onCancel, embedded = false }) {
   const [nombre, setNombre] = useState(template.nombre || '');
   const [subject, setSubject] = useState(template.subject || '');
   const [body, setBody] = useState(template.body_text || template.body_html || '');
+  const [copiedVar, setCopiedVar] = useState(null);
 
   const handleSave = () => {
     onSave({ nombre, subject, body_text: body, body_html: body });
   };
 
+  const copyVariable = (variable) => {
+    navigator.clipboard.writeText(variable);
+    setCopiedVar(variable);
+    setTimeout(() => setCopiedVar(null), 1500);
+  };
+
+  const variables = ['{nombre_empresa}', '{rubro}', '{ciudad}', '{direccion}', '{website}'];
+
   return (
     <div className={embedded ? "email-sender-embedded" : "email-sender-overlay"} style={{alignItems:'flex-start', paddingTop: embedded?0:'40px'}}>
-       <div className="email-sender-modal" style={{height: embedded?'100%':'auto', maxHeight:'90vh', width:'800px'}} onClick={e => e.stopPropagation()}>
-          <div className="email-sender-header">
+       <div className="email-sender-modal" style={{height: embedded?'100%':'auto', maxHeight:'90vh', width:'100%', maxWidth: '1000px'}} onClick={e => e.stopPropagation()}>
+          <div className="email-sender-header" style={{gap:'16px', justifyContent:'flex-start'}}>
+             <button className="btn-text" onClick={onCancel} style={{fontSize:'16px', display:'flex', alignItems:'center', color:'#64748b'}}>
+                <FaArrowLeft />
+             </button>
              <h2>{template.id ? 'Editar Template' : 'Nuevo Template'}</h2>
           </div>
           <div style={{padding:'24px', flex:1, overflowY:'auto'}}>
@@ -522,11 +534,31 @@ function TemplateEditor({ template, onSave, onCancel, embedded = false }) {
                 <input className="es-input" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Ej: Propuesta para {nombre_empresa}" />
              </div>
              <div className="config-group" style={{marginBottom:'16px'}}>
-                <label className="config-label">
-                  Cuerpo del Mensaje 
-                  <span style={{fontWeight:'400', color:'#64748b', marginLeft:'8px', textTransform:'none'}}>
-                    (Variables: {'{nombre_empresa}, {rubro}, {ciudad}'})
-                  </span>
+                <label className="config-label" style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                  Cuerpo del Mensaje
+                  <div style={{display:'flex', gap:'8px', alignItems:'center'}}>
+                    <span style={{fontWeight:'400', color:'#64748b', textTransform:'none'}}>Variables:</span>
+                    {variables.map(v => (
+                      <button 
+                        key={v}
+                        onClick={() => copyVariable(v)}
+                        style={{
+                          background: copiedVar === v ? '#dcfce7' : '#f1f5f9',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '4px',
+                          padding: '2px 8px',
+                          fontSize: '11px',
+                          color: copiedVar === v ? '#166534' : '#475569',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          fontFamily: 'monospace'
+                        }}
+                        title="Click para copiar"
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
                 </label>
                 <textarea className="es-textarea" value={body} onChange={e => setBody(e.target.value)} />
              </div>
