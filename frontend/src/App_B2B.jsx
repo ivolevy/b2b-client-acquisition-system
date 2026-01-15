@@ -367,46 +367,37 @@ function AppB2B() {
         } else if (validas === 0 && params.solo_validadas) {
           warning(
             <>
-              <strong>Se encontraron {total} empresas</strong>
-              <p>Pero ninguna tiene datos de contacto válidos.</p>
-              <p>Desmarca la opción "Solo empresas con email O teléfono válido" para verlas todas.</p>
+              <strong>Se encontraron {total} prospectos brutos</strong>
+              <p>Ninguno cumple los criterios de contacto verificado.</p>
+              <p>Desmarca "Solo empresas con email..." para ver resultados con datos parciales.</p>
             </>
           );
         } else {
+          const descartadas = total - guardadas;
+          
           if (params.solo_validadas) {
-            if (guardadas === total) {
-              success(
-                <>
-                  <strong>{guardadas} empresas guardadas</strong>
-                  <p>Todas con contacto válido</p>
-                </>
-              );
-            } else {
-              success(
-                <>
-                  <strong>{guardadas} empresas guardadas de {total} encontradas</strong>
-                  <p>Todas las guardadas tienen contacto válido</p>
-                </>
-              );
-            }
+             success(
+               <>
+                 <strong>Resultados de la búsqueda</strong>
+                 <p><strong>{guardadas} empresas guardadas</strong> (de {total} rastro)</p>
+                 <p style={{ marginTop: '4px' }}>✓ 100% con contacto verificado</p>
+               </>
+             );
           } else {
-            if (guardadas === total) {
-              success(
-                <>
-                  <strong>{guardadas} empresas guardadas</strong>
-                  <p>{validas} con contacto válido</p>
-                </>
-              );
-            } else {
-              const noGuardadas = total - guardadas;
-              success(
-                <>
-                  <strong>{guardadas} empresas guardadas de {total} encontradas</strong>
-                  <p>{validas} con contacto válido ({noGuardadas} no se guardaron por falta de datos válidos)</p>
-                </>
-              );
-            }
-        }
+             success(
+               <>
+                 <strong>Resultados de la búsqueda</strong>
+                 <p><strong>{guardadas} empresas guardadas</strong> de {total} detectadas</p>
+                 <ul style={{ margin: '8px 0 0 0', paddingLeft: '15px' }}>
+                    <li>{validas} con contacto verificado</li>
+                    <li>{guardadas - validas} con datos básicos</li>
+                    {descartadas > 0 && (
+                        <li style={{ opacity: 0.75 }}>{descartadas} descartadas (fuera de radio / sin nombre)</li>
+                    )}
+                 </ul>
+               </>
+             );
+          }
         }
         
         // Cargar todas las empresas de la base de datos para actualizar la vista completa
