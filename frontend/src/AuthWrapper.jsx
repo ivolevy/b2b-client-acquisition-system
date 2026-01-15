@@ -16,6 +16,7 @@ const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
 const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'));
 const AdminPromoCodes = lazy(() => import('./components/admin/AdminPromoCodes'));
+const LandingPage = lazy(() => import('./components/LandingPage'));
 
 // Contexto de autenticación
 const AuthContext = createContext(null);
@@ -373,6 +374,7 @@ function AuthWrapper() {
         <Suspense fallback={<LoadingFallback />}>
         {user ? (
           <Routes>
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/profile" element={
               <div className={`app ${user?.plan === 'pro' ? 'pro-theme' : ''}`}>
                 {user?.plan === 'pro' && <ProBackground />}
@@ -396,6 +398,7 @@ function AuthWrapper() {
           </Routes>
         ) : (
           <Routes>
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/*" element={<Login onLogin={handleDemoLogin} />} />
           </Routes>
         )}
