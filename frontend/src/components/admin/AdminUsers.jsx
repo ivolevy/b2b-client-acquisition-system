@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { adminService } from '../../lib/supabase';
 import UserDetailModal from './UserDetailModal';
 import CreateUserModal from './CreateUserModal';
+import AdminApiDashboard from '../AdminApiDashboard'; // Added this import
 import './AdminUsers.css';
 import './AdminLayout.css';
 
@@ -108,6 +109,8 @@ function AdminUsers() {
 
   return (
     <div className="admin-users">
+      <AdminApiDashboard />
+      
       {/* Filtros y búsqueda */}
       <div className="users-filters">
         <div className="filter-group">
