@@ -302,22 +302,44 @@
   gap: 0.25rem;
 }
 
+
+.location-inline-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: baseline !important;
+  gap: 0.3rem !important;
+  white-space: nowrap !important;
+  position: absolute !important;
+  top: -1.4rem !important;
+  /* Adjusted to sit nicely above */
+  right: 0 !important;
+  background: transparent;
+}
+
+.location-separator {
+  color: var(--gray-500);
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
 .form-row-compact .btn-location-inline {
   background: none;
   border: none;
   padding: 0;
   margin: 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--primary);
+  font-size: 0.7rem;
+  /* Smaller font as requested */
+  font-weight: 700;
+  color: #3b82f6;
   cursor: pointer;
   text-decoration: underline;
+  text-transform: uppercase;
   transition: color 0.2s ease;
-  display: inline;
+  display: inline-block;
 }
 
 .form-row-compact .btn-location-inline:hover {
-  color: var(--primary-dark);
+  color: #2563eb;
 }
 
 .form-row-compact .btn-location-inline:active {
