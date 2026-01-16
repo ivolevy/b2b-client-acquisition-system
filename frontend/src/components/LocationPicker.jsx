@@ -682,7 +682,15 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       </div>
 
       <div className="address-search">
-        <label htmlFor="address-input">BUSCAR DIRECCIÓN</label>
+        <div className="address-search-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', maxWidth: '400px' }}>
+          <label htmlFor="address-input" style={{ marginBottom: 0 }}>BUSCAR DIRECCIÓN</label>
+          <div className="location-inline-container-new">
+            <span className="location-separator">o</span>
+            <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>
+              USAR UBICACION ACTUAL
+            </button>
+          </div>
+        </div>
         <div className="address-input-wrapper">
           <input
             id="address-input"
@@ -713,13 +721,6 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
           </button>
-          
-          <div className="location-inline-container">
-            <span className="location-separator">o</span>
-            <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>
-              USAR UBICACION ACTUAL
-            </button>
-          </div>
         </div>
         {isSearching && <div className="address-status">Buscando coincidencias...</div>}
 
