@@ -187,22 +187,22 @@
 
 .btn-search-address {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--primary);
+  background: #3b82f6;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
   padding: 0;
 }
 
 .btn-search-address:hover:not(:disabled) {
-  background: var(--primary-dark, #4f46e5);
+  background: #2563eb;
   transform: scale(1.05);
 }
 
@@ -514,6 +514,7 @@
     font-size: 0.7rem;
   }
 }
+
 .location-inline-container {
   display: flex;
   flex-direction: column;

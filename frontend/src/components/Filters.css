@@ -80,14 +80,29 @@
   height: 40px;
 }
 
-.form-row-compact>.rubro-inline {
-  flex: 1.2;
-  min-width: 280px;
+.form-row-compact {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: nowrap;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: 50px;
+  padding: 0.5rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  margin-bottom: 1.5rem;
 }
 
-.form-row-compact .radius-control {
-  flex: 0 0 auto;
-  min-width: 180px;
+.form-row-compact .radius-control,
+.form-row-compact .address-search,
+.form-row-compact .rubro-inline {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1.5rem;
+  position: relative;
+  flex: 1;
 }
 
 .form-row-compact .address-search {
@@ -96,24 +111,24 @@
 }
 
 .form-row-compact label {
-  flex: 0 0 140px;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: var(--gray-600);
+  color: var(--gray-800);
   margin-bottom: 0;
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 /* Separadores verticales limpios */
-.form-row-compact>.rubro-inline::after,
-.form-row-compact .radius-control::after {
+.form-row-compact .radius-control::before,
+.form-row-compact .address-search::before {
   content: '';
   position: absolute;
-  right: 0;
+  left: 0;
   top: 20%;
   bottom: 20%;
   width: 1px;
-  background: var(--gray-300);
+  background: var(--gray-200);
 }
 
 .select-rubro-compact {
@@ -1173,14 +1188,17 @@ select.filter-input {
 .section-header-with-action h3 {
   margin: 0;
   flex: 1;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
 }
 
 .btn-history {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1rem;
-  background: var(--primary);
+  padding: 0.6rem 1.25rem;
+  background: #3b82f6;
   color: white;
   border: none;
   border-radius: var(--radius-pill);
