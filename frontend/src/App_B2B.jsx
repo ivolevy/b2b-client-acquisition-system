@@ -129,30 +129,6 @@ function AppB2B() {
     return () => clearInterval(interval);
   }, [searchProgress.percent, blockingLoading]);
 
-  // Bloquear scroll durante la búsqueda
-  useEffect(() => {
-    if (blockingLoading) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [blockingLoading]);
-
-  // Auto-scroll a resultados cuando termina la carga y hay datos
-  useEffect(() => {
-    if (!blockingLoading && empresas.length > 0 && view === 'table') {
-      setTimeout(() => {
-        const resultsElement = document.getElementById('results-section');
-        if (resultsElement) {
-          resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 500); // Pequeño delay para asegurar que el DOM se actualizó
-    }
-  }, [blockingLoading, empresas.length, view]);
-
   useEffect(() => {
     // Intentar recuperar estado del sessionStorage al montar
     const cachedEmpresas = sessionStorage.getItem('b2b_empresas_cache');
@@ -189,6 +165,40 @@ function AppB2B() {
       sessionStorage.setItem('b2b_empresas_cache', JSON.stringify(empresas));
     }
   }, [empresas]);
+
+  // Scroll lock when searching
+  useEffect(() => {
+    if (blockingLoading) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.height = '100vh'; // Prevent layout shifts
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+    };
+  }, [blockingLoading]);
+
+  // Auto-scroll to results when search finishes
+  const resultsRef = useRef(null);
+  
+  // Ref para rastrear si acabamos de terminar una carga
+  const prevLoadingRef = useRef(loading);
+
+  useEffect(() => {
+    // Si estaba cargando y ahora no, y tenemos empresas, scrollear
+    if (prevLoadingRef.current && !loading && empresas.length > 0 && !isFromHistory) {
+      // Pequeño timeout para asegurar que el DOM se renderizó
+      setTimeout(() => {
+        if (resultsRef.current) {
+          resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+    }
+    prevLoadingRef.current = loading;
+  }, [loading, empresas.length, isFromHistory]);
 
   useEffect(() => {
     if (stats) {

@@ -43,10 +43,11 @@
 }
 
 .properties-table td {
-  padding: 0.5rem 1rem;
-  /* Reduced padding from 1rem to 0.5rem */
+  padding: 0.5rem 0.75rem;
+  /* Reduced padding from 1rem to 0.5rem 0.75rem */
   border-bottom: 1px solid var(--gray-100);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
+  /* Slightly smaller font from 0.875rem to 0.85rem */
   color: var(--gray-700);
   vertical-align: middle;
 }

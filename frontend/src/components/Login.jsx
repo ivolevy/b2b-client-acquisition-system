@@ -796,57 +796,17 @@ function Login({ onLogin }) {
             </div>
 
             {/* Tabs removidos para ocultar registro */}
-            
+            {/*
             {useSupabase && (
               <div className="auth-tabs">
-                <button 
-                  className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
-                  onClick={() => {
-                    if (mode !== 'login') {
-                      setMode('login');
-                      setError('');
-                      setSuccess('');
-                      setEmail('');
-                      setPassword('');
-                      setPhone('');
-                      setName('');
-                      setEmailError('');
-                      setPhoneError('');
-                      setPasswordError('');
-                      setNameError('');
-                      setTouched({ email: false, phone: false, password: false, name: false });
-                    }
-                  }}
-                  type="button"
-                >
-                  Iniciar Sesión
-                </button>
-                {/* 
-                <button 
-                  className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
-                  onClick={() => {
-                    if (mode !== 'register') {
-                      setMode('register');
-                      setError('');
-                      setSuccess('');
-                      setEmail('');
-                      setPassword('');
-                      setPhone('');
-                      setName('');
-                      setEmailError('');
-                      setPhoneError('');
-                      setPasswordError('');
-                      setNameError('');
-                      setTouched({ email: false, phone: false, password: false, name: false });
-                    }
-                  }}
-                  type="button"
-                >
-                  Registrarse
-                </button>
-                */}
+                 ... (register content hidden) ...
               </div>
             )}
+            */}
+            {/* Tabs removidos para ocultar registro */}
+            <div className="auth-header-simple">
+              <h2>Iniciar Sesión</h2>
+            </div>
 
             <form onSubmit={handleSubmit} className="login-form">
               {loginMessage && (

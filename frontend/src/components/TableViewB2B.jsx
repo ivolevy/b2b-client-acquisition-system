@@ -191,10 +191,10 @@ function TableViewB2B({
 
   const hayFiltrosActivos = filtroRubro || filtroConEmail || filtroConTelefono || filtroDistancia || filtroConRedes !== 'todas';
 
-  return (
-    <div className="table-view-container" id="results-section">
-      {/* Header con estadísticas y acciones */}
-      <div className="table-header-actions">
+    return (
+    <div className="unified-results-module" ref={tableContainerRef}>
+      {/* Header unificado */}
+      <div className="results-unified-header">
         <div className="results-title-section">
           <h2>Resultados</h2>
           <div className="results-counts">
