@@ -673,12 +673,6 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             onKeyDown={handleAddressKeyDown}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             autoComplete="off"
-            style={{
-              background: '#ffffff',
-              backgroundColor: '#ffffff',
-              color: '#1a1a1a',
-              WebkitTextFillColor: '#1a1a1a'
-            }}
           />
           <button 
             type="button" 
