@@ -95,24 +95,51 @@ function UserProfile() {
   }, [user?.id]);
 
   const fetchUserRubros = async () => {
+    if (!user?.id) return;
+    
     setRubrosLoading(true);
     setRubrosError('');
     try {
+      console.log('Fetching rubros for user:', user.id);
       const response = await axios.get(`${API_URL}/users/${user.id}/rubros?t=${Date.now()}`);
+      console.log('Rubros response:', response.data);
+      
       if (response.data.success) {
-        const all = response.data.all_rubros || {};
+        let all = response.data.all_rubros;
         const selected = response.data.selected_rubros || [];
-        setAvailableRubros(all);
+        
+        // Fallback: si no viene all_rubros, intentar pedirlo del endpoint general
+        if (!all || Object.keys(all).length === 0) {
+          console.warn('all_rubros empty in user endpoint, falling back to /rubros');
+          const fallbackRes = await axios.get(`${API_URL}/rubros`);
+          if (fallbackRes.data && fallbackRes.data.rubros) {
+            all = fallbackRes.data.rubros;
+          }
+        }
+        
+        const rubrosDict = all || {};
+        setAvailableRubros(rubrosDict);
         
         // Si no hay nada guardado, por defecto seleccionamos todos
-        if (selected.length === 0 && Object.keys(all).length > 0) {
-          setSelectedRubros(Object.keys(all));
+        if (selected.length === 0 && Object.keys(rubrosDict).length > 0) {
+          setSelectedRubros(Object.keys(rubrosDict));
         } else {
           setSelectedRubros(selected);
         }
       }
     } catch (err) {
       console.error('Error fetching user rubros:', err);
+      // Último intento: cargar rubros generales si falla el endpoint de usuario
+      try {
+        const fallbackRes = await axios.get(`${API_URL}/rubros`);
+        if (fallbackRes.data && fallbackRes.data.rubros) {
+          setAvailableRubros(fallbackRes.data.rubros);
+          setSelectedRubros(Object.keys(fallbackRes.data.rubros));
+          return;
+        }
+      } catch (e) {
+        console.error('Final fallback failed:', e);
+      }
       setRubrosError('No se pudieron cargar tus rubros preferidos.');
     } finally {
       setRubrosLoading(false);
