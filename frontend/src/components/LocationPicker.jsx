@@ -568,14 +568,38 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     // Función recursiva con reintentos
     const tryGetLocation = (options, attempt = 1) => {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           removeToast(loadingToast);
           const latlng = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
+          
+          // Reverse geocoding with Nominatim to get the address
+          let addressName = 'Mi ubicación actual';
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`,
+              {
+                headers: {
+                  'Accept-Language': 'es',
+                  'User-Agent': 'b2b-client-acquisition-system/1.0'
+                }
+              }
+            );
+            if (response.ok) {
+              const data = await response.json();
+              if (data && data.display_name) {
+                addressName = data.display_name;
+              }
+            }
+          } catch (err) {
+            console.error('Error in reverse geocoding:', err);
+          }
+
+          setSearchQuery(addressName);
           setMapCenter([latlng.lat, latlng.lng]);
-          handleLocationSelect(latlng, 'Mi ubicación actual');
+          handleLocationSelect(latlng, addressName);
           success(
             <>
               <strong>Ubicación obtenida</strong>
@@ -691,6 +715,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           </button>
           
           <div className="location-inline-container">
+            <span className="location-separator">o</span>
             <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>
               USAR UBICACION ACTUAL
             </button>
