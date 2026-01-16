@@ -15,7 +15,6 @@ const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
 const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'));
-const AdminPromoCodes = lazy(() => import('./components/admin/AdminPromoCodes'));
 const LandingPage = lazy(() => import('./components/LandingPage'));
 
 // Contexto de autenticación
@@ -393,7 +392,6 @@ function AuthWrapper() {
                 <Route index element={<Navigate to="/backoffice/users" replace />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="users/:id" element={<AdminUserDetail />} />
-                <Route path="promo-codes" element={<AdminPromoCodes />} />
               </Route>
             <Route path="/*" element={<AppB2B />} />
           </Routes>

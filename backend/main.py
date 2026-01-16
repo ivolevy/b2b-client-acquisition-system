@@ -1983,43 +1983,6 @@ async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
 
 # ========== ENDPOINTS DE ADMIN PARA PLANES ==========
 
-class ActivateProRequest(BaseModel):
-    user_id: str
-    code: str
-
-@app.post("/admin/activate-pro")
-async def activate_pro(request: ActivateProRequest):
-    """Activa el plan PRO para un usuario mediante código"""
-    try:
-        # Importar función de lógica de activación
-        try:
-            from db_supabase import activar_suscripcion_con_codigo
-        except ImportError:
-            # Fallback si no está en db_supabase todavía (durante migración)
-            logger.warning("activar_suscripcion_con_codigo no encontrado en db_supabase, usando mock local")
-            def activar_suscripcion_con_codigo(user_id, codigo):
-                if codigo in ["PRO2024", "DEMO2024", "AAA111"]:
-                    return {
-                        "success": True,
-                        "plan": "pro",
-                        "expires_at": (datetime.now() + timedelta(days=30)).isoformat()
-                    }
-                return {"success": False, "error": "Código inválido"}
-
-        resultado = activar_suscripcion_con_codigo(request.user_id, request.code)
-        
-        if resultado.get("success"):
-            return resultado
-        else:
-            # Retornar error controlado
-            return JSONResponse(
-                status_code=400,
-                content=resultado
-            )
-            
-    except Exception as e:
-        logger.error(f"Error activando plan PRO: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/auth/delete-account")

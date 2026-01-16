@@ -31,19 +31,6 @@ function AdminDashboard() {
           <p>Gestiona usuarios, edita perfiles y administra permisos</p>
         </div>
 
-        <div 
-          className="admin-menu-card"
-          onClick={() => navigate('/backoffice/promo-codes')}
-        >
-          <div className="menu-card-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-              <line x1="7" y1="7" x2="7.01" y2="7"/>
-            </svg>
-          </div>
-          <h2>Códigos Promocionales</h2>
-          <p>Crea y gestiona códigos promocionales para suscripciones</p>
-        </div>
       </div>
     </div>
   );

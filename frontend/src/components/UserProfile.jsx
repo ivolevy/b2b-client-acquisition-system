@@ -147,57 +147,6 @@ function UserProfile() {
     );
   };
 
-  const handleUpgradeToPro = async () => {
-    if (!proTokenInput.trim()) {
-      setUpgradeError('Por favor, ingresa un código promocional.');
-      return;
-    }
-
-    setUpgradeLoading(true);
-    setUpgradeError('');
-
-    try {
-      if (!useSupabase || !user?.id) {
-        setUpgradeError('No se puede validar el código promocional. Supabase no está configurado o no hay sesión activa.');
-        setUpgradeLoading(false);
-        return;
-      }
-
-      // Usar endpoint del backend en lugar de RPC directo
-      const response = await axios.post(`${API_URL}/admin/activate-pro`, {
-        user_id: user.id,
-        code: proTokenInput.trim().toUpperCase()
-      });
-
-      if (!response.data || !response.data.success) {
-        throw new Error(response.data?.error || 'Error al activar el plan.');
-      }
-
-      // Actualizar localStorage
-      const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
-      authData.plan = 'pro';
-      authData.plan_expires_at = response.data.expires_at;
-      localStorage.setItem('b2b_auth', JSON.stringify(authData));
-
-      // Forzar actualización del perfil en el cliente si es posible
-      if (user) {
-         user.plan = 'pro';
-      }
-
-      // Cerrar modal y mostrar éxito (o recargar)
-      setShowUpgradeModal(false);
-      setProTokenInput('');
-      
-      // Mostrar modal de éxito
-      setShowUpgradeSuccessModal(true);
-      
-    } catch (error) {
-      console.error('Error upgrading to PRO:', error);
-      const errorMsg = error.response?.data?.detail || error.message || 'Error desconocido al activar.';
-      setUpgradeError(errorMsg);
-      setUpgradeLoading(false);
-    }
-  };
 
   const handleRequestCode = async () => {
     const emailToUse = passwordChangeEmail || user?.email;
