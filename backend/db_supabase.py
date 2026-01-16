@@ -115,33 +115,7 @@ def admin_update_user(user_id: str, updates: Dict) -> Dict:
             public_updates['updated_at'] = datetime.now().isoformat()
             admin_client.table('users').update(public_updates).eq('id', user_id).execute()
             
-        # 4. Manejar Suscripciones si cambió el plan
-        # Si cambiamos a PRO, asegurarnos de que exista una suscripción activa
-        if updates.get('plan') == 'pro':
-             # Verificar si ya tiene suscripción
-             current_sub = admin_client.table('subscriptions').select('*').eq('user_id', user_id).eq('status', 'active').execute()
-             
-             expires_at = updates.get('plan_expires_at') or (datetime.now() + 365*24*3600).isoformat() # Default 1 año si no se especifica
-             
-             if not current_sub.data:
-                 # Crear nueva suscripción
-                 admin_client.table('subscriptions').insert({
-                     'user_id': user_id,
-                     'plan': 'pro',
-                     'status': 'active',
-                     'payment_method': 'manual',
-                     'expires_at': expires_at
-                 }).execute()
-             else:
-                 # Actualizar existente
-                 sub_id = current_sub.data[0]['id']
-                 admin_client.table('subscriptions').update({
-                     'plan': 'pro',
-                     'status': 'active',
-                     'expires_at': expires_at
-                 }).eq('id', sub_id).execute()
-                 
-            
+
         return {"success": True, "message": "Usuario actualizado correctamente"}
         
     except Exception as e:
@@ -558,7 +532,7 @@ def eliminar_usuario_totalmente(user_id: str) -> Dict:
             'saved_companies', 
             'email_templates', 
             'email_history',
-            'subscriptions',
+
             'user_oauth_tokens',
             'users' # Perfil público en tabla users
         ]

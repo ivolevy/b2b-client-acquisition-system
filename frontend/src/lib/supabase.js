@@ -270,22 +270,6 @@ export const userService = {
     return { data, error };
   },
 
-  // Obtener características del plan
-  async getPlanFeatures(plan) {
-    const { data, error } = await supabase
-      .from('plan_features')
-      .select('*')
-      .eq('plan', plan);
-
-    // Convertir a objeto
-    const features = {};
-    data?.forEach(f => {
-      features[f.feature_key] = f.feature_value;
-    });
-
-    return { data: features, error };
-  },
-
   // Verificar límite de búsquedas
   async checkSearchLimit(userId) {
     const { data: user, error } = await supabase
@@ -596,22 +580,18 @@ export const adminService = {
         .order('created_at', { ascending: false })
         .limit(50);
 
-      // Obtener suscripciones
-      const { data: subscriptions, error: subscriptionsError } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
 
-      if (searchesError || companiesError || subscriptionsError) {
-        throw searchesError || companiesError || subscriptionsError;
+
+
+      if (searchesError || companiesError) {
+        throw searchesError || companiesError;
       }
 
       return {
         data: {
           searches: searches || [],
           companies: companies || [],
-          subscriptions: subscriptions || []
+
         },
         error: null
       };
@@ -725,50 +705,7 @@ export const adminService = {
   },
 
 
-  // ============================================
-  // GESTIÓN DE SUSCRIPCIONES
-  // ============================================
 
-  async getAllSubscriptions(filters = {}) {
-    try {
-      let query = supabase
-        .from('subscriptions')
-        .select(`
-          *,
-          users (
-            email,
-            name,
-            plan
-          )
-        `)
-        .order('created_at', { ascending: false });
-
-      if (filters.status) {
-        query = query.eq('status', filters.status);
-      }
-      if (filters.plan) {
-        query = query.eq('plan', filters.plan);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return { data, error: null };
-    } catch (error) {
-      console.error('[Admin] Error getting subscriptions:', error);
-      return { data: null, error };
-    }
-  },
-
-  async checkAndExpireSubscriptions() {
-    try {
-      const { data, error } = await supabase.rpc('check_and_expire_subscriptions');
-      if (error) throw error;
-      return { data, error: null };
-    } catch (error) {
-      console.error('[Admin] Error checking subscriptions:', error);
-      return { data: null, error };
-    }
-  },
 
   // ============================================
   // ENVÍO DE EMAILS (requiere configuración SMTP)
