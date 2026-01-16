@@ -129,6 +129,30 @@ function AppB2B() {
     return () => clearInterval(interval);
   }, [searchProgress.percent, blockingLoading]);
 
+  // Bloquear scroll durante la búsqueda
+  useEffect(() => {
+    if (blockingLoading) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [blockingLoading]);
+
+  // Auto-scroll a resultados cuando termina la carga y hay datos
+  useEffect(() => {
+    if (!blockingLoading && empresas.length > 0 && view === 'table') {
+      setTimeout(() => {
+        const resultsElement = document.getElementById('results-section');
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500); // Pequeño delay para asegurar que el DOM se actualizó
+    }
+  }, [blockingLoading, empresas.length, view]);
+
   useEffect(() => {
     // Intentar recuperar estado del sessionStorage al montar
     const cachedEmpresas = sessionStorage.getItem('b2b_empresas_cache');

@@ -43,7 +43,8 @@
 }
 
 .properties-table td {
-  padding: 1rem;
+  padding: 0.5rem 1rem;
+  /* Reduced padding from 1rem to 0.5rem */
   border-bottom: 1px solid var(--gray-100);
   font-size: 0.875rem;
   color: var(--gray-700);

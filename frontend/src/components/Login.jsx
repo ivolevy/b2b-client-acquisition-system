@@ -795,7 +795,8 @@ function Login({ onLogin }) {
             <div className="form-header">
             </div>
 
-            {/* Tabs para cambiar entre login y registro */}
+            {/* Tabs removidos para ocultar registro */}
+            
             {useSupabase && (
               <div className="auth-tabs">
                 <button 
@@ -820,6 +821,7 @@ function Login({ onLogin }) {
                 >
                   Iniciar Sesión
                 </button>
+                {/* 
                 <button 
                   className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
                   onClick={() => {
@@ -842,6 +844,7 @@ function Login({ onLogin }) {
                 >
                   Registrarse
                 </button>
+                */}
               </div>
             )}
 
