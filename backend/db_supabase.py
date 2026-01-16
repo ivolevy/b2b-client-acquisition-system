@@ -563,7 +563,9 @@ def eliminar_usuario_totalmente(user_id: str) -> Dict:
 
 def get_user_rubros(user_id: str) -> List[str]:
     """Obtiene las claves de rubros activos para un usuario"""
-    client = get_supabase()
+    # Usamos admin para asegurar que leemos lo que persistimos
+    # y evitar problemas de RLS en lectura desde el backend.
+    client = get_supabase_admin()
     if not client or not user_id:
         return []
         

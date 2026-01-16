@@ -220,18 +220,14 @@ function AppB2B() {
 
   const loadRubros = async () => {
     try {
-      console.log('AppB2B: Iniciando loadRubros...');
       // Si hay usuario, cargar sus rubros personalizados
       if (user?.id) {
-        console.log('AppB2B: Buscando rubros para usuario:', user.id);
         const response = await axios.get(`${API_URL}/users/${user.id}/rubros?t=${Date.now()}`);
-        console.log('AppB2B: Respuesta rubros usuario:', response.data);
         
         if (response.data && response.data.success) {
           const { all_rubros, selected_rubros } = response.data;
           
           if (selected_rubros && selected_rubros.length > 0) {
-            console.log('AppB2B: Filtrando rubros. Seleccionados:', selected_rubros.length);
             const filteredRubros = {};
             selected_rubros.forEach(key => {
               if (all_rubros[key]) {
@@ -240,19 +236,13 @@ function AppB2B() {
             });
             setRubros(filteredRubros);
           } else {
-            console.log('AppB2B: No hay rubros seleccionados, mostrando todos (Opt-out default)');
             setRubros(all_rubros || {});
           }
           return;
-        } else {
-          console.warn('AppB2B: La respuesta de rubros no fue exitosa:', response.data);
         }
-      } else {
-        console.log('AppB2B: No hay usuario ID, usando catálogo general');
       }
 
       // Fallback a rubros generales
-      console.log('AppB2B: Cargando catálogo general de /rubros');
       const response = await axios.get(`${API_URL}/rubros`);
       if (response.data && response.data.rubros) {
         setRubros(response.data.rubros);
@@ -260,7 +250,7 @@ function AppB2B() {
         setRubros({});
       }
     } catch (error) {
-      console.error('AppB2B: Error crítico al cargar rubros:', error);
+      console.error('Error al cargar rubros:', error);
       setRubros({});
     }
   };
