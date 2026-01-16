@@ -44,7 +44,7 @@ const DEMO_USERS = [
     password: 'User2024!',
     name: 'Usuario',
     role: 'user',
-    plan: 'free'
+    plan: 'pro'
   }
 ];
 
@@ -328,7 +328,7 @@ function AuthWrapper() {
   const authValue = {
     user,
     isAuthenticated: !!user,
-    isPro: user?.plan === 'pro',
+    isPro: true,
     useSupabase,
     login: loginFn,
     signUp: signUpFn,
@@ -376,8 +376,7 @@ function AuthWrapper() {
           <Routes>
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/profile" element={
-              <div className={`app ${user?.plan === 'pro' ? 'pro-theme' : ''}`}>
-                {user?.plan === 'pro' && <ProBackground />}
+              <div className="app">
                 <Navbar />
                 <main className="main-content">
                   <UserProfile />

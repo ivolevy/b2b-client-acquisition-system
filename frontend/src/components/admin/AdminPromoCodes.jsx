@@ -404,17 +404,6 @@ function AdminPromoCodes() {
           </select>
         </div>
         <div className="filter-group">
-          <select
-            className="filter-select"
-            value={filters.plan}
-            onChange={(e) => setFilters({ ...filters, plan: e.target.value })}
-          >
-            <option value="">Todos los planes</option>
-            <option value="free">Free</option>
-            <option value="pro">PRO</option>
-          </select>
-        </div>
-        <div className="filter-group">
           <button 
             className="btn-primary"
             onClick={() => setShowCreateModal(true)}
@@ -437,7 +426,6 @@ function AdminPromoCodes() {
           <thead>
             <tr>
               <th>Código</th>
-              <th>Plan</th>
               <th>Duración</th>
               <th>Usos</th>
               <th>Estado</th>
@@ -456,11 +444,6 @@ function AdminPromoCodes() {
               codes.map((code) => (
                 <tr key={code.id}>
                   <td className="code-name">{code.code}</td>
-                  <td>
-                    <span className={`plan-badge ${code.plan}`}>
-                      {code.plan === 'pro' ? 'PRO' : 'Free'}
-                    </span>
-                  </td>
                   <td>{code.duration_days} días</td>
                   <td>{code.used_count} / {code.max_uses || '∞'}</td>
                   <td>

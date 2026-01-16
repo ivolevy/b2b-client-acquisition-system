@@ -122,20 +122,18 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
       <div className="filter-section fetch-section">
         <div className="section-header-with-action">
           <h3>Buscar Empresas por Rubro y Ubicación</h3>
-          {user?.plan === 'pro' && (
-            <button 
-              type="button" 
-              className="btn-history"
-              onClick={() => setShowHistory(true)}
-              disabled={loading}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-              Últimas búsquedas
-            </button>
-          )}
+          <button 
+            type="button" 
+            className="btn-history"
+            onClick={() => setShowHistory(true)}
+            disabled={loading}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Últimas búsquedas
+          </button>
         </div>
         <form onSubmit={handleBuscarSubmit}>
           {/* Controles en una sola línea: Rubro + Radio + Dirección + Botón */}
@@ -242,7 +240,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                   <div className="option-head">
                     <div className="option-title">Modo de búsqueda</div>
                     <div className={`status-badge ${modoBusqueda === 'nueva' ? 'info' : 'success'}`}>
-                      {modoBusqueda === 'nueva' ? 'Reemplazar' : 'Acumular'}
+                      {modoBusqueda === 'nueva' ? 'Reemplazar' : 'Agregar'}
                     </div>
                   </div>
                   <div className="option-desc">
@@ -263,27 +261,9 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                 <button 
                   type="button"
                   className={`mode-btn ${modoBusqueda === 'agregar' ? 'active' : ''}`}
-                  onClick={() => {
-                    // Verificar si es PRO (o admin)
-                    if (user?.plan === 'pro' || user?.role === 'admin') {
-                      setModoBusqueda('agregar');
-                    } else {
-                      toastWarning(
-                        <>
-                          <strong>Función PRO</strong>
-                          <p>Acumular resultados en el mapa es exclusivo para usuarios PRO.</p>
-                        </>
-                      );
-                    }
-                  }}
+                  onClick={() => setModoBusqueda('agregar')}
                   disabled={loading}
-                  style={{ 
-                    opacity: (user?.plan === 'pro' || user?.role === 'admin') ? 1 : 0.6, 
-                    cursor: (user?.plan === 'pro' || user?.role === 'admin') ? 'pointer' : 'not-allowed' 
-                  }}
                 >
-                  {/* Candado para users no PRO */}
-                  {!(user?.plan === 'pro' || user?.role === 'admin') && <span style={{ marginRight: '5px' }}>🔒</span>}
                   Agregar resultados
                 </button>
               </div>
@@ -301,13 +281,11 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
       </div>
 
       {/* Modal de historial de búsquedas (solo PRO) */}
-      {user?.plan === 'pro' && (
-        <SearchHistory 
-          isOpen={showHistory}
-          onClose={() => setShowHistory(false)}
-          onSelectSearch={handleSelectFromHistory}
-        />
-      )}
+      <SearchHistory 
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        onSelectSearch={handleSelectFromHistory}
+      />
     </div>
   );
 }

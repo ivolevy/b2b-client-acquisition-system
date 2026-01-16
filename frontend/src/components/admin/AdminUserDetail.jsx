@@ -17,9 +17,8 @@ function AdminUserDetail() {
     email: '',
     name: '',
     phone: '',
-    plan: 'free',
-    role: 'user',
-    plan_expires_at: ''
+    plan: 'pro',
+    role: 'user'
   });
 
   useEffect(() => {
@@ -42,11 +41,8 @@ function AdminUserDetail() {
           email: userData.email || '',
           name: userData.name || '',
           phone: userData.phone || '',
-          plan: userData.plan || 'free',
-          role: userData.role || 'user',
-          plan_expires_at: userData.plan_expires_at 
-            ? new Date(userData.plan_expires_at).toISOString().split('T')[0]
-            : ''
+          plan: 'pro',
+          role: userData.role || 'user'
         });
       }
     } catch (err) {
@@ -67,15 +63,9 @@ function AdminUserDetail() {
         email: editForm.email,
         name: editForm.name,
         phone: editForm.phone,
-        plan: editForm.plan,
+        plan: 'pro',
         role: editForm.role
       };
-
-      if (editForm.plan === 'pro' && editForm.plan_expires_at) {
-        updates.plan_expires_at = new Date(editForm.plan_expires_at).toISOString();
-      } else if (editForm.plan === 'free') {
-        updates.plan_expires_at = null;
-      }
 
       const { data, error: updateError } = await adminService.updateUser(id, updates);
       if (updateError) throw updateError;
@@ -209,17 +199,6 @@ function AdminUserDetail() {
             <h2>Plan y Rol</h2>
             <div className="form-grid">
               <div className="form-group">
-                <label>Plan</label>
-                <select
-                  value={editForm.plan}
-                  onChange={(e) => setEditForm({ ...editForm, plan: e.target.value })}
-                  className="form-select"
-                >
-                  <option value="free">Free</option>
-                  <option value="pro">PRO</option>
-                </select>
-              </div>
-              <div className="form-group">
                 <label>Rol</label>
                 <select
                   value={editForm.role}
@@ -230,17 +209,6 @@ function AdminUserDetail() {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              {editForm.plan === 'pro' && (
-                <div className="form-group">
-                  <label>Expiración del Plan PRO</label>
-                  <input
-                    type="date"
-                    value={editForm.plan_expires_at}
-                    onChange={(e) => setEditForm({ ...editForm, plan_expires_at: e.target.value })}
-                    className="form-input"
-                  />
-                </div>
-              )}
             </div>
           </div>
 

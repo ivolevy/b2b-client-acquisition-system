@@ -39,7 +39,7 @@ function LandingPage() {
           </p>
           <div className="hero-cta-group">
             <button className="btn-cta-primary" onClick={() => navigate('/')}>
-              Start for free
+              Get Started
             </button>
             <button className="btn-cta-secondary" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>
               How it works
@@ -113,34 +113,14 @@ function LandingPage() {
       {/* Pricing Section */}
       <section id="pricing" className="landing-pricing">
         <div className="pricing-grid">
-          {/* Free Plan */}
-          <div className="pricing-card starter">
+          {/* Unified Pro Plan */}
+          <div className="pricing-card pro" style={{ maxWidth: '500px', margin: '0 auto' }}>
             <div className="pricing-header">
-              <h3 className="plan-name">Starter</h3>
+              <h3 className="plan-name" style={{color: '#60A5FA'}}>Premium Access</h3>
               <div className="price-container">
-                <span className="price">$0</span>
-                <span className="period">/mo</span>
+                <span className="price">Full Access</span>
               </div>
-              <p className="period">Perfect for testing the waters</p>
-            </div>
-            <ul className="pricing-features">
-              <li className="pricing-feature"><FaCheck /> 5 Daily Searches</li>
-              <li className="pricing-feature"><FaCheck /> 50 Leads per search</li>
-              <li className="pricing-feature"><FaCheck /> Basic Validation</li>
-              <li className="pricing-feature"><FaCheck /> Manual Email Support</li>
-            </ul>
-            <button className="btn-pricing outline" onClick={() => navigate('/')}>Get Started</button>
-          </div>
-
-          {/* Pro Plan */}
-          <div className="pricing-card pro">
-            <div className="pricing-header">
-              <h3 className="plan-name" style={{color: '#60A5FA'}}>Pro System</h3>
-              <div className="price-container">
-                <span className="price">$49</span>
-                <span className="period">/mo</span>
-              </div>
-              <p className="period">billed annually</p>
+              <p className="period">All core features included</p>
             </div>
             <ul className="pricing-features">
               <li className="pricing-feature"><FaCheck /> Unlimited Searches</li>
@@ -150,7 +130,7 @@ function LandingPage() {
               <li className="pricing-feature"><FaCheck /> Automated Bulk Sending</li>
               <li className="pricing-feature"><FaCheck /> Priority Support</li>
             </ul>
-            <button className="btn-pricing glow" onClick={() => window.location.href = 'mailto:sales@smartleads.com'}>Contact Sales</button>
+            <button className="btn-pricing glow" onClick={() => navigate('/')}>Access Now</button>
           </div>
         </div>
       </section>

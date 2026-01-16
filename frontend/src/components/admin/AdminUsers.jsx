@@ -10,7 +10,6 @@ function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({
-    plan: '',
     role: '',
     search: ''
   });
@@ -119,17 +118,7 @@ function AdminUsers() {
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           />
         </div>
-        <div className="filter-group">
-          <select
-            className="filter-select"
-            value={filters.plan}
-            onChange={(e) => setFilters({ ...filters, plan: e.target.value })}
-          >
-            <option value="">Todos los planes</option>
-            <option value="free">Free</option>
-            <option value="pro">PRO</option>
-          </select>
-        </div>
+        {/* Eliminado filtro de plan */}
         <div className="filter-group">
           <select
             className="filter-select"
@@ -166,7 +155,6 @@ function AdminUsers() {
             <tr>
               <th>Email</th>
               <th>Nombre</th>
-              <th>Plan</th>
               <th>Rol</th>
               <th>Acciones</th>
             </tr>
@@ -183,11 +171,6 @@ function AdminUsers() {
                 <tr key={user.id}>
                   <td>{user.email}</td>
                   <td>{user.name || '-'}</td>
-                  <td>
-                    <span className={`plan-badge ${user.plan}`}>
-                      {user.plan === 'pro' ? 'PRO' : 'Free'}
-                    </span>
-                  </td>
                   <td>
                     <span className={`role-badge ${user.role}`}>
                       {user.role === 'admin' ? 'Admin' : 'Usuario'}

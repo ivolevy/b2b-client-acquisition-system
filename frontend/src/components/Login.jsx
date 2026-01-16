@@ -21,7 +21,7 @@ const DEMO_USERS = [
     password: 'User2024!',
     name: 'Usuario',
     role: 'user',
-    plan: 'free'
+    plan: 'pro'
   }
 ];
 

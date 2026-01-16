@@ -59,9 +59,6 @@ function Navbar({ onNavigateToProfile }) {
                   <div className="user-details">
                     <div className="user-name-row">
                       <span className="user-name">{user.name || user.email || 'Usuario'}</span>
-                      {user.plan === 'pro' && (
-                        <span className="pro-badge-small">PRO</span>
-                      )}
                     </div>
                     <span className="user-email">{user.email}</span>
                   </div>
@@ -73,13 +70,7 @@ function Navbar({ onNavigateToProfile }) {
                 {/* Menú desplegable */}
                 {showUserMenu && (
                   <div className="user-dropdown">
-                    <div className="dropdown-header">
-                      <div className="dropdown-plan-row">
-                        <span className={`dropdown-plan ${user.plan}`}>
-                          {user.plan === 'pro' ? '⚡ Plan PRO' : 'Plan Free'}
-                        </span>
-                      </div>
-                    </div>
+                    {/* Eliminado indicador de plan */}
                     <div className="dropdown-divider"></div>
                     {user.role === 'admin' && (
                       <>

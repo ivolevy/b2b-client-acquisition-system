@@ -18,14 +18,10 @@ function UserProfile() {
     document.body.classList.add('profile-page-active');
     return () => document.body.classList.remove('profile-page-active');
   }, []);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [activeTab, setActiveTab] = useState('info'); // 'info', 'rubros', 'danger'
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
-  const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
-  const [proTokenInput, setProTokenInput] = useState('');
-  const [upgradeError, setUpgradeError] = useState('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
@@ -43,13 +39,7 @@ function UserProfile() {
   const [resendCountdown, setResendCountdown] = useState(0); // Countdown en segundos
   const [canResendCode, setCanResendCode] = useState(false);
   const [passwordChangeEmail, setPasswordChangeEmail] = useState('');
-  const [showCancelPlanModal, setShowCancelPlanModal] = useState(false);
-  const [showCancelPlanSuccessModal, setShowCancelPlanSuccessModal] = useState(false);
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
-  const [cancelPlanLoading, setCancelPlanLoading] = useState(false);
-  const [cancelPlanError, setCancelPlanError] = useState('');
-  const [cancelConfirmText, setCancelConfirmText] = useState('');
-  const [showUpgradeSuccessModal, setShowUpgradeSuccessModal] = useState(false);
   
   // Custom Rubros State
   const [availableRubros, setAvailableRubros] = useState({});
@@ -60,7 +50,7 @@ function UserProfile() {
 
   // Bloquear scroll del body cuando cualquier modal está abierto
   useEffect(() => {
-    const hasModalOpen = showDeleteModal || showUpgradeModal || showPasswordModal || showCancelPlanModal || showCancelPlanSuccessModal || showDeleteSuccessModal || showUpgradeSuccessModal;
+    const hasModalOpen = showDeleteModal || showPasswordModal || showDeleteSuccessModal;
     
     if (hasModalOpen) {
       // Guardar el scroll actual
@@ -82,7 +72,7 @@ function UserProfile() {
       document.body.classList.remove('modal-open');
       document.body.style.top = '';
     };
-  }, [showDeleteModal, showUpgradeModal, showPasswordModal, showCancelPlanModal, showCancelPlanSuccessModal, showDeleteSuccessModal, showUpgradeSuccessModal]);
+  }, [showDeleteModal, showPasswordModal, showDeleteSuccessModal]);
 
 
   // Countdown para reenviar código de cambio de contraseña
@@ -402,86 +392,6 @@ function UserProfile() {
     }
   };
 
-  const handleCancelPlan = async () => {
-    if (cancelConfirmText !== 'CANCELAR') {
-      return;
-    }
-
-    setCancelPlanLoading(true);
-    setCancelPlanError('');
-    
-    try {
-      if (!useSupabase || !user?.id) {
-        setCancelPlanError('No se puede cancelar el plan. Supabase no está configurado o no hay sesión activa.');
-        setCancelPlanLoading(false);
-        return;
-      }
-
-      // 1. Cancelar suscripciones activas en Supabase
-      const { data: cancelledSubs, error: cancelSubError } = await supabase
-        .from('subscriptions')
-        .update({ 
-          status: 'cancelled',
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .select();
-      
-      if (cancelSubError) {
-        console.error('Error cancelando suscripciones:', cancelSubError);
-        setCancelPlanError('Error al cancelar las suscripciones: ' + cancelSubError.message);
-        setCancelPlanLoading(false);
-        return;
-      }
-
-      console.log(`[CancelPlan] ${cancelledSubs?.length || 0} suscripción(es) cancelada(s)`);
-
-      // 2. Actualizar plan del usuario a 'free' en Supabase
-      const { data: updatedUser, error: updateUserError } = await supabase
-        .from('users')
-        .update({ 
-          plan: 'free',
-          plan_expires_at: null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id)
-        .select()
-        .single();
-      
-      if (updateUserError) {
-        console.error('Error actualizando usuario:', updateUserError);
-        setCancelPlanError('Error al actualizar el plan: ' + updateUserError.message);
-        setCancelPlanLoading(false);
-        return;
-      }
-
-      // Verificar que la actualización se haya realizado correctamente
-      if (!updatedUser || updatedUser.plan !== 'free') {
-        console.error('Error: El plan no se actualizó correctamente', updatedUser);
-        setCancelPlanError('Error: El plan no se actualizó correctamente en la base de datos.');
-        setCancelPlanLoading(false);
-        return;
-      }
-
-      console.log('[CancelPlan] Usuario actualizado en Supabase:', updatedUser);
-
-      // 3. Actualizar localStorage
-      const authData = JSON.parse(localStorage.getItem('b2b_auth') || '{}');
-      authData.plan = 'free';
-      authData.plan_expires_at = null;
-      localStorage.setItem('b2b_auth', JSON.stringify(authData));
-
-      // 4. Cerrar modal de confirmación y mostrar modal de éxito
-      setShowCancelPlanModal(false);
-      setCancelConfirmText('');
-      setShowCancelPlanSuccessModal(true);
-    } catch (error) {
-      console.error('Error al cancelar plan:', error);
-      setCancelPlanError('Error al cancelar el plan: ' + (error.message || 'Error desconocido'));
-      setCancelPlanLoading(false);
-    }
-  };
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'ELIMINAR') {
@@ -625,31 +535,7 @@ function UserProfile() {
                 </div>
               </div>
 
-              {user?.role !== 'admin' && (
-                <div className="account-plan-card-new">
-                  <span className="plan-card-subtitle">Plan actual</span>
-                  <span className={`plan-badge-small ${user?.plan || 'free'}`}>
-                    {user?.plan === 'pro' ? 'PRO' : 'Free'}
-                  </span>
-                  <div className="plan-card-actions">
-                    {user?.plan !== 'pro' ? (
-                      <button 
-                        className="btn-upgrade-pro-compact"
-                        onClick={() => setShowUpgradeModal(true)}
-                      >
-                        Pasar a PRO
-                      </button>
-                    ) : (
-                      <button 
-                        className="btn-cancel-plan-compact"
-                        onClick={() => setShowCancelPlanModal(true)}
-                      >
-                        Gestionar suscripción
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
+              {/* Eliminada la sección de gestión de planes */}
             </div>
           )}
 
@@ -1109,187 +995,6 @@ function UserProfile() {
         </div>
       )}
 
-      {/* Modal para upgrade a PRO */}
-      {showUpgradeModal && (
-        <div className="upgrade-modal-overlay">
-          <div className="upgrade-modal">
-            <div className="upgrade-modal-header">
-              <div className="upgrade-icon">⚡</div>
-              <h3>Activar Plan PRO</h3>
-              <p>Desbloquea todas las funcionalidades premium</p>
-            </div>
-            
-            <div className="upgrade-modal-body">
-              <div className="pro-features">
-                <div className="pro-feature">
-                  <span className="feature-check">✓</span>
-                  <span>Búsquedas ilimitadas</span>
-                </div>
-                <div className="pro-feature">
-                  <span className="feature-check">✓</span>
-                  <span>Guardar historial de búsquedas</span>
-                </div>
-                <div className="pro-feature">
-                  <span className="feature-check">✓</span>
-                  <span>Guardar empresas favoritas</span>
-                </div>
-                <div className="pro-feature">
-                  <span className="feature-check">✓</span>
-                  <span>Emails ilimitados</span>
-                </div>
-                <div className="pro-feature">
-                  <span className="feature-check">✓</span>
-                  <span>Fondo animado premium</span>
-                </div>
-              </div>
-
-              {upgradeError && (
-                <div className="upgrade-error">
-                  {upgradeError}
-                </div>
-              )}
-              
-              <div className="token-input-group">
-                <label>Ingresá tu código promocional:</label>
-                <input
-                  type="text"
-                  value={proTokenInput}
-                  onChange={(e) => {
-                    setProTokenInput(e.target.value.toUpperCase());
-                    setUpgradeError('');
-                  }}
-                  placeholder="Código promocional"
-                  disabled={upgradeLoading}
-                  autoFocus
-                />
-              </div>
-            </div>
-            
-            <div className="upgrade-modal-footer">
-              <button 
-                className="cancel-btn"
-                onClick={() => {
-                  setShowUpgradeModal(false);
-                  setProTokenInput('');
-                  setUpgradeError('');
-                }}
-                disabled={upgradeLoading}
-              >
-                Cancelar
-              </button>
-              <button 
-                className="upgrade-btn"
-                onClick={handleUpgradeToPro}
-                disabled={!proTokenInput.trim() || upgradeLoading}
-              >
-                {upgradeLoading ? 'Activando...' : '⚡ Activar PRO'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal para cancelar plan PRO */}
-      {showCancelPlanModal && (
-        <div className="cancel-plan-modal-overlay">
-          <div className="cancel-plan-modal">
-            <div className="cancel-plan-modal-header">
-              <h3>Cancelar Plan PRO</h3>
-              <p className="cancel-plan-modal-subtitle">¿Estás seguro de que deseas cancelar tu plan PRO?</p>
-            </div>
-            
-            <div className="cancel-plan-modal-body">
-              <div className="cancel-plan-warning-box">
-                <p className="cancel-plan-warning-title">Al cancelar tu plan PRO:</p>
-                <ul className="cancel-plan-warning-list">
-                  <li>Perderás acceso a búsquedas ilimitadas</li>
-                  <li>No podrás guardar historial de búsquedas</li>
-                  <li>No podrás guardar empresas favoritas</li>
-                  <li>Perderás el fondo animado premium</li>
-                  <li>Tu plan cambiará a Free inmediatamente</li>
-                </ul>
-              </div>
-              
-              {cancelPlanError && (
-                <div className="cancel-plan-error">
-                  {cancelPlanError}
-                </div>
-              )}
-              
-              <div className="confirm-input">
-                <label>Escribe <strong>CANCELAR</strong> para confirmar:</label>
-                <input
-                  type="text"
-                  value={cancelConfirmText}
-                  onChange={(e) => setCancelConfirmText(e.target.value.toUpperCase())}
-                  placeholder="CANCELAR"
-                  disabled={cancelPlanLoading}
-                />
-              </div>
-            </div>
-            
-            <div className="cancel-plan-modal-footer">
-              <button 
-                className="cancel-btn"
-                onClick={() => {
-                  setShowCancelPlanModal(false);
-                  setCancelConfirmText('');
-                  setCancelPlanError('');
-                }}
-                disabled={cancelPlanLoading}
-              >
-                Volver
-              </button>
-              <button 
-                className="cancel-plan-btn"
-                onClick={handleCancelPlan}
-                disabled={cancelConfirmText !== 'CANCELAR' || cancelPlanLoading}
-              >
-                {cancelPlanLoading ? 'Cancelando...' : 'Cancelar Plan PRO'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de éxito al cancelar plan PRO */}
-      {showCancelPlanSuccessModal && (
-        <div className="cancel-plan-success-modal-overlay">
-          <div className="cancel-plan-success-modal">
-            <div className="cancel-plan-success-modal-header">
-              <div className="cancel-plan-success-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-              </div>
-              <h3>Plan Cancelado Exitosamente</h3>
-            </div>
-            
-            <div className="cancel-plan-success-modal-body">
-              <p className="cancel-plan-success-message">
-                Tu plan PRO ha sido cancelado exitosamente.
-              </p>
-              <p className="cancel-plan-success-submessage">
-                Ahora tienes plan <strong>Free</strong>. Podés actualizar a PRO nuevamente cuando lo desees.
-              </p>
-            </div>
-            
-            <div className="cancel-plan-success-modal-footer">
-              <button 
-                className="cancel-plan-success-btn"
-                onClick={() => {
-                  setShowCancelPlanSuccessModal(false);
-                  // Recargar la página para que AuthWrapper cargue los datos actualizados de Supabase
-                  window.location.reload();
-                }}
-              >
-                Entendido
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal de éxito al eliminar cuenta */}
       {showDeleteSuccessModal && (
@@ -1328,43 +1033,6 @@ function UserProfile() {
         </div>
       )}
 
-      {/* Modal de éxito al activar PRO */}
-      {showUpgradeSuccessModal && (
-        <div className="cancel-plan-success-modal-overlay">
-          <div className="cancel-plan-success-modal">
-            <div className="cancel-plan-success-modal-header">
-              <div className="upgrade-success-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                </svg>
-              </div>
-              <h3>¡Plan PRO Activado!</h3>
-            </div>
-            
-            <div className="cancel-plan-success-modal-body">
-              <p className="cancel-plan-success-message">
-                Has activado tu suscripción PRO correctamente.
-              </p>
-              <p className="cancel-plan-success-submessage">
-                Ahora tenés acceso ilimitado a todas las herramientas premium. ¡Disfrutalo!
-              </p>
-            </div>
-            
-            <div className="cancel-plan-success-modal-footer">
-              <button 
-                className="cancel-plan-success-btn"
-                style={{ background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' }}
-                onClick={() => {
-                  setShowUpgradeSuccessModal(false);
-                  window.location.reload();
-                }}
-              >
-                Comenzar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );

@@ -20,7 +20,7 @@ function TableViewB2B({
   const [sortBy, setSortBy] = useState(null);
   const [sortColumn, setSortColumn] = useState(null);
   const { user } = useAuth();
-  const isPro = user?.plan === 'pro';
+  const isPro = true; // Todo es Pro ahora
   // Limitar itemsPerPage para evitar problemas de rendimiento
   const itemsPerPage = (isPro && showAllResults) ? 500 : 10;
   const tableContainerRef = useRef(null);
@@ -158,7 +158,7 @@ function TableViewB2B({
 
   const handleSort = (column) => {
     // Permitir ordenar por distancia a todos los usuarios
-    if (column === 'distancia' || isPro) {
+    if (column === 'distancia' || true) {
     if (sortColumn === column) {
       if (sortBy === 'asc') {
         setSortBy('desc');
@@ -205,72 +205,32 @@ function TableViewB2B({
           </div>
 
           <div className="header-actions" style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {isPro ? (
-              <button 
-                type="button" 
-                className="btn-action-inline btn-export"
-                onClick={() => onExportCSV(empresasFiltradas)}
-                disabled={empresasFiltradas.length === 0}
-                style={{ height: '32px', padding: '0 12px' }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                CSV
-              </button>
-            ) : (
-              <button 
-                type="button" 
-                className="btn-action-inline btn-export locked"
-                onClick={() => toastWarning?.(
-                  <>
-                    <strong>Función PRO</strong>
-                    <p>Exportar a CSV es exclusivo del plan PRO.</p>
-                  </>
-                )}
-                title="Exportar CSV (solo PRO)"
-                style={{ height: '32px', padding: '0 12px' }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                🔒
-              </button>
-            )}
+            <button 
+              type="button" 
+              className="btn-action-inline btn-export"
+              onClick={() => onExportCSV(empresasFiltradas)}
+              disabled={empresasFiltradas.length === 0}
+              style={{ height: '32px', padding: '0 12px' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              CSV
+            </button>
 
-            {isPro ? (
-              <button 
-                type="button" 
-                className="btn-action-inline btn-export-pdf"
-                onClick={() => onExportPDF(empresasFiltradas)}
-                disabled={empresasFiltradas.length === 0}
-                style={{ height: '32px', padding: '0 12px' }}
-                title="Exportar a PDF"
-              >
-                <FaFilePdf style={{ marginRight: '6px' }} />
-                PDF
-              </button>
-            ) : (
-               <button 
-                type="button" 
-                className="btn-action-inline btn-export locked"
-                onClick={() => toastWarning?.(
-                  <>
-                    <strong>Función PRO</strong>
-                    <p>Exportar a PDF es exclusivo del plan PRO.</p>
-                  </>
-                )}
-                title="Exportar PDF (solo PRO)"
-                style={{ height: '32px', padding: '0 12px' }}
-              >
-                <FaFilePdf style={{ marginRight: '6px' }} />
-                🔒
-              </button>
-            )}
+            <button 
+              type="button" 
+              className="btn-action-inline btn-export-pdf"
+              onClick={() => onExportPDF(empresasFiltradas)}
+              disabled={empresasFiltradas.length === 0}
+              style={{ height: '32px', padding: '0 12px' }}
+              title="Exportar a PDF"
+            >
+              <FaFilePdf style={{ marginRight: '6px' }} />
+              PDF
+            </button>
 
             <button
               type="button"
@@ -449,12 +409,8 @@ function TableViewB2B({
           <option value="distancia-desc">Distancia: Más lejano</option>
           <option value="nombre-asc">Nombre: A-Z</option>
           <option value="nombre-desc">Nombre: Z-A</option>
-          {isPro && (
-            <>
-              <option value="rubro-asc">Rubro: A-Z</option>
-              <option value="rubro-desc">Rubro: Z-A</option>
-            </>
-          )}
+          <option value="rubro-asc">Rubro: A-Z</option>
+          <option value="rubro-desc">Rubro: Z-A</option>
         </select>
 
         {hayFiltrosActivos && (
@@ -506,21 +462,21 @@ function TableViewB2B({
                   <th style={{ width: '45px', textAlign: 'center' }}>#</th>
                   <th
                     onClick={() => handleSort('nombre')}
-                    className={isPro ? 'sortable-header' : ''}
-                    title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
+                    className="sortable-header"
+                    title="Click para ordenar"
                   >
                     Empresa
-                    {isPro && sortColumn === 'nombre' && (
+                    {sortColumn === 'nombre' && (
                       <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
                     )}
                   </th>
                   <th
                     onClick={() => handleSort('rubro')}
-                    className={isPro ? 'sortable-header' : ''}
-                    title={isPro ? 'Click para ordenar' : 'Ordenar (solo PRO)'}
+                    className="sortable-header"
+                    title="Click para ordenar"
                   >
                     Rubro
-                    {isPro && sortColumn === 'rubro' && (
+                    {sortColumn === 'rubro' && (
                       <span className="sort-indicator">{sortBy === 'asc' ? ' ↑' : ' ↓'}</span>
                     )}
                   </th>

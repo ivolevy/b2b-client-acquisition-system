@@ -74,7 +74,7 @@ function CreateUserModal({ onClose, onSuccess }) {
     password: '',
     name: '',
     phone: '',
-    plan: 'free',
+    plan: 'pro',
     role: 'user'
   });
   const [loading, setLoading] = useState(false);
@@ -296,30 +296,16 @@ function CreateUserModal({ onClose, onSuccess }) {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div className="form-group">
-                <label>Plan</label>
-                <select
-                  value={formData.plan}
-                  onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
-                  className="form-select"
-                >
-                  <option value="free">Free</option>
-                  <option value="pro">PRO</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Rol</label>
-                <select
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="form-select"
-                >
-                  <option value="user">Usuario</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
+            <div className="form-group">
+              <label>Rol</label>
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                className="form-select"
+              >
+                <option value="user">Usuario</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
           </div>
 

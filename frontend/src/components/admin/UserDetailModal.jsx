@@ -14,9 +14,8 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
     email: '',
     name: '',
     phone: '',
-    plan: 'free',
-    role: 'user',
-    plan_expires_at: ''
+    plan: 'pro',
+    role: 'user'
   });
 
   useEffect(() => {
@@ -45,11 +44,8 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
           email: userData.email || '',
           name: userData.name || '',
           phone: userData.phone || '',
-          plan: userData.plan || 'free',
-          role: userData.role || 'user',
-          plan_expires_at: userData.plan_expires_at 
-            ? new Date(userData.plan_expires_at).toISOString().split('T')[0]
-            : ''
+          plan: 'pro',
+          role: userData.role || 'user'
         });
       }
     } catch (err) {
@@ -70,19 +66,9 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
         email: editForm.email,
         name: editForm.name,
         phone: editForm.phone,
-        plan: editForm.plan,
+        plan: 'pro',
         role: editForm.role
       };
-
-      if (editForm.plan === 'pro') {
-        // Si hay fecha de expiración, usarla; si no, se establecerá una por defecto en el backend
-        if (editForm.plan_expires_at) {
-          updates.plan_expires_at = new Date(editForm.plan_expires_at).toISOString();
-        }
-        // Si no hay fecha, no la incluimos en updates y el backend usará una por defecto
-      } else if (editForm.plan === 'free') {
-        updates.plan_expires_at = null;
-      }
 
       const { error: updateError } = await adminService.updateUser(userId, updates);
       if (updateError) throw updateError;
@@ -211,19 +197,8 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
               </div>
 
               <div className="form-section">
-                <h3>Plan y Rol</h3>
+                <h3>Rol del Usuario</h3>
                 <div className="form-grid">
-                  <div className="form-group">
-                    <label>Plan</label>
-                    <select
-                      value={editForm.plan}
-                      onChange={(e) => setEditForm({ ...editForm, plan: e.target.value })}
-                      className="form-select"
-                    >
-                      <option value="free">Free</option>
-                      <option value="pro">PRO</option>
-                    </select>
-                  </div>
                   <div className="form-group">
                     <label>Rol</label>
                     <select
@@ -235,17 +210,6 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
                       <option value="admin">Admin</option>
                     </select>
                   </div>
-                  {editForm.plan === 'pro' && (
-                    <div className="form-group">
-                      <label>Expiración del Plan PRO</label>
-                      <input
-                        type="date"
-                        value={editForm.plan_expires_at}
-                        onChange={(e) => setEditForm({ ...editForm, plan_expires_at: e.target.value })}
-                        className="form-input"
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

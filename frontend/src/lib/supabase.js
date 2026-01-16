@@ -34,7 +34,7 @@ export const authService = {
           data: {
             name: name,
             phone: phone,
-            plan: 'free'
+            plan: 'pro'
           }
         }
       });
@@ -193,7 +193,7 @@ export const authService = {
       email: user.email,
       name: profile?.name || user.email?.split('@')[0] || 'Usuario',
       phone: profile?.phone || '',
-      plan: profile?.plan || 'free',
+      plan: profile?.plan || 'pro',
       role: profile?.role || 'user', // Siempre usar role del perfil, nunca derivar del plan
       loginTime: new Date().toISOString(),
       ...profile // Incluir todos los campos adicionales del perfil
@@ -306,19 +306,7 @@ export const userService = {
       user.searches_today = 0;
     }
 
-    // Verificar límite según plan
-    if (user.plan === 'pro') {
-      return { canSearch: true, remaining: 'unlimited' };
-    }
-
-    const limit = 5; // FREE limit
-    const canSearch = user.searches_today < limit;
-
-    return {
-      canSearch,
-      remaining: limit - user.searches_today,
-      limit
-    };
+    return { canSearch: true, remaining: 'unlimited' };
   },
 
   // Incrementar contador de búsquedas

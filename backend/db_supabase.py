@@ -141,11 +141,6 @@ def admin_update_user(user_id: str, updates: Dict) -> Dict:
                      'expires_at': expires_at
                  }).eq('id', sub_id).execute()
                  
-        elif updates.get('plan') == 'free':
-             # Cancelar suscripciones activas
-             admin_client.table('subscriptions').update({
-                 'status': 'cancelled'
-             }).eq('user_id', user_id).eq('status', 'active').execute()
             
         return {"success": True, "message": "Usuario actualizado correctamente"}
         
