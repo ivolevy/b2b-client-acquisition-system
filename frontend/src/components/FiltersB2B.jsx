@@ -19,8 +19,8 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
   // Ref para evitar ejecuciones múltiples de búsqueda desde historial
   const historySearchExecutedRef = useRef(false);
   
-  // Verificar si hay API key de Google Maps
-  const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  // Verificar si hay API key de Google Maps - Migración a GPA desactivada temporalmente
+  const GOOGLE_API_KEY = null; // import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   
   // Efecto para cargar datos desde historial
   useEffect(() => {

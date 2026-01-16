@@ -689,8 +689,8 @@ function AppB2B() {
   };
 
   return (
-    <div className="app">
-      
+    <div className="app pro-theme">
+      <ProBackground />
       
       <Navbar />
       

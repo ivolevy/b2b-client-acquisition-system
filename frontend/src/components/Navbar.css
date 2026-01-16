@@ -211,7 +211,7 @@
 .dropdown-overlay {
   position: fixed;
   inset: 0;
-  z-index: 999;
+  z-index: 1000;
 }
 
 .user-dropdown {
@@ -222,7 +222,7 @@
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   min-width: 220px;
-  z-index: 110;
+  z-index: 1001;
   overflow: hidden;
   animation: dropdownFadeIn 0.2s ease;
 }
