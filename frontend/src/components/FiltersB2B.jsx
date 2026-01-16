@@ -135,7 +135,9 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
           <button 
             type="button" 
             className="btn-history"
-            onClick={() => setShowHistory(true)}
+            onClick={() => {
+              setShowHistory(true);
+            }}
             disabled={loading}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -226,7 +228,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
             <div className="option-card">
                 <div className="option-info">
                   <div className="option-head">
-                    <div className="option-title">Solo con contacto válido</div>
+                    <div className="option-title">Solo contacto válido</div>
                     <div className={`status-badge ${soloValidadas ? 'warn' : 'info'}`}>
                       {soloValidadas ? 'Menos resultados' : 'Más resultados'}
                     </div>

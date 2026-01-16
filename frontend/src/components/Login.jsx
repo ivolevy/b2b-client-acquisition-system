@@ -1195,18 +1195,17 @@ function Login({ onLogin }) {
             </form>
 
             <div className="form-footer">
-              {useSupabase ? (
-                <p>
-                  {mode === 'login' 
-                    ? '¿No tienes una cuenta? ' 
-                    : '¿Ya tienes una cuenta? '}
-                  <button type="button" className="link-button" onClick={toggleMode}>
-                    {mode === 'login' ? 'Regístrate' : 'Inicia sesión'}
-                  </button>
-                </p>
-              ) : (
-                <p>¿No tienes una cuenta? <a href="#">Contactar administrador</a></p>
-              )}
+              <p>
+                ¿No tienes una cuenta?{' '}
+                <a 
+                  href="https://dotasolutions.agency" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="contact-admin-link"
+                >
+                  Contactar administrador
+                </a>
+              </p>
             </div>
           </div>
 

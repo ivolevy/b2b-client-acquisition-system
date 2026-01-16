@@ -608,3 +608,63 @@ def save_user_rubros(user_id: str, rubro_keys: List[str]) -> bool:
     except Exception as e:
         logger.error(f"Error guardando rubros para usuario {user_id}: {e}")
         return False
+
+def save_search_history(user_id: str, search_data: dict) -> dict:
+    """Guarda una búsqueda en el historial del usuario usando el cliente admin para saltar RLS"""
+    admin_client = get_supabase_admin()
+    if not admin_client or not user_id:
+        return {"success": False, "error": "No hay cliente o user_id"}
+        
+    try:
+        insert_data = {
+            "user_id": user_id,
+            "rubro": search_data.get("rubro"),
+            "ubicacion_nombre": search_data.get("ubicacion_nombre"),
+            "centro_lat": search_data.get("centro_lat"),
+            "centro_lng": search_data.get("centro_lng"),
+            "radio_km": search_data.get("radio_km"),
+            "bbox": search_data.get("bbox"),
+            "empresas_encontradas": search_data.get("empresas_encontradas", 0),
+            "empresas_validas": search_data.get("empresas_validas", 0)
+        }
+        
+        response = admin_client.table('search_history').insert(insert_data).execute()
+        if response.data:
+            return {"success": True, "data": response.data[0]}
+        return {"success": False, "error": "No se recibieron datos tras la inserción"}
+    except Exception as e:
+        logger.error(f"Error guardando historial para {user_id}: {e}")
+        return {"success": False, "error": str(e)}
+
+def get_search_history(user_id: str, limit: int = 10) -> List[dict]:
+    """Obtiene el historial de búsquedas del usuario usando el cliente admin"""
+    admin_client = get_supabase_admin()
+    if not admin_client or not user_id:
+        return []
+        
+    try:
+        response = admin_client.table('search_history')\
+            .select('id, rubro, ubicacion_nombre, centro_lat, centro_lng, radio_km, bbox, empresas_encontradas, empresas_validas, created_at')\
+            .eq('user_id', user_id)\
+            .order('created_at', ascending=False)\
+            .limit(limit)\
+            .execute()
+            
+        return response.data or []
+    except Exception as e:
+        logger.error(f"Error obteniendo historial para {user_id}: {e}")
+        return []
+
+def delete_search_history(user_id: str, search_id: str) -> bool:
+    """Elimina una entrada del historial validando que pertenezca al usuario"""
+    admin_client = get_supabase_admin()
+    if not admin_client or not user_id or not search_id:
+        return False
+        
+    try:
+        # Usamos admin pero filtramos por user_id para seguridad
+        admin_client.table('search_history').delete().eq('id', search_id).eq('user_id', user_id).execute()
+        return True
+    except Exception as e:
+        logger.error(f"Error eliminando historial {search_id} para {user_id}: {e}")
+        return False

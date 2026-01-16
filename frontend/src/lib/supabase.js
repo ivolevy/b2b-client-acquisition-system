@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { API_URL } from '../config';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -307,61 +308,73 @@ export const userService = {
 export const searchHistoryService = {
   // Guardar búsqueda
   async saveSearch(userId, searchData) {
-    console.log('[SearchHistory] Guardando búsqueda:', { userId, searchData });
+    try {
+      const response = await fetch(`${API_URL}/users/history`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          rubro: searchData.rubro,
+          ubicacion_nombre: searchData.ubicacion_nombre || null,
+          centro_lat: searchData.centro_lat || null,
+          centro_lng: searchData.centro_lng || null,
+          radio_km: searchData.radio_km || null,
+          bbox: searchData.bbox || null,
+          empresas_encontradas: searchData.empresas_encontradas || 0,
+          empresas_validas: searchData.empresas_validas || 0
+        })
+      });
 
-    const insertData = {
-      user_id: userId,
-      rubro: searchData.rubro,
-      ubicacion_nombre: searchData.ubicacion_nombre || null,
-      centro_lat: searchData.centro_lat || null,
-      centro_lng: searchData.centro_lng || null,
-      radio_km: searchData.radio_km || null,
-      bbox: searchData.bbox || null,
-      empresas_encontradas: searchData.empresas_encontradas || 0,
-      empresas_validas: searchData.empresas_validas || 0
-    };
+      const data = await response.json();
 
-    console.log('[SearchHistory] Datos a insertar:', insertData);
+      if (!response.ok) {
+        return { data: null, error: { message: data.detail || 'Error al guardar historial' } };
+      }
 
-    const { data, error } = await supabase
-      .from('search_history')
-      .insert(insertData)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('[SearchHistory] Error al guardar:', error);
-      console.error('[SearchHistory] Código:', error.code);
-      console.error('[SearchHistory] Mensaje:', error.message);
-      console.error('[SearchHistory] Detalles:', error.details);
-    } else {
-      console.log('[SearchHistory] Guardado exitosamente:', data);
+      return { data: data.data, error: null };
+    } catch (error) {
+      console.error('[SearchHistory] Error catch:', error);
+      return { data: null, error };
     }
-
-    return { data, error };
   },
 
   // Obtener historial
   async getHistory(userId, limit = 20) {
-    const { data, error } = await supabase
-      .from('search_history')
-      // Seleccionar columnas específicas para reducir payload
-      .select('id, rubro, ubicacion_nombre, centro_lat, centro_lng, radio_km, bbox, empresas_encontradas, empresas_validas, created_at')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false }) // Corregido: Usar created_at para orden cronológico real y aprovechar el índice
-      .limit(limit);
+    try {
+      const response = await fetch(`${API_URL}/users/${userId}/history?limit=${limit}`);
+      const data = await response.json();
 
-    return { data, error };
+      if (!response.ok) {
+        return { data: null, error: { message: data.detail || 'Error al obtener historial' } };
+      }
+
+      return { data: data.history, error: null };
+    } catch (error) {
+      console.error('[SearchHistory] Error catch:', error);
+      return { data: null, error };
+    }
   },
 
   // Eliminar búsqueda del historial
-  async deleteSearch(searchId) {
-    const { error } = await supabase
-      .from('search_history')
-      .delete()
-      .eq('id', searchId);
+  async deleteSearch(userId, searchId) {
+    try {
+      const response = await fetch(`${API_URL}/users/${userId}/history/${searchId}`, {
+        method: 'DELETE'
+      });
 
-    return { error };
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { error: { message: data.detail || 'Error al eliminar historial' } };
+      }
+
+      return { error: null };
+    } catch (error) {
+      console.error('[SearchHistory] Error catch:', error);
+      return { error };
+    }
   }
 };
 

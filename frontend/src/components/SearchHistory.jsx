@@ -33,27 +33,39 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
   const loadSearchHistory = useCallback(async () => {
     if (!user?.id) {
       setLoading(false);
-      setError('Usuario no identificado');
       return;
     }
 
     setLoading(true);
     setError(null);
+    
     try {
-      // Timeout aumentado significativamente para conexiones lentas
+      // Timeout de 20s
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout: La solicitud tardó demasiado (30s). Por favor, verificá tu conexión.')), 30000)
+        setTimeout(() => reject(new Error('Timeout: El servidor no responde.')), 20000)
       );
 
-      const fetchPromise = searchHistoryService.getHistory(user.id, 5);
+      const fetchPromise = searchHistoryService.getHistory(user.id, 10);
       const result = await Promise.race([fetchPromise, timeoutPromise]);
-      const { data, error: fetchError } = result || { data: null, error: new Error('No se recibió respuesta') };
       
-      if (fetchError) throw fetchError;
+      if (!result) {
+        throw new Error('Sin respuesta del servidor.');
+      }
+
+      const { data, error: fetchError } = result;
+      
+      if (fetchError) {
+        if (fetchError.code === 'PGRST116') {
+          setSearches([]);
+          return;
+        }
+        throw new Error(fetchError.message);
+      }
+      
       setSearches(data || []);
     } catch (err) {
-      console.error('Error loading search history:', err);
-      setError(err.message || 'No se pudo cargar el historial');
+      console.error('Error al cargar historial:', err);
+      setError(err.message || 'Error al cargar el historial');
     } finally {
       setLoading(false);
     }
@@ -64,13 +76,15 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
       if (user?.id) {
         loadSearchHistory();
       } else {
-        setLoading(false);
-        setError('Debes estar autenticado para ver el historial');
+        const userWaitTimeout = setTimeout(() => {
+          if (!user?.id) {
+             setLoading(false);
+             setError('Inicia sesión para ver tu historial');
+          }
+        }, 3000);
+        return () => clearTimeout(userWaitTimeout);
       }
     } else {
-      // Resetear estado cuando se cierra
-      setLoading(true);
-      setError(null);
       setSearches([]);
     }
   }, [isOpen, user?.id, loadSearchHistory]);
@@ -78,7 +92,7 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
   const handleDeleteSearch = async (searchId, e) => {
     e.stopPropagation();
     try {
-      const { error: deleteError } = await searchHistoryService.deleteSearch(searchId);
+      const { error: deleteError } = await searchHistoryService.deleteSearch(user.id, searchId);
       if (deleteError) throw deleteError;
       setSearches(prev => prev.filter(s => s.id !== searchId));
     } catch (err) {

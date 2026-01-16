@@ -42,7 +42,10 @@ try:
         admin_update_user,
         eliminar_usuario_totalmente,
         get_user_rubros,
-        save_user_rubros
+        save_user_rubros,
+        save_search_history,
+        get_search_history,
+        delete_search_history
     )
     from .auth_google import get_google_auth_url, exchange_code_for_token
 except ImportError:
@@ -72,7 +75,10 @@ except ImportError:
         admin_update_user,
         eliminar_usuario_totalmente,
         get_user_rubros,
-        save_user_rubros
+        save_user_rubros,
+        save_search_history,
+        get_search_history,
+        delete_search_history
     )
     from auth_google import get_google_auth_url, exchange_code_for_token
     from db_supabase import (
@@ -521,6 +527,17 @@ class UserRubrosRequest(BaseModel):
     user_id: str
     rubro_keys: List[str]
 
+class SearchHistoryRequest(BaseModel):
+    user_id: str
+    rubro: str
+    ubicacion_nombre: Optional[str] = None
+    centro_lat: Optional[float] = None
+    centro_lng: Optional[float] = None
+    radio_km: Optional[float] = None
+    bbox: Optional[str] = None
+    empresas_encontradas: Optional[int] = 0
+    empresas_validas: Optional[int] = 0
+
 # Inicializar sistema en memoria
 @app.on_event("startup")
 async def startup():
@@ -613,6 +630,34 @@ async def api_save_user_rubros(request: UserRubrosRequest):
         "success": True,
         "message": "Preferencias de rubros guardadas correctamente"
     }
+
+@app.get("/users/{user_id}/history")
+async def api_get_search_history(user_id: str, limit: int = 10):
+    """Obtiene el historial de búsquedas de un usuario"""
+    history = get_search_history(user_id, limit)
+    return {
+        "success": True,
+        "user_id": user_id,
+        "history": history
+    }
+
+@app.post("/users/history")
+async def api_save_search_history(request: SearchHistoryRequest):
+    """Guarda una búsqueda en el historial"""
+    result = save_search_history(request.user_id, request.dict())
+    if not result.get("success"):
+        raise HTTPException(status_code=500, detail=result.get("error", "Error al guardar historial"))
+    
+    return result
+
+@app.delete("/users/{user_id}/history/{search_id}")
+async def api_delete_search_history(user_id: str, search_id: str):
+    """Elimina una entrada del historial"""
+    success = delete_search_history(user_id, search_id)
+    if not success:
+        raise HTTPException(status_code=500, detail="Error al eliminar del historial")
+    
+    return {"success": True, "message": "Entrada eliminada correctamente"}
 
 @app.post("/buscar")
 async def buscar_por_rubro(request: BusquedaRubroRequest):
