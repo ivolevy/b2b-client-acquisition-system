@@ -94,6 +94,16 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
       return;
     }
 
+    if (!locationData.radius) {
+      toastWarning?.(
+        <>
+          <strong>Selecciona un radio</strong>
+          <p>Indica el radio de búsqueda (en km) para la zona seleccionada.</p>
+        </>
+      );
+      return;
+    }
+
     const params = {
       rubro: rubro,
       bbox: locationData.bbox.bbox_string,
@@ -151,7 +161,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                     required
                     className="select-rubro-compact"
                   >
-                    <option value="">-- Selecciona un rubro --</option>
+                    <option value="" disabled>-- Selecciona un rubro --</option>
                     {rubros && Object.keys(rubros).length > 0 ? (
                       Object.entries(rubros).map(([key, nombre]) => (
                       <option key={key} value={key}>{nombre}</option>

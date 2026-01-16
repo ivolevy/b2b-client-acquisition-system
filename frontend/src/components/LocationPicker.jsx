@@ -58,7 +58,7 @@ const formatNominatimResult = (item) => {
 
 function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [radius, setRadius] = useState(5000); // 5km por defecto
+  const [radius, setRadius] = useState(''); // Sin radio por defecto para mostrar placeholder
   const [mapCenter, setMapCenter] = useState([40.4168, -3.7038]); // Madrid por defecto
   const [initialLocationApplied, setInitialLocationApplied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -669,7 +669,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     <div className="search-row" ref={suggestionsRef}>
       <div className="radius-control">
         <label className="radius-label">Radio de búsqueda</label>
-        <select value={radius} onChange={(e) => handleRadiusChange(parseInt(e.target.value))}>
+        <select value={radius} onChange={(e) => handleRadiusChange(e.target.value ? parseInt(e.target.value) : '')}>
+          <option value="" disabled>-- Selecciona un radio --</option>
           {[...Array(15)].map((_, i) => {
             const km = i + 1;
             return (
