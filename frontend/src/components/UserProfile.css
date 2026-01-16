@@ -1070,6 +1070,35 @@ body.profile-page-active {
 }
 
 /* Rubros Grid */
+.rubros-selection-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.btn-rubros-action {
+  padding: 6px 14px;
+  background: white;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  color: var(--gray-700);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-rubros-action:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-400);
+  color: var(--gray-900);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.btn-rubros-action:active {
+  transform: translateY(1px);
+}
+
 .rubros-modern-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));

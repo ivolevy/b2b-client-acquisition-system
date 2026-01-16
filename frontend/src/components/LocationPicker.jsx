@@ -682,44 +682,48 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       </div>
 
       <div className="address-search">
-        <div className="address-search-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', maxWidth: '400px' }}>
-          <label htmlFor="address-input" style={{ marginBottom: 0 }}>BUSCAR DIRECCIÓN</label>
-          <div className="location-inline-container-new">
-            <span className="location-separator">o</span>
-            <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>
-              USAR UBICACION ACTUAL
+        <label htmlFor="address-input" className="address-label-compact">BUSCAR DIRECCIÓN</label>
+        <div className="address-input-group-modern">
+          <div className="address-input-wrapper">
+            <input
+              id="address-input"
+              type="text"
+              className="address-input"
+              placeholder="Ej: Plaza de Mayo, Buenos Aires"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onKeyDown={handleAddressKeyDown}
+              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+              autoComplete="off"
+            />
+            <button 
+              type="button" 
+              className="btn-search-address"
+              onClick={(e) => {
+                e.preventDefault();
+                handleAddressSubmit();
+              }}
+              disabled={isSearching || !searchQuery || searchQuery.trim().length < 3}
+              title="Buscar dirección"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
             </button>
           </div>
-        </div>
-        <div className="address-input-wrapper">
-          <input
-            id="address-input"
-            type="text"
-            className="address-input"
-            placeholder="Ej: Plaza de Mayo, Buenos Aires"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setShowSuggestions(true);
-            }}
-            onKeyDown={handleAddressKeyDown}
-            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-            autoComplete="off"
-          />
-          <button 
-            type="button" 
-            className="btn-search-address"
-            onClick={(e) => {
-              e.preventDefault();
-              handleAddressSubmit();
-            }}
-            disabled={isSearching || !searchQuery || searchQuery.trim().length < 3}
-            title="Buscar dirección"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          
+          <div className="location-action-divider">o</div>
+          
+          <button type="button" className="btn-location-link-compact" onClick={handleUseCurrentLocation}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
             </svg>
+            USAR MI UBICACIÓN
           </button>
         </div>
         {isSearching && <div className="address-status">Buscando coincidencias...</div>}

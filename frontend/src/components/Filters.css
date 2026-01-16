@@ -121,12 +121,16 @@
   font-weight: 700;
   color: var(--gray-400);
   /* Color sutil */
-  margin-bottom: 0;
+  margin-bottom: 2px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
   flex: 0 0 auto;
   line-height: 1;
+}
+
+.address-label-compact {
+  display: block;
 }
 
 /* Separadores verticales */
@@ -253,14 +257,55 @@
 
 
 /* Wrapper del input y botón de búsqueda */
+.form-row-compact .address-input-group-modern {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
 .form-row-compact .address-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
-  max-width: 400px;
-  /* Limitamos el ancho para que no sea infinito */
+  flex: 1;
+  max-width: 320px;
+  /* Acortamos el input como pidió el usuario */
   z-index: 20;
+}
+
+.location-action-divider {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+  font-weight: 500;
+  text-transform: lowercase;
+}
+
+.btn-location-link-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-location-link-compact:hover {
+  background: rgba(59, 130, 246, 0.05);
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.btn-location-link-compact svg {
+  opacity: 0.8;
 }
 
 /* El botón de ubicación ahora está en el header, estilos base */

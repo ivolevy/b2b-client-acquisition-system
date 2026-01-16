@@ -122,6 +122,17 @@ function UserProfile() {
   const handleSaveRubros = async () => {
     setSavingRubros(true);
     setRubrosError('');
+    if (selectedRubros.length === 0) {
+      toastWarning?.(
+        <>
+          <strong>Selección requerida</strong>
+          <p>Debes elegir al menos un rubro para poder buscar empresas.</p>
+        </>
+      );
+      setSavingRubros(false);
+      return;
+    }
+
     try {
       const response = await axios.post(`${API_URL}/users/rubros`, {
         user_id: user.id,
@@ -129,6 +140,7 @@ function UserProfile() {
       });
       if (response.data.success) {
         setRubrosSaved(true);
+        toastSuccess?.("Preferencias de rubros guardadas correctamente.");
         setTimeout(() => setRubrosSaved(false), 3000);
       }
     } catch (err) {
@@ -144,6 +156,22 @@ function UserProfile() {
       prev.includes(key) 
         ? prev.filter(k => k !== key) 
         : [...prev, key]
+    );
+  };
+
+  const handleSelectAll = () => {
+    setSelectedRubros(Object.keys(availableRubros));
+  };
+
+  const handleDeselectAll = () => {
+    // Dejamos el primero o simplemente vaciamos y validamos al guardar
+    // El usuario pidió "mínimo 1", así que al guardar validaremos.
+    setSelectedRubros([]);
+    toastWarning?.(
+      <>
+        <strong>Selección vacía</strong>
+        <p>Recuerda que debes tener al menos un rubro seleccionado para guardar.</p>
+      </>
     );
   };
 
@@ -502,6 +530,15 @@ function UserProfile() {
                 </div>
               ) : (
                 <div className="rubros-selection-wrapper">
+                  <div className="rubros-selection-actions">
+                    <button type="button" className="btn-rubros-action" onClick={handleSelectAll}>
+                      Seleccionar todos
+                    </button>
+                    <button type="button" className="btn-rubros-action" onClick={handleDeselectAll}>
+                      Deseleccionar todos
+                    </button>
+                  </div>
+
                   <div className="rubros-modern-grid">
                     {Object.entries(availableRubros).map(([key, nombre]) => (
                       <div 
