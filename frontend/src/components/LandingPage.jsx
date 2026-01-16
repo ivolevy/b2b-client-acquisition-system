@@ -15,7 +15,6 @@ function LandingPage() {
         </div>
         <div className="landing-nav-links">
           <span className="nav-link" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>Features</span>
-          <span className="nav-link" onClick={() => document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})}>Pricing</span>
           <span className="nav-link" onClick={() => window.location.href = 'mailto:support@smartleads.com'}>Support</span>
         </div>
         <button className="btn-login-nav" onClick={() => navigate('/')}>
@@ -110,30 +109,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="landing-pricing">
-        <div className="pricing-grid">
-          {/* Unified Pro Plan */}
-          <div className="pricing-card pro" style={{ maxWidth: '500px', margin: '0 auto' }}>
-            <div className="pricing-header">
-              <h3 className="plan-name" style={{color: '#60A5FA'}}>Premium Access</h3>
-              <div className="price-container">
-                <span className="price">Full Access</span>
-              </div>
-              <p className="period">All core features included</p>
-            </div>
-            <ul className="pricing-features">
-              <li className="pricing-feature"><FaCheck /> Unlimited Searches</li>
-              <li className="pricing-feature"><FaCheck /> Unlimited Leads</li>
-              <li className="pricing-feature"><FaCheck /> Social Media Enrichment</li>
-              <li className="pricing-feature"><FaCheck /> Advanced Email Validation</li>
-              <li className="pricing-feature"><FaCheck /> Automated Bulk Sending</li>
-              <li className="pricing-feature"><FaCheck /> Priority Support</li>
-            </ul>
-            <button className="btn-pricing glow" onClick={() => navigate('/')}>Access Now</button>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="landing-footer">
