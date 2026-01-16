@@ -376,7 +376,8 @@ function AuthWrapper() {
           <Routes>
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/profile" element={
-              <div className="app">
+              <div className="app pro-theme">
+                <ProBackground />
                 <Navbar />
                 <main className="main-content">
                   <UserProfile />
@@ -384,7 +385,8 @@ function AuthWrapper() {
               </div>
             } />
             <Route path="/backoffice" element={
-              <div className="app">
+              <div className="app pro-theme">
+                <ProBackground />
                 <AdminLayout />
               </div>
             }>
