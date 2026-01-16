@@ -245,37 +245,23 @@
   color: #374151 !important;
 }
 
+
 /* Wrapper del input y botón de búsqueda */
 .form-row-compact .address-input-wrapper {
   display: flex;
   align-items: center;
-  position: relative;
-  width: 100%;
-  gap: 0;
-}
-
-/* Contenedor del enlace "usar ubicación actual" - RESTAURADO ARRIBA */
-.form-row-compact .location-inline-container {
-  position: absolute;
   right: 0;
-  top: -1.4rem;
-  /* Alineado con el label */
+  top: -1.7rem;
+  /* Subido para alinearse con el label */
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  z-index: 10;
-  background: transparent;
-  padding: 0;
-  height: auto;
-  transform: none;
+  z-index: 20;
 }
 
-.form-row-compact .or-text {
-  display: none;
-}
-
+/* El botón de ubicación ahora está en el header, estilos base */
 .form-row-compact .btn-location-inline {
-  font-size: 0.70rem;
+  font-size: 0.65rem;
   color: #3b82f6;
   text-decoration: none;
   background: none;
@@ -285,23 +271,20 @@
   white-space: nowrap;
   font-weight: 700;
   text-transform: uppercase;
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  margin-left: auto;
+  /* Push to right just in case */
 }
 
 .form-row-compact .btn-location-inline:hover {
-  background-color: transparent;
-  color: #2563eb;
   text-decoration: underline;
+  color: #2563eb;
 }
 
-/* Ajustamos el padding del input a la normalidad */
+/* Ajustamos el padding del input para dejar espacio solo a la lupa */
 .form-row-compact .address-input {
   padding-right: 40px !important;
-  /* Espacio solo para la lupa */
 }
+
 
 .form-row-compact .location-text {
   font-size: 0.8rem;

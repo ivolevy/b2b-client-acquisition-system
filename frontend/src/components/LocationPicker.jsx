@@ -658,7 +658,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       </div>
 
       <div className="address-search">
-        <label htmlFor="address-input">Buscar dirección</label>
+        <label htmlFor="address-input">BUSCAR DIRECCIÓN</label>
         <div className="address-input-wrapper">
           <input
             id="address-input"
@@ -689,9 +689,11 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
           </button>
+          
           <div className="location-inline-container">
-            <span className="or-text">o</span>
-            <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>usar ubicacion actual</button>
+            <button type="button" className="btn-location-inline" onClick={handleUseCurrentLocation}>
+              USAR UBICACION ACTUAL
+            </button>
           </div>
         </div>
         {isSearching && <div className="address-status">Buscando coincidencias...</div>}
