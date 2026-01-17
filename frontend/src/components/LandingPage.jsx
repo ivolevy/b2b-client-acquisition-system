@@ -1,125 +1,233 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaMapMarkedAlt, FaPlane, FaSearch, FaCheckCircle, FaRocket, FaCheck, FaDatabase, FaBolt, FaGlobeAmericas } from 'react-icons/fa';
+import { 
+  FaArrowRight, 
+  FaMapMarkerAlt, 
+  FaRobot, 
+  FaEnvelopeOpenText, 
+  FaDatabase, 
+  FaCheck, 
+  FaLinkedin, 
+  FaTwitter, 
+  FaInstagram,
+  FaBolt
+} from 'react-icons/fa';
 import './LandingPage.css';
 
 function LandingPage() {
   const navigate = useNavigate();
 
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="landing-page">
-      {/* Navbar Floating Pill */}
-      <nav className="landing-nav">
-        <div className="landing-logo">
-          <FaBolt /> Smart Leads
-        </div>
-        <div className="landing-nav-links">
-          <span className="nav-link" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>Features</span>
-          <span className="nav-link" onClick={() => window.location.href = 'mailto:support@smartleads.com'}>Support</span>
-        </div>
-        <button className="btn-login-nav" onClick={() => navigate('/')}>
-          Login
-        </button>
-      </nav>
-
-      {/* Hero Section */}
-      <header className="landing-hero">
-        <div className="hero-content">
-          <div className="hero-badge">
-            <span className="badge-dot"></span>
-            v2.0 Now Available
+      {/* Header / Navbar */}
+      <header className="landing-header">
+        <div className="container header-container">
+          <div className="logo" onClick={() => navigate('/')}>
+            <div className="logo-icon"><FaBolt /></div>
+            <span>Smart Leads</span>
           </div>
-          <h1 className="hero-title">
-            Turn Google Maps into your<br/>
-            <span>Client Database</span>
-          </h1>
-          <p className="hero-subtitle">
-            Extract verified B2B leads, enrich data with social profiles, and automate your cold outreach—all from a single, beautiful interface.
-          </p>
-          <div className="hero-cta-group">
-            <button className="btn-cta-primary" onClick={() => navigate('/')}>
-              Get Started
-            </button>
-            <button className="btn-cta-secondary" onClick={() => document.getElementById('features').scrollIntoView({behavior: 'smooth'})}>
-              How it works
-            </button>
+          <nav className="main-nav">
+            <button onClick={() => scrollToSection('services')}>Servicios</button>
+            <button onClick={() => scrollToSection('features')}>Funciones</button>
+            <button onClick={() => scrollToSection('pricing')}>Precios</button>
+            <button onClick={() => navigate('/blog')}>Blog</button>
+            <button onClick={() => navigate('/contact')}>Contacto</button>
+          </nav>
+          <div className="header-actions">
+            <button className="btn-login" onClick={() => navigate('/')}>Log in</button>
+            <button className="btn-primary-small" onClick={() => navigate('/')}>Empezar ahora</button>
           </div>
         </div>
       </header>
 
-      {/* Bento Grid Features */}
-      <section id="features" className="landing-features">
-        <div className="section-header">
-          <h2 className="section-title">Everything you need to grow</h2>
-          <p className="section-desc">Powerful tools designed for modern sales teams.</p>
-        </div>
-
-        <div className="bento-grid">
-          {/* Main Feature - Wide */}
-          <div className="bento-card wide">
-            <div className="card-icon"><FaGlobeAmericas /></div>
-            <h3 className="card-title">Global Geolocation Search</h3>
-            <p className="card-text">
-              Draw a radius anywhere in the world and identify every business in your niche. 
-              Our integration with Google Places ensures 99.9% accuracy for local businesses.
+      {/* Hero Section */}
+      <section className="hero">
+        <div className="container hero-container">
+          <div className="hero-text">
+            <h1>Software that saves money and drives revenue</h1>
+            <p>
+              Construimos soluciones personalizadas que reducen costes operativos, 
+              automatizan el trabajo manual e incrementan tus documentos.
             </p>
+            <button className="btn-primary" onClick={() => navigate('/')}>
+              Contactanos <FaArrowRight />
+            </button>
           </div>
-
-          {/* Feature - Vertical */}
-          <div className="bento-card tall">
-            <div className="card-icon"><FaDatabase /></div>
-            <h3 className="card-title">Data Enrichment</h3>
-            <p className="card-text">
-              We don't just find names. We find:
-              <br/><br/>
-              • Direct Emails<br/>
-              • Phone Numbers<br/>
-              • LinkedIn Profiles<br/>
-              • Instagram Handles<br/>
-              • Website Technology
-            </p>
-          </div>
-
-          {/* Feature - Standard */}
-          <div className="bento-card">
-            <div className="card-icon"><FaCheckCircle /></div>
-            <h3 className="card-title">Verified Contacts</h3>
-            <p className="card-text">
-              Stop bouncing. Our real-time validation engine tests every email before you send.
-            </p>
-          </div>
-
-          {/* Feature - Standard */}
-          <div className="bento-card">
-            <div className="card-icon"><FaRocket /></div>
-            <h3 className="card-title">Bulk Sender</h3>
-            <p className="card-text">
-              Launch campaigns to 1,000+ prospects with persistent personalized templates.
-            </p>
-          </div>
-
-          {/* Feature - Wide */}
-          <div className="bento-card wide">
-            <div className="card-icon"><FaBolt /></div>
-            <h3 className="card-title">Instant Export</h3>
-             <p className="card-text">
-              Push your leads directly to your CRM or download as CSV/Excel compatible with Apollo, Instantly, and more.
-            </p>
+          <div className="hero-mockup">
+            <div className="laptop-wrapper">
+              <img src="https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?q=80&w=2071&auto=format&fit=crop" alt="Dashboard Mockup" />
+            </div>
           </div>
         </div>
       </section>
 
+      {/* AI Section */}
+      <section id="services" className="ai-section">
+        <div className="container">
+          <h2 className="section-title text-center">Potenciado por Inteligencia Artificial</h2>
+          
+          <div className="ai-grid">
+            <div className="ai-card">
+              <div className="card-icon"><FaMapMarkerAlt /></div>
+              <h3>Geolocalización Avanzada</h3>
+              <p>Centra empresas con conocimiento y revisa inversamente y cada configuración.</p>
+            </div>
+            <div className="ai-card">
+              <div className="card-icon"><FaRobot /></div>
+              <h3>Por Inteligencia Artificial</h3>
+              <p>Botones de contacto, activada la generación de emails automáticamente.</p>
+            </div>
+            <div className="ai-card">
+              <div className="card-icon"><FaEnvelopeOpenText /></div>
+              <h3>Potenciado por Indirectamente</h3>
+              <p>Conecta centros positivos y genera artificial, profesionalmente e inmediatamente.</p>
+            </div>
+          </div>
+
+          <div className="dashboard-preview">
+             <img src="https://images.unsplash.com/photo-1551288049-bbda48658a7d?q=80&w=2070&auto=format&fit=crop" alt="Dashboard Feature" />
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Modules */}
+      <section id="features" className="modules-section">
+        <div className="container">
+          <div className="section-header text-center">
+            <h2 className="section-title">Módulos de la Plataforma</h2>
+            <p className="section-subtitle">
+              Domina la prospección con herramientas integradas, destacando nuestro potente motor de email marketing masivo.
+            </p>
+          </div>
+
+          <div className="modules-grid">
+            <div className="module-item">
+              <div className="module-icon"><FaMapMarkerAlt /></div>
+              <div className="module-content">
+                <h3>Geolocalización Avanzada.</h3>
+                <p>Encuentra empresas con precisión y revisa inversamente cada detalle configurado.</p>
+              </div>
+            </div>
+            <div className="module-item">
+              <div className="module-icon"><FaBolt /></div>
+              <div className="module-content">
+                <h3>Por Inteligencia Artificial</h3>
+                <p>Decisiones de contacto, activada la generación de textos automáticamente.</p>
+              </div>
+            </div>
+            <div className="module-item">
+              <div className="module-icon"><FaEnvelopeOpenText /></div>
+              <div className="module-content">
+                <h3>Potenciado por Emailing</h3>
+                <p>Conecta con potenciales clientes y genera respuestas profesionales al instante.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="pricing-section">
+        <div className="container">
+          <div className="section-header text-center">
+            <h2 className="section-title">Planes Flexibles</h2>
+            <p className="section-subtitle">Elige el proceso que mejor se adapte a tus beneficios SaaS.</p>
+          </div>
+
+          <div className="pricing-grid">
+            {/* Plan Premium */}
+            <div className="pricing-card">
+              <div className="plan-name">Premium</div>
+              <div className="plan-price">$10<span>/mo</span></div>
+              <div className="plan-desc">10 búsquedas por proceso</div>
+              <ul className="plan-features">
+                <li><FaCheck /> Premium avanzada</li>
+                <li><FaCheck /> Geolocalización Artificial</li>
+                <li><FaCheck /> Recortes a cuenta</li>
+                <li><FaCheck /> Geolocalización Áreas</li>
+              </ul>
+              <button className="btn-dark" onClick={() => navigate('/')}>Suscribirse</button>
+            </div>
+
+            {/* Plan Plano (Featured) */}
+            <div className="pricing-card featured">
+              <div className="plan-name">Plano</div>
+              <div className="plan-price">$29<span>/mo</span></div>
+              <div className="plan-desc">50 búsquedas por proceso</div>
+              <ul className="plan-features">
+                <li><FaCheck /> Premium avanzada</li>
+                <li><FaCheck /> Inteligencia Artificial</li>
+                <li><FaCheck /> Gestión de filtros</li>
+                <li><FaCheck /> Geolocalización Manía</li>
+              </ul>
+              <button className="btn-dark" onClick={() => navigate('/')}>Suscribirse</button>
+            </div>
+
+            {/* Plan Profio */}
+            <div className="pricing-card">
+              <div className="plan-name">Profio</div>
+              <div className="plan-price">$79<span>/mo</span></div>
+              <div className="plan-desc">Ilimitado búsquedas por proceso</div>
+              <ul className="plan-features">
+                <li><FaCheck /> Premium avanzada</li>
+                <li><FaCheck /> Inteligencia Artificial</li>
+                <li><FaCheck /> Gestión de Resultado</li>
+                <li><FaCheck /> Exportación Analítica de Datos</li>
+                <li><FaCheck /> Interactividad y exporta a CSV/PDF</li>
+              </ul>
+              <button className="btn-dark" onClick={() => navigate('/')}>Suscribirse</button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="landing-footer">
-        <div className="footer-content">
-          <div>
-            <div className="footer-logo">Smart Leads</div>
-            <p className="footer-copy">© 2026 Smart Leads Inc.</p>
+      <footer className="footer">
+        <div className="container footer-container">
+          <div className="footer-column">
+            <h4>About Us</h4>
+            <ul>
+              <li>Our Vision</li>
+              <li>Success Stories</li>
+              <li>Brand Identity</li>
+            </ul>
           </div>
-          <div className="footer-copy">
-            Privacy Policy • Terms of Service
+          <div className="footer-column">
+            <h4>Resources</h4>
+            <ul>
+              <li>About Us</li>
+              <li>Careers</li>
+              <li>Blog</li>
+              <li>Templates</li>
+            </ul>
           </div>
+          <div className="footer-column">
+            <h4>Teamline</h4>
+            <ul>
+              <li>Pricing</li>
+              <li>Contact Us</li>
+              <li>Guidelines</li>
+            </ul>
+          </div>
+          <div className="footer-column">
+            <h4>Contact Us</h4>
+            <div className="social-links">
+              <FaLinkedin />
+              <FaTwitter />
+              <FaInstagram />
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+           {/* Decorative elements can go here */}
+           <div className="star-icon">✦</div>
         </div>
       </footer>
     </div>

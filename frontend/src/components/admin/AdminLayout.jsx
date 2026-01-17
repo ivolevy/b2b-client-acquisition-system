@@ -119,13 +119,7 @@ function AdminLayout() {
                 onClick={() => navigate('/backoffice/users')}
               >
                 Usuarios
-              </button>
-              <button 
-                className={`admin-nav-btn ${isPromoCodesPage ? 'active' : ''}`}
-                onClick={() => navigate('/backoffice/promo-codes')}
-              >
-                Códigos Promocionales
-              </button>
+              </button>          
             </div>
           )}
         </div>
