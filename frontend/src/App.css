@@ -3,8 +3,13 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: rgba(244, 244, 245, 0.85);
+  background-color: #111827;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
   position: relative;
+  color: #fff;
 }
 
 .main-content {
