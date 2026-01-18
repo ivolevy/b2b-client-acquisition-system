@@ -22,12 +22,16 @@
   flex-wrap: wrap;
   align-items: center;
   /* Center alignment */
-  justify-content: space-between;
+  justify-content: flex-start;
+  /* Pack items to start */
 }
 
 .filter-group {
-  flex: 1;
-  min-width: 240px;
+  flex: 0 1 auto;
+  /* Don't grow indefinitely */
+  min-width: 200px;
+  max-width: 300px;
+  /* Cap width */
 }
 
 .filter-input,
@@ -66,10 +70,11 @@
   /* Important override to ensure flex context */
   margin: 0 !important;
   padding: 0 !important;
-  /* Inline with filters now */
 }
 
 .btn-create {
+  margin-left: auto;
+  /* Push to right if desired, or keep next to filters */
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   /* Clean blue gradient */
   color: white;
@@ -85,6 +90,9 @@
   align-items: center;
   justify-content: center;
   white-space: nowrap;
+  min-width: auto;
+  /* Allow it to shrink */
+  flex: 0 0 auto;
 }
 
 .btn-create:hover {
