@@ -286,8 +286,10 @@ function AuthWrapper() {
     }
   }, [useSupabase, user?.id]);
 
-  // Pantalla de carga
-  if (loading) {
+  // Pantalla de carga (no mostrar en landing para LCP rápido)
+  const isLanding = window.location.pathname === '/landing';
+
+  if (loading && !isLanding) {
     return (
       <div style={{
         minHeight: '100vh',

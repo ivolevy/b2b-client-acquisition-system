@@ -6,6 +6,7 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../AuthWrapper';
 import { API_URL } from '../config';
 import GmailConnection from './GmailConnection';
+import OutlookConnection from './OutlookConnection';
 import './EmailSender.css';
 
 function EmailSender({ empresas, onClose, embedded = false }) {
@@ -35,28 +36,30 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [previewEmpresa, setPreviewEmpresa] = useState(null);
-  const [gmailStatus, setGmailStatus] = useState({ connected: false, loading: true });
+
+  const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false }, loading: true });
   
   const { user } = useAuth();
   const { toasts, success, error: toastError, warning, removeToast } = useToast();
 
   useEffect(() => {
     loadTemplates();
-    checkGmailStatus();
+    checkAuthStatus();
   }, [user]);
 
-  const checkGmailStatus = async () => {
+  const checkAuthStatus = async () => {
     if (!user?.id) return;
     try {
-      const response = await axios.get(`${API_URL}/auth/google/status/${user.id}`);
-      setGmailStatus({ 
-        connected: response.data.connected, 
-        loading: false, 
-        email: response.data.account_email 
+      // Usar endpoint global
+      const response = await axios.get(`${API_URL}/auth/status/${user.id}`);
+      setAuthStatus({ 
+        google: response.data.google || { connected: false },
+        outlook: response.data.outlook || { connected: false },
+        loading: false
       });
     } catch (err) {
-      console.error("Error checking Gmail:", err);
-      setGmailStatus(prev => ({ ...prev, loading: false }));
+      console.error("Error checking Auth status:", err);
+      setAuthStatus(prev => ({ ...prev, loading: false }));
     }
   };
 
@@ -247,18 +250,27 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     );
   }
 
-  // Not Connected State
-  if (!gmailStatus.loading && !gmailStatus.connected) {
+  // Not Connected State (Neither connected)
+  if (!authStatus.loading && !authStatus.google.connected && !authStatus.outlook.connected) {
     return (
       <div className={embedded ? "email-sender-embedded" : "email-sender-modal"}>
-         <div style={{padding: '40px', textAlign: 'center'}}>
-            <h2>Conecta tu Gmail</h2>
-            <p style={{color: '#64748b', marginBottom: '24px'}}>Para enviar correos necesitas vincular tu cuenta.</p>
-            <GmailConnection 
-              user={user} 
-              onSuccess={() => checkGmailStatus()} 
-              onError={toastError}
-            />
+         <div style={{padding: '40px', textAlign: 'center', overflowY:'auto'}}>
+            <h2>Conecta tu Email</h2>
+            <p style={{color: '#64748b', marginBottom: '24px'}}>Para enviar correos necesitas vincular una cuenta.</p>
+            
+            <div style={{display:'grid', gap:'16px', maxWidth:'400px', margin:'0 auto'}}>
+              <GmailConnection 
+                user={user} 
+                onSuccess={() => checkAuthStatus()} 
+                onError={toastError}
+              />
+              <OutlookConnection 
+                user={user} 
+                onSuccess={() => checkAuthStatus()} 
+                onError={toastError}
+              />
+            </div>
+
             {!embedded && <button onClick={onClose} style={{marginTop: '20px', background:'none', border:'none', textDecoration:'underline', cursor:'pointer'}}>Cancelar</button>}
          </div>
          <ToastContainer toasts={toasts} onRemove={removeToast} />
@@ -273,10 +285,16 @@ function EmailSender({ empresas, onClose, embedded = false }) {
         <div className="email-sender-header">
           <h2>Enviar Emails</h2>
           <div className="header-right">
-             {gmailStatus.email && (
+             {authStatus.google.connected && (
                <span className="gmail-status-pill">
                  <span style={{width: 8, height: 8, borderRadius: '50%', background: '#10b981'}}></span>
-                 {gmailStatus.email}
+                 Gmail: {authStatus.google.email}
+               </span>
+             )}
+             {authStatus.outlook.connected && (
+               <span className="gmail-status-pill" style={{borderColor:'#0078D4', color:'#0078D4'}}>
+                 <span style={{width: 8, height: 8, borderRadius: '50%', background: '#0078D4'}}></span>
+                 Outlook: {authStatus.outlook.email}
                </span>
              )}
              <button className="close-btn" onClick={onClose}>×</button>

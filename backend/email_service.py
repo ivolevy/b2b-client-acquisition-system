@@ -17,9 +17,11 @@ import re
 try:
     from .db_supabase import get_user_oauth_token, save_user_oauth_token, obtener_perfil_usuario
     from .auth_google import send_gmail_api
+    from .auth_outlook import send_outlook_email
 except ImportError:
     from db_supabase import get_user_oauth_token, save_user_oauth_token, obtener_perfil_usuario
     from auth_google import send_gmail_api
+    from auth_outlook import send_outlook_email
 
 # Cargar variables de entorno desde .env.local o .env (busca en el directorio del backend)
 env_local_path = os.path.join(os.path.dirname(__file__), '.env.local')
@@ -136,6 +138,37 @@ def enviar_email(
                 }
             else:
                 logger.warning(f" Falló envío vía Gmail API, reintentando con SMTP global...")
+
+            else:
+                logger.warning(f" Falló envío vía Gmail API, reintentando con SMTP global...")
+
+    # 1.5. Intentar enviar vía Outlook API (si no se usó Gmail)
+    if user_id:
+        token_data_outlook = get_user_oauth_token(user_id, 'outlook')
+        if token_data_outlook:
+            logger.info(f" Intentando enviar vía Outlook API para usuario {user_id}")
+            # send_outlook_email retorna (success, new_tokens_dict_or_None)
+            success_outlook, new_tokens = send_outlook_email(
+                token_data=token_data_outlook,
+                to=destinatario,
+                subject=asunto,
+                body_html=cuerpo_html
+            )
+            
+            if new_tokens:
+                logger.info(f" Actualizando token Outlook refrescado para usuario {user_id}")
+                # new_tokens ya trae todo lo necesario mergeado
+                save_user_oauth_token(user_id, new_tokens, provider='outlook')
+                
+            if success_outlook:
+                return {
+                    'success': True,
+                    'message': f'Email enviado vía Outlook API a {destinatario}',
+                    'error': None,
+                    'via': 'outlook_api'
+                }
+            else:
+                logger.warning(f" Falló envío vía Outlook API, reintentando con SMTP global...")
 
     # 2. Fallback a SMTP Global
     if not SMTP_PASSWORD or SMTP_PASSWORD.strip() == '':

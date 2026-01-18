@@ -48,6 +48,7 @@ try:
         delete_search_history
     )
     from .auth_google import get_google_auth_url, exchange_code_for_token
+    from .auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
 except ImportError:
     # Fallback for direct execution
     from overpass_client import (
@@ -81,6 +82,7 @@ except ImportError:
         delete_search_history
     )
     from auth_google import get_google_auth_url, exchange_code_for_token
+    from auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
     from db_supabase import (
         insertar_empresa, 
         buscar_empresas, 
@@ -1393,6 +1395,62 @@ async def google_disconnect(user_id: str):
     except Exception as e:
         logger.error(f"Error desconectando Google Auth: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# ========== OUTLOOK OAUTH ENDPOINTS ==========
+
+@app.post("/auth/outlook/url")
+async def outlook_auth_url(request: GoogleAuthURLRequest):
+    """Obtiene URL para OAuth de Outlook"""
+    try:
+        url = get_outlook_auth_url(state=request.state)
+        return {"success": True, "url": url}
+    except Exception as e:
+        logger.error(f"Error generando URL Outlook: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/auth/outlook/callback")
+async def outlook_callback(code: str, state: str):
+    """Callback Outlook OAuth"""
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    try:
+        user_id = state
+        token_data = exchange_outlook_token(code)
+        
+        success = save_user_oauth_token(user_id, token_data, provider='outlook')
+        
+        if not success:
+             return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason=save_failed"})
+             
+        return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=success"})
+    except Exception as e:
+        logger.error(f"Error callback Outlook: {e}")
+        return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason={str(e)}"})
+
+@app.post("/auth/outlook/disconnect/{user_id}")
+async def outlook_disconnect(user_id: str):
+    """Desconectar Outlook"""
+    try:
+        success = delete_user_oauth_token(user_id, provider='outlook')
+        return {"success": success, "message": "Outlook desconectado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/auth/status/{user_id}")
+async def auth_status_global(user_id: str):
+    """Estado de todas las conexiones"""
+    google = get_user_oauth_token(user_id, 'google')
+    outlook = get_user_oauth_token(user_id, 'outlook')
+    
+    return {
+        "google": {
+            "connected": bool(google),
+            "email": google.get('account_email') if google else None
+        },
+        "outlook": {
+            "connected": bool(outlook),
+            "email": outlook.get('account_email') if outlook else None
+        }
+    }
 
 # ========== ENDPOINTS DE ENVÍO DE EMAILS ==========
 
