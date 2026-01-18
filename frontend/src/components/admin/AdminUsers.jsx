@@ -130,9 +130,6 @@ function AdminUsers() {
             <option value="admin">Admin</option>
           </select>
         </div>
-      </div>
-
-      <div className="users-actions">
         <button 
           className="btn-primary btn-create"
           onClick={() => setShowCreateModal(true)}
