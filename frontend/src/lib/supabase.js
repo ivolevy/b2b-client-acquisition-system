@@ -618,7 +618,7 @@ export const adminService = {
     try {
       console.log('[Admin] Creating user via backend:', userData);
 
-      const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
+
 
       const response = await fetch(`${API_URL}/admin/create-user`, {
         method: 'POST',
@@ -645,7 +645,7 @@ export const adminService = {
     try {
       console.log('[Admin] Updating user via backend:', userId, updates);
 
-      const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
+
 
       const response = await fetch(`${API_URL}/admin/update-user`, {
         method: 'PUT',
@@ -676,7 +676,7 @@ export const adminService = {
     try {
       console.log('[Admin] Deleting user fully via backend:', userId);
 
-      const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
+
 
       const response = await fetch(`${API_URL}/admin/delete-user`, {
         method: 'POST',
