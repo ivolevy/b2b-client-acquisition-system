@@ -139,8 +139,7 @@ def enviar_email(
             else:
                 logger.warning(f" Falló envío vía Gmail API, reintentando con SMTP global...")
 
-            else:
-                logger.warning(f" Falló envío vía Gmail API, reintentando con SMTP global...")
+
 
     # 1.5. Intentar enviar vía Outlook API (si no se usó Gmail)
     if user_id:

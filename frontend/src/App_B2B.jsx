@@ -153,7 +153,7 @@ function AppB2B() {
     // No cargar empresas automáticamente de la API si ya recuperamos del cache o si no es necesario
     // Solo cargar estadísticas frescas si no hay cacheadas o para actualizar
     if (!cachedStats) {
-      loadStats();
+      // loadStats();
     }
     loadRubros();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -282,12 +282,7 @@ function AppB2B() {
   };
 
   const loadStats = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/estadisticas`);
-      setStats(response.data.data);
-    } catch (error) {
-      console.error('Error al cargar estadísticas:', error);
-    }
+    // Stats disabled per user request
   };
 
   /* ----------------------------------------------------------------------------------
