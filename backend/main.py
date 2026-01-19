@@ -609,11 +609,11 @@ def obtener_rubros():
 @app.get("/users/{user_id}/rubros")
 async def api_get_user_rubros(user_id: str):
     """Obtiene los rubros personalizados de un usuario"""
-    # try:
-    #     user_rubros = get_user_rubros(user_id)
-    # except:
-    #     user_rubros = []
-    user_rubros = [] # FORCE MOCK to ensure stability
+    try:
+        user_rubros = get_user_rubros(user_id)
+    except Exception as e:
+        logger.error(f"Error obteniendo rubros de usuario {user_id}: {e}")
+        user_rubros = [] # Fallback seguro
     
     all_rubros = listar_rubros_disponibles()
     

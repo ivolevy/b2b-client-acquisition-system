@@ -136,8 +136,7 @@ def enviar_email(
                     'error': None,
                     'via': 'gmail_api'
                 }
-            else:
-                logger.warning(f" Falló envío vía Gmail API, reintentando con SMTP global...")
+
 
 
 
