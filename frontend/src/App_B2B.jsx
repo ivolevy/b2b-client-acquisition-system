@@ -220,29 +220,7 @@ function AppB2B() {
 
   const loadRubros = async () => {
     try {
-      // Si hay usuario, cargar sus rubros personalizados
-      if (user?.id) {
-        const response = await axios.get(`${API_URL}/users/${user.id}/rubros?t=${Date.now()}`);
-        
-        if (response.data && response.data.success) {
-          const { all_rubros, selected_rubros } = response.data;
-          
-          if (selected_rubros && selected_rubros.length > 0) {
-            const filteredRubros = {};
-            selected_rubros.forEach(key => {
-              if (all_rubros[key]) {
-                filteredRubros[key] = all_rubros[key];
-              }
-            });
-            setRubros(filteredRubros);
-          } else {
-            setRubros(all_rubros || {});
-          }
-          return;
-        }
-      }
-
-      // Fallback a rubros generales
+      // Cargar siempre TODOS los rubros disponibles (comportamiento original)
       const response = await axios.get(`${API_URL}/rubros`);
       if (response.data && response.data.rubros) {
         setRubros(response.data.rubros);
