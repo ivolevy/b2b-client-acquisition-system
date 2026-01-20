@@ -43,5 +43,8 @@ except Exception as e:
             }
         )
     
-    # Exponer handler para Vercel
-    handler = app
+    # Exponer app
+    app = app
+
+# Exponer handler para Vercel (Debe estar en el scope global)
+handler = app

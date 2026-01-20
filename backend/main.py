@@ -17,17 +17,17 @@ import string
 from datetime import datetime, timedelta
 
 try:
-    from .overpass_client import (
+    from backend.overpass_client import (
         buscar_empresas_por_rubro, 
         listar_rubros_disponibles,
         buscar_empresas_multiples_rubros,
         query_by_bbox
     )
-    from .scraper import enriquecer_empresa_b2b
-    from .social_scraper import enriquecer_con_redes_sociales
-    from .scraper_parallel import enriquecer_empresas_paralelo
-    from .validators import validar_empresa
-    from .db_supabase import (
+    from backend.scraper import enriquecer_empresa_b2b
+    from backend.social_scraper import enriquecer_con_redes_sociales
+    from backend.scraper_parallel import enriquecer_empresas_paralelo
+    from backend.validators import validar_empresa
+    from backend.db_supabase import (
         insertar_empresa, 
         buscar_empresas, 
         obtener_estadisticas, 
@@ -47,53 +47,19 @@ try:
         get_search_history,
         delete_search_history
     )
-    from .auth_google import get_google_auth_url, exchange_code_for_token
-    from .auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
-except ImportError:
-    # Fallback for direct execution
-    from overpass_client import (
-        buscar_empresas_por_rubro, 
-        listar_rubros_disponibles,
-        buscar_empresas_multiples_rubros,
-        query_by_bbox
-    )
-    from scraper import enriquecer_empresa_b2b
-    from social_scraper import enriquecer_con_redes_sociales
-    from scraper_parallel import enriquecer_empresas_paralelo
-    from validators import validar_empresa
-    from db_supabase import (
-        insertar_empresa, 
-        buscar_empresas, 
-        obtener_estadisticas, 
-        exportar_a_csv, 
-        exportar_a_json, 
-        init_db_b2b, 
-        crear_usuario_admin,
-        obtener_todas_empresas,
-        get_user_oauth_token,
-        save_user_oauth_token,
-        delete_user_oauth_token,
-        admin_update_user,
-        eliminar_usuario_totalmente,
-        get_user_rubros,
-        save_user_rubros,
-        save_search_history,
-        get_search_history,
-        delete_search_history
-    )
-    from auth_google import get_google_auth_url, exchange_code_for_token
-    from auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
-    from db_supabase import (
-        insertar_empresa, 
-        buscar_empresas, 
-        obtener_estadisticas, 
-        exportar_a_csv, 
-        exportar_a_json, 
-        init_db_b2b, 
-        crear_usuario_admin,
-        obtener_todas_empresas,
-        eliminar_usuario_totalmente
-    )
+    from backend.auth_google import get_google_auth_url, exchange_code_for_token
+    from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
+except ImportError as e:
+    logging.error(f"Error importando módulos del backend: {e}")
+    # Solo para desarrollo local si el paquete no está instalado
+    from overpass_client import *
+    from scraper import *
+    from social_scraper import *
+    from scraper_parallel import *
+    from validators import *
+    from db_supabase import *
+    from auth_google import *
+    from auth_outlook import *
 # Todas las funciones trabajan con datos en memoria durante la sesión
 
 import math
@@ -360,7 +326,7 @@ Sitio web: [Tu Sitio Web]'''
     except Exception as e:
         logger.error(f"Error inicializando templates por defecto: {e}")
 
-from email_service import enviar_email_empresa, enviar_emails_masivo, enviar_email
+from backend.email_service import enviar_email_empresa, enviar_emails_masivo, enviar_email
 
 # Configurar logging
 _default_log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
@@ -403,7 +369,12 @@ app = FastAPI(
 # IMPORTANTE: Deshabilitamos credenciales y permitimos TODO (*) para evitar problemas en Vercel
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    # Permitir el dominio de producción específico y subdominios de Vercel
+    allow_origins=[
+        "https://b2b-client-acquisition-system.vercel.app",
+        "https://b2b-client-acquisition-system-4u9f.vercel.app"
+    ],
+    allow_origin_regex=r"https://b2b-client-acquisition-system.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
