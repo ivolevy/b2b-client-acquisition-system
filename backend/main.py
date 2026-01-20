@@ -41,8 +41,6 @@ try:
         delete_user_oauth_token,
         admin_update_user,
         eliminar_usuario_totalmente,
-        get_user_rubros,
-        save_user_rubros,
         save_search_history,
         get_search_history,
         delete_search_history
@@ -496,10 +494,6 @@ class GoogleCallbackRequest(BaseModel):
     code: str
     user_id: str
 
-class UserRubrosRequest(BaseModel):
-    user_id: str
-    rubro_keys: List[str]
-
 class SearchHistoryRequest(BaseModel):
     user_id: str
     rubro: str
@@ -575,38 +569,6 @@ def obtener_rubros():
             "pais": "España",
             "ciudad": "Madrid"
         }
-    }
-
-@app.get("/users/{user_id}/rubros")
-async def api_get_user_rubros(user_id: str):
-    """Obtiene los rubros personalizados de un usuario"""
-    try:
-        user_rubros = get_user_rubros(user_id)
-    except Exception as e:
-        logger.error(f"Error obteniendo rubros de usuario {user_id}: {e}")
-        user_rubros = [] # Fallback seguro
-    
-    all_rubros = listar_rubros_disponibles()
-    
-    # Si el usuario no tiene rubros personalizados, devolver todos por defecto
-    # o indicar cuáles son los preferidos
-    return {
-        "success": True,
-        "user_id": user_id,
-        "selected_rubros": user_rubros,
-        "all_rubros": all_rubros
-    }
-
-@app.post("/users/rubros")
-async def api_save_user_rubros(request: UserRubrosRequest):
-    """Guarda los rubros personalizados de un usuario"""
-    success = save_user_rubros(request.user_id, request.rubro_keys)
-    if not success:
-        raise HTTPException(status_code=500, detail="Error al guardar preferencias de rubros")
-    
-    return {
-        "success": True,
-        "message": "Preferencias de rubros guardadas correctamente"
     }
 
 @app.get("/users/{user_id}/history")
