@@ -419,6 +419,16 @@ async def global_exception_handler(request: Request, exc: Exception):
     return response
 
 # Modelos
+
+@app.get("/")
+def read_root():
+    return {
+        "status": "online",
+        "service": "B2B Client Acquisition API",
+        "documentation": "/docs",
+        "python_version": sys.version
+    }
+
 class BusquedaRubroRequest(BaseModel):
     rubro: str
     bbox: Optional[str] = None  # "south,west,north,east"
