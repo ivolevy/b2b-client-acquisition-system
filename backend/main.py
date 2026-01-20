@@ -368,9 +368,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     # Permitir el dominio de producción específico y subdominios de Vercel
-    allow_origins=[
         "https://b2b-client-acquisition-system.vercel.app",
-        "https://b2b-client-acquisition-system-4u9f.vercel.app"
+        "https://b2b-client-acquisition-system-4u9f.vercel.app",
+        "https://b2b-client-acquisition-system-hlll.vercel.app"
     ],
     allow_origin_regex=r"https://b2b-client-acquisition-system.*\.vercel\.app",
     allow_credentials=True,
@@ -519,11 +519,20 @@ class SearchHistoryRequest(BaseModel):
 @app.on_event("startup")
 async def startup():
     logger.info(" Iniciando API B2B...")
-    _init_default_templates()
-    if init_db_b2b():
-        logger.info(" Sistema B2B listo (Conectado a Supabase)")
-    else:
-        logger.error(" ERROR: No se pudo conectar a Supabase. Verifique credenciales.")
+    try:
+        # Intentar conectar a DB pero no bloquear si falla
+        logger.info("Verificando templates...")
+        _init_default_templates()
+        
+        logger.info("Verificando conexión DB...")
+        if init_db_b2b():
+            logger.info(" Sistema B2B listo (Conectado a Supabase)")
+        else:
+            logger.warning(" Advertencia: Conexión Supabase inestable, pero API inicia.")
+    except Exception as e:
+        logger.error(f"⚠️ Error no fatal en startup: {e}")
+        # No relanzamos la excepción para permitir que la app inicie
+
 
 @app.get("/")
 async def root():
