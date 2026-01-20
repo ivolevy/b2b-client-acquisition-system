@@ -24,20 +24,23 @@ SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 logger.info(f"Supabase Init - URL present: {bool(SUPABASE_URL)}, Key present: {bool(SUPABASE_KEY)}")
 
 supabase: Optional[Client] = None
+_supabase_client: Optional[Client] = None
 
 try:
     if SUPABASE_URL and SUPABASE_KEY:
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        supabase = _supabase_client
         logger.info("✅ Cliente Supabase inicializado correctamente")
     else:
         logger.warning("⚠️ Faltan credenciales de Supabase (SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY)")
 except Exception as e:
     logger.error(f"❌ Error FATAL inicializando cliente Supabase: {e}")
-    # No re-lanzamos la excepción para permitir que el backend arranque en modo degradado
+    _supabase_client = None
     supabase = None
 
 def get_supabase() -> Optional[Client]:
     """Obtiene o inicializa el cliente de Supabase"""
+    global _supabase_client
     if _supabase_client:
         return _supabase_client
         
