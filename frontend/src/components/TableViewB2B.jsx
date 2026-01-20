@@ -21,7 +21,7 @@ function TableViewB2B({
   const [sortColumn, setSortColumn] = useState(null);
   const { user } = useAuth();
   const isPro = true; // Todo es Pro ahora
-  // Limitar itemsPerPage para evitar problemas de rendimientoa
+  // Limitar itemsPerPage para evitar problemas de rendimientoaa
   const itemsPerPage = (isPro && showAllResults) ? 500 : 10;
   const tableContainerRef = useRef(null);
 
