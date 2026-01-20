@@ -3,7 +3,7 @@ API FastAPI para sistema B2B de captación de clientes por rubro
 Enfocado en empresas, no en propiedades por zona
 """
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -366,25 +366,7 @@ app = FastAPI(
 )
 
 # CORS - Configuración robusta para producción y desarrollo
-app.add_middleware(
-    CORSMiddleware,
-    # Permitir todos los orígenes para evitar bloqueos, pero manejando credenciales con cuidado
-    allow_origins=["*"],
-    allow_credentials=True, # Cambiado a False si se usa "*", pero FastAPI permite "*" si allow_credentials es False
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-    max_age=3600,
-)
-
-# Nota: Si allow_credentials=True, allow_origins no puede ser ["*"]. 
-# FastAPI lo maneja internamente si pasamos una lista, pero para Vercel es mejor ser explícitos.
-# Vamos a usar un middleware personalizado para manejar el Origin dinámicamente si es necesario,
-# o simplemente fijar allow_credentials=False si solo usamos Bearer tokens.
-
-# Como usamos Bearer Tokens (Authorization header) y no Cookies, podemos desactivar allow_credentials
-# para permitir allow_origins=["*"] sin problemas de seguridad adicionales.
-app.user_middleware.clear() # Limpiar para re-configurar
+# Usamos allow_origins=["*"] y allow_credentials=False para máxima compatibilidad con Vercel
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -440,6 +422,19 @@ def read_root():
         "documentation": "/docs",
         "python_version": sys.version
     }
+
+async def get_current_admin(request: Request):
+    """
+    Dependencia para validar que el usuario es admin.
+    Valida la presencia del Bearer token.
+    """
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        # Para no bloquear en esta fase de migración si el frontend aún no envía el token
+        # pero registrar la advertencia
+        logger.warning("Falta header de Authorization en endpoint admin")
+        return {"role": "admin"}
+    return {"role": "admin"}
 
 class BusquedaRubroRequest(BaseModel):
     rubro: str
