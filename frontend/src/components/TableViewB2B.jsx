@@ -620,8 +620,28 @@ function TableViewB2B({
       </div>
 
       {totalPages > 1 && (
+        <div className="pagination">
+          <button 
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="pagination-btn"
+          >
+            ← Anterior
+          </button>
+          
+          <div className="pagination-info">
+            Página {currentPage} de {totalPages}
+          </div>
+          
+          <button 
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="pagination-btn"
+          >
+            Siguiente →
+          </button>
         </div>
-          )}
+      )}
           
           {/* Atribución de Google - Requerida por TOS */}
           {empresas.some(e => e.fuente === 'google') && (
