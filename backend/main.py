@@ -655,8 +655,12 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 "message": "Buscando en OpenStreetMap..."
             }
         
-        logger.info(f" Búsqueda B2B - Rubro: {request.rubro}, Solo válidas: {solo_validadas}, Limpiar anterior: {limpiar_anterior}")
-        
+        # Validar bbox
+        bbox_valido = False
+        if request.bbox:
+            partes = request.bbox.split(',')
+            bbox_valido = len(partes) == 4
+            
         # --- NUEVA LÓGICA: PRIORITY GOOGLE CON FALLBACK A OSM ---
         empresas = []
         source_used = "osm" # Default fallback
