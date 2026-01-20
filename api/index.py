@@ -21,8 +21,9 @@ try:
     app = fastapi_app
     logger.info("Backend cargado exitosamente")
 except Exception as e:
-    logger.error(f"FATAL: Error cargando backend: {e}")
+    error_msg = str(e)
     trace = traceback.format_exc()
+    logger.error(f"FATAL: Error cargando backend: {error_msg}")
     logger.error(trace)
     
     # Fallback app visible
@@ -33,7 +34,7 @@ except Exception as e:
     async def catch_all(path: str):
         return {
             "error": "Startup Failed",
-            "message": str(e),
+            "message": error_msg,
             "trace": trace.split('\n')
         }
 
