@@ -368,6 +368,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     # Permitir el dominio de producción específico y subdominios de Vercel
+    allow_origins=[
         "https://b2b-client-acquisition-system.vercel.app",
         "https://b2b-client-acquisition-system-4u9f.vercel.app",
         "https://b2b-client-acquisition-system-hlll.vercel.app"
