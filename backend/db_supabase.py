@@ -24,6 +24,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 logger.info(f"Supabase Init - URL present: {bool(SUPABASE_URL)}, Key present: {bool(SUPABASE_KEY)}")
 
 supabase: Optional[Client] = None
+# Variable privada para el módulo, inicializada aquí
 _supabase_client: Optional[Client] = None
 
 try:
@@ -35,25 +36,22 @@ try:
         logger.warning("⚠️ Faltan credenciales de Supabase (SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY)")
 except Exception as e:
     logger.error(f"❌ Error FATAL inicializando cliente Supabase: {e}")
+    # Asegurar que quedan como None en caso de error
     _supabase_client = None
     supabase = None
 
 def get_supabase() -> Optional[Client]:
     """Obtiene o inicializa el cliente de Supabase"""
-    global _supabase_client
+    # Retornar el cliente ya inicializado a nivel de módulo
     if _supabase_client:
         return _supabase_client
         
+    # Si no está inicializado, intentar verificar credenciales
     if not SUPABASE_URL or not SUPABASE_KEY:
         logger.error("Faltan credenciales de Supabase (SUPABASE_URL o SUPABASE_KEY)")
         return None
         
-    try:
-        _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
-        return _supabase_client
-    except Exception as e:
-        logger.error(f"Error conectando a Supabase: {e}")
-        return None
+    return None
 
 # Intentar obtener Service Role Key para operaciones administrativas
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
