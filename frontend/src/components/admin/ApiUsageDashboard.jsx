@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from '../../config';
+import { API_URL } from '../../config';
 import './AdminDashboard.css'; // Reusar estilos base de admin
 
 function ApiUsageDashboard() {
@@ -16,7 +16,7 @@ function ApiUsageDashboard() {
     try {
       setLoading(true);
       const token = localStorage.getItem('supabase.auth.token'); // O el método que uses para el token
-      const response = await axios.get(`${API_BASE_URL}/admin/usage-stats`, {
+      const response = await axios.get(`${API_URL}/admin/usage-stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
