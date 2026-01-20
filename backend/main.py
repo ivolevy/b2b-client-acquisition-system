@@ -365,18 +365,30 @@ app = FastAPI(
     description="Sistema de captación de clientes B2B por rubro empresarial"
 )
 
-# CORS - Configuración completa para deshabilitar políticas restrictivas
-# IMPORTANTE: Deshabilitamos credenciales y permitimos TODO (*) para evitar problemas en Vercel
+# CORS - Configuración robusta para producción y desarrollo
 app.add_middleware(
     CORSMiddleware,
-    # Permitir el dominio de producción específico y subdominios de Vercel
-    allow_origins=[
-        "https://b2b-client-acquisition-system.vercel.app",
-        "https://b2b-client-acquisition-system-4u9f.vercel.app",
-        "https://b2b-client-acquisition-system-hlll.vercel.app"
-    ],
-    allow_origin_regex=r"https://b2b-client-acquisition-system.*\.vercel\.app",
-    allow_credentials=True,
+    # Permitir todos los orígenes para evitar bloqueos, pero manejando credenciales con cuidado
+    allow_origins=["*"],
+    allow_credentials=True, # Cambiado a False si se usa "*", pero FastAPI permite "*" si allow_credentials es False
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
+)
+
+# Nota: Si allow_credentials=True, allow_origins no puede ser ["*"]. 
+# FastAPI lo maneja internamente si pasamos una lista, pero para Vercel es mejor ser explícitos.
+# Vamos a usar un middleware personalizado para manejar el Origin dinámicamente si es necesario,
+# o simplemente fijar allow_credentials=False si solo usamos Bearer tokens.
+
+# Como usamos Bearer Tokens (Authorization header) y no Cookies, podemos desactivar allow_credentials
+# para permitir allow_origins=["*"] sin problemas de seguridad adicionales.
+app.user_middleware.clear() # Limpiar para re-configurar
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
@@ -386,40 +398,37 @@ app.add_middleware(
 # Exception handler para HTTPException limpio
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
-    """Maneja HTTPException"""
-    # Asegurar headers CORS incluso en error
-    response = JSONResponse(
+    """Maneja HTTPException con headers CORS"""
+    return JSONResponse(
         status_code=exc.status_code,
-        content={"detail": exc.detail}
+        content={"detail": exc.detail},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*"
+        }
     )
-    # Forzar headers CORS por si acaso el middleware falló antes
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    return response
 
 # Exception handler global para asegurar que CORS siempre se incluya
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Maneja cualquier error no controlado"""
+    """Maneja cualquier error no controlado con headers CORS"""
     import traceback
-    logger.error(f"Error no manejado: {exc}", exc_info=True)
-    logger.error(f"Traceback: {traceback.format_exc()}")
+    logger.error(f"Error fatal: {exc}", exc_info=True)
     
-    # Crear respuesta con headers CORS
-    response = JSONResponse(
+    return JSONResponse(
         status_code=500,
-        content={"detail": "Error interno del servidor", "error": str(exc)}
+        content={
+            "detail": "Error interno del servidor",
+            "error": str(exc),
+            "trace": traceback.format_exc().split('\n')
+        },
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*"
+        }
     )
-    
-    # Agregar headers CORS manualmente
-    origin = request.headers.get("origin", "*")
-    response.headers["Access-Control-Allow-Origin"] = origin if origin else "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-    response.headers["Access-Control-Allow-Credentials"] = "false"
-    
-    return response
 
 # Modelos
 

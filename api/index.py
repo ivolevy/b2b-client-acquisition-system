@@ -28,9 +28,22 @@ except Exception as e:
     
     # Fallback app visible
     from fastapi import FastAPI, Response
+    from fastapi.middleware.cors import CORSMiddleware
+    
     app = FastAPI()
     
+    # Habilitar CORS en el app de fallback para poder ver el error en el navegador
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False, # No podemos usar credenciales con "*"
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    
     @app.get("/{path:path}")
+    @app.post("/{path:path}")
+    @app.options("/{path:path}")
     async def catch_all(path: str):
         return {
             "error": "Startup Failed",
