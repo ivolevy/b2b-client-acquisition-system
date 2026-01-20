@@ -111,11 +111,9 @@ def admin_update_user(user_id: str, updates: Dict) -> Dict:
         if 'password' in updates: auth_updates['password'] = updates['password']
         
         # Campos para public.users
-        if 'plan' in updates: public_updates['plan'] = updates['plan']
         if 'role' in updates: public_updates['role'] = updates['role']
         if 'name' in updates: public_updates['name'] = updates['name']
         if 'phone' in updates: public_updates['phone'] = updates['phone']
-        if 'plan_expires_at' in updates: public_updates['plan_expires_at'] = updates['plan_expires_at']
         
         # 2. Actualizar Auth si es necesario
         if auth_updates:
@@ -587,9 +585,10 @@ def get_current_month_usage() -> float:
         
     try:
         current_month = datetime.now().replace(day=1).date().isoformat()
+        # Nota: En Postgres el tipo DATE se compara bien con string ISO 'YYYY-MM-DD'
         res = client.table('api_usage_stats').select('estimated_cost_usd').eq('month', current_month).execute()
         
-        total = sum([float(item['estimated_cost_usd']) for item in res.data])
+        total = sum([float(item.get('estimated_cost_usd', 0)) for item in res.data])
         return total
     except Exception as e:
         logger.error(f"Error obteniendo uso mensual: {e}")
