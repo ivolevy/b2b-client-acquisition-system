@@ -2172,7 +2172,6 @@ class AdminCreateUserRequest(BaseModel):
     password: str
     name: str
     phone: Optional[str] = None
-    plan: Optional[str] = 'free'
     role: Optional[str] = 'user'
 
 @app.post("/admin/create-user")
@@ -2185,7 +2184,6 @@ async def admin_create_user(user_data: AdminCreateUserRequest):
         metadata = {
             "name": user_data.name,
             "phone": user_data.phone,
-            "plan": user_data.plan,
             "role": user_data.role
         }
         

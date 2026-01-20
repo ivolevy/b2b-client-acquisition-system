@@ -74,7 +74,6 @@ function CreateUserModal({ onClose, onSuccess }) {
     password: '',
     name: '',
     phone: '',
-    plan: 'pro',
     role: 'user'
   });
   const [loading, setLoading] = useState(false);

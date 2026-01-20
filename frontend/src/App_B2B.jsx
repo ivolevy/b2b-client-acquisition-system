@@ -62,7 +62,7 @@ function AppB2B() {
   const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
   const { user } = useAuth();
   
-  const isPro = true; // Todo es Pro ahora
+
   const [historySearchData, setHistorySearchData] = useState(null);
   const [showAllResults, setShowAllResults] = useState(false);
   const [isFromHistory, setIsFromHistory] = useState(false);
@@ -358,7 +358,7 @@ function AppB2B() {
 
         // Guardar búsqueda en historial si es PRO (en background, sin bloquear)
         // NO guardar si viene del historial para evitar duplicados
-        if (isPro && user?.id && total > 0 && !isFromHistory) {
+        if (user?.id && total > 0 && !isFromHistory) {
           // Ejecutar en background sin await para no bloquear la UI
           searchHistoryService.saveSearch(user.id, {
             rubro: params.rubro,
@@ -772,7 +772,7 @@ function AppB2B() {
             />
           )}
           
-          {view === 'emails' && isPro && (
+          {view === 'emails' && (
             <EmailSender
               empresas={empresas}
               onClose={() => {

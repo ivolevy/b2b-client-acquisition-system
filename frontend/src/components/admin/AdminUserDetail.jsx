@@ -17,7 +17,6 @@ function AdminUserDetail() {
     email: '',
     name: '',
     phone: '',
-    plan: 'pro',
     role: 'user'
   });
 
@@ -41,7 +40,6 @@ function AdminUserDetail() {
           email: userData.email || '',
           name: userData.name || '',
           phone: userData.phone || '',
-          plan: 'pro',
           role: userData.role || 'user'
         });
       }
@@ -63,7 +61,6 @@ function AdminUserDetail() {
         email: editForm.email,
         name: editForm.name,
         phone: editForm.phone,
-        plan: 'pro',
         role: editForm.role
       };
 

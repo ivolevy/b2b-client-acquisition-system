@@ -278,13 +278,7 @@ function AuthWrapper() {
     }
   }, [useSupabase]);
 
-  // Actualizar plan del usuario (memoizado)
-  const updateUserPlan = useCallback(async (plan) => {
-    if (useSupabase && user?.id) {
-      await userService.updateProfile(user.id, { plan });
-      setUser(prev => ({ ...prev, plan }));
-    }
-  }, [useSupabase, user?.id]);
+
 
   // Pantalla de carga (no mostrar en landing para LCP rápido)
   const isLanding = window.location.pathname === '/landing';
@@ -334,7 +328,6 @@ function AuthWrapper() {
     login: loginFn,
     signUp: signUpFn,
     logout: handleLogout,
-    updateUserPlan,
     demoUsers: DEMO_USERS // Siempre disponible
   };
 

@@ -14,7 +14,6 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
     email: '',
     name: '',
     phone: '',
-    plan: 'pro',
     role: 'user'
   });
 
@@ -44,7 +43,6 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
           email: userData.email || '',
           name: userData.name || '',
           phone: userData.phone || '',
-          plan: 'pro',
           role: userData.role || 'user'
         });
       }
@@ -66,7 +64,6 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
         email: editForm.email,
         name: editForm.name,
         phone: editForm.phone,
-        plan: 'pro',
         role: editForm.role
       };
 

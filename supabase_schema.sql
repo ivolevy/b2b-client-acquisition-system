@@ -6,8 +6,6 @@ CREATE TABLE IF NOT EXISTS public.users (
   email VARCHAR(255) UNIQUE NOT NULL,
   name VARCHAR(50) NOT NULL,
   phone VARCHAR(20),
-  plan VARCHAR(20) DEFAULT 'free' CHECK (plan IN ('free', 'pro')),
-  plan_expires_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_login_at TIMESTAMP WITH TIME ZONE,
@@ -58,44 +56,17 @@ CREATE POLICY "Users can insert own saved companies" ON public.saved_companies F
 CREATE POLICY "Users can update own saved companies" ON public.saved_companies FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own saved companies" ON public.saved_companies FOR DELETE USING (auth.uid() = user_id);
 
-CREATE TABLE IF NOT EXISTS public.plan_features (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  plan VARCHAR(20) NOT NULL,
-  feature_key VARCHAR(100) NOT NULL,
-  feature_value VARCHAR(255) NOT NULL,
-  UNIQUE(plan, feature_key)
-);
 
-ALTER TABLE public.plan_features ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Anyone can view plan features" ON public.plan_features FOR SELECT USING (true);
-
-INSERT INTO public.plan_features (plan, feature_key, feature_value) VALUES
-  ('free', 'max_searches_per_day', '5'),
-  ('free', 'max_results_per_search', '50'),
-  ('free', 'save_search_history', 'false'),
-  ('free', 'save_companies', 'false'),
-  ('free', 'export_csv', 'true'),
-  ('free', 'emails_per_day', '10'),
-  ('free', 'pro_background', 'false'),
-  ('pro', 'max_searches_per_day', 'unlimited'),
-  ('pro', 'max_results_per_search', 'unlimited'),
-  ('pro', 'save_search_history', 'true'),
-  ('pro', 'save_companies', 'true'),
-  ('pro', 'export_csv', 'true'),
-  ('pro', 'emails_per_day', 'unlimited'),
-  ('pro', 'pro_background', 'true')
-ON CONFLICT (plan, feature_key) DO NOTHING;
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.users (id, email, name, phone, plan)
+  INSERT INTO public.users (id, email, name, phone)
   VALUES (
     NEW.id, 
     NEW.email, 
     COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
-    COALESCE(NEW.raw_user_meta_data->>'phone', ''),
-    'free'
+    COALESCE(NEW.raw_user_meta_data->>'phone', '')
   );
   RETURN NEW;
 END;

@@ -26,7 +26,6 @@ function AdminUsers() {
     
     try {
       const activeFilters = {};
-      if (filters.plan) activeFilters.plan = filters.plan;
       if (filters.role) activeFilters.role = filters.role;
       if (filters.search && filters.search.trim()) {
         activeFilters.search = filters.search.trim();
@@ -73,7 +72,7 @@ function AdminUsers() {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.plan, filters.role, filters.search]);
+  }, [filters.role, filters.search]);
 
   const handleDeleteUser = async () => {
     if (!showDeleteConfirm) return;

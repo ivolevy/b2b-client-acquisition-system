@@ -34,8 +34,7 @@ export const authService = {
           emailRedirectTo: redirectTo,
           data: {
             name: name,
-            phone: phone,
-            plan: 'pro'
+            phone: phone
           }
         }
       });
@@ -194,8 +193,7 @@ export const authService = {
       email: user.email,
       name: profile?.name || user.email?.split('@')[0] || 'Usuario',
       phone: profile?.phone || '',
-      plan: profile?.plan || 'pro',
-      role: profile?.role || 'user', // Siempre usar role del perfil, nunca derivar del plan
+      role: profile?.role || 'user', // Siempre usar role del perfil
       loginTime: new Date().toISOString(),
       ...profile // Incluir todos los campos adicionales del perfil
     };
@@ -275,7 +273,7 @@ export const userService = {
   async checkSearchLimit(userId) {
     const { data: user, error } = await supabase
       .from('users')
-      .select('plan, searches_today, searches_reset_at')
+      .select('searches_today, searches_reset_at')
       .eq('id', userId)
       .single();
 
@@ -534,9 +532,6 @@ export const adminService = {
         .order('updated_at', { ascending: false });
 
       // Aplicar filtros
-      if (filters.plan) {
-        query = query.eq('plan', filters.plan);
-      }
       if (filters.role) {
         query = query.eq('role', filters.role);
       }
