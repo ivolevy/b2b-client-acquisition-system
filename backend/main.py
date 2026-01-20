@@ -55,7 +55,7 @@ except ImportError as e:
     from scraper import *
     from social_scraper import *
     from scraper_parallel import *
-    from validators import *
+    from .validators import *
     from db_supabase import *
     from auth_google import *
     from auth_outlook import *
@@ -798,7 +798,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             logger.info(f" Después del filtro por radio: {len(empresas)} empresas dentro del radio de {radio_km:.2f}km")
         
         # Validar empresas
-        from validators import validar_email, validar_telefono, validar_website
+        from backend.validators import validar_email, validar_telefono, validar_website
         
         empresas_validadas = []
         empresas_rechazadas = []
@@ -1563,7 +1563,7 @@ class ValidarCodigoRequest(BaseModel):
 async def solicitar_codigo_cambio_password(request: SolicitarCodigoRequest):
     """Genera y envía un código de validación por email para cambio de contraseña"""
     try:
-        from validators import validar_email
+        from backend.validators import validar_email
         email_valido, email_limpio = validar_email(request.email)
         if not email_valido:
             raise HTTPException(status_code=400, detail="Email inválido")
@@ -1655,7 +1655,7 @@ async def solicitar_codigo_cambio_password(request: SolicitarCodigoRequest):
 async def validar_codigo_cambio_password(request: ValidarCodigoRequest):
     """Valida el código de verificación para cambio de contraseña"""
     try:
-        from validators import validar_email
+        from backend.validators import validar_email
         email_valido, email_limpio = validar_email(request.email)
         if not email_valido:
             raise HTTPException(status_code=400, detail="Email inválido")
@@ -1700,7 +1700,7 @@ async def validar_codigo_cambio_password(request: ValidarCodigoRequest):
 async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
     """Genera y envía un código de validación por email para reset de contraseña (sin autenticación)"""
     try:
-        from validators import validar_email
+        from backend.validators import validar_email
         email_valido, email_limpio = validar_email(request.email)
         if not email_valido:
             raise HTTPException(status_code=400, detail="Email inválido")
@@ -1793,7 +1793,7 @@ async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
 async def reset_password(request: ValidarCodigoRequest):
     """Valida el código y permite resetear la contraseña (sin autenticación)"""
     try:
-        from validators import validar_email
+        from backend.validators import validar_email
         email_valido, email_limpio = validar_email(request.email)
         if not email_valido:
             raise HTTPException(status_code=400, detail="Email inválido")
@@ -1847,7 +1847,7 @@ class ActualizarPasswordResetRequest(BaseModel):
 async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
     """Valida el código y actualiza la contraseña usando Supabase Admin API"""
     try:
-        from validators import validar_email
+        from backend.validators import validar_email
         email_valido, email_limpio = validar_email(request.email)
         if not email_valido:
             raise HTTPException(status_code=400, detail="Email inválido")

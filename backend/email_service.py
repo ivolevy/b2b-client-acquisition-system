@@ -19,9 +19,9 @@ try:
     from .auth_google import send_gmail_api
     from .auth_outlook import send_outlook_email
 except ImportError:
-    from db_supabase import get_user_oauth_token, save_user_oauth_token, obtener_perfil_usuario
-    from auth_google import send_gmail_api
-    from auth_outlook import send_outlook_email
+    from backend.db_supabase import get_user_oauth_token, save_user_oauth_token, obtener_perfil_usuario
+    from backend.auth_google import send_gmail_api
+    from backend.auth_outlook import send_outlook_email
 
 # Cargar variables de entorno desde .env.local o .env (busca en el directorio del backend)
 env_local_path = os.path.join(os.path.dirname(__file__), '.env.local')
