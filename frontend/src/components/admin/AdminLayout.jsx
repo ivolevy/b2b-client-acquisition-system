@@ -92,6 +92,7 @@ function AdminLayout() {
 
   const isUsersPage = location.pathname.includes('/users');
   const isPromoCodesPage = location.pathname.includes('/promo-codes');
+  const isApiUsagePage = location.pathname.includes('/api-usage');
 
   return (
     <>
@@ -112,7 +113,7 @@ function AdminLayout() {
               </button>
               <h2 className="admin-header-title">Panel de Administración</h2>
             </div>
-          {(isUsersPage || isPromoCodesPage) && (
+          {(isUsersPage || isPromoCodesPage || isApiUsagePage) && (
             <div className="admin-nav">
               <button 
                 className={`admin-nav-btn ${isUsersPage ? 'active' : ''}`}
@@ -120,6 +121,12 @@ function AdminLayout() {
               >
                 Usuarios
               </button>          
+              <button 
+                className={`admin-nav-btn ${isApiUsagePage ? 'active' : ''}`}
+                onClick={() => navigate('/backoffice/api-usage')}
+              >
+                Métricas API
+              </button>
             </div>
           )}
         </div>

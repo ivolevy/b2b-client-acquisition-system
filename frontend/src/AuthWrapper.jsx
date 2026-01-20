@@ -16,6 +16,7 @@ const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
 const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'));
 const LandingPage = lazy(() => import('./components/LandingPage'));
+const ApiUsageDashboard = lazy(() => import('./components/admin/ApiUsageDashboard'));
 
 // Contexto de autenticación
 const AuthContext = createContext(null);
@@ -387,6 +388,7 @@ function AuthWrapper() {
                 <Route index element={<Navigate to="/backoffice/users" replace />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="users/:id" element={<AdminUserDetail />} />
+                <Route path="api-usage" element={<ApiUsageDashboard />} />
               </Route>
             <Route path="/*" element={<AppB2B />} />
           </Routes>

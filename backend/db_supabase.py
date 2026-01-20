@@ -538,3 +538,59 @@ def delete_search_history(user_id: str, search_id: str) -> bool:
     except Exception as e:
         logger.error(f"Error eliminando historial {search_id} para {user_id}: {e}")
         return False
+def increment_api_usage(provider: str, sku: str, cost_usd: float) -> bool:
+    """Incrementa las estadísticas de uso de API para el mes actual"""
+    client = get_supabase_admin() # Usar admin para saltar RLS si es necesario
+    if not client:
+        return False
+        
+    try:
+        current_month = datetime.now().replace(day=1).date().isoformat()
+        
+        # Primero intentamos obtener el registro actual para hacer el incremento manual si upsert no soporta increment
+        # Pero Supabase/Postgres permite RPC o simplemente upsert con columnas calculadas
+        # Para simplificar, usaremos una función RPC en el futuro o un upsert aquí
+        
+        # Obtener valor actual
+        res = client.table('api_usage_stats').select('calls_count, estimated_cost_usd').eq('month', current_month).eq('provider', provider).eq('sku', sku).execute()
+        
+        if res.data:
+            curr = res.data[0]
+            new_calls = curr['calls_count'] + 1
+            new_cost = float(curr['estimated_cost_usd']) + cost_usd
+            
+            client.table('api_usage_stats').update({
+                'calls_count': new_calls,
+                'estimated_cost_usd': new_cost,
+                'last_update': datetime.now().isoformat()
+            }).eq('month', current_month).eq('provider', provider).eq('sku', sku).execute()
+        else:
+            client.table('api_usage_stats').insert({
+                'month': current_month,
+                'provider': provider,
+                'sku': sku,
+                'calls_count': 1,
+                'estimated_cost_usd': cost_usd,
+                'last_update': datetime.now().isoformat()
+            }).execute()
+            
+        return True
+    except Exception as e:
+        logger.error(f"Error incrementando uso de API: {e}")
+        return False
+
+def get_current_month_usage() -> float:
+    """Retorna el costo estimado total del mes actual en USD"""
+    client = get_supabase()
+    if not client:
+        return 0.0
+        
+    try:
+        current_month = datetime.now().replace(day=1).date().isoformat()
+        res = client.table('api_usage_stats').select('estimated_cost_usd').eq('month', current_month).execute()
+        
+        total = sum([float(item['estimated_cost_usd']) for item in res.data])
+        return total
+    except Exception as e:
+        logger.error(f"Error obteniendo uso mensual: {e}")
+        return 0.0

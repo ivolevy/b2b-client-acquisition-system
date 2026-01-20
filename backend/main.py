@@ -48,6 +48,7 @@ try:
     )
     from backend.auth_google import get_google_auth_url, exchange_code_for_token
     from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
+    from backend.google_places_client import google_client
 except ImportError as e:
     logging.error(f"Error importando módulos del backend: {e}")
     # Solo para desarrollo local si el paquete no está instalado
@@ -652,60 +653,77 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         logger.info(f" Búsqueda B2B - Rubro: {request.rubro}, Solo válidas: {solo_validadas}, Limpiar anterior: {limpiar_anterior}")
         
-        # Validar bbox si se proporciona
-        bbox_valido = False
-        if request.bbox:
-            try:
-                # Validar formato: debe ser "south,west,north,east" con 4 números
-                partes = request.bbox.split(',')
-                if len(partes) == 4:
-                    coords = [float(p.strip()) for p in partes]
-                    # Validar rangos: latitud -90 a 90, longitud -180 a 180
-                    if (-90 <= coords[0] <= 90 and -90 <= coords[2] <= 90 and
-                        -180 <= coords[1] <= 180 and -180 <= coords[3] <= 180 and
-                        coords[0] < coords[2] and coords[1] < coords[3]):
-                        bbox_valido = True
-            except (ValueError, AttributeError) as e:
-                logger.warning(f"Bbox inválido: {request.bbox}, error: {e}")
-        
-        # Buscar en OpenStreetMap
-        if request.bbox and bbox_valido:
-            # Búsqueda por bounding box (ubicación en mapa)
-            logger.info(f" Búsqueda por bbox: {request.bbox}")
-            # Ejecutar en thread separado
-            import asyncio
-            empresas = await asyncio.to_thread(
-                query_by_bbox,
-                bbox=request.bbox,
-                rubro=request.rubro
-            )
-            # Validar que query_by_bbox retornó una lista válida
-            if empresas is None:
-                logger.error("query_by_bbox retornó None")
-                empresas = []
-        else:
-            # Búsqueda por ciudad/país (método antiguo)
-            if request.bbox and not bbox_valido:
-                logger.warning(f"Bbox inválido, usando búsqueda por ciudad/país")
+        # --- NUEVA LÓGICA: PRIORITY GOOGLE CON FALLBACK A OSM ---
+        empresas = []
+        source_used = "osm" # Default fallback
+        search_method = "bbox" if request.bbox and bbox_valido else "city"
+
+        try:
+            # Intentar primero con Google Places
+            logger.info(f" Intentando búsqueda con Google Places API (New)...")
             
-            # Ejecutar en thread separado
-            import asyncio
-            empresas = await asyncio.to_thread(
-                buscar_empresas_por_rubro,
-                rubro=request.rubro,
-                pais=request.pais,
-                ciudad=request.ciudad
+            # Mapear bbox si existe
+            google_bbox = None
+            if request.bbox and bbox_valido:
+                partes = request.bbox.split(',')
+                google_bbox = {
+                    "south": float(partes[0]),
+                    "west": float(partes[1]),
+                    "north": float(partes[2]),
+                    "east": float(partes[3])
+                }
+
+            # Ejecutar búsqueda en Google (incluye Quadtree y Deduplicación interna)
+            # Pasamos el nombre del rubro para el mapeo
+            from backend.overpass_client import RUBROS_DISPONIBLES
+            rubro_info = RUBROS_DISPONIBLES.get(request.rubro, {"nombre": request.rubro})
+            
+            google_results = await asyncio.to_thread(
+                google_client.search_all_places,
+                query=f"{rubro_info['nombre']} en {request.ciudad or request.pais or 'el mapa'}",
+                rubro_nombre=rubro_info['nombre'],
+                rubro_key=request.rubro,
+                bbox=google_bbox,
+                lat=request.busqueda_centro_lat,
+                lng=request.busqueda_centro_lng,
+                radius=(request.busqueda_radio_km * 1000) if request.busqueda_radio_km else None
             )
-            # Validar que buscar_empresas_por_rubro retornó una lista válida
-            if empresas is None:
-                logger.error("buscar_empresas_por_rubro retornó None")
-                empresas = []
-        
+
+            if google_results and not any(isinstance(r, dict) and r.get('error') == 'PRESUPUESTO_AGOTADO' for r in google_results):
+                empresas = google_results
+                source_used = "google"
+                logger.info(f" EXITOSA: {len(empresas)} empresas obtenidas de Google Places")
+            else:
+                logger.warning(" Fallback a OSM por presupuesto agotado o falta de resultados en Google.")
+                raise Exception("Trigger OSM Fallback")
+
+        except Exception as e:
+            if str(e) != "Trigger OSM Fallback":
+                logger.error(f" Error en Google Places: {e}. Usando OpenStreetMap como fallback.")
+            
+            # FALLBACK: Buscar en OpenStreetMap (Lógica original)
+            if request.bbox and bbox_valido:
+                empresas = await asyncio.to_thread(
+                    query_by_bbox,
+                    bbox=request.bbox,
+                    rubro=request.rubro
+                )
+            else:
+                empresas = await asyncio.to_thread(
+                    buscar_empresas_por_rubro,
+                    rubro=request.rubro,
+                    pais=request.pais,
+                    ciudad=request.ciudad
+                )
+            source_used = "osm"
+            logger.info(f" Fallback OSM: {len(empresas if empresas else [])} empresas obtenidas")
+
         # Asegurar que empresas es una lista
         if not isinstance(empresas, list):
-            logger.error(f"Empresas no es una lista: {type(empresas)}")
             empresas = []
         
+        # --- FIN DE LÓGICA HÍBRIDA ---
+
         if not empresas:
             return {
                 "success": True,
@@ -1046,6 +1064,32 @@ async def filtrar(request: FiltroRequest):
         
     except Exception as e:
         logger.error(f"Error filtrando: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/admin/usage-stats")
+async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
+    """Obtiene las estadísticas de uso de API para el dashboard"""
+    from backend.db_supabase import get_current_month_usage
+    client = get_supabase()
+    if not client:
+        raise HTTPException(status_code=500, detail="Error de base de datos")
+        
+    try:
+        from datetime import datetime
+        current_month = datetime.now().replace(day=1).date().isoformat()
+        res = client.table('api_usage_stats').select('*').eq('month', current_month).execute()
+        
+        total_cost = sum([float(item.get('estimated_cost_usd', 0)) for item in res.data])
+        
+        return {
+            "success": True,
+            "month": current_month,
+            "total_estimated_cost_usd": total_cost,
+            "stats": res.data,
+            "provider_status": "google" if total_cost < 195 else "osm"
+        }
+    except Exception as e:
+        logger.error(f"Error en /admin/usage-stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/estadisticas")

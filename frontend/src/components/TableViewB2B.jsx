@@ -620,27 +620,24 @@ function TableViewB2B({
       </div>
 
       {totalPages > 1 && (
-        <div className="pagination">
-          <button 
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="pagination-btn"
-          >
-            ← Anterior
-          </button>
-          
-          <div className="pagination-info">
-            Página {currentPage} de {totalPages}
-          </div>
-          
-          <button 
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="pagination-btn"
-          >
-            Siguiente →
-          </button>
         </div>
+          )}
+          
+          {/* Atribución de Google - Requerida por TOS */}
+          {empresas.some(e => e.fuente === 'google') && (
+            <div className="google-attribution-container" style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              marginTop: '1.5rem',
+              padding: '10px',
+              borderTop: '1px solid rgba(255,105,180,0.1)'
+            }}>
+              <img 
+                src="https://developers.google.com/static/maps/documentation/images/powered_by_google_on_white.png" 
+                alt="Powered by Google" 
+                style={{ height: '18px', opacity: 0.8 }}
+              />
+            </div>
           )}
         </>
       )}
