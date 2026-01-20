@@ -96,7 +96,7 @@ def enviar_email(
         Dict con success, message, error
     """
     # Validar formato de email
-    from validators import validar_email
+    from backend.validators import validar_email
     email_valido, email_limpio = validar_email(destinatario)
     if not email_valido:
         return {
