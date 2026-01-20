@@ -757,7 +757,6 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         if request.scrapear_websites:
             logger.info(" Iniciando enriquecimiento paralelo de empresas...")
             try:
-                import asyncio
                 # Ejecutar scraping en un thread separado para no bloquear el event loop
                 empresas_enriquecidas = await asyncio.to_thread(
                     enriquecer_empresas_paralelo,
