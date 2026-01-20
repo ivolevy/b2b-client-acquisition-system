@@ -37,5 +37,5 @@ except Exception as e:
             "trace": trace.split('\n')
         }
 
-# Exponer handler para Vercel
-handler = app
+# Exponer handler para Vercel (eliminado para que detecte 'app' automáticamente)
+# handler = app
