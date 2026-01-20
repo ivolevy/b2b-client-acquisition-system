@@ -1,36 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import './MapView.css';
 
-// Arreglar el problema de los iconos de Leaflet con Vite
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-// Componente interno para actualizar el mapa cuando cambia el centro
-function MapUpdater({ center, zoom }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    map.setView(center, zoom);
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 100);
-  }, [center, zoom, map]);
-  
-  return null;
-}
+const mapContainerStyle = {
+  width: '100%',
+  height: '600px'
+};
+
+const defaultCenter = {
+  lat: 40.4168,
+  lng: -3.7038 // Madrid por defecto
+};
+
+const options = {
+  disableDefaultUI: false,
+  zoomControl: true,
+};
 
 function MapView({ properties }) {
-  const [center, setCenter] = useState([40.4168, -3.7038]); // Madrid por defecto
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY
+  });
+
+  const [map, setMap] = useState(null);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [center, setCenter] = useState(defaultCenter);
   const [zoom, setZoom] = useState(6);
 
+  const onLoad = useCallback(function callback(map) {
+    setMap(map);
+  }, []);
+
+  const onUnmount = useCallback(function callback(map) {
+    setMap(null);
+  }, []);
+
   useEffect(() => {
-    // Calcular centro basado en propiedades
     if (properties && properties.length > 0) {
       const validProperties = properties.filter(p => {
         const lat = parseFloat(p.latitud);
@@ -41,11 +49,24 @@ function MapView({ properties }) {
       if (validProperties.length > 0) {
         const avgLat = validProperties.reduce((sum, p) => sum + parseFloat(p.latitud), 0) / validProperties.length;
         const avgLng = validProperties.reduce((sum, p) => sum + parseFloat(p.longitud), 0) / validProperties.length;
-        setCenter([avgLat, avgLng]);
+        
+        setCenter({ lat: avgLat, lng: avgLng });
         setZoom(validProperties.length === 1 ? 15 : 12);
+
+        // Ajustar el mapa para mostrar todos los marcadores si hay varios
+        if (map && validProperties.length > 1) {
+          const bounds = new window.google.maps.LatLngBounds();
+          validProperties.forEach(p => {
+            bounds.extend({ 
+              lat: parseFloat(p.latitud), 
+              lng: parseFloat(p.longitud) 
+            });
+          });
+          map.fitBounds(bounds);
+        }
       }
     }
-  }, [properties]);
+  }, [properties, map]);
 
   const validProperties = (properties || []).filter(p => {
     const lat = parseFloat(p.latitud);
@@ -53,12 +74,14 @@ function MapView({ properties }) {
     return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
   });
 
+  if (!isLoaded) return <div className="loading-map">Cargando mapa...</div>;
+
   if (!properties || properties.length === 0) {
     return (
       <div className="empty-state">
         <div className="empty-icon"></div>
         <h3>No hay empresas para mostrar en el mapa</h3>
-        <p>Utiliza el formulario de búsqueda para obtener empresas de OpenStreetMap</p>
+        <p>Utiliza el formulario de búsqueda para obtener empresas</p>
       </div>
     );
   }
@@ -80,72 +103,70 @@ function MapView({ properties }) {
       </div>
       
       <div style={{ position: 'relative', width: '100%', height: '600px' }}>
-        <MapContainer 
-          center={center} 
-          zoom={zoom} 
-          className="leaflet-map"
-          style={{ height: '100%', width: '100%', zIndex: 1 }}
-          key={`map-${validProperties.length}`}
-          scrollWheelZoom={true}
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          center={center}
+          zoom={zoom}
+          onLoad={onLoad}
+          onUnmount={onUnmount}
+          options={options}
         >
-          <MapUpdater center={center} zoom={zoom} />
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            maxZoom={19}
-            minZoom={2}
-          />
-          
           {validProperties.map((property) => {
-            const lat = parseFloat(property.latitud);
-            const lng = parseFloat(property.longitud);
-            
-            // Validar que las coordenadas sean números válidos
-            if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
-              return null;
-            }
+            const position = {
+              lat: parseFloat(property.latitud),
+              lng: parseFloat(property.longitud)
+            };
             
             return (
-              <Marker 
-                key={property.id || `marker-${lat}-${lng}`} 
-                position={[lat, lng]}
-              >
-                <Popup>
-                  <div className="popup-content">
-                    <h3>{property.nombre || 'Sin nombre'}</h3>
-                    <div className="popup-info">
-                      <p><strong>Rubro:</strong> {property.rubro || 'N/A'}</p>
-                      <p><strong>Ciudad:</strong> {property.ciudad || 'N/A'}</p>
-                      {property.direccion && (
-                        <p><strong>Dirección:</strong> {property.direccion}</p>
-                      )}
-                      {(property.sitio_web || property.website) && (
-                        <p>
-                          <strong>Web:</strong>{' '}
-                          <a href={property.sitio_web || property.website} target="_blank" rel="noopener noreferrer">
-                            Ver sitio
-                          </a>
-                        </p>
-                      )}
-                      {property.email && (
-                        <p>
-                          <strong>Email:</strong>{' '}
-                          <a href={`mailto:${property.email}`}>{property.email}</a>
-                        </p>
-                      )}
-                      {property.telefono && (
-                        <p>
-                          <strong>Teléfono:</strong>{' '}
-                          <a href={`tel:${property.telefono}`}>{property.telefono}</a>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
+              <Marker
+                key={property.id || `marker-${position.lat}-${position.lng}`}
+                position={position}
+                onClick={() => setSelectedProperty(property)}
+              />
             );
           })}
-        </MapContainer>
+
+          {selectedProperty && (
+            <InfoWindow
+              position={{
+                lat: parseFloat(selectedProperty.latitud),
+                lng: parseFloat(selectedProperty.longitud)
+              }}
+              onCloseClick={() => setSelectedProperty(null)}
+            >
+              <div className="popup-content">
+                <h3>{selectedProperty.nombre || 'Sin nombre'}</h3>
+                <div className="popup-info">
+                  <p><strong>Rubro:</strong> {selectedProperty.rubro || 'N/A'}</p>
+                  <p><strong>Ciudad:</strong> {selectedProperty.ciudad || 'N/A'}</p>
+                  {selectedProperty.direccion && (
+                    <p><strong>Dirección:</strong> {selectedProperty.direccion}</p>
+                  )}
+                  {(selectedProperty.website || selectedProperty.sitio_web) && (
+                    <p>
+                      <strong>Web:</strong>{' '}
+                      <a href={selectedProperty.website || selectedProperty.sitio_web} target="_blank" rel="noopener noreferrer">
+                        Ver sitio
+                      </a>
+                    </p>
+                  )}
+                  {selectedProperty.email && (
+                    <p>
+                      <strong>Email:</strong>{' '}
+                      <a href={`mailto:${selectedProperty.email}`}>{selectedProperty.email}</a>
+                    </p>
+                  )}
+                  {selectedProperty.telefono && (
+                    <p>
+                      <strong>Teléfono:</strong>{' '}
+                      <a href={`tel:${selectedProperty.telefono}`}>{selectedProperty.telefono}</a>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </InfoWindow>
+          )}
+        </GoogleMap>
       </div>
     </div>
   );

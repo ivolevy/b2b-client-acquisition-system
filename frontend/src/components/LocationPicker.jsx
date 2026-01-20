@@ -1,45 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Circle, useMapEvents, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { GoogleMap, useJsApiLoader, Marker, Circle } from '@react-google-maps/api';
 import ToastContainer from './ToastContainer';
 import { useToast } from '../hooks/useToast';
 import './LocationPicker.css';
 
-// Arreglar iconos de Leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-function MapClickHandler({ onLocationSelect }) {
-  useMapEvents({
-    click: (e) => {
-      onLocationSelect(e.latlng);
-    },
-  });
-  return null;
-}
+const mapContainerStyle = {
+  width: '100%',
+  height: '400px',
+  borderRadius: '12px'
+};
 
-// Componente para actualizar el mapa cuando cambia el centro
-function MapUpdater({ center, zoom = 15 }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (center && Array.isArray(center) && center.length === 2) {
-      map.setView(center, zoom);
-      // Invalidar tamaño para asegurar que el mapa se renderice correctamente
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
-    }
-  }, [center, zoom, map]);
-  
-  return null;
-}
+const options = {
+  disableDefaultUI: false,
+  zoomControl: true,
+  mapTypeControl: false,
+  streetViewControl: false,
+  fullscreenControl: false
+};
 
 const formatNominatimResult = (item) => {
   if (!item) return null;
@@ -57,9 +36,17 @@ const formatNominatimResult = (item) => {
 };
 
 function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null }) {
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: GOOGLE_API_KEY,
+    libraries: ['places']
+  });
+
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radius, setRadius] = useState(''); // Sin radio por defecto para mostrar placeholder
-  const [mapCenter, setMapCenter] = useState([40.4168, -3.7038]); // Madrid por defecto
+  const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 }); // Madrid por defecto
+  const [mapZoom, setMapZoom] = useState(12);
+  const [map, setMap] = useState(null);
   const [initialLocationApplied, setInitialLocationApplied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -86,7 +73,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       
       // Configurar ubicación
       setSelectedLocation(location);
-      setMapCenter([lat, lng]);
+      setMapCenter(location);
+      setMapZoom(15);
       setSearchQuery(name || '');
       
       // Notificar al padre
@@ -122,7 +110,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
-          setMapCenter([userLocation.lat, userLocation.lng]);
+          setMapCenter(userLocation);
+          setMapZoom(12);
         },
         (error) => {
           console.log('No se pudo obtener ubicación:', error);
@@ -131,42 +120,19 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     }
   }, [initialLocation, initialLocationApplied]);
 
-  useEffect(() => {
-    if (!GOOGLE_API_KEY || typeof window === 'undefined') return;
-
-    const initPlaces = () => {
-      if (window.google?.maps?.places) {
-        autocompleteRef.current = new window.google.maps.places.AutocompleteService();
-        placesServiceRef.current = new window.google.maps.places.PlacesService(document.createElement('div'));
-        sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
-        setUseGooglePlaces(true);
-      }
-    };
-
-    const scriptId = 'google-places-script';
-    const existingScript = document.getElementById(scriptId);
-
-    if (existingScript) {
-      if (window.google?.maps?.places) {
-        initPlaces();
-      } else {
-        existingScript.addEventListener('load', initPlaces);
-      }
-      return () => existingScript.removeEventListener('load', initPlaces);
+  const onLoad = useCallback(function callback(map) {
+    setMap(map);
+    // Inicializar servicios si no están
+    if (window.google?.maps?.places && !autocompleteRef.current) {
+      autocompleteRef.current = new window.google.maps.places.AutocompleteService();
+      placesServiceRef.current = new window.google.maps.places.PlacesService(map);
+      sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
+      setUseGooglePlaces(true);
     }
+  }, []);
 
-    const script = document.createElement('script');
-    script.id = scriptId;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&language=es&loading=async`;
-    script.async = true;
-    script.defer = true;
-    script.onload = initPlaces;
-    script.onerror = () => console.error('No se pudo cargar Google Places API');
-    document.head.appendChild(script);
-
-    return () => {
-      script.removeEventListener('load', initPlaces);
-    };
+  const onUnmount = useCallback(function callback(map) {
+    setMap(null);
   }, []);
 
   useEffect(() => {
@@ -354,7 +320,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       const lng = parseFloat(suggestion.lon);
       const nombreUbicacion = suggestion.full_label || suggestion.display_name;
       setSearchQuery(nombreUbicacion);
-      setMapCenter([lat, lng]);
+      setMapCenter({ lat, lng });
+      setMapZoom(15);
       handleLocationSelect({ lat, lng }, nombreUbicacion);
     }
   };
@@ -482,8 +449,9 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
                   const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
                   const nombreUbicacion = results2[0].formatted_address;
                   setSearchQuery(nombreUbicacion);
-          setMapCenter([lat, lng]);
-          handleLocationSelect({ lat, lng }, nombreUbicacion);
+                  setMapCenter({ lat, lng });
+                  setMapZoom(15);
+                  handleLocationSelect({ lat, lng }, nombreUbicacion);
           if (window.google?.maps?.places) {
             sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
           }
@@ -598,7 +566,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           }
 
           setSearchQuery(addressName);
-          setMapCenter([latlng.lat, latlng.lng]);
+          setMapCenter({ lat: latlng.lat, lng: latlng.lng });
+          setMapZoom(15);
           handleLocationSelect(latlng, addressName);
           success(
             <>
@@ -760,35 +729,37 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           También puedes hacer clic directamente en el mapa para seleccionar una ubicación
         </div>
 
-        <MapContainer
-          center={mapCenter}
-          zoom={12}
-          className="location-map"
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; OpenStreetMap contributors'
-          />
-          
-          <MapUpdater center={mapCenter} zoom={selectedLocation ? 15 : 12} />
-          
-          <MapClickHandler onLocationSelect={handleMapClickFromMap} />
-          
-          {selectedLocation && (
-            <>
-              <Marker position={[selectedLocation.lat, selectedLocation.lng]} />
-              <Circle
-                center={[selectedLocation.lat, selectedLocation.lng]}
-                radius={radius}
-                pathOptions={{
-                  color: '#667eea',
-                  fillColor: '#667eea',
-                  fillOpacity: 0.2
-                }}
-              />
-            </>
-          )}
-        </MapContainer>
+        {isLoaded ? (
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            center={mapCenter}
+            zoom={mapZoom}
+            onLoad={onLoad}
+            onUnmount={onUnmount}
+            onClick={(e) => handleMapClickFromMap({ lat: e.latLng.lat(), lng: e.latLng.lng() })}
+            options={options}
+            className="location-map"
+          >
+            {selectedLocation && (
+              <>
+                <Marker position={{ lat: selectedLocation.lat, lng: selectedLocation.lng }} />
+                <Circle
+                  center={{ lat: selectedLocation.lat, lng: selectedLocation.lng }}
+                  radius={radius}
+                  options={{
+                    strokeColor: '#667eea',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: '#667eea',
+                    fillOpacity: 0.2,
+                  }}
+                />
+              </>
+            )}
+          </GoogleMap>
+        ) : (
+          <div className="loading-map">Cargando Google Maps...</div>
+        )}
         <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>
     </>
