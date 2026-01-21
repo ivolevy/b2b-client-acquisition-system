@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../AuthWrapper';
 import { adminService } from '../../lib/supabase';
-import ProBackground from '../ProBackground';
-import Navbar from '../Navbar';
 import './AdminLayout.css';
 
 function AdminLayout() {
@@ -61,15 +59,14 @@ function AdminLayout() {
     }
   };
 
+  // Check admin status logic remains the same...
+  
   if (loading) {
     return (
-      <>
-        <ProBackground />
-        <div className="admin-loading">
-          <div className="spinner"></div>
-          <p>Verificando permisos...</p>
-        </div>
-      </>
+      <div className="admin-loading-screen">
+        <div className="spinner"></div>
+        <p>Verificando permisos...</p>
+      </div>
     );
   }
 
@@ -79,63 +76,72 @@ function AdminLayout() {
 
   if (!isAdmin) {
     return (
-      <>
-        <ProBackground />
-        <div className="admin-access-denied">
-          <h2>Acceso Denegado</h2>
-          <p>No tienes permisos para acceder al panel de administración.</p>
-          <button onClick={() => window.history.back()}>Volver</button>
-        </div>
-      </>
+      <div className="admin-access-denied-screen">
+        <h2>Acceso Denegado</h2>
+        <p>No tienes permisos para acceder al panel de administración.</p>
+        <button onClick={() => window.history.back()}>Volver</button>
+      </div>
     );
   }
 
   const isUsersPage = location.pathname.includes('/users');
-  const isPromoCodesPage = location.pathname.includes('/promo-codes');
   const isApiUsagePage = location.pathname.includes('/api-usage');
 
   return (
-    <>
-      <ProBackground />
-      <Navbar />
-      <main className="main-content">
-        <div className="admin-container">
-          <div className="admin-header">
-            <div className="admin-header-content">
-              <button 
-                className="admin-back-btn"
-                onClick={() => navigate('/')}
-                title="Volver al inicio"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-              </button>
-              <h2 className="admin-header-title">Panel de Administración</h2>
-            </div>
-          {(isUsersPage || isPromoCodesPage || isApiUsagePage) && (
-            <div className="admin-nav">
-              <button 
-                className={`admin-nav-btn ${isUsersPage ? 'active' : ''}`}
-                onClick={() => navigate('/backoffice/users')}
-              >
-                Usuarios
-              </button>          
-              <button 
-                className={`admin-nav-btn ${isApiUsagePage ? 'active' : ''}`}
-                onClick={() => navigate('/backoffice/api-usage')}
-              >
-                Métricas API
-              </button>
-            </div>
-          )}
+    <div className="backoffice-layout">
+      <aside className="backoffice-sidebar">
+        <div className="backoffice-brand">
+          <h2>Backoffice</h2>
         </div>
-          <div className="admin-content">
-        <Outlet />
-          </div>
+        
+        <nav className="backoffice-nav">
+          <button 
+            className={`backoffice-nav-item ${isUsersPage ? 'active' : ''}`}
+            onClick={() => navigate('/backoffice/users')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Usuarios
+          </button>
+          
+          <button 
+            className={`backoffice-nav-item ${isApiUsagePage ? 'active' : ''}`}
+            onClick={() => navigate('/backoffice/api-usage')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 20V10"></path>
+              <path d="M12 20V4"></path>
+              <path d="M6 20v-6"></path>
+            </svg>
+            Métricas API
+          </button>
+        </nav>
+
+        <div className="backoffice-sidebar-footer">
+          <button 
+            className="backoffice-exit-btn"
+            onClick={() => navigate('/')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Volver al Sistema
+          </button>
+        </div>
+      </aside>
+
+      <main className="backoffice-main">
+        <div className="backoffice-content-wrapper">
+          <Outlet />
         </div>
       </main>
-    </>
+    </div>
   );
 }
 

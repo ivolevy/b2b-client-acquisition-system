@@ -1,181 +1,224 @@
-.admin-loading,
-.admin-access-denied {
+/* Admin Layout - Minimalist Design */
+:root {
+  --admin-sidebar-width: 260px;
+  --admin-bg: #f3f4f6; /* Light gray background for content */
+  --admin-sidebar-bg: #111827; /* Dark sidebar */
+  --admin-sidebar-text: #e5e7eb;
+  --admin-sidebar-active: #2563eb; /* Primary blue */
+  --admin-text: #1f2937;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+.backoffice-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--admin-bg);
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--admin-text);
+}
+
+/* Sidebar Styling */
+.backoffice-sidebar {
+  width: var(--admin-sidebar-width);
+  background-color: var(--admin-sidebar-bg);
+  color: var(--admin-sidebar-text);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0;
+  z-index: 50;
+  transition: width 0.3s ease;
+}
+
+.backoffice-brand {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.backoffice-brand h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+  letter-spacing: -0.02em;
+}
+
+.backoffice-nav {
+  flex: 1;
+  padding: 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.backoffice-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  color: #9ca3af;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.backoffice-nav-item svg {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.backoffice-nav-item:hover {
+  background-color: rgba(255,255,255,0.05);
+  color: white;
+}
+
+.backoffice-nav-item:hover svg {
+  opacity: 1;
+}
+
+.backoffice-nav-item.active {
+  background-color: var(--admin-sidebar-active);
+  color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.backoffice-nav-item.active svg {
+  opacity: 1;
+}
+
+.backoffice-sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  background-color: rgba(0,0,0,0.2);
+}
+
+.backoffice-exit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background-color: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-md);
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.backoffice-exit-btn:hover {
+  background-color: rgba(255,255,255,0.05);
+  color: white;
+  border-color: rgba(255,255,255,0.2);
+}
+
+/* Main Content Area */
+.backoffice-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.backoffice-content-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+ box-sizing: border-box;
+}
+
+/* Loading & Error Screens */
+.admin-loading-screen,
+.admin-access-denied-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
-  text-align: center;
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--admin-bg);
+  color: var(--admin-text);
 }
 
-.admin-loading .spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #e0e0e0;
-  border-top-color: #81D4FA;
+.admin-loading-screen .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top-color: var(--admin-sidebar-active);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 16px;
 }
 
-.admin-access-denied h2 {
+.admin-access-denied-screen h2 {
   color: #ef4444;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
-.admin-access-denied button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background: #81D4FA;
+.admin-access-denied-screen button {
+  margin-top: 24px;
+  padding: 8px 16px;
+  background: var(--admin-sidebar-active);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-}
-
-.admin-container {
-  background: white;
-  border-radius: var(--radius-xl, 12px);
-  box-shadow: var(--shadow-lg, 0 2px 8px rgba(0, 0, 0, 0.1));
-  overflow: hidden;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  min-width: 0;
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-
-.admin-header {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid var(--gray-100, #e5e7eb);
-  background: linear-gradient(to right, #fff, #fdf2f8);
-}
-
-.admin-header-content {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.admin-back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  background: white;
-  border: 1px solid var(--gray-300, #d1d5db);
-  border-radius: var(--radius-md, 8px);
-  color: var(--gray-700, #374151);
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
-}
-
-.admin-back-btn:hover {
-  background: var(--gray-50, #f9fafb);
-  border-color: var(--gray-400, #9ca3af);
-  color: var(--gray-900, #111827);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transform: translateX(-2px);
-}
-
-.admin-back-btn svg {
-  width: 20px;
-  height: 20px;
-}
-
-.admin-header-title {
-  margin: 0;
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--gray-900, #111827);
-  letter-spacing: -0.01em;
-}
-
-.admin-navigation-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  padding-left: 32px;
-  padding-right: 32px;
-}
-
-.admin-nav {
-  display: flex;
-  gap: 12px;
-}
-
-.admin-nav-btn {
-  padding: 10px 20px;
-  border: 2px solid #e0e0e0;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  color: #333;
-  transition: all 0.2s;
-}
-
-.admin-nav-btn:hover {
-  border-color: #81D4FA;
-  color: #81D4FA;
-}
-
-.admin-nav-btn.active {
-  background: #81D4FA;
-  color: white;
-  border-color: #81D4FA;
-}
-
-.admin-content {
-  padding: 2rem;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
+/* Responsive */
 @media (max-width: 768px) {
-  .admin-container {
-    margin: 0 1rem;
-  }
-
-  .admin-header {
-    padding: 1rem 1.5rem;
-  }
-
-  .admin-header-content {
-    flex-wrap: wrap;
-  }
-
-  .admin-header-title {
-    font-size: 1.5rem;
+  .backoffice-sidebar {
+    width: 64px;
   }
   
-  .admin-content {
-    padding: 1.5rem;
+  .backoffice-brand h2,
+  .backoffice-nav-item span,
+  .backoffice-exit-btn span {
+    display: none;
   }
   
-  .admin-nav {
-    width: 100%;
-    flex-direction: column;
+  .backoffice-brand {
+    justify-content: center;
+    padding: 0;
   }
   
-  .admin-nav-btn {
-    width: 100%;
+  .backoffice-brand::after {
+    content: "BO";
+    font-weight: 800;
+    color: white;
+  }
+  
+  .backoffice-nav-item,
+  .backoffice-exit-btn {
+    justify-content: center;
+    padding: 12px;
+  }
+  
+  .backoffice-content-wrapper {
+    padding: 16px;
   }
 }
-
