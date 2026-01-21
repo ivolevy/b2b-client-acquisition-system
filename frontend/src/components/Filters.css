@@ -7,14 +7,11 @@
 }
 
 .filter-section {
-  background: rgba(255, 255, 255, 0.85);
-  /* Glass effect */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: white;
   padding: var(--spacing-2xl);
   border-radius: var(--radius-xl);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: var(--shadow-lg);
+  border: none;
   width: 100%;
   box-sizing: border-box;
 }
@@ -58,14 +55,11 @@
   align-items: center;
   gap: 0;
   flex-wrap: nowrap;
-  background: rgba(255, 255, 255, 0.9);
-  /* Stronger glass for input bar */
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 999px;
-  /* Pill shape */
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
   padding: 8px 0;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   width: 100%;
 }
 

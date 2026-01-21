@@ -1,21 +1,33 @@
 /* Admin Layout - Minimalist Design */
 :root {
   --admin-sidebar-width: 260px;
-  --admin-bg: #f3f4f6; /* Light gray background for content */
-  --admin-sidebar-bg: #111827; /* Dark sidebar */
+  --admin-bg: #f3f4f6;
+  /* Light gray background for content */
+  --admin-sidebar-bg: #111827;
+  /* Dark sidebar */
   --admin-sidebar-text: #e5e7eb;
-  --admin-sidebar-active: #2563eb; /* Primary blue */
+  --admin-sidebar-active: #2563eb;
+  /* Primary blue */
   --admin-text: #1f2937;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
 }
 
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+  .backoffice-sidebar {
+    background-color: rgba(17, 24, 39, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+}
+
 .backoffice-layout {
   display: flex;
   height: 100vh;
   width: 100vw;
-  background-color: var(--admin-bg);
+  background-color: transparent;
+  /* Transparent to show global gradient */
   overflow: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--admin-text);
@@ -25,13 +37,15 @@
 .backoffice-sidebar {
   width: var(--admin-sidebar-width);
   background-color: var(--admin-sidebar-bg);
+  /* Fallback */
   color: var(--admin-sidebar-text);
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255,255,255,0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
   z-index: 50;
   transition: width 0.3s ease;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
 }
 
 .backoffice-brand {
@@ -39,7 +53,8 @@
   display: flex;
   align-items: center;
   padding: 0 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .backoffice-brand h2 {
@@ -65,7 +80,7 @@
   gap: 12px;
   padding: 10px 16px;
   border-radius: var(--radius-md);
-  color: #9ca3af;
+  color: rgba(229, 231, 235, 0.7);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -81,7 +96,8 @@
 }
 
 .backoffice-nav-item:hover {
-  background-color: rgba(255,255,255,0.05);
+  background-color: rgba(255, 255, 255, 0.1);
+  /* Brighter hover */
   color: white;
 }
 
@@ -90,9 +106,11 @@
 }
 
 .backoffice-nav-item.active {
-  background-color: var(--admin-sidebar-active);
+  background-color: rgba(37, 99, 235, 0.9);
+  /* Glassy Active */
   color: white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  backdrop-filter: blur(4px);
 }
 
 .backoffice-nav-item.active svg {
@@ -101,8 +119,8 @@
 
 .backoffice-sidebar-footer {
   padding: 20px;
-  border-top: 1px solid rgba(255,255,255,0.05);
-  background-color: rgba(0,0,0,0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .backoffice-exit-btn {
@@ -112,8 +130,8 @@
   gap: 8px;
   width: 100%;
   padding: 10px;
-  background-color: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
   color: #9ca3af;
   cursor: pointer;
@@ -123,9 +141,9 @@
 }
 
 .backoffice-exit-btn:hover {
-  background-color: rgba(255,255,255,0.05);
+  background-color: rgba(255, 255, 255, 0.1);
   color: white;
-  border-color: rgba(255,255,255,0.2);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Main Content Area */
@@ -135,6 +153,8 @@
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  background: transparent;
+  /* Show Gradient */
 }
 
 .backoffice-content-wrapper {
@@ -144,7 +164,7 @@
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
- box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 /* Loading & Error Screens */
@@ -186,7 +206,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive */
@@ -194,30 +216,30 @@
   .backoffice-sidebar {
     width: 64px;
   }
-  
+
   .backoffice-brand h2,
   .backoffice-nav-item span,
   .backoffice-exit-btn span {
     display: none;
   }
-  
+
   .backoffice-brand {
     justify-content: center;
     padding: 0;
   }
-  
+
   .backoffice-brand::after {
     content: "BO";
     font-weight: 800;
     color: white;
   }
-  
+
   .backoffice-nav-item,
   .backoffice-exit-btn {
     justify-content: center;
     padding: 12px;
   }
-  
+
   .backoffice-content-wrapper {
     padding: 16px;
   }
