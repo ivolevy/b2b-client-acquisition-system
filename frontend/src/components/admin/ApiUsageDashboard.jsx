@@ -765,6 +765,80 @@ function ApiUsageDashboard() {
           align-items: center;
           gap: 1rem;
         }
+
+        /* Mobile Adjustments */
+        @media (max-width: 1024px) {
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .premium-dashboard {
+            padding: 1.5rem 1rem;
+          }
+
+          .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+          }
+
+          .header-content h1 {
+            font-size: 1.5rem;
+          }
+
+          .stats-grid {
+            grid-template-columns: 1fr;
+            margin-bottom: 2rem;
+          }
+
+          .current-spend {
+            font-size: 2rem;
+          }
+
+          .sku-details {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+          }
+
+          .section-header h3 {
+            font-size: 1.1rem;
+          }
+
+          .modern-table th, .modern-table td {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+          }
+
+          .date-cell {
+            white-space: nowrap;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .header-badges {
+            flex-direction: column;
+            width: 100%;
+          }
+
+          .badge {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .summary-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .modern-table th:nth-child(4),
+          .modern-table td:nth-child(4),
+          .modern-table th:nth-child(5),
+          .modern-table td:nth-child(5) {
+            display: none; /* Hide date and status on very small screens to avoid overflow */
+          }
+        }
       `}</style>
     </div>
   );

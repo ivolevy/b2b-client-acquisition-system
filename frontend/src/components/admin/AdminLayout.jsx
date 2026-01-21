@@ -59,6 +59,11 @@ function AdminLayout() {
     }
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setIsSidebarOpen(false);
+
   // Check admin status logic remains the same...
   
   if (loading) {
@@ -88,8 +93,29 @@ function AdminLayout() {
   const isApiUsagePage = location.pathname.includes('/api-usage');
 
   return (
-    <div className="backoffice-layout">
-      <aside className="backoffice-sidebar">
+    <div className={`backoffice-layout ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+      {/* Dynamic Overlay */}
+      {isSidebarOpen && <div className="backoffice-overlay" onClick={closeSidebar}></div>}
+
+      {/* Mobile Top Header */}
+      <header className="backoffice-mobile-header">
+        <button className="hamburger-menu" onClick={toggleSidebar} aria-label="Toggle Menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            {isSidebarOpen ? (
+              <path d="M18 6L6 18M6 6l12 12"></path>
+            ) : (
+              <>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </>
+            )}
+          </svg>
+        </button>
+        <div className="mobile-brand">Backoffice</div>
+      </header>
+
+      <aside className={`backoffice-sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="backoffice-brand">
           <h2>Backoffice</h2>
         </div>
@@ -97,7 +123,10 @@ function AdminLayout() {
         <nav className="backoffice-nav">
           <button 
             className={`backoffice-nav-item ${isUsersPage ? 'active' : ''}`}
-            onClick={() => navigate('/backoffice/users')}
+            onClick={() => {
+              navigate('/backoffice/users');
+              closeSidebar();
+            }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -105,33 +134,39 @@ function AdminLayout() {
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
-            Usuarios
+            <span>Usuarios</span>
           </button>
           
           <button 
             className={`backoffice-nav-item ${isApiUsagePage ? 'active' : ''}`}
-            onClick={() => navigate('/backoffice/api-usage')}
+            onClick={() => {
+              navigate('/backoffice/api-usage');
+              closeSidebar();
+            }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 20V10"></path>
               <path d="M12 20V4"></path>
               <path d="M6 20v-6"></path>
             </svg>
-            Métricas API
+            <span>Métricas API</span>
           </button>
         </nav>
 
         <div className="backoffice-sidebar-footer">
           <button 
             className="backoffice-exit-btn"
-            onClick={() => navigate('/')}
+            onClick={() => {
+              navigate('/');
+              closeSidebar();
+            }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
-            Volver al Sistema
+            <span>Volver al Sistema</span>
           </button>
         </div>
       </aside>
