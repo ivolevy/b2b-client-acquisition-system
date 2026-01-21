@@ -598,44 +598,36 @@ function UserProfile() {
                 </div>
               </div>
 
-              <div className="profile-divider" style={{ margin: '2rem 0', borderTop: '1px solid rgba(255,255,255,0.1)' }}></div>
+              <div className="profile-divider"></div>
               
-              <h3 className="profile-section-title" style={{ marginTop: '0' }}>Integraciones de Email</h3>
-              <p className="profile-section-subtitle" style={{ marginBottom: '1.5rem' }}>Conectá tus cuentas para enviar emails directamente desde la plataforma.</p>
+              <h3 className="profile-section-title">Integraciones de Email</h3>
+              <p className="profile-section-subtitle">Conectá tus cuentas para enviar emails directamente desde la plataforma.</p>
               
-              <div className="integrations-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+              <div className="integrations-grid">
                 {/* Gmail Card */}
-                <div className={`integration-card ${authStatus.google.connected ? 'connected' : ''}`} style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${authStatus.google.connected ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255,255,255,0.1)'}`,
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className={`integration-card ${authStatus.google.connected ? 'connected' : ''}`}>
+                  <div className="card-header">
+                    <div className="provider-info">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" fill="#EA4335"/>
                       </svg>
-                      <div>
-                        <h4 style={{ margin: 0, fontSize: '0.95rem' }}>Gmail</h4>
+                      <div className="provider-text">
+                        <h4>Gmail</h4>
                         {authStatus.google.connected && (
-                          <span style={{ fontSize: '0.8rem', color: '#22c55e' }}>● Conectado</span>
+                          <span className="status-badge">● Conectado</span>
                         )}
                       </div>
                     </div>
                   </div>
                   
                   {authStatus.google.connected ? (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                      <span style={{ fontSize: '0.85rem', color: '#94a3b8', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div className="card-footer connected">
+                      <span className="email-address">
                         {authStatus.google.email}
                       </span>
                       <button 
                         onClick={() => handleDisconnectProvider('google')}
-                        style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer' }}
+                        className="btn-disconnect"
                       >
                         Desconectar
                       </button>
@@ -643,7 +635,7 @@ function UserProfile() {
                   ) : (
                     <button 
                       onClick={handleConnectGoogle}
-                      style={{ marginTop: 'auto', background: '#EA4335', border: 'none', color: 'white', padding: '0.6rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 500 }}
+                      className="btn-connect gmail"
                     >
                       Conectar Gmail
                     </button>
@@ -651,37 +643,29 @@ function UserProfile() {
                 </div>
 
                 {/* Outlook Card */}
-                <div className={`integration-card ${authStatus.outlook.connected ? 'connected' : ''}`} style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${authStatus.outlook.connected ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255,255,255,0.1)'}`,
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className={`integration-card ${authStatus.outlook.connected ? 'connected' : ''}`}>
+                  <div className="card-header">
+                    <div className="provider-info">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 18L10.2 21.3V2.7L1 6V18ZM23 7.3V16.7L11.5 19.8V4.2L23 7.3ZM23 18.2L11 22V19.2L23 16.7V18.2ZM11 2V4.8L23 7.3V5.8L11 2Z" fill="#0078D4"/>
                       </svg>
-                      <div>
-                        <h4 style={{ margin: 0, fontSize: '0.95rem' }}>Outlook</h4>
+                      <div className="provider-text">
+                        <h4>Outlook</h4>
                         {authStatus.outlook.connected && (
-                          <span style={{ fontSize: '0.8rem', color: '#22c55e' }}>● Conectado</span>
+                          <span className="status-badge">● Conectado</span>
                         )}
                       </div>
                     </div>
                   </div>
                   
                   {authStatus.outlook.connected ? (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                      <span style={{ fontSize: '0.85rem', color: '#94a3b8', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div className="card-footer connected">
+                      <span className="email-address">
                         {authStatus.outlook.email}
                       </span>
                       <button 
                         onClick={() => handleDisconnectProvider('outlook')}
-                        style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer' }}
+                        className="btn-disconnect"
                       >
                         Desconectar
                       </button>
@@ -689,7 +673,7 @@ function UserProfile() {
                   ) : (
                     <button 
                       onClick={handleConnectOutlook}
-                      style={{ marginTop: 'auto', background: '#0078D4', border: 'none', color: 'white', padding: '0.6rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 500 }}
+                      className="btn-connect outlook"
                     >
                       Conectar Outlook
                     </button>
