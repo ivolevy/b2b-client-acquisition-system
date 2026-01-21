@@ -104,14 +104,15 @@ def crear_usuario_admin(email: str, password: str, user_metadata: Dict) -> Dict:
             "email_confirm": True
         })
         
-        # response suele ser un objeto User o similar en la librería python
-        # Dependiendo de la versión, puede devolver un objeto con .user o ser el user directamente
-        # Probaremos asumiendo la estructura estándar de gotrue-py
+        logger.info(f"✅ Usuario Auth creado exitosamente: {email}")
         
-        return {"data": response, "error": None}
+        # En supabase-py v2, response es un UserResponse que tiene .user
+        # Lo convertimos a dict para la respuesta de la API si es necesario, 
+        # o devolvemos el objeto si es serializable (fastapi lo maneja)
+        return {"data": response.user if hasattr(response, "user") else response, "error": None}
         
     except Exception as e:
-        logger.error(f"Error creando usuario admin: {e}")
+        logger.error(f"❌ Error creando usuario admin ({email}): {e}")
         return {"error": str(e)}
 
 def admin_update_user(user_id: str, updates: Dict) -> Dict:
