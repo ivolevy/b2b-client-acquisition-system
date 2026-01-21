@@ -47,7 +47,9 @@ try:
         eliminar_usuario_totalmente,
         save_search_history,
         get_search_history,
-        delete_search_history
+        delete_search_history,
+        get_supabase,
+        get_supabase_admin
     )
     from backend.auth_google import get_google_auth_url, exchange_code_for_token
     from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
@@ -1093,7 +1095,7 @@ async def list_users(admin: Dict = Depends(get_current_admin)):
 @app.get("/admin/usage-stats")
 async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
     """Obtiene las estadísticas de uso de API para el dashboard"""
-    from backend.db_supabase import get_current_month_usage
+    # No es necesario el import local si ya está arriba
     client = get_supabase()
     if not client:
         raise HTTPException(status_code=500, detail="Error de base de datos")
