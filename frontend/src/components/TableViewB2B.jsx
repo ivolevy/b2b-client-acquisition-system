@@ -653,9 +653,13 @@ function TableViewB2B({
               borderTop: '1px solid rgba(255,105,180,0.1)'
             }}>
               <img 
-                src="https://developers.google.com/static/maps/documentation/images/powered_by_google_on_white.png" 
+                src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" 
                 alt="Powered by Google" 
-                style={{ height: '18px', opacity: 0.8 }}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.insertAdjacentHTML('afterend', '<span style="color: #666; font-size: 11px; font-weight: 500; font-family: sans-serif;">Powered by Google</span>');
+                }}
+                style={{ height: '18px', opacity: 0.8, display: 'block' }}
               />
             </div>
           )}
