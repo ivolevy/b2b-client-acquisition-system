@@ -66,14 +66,14 @@ const NotFound = () => {
       overflow: 'hidden',
       fontFamily: 'inherit'
     }}>
-      {/* Background Effect - Subtle stars in dark void */}
+      {/* Background Effect - Clean Dark */}
       <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        background: '#040b14', // Deeper black/blue for space feel
+        background: '#0f172a',
         zIndex: -1
       }}>
         <div style={{
@@ -82,8 +82,7 @@ const NotFound = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: 'radial-gradient(circle at 50% 100%, #1e1b4b 0%, transparent 50%), radial-gradient(circle at 80% 0%, #312e81 0%, transparent 30%)',
-          opacity: 0.6
+          backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%)',
         }} />
       </div>
 
@@ -92,46 +91,48 @@ const NotFound = () => {
         maxWidth: '800px',
         width: '100%',
         position: 'relative',
-        zIndex: 10
+        zIndex: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
       }}>
-        {/* Massive Galaxy Text */}
+        {/* Clean White Title */}
         <h1 style={{
-          fontSize: 'clamp(8rem, 20vw, 15rem)', // Responsive massive text
+          fontSize: 'clamp(6rem, 15vw, 12rem)',
           fontWeight: '900',
-          margin: '-2rem 0',
-          backgroundImage: 'url("https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2050&auto=format&fit=crop")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          margin: '0',
+          background: 'linear-gradient(to bottom, #ffffff, #94a3b8)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          filter: 'drop-shadow(0 0 30px rgba(124, 58, 237, 0.3))',
-          letterSpacing: '-0.05em',
-          lineHeight: 1
+          filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))',
+          letterSpacing: '-0.02em',
+          lineHeight: 1.1,
+          paddingBottom: '1rem' // Give space for descenders/shadow
         }}>
           ¡Ups!
         </h1>
         
         <div style={{
-          marginTop: '2rem',
-          marginBottom: '3rem',
-          position: 'relative'
+          marginTop: '1rem',
+          marginBottom: '2.5rem',
+          position: 'relative',
+          maxWidth: '600px'
         }}>
           <h2 style={{
-            fontSize: '1.5rem',
-            fontWeight: '700',
+            fontSize: '1.25rem',
+            fontWeight: '600',
             textTransform: 'uppercase',
-            letterSpacing: '0.2em',
-            marginBottom: '1rem',
-            color: '#fff'
+            letterSpacing: '0.15em',
+            marginBottom: '0.75rem',
+            color: '#e2e8f0'
           }}>
             404 - Página no encontrada
           </h2>
           
           <p style={{
             color: '#94a3b8',
-            fontSize: '1.1rem',
+            fontSize: '1rem',
             lineHeight: 1.6,
-            maxWidth: '500px',
             margin: '0 auto'
           }}>
             La página que estás buscando podría haber sido eliminada, cambió de nombre o no está disponible temporalmente.
@@ -141,7 +142,7 @@ const NotFound = () => {
         <div style={{
           display: 'flex',
           justifyContent: 'center',
-          gap: '1.5rem',
+          gap: '1rem',
           flexWrap: 'wrap'
         }}>
           <button 
@@ -150,18 +151,18 @@ const NotFound = () => {
               background: '#fff',
               border: 'none',
               color: '#0f172a',
-              padding: '1rem 2.5rem',
-              borderRadius: '50px', // Pill shape like reference
+              padding: '0.75rem 2rem',
+              borderRadius: '50px',
               cursor: 'pointer',
-              fontSize: '0.95rem',
-              fontWeight: '700',
+              fontSize: '0.9rem',
+              fontWeight: '600',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
               e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(255, 255, 255, 0.2)';
             }}
             onMouseOut={(e) => {
@@ -176,24 +177,24 @@ const NotFound = () => {
             onClick={() => navigate('/landing')}
             style={{
               background: 'transparent',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               color: '#fff',
-              padding: '1rem 2.5rem',
+              padding: '0.75rem 2rem',
               borderRadius: '50px',
               cursor: 'pointer',
-              fontSize: '0.95rem',
-              fontWeight: '700',
+              fontSize: '0.9rem',
+              fontWeight: '600',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.2s ease'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
               e.currentTarget.style.borderColor = '#fff';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.background = 'transparent';
               e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+              e.currentTarget.style.background = 'transparent';
             }}
           >
             Más sobre nosotros
