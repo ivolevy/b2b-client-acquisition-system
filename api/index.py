@@ -4,7 +4,7 @@ import os
 import sys
 from dotenv import load_dotenv
 
-# Cargar .env explícitamente primeroa
+# Cargar .env explícitamente primeroaa
 load_dotenv()
 
 # Asegurar que el path incluya el directorio raíz
