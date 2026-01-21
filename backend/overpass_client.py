@@ -67,7 +67,8 @@ RUBROS_DISPONIBLES = {
             '["amenity"="club"]',
             '["amenity"="music_school"]',
             '["amenity"="arts_centre"]'
-        ]
+        ],
+        "keywords": ["Colegio", "Escuela", "Jardin", "Instituto", "Primaria", "Secundaria", "Educación", "Centro Educativo", "Universidad", "Facultad", "Terciario", "Academia", "Capacitación", "Posgrado"]
     },
     "metalurgicas": {
         "nombre": "Metalúrgicas e Industria del Metal",
