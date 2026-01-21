@@ -63,16 +63,17 @@ const NotFound = () => {
       color: '#fff',
       padding: '20px',
       position: 'relative',
+      overflow: 'hidden',
       fontFamily: 'inherit'
     }}>
-      {/* Background Effect */}
+      {/* Background Effect - Subtle stars in dark void */}
       <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        background: '#0f172a',
+        background: '#040b14', // Deeper black/blue for space feel
         zIndex: -1
       }}>
         <div style={{
@@ -81,95 +82,118 @@ const NotFound = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)',
+          backgroundImage: 'radial-gradient(circle at 50% 100%, #1e1b4b 0%, transparent 50%), radial-gradient(circle at 80% 0%, #312e81 0%, transparent 30%)',
+          opacity: 0.6
         }} />
       </div>
 
       <div style={{
-        background: 'rgba(30, 41, 59, 0.4)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        borderRadius: '24px',
-        padding: '3rem 4rem',
         textAlign: 'center',
-        maxWidth: '500px',
+        maxWidth: '800px',
         width: '100%',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+        position: 'relative',
+        zIndex: 10
       }}>
+        {/* Massive Galaxy Text */}
         <h1 style={{
-          fontSize: '6rem',
-          fontWeight: '800',
-          margin: 0,
-          background: 'linear-gradient(to right, #60a5fa, #c084fc)',
+          fontSize: 'clamp(8rem, 20vw, 15rem)', // Responsive massive text
+          fontWeight: '900',
+          margin: '-2rem 0',
+          backgroundImage: 'url("https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2050&auto=format&fit=crop")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          marginBottom: '1rem',
+          filter: 'drop-shadow(0 0 30px rgba(124, 58, 237, 0.3))',
+          letterSpacing: '-0.05em',
           lineHeight: 1
-        }}>404</h1>
-        
-        <h2 style={{
-          fontSize: '1.5rem',
-          fontWeight: '600',
-          marginBottom: '1rem',
-          color: '#e2e8f0'
-        }}>Página no encontrada</h2>
-        
-        <p style={{
-          color: '#94a3b8',
-          marginBottom: '2.5rem',
-          fontSize: '1rem',
-          lineHeight: 1.5
         }}>
-          La URL que intentas visitar no existe o ha sido movida.
-        </p>
+          ¡Ups!
+        </h1>
+        
+        <div style={{
+          marginTop: '2rem',
+          marginBottom: '3rem',
+          position: 'relative'
+        }}>
+          <h2 style={{
+            fontSize: '1.5rem',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            letterSpacing: '0.2em',
+            marginBottom: '1rem',
+            color: '#fff'
+          }}>
+            404 - Página no encontrada
+          </h2>
+          
+          <p style={{
+            color: '#94a3b8',
+            fontSize: '1.1rem',
+            lineHeight: 1.6,
+            maxWidth: '500px',
+            margin: '0 auto'
+          }}>
+            La página que estás buscando podría haber sido eliminada, cambió de nombre o no está disponible temporalmente.
+          </p>
+        </div>
 
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem'
+          justifyContent: 'center',
+          gap: '1.5rem',
+          flexWrap: 'wrap'
         }}>
           <button 
             onClick={() => setShowModal(true)}
             style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: '#fff',
-              padding: '0.875rem',
-              borderRadius: '12px',
+              background: '#fff',
+              border: 'none',
+              color: '#0f172a',
+              padding: '1rem 2.5rem',
+              borderRadius: '50px', // Pill shape like reference
               cursor: 'pointer',
               fontSize: '0.95rem',
-              fontWeight: '500',
-              transition: 'all 0.2s',
-              width: '100%'
+              fontWeight: '700',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
             }}
-            onMouseOver={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
-            onMouseOut={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.05)'}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(255, 255, 255, 0.2)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            }}
           >
-            Contactar a administrador
+            Contactar Admin
           </button>
 
           <button 
             onClick={() => navigate('/landing')}
             style={{
-              background: 'linear-gradient(to right, #3b82f6, #8b5cf6)',
-              border: 'none',
+              background: 'transparent',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
               color: '#fff',
-              padding: '0.875rem',
-              borderRadius: '12px',
+              padding: '1rem 2.5rem',
+              borderRadius: '50px',
               cursor: 'pointer',
               fontSize: '0.95rem',
-              fontWeight: '600',
-              transition: 'all 0.2s',
-              width: '100%',
-              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+              fontWeight: '700',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              transition: 'all 0.3s ease'
             }}
             onMouseOver={(e) => {
-              e.target.style.transform = 'translateY(-1px)';
-              e.target.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.4)';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.borderColor = '#fff';
             }}
             onMouseOut={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
             }}
           >
             Más sobre nosotros
@@ -177,7 +201,7 @@ const NotFound = () => {
         </div>
       </div>
 
-      {/* Modal de Contacto */}
+      {/* Modal de Contacto (Manteniendo funcionalidad) */}
       {showModal && (
         <div style={{
           position: 'fixed',
