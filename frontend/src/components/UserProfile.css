@@ -473,6 +473,47 @@ body.profile-page-active {
   box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
+/* Danger Zone */
+.danger-zone-card {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.danger-card-content h4 {
+  color: #991b1b;
+  /* Dark red */
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.danger-card-content p {
+  color: #7f1d1d;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.btn-delete-account-modern {
+  background: #dc2626;
+  /* Red button */
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+}
+
+.btn-delete-account-modern:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(185, 28, 28, 0.3);
+}
+
 /* Modals - Light Theme */
 .password-modal-overlay,
 .delete-modal-overlay {
