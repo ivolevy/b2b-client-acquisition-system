@@ -234,7 +234,7 @@ def buscar_empresas(
             query = query.eq('telefono_valido', True)
             
         # Ordenar por fecha de creación descendente
-        query = query.order('created_at', desc=True)
+        query = query.order('created_at', ascending=False)
         
         response = query.execute()
         return response.data
@@ -252,7 +252,7 @@ def obtener_todas_empresas() -> List[Dict]:
     try:
         # Por defecto Supabase limita a 1000 rows.
         # Ordenamos por created_at para ver las más recientes.
-        response = client.table('empresas').select('*').order('created_at', desc=True).limit(1000).execute()
+        response = client.table('empresas').select('*').order('created_at', ascending=False).limit(1000).execute()
         return response.data
     except Exception as e:
         logger.error(f"Error obteniendo todas las empresas: {e}")

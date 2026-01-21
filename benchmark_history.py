@@ -17,7 +17,7 @@ supabase: Client = create_client(url, key)
 print("Finding user with most search history...")
 try:
     # Grab the latest row from search_history to pick a user_id
-    response = supabase.table("search_history").select("user_id").limit(1).order("created_at", desc=True).execute()
+    response = supabase.table("search_history").select("user_id").limit(1).order("created_at", ascending=False).execute()
     
     if not response.data:
         print("No search history found at all.")
@@ -34,7 +34,7 @@ try:
     history = supabase.table("search_history")\
         .select("*")\
         .eq("user_id", user_id)\
-        .order("created_at", desc=True)\
+        .order("created_at", ascending=False)\
         .limit(20)\
         .execute()
         

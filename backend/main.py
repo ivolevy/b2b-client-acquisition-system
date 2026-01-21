@@ -1084,7 +1084,7 @@ async def list_users(admin: Dict = Depends(get_current_admin)):
         raise HTTPException(status_code=500, detail="Supabase Admin not configured")
         
     try:
-        res = client.table('users').select('*').order('created_at', desc=True).execute()
+        res = client.table('users').select('*').order('created_at', ascending=False).execute()
         return {"success": True, "users": res.data}
     except Exception as e:
         logger.error(f"Error listing users: {e}")
