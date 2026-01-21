@@ -391,13 +391,16 @@ function AuthWrapper() {
                 <Route path="users/:id" element={<AdminUserDetail />} />
                 <Route path="api-usage" element={<ApiUsageDashboard />} />
               </Route>
+            {/* Main App Route - Only matches root */}
             <Route path="/" element={<AppB2B />} />
+            {/* 404 Route - Catch all unknown */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         ) : (
           <Routes>
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/" element={<Login onLogin={handleDemoLogin} />} />
+            {/* 404 Route for unauthenticated users too */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         )}

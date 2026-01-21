@@ -1,178 +1,133 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProBackground from './ProBackground';
-import { FiAlertTriangle, FiArrowLeft, FiMail, FiUsers } from 'react-icons/fi';
+import ProBackground from './ProBackground'; // Reusing the background effect
 
 const NotFound = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="not-found-container pro-theme">
-      <ProBackground />
-      
-      <div className="content-wrapper">
-        <div className="error-code">404</div>
-        <div className="divider"></div>
-        <h1 className="title">Página no encontrada</h1>
-        <p className="description">
-          Lo sentimos, la página que estás buscando no existe o ha sido movida.
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#fff',
+      padding: '20px',
+      position: 'relative',
+      fontFamily: 'inherit' // Inherit font from global app
+    }}>
+      {/* Background Effect */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: '#0f172a',
+        zIndex: -1
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)',
+        }} />
+      </div>
+
+      <div style={{
+        background: 'rgba(30, 41, 59, 0.4)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        borderRadius: '24px',
+        padding: '3rem 4rem',
+        textAlign: 'center',
+        maxWidth: '500px',
+        width: '100%',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+      }}>
+        <h1 style={{
+          fontSize: '6rem',
+          fontWeight: '800',
+          margin: 0,
+          background: 'linear-gradient(to right, #60a5fa, #c084fc)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          marginBottom: '1rem',
+          lineHeight: 1
+        }}>404</h1>
+        
+        <h2 style={{
+          fontSize: '1.5rem',
+          fontWeight: '600',
+          marginBottom: '1rem',
+          color: '#e2e8f0'
+        }}>Página no encontrada</h2>
+        
+        <p style={{
+          color: '#94a3b8',
+          marginBottom: '2.5rem',
+          fontSize: '1rem',
+          lineHeight: 1.5
+        }}>
+          La URL que intentas visitar no existe o ha sido movida.
         </p>
 
-        <div className="actions">
-          <button onClick={() => window.location.href = 'mailto:admin@dotasolutions.com'} className="action-btn contact">
-            <FiMail />
-            Contactar Administrador
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}>
+          <button 
+            onClick={() => window.location.href = 'mailto:admin@dotasolutions.com'}
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#fff',
+              padding: '0.875rem',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              width: '100%'
+            }}
+            onMouseOver={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+            onMouseOut={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.05)'}
+          >
+            Contactar a administrador
           </button>
-          
-          <button onClick={() => navigate('/landing')} className="action-btn about">
-            <FiUsers />
+
+          <button 
+            onClick={() => navigate('/landing')}
+            style={{
+              background: 'linear-gradient(to right, #3b82f6, #8b5cf6)',
+              border: 'none',
+              color: '#fff',
+              padding: '0.875rem',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              fontWeight: '600',
+              transition: 'all 0.2s',
+              width: '100%',
+              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-1px)';
+              e.target.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+            }}
+          >
             Más sobre nosotros
           </button>
         </div>
-
-        <button onClick={() => navigate('/')} className="back-link">
-          <FiArrowLeft />
-          Volver al inicio
-        </button>
       </div>
-
-      <style jsx>{`
-        .not-found-container {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          font-family: 'Inter', system-ui, sans-serif;
-          color: #fff;
-          overflow: hidden;
-        }
-
-        .content-wrapper {
-          position: relative;
-          z-index: 10;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-          padding: 2rem;
-          max-width: 600px;
-          animation: fadeIn 0.8s ease-out;
-        }
-
-        .error-code {
-          font-size: 8rem;
-          font-weight: 800;
-          line-height: 1;
-          margin-bottom: 1rem;
-          background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          letter-spacing: -0.05em;
-          filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.1));
-        }
-
-        .divider {
-          width: 60px;
-          height: 4px;
-          background: linear-gradient(90deg, #3b82f6, #ec4899);
-          border-radius: 2px;
-          margin-bottom: 2rem;
-        }
-
-        .title {
-          font-size: 2rem;
-          font-weight: 700;
-          margin-bottom: 1rem;
-          color: #e2e8f0;
-        }
-
-        .description {
-          font-size: 1.1rem;
-          color: #94a3b8;
-          line-height: 1.6;
-          margin-bottom: 3rem;
-          max-width: 400px;
-        }
-
-        .actions {
-          display: flex;
-          gap: 1rem;
-          margin-bottom: 3rem;
-          flex-wrap: wrap;
-          justify-content: center;
-        }
-
-        .action-btn {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          padding: 0.875rem 1.5rem;
-          border-radius: 12px;
-          font-weight: 600;
-          font-size: 0.95rem;
-          cursor: pointer;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-          backdrop-filter: blur(10px);
-        }
-
-        .action-btn.contact {
-          background: rgba(59, 130, 246, 0.1);
-          border: 1px solid rgba(59, 130, 246, 0.2);
-          color: #60a5fa;
-        }
-
-        .action-btn.contact:hover {
-          background: rgba(59, 130, 246, 0.2);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-        }
-
-        .action-btn.about {
-          background: rgba(236, 72, 153, 0.1);
-          border: 1px solid rgba(236, 72, 153, 0.2);
-          color: #f472b6;
-        }
-
-        .action-btn.about:hover {
-          background: rgba(236, 72, 153, 0.2);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(236, 72, 153, 0.2);
-        }
-
-        .back-link {
-          background: none;
-          border: none;
-          color: #64748b;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          cursor: pointer;
-          font-size: 0.9rem;
-          transition: color 0.2s;
-        }
-
-        .back-link:hover {
-          color: #fff;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 640px) {
-          .actions {
-            flex-direction: column;
-            width: 100%;
-          }
-          
-          .action-btn {
-            width: 100%;
-            justify-content: center;
-          }
-        }
-      `}</style>
     </div>
   );
 };
