@@ -498,64 +498,42 @@ def eliminar_usuario_totalmente(user_id: str) -> Dict:
 
 
 def save_search_history(user_id: str, search_data: dict) -> dict:
-    """Guarda una búsqueda en el historial del usuario, evitando duplicados y manteniendo solo las últimas 4"""
+    """Guarda una búsqueda en el historial del usuario usando el cliente admin para saltar RLS"""
     admin_client = get_supabase_admin()
     if not admin_client or not user_id:
+        logger.warning(f"save_search_history: Faltan credenciales admin o user_id ({user_id})")
         return {"success": False, "error": "No hay cliente o user_id"}
         
     try:
-        rubro = search_data.get("rubro")
-        ubicacion = search_data.get("ubicacion_nombre")
-        
-        # 1. Intentar encontrar una búsqueda idéntica reciente (mismo rubro y ubicación)
-        # para actualizarla en lugar de duplicarla
-        existente = admin_client.table('search_history')\
-            .select('id')\
-            .eq('user_id', user_id)\
-            .eq('rubro', rubro)\
-            .eq('ubicacion_nombre', ubicacion)\
-            .order('created_at', desc=True)\
-            .limit(1)\
-            .execute()
-            
+        # Asegurar conversión de tipos para PostgreSQL (DECIMAL)
+        def to_float(val):
+            if val is None or val == '': return None
+            try: return float(val)
+            except: return None
+
         insert_data = {
             "user_id": user_id,
-            "rubro": rubro,
-            "ubicacion_nombre": ubicacion,
-            "centro_lat": search_data.get("centro_lat"),
-            "centro_lng": search_data.get("centro_lng"),
-            "radio_km": search_data.get("radio_km"),
+            "rubro": search_data.get("rubro"),
+            "ubicacion_nombre": search_data.get("ubicacion_nombre"),
+            "centro_lat": to_float(search_data.get("centro_lat")),
+            "centro_lng": to_float(search_data.get("centro_lng")),
+            "radio_km": to_float(search_data.get("radio_km")),
             "bbox": search_data.get("bbox"),
-            "empresas_encontradas": search_data.get("empresas_encontradas", 0),
-            "empresas_validas": search_data.get("empresas_validas", 0),
-            "created_at": datetime.now().isoformat()
+            "empresas_encontradas": int(search_data.get("empresas_encontradas", 0)),
+            "empresas_validas": int(search_data.get("empresas_validas", 0))
         }
         
-        if existente.data:
-            # Actualizar existente
-            search_id = existente.data[0]['id']
-            response = admin_client.table('search_history').update(insert_data).eq('id', search_id).execute()
-        else:
-            # Insertar nueva
-            response = admin_client.table('search_history').insert(insert_data).execute()
-            
-        # 2. Mantener solo las últimas 4 búsquedas (Limpieza automática)
-        todas = admin_client.table('search_history')\
-            .select('id')\
-            .eq('user_id', user_id)\
-            .order('created_at', desc=True)\
-            .execute()
-            
-        if len(todas.data) > 4:
-            ids_a_borrar = [s['id'] for s in todas.data[4:]]
-            admin_client.table('search_history').delete().in_('id', ids_a_borrar).execute()
-            logger.info(f" Limpieza de historial para {user_id}: eliminados {len(ids_a_borrar)} registros antiguos")
-
+        logger.info(f"💾 Guardando historial para {user_id}: {insert_data.get('rubro')} en {insert_data.get('ubicacion_nombre')}")
+        
+        response = admin_client.table('search_history').insert(insert_data).execute()
         if response.data:
+            logger.info(f"✅ Historial guardado con ID: {response.data[0].get('id')}")
             return {"success": True, "data": response.data[0]}
-        return {"success": False, "error": "No se recibieron datos tras la operación"}
+        
+        logger.warning(f"⚠️ No se recibieron datos tras insertar historial para {user_id}")
+        return {"success": False, "error": "No se recibieron datos tras la inserción"}
     except Exception as e:
-        logger.error(f"Error guardando historial para {user_id}: {e}")
+        logger.error(f"❌ Error guardando historial para {user_id}: {e}")
         return {"success": False, "error": str(e)}
 
 def get_search_history(user_id: str, limit: int = 10) -> List[dict]:
