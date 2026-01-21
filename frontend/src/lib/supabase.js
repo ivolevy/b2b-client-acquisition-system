@@ -545,6 +545,9 @@ export const adminService = {
       }
     } catch (error) {
       console.error('[Admin] Error getting users from backend:', error);
+      if (error.response && error.response.data) {
+        console.error('[Admin] Backend Error Details:', error.response.data);
+      }
       return { data: null, error };
     }
   },
