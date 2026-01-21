@@ -425,7 +425,8 @@ def read_root():
         "status": "online",
         "service": "B2B Client Acquisition API",
         "documentation": "/docs",
-        "python_version": sys.version
+        "python_version": sys.version,
+        "version": "2026-01-21 01:20 (Fix Revert desc=True)"
     }
 
 async def get_current_admin(request: Request):
