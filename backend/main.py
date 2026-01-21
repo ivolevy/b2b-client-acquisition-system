@@ -457,6 +457,7 @@ class BusquedaRubroRequest(BaseModel):
     busqueda_centro_lng: Optional[float] = None
     busqueda_radio_km: Optional[float] = None
     task_id: Optional[str] = None  # ID único de la tarea para tracking de progreso
+    user_id: Optional[str] = None  # ID del usuario para guardar historial
 
 class BusquedaMultipleRequest(BaseModel):
     rubros: List[str]
@@ -607,8 +608,8 @@ def obtener_rubros():
     }
 
 @app.get("/users/{user_id}/history")
-async def api_get_search_history(user_id: str, limit: int = 10):
-    """Obtiene el historial de búsquedas de un usuario"""
+async def api_get_search_history(user_id: str, limit: int = 4):
+    """Obtiene el historial de búsquedas de un usuario (limitado a las últimas 4)"""
     history = get_search_history(user_id, limit)
     return {
         "success": True,
@@ -990,6 +991,24 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     del SEARCH_PROGRESS[k]
             except Exception as e:
                 logger.warning(f"Error en limpieza lazy de tareas: {e}")
+
+        # Guardar automáticamente en historial si hay user_id y resultados
+        if request.user_id and total_encontradas_original > 0:
+            try:
+                search_history_data = {
+                    "rubro": request.rubro,
+                    "ubicacion_nombre": request.busqueda_ubicacion_nombre,
+                    "centro_lat": request.busqueda_centro_lat,
+                    "centro_lng": request.busqueda_centro_lng,
+                    "radio_km": request.busqueda_radio_km,
+                    "bbox": request.bbox,
+                    "empresas_encontradas": total_encontradas_original,
+                    "empresas_validas": validas
+                }
+                save_search_history(request.user_id, search_history_data)
+                logger.info(f" Historial guardado automáticamente para usuario {request.user_id}")
+            except Exception as e_hist:
+                logger.error(f" Error al guardar historial automático: {e_hist}")
 
         return {
             "success": True,

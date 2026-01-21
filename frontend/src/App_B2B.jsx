@@ -346,7 +346,11 @@ function AppB2B() {
         }
       }, 200);
 
-      const paramsWithTask = { ...params, task_id: taskId };
+      const paramsWithTask = { 
+        ...params, 
+        task_id: taskId,
+        user_id: user?.id
+      };
       const response = await axios.post(`${API_URL}/buscar`, paramsWithTask);
       
       // Detener polling
@@ -365,24 +369,7 @@ function AppB2B() {
         const guardadas = response.data.guardadas || 0;
         const empresasEncontradas = response.data.data || [];
 
-        // Guardar búsqueda en historial si es PRO (en background, sin bloquear)
-        // NO guardar si viene del historial para evitar duplicados
-        if (user?.id && total > 0 && !isFromHistory) {
-          // Ejecutar en background sin await para no bloquear la UI
-          searchHistoryService.saveSearch(user.id, {
-            rubro: params.rubro,
-            ubicacion_nombre: params.busqueda_ubicacion_nombre,
-            centro_lat: params.busqueda_centro_lat,
-            centro_lng: params.busqueda_centro_lng,
-            radio_km: params.busqueda_radio_km,
-            bbox: params.bbox,
-            empresas_encontradas: total,
-            empresas_validas: validas
-          }).then(({ data, error }) => {
-            if (error) console.warn('Historial no guardado:', error.message);
-            else console.log('Historial guardado:', data?.id);
-          }).catch(e => console.warn('Error historial:', e));
-        }
+        // Historial se guarda automáticamente en el backend si viene user_id
         
         // Resetear flag después de la búsqueda
         if (isFromHistory) {

@@ -1,25 +1,14 @@
 .navbar {
-  background: var(--glass-bg, rgba(255, 255, 255, 0.6));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: var(--glass-shadow, 0 8px 32px 0 rgba(31, 38, 135, 0.07));
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.4));
+  background: white;
+  box-shadow: var(--shadow-md);
   position: sticky;
-  top: 1.5rem;
-  z-index: 1000;
-  margin: 0 auto 2rem;
-  width: auto;
-  min-width: 600px;
-  max-width: 90%;
-  border-radius: 9999px;
-  padding: 0.5rem 2rem;
-  transition: all 0.3s ease;
-}
-
-.navbar:hover {
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 10px 40px rgba(129, 212, 250, 0.15);
-  transform: translateY(-2px);
+  top: 1rem;
+  z-index: 100;
+  margin: 1rem auto;
+  width: 40%;
+  border-radius: var(--radius-pill);
+  padding: 0.5rem 1.5rem;
+  overflow: visible;
 }
 
 .navbar-container {

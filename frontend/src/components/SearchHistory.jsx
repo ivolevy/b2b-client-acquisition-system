@@ -45,7 +45,7 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
         setTimeout(() => reject(new Error('Timeout: El servidor no responde.')), 20000)
       );
 
-      const fetchPromise = searchHistoryService.getHistory(user.id, 10);
+      const fetchPromise = searchHistoryService.getHistory(user.id, 4);
       const result = await Promise.race([fetchPromise, timeoutPromise]);
       
       if (!result) {

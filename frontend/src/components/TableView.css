@@ -1,17 +1,15 @@
 .table-container {
-  background: var(--glass-bg, rgba(255, 255, 255, 0.6));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: white;
   border-radius: var(--radius-xl);
-  box-shadow: var(--glass-shadow, 0 8px 32px 0 rgba(31, 38, 135, 0.07));
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.4));
+  box-shadow: var(--shadow-lg);
+  border: none;
   overflow: hidden;
 }
 
 .table-header {
   padding: var(--spacing-2xl);
-  border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.4));
-  background: transparent;
+  border-bottom: 1px solid var(--gray-100);
+  background: white;
 }
 
 .table-header h2 {
@@ -419,23 +417,16 @@
   margin-top: var(--spacing-xl);
   margin-bottom: 0;
   padding: 1rem 1.25rem;
-  background: var(--glass-bg, rgba(255, 255, 255, 0.6));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: white;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  box-shadow: var(--glass-shadow, 0 8px 32px 0 rgba(31, 38, 135, 0.07));
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.4));
+  box-shadow: var(--shadow-lg);
   border-bottom: none;
 }
 
 .unified-results-module {
-  background: var(--glass-bg, rgba(255, 255, 255, 0.6));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: white;
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-  box-shadow: var(--glass-shadow, 0 8px 32px 0 rgba(31, 38, 135, 0.07));
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.4));
-  border-top: none;
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   margin-top: 0;
 }
