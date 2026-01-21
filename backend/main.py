@@ -1605,6 +1605,8 @@ async def enviar_email_individual(request: EnviarEmailRequest):
             raise HTTPException(status_code=404, detail="Template no encontrado")
         
         # Enviar email
+        resultado = enviar_email(
+            empresa=empresa,
             template=template,
             asunto_personalizado=request.asunto_personalizado,
             user_id=request.user_id,
