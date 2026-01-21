@@ -384,9 +384,10 @@ function AppB2B() {
           }).catch(e => console.warn('Error historial:', e));
         }
         
-        // Resetear flag después de la búsqueda
+        // Resetear flag después de la búsqueda satisfactoria
         if (isFromHistory) {
           setIsFromHistory(false);
+          setHistorySearchData(null); // Limpiar para que FiltersB2B sepa que terminó
         }
         
         if (total === 0) {
@@ -439,9 +440,15 @@ function AppB2B() {
         // Actualizar la vista con los resultados encontrados inmediatamente
         setEmpresas(empresasEncontradas);
         
-        // Refrescar también de la base de datos para asegurar consistencia
-        await loadEmpresas(false);
-        await loadStats();
+        // Actualizamos las estadísticas en background
+        loadStats();
+        
+        console.log('Búsqueda completada exitosamente. Resultados en pantalla:', empresasEncontradas.length);
+        
+        // NO llamamos a loadEmpresas(false) inmediatamente para evitar race conditions
+        // que puedan sobreescribir los resultados recién obtenidos si el servidor
+        // aún está persistiendo en la base de datos física.
+        // setEmpresas(empresasEncontradas) ya es suficiente para la UI.
       }
     } catch (err) {
       console.error('Error al buscar empresas:', err);

@@ -25,8 +25,10 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
   // Efecto para cargar datos desde historial
   useEffect(() => {
     if (historySearchData) {
+      console.log('🔄 FiltersB2B: Cargando desde historial:', historySearchData);
       historySearchExecutedRef.current = false;
       setRubro(historySearchData.rubro);
+      
       if (historySearchData.centro_lat && historySearchData.centro_lng) {
         setInitialMapLocation({
           lat: historySearchData.centro_lat,

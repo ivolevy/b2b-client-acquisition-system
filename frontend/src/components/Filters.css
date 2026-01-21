@@ -792,6 +792,7 @@ select.filter-input {
     background: #ffffff;
     border: 1px solid var(--gray-200);
     box-shadow: var(--shadow-sm);
+    height: auto !important;
   }
 
   /* Todos los controles en columna en mobile */

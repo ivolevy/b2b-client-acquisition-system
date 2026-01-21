@@ -66,10 +66,10 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       const { lat, lng, name, radius: initialRadius } = initialLocation;
       const location = { lat, lng };
       
-      // Configurar radio si viene
-      if (initialRadius) {
-        setRadius(initialRadius);
-      }
+      const effectiveRadius = initialRadius || radius || 5000;
+      
+      // Configurar radio
+      setRadius(effectiveRadius);
       
       // Configurar ubicación
       setSelectedLocation(location);
@@ -77,11 +77,11 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       setMapZoom(15);
       setSearchQuery(name || '');
       
-      // Notificar al padre
-      const bbox = calculateBoundingBox(lat, lng, initialRadius || radius);
+      // Notificar al padre CON LOS VALORES CORRECTOS
+      const bbox = calculateBoundingBox(lat, lng, effectiveRadius);
       onLocationChange({
         center: location,
-        radius: initialRadius || radius,
+        radius: effectiveRadius,
         bbox: bbox,
         ubicacion_nombre: name || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
       });

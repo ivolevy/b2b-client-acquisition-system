@@ -546,15 +546,8 @@ p {
     transform: perspective(1000px) rotateX(0deg) translateY(-10px);
 }
 
-.dashboard-preview .browser-card {
-    /* If we nest it, or we just apply browser-card properties to dashboard-preview directly? 
-       Let's use composition in JSX: className="dashboard-preview browser-card" */
-}
 
 /* Hero Mockup specific overrides if needed */
-.hero-mockup .browser-card {
-    /* Maybe slightly different hover or shadow? Default is good for now */
-}
 
 .browser-window-header {
     background: rgba(255, 255, 255, 0.8);
@@ -954,9 +947,6 @@ p {
 
 /* Custom "hat" for the O in dota if purely CSS needed, 
    but for now just text is fine or we can add a pseudo element */
-.dota-brand::first-letter {
-    /* No special treatment needed for 'd' */
-}
 
 .footer-right {
     text-align: right;
@@ -1056,7 +1046,6 @@ p {
 @media (max-width: 768px) {
 
     .bento-grid,
-    /* Add bento-grid here */
     .ai-grid,
     .modules-grid,
     .pricing-grid,
@@ -1064,7 +1053,6 @@ p {
         grid-template-columns: 1fr;
     }
 
-    /* Reset Bento spans on mobile */
     .bento-card:nth-child(1),
     .bento-card:nth-child(2),
     .bento-card:nth-child(3) {
@@ -1091,7 +1079,6 @@ p {
     .landing-header {
         justify-content: center;
         min-width: auto;
-        /* Reset min-width for mobile */
         width: auto;
     }
 
@@ -1114,5 +1101,54 @@ p {
     .btn-primary {
         width: 100%;
         justify-content: center;
+    }
+
+    .plan-price {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-text h1 {
+        font-size: 2.5rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 40px;
+    }
+
+    .hero-text p {
+        font-size: 1rem;
+        margin-bottom: 32px;
+    }
+
+    .ai-section,
+    .feature-highlight-section,
+    .modules-section,
+    .pricing-section {
+        padding: 60px 0;
+    }
+
+    .bento-card {
+        padding: 24px;
+    }
+
+    .feature-content h2 {
+        font-size: 2.2rem;
+    }
+
+    .pricing-card {
+        padding: 32px 24px;
+    }
+
+    .footer-emotional {
+        padding: 60px 0 30px;
+        border-top-left-radius: 30px;
+        border-top-right-radius: 30px;
+    }
+
+    .dota-brand {
+        font-size: 2.2rem;
     }
 }

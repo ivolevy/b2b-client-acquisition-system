@@ -596,11 +596,28 @@ body.profile-page-active {
   }
 
   .profile-main-content {
-    padding: 1.5rem;
+    padding: 1rem;
+  }
+
+  .profile-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .profile-field-value {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .integrations-grid,
+  .rubros-modern-grid {
+    grid-template-columns: 1fr;
   }
 
   .user-profile-container {
     margin: 1rem auto;
     width: 95%;
+    border-radius: 12px;
   }
 }

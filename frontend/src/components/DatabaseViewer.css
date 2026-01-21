@@ -527,5 +527,28 @@ tr.expanded {
 
   .pagination {
     flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .db-viewer-modal {
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .db-viewer-header {
+    padding: 15px;
+  }
+
+  .db-viewer-content {
+    padding: 15px;
+  }
+
+  .footer-stats {
+    display: none;
+  }
+
+  .db-viewer-footer {
+    justify-content: center;
   }
 }
