@@ -10,7 +10,8 @@ import {
   FiServer,
   FiClock,
   FiTrendingUp,
-  FiShield
+  FiShield,
+  FiChevronDown
 } from 'react-icons/fi';
 import './AdminDashboard.css';
 
@@ -18,6 +19,7 @@ function ApiUsageDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedRow, setExpandedRow] = useState(null);
 
   useEffect(() => {
     fetchStats();
@@ -161,26 +163,69 @@ function ApiUsageDashboard() {
                 <th>Costo Total</th>
                 <th>Última Actividad</th>
                 <th>Estado</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {(stats?.stats || []).map((s, idx) => (
-                <tr key={idx}>
-                  <td className="sku-cell">
-                    <span className="sku-icon"><FiCheckCircle /></span>
-                    {s.sku.toUpperCase()}
-                  </td>
-                  <td className="volume-cell">{s.calls_count} req</td>
-                  <td className="cost-cell">${parseFloat(s.estimated_cost_usd).toFixed(4)}</td>
-                  <td className="date-cell">{new Date(s.last_update).toLocaleDateString()} {new Date(s.last_update).toLocaleTimeString()}</td>
-                  <td>
-                    <span className="status-pill active">Activo</span>
-                  </td>
-                </tr>
+                <React.Fragment key={idx}>
+                  <tr 
+                    className={`sku-row ${expandedRow === idx ? 'expanded' : ''}`}
+                    onClick={() => setExpandedRow(expandedRow === idx ? null : idx)}
+                  >
+                    <td className="sku-cell">
+                      <span className="sku-icon"><FiCheckCircle /></span>
+                      {s.sku.toUpperCase()}
+                    </td>
+                    <td className="volume-cell">{s.calls_count} req</td>
+                    <td className="cost-cell">${parseFloat(s.estimated_cost_usd).toFixed(4)}</td>
+                    <td className="date-cell">{new Date(s.last_update).toLocaleDateString()} {new Date(s.last_update).toLocaleTimeString()}</td>
+                    <td>
+                      <span className="status-pill active">Activo</span>
+                    </td>
+                    <td className="action-cell">
+                      <FiChevronDown className={`chevron ${expandedRow === idx ? 'rotate' : ''}`} />
+                    </td>
+                  </tr>
+                  {expandedRow === idx && (
+                    <tr className="detail-row">
+                      <td colSpan="6">
+                        <div className="sku-details">
+                          <div className="detail-column">
+                            <h4>Descripción del Servicio</h4>
+                            <p>
+                              {s.sku === 'pro' 
+                                ? 'Acceso a datos de contacto premium de Google Places (New). Incluye sitio web, teléfono internacional y estado operativo.'
+                                : 'Acceso básico a lugares (ID, nombre, lat/lng).'}
+                            </p>
+                          </div>
+                          <div className="detail-column">
+                            <h4>Campos Incluidos</h4>
+                            <div className="tags">
+                              {s.sku === 'pro' ? (
+                                <>
+                                  <span className="tag">places.websiteUri</span>
+                                  <span className="tag">places.nationalPhoneNumber</span>
+                                  <span className="tag">places.businessStatus</span>
+                                </>
+                              ) : <span className="tag">Basic Fields</span>}
+                            </div>
+                          </div>
+                          <div className="detail-column">
+                            <h4>Costo Unitario</h4>
+                            <span className="unit-cost">
+                              {s.sku === 'pro' ? '$0.0125 / solicitud' : '$0.00 / solicitud'}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
               {(!stats?.stats || stats.stats.length === 0) && (
                 <tr>
-                  <td colSpan="5" className="empty-state">
+                  <td colSpan="6" className="empty-state">
                     <div className="empty-content">
                       <FiDatabase size={24} />
                       <p>No hay actividad registrada este mes</p>
@@ -470,7 +515,15 @@ function ApiUsageDashboard() {
         }
 
         .modern-table tr:last-child td { border-bottom: none; }
-        .modern-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+        
+        /* Interactive Rows */
+        .sku-row {
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        
+        .sku-row:hover { background: rgba(255, 255, 255, 0.02); }
+        .sku-row.expanded { background: rgba(59, 130, 246, 0.05); }
 
         .sku-cell {
           display: flex;
@@ -495,6 +548,67 @@ function ApiUsageDashboard() {
         .status-pill.active {
           background: rgba(59, 130, 246, 0.1);
           color: #60a5fa;
+        }
+        
+        .action-cell { text-align: right; }
+        .chevron { transition: transform 0.2s; opacity: 0.5; }
+        .chevron.rotate { transform: rotate(180deg); opacity: 1; }
+
+        /* Detail Row */
+        .detail-row td {
+          background: rgba(15, 23, 42, 0.3);
+          box-shadow: inset 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          padding: 0 !important;
+        }
+
+        .sku-details {
+          display: grid;
+          grid-template-columns: 2fr 1fr 1fr;
+          gap: 2rem;
+          padding: 2rem;
+          animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-column h4 {
+          margin: 0 0 0.5rem 0;
+          font-size: 0.85rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #94a3b8;
+        }
+
+        .detail-column p {
+          margin: 0;
+          font-size: 0.95rem;
+          line-height: 1.5;
+          color: #cbd5e1;
+        }
+
+        .tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .tag {
+          font-size: 0.75rem;
+          padding: 0.25rem 0.5rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+          color: #e2e8f0;
+          font-family: 'Space Mono', monospace;
+        }
+
+        .unit-cost {
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: #fff;
         }
 
         /* Loading & Error States */
