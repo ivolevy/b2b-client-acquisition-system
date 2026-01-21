@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from '../config';
 
-const GmailConnection = ({ user, onSuccess, onError, variant = 'default' }) => {
+const GmailConnection = ({ user, onSuccess, onError, variant = 'default', minimalist = false }) => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ connected: false, account_email: null });
 
@@ -79,6 +79,28 @@ const GmailConnection = ({ user, onSuccess, onError, variant = 'default' }) => {
             Vincular con Google
           </>
         )}
+      </button>
+    );
+  }
+
+  if (minimalist) {
+    return status.connected ? (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', alignItems: 'center' }}>
+        <div style={{ fontSize: '0.9rem', color: '#10b981', fontWeight: '600' }}>
+          ✓ Conectado: {status.account_email}
+        </div>
+        <button className="cancel-connection-btn" onClick={handleDisconnect} disabled={loading} style={{fontSize: '0.8rem'}}>
+          Desconectar
+        </button>
+      </div>
+    ) : (
+      <button 
+        onClick={handleConnect}
+        disabled={loading}
+        className="btn-primary-block"
+        style={{ borderRadius: '12px', padding: '12px 24px', width: '100%', background: '#ea4335' }}
+      >
+        {loading ? 'Conectando...' : 'Conectar Gmail'}
       </button>
     );
   }

@@ -272,24 +272,51 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   if (!authStatus.loading && !authStatus.google.connected && !authStatus.outlook.connected) {
     return (
       <div className={embedded ? "email-sender-embedded" : "email-sender-modal"}>
-         <div style={{padding: '40px', textAlign: 'center', overflowY:'auto'}}>
-            <h2>Conecta tu Email</h2>
-            <p style={{color: '#64748b', marginBottom: '24px'}}>Para enviar correos necesitas vincular una cuenta.</p>
+         <div className="email-auth-container">
+            <h2 className="email-auth-title">Conecta tu Email</h2>
+            <p className="email-auth-subtitle">Elegí tu proveedor para comenzar a enviar campañas personalizadas.</p>
             
-            <div style={{display:'grid', gap:'16px', maxWidth:'400px', margin:'0 auto'}}>
-              <GmailConnection 
-                user={user} 
-                onSuccess={() => checkAuthStatus()} 
-                onError={toastError}
-              />
-              <OutlookConnection 
-                user={user} 
-                onSuccess={() => checkAuthStatus()} 
-                onError={toastError}
-              />
+            <div className="email-auth-cards-grid">
+              {/* Gmail Card */}
+              <div className="email-auth-card">
+                <div className="email-auth-icon-wrapper">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Gmail" style={{width: 32}} />
+                </div>
+                <div className="email-auth-info">
+                  <h3>Gmail OAuth2</h3>
+                  <p>Enviá desde tu cuenta personal o Workspace</p>
+                </div>
+                <GmailConnection 
+                  user={user} 
+                  onSuccess={() => checkAuthStatus()} 
+                  onError={toastError}
+                  minimalist={true}
+                />
+              </div>
+
+              {/* Outlook Card */}
+              <div className="email-auth-card">
+                <div className="email-auth-icon-wrapper">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Outlook" style={{width: 32}} />
+                </div>
+                <div className="email-auth-info">
+                  <h3>Outlook / Office 365</h3>
+                  <p>Conectá tu cuenta corporativa o Outlook.com</p>
+                </div>
+                <OutlookConnection 
+                  user={user} 
+                  onSuccess={() => checkAuthStatus()} 
+                  onError={toastError}
+                  minimalist={true}
+                />
+              </div>
             </div>
 
-            {!embedded && <button onClick={onClose} style={{marginTop: '20px', background:'none', border:'none', textDecoration:'underline', cursor:'pointer'}}>Cancelar</button>}
+            {!embedded && (
+              <button onClick={onClose} className="cancel-connection-btn">
+                Tal vez más tarde
+              </button>
+            )}
          </div>
          <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>
