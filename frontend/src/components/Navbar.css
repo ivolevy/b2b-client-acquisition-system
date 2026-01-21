@@ -1,14 +1,19 @@
 .navbar {
-  background: white;
-  box-shadow: var(--shadow-md);
+  background: rgba(255, 255, 255, 0.85);
+  /* Glass effect */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
   position: sticky;
   top: 1rem;
   z-index: 100;
-  margin: 1rem auto;
+  margin: 0.5rem auto 0.25rem;
+  /* Reduced margins */
   width: 40%;
   border-radius: var(--radius-pill);
   padding: 0.5rem 1.5rem;
   overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .navbar-container {

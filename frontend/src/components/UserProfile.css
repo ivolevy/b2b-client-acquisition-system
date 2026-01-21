@@ -9,20 +9,17 @@ body.profile-page-active {
 }
 
 .user-profile-container {
-  background: rgba(255, 255, 255, 0.95);
-  /* White glass */
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.85);
+  /* Consistent Glass */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 16px;
-  /* Slightly smaller radius */
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-  /* Softer shadow */
-  border: 1px solid rgba(255, 255, 255, 1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   width: 90%;
   max-width: 1000px;
-  /* Slightly narrower */
-  margin: 2rem auto;
-  /* Reduced margin */
+  margin: 0.5rem auto;
+  /* Reduced margins */
   min-height: 500px;
   /* Reduced min-height */
   overflow: hidden;
