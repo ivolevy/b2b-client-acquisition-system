@@ -42,6 +42,7 @@ except Exception as e:
 
 def get_supabase() -> Optional[Client]:
     """Obtiene o inicializa el cliente de Supabase"""
+    global _supabase_client, supabase
     # Retornar el cliente ya inicializado a nivel de módulo
     if _supabase_client:
         return _supabase_client
@@ -53,7 +54,6 @@ def get_supabase() -> Optional[Client]:
         
     # Si las credenciales están presentes pero el cliente no está inicializado (ej. falló la primera vez)
     try:
-        global _supabase_client, supabase
         _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
         supabase = _supabase_client
         logger.info("✅ Cliente Supabase re-inicializado correctamente en get_supabase()")
