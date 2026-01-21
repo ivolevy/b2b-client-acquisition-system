@@ -194,6 +194,15 @@
   }
 }
 
+/* Mobile Elements Hidden by Default */
+.backoffice-mobile-header {
+  display: none;
+}
+
+.backoffice-overlay {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .backoffice-mobile-header {
     display: flex;
