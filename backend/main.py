@@ -1076,6 +1076,20 @@ async def filtrar(request: FiltroRequest):
         logger.error(f"Error filtrando: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/admin/users")
+async def list_users(admin: Dict = Depends(get_current_admin)):
+    """Lista todos los usuarios usando Service Role (bypass RLS)"""
+    client = get_supabase_admin()
+    if not client:
+        raise HTTPException(status_code=500, detail="Supabase Admin not configured")
+        
+    try:
+        res = client.table('users').select('*').order('created_at', desc=True).execute()
+        return {"success": True, "users": res.data}
+    except Exception as e:
+        logger.error(f"Error listing users: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/admin/usage-stats")
 async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
     """Obtiene las estadísticas de uso de API para el dashboard"""
@@ -1100,7 +1114,13 @@ async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
         }
     except Exception as e:
         logger.error(f"Error en /admin/usage-stats: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {
+            "success": False,
+            "error": str(e),
+            "stats": [],
+            "total_estimated_cost_usd": 0,
+            "provider_status": "google"
+        }
 
 @app.get("/estadisticas")
 async def estadisticas():

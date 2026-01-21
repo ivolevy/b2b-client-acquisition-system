@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import axios from 'axios';
 import { API_URL } from '../config';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -526,30 +527,24 @@ export const adminService = {
 
   async getAllUsers(filters = {}) {
     try {
-      let query = supabase
-        .from('users')
-        .select('*')
-        .order('updated_at', { ascending: false });
+      console.log('[Admin] Fetching users via backend...');
+      const { data: { session } } = await supabase.auth.getSession();
 
-      // Aplicar filtros
-      if (filters.role) {
-        query = query.eq('role', filters.role);
-      }
-      if (filters.search && filters.search.trim()) {
-        const searchTerm = `%${filters.search.trim()}%`;
-        query = query.or(`email.ilike.${searchTerm},name.ilike.${searchTerm}`);
-      }
+      const response = await axios.get(`${API_URL}/admin/users`, {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        },
+        params: filters
+      });
 
-      console.log('[Admin] Fetching users with filters:', filters);
-      const { data, error } = await query;
-      if (error) {
-        console.error('[Admin] Error fetching users:', error);
-        throw error;
+      if (response.data.success) {
+        console.log('[Admin] Fetched users:', response.data.users.length);
+        return { data: response.data.users, error: null };
+      } else {
+        throw new Error(response.data.error || 'Error fetching users');
       }
-      console.log('[Admin] Fetched users:', data?.length || 0);
-      return { data: data || [], error: null };
     } catch (error) {
-      console.error('[Admin] Error getting users:', error);
+      console.error('[Admin] Error getting users from backend:', error);
       return { data: null, error };
     }
   },
