@@ -273,42 +273,46 @@ function EmailSender({ empresas, onClose, embedded = false }) {
     return (
       <div className={embedded ? "email-sender-embedded" : "email-sender-modal"}>
          <div className="email-auth-container">
-            <h2 className="email-auth-title">Conecta tu Email</h2>
-            <p className="email-auth-subtitle">Elegí tu proveedor para comenzar a enviar campañas personalizadas.</p>
+            <h2 className="email-auth-title">Conecta tu cuenta</h2>
+            <p className="email-auth-subtitle">Elegí tu proveedor de preferencia para comenzar a enviar campañas personalizadas.</p>
             
             <div className="email-auth-cards-grid">
               {/* Gmail Card */}
-              <div className="email-auth-card">
+              <div className="email-auth-card" onClick={() => document.getElementById('gmail-connect-trigger')?.click()}>
                 <div className="email-auth-icon-wrapper">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Gmail" style={{width: 32}} />
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Gmail" style={{width: 28}} />
                 </div>
                 <div className="email-auth-info">
-                  <h3>Gmail OAuth2</h3>
-                  <p>Enviá desde tu cuenta personal o Workspace</p>
+                  <h3>Gmail</h3>
+                  <p>Cuenta personal o Workspace</p>
                 </div>
-                <GmailConnection 
-                  user={user} 
-                  onSuccess={() => checkAuthStatus()} 
-                  onError={toastError}
-                  minimalist={true}
-                />
+                <div className="email-auth-action">
+                  <GmailConnection 
+                    user={user} 
+                    onSuccess={() => checkAuthStatus()} 
+                    onError={toastError}
+                    minimalist={true}
+                  />
+                </div>
               </div>
 
               {/* Outlook Card */}
-              <div className="email-auth-card">
+              <div className="email-auth-card" onClick={() => document.getElementById('outlook-connect-trigger')?.click()}>
                 <div className="email-auth-icon-wrapper">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Outlook" style={{width: 32}} />
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Outlook" style={{width: 28}} />
                 </div>
                 <div className="email-auth-info">
-                  <h3>Outlook / Office 365</h3>
-                  <p>Conectá tu cuenta corporativa o Outlook.com</p>
+                  <h3>Outlook</h3>
+                  <p>Cuenta corporativa o personal</p>
                 </div>
-                <OutlookConnection 
-                  user={user} 
-                  onSuccess={() => checkAuthStatus()} 
-                  onError={toastError}
-                  minimalist={true}
-                />
+                <div className="email-auth-action">
+                  <OutlookConnection 
+                    user={user} 
+                    onSuccess={() => checkAuthStatus()} 
+                    onError={toastError}
+                    minimalist={true}
+                  />
+                </div>
               </div>
             </div>
 

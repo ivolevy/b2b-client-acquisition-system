@@ -95,22 +95,17 @@ const OutlookConnection = ({ user, onSuccess, onError, variant = 'default', mini
 
   if (minimalist) {
     return status.connected ? (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', alignItems: 'center' }}>
-        <div style={{ fontSize: '0.9rem', color: '#10b981', fontWeight: '600' }}>
-          ✓ Conectado: {status.account_email}
-        </div>
-        <button className="cancel-connection-btn" onClick={handleDisconnect} disabled={loading} style={{fontSize: '0.8rem'}}>
-          Desconectar
-        </button>
+      <div style={{ color: '#0078D4', fontWeight: '600', fontSize: '0.85rem' }}>
+        ✓ Conectado
       </div>
     ) : (
       <button 
-        onClick={handleConnect}
+        id="outlook-connect-trigger"
+        onClick={(e) => { e.stopPropagation(); handleConnect(); }}
         disabled={loading}
-        className="btn-primary-block"
-        style={{ borderRadius: '12px', padding: '12px 24px', width: '100%', background: '#0078D4' }}
+        className="outlook-connect-mini"
       >
-        {loading ? 'Conectando...' : 'Conectar Outlook'}
+        {loading ? '...' : 'Conectar'}
       </button>
     );
   }

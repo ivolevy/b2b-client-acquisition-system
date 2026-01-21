@@ -85,22 +85,17 @@ const GmailConnection = ({ user, onSuccess, onError, variant = 'default', minima
 
   if (minimalist) {
     return status.connected ? (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', alignItems: 'center' }}>
-        <div style={{ fontSize: '0.9rem', color: '#10b981', fontWeight: '600' }}>
-          ✓ Conectado: {status.account_email}
-        </div>
-        <button className="cancel-connection-btn" onClick={handleDisconnect} disabled={loading} style={{fontSize: '0.8rem'}}>
-          Desconectar
-        </button>
+      <div style={{ color: '#10b981', fontWeight: '600', fontSize: '0.85rem' }}>
+        ✓ Conectado
       </div>
     ) : (
       <button 
-        onClick={handleConnect}
+        id="gmail-connect-trigger"
+        onClick={(e) => { e.stopPropagation(); handleConnect(); }}
         disabled={loading}
-        className="btn-primary-block"
-        style={{ borderRadius: '12px', padding: '12px 24px', width: '100%', background: '#ea4335' }}
+        className="gmail-connect-mini"
       >
-        {loading ? 'Conectando...' : 'Conectar Gmail'}
+        {loading ? '...' : 'Conectar'}
       </button>
     );
   }

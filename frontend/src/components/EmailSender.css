@@ -53,6 +53,130 @@
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
+/* Redesigned Connection UI - Minimalist White */
+.email-auth-container {
+  padding: 60px 40px;
+  text-align: center;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  min-height: 100%;
+}
+
+.email-auth-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+  letter-spacing: -0.025em;
+}
+
+.email-auth-subtitle {
+  color: #64748b;
+  font-size: 1rem;
+  margin-bottom: 48px;
+  max-width: 450px;
+}
+
+.email-auth-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.email-auth-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: left;
+}
+
+.email-auth-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  background: #fafafa;
+}
+
+.email-auth-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.email-auth-info {
+  flex: 1;
+}
+
+.email-auth-info h3 {
+  color: #0f172a;
+  font-size: 1.1rem;
+  margin: 0 0 2px 0;
+  font-weight: 600;
+}
+
+.email-auth-info p {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.email-auth-action {
+  flex-shrink: 0;
+}
+
+.cancel-connection-btn {
+  margin-top: 40px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.cancel-connection-btn:hover {
+  color: #475569;
+}
+
+/* Custom button overrides for connection buttons */
+.gmail-connect-mini {
+  background: #EA4335 !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+}
+
+.outlook-connect-mini {
+  background: #0078D4 !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+}
+
 /* Header */
 .email-sender-header {
   height: 64px;
