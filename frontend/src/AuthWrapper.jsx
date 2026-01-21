@@ -17,6 +17,7 @@ const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
 const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'));
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const ApiUsageDashboard = lazy(() => import('./components/admin/ApiUsageDashboard'));
+const NotFound = lazy(() => import('./components/NotFound'));
 
 // Contexto de autenticación
 const AuthContext = createContext(null);
@@ -390,12 +391,14 @@ function AuthWrapper() {
                 <Route path="users/:id" element={<AdminUserDetail />} />
                 <Route path="api-usage" element={<ApiUsageDashboard />} />
               </Route>
-            <Route path="/*" element={<AppB2B />} />
+            <Route path="/" element={<AppB2B />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         ) : (
           <Routes>
             <Route path="/landing" element={<LandingPage />} />
-            <Route path="/*" element={<Login onLogin={handleDemoLogin} />} />
+            <Route path="/" element={<Login onLogin={handleDemoLogin} />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         )}
         </Suspense>
