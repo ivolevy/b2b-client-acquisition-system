@@ -109,7 +109,6 @@ def enviar_email(
 
     # 1. Intentar enviar vía Gmail API si tenemos user_id (y provider es None o 'google')
     if user_id and (provider is None or provider == 'google'):
-    if user_id:
         token_data = get_user_oauth_token(user_id)
         if token_data:
             logger.info(f" Intentando enviar vía Gmail API para usuario {user_id}")
@@ -269,7 +268,6 @@ def enviar_email_empresa(
     empresa: Dict,
     template: Dict,
     asunto_personalizado: Optional[str] = None,
-    asunto_personalizado: Optional[str] = None,
     user_id: Optional[str] = None,
     provider: Optional[str] = None
 ) -> Dict:
@@ -341,7 +339,6 @@ def enviar_email_empresa(
         asunto=asunto,
         cuerpo_html=cuerpo_html,
         cuerpo_texto=cuerpo_texto,
-        cuerpo_texto=cuerpo_texto,
         user_id=user_id,
         provider=provider
     )
@@ -357,7 +354,6 @@ def enviar_emails_masivo(
     empresas: List[Dict],
     template: Dict,
     asunto_personalizado: Optional[str] = None,
-    delay_segundos: float = 3.0,
     delay_segundos: float = 3.0,
     user_id: Optional[str] = None,
     provider: Optional[str] = None
