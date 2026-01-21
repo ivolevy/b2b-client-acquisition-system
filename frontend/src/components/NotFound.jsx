@@ -1,9 +1,57 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProBackground from './ProBackground'; // Reusing the background effect
+import { FiMail, FiPhone, FiLinkedin, FiX } from 'react-icons/fi';
 
 const NotFound = () => {
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+
+  // Helper for contact items
+  const ContactItem = ({ icon: Icon, label, value, href, color }) => (
+    <a 
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem',
+        background: 'rgba(255, 255, 255, 0.03)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        padding: '1rem',
+        borderRadius: '12px',
+        textDecoration: 'none',
+        transition: 'all 0.2s',
+        cursor: 'pointer'
+      }}
+      onMouseOver={(e) => {
+        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+      }}
+      onMouseOut={(e) => {
+        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+        e.currentTarget.style.transform = 'translateY(0)';
+      }}
+    >
+      <div style={{
+        background: `rgba(${color}, 0.1)`,
+        color: `rgb(${color})`,
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.2rem'
+      }}>
+        <Icon />
+      </div>
+      <div style={{ textAlign: 'left' }}>
+        <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '2px' }}>{label}</div>
+        <div style={{ color: '#fff', fontWeight: '500', fontSize: '0.95rem' }}>{value}</div>
+      </div>
+    </a>
+  );
 
   return (
     <div style={{
@@ -15,7 +63,7 @@ const NotFound = () => {
       color: '#fff',
       padding: '20px',
       position: 'relative',
-      fontFamily: 'inherit' // Inherit font from global app
+      fontFamily: 'inherit'
     }}>
       {/* Background Effect */}
       <div style={{
@@ -81,7 +129,7 @@ const NotFound = () => {
           gap: '1rem'
         }}>
           <button 
-            onClick={() => window.location.href = 'mailto:admin@dotasolutions.com'}
+            onClick={() => setShowModal(true)}
             style={{
               background: 'rgba(255, 255, 255, 0.05)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -128,6 +176,94 @@ const NotFound = () => {
           </button>
         </div>
       </div>
+
+      {/* Modal de Contacto */}
+      {showModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          animation: 'fadeIn 0.2s ease'
+        }}
+        onClick={(e) => {
+           if(e.target === e.currentTarget) setShowModal(false);
+        }}
+        >
+          <div style={{
+            background: '#1e293b',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '20px',
+            padding: '2rem',
+            width: '90%',
+            maxWidth: '400px',
+            position: 'relative',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            animation: 'scaleIn 0.2s ease'
+          }}>
+            <button 
+              onClick={() => setShowModal(false)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'transparent',
+                border: 'none',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                padding: '0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <FiX size={24} />
+            </button>
+
+            <h3 style={{
+              margin: '0 0 1.5rem 0',
+              fontSize: '1.25rem',
+              color: '#fff',
+              textAlign: 'center'
+            }}>Contacto del Administrador</h3>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <ContactItem 
+                icon={FiMail} 
+                label="Correo Electrónico" 
+                value="ivo.levy03@gmail.com" 
+                href="mailto:ivo.levy03@gmail.com"
+                color="244, 63, 94" // pink
+              />
+              <ContactItem 
+                icon={FiPhone} 
+                label="WhatsApp" 
+                value="+54 11 3824 0929" 
+                href="https://wa.me/5491138240929"
+                color="34, 197, 94" // green
+              />
+              <ContactItem 
+                icon={FiLinkedin} 
+                label="LinkedIn" 
+                value="Ivan Levy" 
+                href="https://www.linkedin.com/in/ivan-levy/"
+                color="59, 130, 246" // blue
+              />
+            </div>
+          </div>
+          <style>{`
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+          `}</style>
+        </div>
+      )}
     </div>
   );
 };
