@@ -38,6 +38,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
   const [previewEmpresa, setPreviewEmpresa] = useState(null);
 
   const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false }, loading: true });
+  const [selectedProvider, setSelectedProvider] = useState(null);
   
   const { user } = useAuth();
   const { toasts, success, error: toastError, warning, removeToast } = useToast();
@@ -57,6 +58,20 @@ function EmailSender({ empresas, onClose, embedded = false }) {
         outlook: response.data.outlook || { connected: false },
         loading: false
       });
+      
+      const google = response.data.google || { connected: false };
+      const outlook = response.data.outlook || { connected: false };
+      
+      // Default provider logic
+      if (google.connected && !outlook.connected) {
+        setSelectedProvider('google');
+      } else if (!google.connected && outlook.connected) {
+        setSelectedProvider('outlook');
+      } else if (google.connected && outlook.connected) {
+        setSelectedProvider('google'); // Default to Google if both
+      } else {
+        setSelectedProvider(null);
+      }
     } catch (err) {
       console.error("Error checking Auth status:", err);
       setAuthStatus(prev => ({ ...prev, loading: false }));
@@ -172,7 +187,8 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           empresa_id: emp.id,
           template_id: selectedTemplate,
           user_id: user?.id,
-          empresa_data: emp
+          empresa_data: emp,
+          provider: selectedProvider
         });
         if (res.data.success) {
           success(<strong>¡Email enviado a {emp.nombre}!</strong>);
@@ -186,7 +202,9 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           empresa_ids: toSend.map(e => e.id),
           template_id: selectedTemplate,
           delay_segundos: 2.0,
-          user_id: user?.id
+          delay_segundos: 2.0,
+          user_id: user?.id,
+          provider: selectedProvider
         });
         if (res.data.success) {
           success(
@@ -338,7 +356,33 @@ function EmailSender({ empresas, onClose, embedded = false }) {
                    Masivo
                  </button>
                </div>
+               </div>
             </div>
+
+            {/* Provider Selector if both connected */}
+            {authStatus.google.connected && authStatus.outlook.connected && (
+              <div className="config-group">
+                 <label className="config-label">Enviar desde</label>
+                 <div className="provider-selector" style={{display: 'flex', gap: '8px'}}>
+                    <button 
+                      className={`mode-btn ${selectedProvider === 'google' ? 'active' : ''}`}
+                      onClick={() => setSelectedProvider('google')}
+                      style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'}}
+                    >
+                      <span style={{width: 8, height: 8, borderRadius: '50%', background: '#10b981'}}></span> Gmail
+                    </button>
+                    <button 
+                      className={`mode-btn ${selectedProvider === 'outlook' ? 'active' : ''}`}
+                      onClick={() => setSelectedProvider('outlook')}
+                      style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'}}
+                    >
+                      <span style={{width: 8, height: 8, borderRadius: '50%', background: '#0078D4'}}></span> Outlook
+                    </button>
+                 </div>
+              </div>
+            )}
+
+            <div className="config-group">
 
             <div className="config-group">
               <label className="config-label">Template</label>

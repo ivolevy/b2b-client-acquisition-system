@@ -502,6 +502,7 @@ class EnviarEmailRequest(BaseModel):
     asunto_personalizado: Optional[str] = None
     user_id: Optional[str] = None
     empresa_data: Optional[Dict[str, Any]] = None
+    provider: Optional[str] = None
 
 class EnviarEmailMasivoRequest(BaseModel):
     empresa_ids: List[int]
@@ -509,6 +510,7 @@ class EnviarEmailMasivoRequest(BaseModel):
     asunto_personalizado: Optional[str] = None
     delay_segundos: float = 3.0
     user_id: Optional[str] = None
+    provider: Optional[str] = None
 
 # Modelos Gmail OAuth
 class GoogleAuthURLRequest(BaseModel):
@@ -1439,6 +1441,58 @@ async def google_callback(code: str, state: str):
         logger.error(f"Error en callback de Google Auth: {e}")
         return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=error&reason={str(e)}"})
 
+# ========== OUTLOOK OAUTH ENDPOINTS ==========
+
+@app.post("/auth/outlook/url")
+async def outlook_auth_url(request: GoogleAuthURLRequest):
+    """Obtiene la URL para iniciar el flujo de Outlook OAuth"""
+    try:
+        url = get_outlook_auth_url(state=request.state)
+        return {"success": True, "url": url}
+    except Exception as e:
+        logger.error(f"Error generando URL de Outlook Auth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/auth/outlook/callback")
+async def outlook_callback(code: str, state: str):
+    """Maneja el callback de Outlook OAuth"""
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    try:
+        user_id = state
+        
+        # Intercambiar código por tokens
+        token_data = exchange_outlook_token(code)
+        
+        if "error" in token_data:
+            raise Exception(token_data["error"])
+            
+        # Obtener email del usuario para confirmar
+        from backend.auth_outlook import get_user_profile
+        profile = get_user_profile(token_data['access_token'])
+        
+        # Guardar tokens (incluyendo email)
+        token_to_save = {
+            'access_token': token_data['access_token'],
+            'refresh_token': token_data.get('refresh_token'),
+            'expiry': (datetime.now() + timedelta(seconds=token_data.get('expires_in', 3600))).isoformat(),
+            'scope': token_data.get('scope'),
+            'account_email': profile.get('mail') or profile.get('userPrincipalName')
+        }
+        
+        success = save_user_oauth_token(user_id, token_to_save, provider='outlook')
+        
+        if not success:
+            logger.error(f"Error guardando token Outlook para usuario {user_id}")
+            return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason=save_failed"})
+            
+        # Redirigir de vuelta al frontend
+        logger.info(f"Outlook conectado exitosamente para usuario {user_id}")
+        return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=success"})
+        
+    except Exception as e:
+        logger.error(f"Error en callback de Outlook Auth: {e}")
+        return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason={str(e)}"})
+
 @app.get("/auth/google/status/{user_id}")
 async def google_status(user_id: str):
     """Verifica si el usuario tiene una cuenta de Gmail conectada"""
@@ -1551,11 +1605,10 @@ async def enviar_email_individual(request: EnviarEmailRequest):
             raise HTTPException(status_code=404, detail="Template no encontrado")
         
         # Enviar email
-        resultado = enviar_email_empresa(
-            empresa=empresa,
             template=template,
             asunto_personalizado=request.asunto_personalizado,
-            user_id=request.user_id
+            user_id=request.user_id,
+            provider=request.provider
         )
         
         # Guardar en historial

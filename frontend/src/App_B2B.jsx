@@ -71,14 +71,23 @@ function AppB2B() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const gmailStatus = params.get('gmail');
+    const outlookStatus = params.get('outlook');
     
     if (gmailStatus === 'success') {
       success("✓ Gmail conectado correctamente. Ya podés enviar correos.");
-      // Limpiar parámetros de la URL
       navigate('/', { replace: true });
     } else if (gmailStatus === 'error') {
       const reason = params.get('reason');
       toastError(`✗ Error al conectar con Gmail: ${reason || 'Error desconocido'}`);
+      navigate('/', { replace: true });
+    }
+
+    if (outlookStatus === 'success') {
+      success("✓ Outlook conectado correctamente. Ya podés enviar correos.");
+      navigate('/', { replace: true });
+    } else if (outlookStatus === 'error') {
+      const reason = params.get('reason');
+      toastError(`✗ Error al conectar con Outlook: ${reason || 'Error desconocido'}`);
       navigate('/', { replace: true });
     }
   }, [location.search, navigate, success, toastError]);
