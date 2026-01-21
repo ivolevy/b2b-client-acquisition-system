@@ -49,7 +49,8 @@ try:
         get_search_history,
         delete_search_history,
         get_supabase,
-        get_supabase_admin
+        get_supabase_admin,
+        get_api_logs
     )
     from backend.auth_google import get_google_auth_url, exchange_code_for_token
     from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
@@ -1136,6 +1137,26 @@ async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
             "total_estimated_cost_usd": 0,
             "provider_status": "google"
         }
+
+@app.get("/admin/api-logs")
+async def get_api_logs_endpoint(
+    limit: int = 100, 
+    offset: int = 0, 
+    admin: Dict = Depends(get_current_admin)
+):
+    """Obtiene el historial detallado de llamadas a API"""
+    try:
+        logs = get_api_logs(limit=limit, offset=offset)
+        return {
+            "success": True, 
+            "logs": logs,
+            "limit": limit,
+            "offset": offset
+        }
+    except Exception as e:
+        logger.error(f"Error en /admin/api-logs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/estadisticas")
 async def estadisticas():

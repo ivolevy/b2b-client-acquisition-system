@@ -604,3 +604,59 @@ def get_current_month_usage() -> float:
     except Exception as e:
         logger.error(f"Error obteniendo uso mensual: {e}")
         return 0.0
+
+def log_api_call(
+    provider: str,
+    endpoint: str,
+    cost_usd: float,
+    metadata: Dict = {},
+    status_code: int = 200,
+    duration_ms: int = 0,
+    sku: Optional[str] = None
+) -> bool:
+    """Registra una llamada individual a API en el historial detallado"""
+    client = get_supabase_admin()
+    if not client:
+        return False
+        
+    try:
+        # Intentar obtener user_id del contexto si es posible (not implemented yet globally)
+        # Por ahora lo dejamos nulo o lo pasamos en metadata
+        user_id = metadata.get('user_id')
+        
+        data = {
+            'provider': provider,
+            'endpoint': endpoint,
+            'cost_usd': cost_usd,
+            'metadata': metadata,
+            'status_code': status_code,
+            'duration_ms': duration_ms,
+            'sku': sku,
+            'created_at': datetime.now().isoformat()
+        }
+        
+        if user_id:
+            data['user_id'] = user_id
+            
+        client.table('api_call_logs').insert(data).execute()
+        return True
+    except Exception as e:
+        logger.error(f"Error registrando log de API: {e}")
+        return False
+
+def get_api_logs(limit: int = 100, offset: int = 0) -> List[Dict]:
+    """Obtiene los logs detallados de API"""
+    client = get_supabase_admin()
+    if not client:
+        return []
+        
+    try:
+        response = client.table('api_call_logs')\
+            .select('*')\
+            .order('created_at', desc=True)\
+            .range(offset, offset + limit - 1)\
+            .execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Error obteniendo logs de API: {e}")
+        return []

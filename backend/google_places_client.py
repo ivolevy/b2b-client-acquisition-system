@@ -2,8 +2,9 @@ import os
 import requests
 import logging
 from typing import List, Dict, Optional, Any
+import time
 from dotenv import load_dotenv
-from backend.db_supabase import increment_api_usage, get_current_month_usage
+from backend.db_supabase import increment_api_usage, get_current_month_usage, log_api_call
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -47,8 +48,9 @@ class GooglePlacesClient:
         self.default_field_mask = ",".join(self.FIELD_MASK_ESSENTIALS + self.FIELD_MASK_PRO)
         
         # Configuración de costos y límites
-        self.COST_PER_PRO_CALL = 0.0125 # $12.50 per 1000
-        self.COST_PER_ESSENTIAL_CALL = 0.00 # Generalmente free
+        # Precio oficial Text Search (Advanced) al 2025: $32.00 USD por 1000 calls
+        self.COST_PER_PRO_CALL = 0.032 
+        self.COST_PER_ESSENTIAL_CALL = 0.00 # Text Search ID Only es free, Basic es $0.017
         self.BUDGET_LIMIT_USD = 195.00 # Umbral para fallback (de los $200)
 
     def is_within_budget(self) -> bool:
@@ -108,22 +110,65 @@ class GooglePlacesClient:
                 }
             }
 
+        start_time = time.time()
         try:
             logger.info(f"Buscando en Google Places: '{query}'")
             response = requests.post(self.BASE_URL, headers=headers, json=payload, timeout=30)
+            duration_ms = int((time.time() - start_time) * 1000)
             
             if response.status_code != 200:
                 logger.error(f"Error en Google Places API: {response.status_code} - {response.text}")
+                
+                # Log failure
+                log_api_call(
+                    provider='google',
+                    endpoint='places:searchText',
+                    sku='pro',
+                    cost_usd=0, # No cost on error usually
+                    status_code=response.status_code,
+                    duration_ms=duration_ms,
+                    metadata={"query": query, "error": response.text}
+                )
+                
                 return {"error": f"API Error {response.status_code}", "places": []}
 
             # 2. Registrar el gasto si la llamada fue exitosa
             # Si usamos Pro fields, cobramos el Tier Pro
             increment_api_usage(provider='google', sku='pro', cost_usd=self.COST_PER_PRO_CALL)
+            
+            data = response.json()
+            places_count = len(data.get('places', []))
+            
+            # Log success detail
+            log_api_call(
+                provider='google',
+                endpoint='places:searchText',
+                sku='pro',
+                cost_usd=self.COST_PER_PRO_CALL,
+                status_code=200,
+                duration_ms=duration_ms,
+                metadata={"query": query, "results_count": places_count}
+            )
 
-            return response.json()
+            return data
 
         except Exception as e:
             logger.error(f"Excepción en search_places: {e}")
+            # Log exception
+            try:
+                duration_ms = int((time.time() - start_time) * 1000)
+                log_api_call(
+                    provider='google', 
+                    endpoint='places:searchText',
+                    sku='pro',
+                    cost_usd=0,
+                    status_code=500,
+                    duration_ms=duration_ms,
+                    metadata={"query": query, "exception": str(e)}
+                )
+            except:
+                pass
+                
             return {"error": str(e), "places": []}
 
     def search_all_places(

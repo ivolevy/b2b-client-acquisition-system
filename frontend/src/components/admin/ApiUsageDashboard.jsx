@@ -20,9 +20,12 @@ function ApiUsageDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedRow, setExpandedRow] = useState(null);
+  const [logs, setLogs] = useState([]);
+  const [expandedLog, setExpandedLog] = useState(null);
 
   useEffect(() => {
     fetchStats();
+    fetchLogs();
   }, []);
 
   const fetchStats = async () => {
@@ -40,6 +43,20 @@ function ApiUsageDashboard() {
       setError('No se pudieron cargar las estadísticas de uso.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLogs = async () => {
+    try {
+      const token = localStorage.getItem('supabase.auth.token');
+      const response = await axios.get(`${API_URL}/admin/api-logs?limit=50`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.data.success) {
+        setLogs(response.data.logs);
+      }
+    } catch (err) {
+      console.error('Error fetching logs:', err);
     }
   };
 
@@ -229,6 +246,86 @@ function ApiUsageDashboard() {
                     <div className="empty-content">
                       <FiDatabase size={24} />
                       <p>No hay actividad registrada este mes</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Detailed Logs Section */}
+      <div className="table-section" style={{ marginTop: '2rem' }}>
+        <div className="section-header">
+          <h3>Historial Detallado (Últimos 50)</h3>
+        </div>
+        <div className="table-wrapper">
+          <table className="modern-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Endpoint</th>
+                <th>Estado</th>
+                <th>Duración</th>
+                <th>Costo</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {logs.map((log) => (
+                <React.Fragment key={log.id}>
+                  <tr 
+                    className={`sku-row ${expandedLog === log.id ? 'expanded' : ''}`}
+                    onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)}
+                  >
+                    <td className="date-cell">
+                      {new Date(log.created_at).toLocaleString()}
+                    </td>
+                    <td className="sku-cell" style={{ fontSize: '0.9rem' }}>
+                      {log.endpoint}
+                      {log.sku && <span className="tag" style={{ marginLeft: '10px', fontSize: '0.7rem' }}>{log.sku}</span>}
+                    </td>
+                    <td>
+                      <span className={`status-pill ${log.status_code === 200 ? 'active' : 'warning'}`}>
+                        {log.status_code}
+                      </span>
+                    </td>
+                    <td className="volume-cell">{log.duration_ms} ms</td>
+                    <td className="cost-cell">${parseFloat(log.cost_usd).toFixed(4)}</td>
+                    <td className="action-cell">
+                      <FiChevronDown className={`chevron ${expandedLog === log.id ? 'rotate' : ''}`} />
+                    </td>
+                  </tr>
+                  {expandedLog === log.id && (
+                    <tr className="detail-row">
+                      <td colSpan="6">
+                        <div className="sku-details">
+                          <div className="detail-column" style={{ gridColumn: 'span 3' }}>
+                            <h4>Metadata y Query</h4>
+                            <pre style={{ 
+                              background: 'rgba(0,0,0,0.3)', 
+                              padding: '1rem', 
+                              borderRadius: '8px', 
+                              overflowX: 'auto',
+                              fontSize: '0.8rem',
+                              color: '#94a3b8'
+                            }}>
+                              {JSON.stringify(log.metadata, null, 2)}
+                            </pre>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
+              {logs.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="empty-state">
+                    <div className="empty-content">
+                      <FiActivity size={24} />
+                      <p>No hay logs recientes</p>
                     </div>
                   </td>
                 </tr>
