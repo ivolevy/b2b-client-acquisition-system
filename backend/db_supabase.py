@@ -67,14 +67,23 @@ def get_supabase() -> Optional[Client]:
 # Intentar obtener Service Role Key para operaciones administrativas
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
+# Caching para el cliente admin
+_supabase_admin_client: Optional[Client] = None
+
 def get_supabase_admin() -> Optional[Client]:
-    """Obtiene cliente con privilegios de admin (Service Role)"""
+    """Obtiene cliente con privilegios de admin (Service Role) - Singleton"""
+    global _supabase_admin_client
+    
+    if _supabase_admin_client:
+        return _supabase_admin_client
+
     if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
         logger.warning("Falta SUPABASE_SERVICE_ROLE_KEY. Operaciones administrativas limitadas.")
         return None
         
     try:
-        return create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+        _supabase_admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+        return _supabase_admin_client
     except Exception as e:
         logger.error(f"Error creando cliente admin: {e}")
         return None
