@@ -1081,16 +1081,28 @@ async def filtrar(request: FiltroRequest):
 @app.get("/admin/users")
 async def list_users(admin: Dict = Depends(get_current_admin)):
     """Lista todos los usuarios usando Service Role (bypass RLS)"""
-    client = get_supabase_admin()
-    if not client:
-        raise HTTPException(status_code=500, detail="Supabase Admin not configured")
-        
+    client = None
     try:
+        client = get_supabase_admin()
+        if not client:
+            return {"success": False, "error": "Supabase Admin (Service Role) not configured. Check env vars."}
+            
         res = client.table('users').select('*').order('created_at', ascending=False).execute()
         return {"success": True, "users": res.data}
     except Exception as e:
-        logger.error(f"Error listing users: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        error_detail = str(e)
+        logger.error(f"Error in /admin/users: {error_detail}")
+        # Retornamos error con 200 y success: false para que el frontend pueda capturar el mensaje JSON
+        # o 500 pero con el detalle real en el mensaje
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False, 
+                "error": error_detail,
+                "trace": traceback.format_exc().split('\n')[-5:] # Últimas 5 líneas de trace
+            }
+        )
 
 @app.get("/admin/usage-stats")
 async def get_usage_stats(admin: Dict = Depends(get_current_admin)):

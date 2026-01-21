@@ -48,10 +48,21 @@ def get_supabase() -> Optional[Client]:
         
     # Si no está inicializado, intentar verificar credenciales
     if not SUPABASE_URL or not SUPABASE_KEY:
-        logger.error("Faltan credenciales de Supabase (SUPABASE_URL o SUPABASE_KEY)")
+        logger.error("Faltan credenciales de Supabase (SUPABASE_URL o SUPABASE_KEY). No se puede inicializar el cliente.")
         return None
         
-    return None
+    # Si las credenciales están presentes pero el cliente no está inicializado (ej. falló la primera vez)
+    try:
+        global _supabase_client, supabase
+        _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        supabase = _supabase_client
+        logger.info("✅ Cliente Supabase re-inicializado correctamente en get_supabase()")
+        return _supabase_client
+    except Exception as e:
+        logger.error(f"Error re-inicializando Supabase en get_supabase(): {e}")
+        _supabase_client = None
+        supabase = None
+        return None
 
 # Intentar obtener Service Role Key para operaciones administrativas
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
