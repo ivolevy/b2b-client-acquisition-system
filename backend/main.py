@@ -1087,7 +1087,7 @@ async def list_users(admin: Dict = Depends(get_current_admin)):
         if not client:
             return {"success": False, "error": "Supabase Admin (Service Role) not configured. Check env vars."}
             
-        res = client.table('users').select('*').order('created_at', ascending=False).execute()
+        res = client.table('users').select('*').order('created_at', desc=True).execute()
         return {"success": True, "users": res.data}
     except Exception as e:
         import traceback
