@@ -661,7 +661,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             global SEARCH_PROGRESS
             SEARCH_PROGRESS[request.task_id] = {
                 "progress": 5,
-                "message": "Buscando en OpenStreetMap..."
+                "message": "Buscando prospectos..."
             }
         
         # Validar bbox
