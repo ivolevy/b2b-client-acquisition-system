@@ -1441,13 +1441,15 @@ async def google_callback(code: str, state: str):
         logger.error(f"Error en callback de Google Auth: {e}")
         return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=error&reason={str(e)}"})
 
-# ========== OUTLOOK OAUTH ENDPOINTS ==========
+# ========== OUTLOOK OAUTH ENDPOINTS (CONSOLIDATED) ==========
 
 @app.post("/auth/outlook/url")
 async def outlook_auth_url(request: GoogleAuthURLRequest):
-    """Obtiene la URL para iniciar el flujo de Outlook OAuth"""
+    """Obtiene la URL de autorización para Outlook/Microsoft 365"""
     try:
+        from backend.auth_outlook import get_outlook_auth_url
         url = get_outlook_auth_url(state=request.state)
+        logger.info(f"Generada URL de Outlook para usuario {request.state}")
         return {"success": True, "url": url}
     except Exception as e:
         logger.error(f"Error generando URL de Outlook Auth: {e}")
@@ -1456,41 +1458,47 @@ async def outlook_auth_url(request: GoogleAuthURLRequest):
 @app.get("/auth/outlook/callback")
 async def outlook_callback(code: str, state: str):
     """Maneja el callback de Outlook OAuth"""
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    frontend_url = os.getenv("FRONTEND_URL", "https://b2b-client-acquisition-system.vercel.app")
     try:
         user_id = state
+        logger.info(f"Recibido callback de Outlook para usuario {user_id}")
         
         # Intercambiar código por tokens
-        token_data = exchange_outlook_token(code)
+        from backend.auth_outlook import exchange_code_for_token, get_user_profile
+        token_data = exchange_code_for_token(code)
         
         if "error" in token_data:
+            logger.error(f"Error en intercambio de token Outlook: {token_data['error']}")
             raise Exception(token_data["error"])
             
-        # Obtener email del usuario para confirmar
-        from backend.auth_outlook import get_user_profile
+        # Obtener perfil para tener el email
         profile = get_user_profile(token_data['access_token'])
         
-        # Guardar tokens (incluyendo email)
+        if "error" in profile:
+            logger.warning(f"No se pudo obtener el perfil de Outlook: {profile['error']}")
+            email = "Cuenta Outlook"
+        else:
+            email = profile.get('mail') or profile.get('userPrincipalName') or "Cuenta Outlook"
+
+        # Preparar data para guardar
         token_to_save = {
             'access_token': token_data['access_token'],
             'refresh_token': token_data.get('refresh_token'),
             'expiry': (datetime.now() + timedelta(seconds=token_data.get('expires_in', 3600))).isoformat(),
             'scope': token_data.get('scope'),
-            'account_email': profile.get('mail') or profile.get('userPrincipalName')
+            'account_email': email
         }
         
         success = save_user_oauth_token(user_id, token_to_save, provider='outlook')
         
         if not success:
-            logger.error(f"Error guardando token Outlook para usuario {user_id}")
-            return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason=save_failed"})
+            logger.error(f"Error guardando token Outlook en BD para usuario {user_id}")
+            return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason=db_error"})
             
-        # Redirigir de vuelta al frontend
-        logger.info(f"Outlook conectado exitosamente para usuario {user_id}")
         return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=success"})
         
     except Exception as e:
-        logger.error(f"Error en callback de Outlook Auth: {e}")
+        logger.error(f"Error crítico en callback de Outlook: {e}")
         return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason={str(e)}"})
 
 @app.get("/auth/google/status/{user_id}")
@@ -1518,36 +1526,6 @@ async def google_disconnect(user_id: str):
     except Exception as e:
         logger.error(f"Error desconectando Google Auth: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-# ========== OUTLOOK OAUTH ENDPOINTS ==========
-
-@app.post("/auth/outlook/url")
-async def outlook_auth_url(request: GoogleAuthURLRequest):
-    """Obtiene URL para OAuth de Outlook"""
-    try:
-        url = get_outlook_auth_url(state=request.state)
-        return {"success": True, "url": url}
-    except Exception as e:
-        logger.error(f"Error generando URL Outlook: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/auth/outlook/callback")
-async def outlook_callback(code: str, state: str):
-    """Callback Outlook OAuth"""
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-    try:
-        user_id = state
-        token_data = exchange_outlook_token(code)
-        
-        success = save_user_oauth_token(user_id, token_data, provider='outlook')
-        
-        if not success:
-             return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason=save_failed"})
-             
-        return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=success"})
-    except Exception as e:
-        logger.error(f"Error callback Outlook: {e}")
-        return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason={str(e)}"})
 
 @app.post("/auth/outlook/disconnect/{user_id}")
 async def outlook_disconnect(user_id: str):

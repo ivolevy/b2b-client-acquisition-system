@@ -46,7 +46,7 @@
   height: 85vh;
   background: var(--es-surface);
   /* Fallback */
-  border-radius: 16px;
+  border-radius: 32px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -64,6 +64,7 @@
   justify-content: center;
   background: white;
   min-height: 100%;
+  border-radius: 32px;
 }
 
 .email-auth-title {
