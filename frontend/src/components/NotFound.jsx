@@ -73,17 +73,10 @@ const NotFound = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        background: '#0f172a',
+        background: '#020617',
         zIndex: -1
       }}>
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%)',
-        }} />
+        {/* Simplified background - removed radial gradient for cleaner look */}
       </div>
 
       <div style={{
@@ -162,42 +155,40 @@ const NotFound = () => {
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(255, 255, 255, 0.2)';
+              // Removed lift effect
+              e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(255, 255, 255, 0.15)';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
             }}
           >
-            Contactar Admin
+            CONTACTAR ADMINISTRADOR
           </button>
 
           <button 
             onClick={() => navigate('/landing')}
             style={{
               background: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: '#fff',
-              padding: '0.75rem 2rem',
-              borderRadius: '50px',
+              border: 'none',
+              color: '#94a3b8', // Muted text color
+              padding: '0.75rem 1rem', // Reduced padding since no border
               cursor: 'pointer',
               fontSize: '0.9rem',
-              fontWeight: '600',
+              fontWeight: '500', 
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
-              transition: 'all 0.2s ease'
+              textDecoration: 'underline',
+              textUnderlineOffset: '4px',
+              transition: 'color 0.2s ease'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.borderColor = '#fff';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+              e.currentTarget.style.color = '#fff';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#94a3b8';
             }}
           >
-            Más sobre nosotros
+            MÁS SOBRE NOSOTROS
           </button>
         </div>
       </div>
