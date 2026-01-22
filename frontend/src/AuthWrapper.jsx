@@ -18,6 +18,7 @@ const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'))
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const ApiUsageDashboard = lazy(() => import('./components/admin/ApiUsageDashboard'));
 const NotFound = lazy(() => import('./components/NotFound'));
+const OAuthCallback = lazy(() => import('./components/OAuthCallback'));
 
 // Contexto de autenticación
 const AuthContext = createContext(null);
@@ -388,6 +389,7 @@ function AuthWrapper() {
               </Route>
             {/* Main App Route - Only matches root */}
             <Route path="/" element={<AppB2B />} />
+            <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
             {/* 404 Route - Catch all unknown */}
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -396,6 +398,7 @@ function AuthWrapper() {
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/" element={<Login onLogin={handleDemoLogin} />} />
             {/* 404 Route for unauthenticated users too */}
+            <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         )}

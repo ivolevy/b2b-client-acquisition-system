@@ -388,7 +388,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
                  </button>
                </div>
                </div>
-            </div>
+
 
             {/* Provider Selector if both connected */}
             {authStatus.google.connected && authStatus.outlook.connected && (
@@ -413,8 +413,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
               </div>
             )}
 
-            <div className="config-group">
-
+            {/* Template Selector */}
             <div className="config-group">
               <label className="config-label">Template</label>
               <select 

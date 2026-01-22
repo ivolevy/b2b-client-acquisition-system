@@ -96,7 +96,8 @@
   padding: 0.5rem 0.5rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   width: 100%;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
+  /* Reduced from 1.5rem to tighten layout */
   height: 72px;
   /* Increased height for better proportions */
 }

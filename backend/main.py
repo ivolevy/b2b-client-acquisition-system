@@ -62,7 +62,7 @@ except ImportError as e:
     from scraper import *
     from social_scraper import *
     from scraper_parallel import *
-    from .validators import *
+    from validators import *
     from db_supabase import *
     from auth_google import *
     from auth_outlook import *

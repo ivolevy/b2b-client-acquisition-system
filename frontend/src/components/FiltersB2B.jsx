@@ -133,7 +133,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
       {/* Sección de Búsqueda B2B */}
       <div className="filter-section fetch-section">
         <div className="section-header-with-action">
-          <h3>Buscar Empresas por Rubro y Ubicación</h3>
+          <h3>Buscar empresas por rubro y ubicación</h3>
           <button 
             type="button" 
             className="btn-history"

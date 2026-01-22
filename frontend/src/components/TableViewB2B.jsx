@@ -272,6 +272,44 @@ function TableViewB2B({
           </label>
         </div>
 
+        <div className="filter-distance-group">
+          <div className="filter-distance-toggle">
+            <button
+              type="button"
+              className={`filter-toggle-btn ${filtroDistanciaOperador === 'menor' ? 'active' : ''}`}
+              onClick={() => setFiltroDistanciaOperador('menor')}
+              title="Menos de X km"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14"/>
+                <path d="M12 5l-7 7 7 7"/>
+              </svg>
+              <span>Menos de</span>
+            </button>
+            <button
+              type="button"
+              className={`filter-toggle-btn ${filtroDistanciaOperador === 'mayor' ? 'active' : ''}`}
+              onClick={() => setFiltroDistanciaOperador('mayor')}
+              title="Más de X km"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14"/>
+                <path d="M12 5l7 7-7 7"/>
+              </svg>
+              <span>Más de</span>
+            </button>
+          </div>
+          <input
+            type="number"
+            placeholder="km"
+            value={filtroDistancia}
+            onChange={(e) => setFiltroDistancia(e.target.value)}
+            min="0"
+            step="0.1"
+            className="filter-inline-input filter-km"
+          />
+        </div>
+
         {/* Dropdown de rubros con buscador */}
         <div className="rubro-dropdown" ref={rubroDropdownRef}>
           <button 
@@ -313,7 +351,6 @@ function TableViewB2B({
                   className={`rubro-option ${!filtroRubro ? 'selected' : ''}`}
                   onClick={() => handleSelectRubro('')}
                 >
-                  <span className="option-icon">🏢</span>
                   Todos los rubros
                 </button>
                 {rubrosFiltrados.map(([key, nombre]) => (
@@ -323,7 +360,6 @@ function TableViewB2B({
                     className={`rubro-option ${filtroRubro === key ? 'selected' : ''}`}
                     onClick={() => handleSelectRubro(key)}
                   >
-                    <span className="option-icon">📍</span>
                     {nombre}
                   </button>
                 ))}
@@ -336,82 +372,53 @@ function TableViewB2B({
             </div>
           )}
         </div>
-        
-        {/* El filtro por ciudad ha sido eliminado según requerimiento */}
 
-        <div className="filter-distance-group">
-          <div className="filter-distance-toggle">
-            <button
-              type="button"
-              className={`filter-toggle-btn ${filtroDistanciaOperador === 'menor' ? 'active' : ''}`}
-              onClick={() => setFiltroDistanciaOperador('menor')}
-              title="Menos de X km"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14"/>
-                <path d="M12 5l-7 7 7 7"/>
-              </svg>
-              <span>Menos de</span>
-            </button>
-            <button
-              type="button"
-              className={`filter-toggle-btn ${filtroDistanciaOperador === 'mayor' ? 'active' : ''}`}
-              onClick={() => setFiltroDistanciaOperador('mayor')}
-              title="Más de X km"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14"/>
-                <path d="M12 5l7 7-7 7"/>
-              </svg>
-              <span>Más de</span>
-            </button>
-          </div>
-          <input
-            type="number"
-            placeholder="km"
-            value={filtroDistancia}
-            onChange={(e) => setFiltroDistancia(e.target.value)}
-            min="0"
-            step="0.1"
-            className="filter-inline-input filter-km"
-          />
+        <div className="custom-select-wrapper">
+          <select 
+            value={filtroConRedes} 
+            onChange={(e) => setFiltroConRedes(e.target.value)}
+            className="filter-inline-input"
+          >
+            <option value="todas">Redes: todas</option>
+            <option value="con">Con redes</option>
+            <option value="sin">Sin redes</option>
+          </select>
+          <svg className="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
         </div>
 
-        <select 
-          value={filtroConRedes} 
-          onChange={(e) => setFiltroConRedes(e.target.value)}
-          className="filter-inline-input"
-        >
-          <option value="todas">Redes: todas</option>
-          <option value="con">Con redes</option>
-          <option value="sin">Sin redes</option>
-        </select>
-
         {/* Selector de ordenamiento */}
-        <select 
-          value={sortColumn && sortBy ? `${sortColumn}-${sortBy}` : ''}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value) {
-              const [column, order] = value.split('-');
-              setSortColumn(column);
-              setSortBy(order);
-            } else {
-              setSortColumn(null);
-              setSortBy(null);
-            }
-          }}
-          className="filter-inline-input"
-          style={{ minWidth: '180px' }}
-        >
-          <option value="">Ordenar por...</option>
-          <option value="distancia-asc">Distancia: Más cercano</option>
-          <option value="distancia-desc">Distancia: Más lejano</option>
-          <option value="nombre-asc">Nombre: A-Z</option>
-          <option value="nombre-desc">Nombre: Z-A</option>
-          <option value="rubro-asc">Rubro: A-Z</option>
-          <option value="rubro-desc">Rubro: Z-A</option>
-        </select>
+        {/* Selector de ordenamiento */}
+        <div className="custom-select-wrapper" style={{ width: 'auto', minWidth: '180px' }}>
+          <select 
+            value={sortColumn && sortBy ? `${sortColumn}-${sortBy}` : ''}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value) {
+                const [column, order] = value.split('-');
+                setSortColumn(column);
+                setSortBy(order);
+              } else {
+                setSortColumn(null);
+                setSortBy(null);
+              }
+            }}
+            className="filter-inline-input"
+            style={{ minWidth: '100%' }}
+          >
+            <option value="">Ordenar por...</option>
+            <option value="distancia-asc">Distancia: Más cercano</option>
+            <option value="distancia-desc">Distancia: Más lejano</option>
+            <option value="nombre-asc">Nombre: A-Z</option>
+            <option value="nombre-desc">Nombre: Z-A</option>
+            <option value="rubro-asc">Rubro: A-Z</option>
+            <option value="rubro-desc">Rubro: Z-A</option>
+          </select>
+          <svg className="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
 
         {hayFiltrosActivos && (
           <button 

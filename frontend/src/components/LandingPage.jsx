@@ -18,11 +18,16 @@ import {
 } from 'react-icons/fa';
 import './LandingPage.css';
 
-function LandingPage() {
+const LandingPage = () => {
   const navigate = useNavigate();
 
   const scrollToSection = (id) => {
-    const element = document.getElementById(id);
+    // Mapping old IDs to new sections for compatibility
+    let targetId = id;
+    if (id === 'problema') targetId = 'modulos'; 
+    if (id === 'sistema') targetId = 'modulos';
+    
+    const element = document.getElementById(targetId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
@@ -40,12 +45,13 @@ function LandingPage() {
             <span>Smart Leads</span>
           </div>
           <nav className="main-nav">
-            <button onClick={() => scrollToSection('problema')}>Por qué Smart Leads</button>
-            <button onClick={() => scrollToSection('sistema')}>El Sistema</button>
-            <button onClick={() => scrollToSection('pricing')}>Precios</button>
+             {/* Updated Links per user request */}
+            <button onClick={() => scrollToSection('modulos')}>Work smart</button>
+            <button onClick={() => scrollToSection('pricing')}>Pricing</button>
+            <button onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}>Contactanos</button>
           </nav>
           <div className="header-actions">
-            <button className="btn-primary-small" onClick={() => navigate('/')}>Empezar ahora</button>
+            {/* CTA removed per request */}
           </div>
         </div>
       </header>
@@ -54,17 +60,19 @@ function LandingPage() {
       <section className="hero">
         <div className="container hero-container">
           <div className="hero-text reveal">
-            <h1>Deja de buscar clientes en Google Maps a mano. Automatiza tu prospección hoy.</h1>
-            <p>Extrae cientos de empresas locales con un clic, obtén correos verificados y programa secuencias de email que caen en la bandeja de entrada, no en spam.</p>
+            <h1>Dominá tu mercado.</h1>
+            <p>Prospecta, contacta y cierra ventas B2B en piloto automático.</p>
             <div style={{ display: 'flex', gap: '16px' }}>
               <button className="btn-primary" onClick={() => navigate('/')}>
-                Probar Gratis Ahora <FaArrowRight />
+                Probar Gratis <FaArrowRight />
+              </button>
+              <button className="btn-secondary" onClick={() => scrollToSection('modulos')}>
+                Ver Demo
               </button>
             </div>
           </div>
           <div className="hero-mockup reveal" style={{ animationDelay: '0.2s', position: 'relative' }}>
-            <div className="floating-results-tag">Resultados en &lt; 1 minuto</div>
-            <div className="browser-card">
+            <div className="browser-card dashboard-preview">
                <div className="browser-window-header">
                  <div className="browser-dots">
                    <span></span><span></span><span></span>
@@ -77,96 +85,72 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Agitation Section (The Pain) */}
-      <section className="agitation-section" id="problema">
+      {/* Modules Section (Bento Grid) */}
+      <section className="modules-section" id="modulos">
         <div className="container">
           <div className="text-center reveal">
-            <h2 className="section-title">¿Por qué el 90% de la prospección en frío falla?</h2>
+            <h2 className="section-title">Módulos de la Plataforma</h2>
+            <p className="section-subtitle">Herramientas integradas para potenciar tu prospección.</p>
           </div>
-          <div className="agitation-grid">
-            <div className="agitation-card reveal" style={{ animationDelay: '0.1s' }}>
-              <div className="agitation-icon"><FaClock /></div>
-              <h3>Pérdida de Tiempo</h3>
-              <p>Copiar y pegar datos de Maps es un trabajo de esclavos. Perdés horas que podrías usar cerrando ventas.</p>
-            </div>
-            <div className="agitation-card reveal" style={{ animationDelay: '0.2s' }}>
-              <div className="agitation-icon"><FaTimesCircle /></div>
-              <h3>Correos Rebotados</h3>
-              <p>Enviar a emails falsos o no verificados destruye tu reputación de envío y te manda directo a SPAM.</p>
-            </div>
-            <div className="agitation-card reveal" style={{ animationDelay: '0.3s' }}>
-              <div className="agitation-icon"><FaRedo /></div>
-              <h3>Falta de Seguimiento</h3>
-              <p>El 80% de las ventas se cierran tras el 5to contacto. Si no automatizás, estás dejando dinero en la mesa.</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* The 3-Step System (The Solution) */}
-      <section className="step-section" id="sistema">
-        <div className="container">
-          <div className="text-center reveal">
-            <h2 className="section-title">Vende más con nuestro Sistema de 3 Pasos</h2>
-            <p className="section-subtitle">Pasamos de "explicar funciones" a entregarte resultados reales.</p>
-          </div>
-          
-          <div className="steps-timeline reveal">
-            <div className="step-item">
-              <div className="step-number">1</div>
-              <div className="card-icon" style={{margin: '0 auto 24px'}}><FaSearch /></div>
-              <h3>Escaneo Inteligente</h3>
-              <p>Elige rubro y ciudad. Nuestra tecnología extrae los datos y los limpia por ti en segundos.</p>
-            </div>
-
-            <div className="step-item">
-              <div className="step-number">2</div>
-              <div className="card-icon" style={{margin: '0 auto 24px'}}><FaMagic /></div>
-              <h3>Enriquecimiento Pro</h3>
-              <p>Validamos teléfonos y emails en tiempo real. Eliminamos los datos basura para proteger tu envío.</p>
-            </div>
-
-            <div className="step-item">
-              <div className="step-number">3</div>
-              <div className="card-icon" style={{margin: '0 auto 24px'}}><FaRocket /></div>
-              <h3>Cierre en Automático</h3>
-              <p>Crea campañas que hacen el seguimiento por ti hasta que te respondan. Caé en el Inbox siempre.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Emphasis Section (Anti-Spam) */}
-      <section className="feature-highlight-section" style={{background: '#f8fafc'}}>
-        <div className="container feature-container">
-          <div className="feature-content reveal">
-            <div className="pill-badge" style={{marginBottom: '20px'}}><FaShieldAlt /> 100% Inbox Deliverability</div>
-            <h2>Olvídate de la carpeta de SPAM</h2>
-            <p>
-              Smart Leads utiliza rotación de cuentas y validación de sintaxis proactiva para asegurar que cada email 
-              que envíes sea tratado como prioritario por los servidores de correo.
-            </p>
-            <div className="benefits-grid">
-                <div className="benefit-item">
-                  <div className="benefit-icon"><FaCheck /></div>
-                  <div className="benefit-text">
-                    <strong>Validación de Emails</strong>
-                    <span>Nunca envíes a un correo inexistente.</span>
-                  </div>
+          <div className="bento-grid reveal">
+            {/* Card 1: Maps */}
+            <div className="bento-card bento-map">
+              <div className="bento-content">
+                <h3>Búsqueda Geográfica</h3>
+                <p>Encuentra empresas por rubro y ubicación exacta.</p>
+                <div className="more-info">
+                  <p>Filtra por código postal, barrio o dibuja tu zona en el mapa. Datos actualizados en tiempo real.</p>
                 </div>
-                <div className="benefit-item">
-                  <div className="benefit-icon"><FaCheck /></div>
-                  <div className="benefit-text">
-                    <strong>Headers Optimizados</strong>
-                    <span>Tu reputación de dominio se mantiene intacta.</span>
-                  </div>
+              </div>
+              <div className="bento-visual">
+                <div className="mini-map-visual">
+                  {/* Abstract Map UI representation */}
+                  <div className="map-point" style={{top: '40%', left: '30%'}}></div>
+                  <div className="map-point" style={{top: '60%', left: '70%'}}></div>
+                  <div className="map-point active" style={{top: '50%', left: '50%'}}></div>
                 </div>
+              </div>
             </div>
-          </div>
-          <div className="feature-image reveal" style={{animationDelay: '0.2s'}}>
-             <div className="browser-card">
-               <img src="/images/results.png" alt="Email Monitoring" />
-             </div>
+
+            {/* Card 2: Email Marketing (Featured) */}
+            <div className="bento-card bento-email featured">
+              <div className="bento-content text-center">
+                <h3>Email Marketing Masivo</h3>
+                <div className="highlight-text">e Inteligente</div>
+                <p>Crea campañas dinámicas y envía correos a miles de contactos automáticamente.</p>
+                <div className="more-info">
+                  <p>Incluye rotación de IPs, calentamiento de cuentas y validación de emails para asegurar inbox delivery.</p>
+                </div>
+                <button className="btn-text-arrow" onClick={() => navigate('/')}>Empezar Ahora <FaArrowRight /></button>
+              </div>
+              <div className="bento-visual email-visual">
+                <div className="email-interface">
+                   <div className="email-header-line"></div>
+                   <div className="email-body-line"></div>
+                   <div className="email-body-line short"></div>
+                   <div className="send-btn-mock"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Data/Results */}
+            <div className="bento-card bento-data">
+               <div className="bento-content">
+                <h3>Gestión de Resultados</h3>
+                <p>Gestiona leads en tablas y exporta a CSV.</p>
+                <div className="more-info">
+                   <p>CRM integrado para trackear estados, notas y cierres de venta sin salir de la plataforma.</p>
+                </div>
+              </div>
+              <div className="bento-visual">
+                <div className="table-visual">
+                  <div className="table-row"></div>
+                  <div className="table-row"></div>
+                  <div className="table-row"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -175,72 +159,62 @@ function LandingPage() {
       <section id="pricing" className="pricing-section">
         <div className="container">
           <div className="section-header text-center">
-            <h2 className="section-title">Planes diseñados para crecer</h2>
-            <p className="section-subtitle">Empieza gratis y escala tu prospección a medida que cierres clientes.</p>
+            <h2 className="section-title">Planes Simples</h2>
           </div>
 
           <div className="pricing-grid">
-            <div className="pricing-card reveal">
-              <div className="plan-name">Prueba</div>
-              <div className="plan-price">$10<span>/mes</span></div>
-              <div className="plan-desc">Para probar el motor</div>
+            <div className="pricing-card">
+              <div className="plan-name">Starter</div>
+              <div className="plan-price">$29</div>
               <ul className="plan-features">
-                <li><FaCheck /> 10 búsquedas mensuales</li>
-                <li><FaCheck /> Filtros inteligentes</li>
-                <li><FaCheck /> Soporte estándar</li>
+                 <li><FaCheck /> 50 Búsquedas</li>
+                 <li><FaCheck /> Email Marketing Básico</li>
               </ul>
-              <button className="btn-dark" onClick={() => navigate('/')}>Suscribirse</button>
+              <button className="btn-outline" onClick={() => navigate('/')}>Comenzar</button>
             </div>
 
-            <div className="pricing-card featured reveal" style={{animationDelay: '0.1s'}}>
-              <div className="premium-badge">Más Rentable</div>
+            <div className="pricing-card featured">
               <div className="plan-name">Pro</div>
-              <div className="plan-price">$29<span>/mes</span></div>
-              <div className="plan-desc">El favorito de las agencias</div>
+              <div className="plan-price">$79</div>
               <ul className="plan-features">
-                <li><FaCheck /> 50 búsquedas mensuales</li>
-                <li><FaCheck /> Enriquecimiento de Emails</li>
-                <li><FaCheck /> Secuencias Automatizadas</li>
-                <li><FaCheck /> Soporte Prioritario</li>
+                 <li><FaCheck /> Búsquedas Ilimitadas</li>
+                 <li><FaCheck /> Email Marketing Avanzado</li>
+                 <li><FaCheck /> Soporte Prioritario</li>
               </ul>
-              <button className="btn-primary" style={{width: '100%'}} onClick={() => navigate('/')}>Suscribirse</button>
+              <button className="btn-primary" onClick={() => navigate('/')}>Comenzar</button>
             </div>
 
-            <div className="pricing-card reveal" style={{animationDelay: '0.2s'}}>
-              <div className="plan-name">Enterprise</div>
-              <div className="plan-price">$79<span>/mes</span></div>
-              <div className="plan-desc">Sin límites para equipos pro</div>
+            <div className="pricing-card">
+              <div className="plan-name">Agency</div>
+              <div className="plan-price">$199</div>
               <ul className="plan-features">
-                <li><FaCheck /> Búsquedas ilimitadas</li>
-                <li><FaCheck /> **Consultoría de Copywriting**</li>
-                <li><FaCheck /> **Setup Dominio Personalizado**</li>
-                <li><FaCheck /> Account Manager dedicado</li>
+                 <li><FaCheck /> Todo Ilimitado</li>
+                 <li><FaCheck /> API Access</li>
               </ul>
-              <button className="btn-dark" onClick={() => navigate('/')}>Suscribirse</button>
+              <button className="btn-outline" onClick={() => navigate('/')}>Contactar</button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="footer-emotional">
+      {/* Minimal Footer */}
+      <footer id="footer" className="footer-minimal">
         <div className="container">
-          <div className="footer-content">
-            <div className="footer-left">
-              <h4>Smart Leads</h4>
-              <p>Powered by <a href="https://www.linkedin.com/in/ivan-levy/" target="_blank" rel="noopener noreferrer">Ivan Levy</a></p>
+          <div className="footer-flex">
+            <div className="footer-brand">
+              <span className="brand-text">Smart Leads</span>
+              <span className="copyright">© 2026</span>
             </div>
-            <div className="footer-center">
-               <p className="copyright">© 2026 Smart Leads. All rights reserved.</p>
-            </div>
-            <div className="footer-right">
-              <p className="contact-email">solutionsdota@gmail.com</p>
+            <div className="footer-links">
+               <a href="#">Términos</a>
+               <a href="#">Privacidad</a>
+               <a href="mailto:solutionsdota@gmail.com">Contacto</a>
             </div>
           </div>
         </div>
       </footer>
     </div>
   );
-}
+};
 
 export default LandingPage;

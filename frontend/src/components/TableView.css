@@ -427,8 +427,20 @@
   background: white;
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   box-shadow: var(--shadow-lg);
-  overflow: hidden;
+  /* overflow: hidden; Removed to allow dropdowns to overflow */
   margin-top: 0;
+}
+
+/* ... existing code ... */
+
+.rubro-search-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid var(--gray-100);
+  background: white;
+  border-radius: 12px 12px 0 0;
 }
 
 .results-unified-header {
@@ -521,23 +533,51 @@
   padding: 0.75rem 1.25rem;
   background: var(--gray-50);
   border-bottom: 1px solid var(--gray-100);
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  overflow-y: visible;
+  flex-wrap: wrap;
+  /* Changed from nowrap to wrap */
+  overflow: visible;
+  /* Changed from overflow-x: auto */
+}
+
+.custom-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.custom-select-wrapper .filter-inline-input {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 28px;
+  cursor: pointer;
+  background: white;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: var(--gray-400);
+  transition: transform 0.2s ease;
 }
 
 .filter-inline-input {
   padding: 6px 10px;
-  border: 1px solid var(--gray-200);
+  border: none;
   border-radius: 6px;
   font-size: 0.8rem;
   background: white;
   color: var(--gray-700);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: box-shadow 0.2s;
   width: 140px;
   min-width: 140px;
   box-sizing: border-box;
   flex-shrink: 0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .filter-inline-input:focus {
@@ -557,7 +597,7 @@
   align-items: center;
   gap: 0;
   flex-wrap: nowrap;
-  border: 1px solid var(--gray-200);
+  border: none;
   border-radius: 6px;
   overflow: hidden;
   background: white;
@@ -592,7 +632,7 @@
   min-width: 34px;
   height: 32px;
   box-sizing: border-box;
-  border-right: 1px solid var(--gray-200);
+  border-right: none;
 }
 
 .filter-toggle-btn:last-child {
@@ -632,7 +672,7 @@
   width: 40px;
   border-radius: 0 6px 6px 0;
   border: none;
-  border-left: 1px solid var(--gray-200);
+  border-left: none;
   height: 32px;
   box-sizing: border-box;
   flex-shrink: 0;
@@ -1307,21 +1347,22 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: white;
-  border: 1px solid var(--gray-200);
-  border-radius: 8px;
-  font-size: 0.9rem;
-  color: var(--gray-600);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: var(--gray-700);
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 200px;
+  min-width: 140px;
   justify-content: space-between;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .rubro-dropdown-trigger:hover {
   background: var(--gray-50);
-  border-color: var(--gray-300);
+  /* border-color removed */
 }
 
 .rubro-dropdown-trigger.has-value {
@@ -1386,9 +1427,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 12px;
   border-bottom: 1px solid var(--gray-100);
-  background: var(--gray-50);
+  background: white;
 }
 
 .rubro-search-container svg {
@@ -1397,12 +1438,14 @@
 }
 
 .rubro-search-input {
-  border: none;
-  background: transparent;
+  border: none !important;
+  background: transparent !important;
   width: 100%;
   font-size: 0.9rem;
   color: var(--gray-700);
-  outline: none;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0;
 }
 
 .rubro-search-input::placeholder {
