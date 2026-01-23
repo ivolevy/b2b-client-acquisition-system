@@ -596,12 +596,11 @@ function AppB2B() {
       formatDate(e.created_at || e.fecha_creacion || e.fecha_registro || new Date().toISOString())
     ]);
 
+    const separator = ';';
     const csvContent = [
-      'Para más información contactar a Ivan Levy - CTO de Dota | LinkedIn: https://www.linkedin.com/in/ivan-levy/ | Email: ivo.levy03@gmail.com',
-      '',
-      headers.map(escapeCSV).join(','),
-      ...rows.map(row => row.map(escapeCSV).join(','))
-    ].join('\n');
+      headers.map(escapeCSV).join(separator),
+      ...rows.map(row => row.map(escapeCSV).join(separator))
+    ].join('\r\n');
 
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });

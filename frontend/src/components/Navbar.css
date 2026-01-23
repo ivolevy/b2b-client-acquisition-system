@@ -65,10 +65,7 @@
   /* Verified: LandingPage uses inheritance, but looks like 16px/1rem */
 }
 
-.navbar-brand:hover {
-  /* No hover opacity in LandingPage.css, keeping it clean or adding if desired. 
-      LandingPage.css doesn't have .logo:hover opacity. Removing for parity. */
-}
+/* .navbar-brand:hover { } */
 
 .navbar-brand .nav-logo-icon {
   display: flex;
