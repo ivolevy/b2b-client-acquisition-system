@@ -22,7 +22,8 @@ body.profile-page-active {
   max-width: 1000px;
   /* Slightly narrower */
   /* Slightly narrower */
-  margin: 1rem auto;
+  margin: 6rem auto;
+  /* Moved down to clear floating navbar safely */
   /* Moved up (was 2.5rem) */
   /* Reduced top margin to clear floating navbar */
   min-height: 500px;
@@ -623,4 +624,12 @@ body.profile-page-active {
     width: 95%;
     border-radius: 12px;
   }
+}
+
+.profile-divider {
+  height: 1px;
+  background-color: #f1f5f9;
+  margin: 3rem 0;
+  /* Significant spacing between sections */
+  width: 100%;
 }

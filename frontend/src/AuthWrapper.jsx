@@ -293,7 +293,7 @@ function AuthWrapper() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0f0f1a 0%, #1a0a1a 50%, #0a0a0f 100%)',
+        background: '#0f172a',
         color: 'white',
         fontFamily: 'Inter, -apple-system, sans-serif'
       }}>
@@ -301,8 +301,8 @@ function AuthWrapper() {
           <div style={{
             width: '48px',
             height: '48px',
-            border: '3px solid rgba(255, 105, 180, 0.2)',
-            borderTopColor: '#81D4FA',
+            border: '3px solid rgba(255, 255, 255, 0.1)',
+            borderTopColor: '#ffffff',
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
             margin: '0 auto 16px'
@@ -341,7 +341,7 @@ function AuthWrapper() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #0f0f1a 0%, #1a0a1a 50%, #0a0a0f 100%)',
+      background: '#0f172a',
       color: 'white',
       fontFamily: 'Inter, -apple-system, sans-serif'
     }}>
@@ -349,8 +349,8 @@ function AuthWrapper() {
         <div style={{
           width: '48px',
           height: '48px',
-          border: '3px solid rgba(255, 105, 180, 0.2)',
-          borderTopColor: '#81D4FA',
+          border: '3px solid rgba(255, 255, 255, 0.1)',
+          borderTopColor: '#ffffff',
           borderRadius: '50%',
           animation: 'spin 0.8s linear infinite',
           margin: '0 auto 16px'
