@@ -595,7 +595,7 @@ function AppB2B() {
       e.youtube || '',
       e.tiktok || '',
       e.validada ? 'Validada' : 'Pendiente',
-      formatDate(e.created_at || e.fecha_creacion)
+      formatDate(e.created_at || e.fecha_creacion || e.fecha_registro || new Date().toISOString())
     ]);
 
     const csvContent = [
@@ -626,7 +626,7 @@ function AppB2B() {
     success(
       <>
         <strong>Exportación completada</strong>
-        <p>Se exportaron {empresasToExport.length} empresas con el nuevo formato.</p>
+        <p>Se exportaron {empresasToExport.length} empresas.</p>
       </>
     );
   };

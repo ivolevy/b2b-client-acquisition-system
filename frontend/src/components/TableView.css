@@ -762,21 +762,30 @@
   transition: all 0.2s;
 }
 
-.btn-export,
-.btn-export-pdf {
+.btn-export {
   background: white;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
+  border: 1px solid #10b981;
+  color: #10b981;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.btn-export:hover:not(:disabled),
+.btn-export-pdf {
+  background: white;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-export:hover:not(:disabled) {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
 .btn-export-pdf:hover:not(:disabled) {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #cbd5e1;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 
 .btn-delete {
@@ -837,25 +846,26 @@
 
 /* Social Icons Compact */
 /* Social Icons Modern */
+/* Social Icons Modern */
 .social-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: white;
-  border: 1px solid #f1f5f9;
-  font-size: 14px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  width: auto;
+  height: auto;
+  font-size: 18px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  transition: opacity 0.2s ease;
 }
 
 .social-icon:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border-color: transparent;
-  color: white !important;
+  opacity: 0.8;
+  transform: none;
+  box-shadow: none;
+  background: transparent;
 }
 
 .social-icon.instagram {
@@ -863,8 +873,8 @@
 }
 
 .social-icon.instagram:hover {
-  background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
-  color: white;
+  background: transparent;
+  color: #E1306C;
 }
 
 .social-icon.facebook {
@@ -872,7 +882,7 @@
 }
 
 .social-icon.facebook:hover {
-  background: #1877f2;
+  background: transparent;
 }
 
 .social-icon.twitter {
@@ -880,7 +890,7 @@
 }
 
 .social-icon.twitter:hover {
-  background: #000;
+  background: transparent;
 }
 
 .social-icon.linkedin {
@@ -888,7 +898,7 @@
 }
 
 .social-icon.linkedin:hover {
-  background: #0077b5;
+  background: transparent;
 }
 
 .social-icon.youtube {
@@ -896,7 +906,7 @@
 }
 
 .social-icon.youtube:hover {
-  background: #ff0000;
+  background: transparent;
 }
 
 .social-icon.tiktok {
@@ -904,7 +914,7 @@
 }
 
 .social-icon.tiktok:hover {
-  background: #000;
+  background: transparent;
 }
 
 /* Action Buttons Mini (PRO) */

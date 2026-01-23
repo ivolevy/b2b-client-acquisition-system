@@ -540,7 +540,7 @@ function TableViewB2B({
           <tbody>
                 {currentItems.map((empresa, index) => (
               <tr key={empresa.id}>
-                    <td style={{ textAlign: 'center', fontWeight: '600', color: '#e91e63' }}>
+                    <td style={{ textAlign: 'center', fontWeight: '600', color: '#3b82f6' }}>
                       {indexOfFirstItem + index + 1}
                     </td>
                 <td className="name-cell">
@@ -552,7 +552,7 @@ function TableViewB2B({
                 </td>
                 <td>
                   {empresa.distancia_km !== null && empresa.distancia_km !== undefined ? (
-                        <span style={{ fontSize: '12px', fontWeight: '500', color: '#e91e63' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '500', color: '#3b82f6' }}>
                           {empresa.distancia_km.toFixed(1)} km
                         </span>
                   ) : (
