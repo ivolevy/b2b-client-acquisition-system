@@ -329,16 +329,13 @@ def exportar_a_csv(rubro: Optional[str] = None, solo_validas: bool = True) -> Op
             if not empresas:
                 return None
             
-            # Forzar Excel a usar punto y coma
-            csvfile.write("sep=;\r\n")
-            
             # Usar las claves del primer elemento como headers
             campos = list(empresas[0].keys())
             writer = csv.DictWriter(
                 csvfile, 
                 fieldnames=campos, 
                 extrasaction='ignore', 
-                delimiter=';',
+                delimiter=',',
                 quoting=csv.QUOTE_ALL
             )
             writer.writeheader()

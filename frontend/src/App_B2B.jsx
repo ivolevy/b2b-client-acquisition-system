@@ -565,7 +565,6 @@ function AppB2B() {
       'Twitter',
       'YouTube',
       'TikTok',
-      'Estado',
       'Distancia (km)',
       'Latitud',
       'Longitud',
@@ -588,7 +587,6 @@ function AppB2B() {
       e.twitter || '',
       e.youtube || '',
       e.tiktok || '',
-      e.validada ? 'Validada' : 'Pendiente',
       e.distancia_km !== null ? e.distancia_km.toFixed(2) : '',
       e.latitud || '',
       e.longitud || '',
@@ -597,7 +595,6 @@ function AppB2B() {
 
     const separator = ';';
     const csvContent = [
-      'sep=;',
       headers.map(h => `"${h}"`).join(separator),
       ...rows.map(row => row.map(escapeCSV).join(separator))
     ].join('\r\n');

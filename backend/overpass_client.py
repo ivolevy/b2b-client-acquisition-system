@@ -213,6 +213,16 @@ RUBROS_DISPONIBLES = {
             '["amenity"="events_venue"]'
         ]
     },
+    "hoteles": {
+        "nombre": "Hotelería y Alojamiento",
+        "tags": [
+            '["tourism"="hotel"]',
+            '["tourism"="motel"]',
+            '["tourism"="hostel"]',
+            '["tourism"="guest_house"]',
+            '["tourism"="apartment"]'
+        ]
+    },
     "logistica_transporte": {
         "nombre": "Logística y Transporte",
         "tags": [
