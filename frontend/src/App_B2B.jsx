@@ -30,6 +30,8 @@ function AppB2B() {
   const [searchProgress, setSearchProgress] = useState({ percent: 0, message: '' });
   const [displayProgress, setDisplayProgress] = useState(0); // Para animación suave
   const loadingIntervalRef = useRef(null);
+  const loadingTimeoutRef = useRef(null); // Timeout de seguridad 
+
   
   // Determinar la vista basada en la ruta
   const isProfilePage = location.pathname === '/profile';
@@ -40,6 +42,8 @@ function AppB2B() {
     // Limpiar estados de carga inmediatamente al cambiar de ruta (incluyendo admin)
     setLoading(false);
     setBlockingLoading(false);
+    if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+    if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
     
     // Si está en admin o backoffice, no hacer nada más
     if (location.pathname.startsWith('/backoffice') || location.pathname.startsWith('/admin')) {
@@ -183,10 +187,16 @@ function AppB2B() {
     } else {
       document.body.style.overflow = '';
       document.body.style.height = '';
+      // Limpiar timeout si se apaga manualmente
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
     }
     return () => {
       document.body.style.overflow = '';
       document.body.style.height = '';
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
     };
   }, [blockingLoading]);
 
@@ -308,6 +318,18 @@ function AppB2B() {
       setBlockingLoading(true);
       setSearchProgress({ percent: 0, message: 'Iniciando búsqueda...' });
       setDisplayProgress(0);
+
+      // Seguridad: Timeout de 60 segundos por si el socket/poll fallan catastróficamente
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = setTimeout(() => {
+        if (blockingLoading || loading) {
+          console.warn('Safety timeout reached for search loading');
+          setBlockingLoading(false);
+          setLoading(false);
+          toastError?.('La búsqueda está tardando más de lo esperado. Se canceló la espera visual, pero los resultados podrían aparecer en breve.');
+        }
+      }, 60000); 
+
       
       // Generar Task ID único para tracking
       const taskId = `search_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;

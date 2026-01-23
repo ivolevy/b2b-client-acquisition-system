@@ -15,8 +15,8 @@
 .main-content {
   flex: 1;
   padding: var(--spacing-2xl);
-  padding-top: 110px;
-  /* Added visual separation for fixed navbar */
+  padding-top: 140px;
+  /* Increased separation for fixed navbar per user feedback */
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;

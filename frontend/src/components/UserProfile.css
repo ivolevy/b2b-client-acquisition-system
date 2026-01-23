@@ -21,8 +21,8 @@ body.profile-page-active {
   width: 90%;
   max-width: 1000px;
   /* Slightly narrower */
-  margin: 1rem auto;
-  /* Reduced margin */
+  margin: 2.5rem auto;
+  /* Increased margin to clear floating navbar */
   min-height: 500px;
   /* Reduced min-height */
   overflow: hidden;
