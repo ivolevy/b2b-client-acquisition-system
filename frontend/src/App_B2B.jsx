@@ -676,7 +676,7 @@ function AppB2B() {
         empresa.sitio_web || empresa.website || '',
         empresa.email || '',
         empresa.telefono || '',
-        [empresa.ciudad, empresa.pais].filter(Boolean).join(', '),
+        empresa.direccion || [empresa.ciudad, empresa.pais].filter(Boolean).join(', ') || '',
         empresa.validada ? 'Validada' : 'Pendiente'
       ]);
 
