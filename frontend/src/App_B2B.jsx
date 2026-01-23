@@ -532,29 +532,23 @@ function AppB2B() {
     }
 
     const escapeCSV = (value) => {
-      if (value === null || value === undefined) return '';
-      const stringValue = String(value);
-      // Siempre encapsular en comillas para evitar problemas con separadores
+      if (value === null || value === undefined) return '""';
+      // Limpiar saltos de línea y tabulaciones que rompen el CSV
+      const stringValue = String(value).replace(/[\r\n\t]+/g, ' ').trim();
+      // Siempre encapsular en comillas dobles y escapar comillas internas
       return `"${stringValue.replace(/"/g, '""')}"`;
     };
 
     const formatDate = (dateString) => {
-      if (!dateString) return '';
+      if (!dateString) return '""';
       try {
         const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
-          day: '2-digit', 
-          month: '2-digit', 
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
+        return `"${date.toLocaleDateString('es-ES')} ${date.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}"`;
       } catch (e) {
-        return dateString;
+        return `"${dateString}"`;
       }
     };
 
-    // Encabezados más estéticos y ordenados
     const headers = [
       'Nombre Empresa',
       'Rubro',
@@ -572,12 +566,14 @@ function AppB2B() {
       'YouTube',
       'TikTok',
       'Estado',
+      'Distancia (km)',
+      'Latitud',
+      'Longitud',
       'Fecha Captura'
     ];
 
     const rows = empresasToExport.map(e => [
       e.nombre || '',
-      // Intentar usar nombre del rubro del diccionario si existe y si e.rubro es una key
       (rubros && rubros[e.rubro]) ? rubros[e.rubro] : (e.rubro || ''),
       e.sitio_web || e.website || '',
       e.email || '',
@@ -593,12 +589,16 @@ function AppB2B() {
       e.youtube || '',
       e.tiktok || '',
       e.validada ? 'Validada' : 'Pendiente',
-      formatDate(e.created_at || e.fecha_creacion || e.fecha_registro || new Date().toISOString())
+      e.distancia_km !== null ? e.distancia_km.toFixed(2) : '',
+      e.latitud || '',
+      e.longitud || '',
+      e.created_at || e.fecha_creacion || e.fecha_registro || new Date().toISOString()
     ]);
 
     const separator = ';';
     const csvContent = [
-      headers.map(escapeCSV).join(separator),
+      'sep=;',
+      headers.map(h => `"${h}"`).join(separator),
       ...rows.map(row => row.map(escapeCSV).join(separator))
     ].join('\r\n');
 
