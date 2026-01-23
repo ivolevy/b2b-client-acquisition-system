@@ -208,67 +208,78 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
           )}
 
           {/* Toolbar de opciones compactas */}
-          <div className="filters-toolbar">
-            
-            <div className="toolbar-group">
-              <button
-                type="button"
-                className={`filter-pill ${scrapearWebsites ? 'active' : ''}`}
-                onClick={() => setScrapearWebsites(!scrapearWebsites)}
-                disabled={loading}
-                title="Si la empresa tiene sitio web, intentaremos obtener Instagram, LinkedIn, etc."
-              >
-                <div className="pill-icon">
-                  {scrapearWebsites ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle><line x1="2" y1="2" x2="22" y2="22"></line></svg>
-                  )}
-                </div>
-                <span>Redes Sociales</span>
-              </button>
-
-              <button
-                type="button"
-                className={`filter-pill ${soloValidadas ? 'active' : ''}`}
-                onClick={() => setSoloValidadas(!soloValidadas)}
-                disabled={loading}
-                title="Filtra los resultados a empresas con email o teléfono válido"
-              >
-                <div className="pill-icon">
-                  {soloValidadas ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                  )}
-                </div>
-                <span>Solo Validados</span>
-              </button>
-            </div>
-
-            <div className="toolbar-divider"></div>
-
-            <div className="toolbar-group">
-              <div className="search-mode-segment">
-                <button 
+          <div className="filters-bottom-row">
+            <div className="filters-toolbar">
+              
+              <div className="toolbar-group">
+                <button
                   type="button"
-                  className={`segment-btn ${modoBusqueda === 'nueva' ? 'active' : ''}`}
-                  onClick={() => setModoBusqueda('nueva')}
+                  className={`filter-pill ${scrapearWebsites ? 'active' : ''}`}
+                  onClick={() => setScrapearWebsites(!scrapearWebsites)}
                   disabled={loading}
+                  title="Si la empresa tiene sitio web, intentaremos obtener Instagram, LinkedIn, etc."
                 >
-                  Nueva
+                  <div className="pill-icon">
+                    {scrapearWebsites ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle><line x1="2" y1="2" x2="22" y2="22"></line></svg>
+                    )}
+                  </div>
+                  <span>Redes Sociales</span>
                 </button>
-                <button 
+
+                <button
                   type="button"
-                  className={`segment-btn ${modoBusqueda === 'agregar' ? 'active' : ''}`}
-                  onClick={() => setModoBusqueda('agregar')}
+                  className={`filter-pill ${soloValidadas ? 'active' : ''}`}
+                  onClick={() => setSoloValidadas(!soloValidadas)}
                   disabled={loading}
+                  title="Filtra los resultados a empresas con email o teléfono válido"
                 >
-                  Agregar
+                  <div className="pill-icon">
+                    {soloValidadas ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    )}
+                  </div>
+                  <span>Solo Validados</span>
                 </button>
               </div>
+
+              <div className="toolbar-divider"></div>
+
+              <div className="toolbar-group">
+                <div className="search-mode-segment">
+                  <button 
+                    type="button"
+                    className={`segment-btn ${modoBusqueda === 'nueva' ? 'active' : ''}`}
+                    onClick={() => setModoBusqueda('nueva')}
+                    disabled={loading}
+                  >
+                    Nueva
+                  </button>
+                  <button 
+                    type="button"
+                    className={`segment-btn ${modoBusqueda === 'agregar' ? 'active' : ''}`}
+                    onClick={() => setModoBusqueda('agregar')}
+                    disabled={loading}
+                  >
+                    Agregar
+                  </button>
+                </div>
+              </div>
+
             </div>
 
+            <button 
+              type="submit" 
+              className="btn-search-distinct" 
+              disabled={loading}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              Buscar
+            </button>
           </div>
 
           {/* Texto de ayuda dinámico */}

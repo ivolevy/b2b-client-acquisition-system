@@ -531,6 +531,13 @@ class SearchHistoryRequest(BaseModel):
     empresas_encontradas: Optional[int] = 0
     empresas_validas: Optional[int] = 0
 
+class DisconnectRequest(BaseModel):
+    user_id: str
+
+class UserRubrosRequest(BaseModel):
+    user_id: str
+    rubro_keys: List[str]
+
 # Inicializar sistema en memoria
 @app.on_event("startup")
 async def startup():
@@ -1501,6 +1508,13 @@ async def outlook_callback(code: str, state: str):
         logger.error(f"Error crítico en callback de Outlook: {e}")
         return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason={str(e)}"})
 
+class DisconnectRequest(BaseModel):
+    user_id: str
+
+class UserRubrosRequest(BaseModel):
+    user_id: str
+    rubro_keys: List[str]
+
 @app.get("/auth/google/status/{user_id}")
 async def google_status(user_id: str):
     """Verifica si el usuario tiene una cuenta de Gmail conectada"""
@@ -1517,23 +1531,80 @@ async def google_status(user_id: str):
         logger.error(f"Error obteniendo estado de Google Auth: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/auth/google/disconnect/{user_id}")
-async def google_disconnect(user_id: str):
+@app.post("/auth/google/disconnect")
+async def google_disconnect(request: DisconnectRequest):
     """Elimina la conexión con Google Gmail"""
     try:
-        success = delete_user_oauth_token(user_id)
+        success = delete_user_oauth_token(request.user_id)
         return {"success": success, "message": "Cuenta desconectada exitosamente"}
     except Exception as e:
         logger.error(f"Error desconectando Google Auth: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/auth/outlook/disconnect/{user_id}")
-async def outlook_disconnect(user_id: str):
+@app.post("/auth/outlook/disconnect")
+async def outlook_disconnect(request: DisconnectRequest):
     """Desconectar Outlook"""
     try:
-        success = delete_user_oauth_token(user_id, provider='outlook')
+        success = delete_user_oauth_token(request.user_id, provider='outlook')
         return {"success": success, "message": "Outlook desconectado"}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/users/{user_id}/rubros")
+async def get_user_rubros(user_id: str):
+    """Obtiene los rubros seleccionados por el usuario y todos los disponibles"""
+    try:
+        # Obtener todos los disponibles
+        all_rubros = listar_rubros_disponibles()
+        
+        # Obtener seleccionados de la BD
+        client = get_supabase_admin()
+        selected_rubros = []
+        
+        if client:
+            # Intentar leer de la tabla user_rubros
+            # Asumimos estructura: user_id, rubro_key
+            response = client.table('user_rubros').select('rubro_key').eq('user_id', user_id).execute()
+            if response.data:
+                selected_rubros = [item['rubro_key'] for item in response.data]
+        
+        return {
+            "success": True,
+            "all_rubros": all_rubros,
+            "selected_rubros": selected_rubros
+        }
+    except Exception as e:
+        logger.error(f"Error obteniendo rubros de usuario {user_id}: {e}")
+        # Retornar al menos los disponibles para no romper el frontend
+        return {
+            "success": True,
+            "all_rubros": listar_rubros_disponibles(),
+            "selected_rubros": [],
+            "error": str(e)
+        }
+
+@app.post("/users/rubros")
+async def save_user_rubros(request: UserRubrosRequest):
+    """Guarda los rubros seleccionados por el usuario"""
+    try:
+        client = get_supabase_admin()
+        if not client:
+            raise HTTPException(status_code=500, detail="Error de conexión a base de datos")
+            
+        # 1. Eliminar rubros actuales del usuario
+        client.table('user_rubros').delete().eq('user_id', request.user_id).execute()
+        
+        # 2. Insertar nuevos si hay seleccionados
+        if request.rubro_keys:
+            data_to_insert = [
+                {"user_id": request.user_id, "rubro_key": key, "created_at": datetime.now().isoformat()} 
+                for key in request.rubro_keys
+            ]
+            client.table('user_rubros').insert(data_to_insert).execute()
+            
+        return {"success": True, "message": "Rubros actualizados correctamente"}
+    except Exception as e:
+        logger.error(f"Error guardando rubros para {request.user_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/auth/status/{user_id}")

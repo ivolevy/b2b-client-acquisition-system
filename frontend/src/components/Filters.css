@@ -747,10 +747,60 @@ select.filter-input {
    ============================================ */
 
 @media (max-width: 768px) {
-  .filters-container {
-    gap: var(--spacing-md);
+  .filters-bottom-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 
+  .btn-search-distinct {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.filters-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Remove margin from toolbar when inside row */
+.filters-bottom-row .filters-toolbar {
+  margin-top: 0;
+}
+
+.btn-search-distinct {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(2, 136, 209, 0.2);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 42px;
+  /* Match toolbar height roughy */
+}
+
+.btn-search-distinct:hover:not(:disabled) {
+  box-shadow: 0 6px 12px rgba(2, 136, 209, 0.3);
+  background: var(--primary-dark);
+}
+
+.btn-search-distinct:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
   .filter-section {
     padding: var(--spacing-md);
     border-radius: var(--radius-lg);

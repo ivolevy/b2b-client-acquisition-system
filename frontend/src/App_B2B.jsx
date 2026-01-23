@@ -556,12 +556,6 @@ function AppB2B() {
       }
     };
 
-    // Formatear como link de Excel
-    const formatLink = (url) => {
-      if (!url) return '';
-      return `=HYPERLINK("${url}", "${url}")`;
-    };
-
     // Encabezados más estéticos y ordenados
     const headers = [
       'Nombre Empresa',
@@ -587,19 +581,19 @@ function AppB2B() {
       e.nombre || '',
       // Intentar usar nombre del rubro del diccionario si existe y si e.rubro es una key
       (rubros && rubros[e.rubro]) ? rubros[e.rubro] : (e.rubro || ''),
-      formatLink(e.sitio_web || e.website),
+      e.sitio_web || e.website || '',
       e.email || '',
       e.telefono || '',
       e.direccion || '',
       e.ciudad || '',
       e.codigo_postal || '',
       e.pais || '',
-      formatLink(e.instagram),
-      formatLink(e.facebook),
-      formatLink(e.linkedin),
-      formatLink(e.twitter),
-      formatLink(e.youtube),
-      formatLink(e.tiktok),
+      e.instagram || '',
+      e.facebook || '',
+      e.linkedin || '',
+      e.twitter || '',
+      e.youtube || '',
+      e.tiktok || '',
       e.validada ? 'Validada' : 'Pendiente',
       formatDate(e.created_at || e.fecha_creacion)
     ]);
@@ -649,7 +643,8 @@ function AppB2B() {
     }
 
     try {
-      const doc = new jsPDF();
+      // Landscape orientation for better fit
+      const doc = new jsPDF({ orientation: 'landscape' });
       
       const now = new Date();
       const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -657,38 +652,48 @@ function AppB2B() {
 
       // Título
       doc.setFontSize(18);
-      doc.text('Reporte de Smart Leads', 14, 22);
-      
-      doc.setFontSize(11);
-      doc.setTextColor(100);
-      doc.text(`Generado el: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 14, 30);
+      doc.text('Reporte de Smart Leads', 14, 15);
       
       doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Generado el: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 14, 22);
+      
+      doc.setFontSize(9);
       doc.setTextColor(233, 30, 99); // Color pink del tema
-      doc.text('Para más información contactar a Ivan Levy - CTO de Dota', 14, 37);
-      doc.text('LinkedIn: https://www.linkedin.com/in/ivan-levy/ | Email: ivo.levy03@gmail.com', 14, 43);
+      doc.text('Para más información contactar a Ivan Levy - CTO de Dota', 14, 28);
+      doc.text('LinkedIn: https://www.linkedin.com/in/ivan-levy/ | Email: ivo.levy03@gmail.com', 14, 33);
       
       doc.setFontSize(10);
       doc.setTextColor(100);
-      doc.text(`Total empresas: ${empresasToExport.length}`, 14, 50);
+      doc.text(`Total empresas: ${empresasToExport.length}`, 260, 22, { align: 'right' });
 
-      // Columnas para PDF (menos columnas que CSV para que entre)
-      const tableColumn = ["Nombre", "Rubro", "Teléfono", "Email", "Ciudad", "Estado"];
+      // Columnas para PDF (más columnas aprovechando landscape)
+      const tableHead = [['Empresa', 'Rubro', 'Web', 'Email', 'Teléfono', 'Ubicación', 'Estado']];
       
       const tableRows = empresasToExport.map(empresa => [
         empresa.nombre || '',
         (rubros && rubros[empresa.rubro]) ? rubros[empresa.rubro] : (empresa.rubro || ''),
-        empresa.telefono || '',
+        empresa.sitio_web || empresa.website || '',
         empresa.email || '',
-        empresa.ciudad || '',
+        empresa.telefono || '',
+        [empresa.ciudad, empresa.pais].filter(Boolean).join(', '),
         empresa.validada ? 'Validada' : 'Pendiente'
       ]);
 
       autoTable(doc, {
-        head: [['Empresa', 'Rubro', 'Teléfono', 'Email', 'Ciudad', 'Estado']],
+        head: tableHead,
         body: tableRows,
-        startY: 55,
-        styles: { fontSize: 8, cellPadding: 2 },
+        startY: 38,
+        styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+        columnStyles: {
+          0: { cellWidth: 45 }, // Nombre
+          1: { cellWidth: 35 }, // Rubro
+          2: { cellWidth: 40 }, // Web
+          3: { cellWidth: 45 }, // Email
+          4: { cellWidth: 35 }, // Telefono
+          5: { cellWidth: 40 }, // Ubicacion
+          6: { cellWidth: 20 }  // Estado
+        },
         headStyles: { fillColor: [233, 30, 99] }, // Pink color matching theme
         alternateRowStyles: { fillColor: [245, 245, 245] },
         theme: 'grid'
