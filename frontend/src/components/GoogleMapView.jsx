@@ -28,7 +28,7 @@ function GoogleMapView({ empresas }) {
 
   const center = useMemo(() => {
     if (validEmpresas.length === 0) {
-      return { lat: 40.4168, lng: -3.7038 }; // Madrid por defecto
+      return { lat: -34.6037, lng: -58.3816 }; // Buenos Aires por defecto
     }
     const avgLat =
       validEmpresas.reduce((sum, e) => sum + parseFloat(e.latitud), 0) /

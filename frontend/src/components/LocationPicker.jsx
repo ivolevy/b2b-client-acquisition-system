@@ -44,7 +44,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
 
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radius, setRadius] = useState(''); // Sin radio por defecto para mostrar placeholder
-  const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 }); // Madrid por defecto
+  const [mapCenter, setMapCenter] = useState({ lat: -34.6037, lng: -58.3816 }); // Buenos Aires por defecto
   const [mapZoom, setMapZoom] = useState(12);
   const [map, setMap] = useState(null);
   const [initialLocationApplied, setInitialLocationApplied] = useState(false);

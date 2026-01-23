@@ -44,7 +44,7 @@ function Navbar({ onNavigateToProfile }) {
             onClick={() => navigate('/')}
             style={{ cursor: 'pointer' }}
           >
-            <div className="logo-icon">
+            <div className="nav-logo-icon">
               <img src="/favicon.svg" alt="Smart Leads Logo" style={{ width: '24px', height: '24px' }} />
             </div>
             <span>Smart Leads</span>

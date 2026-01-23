@@ -534,10 +534,8 @@ function AppB2B() {
     const escapeCSV = (value) => {
       if (value === null || value === undefined) return '';
       const stringValue = String(value);
-      if (stringValue.includes('"') || stringValue.includes(',') || stringValue.includes('\n')) {
-        return `"${stringValue.replace(/"/g, '""')}"`;
-      }
-      return stringValue;
+      // Siempre encapsular en comillas para evitar problemas con separadores
+      return `"${stringValue.replace(/"/g, '""')}"`;
     };
 
     const formatDate = (dateString) => {

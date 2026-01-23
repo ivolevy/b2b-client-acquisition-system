@@ -70,7 +70,7 @@
       LandingPage.css doesn't have .logo:hover opacity. Removing for parity. */
 }
 
-.navbar-brand .logo-icon {
+.navbar-brand .nav-logo-icon {
   display: flex;
   align-items: center;
   transform: translateY(-2px);
