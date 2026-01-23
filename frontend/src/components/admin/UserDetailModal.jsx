@@ -3,24 +3,22 @@ import { createPortal } from 'react-dom';
 import { adminService } from '../../lib/supabase';
 import './UserDetailModal.css';
 
-function UserDetailModal({ userId, onClose, onUpdate }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+function UserDetailModal({ user, onClose, onUpdate }) {
+  // Use the passed user object directly
+  const [currentUser, setCurrentUser] = useState(user);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
   const [editForm, setEditForm] = useState({
-    email: '',
-    name: '',
-    phone: '',
-    role: 'user'
+    email: user?.email || '',
+    name: user?.name || '',
+    phone: user?.phone || '',
+    role: user?.role || 'user'
   });
 
-  useEffect(() => {
-    loadUserData();
-  }, [userId]);
-
+  // Remove fetch effect since we receive data via props
   // Bloquear scroll del body cuando el modal está abierto
   useEffect(() => {
     document.body.classList.add('modal-open');
@@ -29,30 +27,7 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
     };
   }, []);
 
-  const loadUserData = async () => {
-    setLoading(true);
-    setError('');
-    
-    try {
-      const { data: userData, error: userError } = await adminService.getUserById(userId);
-      if (userError) throw userError;
-      setUser(userData);
-
-      if (userData) {
-        setEditForm({
-          email: userData.email || '',
-          name: userData.name || '',
-          phone: userData.phone || '',
-          role: userData.role || 'user'
-        });
-      }
-    } catch (err) {
-      console.error('Error loading user data:', err);
-      setError('Error al cargar datos del usuario');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Removed loadUserData function as we use props data to avoid RLS 406 errors
 
   const handleSave = async () => {
     setSaving(true);
@@ -67,7 +42,7 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
         role: editForm.role
       };
 
-      const { error: updateError } = await adminService.updateUser(userId, updates);
+      const { error: updateError } = await adminService.updateUser(currentUser.id, updates);
       if (updateError) throw updateError;
 
       setSuccess('Usuario actualizado exitosamente');
@@ -75,8 +50,8 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
       // Esperar un momento para asegurar que la BD se actualizó completamente
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Recargar datos del usuario actualizado
-      await loadUserData();
+      // No recargamos datos locales porque cerramos el modal
+      // y el padre refresca la lista completa
       
       // Llamar al callback para actualizar la lista de usuarios
       if (onUpdate) {
@@ -97,14 +72,14 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
 
   const handleExport = async () => {
     try {
-      const { data, error: exportError } = await adminService.exportUserData(userId);
+      const { data, error: exportError } = await adminService.exportUserData(currentUser.id);
       if (exportError) throw exportError;
       
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `user-${userId}-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `user-${currentUser.id}-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -124,7 +99,7 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
         <p>Cargando usuario...</p>
       </div>
     </div>
-  ) : !user ? (
+  ) : !currentUser ? (
     <div className="modal-overlay">
       <div className="user-detail-modal error-modal">
         <p>Usuario no encontrado</p>
@@ -138,7 +113,7 @@ function UserDetailModal({ userId, onClose, onUpdate }) {
         <div className="modal-header">
           <div className="modal-header-content">
             <h2>Detalle de Usuario</h2>
-            <p className="modal-subtitle">{user.email}</p>
+            <p className="modal-subtitle">{currentUser?.email}</p>
           </div>
           <button className="btn-close-icon" onClick={onClose}>
             ×

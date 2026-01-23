@@ -207,89 +207,89 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
             />
           )}
 
-          <div className="filters-row-compact">
-            <div className="option-card">
-                <div className="option-info">
-                  <div className="option-head">
-                    <div className="option-title">Extraer redes sociales</div>
-                    <div className={`status-badge ${scrapearWebsites ? 'success' : 'off'}`}>
-                      {scrapearWebsites ? 'Activo' : 'Inactivo'}
-                    </div>
-                  </div>
-                  <div className="option-desc">Si la empresa tiene sitio web, intentaremos obtener Instagram, LinkedIn, etc.</div>
+          {/* Toolbar de opciones compactas */}
+          <div className="filters-toolbar">
+            
+            <div className="toolbar-group">
+              <button
+                type="button"
+                className={`filter-pill ${scrapearWebsites ? 'active' : ''}`}
+                onClick={() => setScrapearWebsites(!scrapearWebsites)}
+                disabled={loading}
+                title="Si la empresa tiene sitio web, intentaremos obtener Instagram, LinkedIn, etc."
+              >
+                <div className="pill-icon">
+                  {scrapearWebsites ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle><line x1="2" y1="2" x2="22" y2="22"></line></svg>
+                  )}
                 </div>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={scrapearWebsites}
-                  onChange={(e) => setScrapearWebsites(e.target.checked)}
-                  disabled={loading}
-                />
-                <span className="slider" />
-              </label>
+                <span>Redes Sociales</span>
+              </button>
+
+              <button
+                type="button"
+                className={`filter-pill ${soloValidadas ? 'active' : ''}`}
+                onClick={() => setSoloValidadas(!soloValidadas)}
+                disabled={loading}
+                title="Filtra los resultados a empresas con email o teléfono válido"
+              >
+                <div className="pill-icon">
+                  {soloValidadas ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  )}
+                </div>
+                <span>Solo Validados</span>
+              </button>
             </div>
 
-            <div className="option-card">
-                <div className="option-info">
-                  <div className="option-head">
-                    <div className="option-title">Solo contacto válido</div>
-                    <div className={`status-badge ${soloValidadas ? 'warn' : 'info'}`}>
-                      {soloValidadas ? 'Menos resultados' : 'Más resultados'}
-                    </div>
-                  </div>
-                  <div className="option-desc">Filtra los resultados a empresas con email o teléfono válido.</div>
-                </div>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={soloValidadas}
-                  onChange={(e) => setSoloValidadas(e.target.checked)}
-                  disabled={loading}
-                />
-                <span className="slider" />
-              </label>
-            </div>
+            <div className="toolbar-divider"></div>
 
-            {/* Selector de modo de búsqueda */}
-            <div className="option-card">
-                <div className="option-info">
-                  <div className="option-head">
-                    <div className="option-title">Modo de búsqueda</div>
-                    <div className={`status-badge ${modoBusqueda === 'nueva' ? 'info' : 'success'}`}>
-                      {modoBusqueda === 'nueva' ? 'Reemplazar' : 'Agregar'}
-                    </div>
-                  </div>
-                  <div className="option-desc">
-                    {modoBusqueda === 'nueva' 
-                      ? 'Limpia resultados anteriores antes de buscar.' 
-                      : 'Agrega los nuevos resultados a los existentes.'}
-                  </div>
-                </div>
-              <div className="mode-toggle">
+            <div className="toolbar-group">
+              <div className="search-mode-segment">
                 <button 
                   type="button"
-                  className={`mode-btn ${modoBusqueda === 'nueva' ? 'active' : ''}`}
+                  className={`segment-btn ${modoBusqueda === 'nueva' ? 'active' : ''}`}
                   onClick={() => setModoBusqueda('nueva')}
                   disabled={loading}
                 >
-                  Nueva búsqueda
+                  Nueva
                 </button>
                 <button 
                   type="button"
-                  className={`mode-btn ${modoBusqueda === 'agregar' ? 'active' : ''}`}
+                  className={`segment-btn ${modoBusqueda === 'agregar' ? 'active' : ''}`}
                   onClick={() => setModoBusqueda('agregar')}
                   disabled={loading}
                 >
-                  Agregar resultados
+                  Agregar
                 </button>
               </div>
             </div>
 
-            <div className="option-actions">
-              <button type="submit" className="btn btn-success btn-compact btn-cta" disabled={loading || !locationData}>
-                {loading ? 'Buscando...' : ' Buscar en el área'}
-              </button>
-            </div>
+          </div>
+
+          {/* Texto de ayuda dinámico */}
+          <div className="filters-helper-text">
+            {scrapearWebsites && (
+              <div className="helper-pill info">
+                <span><strong>Redes Sociales:</strong> Intentaremos extraer Instagram/LinkedIn de la web.</span>
+              </div>
+            )}
+            {soloValidadas && (
+              <div className="helper-pill success">
+                <span><strong>Calidad:</strong> Se filtrarán empresas sin email o teléfono válido.</span>
+              </div>
+            )}
+            {modoBusqueda === 'agregar' && (
+              <div className="helper-pill neutral">
+                <span>
+                  <strong>Modo Adición:</strong> Se agregarán los nuevos resultados a la lista existente.
+                </span>
+              </div>
+            )}
           </div>
 
 

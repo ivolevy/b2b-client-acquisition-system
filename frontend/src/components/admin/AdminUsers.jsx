@@ -201,7 +201,7 @@ function AdminUsers() {
       {/* Modal de detalle de usuario */}
       {showDetailModal && selectedUser && (
         <UserDetailModal
-          userId={selectedUser.id}
+          user={selectedUser}
           onClose={() => {
             setShowDetailModal(false);
             setSelectedUser(null);

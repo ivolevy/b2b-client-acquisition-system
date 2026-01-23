@@ -493,6 +493,19 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Embedded Mode Styles */
+.email-sender-embedded {
+  background: white;
+  border-radius: 0 0 20px 20px;
+  /* Match TableView radius */
+  overflow: hidden;
+  height: 100%;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .email-sender-layout {
