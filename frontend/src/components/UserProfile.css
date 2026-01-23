@@ -21,8 +21,10 @@ body.profile-page-active {
   width: 90%;
   max-width: 1000px;
   /* Slightly narrower */
-  margin: 2.5rem auto;
-  /* Increased margin to clear floating navbar */
+  /* Slightly narrower */
+  margin: 1rem auto;
+  /* Moved up (was 2.5rem) */
+  /* Reduced top margin to clear floating navbar */
   min-height: 500px;
   /* Reduced min-height */
   overflow: hidden;
@@ -211,7 +213,8 @@ body.profile-page-active {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.25rem;
+  padding: 1.5rem 1.25rem;
+  /* Increased vertical padding for more separation */
   border-bottom: 1px solid #f1f5f9;
 }
 

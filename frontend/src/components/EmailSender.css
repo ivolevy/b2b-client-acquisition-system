@@ -2,8 +2,8 @@
 
 /* Default Variables: Premium & Compact */
 :root {
-  --es-primary: #e91e63;
-  --es-primary-hover: #c2185b;
+  --es-primary: #3b82f6;
+  --es-primary-hover: #2563eb;
   --es-bg: #f8fafc;
   --es-surface: #ffffff;
   --es-border: #e2e8f0;
@@ -22,7 +22,7 @@
   right: 0;
   bottom: 0;
   background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(4px);
+  /* Darker overlay for better contrast */
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -30,29 +30,22 @@
   padding: 20px;
 }
 
-@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
-  .email-sender-modal {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-  }
-}
+/* REMOVED @supports backdrop-filter block to enforce solid white background */
 
 .email-sender-modal {
   width: 95%;
   max-width: 1200px;
   height: 85vh;
   background: #ffffff;
+  /* Solid White */
   border-radius: 20px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-top: none;
+  border: none;
+  /* Removed border */
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
@@ -67,7 +60,8 @@
   justify-content: center;
   background: white;
   min-height: 100%;
-  border-radius: 32px;
+  border-radius: 0;
+  /* Flat top corners as requested */
 }
 
 .email-auth-title {
@@ -95,7 +89,8 @@
 
 .email-auth-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
+  /* Darker border */
   border-radius: 20px;
   padding: 24px;
   display: flex;
@@ -107,9 +102,10 @@
 }
 
 .email-auth-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  background: #fafafa;
+  border-color: #94a3b8;
+  /* Even darker on hover */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: #f8fafc;
 }
 
 .email-auth-icon-wrapper {
@@ -315,7 +311,7 @@
 .es-select:focus {
   outline: none;
   border-color: var(--es-primary);
-  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   background: white;
 }
 
@@ -374,9 +370,9 @@
 }
 
 .recipient-row.selected {
-  background: #fff0f7;
-  /* Very light pink */
-  border-color: #ec4899;
+  background: #eff6ff;
+  /* Very light blue */
+  border-color: #60a5fa;
 }
 
 .row-check {
@@ -453,8 +449,7 @@
 
 .es-textarea:focus {
   outline: none;
-  border-color: var(--es-primary);
-  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* Responsive */

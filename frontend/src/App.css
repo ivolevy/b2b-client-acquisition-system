@@ -68,7 +68,7 @@
   background: var(--primary);
   border-radius: 99px;
   transition: width 0.2s linear;
-  box-shadow: 0 0 10px rgba(233, 30, 99, 0.5);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 
 .progress-info {
