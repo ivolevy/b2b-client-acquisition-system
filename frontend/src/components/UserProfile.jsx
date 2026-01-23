@@ -600,84 +600,68 @@ function UserProfile() {
 
               <div className="profile-divider"></div>
               
-              <h3 className="profile-section-title">Integraciones de Email</h3>
-              <p className="profile-section-subtitle">Conectá tus cuentas para enviar emails directamente desde la plataforma.</p>
-              
-              <div className="integrations-grid">
-                {/* Gmail Card */}
-                <div className={`integration-card ${authStatus.google.connected ? 'connected' : ''}`}>
-                  <div className="card-header">
-                    <div className="provider-info">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" fill="#EA4335"/>
-                      </svg>
-                      <div className="provider-text">
-                        <h4>Gmail</h4>
-                        {authStatus.google.connected && (
-                          <span className="status-badge">● Conectado</span>
-                        )}
-                      </div>
-                    </div>
+              <div className="integrations-stack" style={{ display: 'flex', flexDirection: 'row', gap: '1rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+                <div style={{ width: '100%', marginBottom: '0.5rem' }}>
+                  <p style={{ fontSize: '0.9rem', fontWeight: '400', color: '#64748b', margin: '0' }}>
+                    Conectá tu correo para gestionar tus campañas de Email Marketing
+                  </p>
+                </div>
+                {/* Gmail Row */}
+                <div className="integration-row-simple">
+                  <div className="integration-logo-box">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" fill="#EA4335"/>
+                    </svg>
                   </div>
-                  
-                  {authStatus.google.connected ? (
-                    <div className="card-footer connected">
-                      <span className="email-address">
-                        {authStatus.google.email}
-                      </span>
+                  <div className="integration-info-simple">
+                    {authStatus.google.connected ? (
+                      <>
+                        <span className="status-text-simple">Conectado</span>
+                        <button 
+                          onClick={() => handleDisconnectProvider('google')}
+                          className="btn-link-disconnect"
+                        >
+                          Desconectar
+                        </button>
+                      </>
+                    ) : (
                       <button 
-                        onClick={() => handleDisconnectProvider('google')}
-                        className="btn-disconnect"
+                        onClick={handleConnectGoogle}
+                        className="btn-link-connect gmail"
                       >
-                        Desconectar
+                        Conectar Gmail
                       </button>
-                    </div>
-                  ) : (
-                    <button 
-                      onClick={handleConnectGoogle}
-                      className="btn-connect gmail"
-                    >
-                      Conectar Gmail
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
 
-                {/* Outlook Card */}
-                <div className={`integration-card ${authStatus.outlook.connected ? 'connected' : ''}`}>
-                  <div className="card-header">
-                    <div className="provider-info">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 18L10.2 21.3V2.7L1 6V18ZM23 7.3V16.7L11.5 19.8V4.2L23 7.3ZM23 18.2L11 22V19.2L23 16.7V18.2ZM11 2V4.8L23 7.3V5.8L11 2Z" fill="#0078D4"/>
-                      </svg>
-                      <div className="provider-text">
-                        <h4>Outlook</h4>
-                        {authStatus.outlook.connected && (
-                          <span className="status-badge">● Conectado</span>
-                        )}
-                      </div>
-                    </div>
+                {/* Outlook Row */}
+                <div className="integration-row-simple">
+                  <div className="integration-logo-box">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1 18L10.2 21.3V2.7L1 6V18ZM23 7.3V16.7L11.5 19.8V4.2L23 7.3ZM23 18.2L11 22V19.2L23 16.7V18.2ZM11 2V4.8L23 7.3V5.8L11 2Z" fill="#0078D4"/>
+                    </svg>
                   </div>
-                  
-                  {authStatus.outlook.connected ? (
-                    <div className="card-footer connected">
-                      <span className="email-address">
-                        {authStatus.outlook.email}
-                      </span>
+                  <div className="integration-info-simple">
+                    {authStatus.outlook.connected ? (
+                      <>
+                        <span className="status-text-simple">Conectado</span>
+                        <button 
+                          onClick={() => handleDisconnectProvider('outlook')}
+                          className="btn-link-disconnect"
+                        >
+                          Desconectar
+                        </button>
+                      </>
+                    ) : (
                       <button 
-                        onClick={() => handleDisconnectProvider('outlook')}
-                        className="btn-disconnect"
+                        onClick={handleConnectOutlook}
+                        className="btn-link-connect outlook"
                       >
-                        Desconectar
+                        Conectar Outlook
                       </button>
-                    </div>
-                  ) : (
-                    <button 
-                      onClick={handleConnectOutlook}
-                      className="btn-connect outlook"
-                    >
-                      Conectar Outlook
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -686,58 +670,19 @@ function UserProfile() {
           )}
 
           {activeTab === 'rubros' && (
-            <div className="profile-section-fade-in">
-              <h3 className="profile-section-title">Mis Rubros Preferidos</h3>
-              <p className="profile-section-subtitle">Seleccioná los rubros que querés que aparezcan en tu buscador. Por defecto todos están activos.</p>
-              
-              {rubrosError && <div className="rubros-error-msg">{rubrosError}</div>}
-              
-              {rubrosLoading ? (
-                <div className="rubros-loading-spinner">
-                  <div className="spinner"></div>
-                  <span>Cargando tus preferencias...</span>
+            <div className="profile-section-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', height: '100%' }}>
+              <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.7 }}>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" style={{ marginBottom: '1.5rem' }}>
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>Próximamente</h3>
+                <p style={{ color: '#64748b', fontSize: '1rem', maxWidth: '300px', margin: '0 auto', lineHeight: '1.6' }}>
+                  Estamos trabajando en nuevas funcionalidades para que puedas personalizar aún más tu experiencia.
+                </p>
+                <div style={{ marginTop: '2rem', display: 'inline-flex', padding: '0.5rem 1rem', background: '#f1f5f9', borderRadius: '100px', fontSize: '0.85rem', color: '#64748b', fontWeight: '500' }}>
+                  Disponible muy pronto
                 </div>
-              ) : (
-                <div className="rubros-selection-wrapper">
-                  <div className="rubros-selection-actions">
-                    <button type="button" className="btn-rubros-action" onClick={handleSelectAll}>
-                      Seleccionar todos
-                    </button>
-                    <button type="button" className="btn-rubros-action" onClick={handleDeselectAll}>
-                      Deseleccionar todos
-                    </button>
-                  </div>
-
-                  <div className="rubros-modern-grid">
-                    {Object.entries(availableRubros).map(([key, nombre]) => (
-                      <div 
-                        key={key} 
-                        className={`rubro-selection-card ${selectedRubros.includes(key) ? 'selected' : ''}`}
-                        onClick={() => toggleRubro(key)}
-                      >
-                        <div className="rubro-card-checkbox">
-                          {selectedRubros.includes(key) && (
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                              <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                          )}
-                        </div>
-                        <span className="rubro-card-name">{nombre}</span>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="rubros-sticky-footer">
-                    <button 
-                      className={`btn-save-rubros-modern ${rubrosSaved ? 'saved' : ''}`} 
-                      onClick={handleSaveRubros}
-                      disabled={savingRubros}
-                    >
-                      {savingRubros ? 'Guardando...' : rubrosSaved ? '✓ Guardado' : 'Guardar Preferencias'}
-                    </button>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           )}
 

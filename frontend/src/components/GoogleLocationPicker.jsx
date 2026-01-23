@@ -447,9 +447,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
   if (!isLoaded) {
     return (
       <div className="location-picker">
-        <div className="map-instruction">
-          <p>Cargando mapa de Google Maps...</p>
-        </div>
+            <div className="skeleton skeleton-box" style={{ width: '100%', height: '400px', minHeight: '350px' }}></div>
       </div>
     );
   }

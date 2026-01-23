@@ -19,7 +19,7 @@ const options = {
   zoomControl: true,
 };
 
-function MapView({ properties }) {
+function MapView({ properties, loading = false }) {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: GOOGLE_MAPS_API_KEY
@@ -74,7 +74,16 @@ function MapView({ properties }) {
     return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
   });
 
-  if (!isLoaded) return <div className="loading-map">Cargando mapa...</div>;
+  if (!isLoaded || loading) {
+    return (
+      <div className="map-container" style={{ position: 'relative', zIndex: 1, minHeight: '600px', border: 'none' }}>
+        <div className="map-header">
+           <div className="skeleton skeleton-text" style={{ width: '300px', height: '32px' }}></div>
+        </div>
+        <div className="skeleton skeleton-box" style={{ width: '100%', height: '600px' }}></div>
+      </div>
+    );
+  }
 
   if (!properties || properties.length === 0) {
     return (

@@ -155,6 +155,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
             <GoogleLocationPicker 
               onLocationChange={setLocationData}
               initialLocation={initialMapLocation}
+              loading={loading}
               rubroSelect={
                 <div className="form-group-compact rubro-inline">
                   <label>Rubro Empresarial *</label>
@@ -181,6 +182,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
             <LocationPicker 
               onLocationChange={setLocationData}
               initialLocation={initialMapLocation}
+              loading={loading}
               rubroSelect={
                 <div className="form-group-compact rubro-inline">
                   <label>Rubro Empresarial *</label>

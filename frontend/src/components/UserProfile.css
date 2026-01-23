@@ -8,27 +8,32 @@ body.profile-page-active {
   overflow-x: hidden;
 }
 
+/* Reduce main content padding specifically for profile page to pull it up */
+body.profile-page-active .main-content {
+  padding-top: 100px !important;
+  /* Reduced from 140px */
+}
+
 .user-profile-container {
   background: rgba(255, 255, 255, 0.95);
   /* White glass */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 16px;
+  border-radius: 24px;
+  /* More rounded */
   /* Slightly smaller radius */
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
   /* Softer shadow */
   border: 1px solid rgba(255, 255, 255, 1);
   width: 90%;
-  max-width: 1000px;
-  /* Slightly narrower */
-  /* Slightly narrower */
-  margin: 6rem auto;
-  /* Moved down to clear floating navbar safely */
-  /* Moved up (was 2.5rem) */
-  /* Reduced top margin to clear floating navbar */
-  min-height: 500px;
-  /* Reduced min-height */
+  max-width: 1200px;
+  /* Wider */
+  margin: 1.5rem auto 2rem;
+  /* Adjusted margins */
+  /* max-height removed for natural flow */
   overflow: hidden;
+  /* Re-added to clip child backgrounds */
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -201,11 +206,12 @@ body.profile-page-active {
 
 /* Info Grid */
 .profile-info-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0;
   background: white;
-  border-radius: 10px;
+  border-radius: 16px;
+  /* More rounded */
   border: 1px solid #e2e8f0;
   overflow: hidden;
 }
@@ -219,6 +225,17 @@ body.profile-page-active {
   border-bottom: 1px solid #f1f5f9;
 }
 
+/* Right border for odd items (left column) */
+.profile-field:nth-child(odd) {
+  border-right: 1px solid #f1f5f9;
+}
+
+/* Remove bottom border for the last two items (bottom row) */
+.profile-field:nth-last-child(-n+2) {
+  border-bottom: none;
+}
+
+/* Override default last-child behavior since we handle it with nth-last-child */
 .profile-field:last-child {
   border-bottom: none;
 }
@@ -382,6 +399,99 @@ body.profile-page-active {
 .btn-disconnect:hover {
   background: #fef2f2;
   border-color: #ef4444;
+}
+
+/* Simplified Integration Card Style */
+.integration-row-simple {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  /* More rounded */
+  transition: all 0.2s;
+  flex: 1;
+  min-width: 200px;
+  /* Allow smaller width for side by side */
+}
+
+.integration-row-simple:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.integration-logo-box {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.integration-info-simple {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.integration-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #0f172a;
+  min-width: 80px;
+}
+
+.btn-link-connect {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: all 0.2s;
+}
+
+.btn-link-connect.gmail {
+  color: #EA4335;
+}
+
+.btn-link-connect.outlook {
+  color: #0078D4;
+}
+
+.btn-link-connect:hover {
+  text-decoration-color: currentColor;
+}
+
+.btn-link-disconnect {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  color: #ef4444;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.btn-link-disconnect:hover {
+  text-decoration: underline;
+}
+
+.status-text-simple {
+  font-size: 0.85rem;
+  color: #10b981;
+  /* Green */
+  background: #ecfdf5;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 500;
 }
 
 /* Rubros Grid */
@@ -603,6 +713,25 @@ body.profile-page-active {
     padding: 1rem;
   }
 
+  .profile-info-grid {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Reset borders for mobile */
+  .profile-field:nth-child(odd) {
+    border-right: none;
+  }
+
+  .profile-field {
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .profile-field:last-child {
+    border-bottom: none;
+  }
+
   .profile-field {
     flex-direction: column;
     align-items: flex-start;
@@ -620,9 +749,15 @@ body.profile-page-active {
   }
 
   .user-profile-container {
-    margin: 1rem auto;
     width: 95%;
+    max-width: 1200px;
+    /* Wider */
+    /* max-height removed mobile */
+    margin: 1.5rem auto 2rem;
+    /* Top margin + bottom margin */
     border-radius: 12px;
+    display: flex;
+    flex-direction: column;
   }
 }
 

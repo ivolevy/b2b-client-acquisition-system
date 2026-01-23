@@ -758,7 +758,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             )}
           </GoogleMap>
         ) : (
-          <div className="loading-map">Cargando Google Maps...</div>
+          <div className="skeleton skeleton-box" style={{ width: '100%', height: '400px', borderRadius: '12px' }}></div>
         )}
         <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>

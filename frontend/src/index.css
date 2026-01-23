@@ -4,6 +4,38 @@
   box-sizing: border-box;
 }
 
+/* Skeleton Loading Animation */
+@keyframes skeleton-loading {
+  0% {
+    background-color: #f1f5f9;
+  }
+
+  50% {
+    background-color: #cbd5e1;
+  }
+
+  100% {
+    background-color: #f1f5f9;
+  }
+}
+
+.skeleton {
+  animation: skeleton-loading 1.5s infinite ease-in-out;
+  border-radius: 4px;
+}
+
+.skeleton-box {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
+
+.skeleton-text {
+  height: 1rem;
+  width: 100%;
+  border-radius: 4px;
+}
+
 /* Estilos globales para Google Places Autocomplete - CARGAR PRIMERO */
 .pac-container {
   background-color: #ffffff !important;

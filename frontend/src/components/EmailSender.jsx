@@ -445,7 +445,7 @@ function EmailSender({ empresas, onClose, embedded = false }) {
              <div className="list-toolbar">
                <span className="selection-info">Destinatarios ({empresas.filter(e => e.email).length})</span>
                {modo === 'masivo' && (
-                 <button className="btn-text" onClick={handleSelectAll}>
+                 <button className="btn-ghost-sm" onClick={handleSelectAll}>
                    {selectedEmpresas.length === empresas.filter(e => e.email).length ? 'Deseleccionar todos' : 'Seleccionar todos'}
                  </button>
                )}

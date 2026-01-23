@@ -37,8 +37,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #0f172a;
-  /* backdrop-filter removed for solid opacity */
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
   justify-content: center;

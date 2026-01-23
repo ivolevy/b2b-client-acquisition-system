@@ -437,8 +437,41 @@ function TableViewB2B({
 
       </div>
 
-      {/* Contenido: Tabla o Empty State */}
-      {empresas.length === 0 ? (
+      {/* Contenido: Tabla o Empty State o Loading Skeleton */}
+      {loading ? (
+        <div className="table-wrapper">
+          <table className="properties-table">
+             <thead>
+               <tr>
+                 <th style={{width:'45px'}}>#</th>
+                 <th>Empresa</th>
+                 <th>Rubro</th>
+                 <th>Dist.</th>
+                 <th>Email</th>
+                 <th>Teléfono</th>
+                 <th>Web</th>
+                 <th>Redes</th>
+                 <th style={{width:'80px'}}>Ir</th>
+               </tr>
+             </thead>
+             <tbody>
+                {[...Array(8)].map((_, i) => (
+                  <tr key={i}>
+                     <td><div className="skeleton skeleton-text" style={{width:'20px'}}></div></td>
+                     <td><div className="skeleton skeleton-text" style={{width:'150px'}}></div></td>
+                     <td><div className="skeleton skeleton-text" style={{width:'100px'}}></div></td>
+                     <td><div className="skeleton skeleton-text" style={{width:'60px'}}></div></td>
+                     <td><div className="skeleton skeleton-text" style={{width:'120px'}}></div></td>
+                     <td><div className="skeleton skeleton-text" style={{width:'100px'}}></div></td>
+                     <td><div className="skeleton skeleton-text" style={{width:'40px'}}></div></td>
+                     <td><div className="skeleton skeleton-text" style={{width:'100px'}}></div></td>
+                     <td><div className="skeleton skeleton-text" style={{width:'30px'}}></div></td>
+                  </tr>
+                ))}
+             </tbody>
+          </table>
+        </div>
+      ) : empresas.length === 0 ? (
         <div className="empty-state-inline">
           <div className="empty-icon">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

@@ -154,6 +154,47 @@
   color: #475569;
 }
 
+/* New Button Variables */
+.btn-ghost-sm {
+  background: transparent;
+  color: var(--es-text-muted);
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-ghost-sm:hover {
+  background: #f1f5f9;
+  color: var(--es-text-main);
+}
+
+.btn-primary-block {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: var(--es-primary);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary-block:hover {
+  background: var(--es-primary-hover);
+}
+
+.btn-primary-block:disabled {
+  background: #cbd5e1;
+  color: #f8fafc;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
 /* Custom button overrides for connection buttons */
 .gmail-connect-mini {
   background: #EA4335 !important;
