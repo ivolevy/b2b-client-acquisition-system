@@ -19,6 +19,7 @@ const LandingPage = lazy(() => import('./components/LandingPage'));
 const ApiUsageDashboard = lazy(() => import('./components/admin/ApiUsageDashboard'));
 const NotFound = lazy(() => import('./components/NotFound'));
 const OAuthCallback = lazy(() => import('./components/OAuthCallback'));
+import LandingSkeleton from './components/LandingSkeleton'; // Eager load for instant feedback
 
 // Contexto de autenticación
 const AuthContext = createContext(null);
@@ -335,7 +336,13 @@ function AuthWrapper() {
   };
 
   // Componente de carga para Suspense
-  const LoadingFallback = () => (
+  const LoadingFallback = () => {
+    // Show Skeleton only for landing page
+    if (window.location.pathname === '/landing') {
+        return <LandingSkeleton />;
+    }
+
+    return (
     <div style={{
       minHeight: '100vh',
       display: 'flex',
@@ -364,6 +371,7 @@ function AuthWrapper() {
       </div>
     </div>
   );
+  };
 
   return (
     <AuthContext.Provider value={authValue}>

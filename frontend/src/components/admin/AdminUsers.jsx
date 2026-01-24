@@ -156,14 +156,29 @@ function AdminUsers() {
             </tr>
           </thead>
           <tbody>
-            {users.length === 0 ? (
+            {users.filter(user => {
+               // Client-side filtering because backend returns all users
+               const matchRole = !filters.role || user.role === filters.role;
+               const searchLower = filters.search.toLowerCase().trim();
+               const matchSearch = !searchLower || 
+                 (user.email && user.email.toLowerCase().includes(searchLower)) ||
+                 (user.name && user.name.toLowerCase().includes(searchLower));
+               return matchRole && matchSearch;
+            }).length === 0 ? (
               <tr>
                 <td colSpan="5" className="no-data">
-                  {loading ? 'Cargando...' : 'No se encontraron usuarios'}
+                  {loading ? 'Cargando...' : 'No se encontraron usuarios coincidentes'}
                 </td>
               </tr>
             ) : (
-              users.map((user) => (
+              users.filter(user => {
+                 const matchRole = !filters.role || user.role === filters.role;
+                 const searchLower = filters.search.toLowerCase().trim();
+                 const matchSearch = !searchLower || 
+                   (user.email && user.email.toLowerCase().includes(searchLower)) ||
+                   (user.name && user.name.toLowerCase().includes(searchLower));
+                 return matchRole && matchSearch;
+              }).map((user) => (
                 <tr key={user.id}>
                   <td>{user.email}</td>
                   <td>{user.name || '-'}</td>
