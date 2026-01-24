@@ -1,215 +1,408 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  FaArrowRight,
-  FaMapMarkerAlt,
-  FaClock,
-  FaExclamationTriangle,
-  FaTimesCircle,
-  FaRedo,
-  FaSearch,
-  FaMagic,
-  FaRocket,
-  FaCheck,
-  FaLinkedin,
-  FaInstagram,
-  FaWhatsapp,
-  FaShieldAlt
-} from 'react-icons/fa';
+import { 
+  FiArrowRight, 
+  FiCheck, 
+  FiMapPin, 
+  FiMail, 
+  FiDatabase, 
+  FiGlobe, /* Globe icon added for enrichment section */
+  FiShield, /* Shield icon added for enrichment section */
+  FiZap, /* Zap icon added for email/enrichment */
+  FiTrendingUp /* TrendingUp icon added for enrichment */
+} from 'react-icons/fi';
+import { FaLinkedin, FaTwitter, FaGithub, FaGoogle } from 'react-icons/fa';
 import './LandingPage.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
 
   const scrollToSection = (id) => {
-    // Mapping old IDs to new sections for compatibility
-    let targetId = id;
-    if (id === 'problema') targetId = 'modulos'; 
-    if (id === 'sistema') targetId = 'modulos';
-    
-    const element = document.getElementById(targetId);
+    const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   return (
-    <div className="landing-page">
-      {/* Header / Navbar */}
+    <div className="landing-page dark-theme">
+      
+      {/* --- NAVBAR (Floating Pill Style) --- */}
       <header className="landing-header">
-        <div className="container header-container">
+        <div className="header-container">
           <div className="logo" onClick={() => navigate('/')}>
             <div className="logo-icon">
-              <img src="/favicon.svg" alt="Smart Leads Logo" style={{ width: '24px', height: '24px' }} />
+              <img src="/favicon.svg" alt="SL" style={{ width: '24px', height: '24px' }} />
             </div>
             <span>Smart Leads</span>
           </div>
+
           <nav className="main-nav">
-             {/* Updated Links per user request */}
-            <button onClick={() => scrollToSection('modulos')}>Work smart</button>
-            <button onClick={() => scrollToSection('pricing')}>Pricing</button>
-            <button onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}>Contactanos</button>
+             <button onClick={() => scrollToSection('features')}>Módulos</button>
+             <button onClick={() => scrollToSection('pricing')}>Precios</button>
+             <button onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}>Contactanos</button>
           </nav>
+
           <div className="header-actions">
             {/* CTA removed per request */}
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="container hero-container">
-          <div className="hero-text reveal">
-            <h1>Dominá tu mercado.</h1>
-            <p>Prospecta, contacta y cierra ventas B2B en piloto automático.</p>
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <button className="btn-primary" onClick={() => navigate('/')}>
-                Probar Gratis <FaArrowRight />
+      {/* --- HERO SECTION --- */}
+      <section className="hero-section">
+        <div className="hero-bg-glow"></div>
+        <div className="container hero-content">
+          <div className="hero-text">
+            <div className="badge-pill">
+              <span className="badge-dot"></span>
+              <span className="badge-text">Nueva Versión 2.0 Disponible</span>
+            </div>
+            <h1>
+              Consigue Clientes B2B <br />
+              <span className="text-gradient">En Piloto Automático</span>
+            </h1>
+            <p className="hero-subtext">
+              La plataforma todo-en-uno para extraer leads de Google Maps y contactarlos masivamente por email. 
+              Sin configuraciones complejas.
+            </p>
+            <div className="hero-buttons">
+              <button className="btn-primary btn-lg" onClick={() => navigate('/')}>
+                Empieza Gratis <FiArrowRight />
               </button>
-              <button className="btn-secondary" onClick={() => scrollToSection('modulos')}>
+              <button className="btn-secondary btn-lg" onClick={() => scrollToSection('features')}>
                 Ver Demo
               </button>
             </div>
+            <div className="hero-trust">
+              <p>Confiado por +500 empresas modernas</p>
+              <div className="trust-logos">
+                 <span>ACME Corp</span>
+                 <span>Stark Ind</span>
+                 <span>Wayne Ent</span>
+                 <span>Cyberdyne</span>
+              </div>
+            </div>
           </div>
-          <div className="hero-mockup reveal" style={{ animationDelay: '0.2s', position: 'relative' }}>
-            <div className="browser-card dashboard-preview">
-               <div className="browser-window-header">
-                 <div className="browser-dots">
-                   <span></span><span></span><span></span>
-                 </div>
-                 <div className="browser-address-bar">smartleads.ai/dashboard</div>
+          
+          <div className="hero-visual">
+            <div className="dashboard-mockup-3d">
+              <div className="mockup-header">
+                <div className="dots"><span></span><span></span><span></span></div>
+                <div className="bar">smartleads.ai/dashboard</div>
+              </div>
+              <img src="/images/hero.png" alt="Dashboard Interface" className="mockup-img" onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.style.display = 'none';
+                  e.target.parentElement.innerHTML += '<div class="fallback-mockup">Dashboard Preview</div>';
+              }}/>
+              
+              {/* Floating Cards (Decorations) */}
+              <div className="float-card card-1">
+                <FiCheck className="icon-success" />
+                <div>
+                  <strong>1,240 Leads</strong>
+                  <span>Extraídos hoy</span>
+                </div>
+              </div>
+              <div className="float-card card-2">
+                <FiMail className="icon-mail" />
+                <div>
+                  <strong>Campañas Activas</strong>
+                  <span>45% Open Rate</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- MODULE 1: DATA EXTRACTION (Full Width) --- */}
+      <section className="product-module-section">
+        <div className="container module-layout">
+          <div className="module-content">
+             <div className="module-number">01</div>
+             <h2>Motor de Búsqueda Granular</h2>
+             <p className="module-lead">
+               No más bases de datos genéricas y desactualizadas. Extrae leads frescos directamente de la fuente en tiempo real.
+             </p>
+             <div className="module-details">
+               <p>
+                 Nuestro algoritmo recorre Google Maps y LinkedIn para encontrar empresas que coinciden exactamente con tu perfil de cliente ideal (ICP). 
+                 Filtra por:
+               </p>
+               <ul className="detail-list">
+                 <li><FiCheck /> <strong>Rubro Específico:</strong> "Abogados", "Dentistas", "Tiendas de Software"</li>
+                 <li><FiCheck /> <strong>Ubicación Exacta:</strong> Ciudades, Barrios o Radio de Km</li>
+                 <li><FiCheck /> <strong>Estado Operativo:</strong> Solo negocios activos y con actividad reciente</li>
+               </ul>
+             </div>
+          </div>
+          <div className="module-visual">
+             {/* Open Visual - No Card */}
+             <div className="visual-display-open">
+                <FiMapPin className="hero-icon-faded" />
+                <div className="data-stream-vertical">
+                   <div className="stream-item"><span>Consultora Tech</span> <small>Buenos Aires</small></div>
+                   <div className="stream-item"><span>Estudio Jurídico</span> <small>CABA</small></div>
+                   <div className="stream-item"><span>Agencia Marketing</span> <small>Córdoba</small></div>
+                </div>
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- MODULE 2: VERIFICATION & ENRICHMENT (Full Width - Reversed) --- */}
+      <section className="product-module-section">
+        <div className="container module-layout reverse">
+          <div className="module-content">
+             <div className="module-number">02</div>
+             <h2>Enriquecimiento de Datos</h2>
+             <p className="module-lead">
+               Un nombre y un teléfono no son suficientes. Transformamos datos crudos en inteligencia de negocio.
+             </p>
+             <div className="module-details">
+               <p>
+                 Nuestro sistema analiza la presencia digital de cada prospecto para validar su calidad antes de que gastes un crédito.
+               </p>
+               <div className="enrichment-grid-text">
+                  <div>
+                    <h4><FiShield /> Verificación Emails</h4>
+                    <p>Ping directo al servidor SMTP para garantizar 0% rebote.</p>
+                  </div>
+                  <div>
+                    <h4><FiGlobe /> Tech Stack</h4>
+                    <p>Detectamos si usan WordPress, Shopify, o tecnologías específicas.</p>
+                  </div>
+                  <div>
+                    <h4><FiTrendingUp /> Social Score</h4>
+                    <p>Validación de perfiles en LinkedIn y actividad en redes.</p>
+                  </div>
                </div>
-               <img src="/images/hero.png" alt="Dashboard Mockup" />
-            </div>
+             </div>
+          </div>
+          <div className="module-visual">
+             <div className="visual-display-open">
+                <FiDatabase className="hero-icon-faded blue" />
+                <div className="verification-pulse">
+                   <div className="pulse-ring"></div>
+                   <span className="verified-badge">VERIFICADO</span>
+                </div>
+             </div>
           </div>
         </div>
       </section>
 
-      {/* Modules Section (Bento Grid) */}
-      <section className="modules-section" id="modulos">
-        <div className="container">
-          <div className="text-center reveal">
-            <h2 className="section-title">Módulos de la Plataforma</h2>
-            <p className="section-subtitle">Herramientas integradas para potenciar tu prospección.</p>
+      {/* --- MODULE 3: SMART OUTREACH (Full Width) --- */}
+      <section className="product-module-section">
+        <div className="container module-layout">
+          <div className="module-content">
+             <div className="module-number">03</div>
+             <h2>Infraestructura de Email Masivo</h2>
+             <p className="module-lead">
+               Llega a la bandeja de entrada, no al spam. Una suite completa de deliverability integrada.
+             </p>
+             <div className="module-details">
+               <p>
+                 Olvídate de configurar servidores complejos. Smart Leads gestiona la reputación de tu dominio automáticamente.
+               </p>
+               <ul className="detail-list">
+                 <li><FiCheck /> <strong>Warm-up Automático:</strong> Calentamos tus casillas gradualmente</li>
+                 <li><FiCheck /> <strong>Rotación de IPs:</strong> Distribuimos el volumen para evitar bloqueos</li>
+                 <li><FiCheck /> <strong>Spintax IA:</strong> Variamos el contenido de cada email para que sea único</li>
+               </ul>
+             </div>
           </div>
-
-          <div className="bento-grid reveal">
-            {/* Card 1: Maps */}
-            <div className="bento-card bento-map">
-              <div className="bento-content">
-                <h3>Búsqueda Geográfica</h3>
-                <p>Encuentra empresas por rubro y ubicación exacta.</p>
-                <div className="more-info">
-                  <p>Filtra por código postal, barrio o dibuja tu zona en el mapa. Datos actualizados en tiempo real.</p>
+          <div className="module-visual">
+             <div className="visual-display-open">
+                <FiMail className="hero-icon-faded violet" />
+                <div className="email-success-graph">
+                   <div className="bar b1"></div>
+                   <div className="bar b2"></div>
+                   <div className="bar b3"></div>
+                   <div className="bar b4"></div>
                 </div>
-              </div>
-              <div className="bento-visual">
-                <div className="mini-map-visual">
-                  {/* Abstract Map UI representation */}
-                  <div className="map-point" style={{top: '40%', left: '30%'}}></div>
-                  <div className="map-point" style={{top: '60%', left: '70%'}}></div>
-                  <div className="map-point active" style={{top: '50%', left: '50%'}}></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 2: Email Marketing (Featured) */}
-            <div className="bento-card bento-email featured">
-              <div className="bento-content text-center">
-                <h3>Email Marketing Masivo</h3>
-                <div className="highlight-text">e Inteligente</div>
-                <p>Crea campañas dinámicas y envía correos a miles de contactos automáticamente.</p>
-                <div className="more-info">
-                  <p>Incluye rotación de IPs, calentamiento de cuentas y validación de emails para asegurar inbox delivery.</p>
-                </div>
-                <button className="btn-text-arrow" onClick={() => navigate('/')}>Empezar Ahora <FaArrowRight /></button>
-              </div>
-              <div className="bento-visual email-visual">
-                <div className="email-interface">
-                   <div className="email-header-line"></div>
-                   <div className="email-body-line"></div>
-                   <div className="email-body-line short"></div>
-                   <div className="send-btn-mock"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 3: Data/Results */}
-            <div className="bento-card bento-data">
-               <div className="bento-content">
-                <h3>Gestión de Resultados</h3>
-                <p>Gestiona leads en tablas y exporta a CSV.</p>
-                <div className="more-info">
-                   <p>CRM integrado para trackear estados, notas y cierres de venta sin salir de la plataforma.</p>
-                </div>
-              </div>
-              <div className="bento-visual">
-                <div className="table-visual">
-                  <div className="table-row"></div>
-                  <div className="table-row"></div>
-                  <div className="table-row"></div>
-                </div>
-              </div>
-            </div>
+             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="pricing-section">
-        <div className="container">
-          <div className="section-header text-center">
-            <h2 className="section-title">Planes Simples</h2>
+      {/* --- MODULE 4: CRM & EXPORT (Full Width - Reversed) --- */}
+      <section className="product-module-section">
+        <div className="container module-layout reverse">
+          <div className="module-content">
+             <div className="module-number">04</div>
+             <h2>Gestión y Exportación</h2>
+             <p className="module-lead">
+               Tu pipeline, bajo control. Visualiza el progreso o lleva los datos a tu herramienta preferida.
+             </p>
+             <div className="module-details">
+               <p>
+                 Mantén el orden de tus oportunidades o integra Smart Leads con tu ecosistema existente.
+               </p>
+               <div className="crm-actions">
+                  <div className="crm-tag">Exportar a CSV</div>
+                  <div className="crm-tag">Webhook API</div>
+                  <div className="crm-tag">Zapier Real-time</div>
+               </div>
+             </div>
           </div>
-
-          <div className="pricing-grid">
-            <div className="pricing-card">
-              <div className="plan-name">Starter</div>
-              <div className="plan-price">$29</div>
-              <ul className="plan-features">
-                 <li><FaCheck /> 50 Búsquedas</li>
-                 <li><FaCheck /> Email Marketing Básico</li>
-              </ul>
-              <button className="btn-outline" onClick={() => navigate('/')}>Comenzar</button>
-            </div>
-
-            <div className="pricing-card featured">
-              <div className="plan-name">Pro</div>
-              <div className="plan-price">$79</div>
-              <ul className="plan-features">
-                 <li><FaCheck /> Búsquedas Ilimitadas</li>
-                 <li><FaCheck /> Email Marketing Avanzado</li>
-                 <li><FaCheck /> Soporte Prioritario</li>
-              </ul>
-              <button className="btn-primary" onClick={() => navigate('/')}>Comenzar</button>
-            </div>
-
-            <div className="pricing-card">
-              <div className="plan-name">Agency</div>
-              <div className="plan-price">$199</div>
-              <ul className="plan-features">
-                 <li><FaCheck /> Todo Ilimitado</li>
-                 <li><FaCheck /> API Access</li>
-              </ul>
-              <button className="btn-outline" onClick={() => navigate('/')}>Contactar</button>
-            </div>
+          <div className="module-visual">
+             <div className="visual-display-open">
+                <FiZap className="hero-icon-faded green" />
+             </div>
           </div>
         </div>
       </section>
 
-      {/* Minimal Footer */}
-      <footer id="footer" className="footer-minimal">
+      {/* --- ROI / EFFICIENCY IMPACT SECTION --- */}
+      <section className="roi-section">
         <div className="container">
-          <div className="footer-flex">
+          <div className="section-header center">
+            <h2>Matemática Simple: Más Volumen = Más Ventas</h2>
+            <p>
+              Deja de perder 35 horas semanales copiando y pegando datos. Dedícate a cerrar tratos.
+            </p>
+          </div>
+
+          <div className="roi-comparison-grid">
+             {/* THE OLD WAY */}
+             <div className="roi-card old-way">
+                <div className="roi-header">
+                   <h3>Método Manual</h3>
+                   <span className="roi-badge-neg">Lento & Costoso</span>
+                </div>
+                <div className="roi-stat-row">
+                   <div className="stat-label">Leads por Semana</div>
+                   <div className="stat-value neg">~50</div>
+                </div>
+                <div className="roi-stat-row">
+                   <div className="stat-label">Tiempo Invertido</div>
+                   <div className="stat-value neg">35+ Horas</div>
+                </div>
+                <div className="roi-stat-row">
+                   <div className="stat-label">Costo Operativo</div>
+                   <div className="stat-value neg">Alto (Tu Tiempo)</div>
+                </div>
+                <div className="roi-outcome">
+                   Resultados limitados y burnout.
+                </div>
+             </div>
+
+             {/* VS DIVIDER */}
+             <div className="roi-vs">
+                <span>VS</span>
+             </div>
+
+             {/* SMART LEADS WAY */}
+             <div className="roi-card new-way">
+                <div className="roi-header">
+                   <h3>Smart Leads</h3>
+                   <span className="roi-badge-pos">Automático</span>
+                </div>
+                <div className="roi-stat-row">
+                   <div className="stat-label">Leads por Semana</div>
+                   <div className="stat-value pos">1,000+</div>
+                </div>
+                <div className="roi-stat-row">
+                   <div className="stat-label">Tiempo Invertido</div>
+                   <div className="stat-value pos">10 Minutos</div>
+                </div>
+                <div className="roi-stat-row">
+                   <div className="stat-label">Costo Operativo</div>
+                   <div className="stat-value pos">Mínimo</div>
+                </div>
+                <div className="roi-outcome highlight">
+                   <FiTrendingUp /> Escapabilidad Infinita.
+                </div>
+             </div>
+          </div>
+
+          <div className="roi-summary-banner">
+             <p>
+               Ahorras <strong>139+ horas al mes</strong>. Si tu hora vale $35, te estamos ahorrando <strong>$4,875/mes</strong>.
+               <br/>
+               Y eso sin contar las ventas extra que generarás con 20x más leads.
+             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* --- PRICING (Tech Panel) --- */}
+      <section id="pricing" className="pricing-section-tech">
+        <div className="container">
+          <div className="pricing-tech-panel">
+             <div className="panel-left">
+                <span className="tech-label">LICENCIA PRO</span>
+                <h2 className="tech-price">$195<small>/mes</small></h2>
+                <p className="tech-desc">Acceso total e ilimitado a todas las herramientas.</p>
+                <div className="tech-divider"></div>
+                <div className="lifetime-option">
+                   o un pago único de <strong>$999</strong> de por vida.
+                </div>
+             </div>
+             <div className="panel-right">
+                <ul className="tech-features-list">
+                  <li><FiCheck /> Búsquedas Ilimitadas</li>
+                  <li><FiCheck /> Emails Ilimitados</li>
+                  <li><FiCheck /> API & Webhooks</li>
+                  <li><FiCheck /> Soporte Prioritario</li>
+                  <li><FiCheck /> Validación en Tiempo Real</li>
+                </ul>
+                <button className="btn-tech-primary full-width" onClick={() => navigate('/')}>
+                   Obtener Acceso <FiArrowRight />
+                </button>
+                <button className="btn-tech-secondary full-width" onClick={() => navigate('/')}>
+                   Solicitar Demo Gratuita
+                </button>
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER --- */}
+      <footer className="footer-section">
+        <div className="container">
+          <div className="footer-grid">
             <div className="footer-brand">
-              <span className="brand-text">Smart Leads</span>
-              <span className="copyright">© 2026</span>
+              <div className="logo white">
+                <div className="logo-icon">
+                  <img src="/favicon.svg" alt="SL" style={{ width: '24px', height: '24px' }} />
+                </div>
+                <span>Smart Leads</span>
+              </div>
+              <p>Tu motor de crecimiento B2B.</p>
+              <div className="social-links">
+                <a href="#"><FaTwitter /></a>
+                <a href="#"><FaLinkedin /></a>
+                <a href="#"><FaGithub /></a>
+              </div>
             </div>
-            <div className="footer-links">
-               <a href="#">Términos</a>
-               <a href="#">Privacidad</a>
-               <a href="mailto:solutionsdota@gmail.com">Contacto</a>
+            
+            <div className="footer-col">
+              <h4>Producto</h4>
+              <a href="#features">Características</a>
+              <a href="#pricing">Precios</a>
+              <a href="#">Roadmap</a>
             </div>
+            
+            <div className="footer-col">
+              <h4>Compañía</h4>
+              <a href="#">Sobre Nosotros</a>
+              <a href="#">Blog</a>
+              <a href="#">Carreras</a>
+            </div>
+            
+            <div className="footer-col">
+              <h4>Legal</h4>
+              <a href="#">Privacidad</a>
+              <a href="#">Términos</a>
+              <a href="#">Seguridad</a>
+            </div>
+          </div>
+          
+          <div className="footer-bottom">
+            <p>© 2026 Smart Leads Inc. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
