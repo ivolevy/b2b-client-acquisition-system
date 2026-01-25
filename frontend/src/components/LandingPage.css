@@ -1682,6 +1682,11 @@ a {
         display: none;
     }
 
+    .header-actions {
+        display: block;
+        /* Show container for hamburger menu */
+    }
+
     .mobile-menu-toggle {
         display: flex;
         align-items: center;
