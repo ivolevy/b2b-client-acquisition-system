@@ -9,7 +9,7 @@
 .filter-section {
   background: white;
   padding: var(--spacing-2xl);
-  border-radius: var(--radius-xl);
+  border-radius: 32px;
   box-shadow: var(--shadow-lg);
   border: none;
   width: 100%;
@@ -47,6 +47,14 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
+}
+
+/* Add specific spacer for mobile to avoid nav overlap */
+@media (max-width: 768px) {
+  .filters-container {
+    margin-top: 80px !important;
+    /* Force push down even if padding fails */
+  }
 }
 
 .form-row-compact {
@@ -750,11 +758,70 @@ select.filter-input {
   .filters-bottom-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+  }
+
+  .filters-toolbar {
+    width: 100%;
+    margin-top: 0;
+    padding: 8px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: none;
+    border: none;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .toolbar-group {
+    display: contents;
+    /* Allow children to participate in parent grid */
+  }
+
+  .toolbar-divider {
+    display: none;
+  }
+
+  /* Make pills behave like grid items */
+  .filter-pill {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 4px;
+    font-size: 0.75rem;
+    background: var(--gray-50);
+    border: none;
+    border-radius: 8px;
+    /* Slightly squarer radius for grid items */
+    margin: 0;
+  }
+
+  .filter-pill .pill-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Search Mode Segment also takes full width */
+  .search-mode-segment {
+    grid-column: 1 / -1;
+    /* Span full width */
+    display: flex;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .segment-btn {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
   }
 
   .btn-search-distinct {
     width: 100%;
     justify-content: center;
+    border-radius: 12px;
   }
 }
 
@@ -803,7 +870,7 @@ select.filter-input {
 @media (max-width: 768px) {
   .filter-section {
     padding: var(--spacing-md);
-    border-radius: var(--radius-lg);
+    border-radius: 32px;
   }
 
   .filter-section h3 {
@@ -854,11 +921,12 @@ select.filter-input {
     align-items: stretch;
     gap: var(--spacing-sm);
     padding: var(--spacing-md);
-    border-radius: var(--radius-lg);
+    border-radius: 24px;
     background: #ffffff;
     border: 1px solid var(--gray-200);
     box-shadow: var(--shadow-sm);
     height: auto !important;
+    overflow: visible !important;
   }
 
   /* Todos los controles en columna en mobile */
@@ -1046,11 +1114,57 @@ select.filter-input {
     margin: 0;
   }
 
-  .location-section .search-row {
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--gray-200);
-  }
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
 }
+
+/* --- FIX COMPACT TOGGLES (Email/Phone) --- */
+.form-row-compact .checkbox-inline {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  width: auto !important;
+  justify-content: flex-start;
+  min-height: auto;
+  gap: 8px;
+}
+
+/* Make them side-by-side if possible */
+.form-row-compact>.form-group-compact:has(.checkbox-inline) {
+  flex-direction: row;
+  align-items: center;
+  width: auto !important;
+  min-width: 0;
+  flex: 1;
+}
+
+.filter-switch {
+  transform: scale(0.85);
+  /* Make switch smaller */
+  margin: 0;
+}
+
+.checkbox-inline span {
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  font-weight: 500;
+}
+
+/* Reduce input heights */
+.form-row-compact .address-input,
+.form-row-compact .radius-control select,
+.select-rubro-compact,
+.filter-input {
+  height: 40px !important;
+  font-size: 0.9rem !important;
+  padding: 0 12px !important;
+}
+
+.form-row-compact .btn-location {
+  height: 40px;
+}
+
 
 @media (max-width: 480px) {
   .filters-container {
@@ -1059,7 +1173,7 @@ select.filter-input {
 
   .filter-section {
     padding: var(--spacing-sm);
-    border-radius: var(--radius-md);
+    border-radius: 32px;
   }
 
   .filter-section h3 {

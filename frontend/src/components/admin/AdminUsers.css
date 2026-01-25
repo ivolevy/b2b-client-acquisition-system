@@ -127,6 +127,9 @@
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-top: none;
   overflow-x: auto;
+  max-height: calc(100vh - 180px);
+  /* Internal scroll */
+  overflow-y: auto;
 }
 
 .users-table {
@@ -389,4 +392,178 @@
 .btn-danger:hover {
   background: #b91c1c;
   /* Red-700 */
+}
+
+/* =======================================================
+   RESPONSIVE (Card View for Mobile)
+   ======================================================= */
+@media (max-width: 768px) {
+
+  /* CONTAINER & HEADER ADJUSTMENTS */
+  .users-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    position: static;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    z-index: 10 !important;
+    /* Ensure visibility */
+    background: white;
+    /* Ensure non-transparent */
+    margin: 16px;
+    /* Add margin since wrapper padding is gone */
+  }
+
+  .users-actions {
+    width: 100%;
+    margin-top: 8px !important;
+    padding: 0 16px;
+    /* Add padding to align with margin */
+  }
+
+  .btn-create {
+    width: calc(100% - 32px);
+    /* Adjust width */
+    margin-left: 16px;
+  }
+
+  .filter-group {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Make input specifically visible */
+  .filter-input {
+    background: white !important;
+    color: #1f2937 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* HIDE TABLE HEADER */
+  .users-table thead {
+    display: none;
+  }
+
+  .users-table-container {
+    margin: 0 16px;
+    /* Add side margins */
+    border: none;
+    /* Remove border if it looks weird */
+    background: transparent;
+    /* Remove container bg */
+    box-shadow: none;
+    /* Remove container shadow */
+  }
+
+  .users-table,
+  .users-table tbody,
+  .users-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  /* RESET CELLS to default for grid placement */
+  .users-table td {
+    display: block;
+    padding: 0;
+    border: none;
+    text-align: left;
+  }
+
+  /* Remove labels */
+  .users-table td:before {
+    display: none;
+  }
+
+  /* CARD STYLE FOR ROWS using GRID - SINGLE ROW LAYOUT */
+  .users-table tbody tr {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 8px;
+    padding: 12px 16px;
+    /* Horizontal padding for alignment */
+    border: 1px solid #e2e8f0;
+
+    display: grid !important;
+    /* Grid: Email (Flexible) | Role (Auto) | Actions (Auto) */
+    grid-template-columns: 1fr auto auto;
+    grid-template-rows: 1fr;
+    gap: 12px;
+    align-items: center;
+  }
+
+  /* 1. EMAIL */
+  .users-table td:nth-child(1) {
+    grid-column: 1 / 2;
+    grid-row: 1;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 2. NAME - HIDE */
+  .users-table td:nth-child(2) {
+    display: none !important;
+  }
+
+  /* 3. ROLE */
+  .users-table td:nth-child(3) {
+    grid-column: 2 / 3;
+    grid-row: 1;
+  }
+
+  /* Simplify Badge on Mobile */
+  .role-badge {
+    padding: 2px 8px;
+    font-size: 0.7rem;
+  }
+
+  /* 4. ACTIONS */
+  .users-table td:nth-child(4) {
+    grid-column: 3 / 4;
+    grid-row: 1;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    width: auto;
+  }
+
+  /* Action Buttons Container */
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    width: auto;
+  }
+
+  .btn-action {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+  }
+
+  .btn-action:hover {
+    background: #f1f5f9;
+  }
+
+  .btn-view {
+    color: #3b82f6;
+    border: 1px solid #dbeafe;
+  }
+
+  .btn-delete {
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+  }
 }

@@ -202,7 +202,6 @@ function EmailSender({ empresas, onClose, embedded = false }) {
           empresa_ids: toSend.map(e => e.id),
           template_id: selectedTemplate,
           delay_segundos: 2.0,
-          delay_segundos: 2.0,
           user_id: user?.id,
           provider: selectedProvider
         });

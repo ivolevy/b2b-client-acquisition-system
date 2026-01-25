@@ -117,7 +117,13 @@ function AdminLayout() {
 
       <aside className={`backoffice-sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="backoffice-brand">
-          <h2>Backoffice</h2>
+          <h2 className="brand-text">Backoffice</h2>
+          <button className="sidebar-close-btn" onClick={closeSidebar}>
+             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
         
         <nav className="backoffice-nav">
@@ -172,7 +178,7 @@ function AdminLayout() {
       </aside>
 
       <main className="backoffice-main">
-        <div className="backoffice-content-wrapper">
+        <div className={`backoffice-content-wrapper ${isApiUsagePage ? 'dark-theme-wrapper' : ''}`}>
           <Outlet />
         </div>
       </main>

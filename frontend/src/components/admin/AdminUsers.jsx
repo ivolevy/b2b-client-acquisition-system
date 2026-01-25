@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { adminService } from '../../lib/supabase';
 import UserDetailModal from './UserDetailModal';
 import CreateUserModal from './CreateUserModal';
+import { 
+  FiChevronDown,
+  FiEdit2,
+  FiTrash2
+} from 'react-icons/fi';
 import './AdminUsers.css';
 import './AdminLayout.css';
 
@@ -195,14 +200,16 @@ function AdminUsers() {
                           setSelectedUser(user);
                           setShowDetailModal(true);
                         }}
+                        title="Editar"
                       >
-                        Editar
+                        <FiEdit2 className="action-icon" size={16} />
                       </button>
                       <button
                         className="btn-action btn-delete"
                         onClick={() => setShowDeleteConfirm(user)}
+                        title="Eliminar"
                       >
-                        Eliminar
+                         <FiTrash2 className="action-icon" size={16} />
                       </button>
                     </div>
                   </td>

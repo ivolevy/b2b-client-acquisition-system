@@ -417,9 +417,61 @@ function ApiUsageDashboard() {
 
         /* Mobile */
         @media (max-width: 768px) {
+            .premium-dashboard { padding: 1rem; }
             .hero-card { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
             .hero-progress { width: 100%; max-width: none; }
             .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            
+            /* Typography reduction */
+            .header-content h1 { font-size: 1.25rem; }
+            .main-number { font-size: 2rem; }
+            .separator, .limit-number { font-size: 1.2rem; }
+            .clean-table { font-size: 0.75rem; }
+            .clean-table th, .clean-table td { padding: 0.5rem; }
+            
+            /* Hide unimportant columns in Service Breakdown (Table 1) */
+            /* Hide Characteristics (2) and Unit Cost (4) */
+            .clean-table:not(.compact) th:nth-child(2), 
+            .clean-table:not(.compact) td:nth-child(2),
+            .clean-table:not(.compact) th:nth-child(4), 
+            .clean-table:not(.compact) td:nth-child(4) {
+                display: none;
+            }
+            
+            /* Hide unimportant columns in Logs (Table 2 - .compact) */
+            /* Hide Duration (4) */
+            .clean-table.compact th:nth-child(4), 
+            .clean-table.compact td:nth-child(4) {
+                display: none;
+            }
+            
+            .sku-name { font-size: 0.8rem; }
+            .mini-tag { font-size: 0.65rem; padding: 1px 4px; }
+            
+            /* FORCE FULL WIDTH on Mobile */
+            .premium-dashboard {
+                padding: 1rem 0.5rem !important; /* Minimal side padding */
+                width: 100% !important;
+                max-width: 100vw !important;
+                box-sizing: border-box;
+                overflow-x: hidden;
+            }
+            
+            .glass-panel {
+                border-radius: 12px;
+                padding: 1rem;
+                margin: 0;
+            }
+            
+            .dashboard-grid {
+                gap: 1rem;
+            }
+            
+            /* Ensure tables don't blowout width */
+            .table-container {
+                width: 100%;
+                overflow-x: auto;
+            }
         }
 
         @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }

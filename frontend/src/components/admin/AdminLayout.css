@@ -43,6 +43,18 @@
   align-items: center;
   padding: 0 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  justify-content: space-between;
+  /* Allow spacing */
+}
+
+/* Close button - Hidden by default (Desktop) */
+.sidebar-close-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
 }
 
 .backoffice-brand h2 {
@@ -148,6 +160,11 @@
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+}
+
+.dark-theme-wrapper {
+  background-color: #0f172a;
+  /* Match API Dashboard dark bg */
 }
 
 /* Loading & Error Screens */
@@ -279,7 +296,23 @@
 
   .backoffice-brand {
     justify-content: flex-start;
-    padding: 0 24px;
+    /* Align start */
+    padding: 0 16px;
+    height: 64px;
+    direction: ltr;
+    /* Ensure LTR */
+  }
+
+  /* On mobile, HIDE the text "Backoffice" in the drawer */
+  .backoffice-brand .brand-text {
+    display: none;
+  }
+
+  /* Helper to force show the close button */
+  .sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
   }
 
   .backoffice-nav-item,
@@ -290,6 +323,8 @@
   }
 
   .backoffice-content-wrapper {
-    padding: 16px;
+    padding: 0;
+    padding-top: 64px;
+    /* Exact header height */
   }
 }

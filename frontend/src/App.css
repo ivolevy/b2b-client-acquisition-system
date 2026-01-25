@@ -96,5 +96,7 @@
 @media (max-width: 768px) {
   .main-content {
     padding: var(--spacing-lg);
+    padding-top: 180px;
+    /* Force extra spacing for fixed navbar */
   }
 }

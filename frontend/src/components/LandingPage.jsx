@@ -55,16 +55,51 @@ const LandingPage = () => {
           </div>
         </div>
 
-        {/* Mobile Nav Overlay */}
-        <div className={`mobile-nav ${mobileMenuOpen ? 'active' : ''}`}>
-           <button onClick={() => scrollToSection('features')}>Módulos</button>
-           <button onClick={() => scrollToSection('pricing')}>Precios</button>
-           <button onClick={() => {
-             setMobileMenuOpen(false);
-             document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' });
-           }}>Contactanos</button>
-        </div>
       </header>
+
+      {/* Mobile Nav Overlay - Moved outside header to avoid transform context issues */}
+      <div 
+        className={`mobile-nav ${mobileMenuOpen ? 'active' : ''}`}
+        onClick={() => setMobileMenuOpen(false)} // Close when clicking backdrop
+      >
+         <div 
+           className="mobile-nav-content"
+           onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside drawer
+         >
+           <div className="mobile-nav-header">
+              <button 
+                className="drawer-close-btn"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <FiX />
+              </button>
+           </div>
+
+           <div className="mobile-nav-links">
+             <button onClick={() => scrollToSection('features')}>
+               <span className="nav-num">01</span> Módulos
+             </button>
+             <button onClick={() => scrollToSection('pricing')}>
+               <span className="nav-num">02</span> Precios
+             </button>
+             <button onClick={() => {
+               setMobileMenuOpen(false);
+               document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' });
+             }}>
+               <span className="nav-num">03</span> Contactanos
+             </button>
+           </div>
+           
+           <div className="mobile-nav-footer">
+              <div className="mobile-socials">
+                <a href="#"><FaTwitter /></a>
+                <a href="#"><FaLinkedin /></a>
+                <a href="#"><FaGithub /></a>
+              </div>
+              <p>© 2026 Smart Leads Inc.</p>
+           </div>
+         </div>
+      </div>
 
       {/* --- HERO SECTION --- */}
       <section className="hero-section">

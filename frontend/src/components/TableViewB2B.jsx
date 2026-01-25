@@ -251,190 +251,183 @@ function TableViewB2B({
 
       {/* Filtros inline instantáneos */}
       <div className="filters-inline-bar">
-        {/* Checkboxes de email y teléfono a la izquierda */}
-        <div className="filter-checkboxes-group" style={{ marginRight: 'auto' }}>
-          <label className="filter-checkbox-inline">
-            <input
-              type="checkbox"
-              checked={filtroConEmail}
-              onChange={(e) => setFiltroConEmail(e.target.checked)}
-            />
-            <span>Email</span>
-          </label>
-
-          <label className="filter-checkbox-inline">
-            <input
-              type="checkbox"
-              checked={filtroConTelefono}
-              onChange={(e) => setFiltroConTelefono(e.target.checked)}
-            />
-            <span>Teléfono</span>
-          </label>
-        </div>
-
-        <div className="filter-distance-group">
-          <div className="filter-distance-toggle">
-            <button
-              type="button"
-              className={`filter-toggle-btn ${filtroDistanciaOperador === 'menor' ? 'active' : ''}`}
-              onClick={() => setFiltroDistanciaOperador('menor')}
-              title="Menos de X km"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14"/>
-                <path d="M12 5l-7 7 7 7"/>
-              </svg>
-              <span>Menos de</span>
-            </button>
-            <button
-              type="button"
-              className={`filter-toggle-btn ${filtroDistanciaOperador === 'mayor' ? 'active' : ''}`}
-              onClick={() => setFiltroDistanciaOperador('mayor')}
-              title="Más de X km"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14"/>
-                <path d="M12 5l7 7-7 7"/>
-              </svg>
-              <span>Más de</span>
-            </button>
-          </div>
-          <input
-            type="number"
-            placeholder="km"
-            value={filtroDistancia}
-            onChange={(e) => setFiltroDistancia(e.target.value)}
-            min="0"
-            step="0.1"
-            className="filter-inline-input filter-km"
-          />
-        </div>
-
-        {/* Dropdown de rubros con buscador */}
-        <div className="rubro-dropdown" ref={rubroDropdownRef}>
-          <button 
-            type="button"
-            className={`rubro-dropdown-trigger ${filtroRubro ? 'has-value' : ''}`}
-            onClick={() => setRubroDropdownOpen(!rubroDropdownOpen)}
-          >
-            <svg className="rubro-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-              <line x1="7" y1="7" x2="7.01" y2="7"/>
-            </svg>
-            <span className="rubro-text">
-              {filtroRubro ? rubros[filtroRubro] || filtroRubro : 'Todos los rubros'}
-            </span>
-            <svg className={`rubro-chevron ${rubroDropdownOpen ? 'open' : ''}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </button>
-          
-          {rubroDropdownOpen && (
-            <div className="rubro-dropdown-menu">
-              <div className="rubro-search-container">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        
+            {/* 1. Rubros (Grid Area: rubro) */}
+            <div className="rubro-dropdown filter-item-rubro" ref={rubroDropdownRef}>
+              <button 
+                type="button"
+                className={`rubro-dropdown-trigger ${filtroRubro ? 'has-value' : ''}`}
+                onClick={() => setRubroDropdownOpen(!rubroDropdownOpen)}
+              >
+                <svg className="rubro-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                  <line x1="7" y1="7" x2="7.01" y2="7"/>
                 </svg>
-                <input
-                  type="text"
-                  placeholder="Buscar rubro..."
-                  value={rubroBusqueda}
-                  onChange={(e) => setRubroBusqueda(e.target.value)}
-                  className="rubro-search-input"
-                  autoFocus
-                />
-              </div>
-              <div className="rubro-options-list">
+                <span className="rubro-text">
+                  {filtroRubro ? rubros[filtroRubro] || filtroRubro : 'Todos los rubros'}
+                </span>
+                <svg className={`rubro-chevron ${rubroDropdownOpen ? 'open' : ''}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              
+              {rubroDropdownOpen && (
+                <div className="rubro-dropdown-menu">
+                  <div className="rubro-search-container">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8"/>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Buscar rubro..."
+                      value={rubroBusqueda}
+                      onChange={(e) => setRubroBusqueda(e.target.value)}
+                      className="rubro-search-input"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="rubro-options-list">
+                    <button
+                      type="button"
+                      className={`rubro-option ${!filtroRubro ? 'selected' : ''}`}
+                      onClick={() => handleSelectRubro('')}
+                    >
+                      Todos los rubros
+                    </button>
+                    {rubrosFiltrados.map(([key, nombre]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        className={`rubro-option ${filtroRubro === key ? 'selected' : ''}`}
+                        onClick={() => handleSelectRubro(key)}
+                      >
+                        {nombre}
+                      </button>
+                    ))}
+                    {rubrosFiltrados.length === 0 && (
+                      <div className="rubro-no-results">
+                        No se encontraron rubros
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 2. Ordenar (Grid Area: sort) */}
+            <div className="custom-select-wrapper sort-select filter-item-sort">
+              <select 
+                value={sortColumn && sortBy ? `${sortColumn}-${sortBy}` : ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value) {
+                    const [column, order] = value.split('-');
+                    setSortColumn(column);
+                    setSortBy(order);
+                  } else {
+                    setSortColumn(null);
+                    setSortBy(null);
+                  }
+                }}
+                className="filter-inline-input"
+              >
+                <option value="">Ordenar...</option>
+                <option value="distancia-asc">Distancia: Cerca</option>
+                <option value="distancia-desc">Distancia: Lejos</option>
+                <option value="nombre-asc">Nombre: A-Z</option>
+                <option value="nombre-desc">Nombre: Z-A</option>
+              </select>
+               <svg className="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+
+            {/* 3. Distancia (Grid Area: distance) */}
+            <div className="filter-distance-group filter-item-distance">
+              <div className="filter-distance-toggle">
                 <button
                   type="button"
-                  className={`rubro-option ${!filtroRubro ? 'selected' : ''}`}
-                  onClick={() => handleSelectRubro('')}
+                  className={`filter-toggle-btn ${filtroDistanciaOperador === 'menor' ? 'active' : ''}`}
+                  onClick={() => setFiltroDistanciaOperador('menor')}
+                  title="Menos de X km"
                 >
-                  Todos los rubros
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                  </svg>
                 </button>
-                {rubrosFiltrados.map(([key, nombre]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    className={`rubro-option ${filtroRubro === key ? 'selected' : ''}`}
-                    onClick={() => handleSelectRubro(key)}
-                  >
-                    {nombre}
-                  </button>
-                ))}
-                {rubrosFiltrados.length === 0 && (
-                  <div className="rubro-no-results">
-                    No se encontraron rubros
-                  </div>
-                )}
+                <button
+                  type="button"
+                  className={`filter-toggle-btn ${filtroDistanciaOperador === 'mayor' ? 'active' : ''}`}
+                  onClick={() => setFiltroDistanciaOperador('mayor')}
+                  title="Más de X km"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
               </div>
+              <input
+                type="number"
+                placeholder="km"
+                value={filtroDistancia}
+                onChange={(e) => setFiltroDistancia(e.target.value)}
+                min="0"
+                step="0.1"
+                className="filter-inline-input filter-km"
+              />
             </div>
-          )}
-        </div>
 
-        <div className="custom-select-wrapper">
-          <select 
-            value={filtroConRedes} 
-            onChange={(e) => setFiltroConRedes(e.target.value)}
-            className="filter-inline-input"
-          >
-            <option value="todas">Redes: todas</option>
-            <option value="con">Con redes</option>
-            <option value="sin">Sin redes</option>
-          </select>
-          <svg className="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </div>
+            {/* 4. Toggles Email/Tel (Grid Area: toggles) */}
+            <div className="filter-checkboxes-group filter-item-toggles">
+              <label className="filter-checkbox-inline simple-toggle">
+                <input
+                  type="checkbox"
+                  checked={filtroConEmail}
+                  onChange={(e) => setFiltroConEmail(e.target.checked)}
+                />
+                <span>Email</span>
+              </label>
 
-        {/* Selector de ordenamiento */}
-        {/* Selector de ordenamiento */}
-        <div className="custom-select-wrapper" style={{ width: 'auto', minWidth: '180px' }}>
-          <select 
-            value={sortColumn && sortBy ? `${sortColumn}-${sortBy}` : ''}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value) {
-                const [column, order] = value.split('-');
-                setSortColumn(column);
-                setSortBy(order);
-              } else {
-                setSortColumn(null);
-                setSortBy(null);
-              }
-            }}
-            className="filter-inline-input"
-            style={{ minWidth: '100%' }}
-          >
-            <option value="">Ordenar por...</option>
-            <option value="distancia-asc">Distancia: Más cercano</option>
-            <option value="distancia-desc">Distancia: Más lejano</option>
-            <option value="nombre-asc">Nombre: A-Z</option>
-            <option value="nombre-desc">Nombre: Z-A</option>
-            <option value="rubro-asc">Rubro: A-Z</option>
-            <option value="rubro-desc">Rubro: Z-A</option>
-          </select>
-          <svg className="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </div>
-
-        {hayFiltrosActivos && (
-          <button 
-            type="button" 
-            className="btn-clear-filters"
-            onClick={handleLimpiarFiltros}
-            title="Limpiar filtros"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        )}
-
-
+              <label className="filter-checkbox-inline simple-toggle">
+                <input
+                  type="checkbox"
+                  checked={filtroConTelefono}
+                  onChange={(e) => setFiltroConTelefono(e.target.checked)}
+                />
+                <span>Teléfono</span>
+              </label>
+            </div>
+            
+            {/* 5. Redes (Grid Area: redes) - Restored */}
+            <div className="custom-select-wrapper filter-item-redes">
+              <select 
+                value={filtroConRedes} 
+                onChange={(e) => setFiltroConRedes(e.target.value)}
+                className="filter-inline-input"
+              >
+                <option value="todas">Redes: todas</option>
+                <option value="con">Con redes</option>
+                <option value="sin">Sin redes</option>
+              </select>
+              <svg className="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            
+             {hayFiltrosActivos && (
+              <button 
+                type="button" 
+                className="btn-clear-filters filter-item-clear"
+                onClick={handleLimpiarFiltros}
+                title="Limpiar filtros"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            )}
       </div>
 
       {/* Contenido: Tabla o Empty State o Loading Skeleton */}
@@ -480,7 +473,7 @@ function TableViewB2B({
             </svg>
           </div>
           <h3>No hay empresas para mostrar</h3>
-          <p>Realiza una búsqueda para ver resultados aquí</p>
+          <p className="text-muted">Realiza una búsqueda para ver resultados aquí</p>
         </div>
       ) : empresasFiltradas.length === 0 ? (
         <div className="empty-state-inline">
@@ -538,7 +531,7 @@ function TableViewB2B({
             </tr>
           </thead>
           <tbody>
-                {currentItems.map((empresa, index) => (
+            {currentItems.map((empresa, index) => (
               <tr key={empresa.id}>
                     <td style={{ textAlign: 'center', fontWeight: '600', color: '#3b82f6' }}>
                       {indexOfFirstItem + index + 1}
