@@ -6,18 +6,22 @@ import {
   FiMapPin, 
   FiMail, 
   FiDatabase, 
-  FiGlobe, /* Globe icon added for enrichment section */
-  FiShield, /* Shield icon added for enrichment section */
-  FiZap, /* Zap icon added for email/enrichment */
-  FiTrendingUp /* TrendingUp icon added for enrichment */
+  FiGlobe,
+  FiShield,
+  FiZap,
+  FiTrendingUp,
+  FiMenu,
+  FiX
 } from 'react-icons/fi';
 import { FaLinkedin, FaTwitter, FaGithub, FaGoogle } from 'react-icons/fa';
 import './LandingPage.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const scrollToSection = (id) => {
+    setMobileMenuOpen(false);
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -25,7 +29,7 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="landing-page dark-theme">
+    <div className={`landing-page dark-theme ${mobileMenuOpen ? 'menu-open' : ''}`}>
       
       {/* --- NAVBAR (Floating Pill Style) --- */}
       <header className="landing-header">
@@ -37,7 +41,7 @@ const LandingPage = () => {
             <span>Smart Leads</span>
           </div>
 
-          <nav className="main-nav">
+          <nav className="main-nav desktop-nav">
              <button onClick={() => scrollToSection('features')}>Módulos</button>
              <button onClick={() => scrollToSection('pricing')}>Precios</button>
              <button onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}>Contactanos</button>
@@ -45,7 +49,20 @@ const LandingPage = () => {
 
           <div className="header-actions">
             {/* CTA removed per request */}
+            <button className="mobile-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <FiX /> : <FiMenu />}
+            </button>
           </div>
+        </div>
+
+        {/* Mobile Nav Overlay */}
+        <div className={`mobile-nav ${mobileMenuOpen ? 'active' : ''}`}>
+           <button onClick={() => scrollToSection('features')}>Módulos</button>
+           <button onClick={() => scrollToSection('pricing')}>Precios</button>
+           <button onClick={() => {
+             setMobileMenuOpen(false);
+             document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' });
+           }}>Contactanos</button>
         </div>
       </header>
 

@@ -473,6 +473,12 @@ a {
     transform: translateY(-1px);
 }
 
+/* Hide mobile elements on desktop */
+.mobile-menu-toggle,
+.mobile-nav {
+    display: none;
+}
+
 
 /* --- HERO --- */
 .hero-section {
@@ -1631,9 +1637,111 @@ a {
     .spotlight-layout {
         grid-template-columns: 1fr;
         text-align: center;
+        gap: 60px;
     }
 
     .spotlight-features-text p {
         text-align: left;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .spotlight-visual {
+        order: -1;
+        /* Visual on top for mobile */
+        height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .email-spotlight-section {
+        padding: 80px 0;
+    }
+
+    .spotlight-content h2 {
+        font-size: 2.5rem;
+    }
+
+    .spotlight-lead {
+        font-size: 1.1rem;
+    }
+
+    .system-visual {
+        transform: scale(0.7);
+        /* Scale down for mobile */
+    }
+
+    .spotlight-visual {
+        height: 300px;
+        /* Reduced container height */
+    }
+
+    /* --- MOBILE NAV & MENU --- */
+    .desktop-nav {
+        display: none;
+    }
+
+    .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 8px;
+        z-index: 1001;
+        /* Above mobile overlay */
+    }
+
+    .mobile-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(10px);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .mobile-nav.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .mobile-nav button {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .mobile-nav button:hover {
+        color: var(--primary);
+    }
+
+    /* Small logos fix */
+    .trust-logos span {
+        font-size: 0.9rem;
+        /* Smaller font for mobile logos */
+    }
+
+    /* Detail list font size fix for mobile */
+    .detail-list li {
+        font-size: 0.9rem;
     }
 }

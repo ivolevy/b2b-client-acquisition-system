@@ -2103,6 +2103,39 @@
    ============================================ */
 
 @media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    margin: 10px;
+    height: auto;
+    min-height: auto;
+  }
+
+  .login-branding {
+    padding: 30px 20px;
+    flex: 0 0 auto;
+  }
+
+  .login-form-panel {
+    padding: 30px 20px;
+  }
+
+  .logo-container {
+    margin-bottom: 20px;
+  }
+
+  .branding-message {
+    margin-bottom: 20px;
+  }
+
+  .branding-message h2 {
+    font-size: 1.5rem;
+  }
+
+  .features-list {
+    display: none;
+    /* Hide features on mobile to save space, or keep if preferred */
+  }
+
   .demo-info {
     margin-top: 24px;
   }
