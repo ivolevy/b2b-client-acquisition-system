@@ -519,24 +519,23 @@ function EmailSender({ empresas, onClose, embedded = false }) {
         </div>
       ) : (
         /* Templates Tab */
-        <div style={{padding: '24px', overflowY: 'auto'}}>
-           <div style={{display:'flex', justifyContent:'space-between', marginBottom:'20px'}}>
+        /* Templates Tab */
+        <div className="templates-container">
+           <div className="templates-header">
              <h3>Mis Templates</h3>
              <button className="btn-secondary" onClick={() => setEditingTemplate({nombre:'', subject:'', body_text:''})} >
                + Nuevo Template
              </button>
            </div>
            
-           <div style={{display:'grid', gap:'16px', gridTemplateColumns:'repeat(auto-fill, minmax(300px, 1fr))'}}>
+           <div className="templates-grid">
              {templates.map(t => (
-               <div key={t.id} style={{
-                 background:'white', border:'1px solid #e2e8f0', borderRadius:'8px', padding:'16px'
-               }}>
-                 <div style={{fontWeight:'600', marginBottom:'4px'}}>{t.nombre}</div>
-                 <div style={{fontSize:'12px', color:'#64748b', marginBottom:'12px'}}>{t.subject}</div>
-                 <div style={{display:'flex', gap:'8px'}}>
+               <div key={t.id} className="template-card">
+                 <div className="template-card-title">{t.nombre}</div>
+                 <div className="template-card-subject">{t.subject}</div>
+                 <div className="template-card-actions">
                     <button className="btn-text" onClick={() => setEditingTemplate(t)}>Editar</button>
-                    {!t.es_default && <button className="btn-text" style={{color:'#ef4444'}} onClick={() => handleDeleteTemplate(t.id)}>Eliminar</button>}
+                    {!t.es_default && <button className="btn-text btn-text-danger" onClick={() => handleDeleteTemplate(t.id)}>Eliminar</button>}
                  </div>
                </div>
              ))}

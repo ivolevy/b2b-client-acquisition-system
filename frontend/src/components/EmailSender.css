@@ -539,3 +539,129 @@
     /* Hide badge on mobile to save space */
   }
 }
+
+/* Templates Section Styling */
+.templates-container {
+  padding: 24px;
+  overflow-y: auto;
+  height: 100%;
+  background: #f8fafc;
+}
+
+.templates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.templates-header h3 {
+  margin: 0;
+  color: var(--es-text-main);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.templates-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.template-card {
+  background: white;
+  border: 1px solid var(--es-border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.template-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+.template-card-title {
+  font-weight: 600;
+  color: var(--es-text-main);
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.template-card-subject {
+  font-size: 0.85rem;
+  color: var(--es-text-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.template-card-actions {
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+  margin-top: auto;
+}
+
+.btn-text {
+  background: transparent;
+  border: none;
+  color: var(--es-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-text:hover {
+  background: #eff6ff;
+}
+
+.btn-text-danger {
+  color: #ef4444;
+}
+
+.btn-text-danger:hover {
+  background: #fef2f2;
+}
+
+/* Secondary button override for consistency */
+.btn-secondary {
+  background: white;
+  border: 1px solid var(--es-border);
+  color: var(--es-text-main);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
