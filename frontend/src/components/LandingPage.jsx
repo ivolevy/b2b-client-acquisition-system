@@ -128,13 +128,12 @@ const LandingPage = () => {
              </p>
              <div className="module-details">
                <p>
-                 Nuestro algoritmo recorre Google Maps y LinkedIn para encontrar empresas que coinciden exactamente con tu perfil de cliente ideal (ICP). 
-                 Filtra por:
+                 Ingresa <strong>Rubro, Radio y Dirección</strong>. Nuestro algoritmo recorre la web para encontrar empresas que coinciden con tu búsqueda.
                </p>
                <ul className="detail-list">
-                 <li><FiCheck /> <strong>Rubro Específico:</strong> "Abogados", "Dentistas", "Tiendas de Software"</li>
-                 <li><FiCheck /> <strong>Ubicación Exacta:</strong> Ciudades, Barrios o Radio de Km</li>
-                 <li><FiCheck /> <strong>Estado Operativo:</strong> Solo negocios activos y con actividad reciente</li>
+                 <li><FiCheck /> <strong>Filtros Estrictos:</strong> Solo contactos con Email y Teléfono verificado</li>
+                 <li><FiCheck /> <strong>Bot de Scrapeo Social:</strong> Detecta automáticamente redes sociales</li>
+                 <li><FiCheck /> <strong>Parámetros Precisos:</strong> Define el radio exacto de búsqueda en km</li>
                </ul>
              </div>
           </div>
@@ -168,11 +167,7 @@ const LandingPage = () => {
                <div className="enrichment-grid-text">
                   <div>
                     <h4><FiShield /> Verificación Emails</h4>
-                    <p>Ping directo al servidor SMTP para garantizar 0% rebote.</p>
-                  </div>
-                  <div>
-                    <h4><FiGlobe /> Tech Stack</h4>
-                    <p>Detectamos si usan WordPress, Shopify, o tecnologías específicas.</p>
+                    <p>Validación automática para proteger tu reputación y minimizar rebotes.</p>
                   </div>
                   <div>
                     <h4><FiTrendingUp /> Social Score</h4>
@@ -203,13 +198,13 @@ const LandingPage = () => {
                Llega a la bandeja de entrada, no al spam. Una suite completa de deliverability integrada.
              </p>
              <div className="module-details">
-               <p>
-                 Olvídate de configurar servidores complejos. Smart Leads gestiona la reputación de tu dominio automáticamente.
-               </p>
-               <ul className="detail-list">
-                 <li><FiCheck /> <strong>Warm-up Automático:</strong> Calentamos tus casillas gradualmente</li>
-                 <li><FiCheck /> <strong>Rotación de IPs:</strong> Distribuimos el volumen para evitar bloqueos</li>
-                 <li><FiCheck /> <strong>Spintax IA:</strong> Variamos el contenido de cada email para que sea único</li>
+                 <p>
+                  Conecta tus cuentas de Google y Outlook mediante protocolo OAuth. Máxima entregabilidad sin configuraciones complejas.
+                </p>
+                <ul className="detail-list">
+                  <li><FiCheck /> <strong>Warm-up Automático:</strong> Calentamos tus casillas gradualmente</li>
+                  <li><FiCheck /> <strong>Rotación de Cuentas:</strong> Evita el spam alternando entre múltiples remitentes</li>
+                  <li><FiCheck /> <strong>Spintax IA:</strong> Variamos el contenido de cada email para que sea único</li>
                </ul>
              </div>
           </div>
@@ -232,18 +227,18 @@ const LandingPage = () => {
         <div className="container module-layout reverse">
           <div className="module-content">
              <div className="module-number">04</div>
-             <h2>Gestión y Exportación</h2>
+             <h2>Exportación y Reportes</h2>
              <p className="module-lead">
-               Tu pipeline, bajo control. Visualiza el progreso o lleva los datos a tu herramienta preferida.
+               Tus datos son tuyos. Descarga listas limpias y listas para usar en cualquier plataforma.
              </p>
              <div className="module-details">
                <p>
-                 Mantén el orden de tus oportunidades o integra Smart Leads con tu ecosistema existente.
+                 Sin funciones complejas que no usas. Simplemente descarga tu lista enriquecida y ponla a trabajar.
                </p>
                <div className="crm-actions">
-                  <div className="crm-tag">Exportar a CSV</div>
-                  <div className="crm-tag">Webhook API</div>
-                  <div className="crm-tag">Zapier Real-time</div>
+                  <div className="crm-tag">Excel (.xlsx)</div>
+                  <div className="crm-tag">Archivo CSV</div>
+                  <div className="crm-tag">Reporte PDF</div>
                </div>
              </div>
           </div>
@@ -252,6 +247,43 @@ const LandingPage = () => {
                 <FiZap className="hero-icon-faded green" />
              </div>
           </div>
+        </div>
+      </section>
+
+
+
+      {/* --- EMAIL MARKETING SPOTLIGHT SECTION --- */}
+      <section className="email-spotlight-section">
+        <div className="container spotlight-layout">
+           <div className="spotlight-content">
+              <span className="spotlight-badge">INFRAESTRUCTURA DE ENVÍO MASIVO</span>
+              <h2>Email Marketing Efectivo,<br />Sin Caer en Spam</h2>
+              <p className="spotlight-lead">
+                Deja de desperdiciar leads. Nuestra tecnología asegura que tus correos lleguen directo a la bandeja de entrada, lejos de la carpeta de promociones.
+              </p>
+              <div className="spotlight-features-text">
+                 <p>
+                    <strong>Escalabilidad Infinita:</strong> Conecta cientos de cuentas de Gmail y Outlook para multiplicar tu alcance al instante.
+                 </p>
+                 <p>
+                    <strong>Motor Anti-Spam:</strong> Nuestra rotación inteligente de IPs y Spintax asegura que tus campañas masivas lleguen siempre a la bandeja de entrada.
+                 </p>
+              </div>
+           </div>
+           
+           <div className="spotlight-visual">
+              {/* CSS Art: Connected System */}
+              <div className="system-visual">
+                 <div className="central-node">
+                    <FiZap />
+                 </div>
+                 <div className="orbit-node n1"><FiMail /></div>
+                 <div className="orbit-node n2"><FiMail /></div>
+                 <div className="orbit-node n3"><FiMail /></div>
+                 <div className="orbit-ring"></div>
+                 <div className="orbit-ring-outer"></div>
+              </div>
+           </div>
         </div>
       </section>
 
@@ -333,9 +365,9 @@ const LandingPage = () => {
         <div className="container">
           <div className="pricing-tech-panel">
              <div className="panel-left">
-                <span className="tech-label">LICENCIA PRO</span>
+                <span className="tech-label">ESCALABILIDAD PURA</span>
                 <h2 className="tech-price">$195<small>/mes</small></h2>
-                <p className="tech-desc">Acceso total e ilimitado a todas las herramientas.</p>
+                <p className="tech-desc">Esto cuesta crecer tu negocio y llevarlo al siguiente nivel.</p>
                 <div className="tech-divider"></div>
                 <div className="lifetime-option">
                    o un pago único de <strong>$999</strong> de por vida.
@@ -353,7 +385,7 @@ const LandingPage = () => {
                    Obtener Acceso <FiArrowRight />
                 </button>
                 <button className="btn-tech-secondary full-width" onClick={() => navigate('/')}>
-                   Solicitar Demo Gratuita
+                   Solicitar Demo Gratuita (Pruébalo Ahora)
                 </button>
              </div>
           </div>

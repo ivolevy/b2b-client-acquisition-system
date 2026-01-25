@@ -1425,3 +1425,215 @@ a {
         width: 90%;
     }
 }
+
+/* --- EMAIL SPOTLIGHT SECTION --- */
+.email-spotlight-section {
+    padding: 140px 0;
+    background: #020617;
+    position: relative;
+    overflow: hidden;
+    padding: 140px 0;
+    background: #020617;
+    position: relative;
+    overflow: hidden;
+}
+
+.spotlight-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+}
+
+.spotlight-content {
+    position: relative;
+    z-index: 2;
+}
+
+.spotlight-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+}
+
+.spotlight-content h2 {
+    font-size: 3.5rem;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    background: linear-gradient(to right, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.spotlight-lead {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+.spotlight-features-text p {
+    font-size: 1.05rem;
+    color: #e2e8f0;
+    margin-bottom: 16px;
+    padding-left: 20px;
+    border-left: 2px solid var(--primary);
+}
+
+.spotlight-features-text strong {
+    color: white;
+}
+
+/* --- SYSTEM VISUAL (CSS ART) --- */
+.spotlight-visual {
+    position: relative;
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.system-visual {
+    position: relative;
+    width: 400px;
+    height: 400px;
+}
+
+.central-node {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, #38bdf8 0%, rgba(56, 189, 248, 0.2) 100%);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
+    animation: pulse-core 3s infinite;
+}
+
+.central-node svg {
+    font-size: 32px;
+    color: white;
+}
+
+.orbit-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    height: 250px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: spin-right 20s linear infinite;
+}
+
+.orbit-ring-outer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 380px;
+    height: 380px;
+    border: 1px dashed rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    animation: spin-left 30s linear infinite;
+}
+
+.orbit-node {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-secondary);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Positioning Orbit Nodes manually for effect */
+.orbit-node.n1 {
+    top: 20%;
+    left: 80%;
+    animation: float 4s ease-in-out infinite;
+}
+
+.orbit-node.n2 {
+    top: 70%;
+    left: 10%;
+    animation: float 5s ease-in-out infinite 1s;
+}
+
+.orbit-node.n3 {
+    top: 80%;
+    left: 70%;
+    animation: float 6s ease-in-out infinite 0.5s;
+}
+
+@keyframes pulse-core {
+    0% {
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        box-shadow: 0 0 60px rgba(56, 189, 248, 0.6);
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    100% {
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes spin-right {
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes spin-left {
+    100% {
+        transform: translate(-50%, -50%) rotate(-360deg);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@media (max-width: 1024px) {
+    .spotlight-layout {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .spotlight-features-text p {
+        text-align: left;
+    }
+}
