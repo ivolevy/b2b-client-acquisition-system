@@ -384,11 +384,11 @@ function ApiUsageDashboard() {
         .table-container { overflow-x: auto; }
         
         .clean-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-        .clean-table th { text-align: left; padding: 1rem; color: #64748b; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .clean-table td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.02); vertical-align: middle; }
+        .clean-table th { text-align: left; padding: 1rem; color: #94a3b8; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .clean-table td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.02); vertical-align: middle; color: #e2e8f0; }
         .clean-table tr:last-child td { border-bottom: none; }
         
-        .hover-row:hover { background: rgba(255,255,255,0.02); }
+        .hover-row:hover { background: rgba(255,255,255,0.03); }
 
         .sku-name { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: #fff; }
         .premium-pill { background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; }

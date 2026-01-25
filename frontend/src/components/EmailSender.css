@@ -582,7 +582,7 @@
 }
 
 .template-card:hover {
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); Removed per user request */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   border-color: #cbd5e1;
 }
