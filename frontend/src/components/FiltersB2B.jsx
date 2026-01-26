@@ -165,6 +165,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                     disabled={loading}
                     required
                     className="select-rubro-compact"
+                    aria-label="Seleccionar rubro empresarial"
                   >
                     <option value="" disabled>-- Selecciona un rubro --</option>
                     {rubros && Object.keys(rubros).length > 0 ? (
@@ -192,6 +193,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                     disabled={loading}
                     required
                     className="select-rubro-compact"
+                    aria-label="Seleccionar rubro empresarial"
                   >
                     <option value="" disabled>-- Selecciona un rubro --</option>
                     {rubros && Object.keys(rubros).length > 0 ? (

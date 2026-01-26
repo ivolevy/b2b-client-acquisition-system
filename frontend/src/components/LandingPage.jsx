@@ -112,11 +112,11 @@ const LandingPage = () => {
             </div>
             <h1>
               Consigue Clientes B2B <br />
-              <span className="text-gradient">En Piloto Automático</span>
+              <span className="text-gradient">100x Más Rápido con IA</span>
             </h1>
             <p className="hero-subtext">
-              La plataforma todo-en-uno para extraer leads de Google Maps y contactarlos masivamente por email. 
-              Sin configuraciones complejas.
+              Tu máquina de ventas autónoma. Extrae leads de Google Maps, enriquecelos con Inteligencia Artificial
+              y contáctalos masivamente. <strong>100% Automático. Calidad Militar.</strong>
             </p>
             <div className="hero-buttons">
               <button className="btn-primary btn-lg" onClick={() => navigate('/')}>
@@ -174,9 +174,9 @@ const LandingPage = () => {
         <div className="container module-layout">
           <div className="module-content">
              <div className="module-number">01</div>
-             <h2>Motor de Búsqueda Granular</h2>
+             <h2>Motor de Búsqueda con IA</h2>
              <p className="module-lead">
-               No más bases de datos genéricas y desactualizadas. Extrae leads frescos directamente de la fuente en tiempo real.
+               No más bases de datos genéricas. Nuestra IA escanea la web en tiempo real para encontrar leads frescos que tu competencia no tiene.
              </p>
              <div className="module-details">
                <p>
@@ -415,11 +415,19 @@ const LandingPage = () => {
       {/* --- PRICING (Tech Panel) --- */}
       <section id="pricing" className="pricing-section-tech">
         <div className="container">
+          <div className="section-header center" style={{ marginBottom: '60px' }}>
+             <h2>¿Cuánto vale multiplicar tus clientes x10?</h2>
+             <p style={{ fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto' }}>
+               No es un gasto, es la inversión con mayor ROI de tu empresa. 
+               <br/>
+               Accede a la tecnología que reemplaza a un equipo de ventas entero.
+             </p>
+          </div>
           <div className="pricing-tech-panel">
              <div className="panel-left">
-                <span className="tech-label">ESCALABILIDAD PURA</span>
+                <span className="tech-label">ACCESO TOTAL</span>
                 <h2 className="tech-price">$195<small>/mes</small></h2>
-                <p className="tech-desc">Esto cuesta crecer tu negocio y llevarlo al siguiente nivel.</p>
+                <p className="tech-desc">Menos de lo que cuesta un solo almuerzo de negocios.</p>
                 <div className="tech-divider"></div>
                 <div className="lifetime-option">
                    o un pago único de <strong>$999</strong> de por vida.
@@ -427,14 +435,14 @@ const LandingPage = () => {
              </div>
              <div className="panel-right">
                 <ul className="tech-features-list">
-                  <li><FiCheck /> Búsquedas Ilimitadas</li>
-                  <li><FiCheck /> Emails Ilimitados</li>
-                  <li><FiCheck /> API & Webhooks</li>
-                  <li><FiCheck /> Soporte Prioritario</li>
+                  <li><FiCheck /> <strong>Motor de IA</strong> Ilimitado</li>
+                  <li><FiCheck /> Búsquedas & Emails Infinitos</li>
+                  <li><FiCheck /> <strong>Automatización 100%</strong></li>
                   <li><FiCheck /> Validación en Tiempo Real</li>
+                  <li><FiCheck /> Soporte Prioritario 24/7</li>
                 </ul>
                 <button className="btn-tech-primary full-width" onClick={() => navigate('/')}>
-                   Obtener Acceso <FiArrowRight />
+                   Obtener Acceso Inmediato <FiArrowRight />
                 </button>
                 <button className="btn-tech-secondary full-width" onClick={() => navigate('/')}>
                    Solicitar Demo Gratuita (Pruébalo Ahora)

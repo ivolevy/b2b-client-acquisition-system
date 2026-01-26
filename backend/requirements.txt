@@ -14,3 +14,6 @@ supabase==2.13.0
 websockets>=13.0
 
 requests>=2.31.0
+pytest>=8.0.0
+httpx>=0.26.0
+locust>=2.23.0

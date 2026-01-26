@@ -638,7 +638,11 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     <div className="search-row" ref={suggestionsRef}>
       <div className="radius-control">
         <label className="radius-label">Radio de búsqueda</label>
-        <select value={radius} onChange={(e) => handleRadiusChange(e.target.value ? parseInt(e.target.value) : '')}>
+        <select 
+          value={radius} 
+          onChange={(e) => handleRadiusChange(e.target.value ? parseInt(e.target.value) : '')}
+          aria-label="Seleccionar radio de búsqueda"
+        >
           <option value="" disabled>-- Selecciona un radio --</option>
           {[...Array(15)].map((_, i) => {
             const km = i + 1;

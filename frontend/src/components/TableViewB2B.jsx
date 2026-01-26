@@ -331,6 +331,7 @@ function TableViewB2B({
                   }
                 }}
                 className="filter-inline-input"
+                aria-label="Ordenar resultados"
               >
                 <option value="">Ordenar...</option>
                 <option value="distancia-asc">Distancia: Cerca</option>
@@ -405,6 +406,7 @@ function TableViewB2B({
                 value={filtroConRedes} 
                 onChange={(e) => setFiltroConRedes(e.target.value)}
                 className="filter-inline-input"
+                aria-label="Filtrar por redes sociales"
               >
                 <option value="todas">Redes: todas</option>
                 <option value="con">Con redes</option>
