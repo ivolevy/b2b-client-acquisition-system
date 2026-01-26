@@ -183,10 +183,8 @@
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: row;
-    /* Force row direction */
     justify-content: flex-end;
     align-items: center;
-    /* Right aligned, buttons only take necessary width */
     gap: 12px;
     width: 100%;
 }
@@ -213,20 +211,16 @@
 .btn-save-premium {
     padding: 8px 20px;
     background: #3b82f6;
-    /* Tailwind Blue-500 */
     color: white;
     border: 1px solid transparent;
-    /* Ensure consistent box model */
     border-radius: 8px;
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    width: auto !important;
-    /* Force auto width to prevent full width */
-    margin-top: 0 !important;
-    /* Prevent margin top if any global style adds it */
+    width: auto;
+    margin-top: 0;
 }
 
 .btn-save-premium:hover {

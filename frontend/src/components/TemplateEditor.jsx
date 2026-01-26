@@ -196,24 +196,11 @@ function TemplateEditor({ templateId, onClose, onSave }) {
               </p>
             </div>
 
-            <div 
-              className="template-editor-actions"
-              style={{ 
-                display: 'flex', 
-                flexDirection: 'row', 
-                justifyContent: 'flex-end', 
-                gap: '12px', 
-                marginTop: '10px',
-                paddingTop: '20px',
-                borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-                width: '100%'
-              }}
-            >
+            <div className="template-editor-actions">
               <button
                 className="btn-cancel"
                 onClick={onClose}
                 disabled={loading}
-                style={{ width: 'auto' }}
               >
                 Cancelar
               </button>
@@ -221,7 +208,6 @@ function TemplateEditor({ templateId, onClose, onSave }) {
                 className="btn-save-premium"
                 onClick={handleSave}
                 disabled={loading}
-                style={{ width: 'auto', marginTop: 0 }}
               >
                 {loading ? 'Guardando...' : (isNew ? 'Crear' : 'Guardar Template')}
               </button>
