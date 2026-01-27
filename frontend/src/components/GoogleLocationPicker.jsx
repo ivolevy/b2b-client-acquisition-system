@@ -129,14 +129,9 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     }
 
     const geocoder = new window.google.maps.Geocoder();
-    // Priorizar Argentina en la búsqueda
-    let searchQueryStr = query;
-    if (!query.toLowerCase().includes('argentina') && !query.toLowerCase().includes('buenos aires')) {
-      searchQueryStr = `${query}, Buenos Aires, Argentina`;
-    }
+    // Búsqueda global
     geocoder.geocode({ 
-      address: searchQueryStr,
-      componentRestrictions: { country: 'ar' }
+      address: query,
     }, (results, status) => {
       if (status === 'OK' && results && results[0]) {
         const location = results[0].geometry.location;
@@ -236,7 +231,6 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
       try {
         const request = {
           input: searchQuery,
-          componentRestrictions: { country: 'ar' }, // Priorizar Argentina
           // types: ['address'] // Opcional
         };
 

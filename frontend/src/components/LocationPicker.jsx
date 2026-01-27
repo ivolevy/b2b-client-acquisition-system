@@ -65,18 +65,18 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     if (initialLocation && !initialLocationApplied) {
       const { lat, lng, name, radius: initialRadius } = initialLocation;
       const location = { lat, lng };
-      
+
       const effectiveRadius = initialRadius || radius || 5000;
-      
+
       // Configurar radio
       setRadius(effectiveRadius);
-      
+
       // Configurar ubicación
       setSelectedLocation(location);
       setMapCenter(location);
       setMapZoom(15);
       setSearchQuery(name || '');
-      
+
       // Notificar al padre CON LOS VALORES CORRECTOS
       const bbox = calculateBoundingBox(lat, lng, effectiveRadius);
       onLocationChange({
@@ -85,7 +85,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
         bbox: bbox,
         ubicacion_nombre: name || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
       });
-      
+
       setInitialLocationApplied(true);
     }
   }, [initialLocation, initialLocationApplied, radius, onLocationChange]);
@@ -99,7 +99,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     // Si ya hay una ubicación inicial, no usar geolocalización
     if (initialLocation && initialLocationApplied) return;
 
@@ -176,14 +176,9 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
 
     const timeoutId = setTimeout(async () => {
       try {
-        // Priorizar Argentina en las sugerencias
-        let searchQueryWithCountry = searchQuery;
-        if (!searchQuery.toLowerCase().includes('argentina') && !searchQuery.toLowerCase().includes('buenos aires')) {
-          searchQueryWithCountry = `${searchQuery}, Argentina`;
-        }
-        
+        // Búsqueda global
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=ar&q=${encodeURIComponent(searchQueryWithCountry)}`,
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(searchQuery)}`,
           {
             headers: {
               'Accept-Language': 'es',
@@ -226,7 +221,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     try {
       // Notificar selección inmediata de coordenadas
       handleLocationSelect(latlng, null);
-      
+
       // Intentar obtener nombre de la dirección (Reverse Geocoding)
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&addressdetails=1`,
@@ -237,7 +232,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           }
         }
       );
-      
+
       if (response.ok) {
         const data = await response.json();
         const nombre = data.display_name || `Ubicación (${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)})`;
@@ -251,9 +246,9 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
 
   const handleLocationSelect = (latlng, ubicacionNombre = null) => {
     setSelectedLocation(latlng);
-    
+
     const bbox = calculateBoundingBox(latlng.lat, latlng.lng, radius);
-    
+
     onLocationChange({
       center: latlng,
       radius: radius,
@@ -264,7 +259,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
 
   const handleRadiusChange = (newRadius) => {
     setRadius(newRadius);
-    
+
     if (selectedLocation) {
       const bbox = calculateBoundingBox(selectedLocation.lat, selectedLocation.lng, newRadius);
       onLocationChange({
@@ -327,16 +322,10 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     }
   };
 
-  const searchWithNominatim = async (query, tryWithArgentina = true) => {
+  const searchWithNominatim = async (query) => {
     try {
-      // Primero intentar con restricción a Argentina
-      let searchQuery = query;
-      if (tryWithArgentina && !query.toLowerCase().includes('argentina') && !query.toLowerCase().includes('buenos aires')) {
-        searchQuery = `${query}, Argentina`;
-      }
-      
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=ar&q=${encodeURIComponent(searchQuery)}`,
+        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`,
         {
           headers: {
             'Accept-Language': 'es',
@@ -344,11 +333,11 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           }
         }
       );
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       if (data && data.length > 0) {
         const formatted = formatNominatimResult(data[0]);
@@ -358,13 +347,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           return;
         }
       }
-      
-      // Si no se encontró con Argentina y es el primer intento, intentar sin restricción
-      if (tryWithArgentina && !query.toLowerCase().includes('argentina')) {
-        setIsSearching(false);
-        return await searchWithNominatim(query, false);
-      }
-      
+
       setIsSearching(false);
       warning(
         <>
@@ -385,7 +368,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       e.preventDefault();
       e.stopPropagation();
     }
-    
+
     const query = searchQuery?.trim();
     if (!query || query.length < 3) {
       warning(
@@ -407,18 +390,13 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
 
     try {
       setIsSearching(true);
-      
+
       // Intentar con Google Geocoding si está disponible
       if (useGooglePlaces && GOOGLE_API_KEY && window.google?.maps?.Geocoder) {
         const geocoder = new window.google.maps.Geocoder();
-        // Priorizar Argentina en la búsqueda
-        let searchQuery = query;
-        if (!query.toLowerCase().includes('argentina') && !query.toLowerCase().includes('buenos aires')) {
-          searchQuery = `${query}, Buenos Aires, Argentina`;
-        }
-        geocoder.geocode({ 
-          address: searchQuery,
-          componentRestrictions: { country: 'ar' }
+        // Búsqueda global
+        geocoder.geocode({
+          address: query,
         }, (results, status) => {
           setIsSearching(false);
           if (status === 'OK' && results && results[0]) {
@@ -440,45 +418,6 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
               </>
             );
           } else {
-            // Si no encontró con Argentina, intentar sin restricción
-            if (!query.toLowerCase().includes('argentina')) {
-              geocoder.geocode({ address: query }, (results2, status2) => {
-                setIsSearching(false);
-                if (status2 === 'OK' && results2 && results2[0]) {
-                  const location = results2[0].geometry.location;
-                  const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
-                  const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
-                  const nombreUbicacion = results2[0].formatted_address;
-                  setSearchQuery(nombreUbicacion);
-                  setMapCenter({ lat, lng });
-                  setMapZoom(15);
-                  handleLocationSelect({ lat, lng }, nombreUbicacion);
-          if (window.google?.maps?.places) {
-            sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
-          }
-          setSuggestions([]);
-                  success(
-                    <>
-                      <strong>Dirección encontrada</strong>
-                      <p>Se ha establecido la ubicación en el mapa.</p>
-                    </>
-                  );
-        } else {
-                  // Fallback a Nominatim
-                  searchWithNominatim(query).catch(err => {
-                    console.error('Error con Nominatim:', err);
-                    setIsSearching(false);
-                    error(
-            <>
-                        <strong>No se encontró la dirección</strong>
-                        <p>No se pudo encontrar esa dirección. Intenta con otra búsqueda.</p>
-                      </>
-                    );
-                  });
-                }
-              });
-              return;
-            }
             // Fallback a Nominatim
             searchWithNominatim(query).catch(err => {
               console.error('Error con Nominatim:', err);
@@ -487,10 +426,10 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
                 <>
                   <strong>No se encontró la dirección</strong>
                   <p>No se pudo encontrar esa dirección. Intenta con otra búsqueda.</p>
-            </>
-          );
+                </>
+              );
             });
-        }
+          }
         });
         return;
       }
@@ -543,7 +482,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
-          
+
           // Reverse geocoding with Nominatim to get the address
           let addressName = 'Mi ubicación actual';
           try {
@@ -582,14 +521,14 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           if (attempt === 1) {
             removeToast(loadingToast);
             const retryToast = info('La primera vez puede tardar un poco más, reintentando...');
-            
+
             // Reintentar con opciones más relajadas o más precisas según sea el caso
             tryGetLocation({
               enableHighAccuracy: attempt === 1 ? true : options.enableHighAccuracy,
               timeout: 20000, // Aumentar a 20 segundos
               maximumAge: 60000
             }, attempt + 1);
-            
+
             setTimeout(() => removeToast(retryToast), 3000);
             return;
           }
@@ -630,7 +569,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     // Intentar primero con opciones rápidas
     tryGetLocation({
       enableHighAccuracy: false,
-      timeout: 10000, 
+      timeout: 10000,
       maximumAge: 300000 // 5 mins caché
     });
   };
@@ -674,8 +613,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               autoComplete="off"
             />
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="btn-search-address"
               onClick={(e) => {
                 e.preventDefault();
@@ -685,16 +624,16 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
               title="Buscar dirección"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
             </button>
           </div>
-                    
+
           <button type="button" className="btn-location-link-compact" onClick={handleUseCurrentLocation}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
             </svg>
             USAR MI UBICACIÓN
           </button>
@@ -727,7 +666,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
         {rubroSelect}
         {controlsRow}
       </div>
-      
+
       <div className="location-picker">
 
         <div className="map-instruction">
@@ -773,10 +712,10 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
 
 function calculateBoundingBox(lat, lng, radiusMeters) {
   const earthRadius = 6371000;
-  
+
   const latDelta = (radiusMeters / earthRadius) * (180 / Math.PI);
   const lngDelta = (radiusMeters / earthRadius) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
-  
+
   return {
     south: lat - latDelta,
     west: lng - lngDelta,
