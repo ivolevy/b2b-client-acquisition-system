@@ -472,7 +472,7 @@ function AppB2B() {
         // aún está persistiendo en la base de datos física.
         // setEmpresas(empresasEncontradas) ya es suficiente para la UI.
       }
-      }
+
     } catch (err) {
       console.error('Error al buscar empresas:', err);
       const errorMsg = err.response?.data?.detail || err.message;

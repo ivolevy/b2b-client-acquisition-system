@@ -149,7 +149,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
         {
           input: searchQuery,
           sessionToken: sessionTokenRef.current,
-          types: ['geocode']
+          types: ['geocode'],
+          componentRestrictions: { country: 'ar' }
         },
         (predictions, status) => {
           if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions?.length) {
