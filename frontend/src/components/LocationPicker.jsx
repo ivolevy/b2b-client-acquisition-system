@@ -300,7 +300,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             if (window.google?.maps?.places) {
               sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
             }
-            setMapCenter([lat, lng]);
+            setMapCenter({ lat, lng });
             handleLocationSelect({ lat, lng }, nombreUbicacion);
           } else {
             error(
@@ -426,7 +426,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
             const nombreUbicacion = results[0].formatted_address;
             setSearchQuery(nombreUbicacion);
-            setMapCenter([lat, lng]);
+            setMapCenter({ lat, lng });
             handleLocationSelect({ lat, lng }, nombreUbicacion);
             if (window.google?.maps?.places) {
               sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();

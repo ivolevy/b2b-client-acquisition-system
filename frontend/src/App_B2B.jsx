@@ -472,9 +472,14 @@ function AppB2B() {
         // aún está persistiendo en la base de datos física.
         // setEmpresas(empresasEncontradas) ya es suficiente para la UI.
       }
+      }
     } catch (err) {
       console.error('Error al buscar empresas:', err);
       const errorMsg = err.response?.data?.detail || err.message;
+      
+      // Si fue cancelado manualmente, no mostrar error
+      if (err.message === 'Canceled') return;
+
       toastError(
         <>
           <strong>Error al buscar empresas</strong>
@@ -490,6 +495,27 @@ function AppB2B() {
         loadingIntervalRef.current = null;
       }
     }
+  };
+
+  const handleCancelSearch = () => {
+    // 1. Limpiar intervalo de polling y timeout
+    if (loadingIntervalRef.current) {
+      clearInterval(loadingIntervalRef.current);
+      loadingIntervalRef.current = null;
+    }
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+
+    // 2. Resetear estados de carga y progreso
+    setLoading(false);
+    setBlockingLoading(false);
+    setSearchProgress({ percent: 0, message: '' });
+    setDisplayProgress(0);
+
+    // 3. Notificar al usuario (opcional, o simplemente cerrar silenciosamente)
+    info("Búsqueda cancelada por el usuario");
   };
 
 
@@ -757,6 +783,27 @@ function AppB2B() {
                   ></div>
                 </div>
                 <p className="loading-message">{searchProgress.message}</p>
+                
+                <button 
+                  onClick={handleCancelSearch}
+                  className="btn-cancel-search"
+                  style={{
+                    marginTop: '15px',
+                    background: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    color: 'white',
+                    padding: '6px 16px',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    backdropFilter: 'blur(5px)',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
+                  onMouseOut={(e) => e.target.style.background = 'transparent'}
+                >
+                  Cancelar
+                </button>
               </div>
             </div>
           )}
