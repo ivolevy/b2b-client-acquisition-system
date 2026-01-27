@@ -149,8 +149,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
         {
           input: searchQuery,
           sessionToken: sessionTokenRef.current,
-          types: ['geocode'],
-          componentRestrictions: { country: 'ar' }
+          types: ['geocode']
         },
         (predictions, status) => {
           if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions?.length) {
@@ -578,8 +577,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
     <div className="search-row" ref={suggestionsRef}>
       <div className="radius-control">
         <label className="radius-label">Radio de búsqueda</label>
-        <select 
-          value={radius} 
+        <select
+          value={radius}
           onChange={(e) => handleRadiusChange(e.target.value ? parseInt(e.target.value) : '')}
           aria-label="Seleccionar radio de búsqueda"
         >
