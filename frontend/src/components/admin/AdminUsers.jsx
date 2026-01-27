@@ -204,13 +204,15 @@ function AdminUsers() {
                       >
                         <FiEdit2 className="action-icon" size={16} />
                       </button>
-                      <button
-                        className="btn-action btn-delete"
-                        onClick={() => setShowDeleteConfirm(user)}
-                        title="Eliminar"
-                      >
-                         <FiTrash2 className="action-icon" size={16} />
-                      </button>
+                      {user.role !== 'admin' && (
+                        <button
+                          className="btn-action btn-delete"
+                          onClick={() => setShowDeleteConfirm(user)}
+                          title="Eliminar"
+                        >
+                           <FiTrash2 className="action-icon" size={16} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

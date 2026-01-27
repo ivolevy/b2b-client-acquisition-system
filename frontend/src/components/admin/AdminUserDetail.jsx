@@ -79,27 +79,7 @@ function AdminUserDetail() {
     }
   };
 
-  const handleExport = async () => {
-    try {
-      const { data, error: exportError } = await adminService.exportUserData(id);
-      if (exportError) throw exportError;
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `user-${id}-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      setSuccess('Datos exportados exitosamente');
-    } catch (err) {
-      console.error('Error exporting data:', err);
-      setError('Error al exportar datos: ' + err.message);
-    }
-  };
+
 
   if (loading) {
     return (
@@ -139,9 +119,6 @@ function AdminUserDetail() {
           <h1>Detalle de Usuario</h1>
         </div>
         <div className="header-actions">
-          <button className="btn-secondary" onClick={handleExport}>
-            📥 Exportar Datos
-          </button>
         </div>
       </div>
 

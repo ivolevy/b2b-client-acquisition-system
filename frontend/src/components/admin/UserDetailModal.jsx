@@ -70,27 +70,7 @@ function UserDetailModal({ user, onClose, onUpdate }) {
     }
   };
 
-  const handleExport = async () => {
-    try {
-      const { data, error: exportError } = await adminService.exportUserData(currentUser.id);
-      if (exportError) throw exportError;
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `user-${currentUser.id}-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      setSuccess('Datos exportados exitosamente');
-    } catch (err) {
-      console.error('Error exporting data:', err);
-      setError('Error al exportar datos: ' + err.message);
-    }
-  };
+
 
   const modalContent = loading ? (
     <div className="modal-overlay">
@@ -195,9 +175,6 @@ function UserDetailModal({ user, onClose, onUpdate }) {
                 disabled={saving}
               >
                 {saving ? 'Guardando...' : 'Guardar'}
-              </button>
-              <button className="btn-export" onClick={handleExport}>
-                Exportar
               </button>
           <button className="btn-secondary" onClick={onClose}>
             Cerrar
