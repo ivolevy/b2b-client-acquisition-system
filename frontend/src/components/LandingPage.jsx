@@ -427,10 +427,13 @@ const LandingPage = () => {
           </div>
           
           <div className="testimonial-slider-container">
-             <div className="testimonial-track">
+          <div className="testimonial-slider-container">
+             <div className="testimonial-track marquee-animation">
+               {/* ORIGINAL SET */}
                <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
                  <p className="testimonial-text">
-                   "Incrementamos nuestros leads cualificados un 400% en el primer mes. La calidad de los datos es impresionante."
+                   Incrementamos nuestros leads cualificados un 400% en el primer mes. La calidad de los datos es impresionante.
                  </p>
                  <div className="testimonial-author">
                     <h4>Carlos M.</h4>
@@ -439,8 +442,9 @@ const LandingPage = () => {
                </div>
                
                <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
                  <p className="testimonial-text">
-                   "La automatización de emails nos ahorró contratar a 2 SDRs. Se paga solo en la primera semana."
+                   La automatización de emails nos ahorró contratar a 2 SDRs. Se paga solo en la primera semana.
                  </p>
                  <div className="testimonial-author">
                     <h4>Ana R.</h4>
@@ -449,8 +453,9 @@ const LandingPage = () => {
                </div>
    
                <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
                  <p className="testimonial-text">
-                   "La mejor herramienta para prospección B2B en LATAM. El soporte es increíble y la plataforma vuela."
+                   La mejor herramienta para prospección B2B en LATAM. El soporte es increíble y la plataforma vuela.
                  </p>
                  <div className="testimonial-author">
                     <h4>Diego S.</h4>
@@ -459,8 +464,9 @@ const LandingPage = () => {
                </div>
 
                <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
                  <p className="testimonial-text">
-                   "Pudimos escalar nuestra agencia sin perder calidad en el trato. La verificación de emails es clave."
+                   Pudimos escalar nuestra agencia sin perder calidad en el trato. La verificación de emails es clave.
                  </p>
                  <div className="testimonial-author">
                     <h4>Juan P.</h4>
@@ -469,8 +475,65 @@ const LandingPage = () => {
                </div>
 
                <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
                  <p className="testimonial-text">
-                   "Una máquina de generar reuniones. Pasamos de 5 a 25 demos semanales en un solo mes."
+                   Una máquina de generar reuniones. Pasamos de 5 a 25 demos semanales en un solo mes.
+                 </p>
+                 <div className="testimonial-author">
+                    <h4>Sofia L.</h4>
+                    <span>CMO @ MarketFit</span>
+                 </div>
+               </div>
+
+               {/* DUPLICATE SET FOR LOOP */}
+               <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
+                 <p className="testimonial-text">
+                   Incrementamos nuestros leads cualificados un 400% en el primer mes. La calidad de los datos es impresionante.
+                 </p>
+                 <div className="testimonial-author">
+                    <h4>Carlos M.</h4>
+                    <span>CEO @ TechStart</span>
+                 </div>
+               </div>
+               
+               <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
+                 <p className="testimonial-text">
+                   La automatización de emails nos ahorró contratar a 2 SDRs. Se paga solo en la primera semana.
+                 </p>
+                 <div className="testimonial-author">
+                    <h4>Ana R.</h4>
+                    <span>Head of Sales @ GrowthAgency</span>
+                 </div>
+               </div>
+   
+               <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
+                 <p className="testimonial-text">
+                   La mejor herramienta para prospección B2B en LATAM. El soporte es increíble y la plataforma vuela.
+                 </p>
+                 <div className="testimonial-author">
+                    <h4>Diego S.</h4>
+                    <span>Founder @ B2B Solutions</span>
+                 </div>
+               </div>
+
+               <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
+                 <p className="testimonial-text">
+                   Pudimos escalar nuestra agencia sin perder calidad en el trato. La verificación de emails es clave.
+                 </p>
+                 <div className="testimonial-author">
+                    <h4>Juan P.</h4>
+                    <span>Director @ ScaleUp</span>
+                 </div>
+               </div>
+
+               <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
+                 <p className="testimonial-text">
+                   Una máquina de generar reuniones. Pasamos de 5 a 25 demos semanales en un solo mes.
                  </p>
                  <div className="testimonial-author">
                     <h4>Sofia L.</h4>
@@ -478,6 +541,10 @@ const LandingPage = () => {
                  </div>
                </div>
              </div>
+             {/* Gradient Overlays for Fade Effect */}
+             <div className="slider-fade-left"></div>
+             <div className="slider-fade-right"></div>
+          </div>
              {/* Gradient Overlays for Fade Effect */}
              <div className="slider-fade-left"></div>
              <div className="slider-fade-right"></div>

@@ -1645,7 +1645,7 @@ a {
 .testimonials-section {
     padding: 120px 0;
     background: #020617;
-    /* Fallback */
+    /* Match site background */
     position: relative;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     overflow: hidden;
@@ -1693,27 +1693,30 @@ a {
 .testimonial-slider-container {
     position: relative;
     width: 100%;
-    padding: 20px 0;
-    /* Space for hover effects */
+    padding: 40px 0;
+    overflow: hidden;
+}
+
+/* Marquee Animation */
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
 .testimonial-track {
     display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
     gap: 32px;
-    padding: 20px 4px;
-    /* Padding for shadows */
-    -ms-overflow-style: none;
-    /* Hide scrollbar IE/Edge */
-    scrollbar-width: none;
-    /* Hide scrollbar Firefox */
-    padding-bottom: 40px;
-    /* Space for scrollbar if visible/touch */
+    width: max-content;
+    animation: scroll-left 40s linear infinite;
 }
 
-.testimonial-track::-webkit-scrollbar {
-    display: none;
+.testimonial-track:hover {
+    animation-play-state: paused;
 }
 
 /* Side Fades for Slider */
@@ -1722,7 +1725,7 @@ a {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 100px;
+    width: 150px;
     z-index: 5;
     pointer-events: none;
 }
@@ -1738,63 +1741,57 @@ a {
 }
 
 .testimonial-card {
-    min-width: 450px;
-    scroll-snap-align: center;
-    background: transparent;
-    border: none;
-    padding: 0 32px;
+    min-width: 400px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+    justify-content: space-between;
+    align-items: flex-start;
+    text-align: left;
     height: 100%;
-    /* No hover effects needed for text only */
+    color: #0f172a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
 }
 
-/* Removed hover lift for cleaner text flow */
 .testimonial-card:hover {
-    transform: none;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
 .quote-icon {
     font-family: var(--font-heading);
-    font-size: 5rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 3rem;
+    color: #cbd5e1;
     line-height: 1;
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    opacity: 0.5;
+    margin-bottom: 16px;
 }
 
 .testimonial-text {
-    font-size: 1.5rem;
-    color: #e2e8f0;
+    font-size: 1.1rem;
+    color: #334155;
     margin-bottom: 24px;
     position: relative;
     z-index: 2;
-    line-height: 1.4;
-    font-family: var(--font-heading);
-    font-style: italic;
-    opacity: 0.9;
+    line-height: 1.6;
+    font-family: var(--font-body);
+    font-style: normal;
+    opacity: 1;
 }
 
 .testimonial-author {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    /* Align back to row */
     align-items: center;
-    gap: 4px;
-    border-top: none;
-    padding-top: 0;
-    margin-top: 0;
+    gap: 12px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 20px;
+    margin-top: auto;
+    width: 100%;
 }
 
 /* Hidden avatar for minimalist look */
@@ -1822,8 +1819,9 @@ a {
 
 .author-info h4 {
     font-size: 1rem;
-    color: white;
-    margin-bottom: 0;
+    color: #0f172a;
+    /* Dark text */
+    margin-bottom: 2px;
     font-family: var(--font-body);
     font-weight: 700;
 }
@@ -1831,9 +1829,9 @@ a {
 .author-info span {
     font-size: 0.85rem;
     color: #64748b;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    font-weight: 600;
+    letter-spacing: 0px;
+    text-transform: none;
+    font-weight: 500;
 }
 
 @media (max-width: 900px) {
