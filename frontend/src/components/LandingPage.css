@@ -1640,6 +1640,97 @@ a {
     }
 }
 
+/* --- TESTIMONIALS SECTION --- */
+.testimonials-section {
+    padding: 100px 0;
+    background: #020617;
+    position: relative;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 40px;
+}
+
+.testimonial-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    position: relative;
+    transition: transform 0.3s;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--border-hover);
+}
+
+.quote-icon {
+    font-family: var(--font-heading);
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.1);
+    line-height: 1;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.testimonial-text {
+    font-size: 1.05rem;
+    color: #cbd5e1;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 2;
+    line-height: 1.6;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    font-size: 1rem;
+    border: 2px solid;
+}
+
+.author-avatar.blue { border-color: var(--primary); color: var(--primary); background: rgba(59,130,246,0.1); }
+.author-avatar.violet { border-color: var(--accent); color: var(--accent); background: rgba(139,92,246,0.1); }
+.author-avatar.green { border-color: #4ade80; color: #4ade80; background: rgba(74,222,128,0.1); }
+
+.author-info h4 {
+    font-size: 1rem;
+    color: white;
+    margin-bottom: 2px;
+    font-family: var(--font-body);
+    font-weight: 600;
+}
+
+.author-info span {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 900px) {
+    .testimonial-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 1024px) {
     .spotlight-layout {
         grid-template-columns: 1fr;
