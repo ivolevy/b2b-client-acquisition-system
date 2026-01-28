@@ -422,48 +422,67 @@ const LandingPage = () => {
             </p>
           </div>
           
-          <div className="testimonial-grid">
-            <div className="testimonial-card">
-              <div className="quote-icon">"</div>
-              <p className="testimonial-text">
-                Incrementamos nuestros leads cualificados un 400% en el primer mes. La calidad de los datos es impresionante y el filtrado es muy preciso.
-              </p>
-              <div className="testimonial-author">
-                <div className="author-avatar blue">CM</div>
-                <div className="author-info">
-                  <h4>Carlos M.</h4>
-                  <span>CEO @ TechStart</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="testimonial-card">
-              <div className="quote-icon">"</div>
-              <p className="testimonial-text">
-                La automatización de emails nos ahorró contratar a 2 SDRs. Se paga solo en la primera semana. Es una herramienta indispensable.
-              </p>
-              <div className="testimonial-author">
-                <div className="author-avatar violet">AR</div>
-                <div className="author-info">
-                  <h4>Ana R.</h4>
-                  <span>Head of Sales @ GrowthAgency</span>
-                </div>
-              </div>
-            </div>
+          <div className="testimonial-slider-container">
+             <div className="testimonial-track">
+               <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
+                 <p className="testimonial-text">
+                   Incrementamos nuestros leads cualificados un 400% en el primer mes. La calidad de los datos es impresionante.
+                 </p>
+                 <div className="testimonial-author">
+                   <div className="author-avatar blue">CM</div>
+                   <div className="author-info">
+                     <h4>Carlos M.</h4>
+                     <span>CEO @ TechStart</span>
+                   </div>
+                 </div>
+               </div>
+               
+               <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
+                 <p className="testimonial-text">
+                   La automatización de emails nos ahorró contratar a 2 SDRs. Se paga solo en la primera semana.
+                 </p>
+                 <div className="testimonial-author">
+                   <div className="author-avatar violet">AR</div>
+                   <div className="author-info">
+                     <h4>Ana R.</h4>
+                     <span>Head of Sales @ GrowthAgency</span>
+                   </div>
+                 </div>
+               </div>
+   
+               <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
+                 <p className="testimonial-text">
+                   La mejor herramienta para prospección B2B en LATAM. El soporte es increíble y la plataforma vuela.
+                 </p>
+                 <div className="testimonial-author">
+                   <div className="author-avatar green">DS</div>
+                   <div className="author-info">
+                     <h4>Diego S.</h4>
+                     <span>Founder @ B2B Solutions</span>
+                   </div>
+                 </div>
+               </div>
 
-            <div className="testimonial-card">
-              <div className="quote-icon">"</div>
-              <p className="testimonial-text">
-                La mejor herramienta para prospección B2B en LATAM. El soporte es increíble y la plataforma vuela. 100% recomendada.
-              </p>
-              <div className="testimonial-author">
-                <div className="author-avatar green">DS</div>
-                <div className="author-info">
-                  <h4>Diego S.</h4>
-                  <span>Founder @ B2B Solutions</span>
-                </div>
-              </div>
-            </div>
+               <div className="testimonial-card">
+                 <div className="quote-icon">"</div>
+                 <p className="testimonial-text">
+                   Pudimos escalar nuestra agencia sin perder calidad en el trato. La verificación de emails es clave.
+                 </p>
+                 <div className="testimonial-author">
+                   <div className="author-avatar blue">JP</div>
+                   <div className="author-info">
+                     <h4>Juan P.</h4>
+                     <span>Director @ ScaleUp</span>
+                   </div>
+                 </div>
+               </div>
+             </div>
+             {/* Gradient Overlays for Fade Effect */}
+             <div className="slider-fade-left"></div>
+             <div className="slider-fade-right"></div>
           </div>
         </div>
       </section>
