@@ -59,6 +59,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
   const autocompleteRef = useRef(null);
   const placesServiceRef = useRef(null);
   const sessionTokenRef = useRef(null);
+  const isSelectionUpdate = useRef(false);
 
   // Efecto para aplicar ubicación inicial desde historial
   useEffect(() => {
@@ -140,6 +141,10 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       setSuggestions([]);
       setIsSearching(false);
       setShowSuggestions(false);
+    }
+
+    if (isSelectionUpdate.current) {
+      isSelectionUpdate.current = false;
       return;
     }
 
@@ -291,6 +296,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             const lat = place.geometry.location.lat();
             const lng = place.geometry.location.lng();
             const nombreUbicacion = suggestion.full_label || suggestion.display_name || place?.formatted_address;
+
+            isSelectionUpdate.current = true;
             setSearchQuery(nombreUbicacion);
             if (window.google?.maps?.places) {
               sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
@@ -314,6 +321,8 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       const lat = parseFloat(suggestion.lat);
       const lng = parseFloat(suggestion.lon);
       const nombreUbicacion = suggestion.full_label || suggestion.display_name;
+
+      isSelectionUpdate.current = true;
       setSearchQuery(nombreUbicacion);
       setMapCenter({ lat, lng });
       setMapZoom(15);
