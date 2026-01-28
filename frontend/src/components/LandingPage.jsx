@@ -42,7 +42,7 @@ const LandingPage = () => {
           </div>
 
           <nav className="main-nav desktop-nav">
-             <button onClick={() => scrollToSection('features')}>Módulos</button>
+             <button onClick={() => scrollToSection('search-engine')}>Módulos</button>
              <button onClick={() => scrollToSection('pricing')}>Precios</button>
              <button onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}>Contactanos</button>
           </nav>
@@ -76,7 +76,7 @@ const LandingPage = () => {
            </div>
 
            <div className="mobile-nav-links">
-             <button onClick={() => scrollToSection('features')}>
+             <button onClick={() => scrollToSection('search-engine')}>
                <span className="nav-num">01</span> Módulos
              </button>
              <button onClick={() => scrollToSection('pricing')}>
@@ -170,7 +170,7 @@ const LandingPage = () => {
       </section>
 
       {/* --- MODULE 1: DATA EXTRACTION (Full Width) --- */}
-      <section className="product-module-section">
+      <section id="search-engine" className="product-module-section">
         <div className="container module-layout">
           <div className="module-content">
              <div className="module-number">01</div>
