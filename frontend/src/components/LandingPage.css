@@ -1738,29 +1738,27 @@ a {
 }
 
 .testimonial-card {
-    min-width: 400px;
+    min-width: 450px;
     scroll-snap-align: center;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
-    padding: 40px 32px;
+    background: transparent;
+    border: none;
+    padding: 0 32px;
     position: relative;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     height: 100%;
+    /* No hover effects needed for text only */
 }
 
+/* Removed hover lift for cleaner text flow */
 .testimonial-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    /* Lift and slightly scale */
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.4);
-    z-index: 10;
+    transform: none;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .quote-icon {
@@ -1778,38 +1776,30 @@ a {
 }
 
 .testimonial-text {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     color: #e2e8f0;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     position: relative;
     z-index: 2;
-    line-height: 1.7;
-    margin-top: 24px;
-    font-weight: 300;
+    line-height: 1.4;
+    font-family: var(--font-heading);
+    font-style: italic;
+    opacity: 0.9;
 }
 
 .testimonial-author {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding-top: 24px;
-    margin-top: auto;
+    gap: 4px;
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
 }
 
+/* Hidden avatar for minimalist look */
 .author-avatar {
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    background: #1e293b;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: white;
-    font-size: 1.1rem;
-    border: 2px solid;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: none;
 }
 
 .author-avatar.blue {
@@ -1831,17 +1821,19 @@ a {
 }
 
 .author-info h4 {
-    font-size: 1.05rem;
+    font-size: 1rem;
     color: white;
-    margin-bottom: 4px;
+    margin-bottom: 0;
     font-family: var(--font-body);
     font-weight: 700;
 }
 
 .author-info span {
     font-size: 0.85rem;
-    color: #94a3b8;
+    color: #64748b;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
 @media (max-width: 900px) {
