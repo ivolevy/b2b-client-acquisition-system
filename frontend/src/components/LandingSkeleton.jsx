@@ -7,23 +7,12 @@ const LandingSkeleton = () => {
 
       {/* --- NAVBAR SKELETON --- */}
       <header className="landing-header">
-        <div className="header-container">
-          {/* Logo Placeholder */}
-          <div className="skeleton-pulse" style={{ width: '120px', height: '24px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)' }}></div>
-
-          {/* Nav Links Placeholder */}
-          <div className="main-nav desktop-nav" style={{ gap: '30px' }}>
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="skeleton-pulse" style={{ width: '80px', height: '20px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}></div>
-            ))}
-          </div>
-
-          <div style={{ width: '24px' }}></div> {/* Spacer */}
-        </div>
+        {/* Simplified Navbar Shadow */}
+        <div style={{ height: '40px', width: '100%' }}></div>
       </header>
 
       {/* --- HERO SECTION SKELETON --- */}
-      <section className="hero-section">
+      < section className="hero-section" >
         <div className="hero-bg-glow" style={{ opacity: 0.5 }}></div>
         <div className="container hero-content">
 
@@ -63,10 +52,10 @@ const LandingSkeleton = () => {
           </div>
 
         </div>
-      </section>
+      </section >
 
       {/* --- MODULE 1 SKELETON (Hint of content below) --- */}
-      <section className="product-module-section">
+      < section className="product-module-section" >
         <div className="container module-layout">
           <div className="module-content">
             <div className="skeleton-pulse" style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', marginBottom: '20px' }}></div>
@@ -77,7 +66,7 @@ const LandingSkeleton = () => {
             <div className="visual-display-open skeleton-pulse" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.02)' }}></div>
           </div>
         </div>
-      </section>
+      </section >
 
       <style>{`
         .skeleton-pulse {
@@ -88,7 +77,7 @@ const LandingSkeleton = () => {
           100% { opacity: 0.7; }
         }
       `}</style>
-    </div>
+    </div >
   );
 };
 

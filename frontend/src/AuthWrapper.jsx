@@ -19,6 +19,7 @@ const LandingPage = lazy(() => import('./components/LandingPage'));
 const ApiUsageDashboard = lazy(() => import('./components/admin/ApiUsageDashboard'));
 const NotFound = lazy(() => import('./components/NotFound'));
 const OAuthCallback = lazy(() => import('./components/OAuthCallback'));
+const PaymentPage = lazy(() => import('./components/PaymentPage'));
 import LandingSkeleton from './components/LandingSkeleton'; // Eager load for instant feedback
 
 // Contexto de autenticación
@@ -63,12 +64,12 @@ const checkLocalAuth = () => {
   try {
     const authData = authStorage.getAuth();
     const token = authStorage.getToken();
-    
+
     if (authData && token) {
       const loginTime = new Date(authData.loginTime);
       const now = new Date();
       const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
-      
+
       if (hoursDiff < 24) {
         return authData;
       }
@@ -111,29 +112,29 @@ function AuthWrapper() {
           const type = hashParams.get('type');
           const accessToken = hashParams.get('access_token');
           const refreshToken = hashParams.get('refresh_token');
-          
+
           if (type === 'signup' && accessToken && refreshToken) {
             // El usuario viene de confirmar su email
             // NO loguear automáticamente, solo limpiar la URL y redirigir a login
             window.history.replaceState({}, document.title, window.location.pathname);
-            
+
             // Limpiar email pendiente de confirmación ya que el usuario acaba de confirmar
             authStorage.removePendingEmail();
             authStorage.removeDismissedPendingEmail();
-            
+
             // Guardar un flag para mostrar mensaje de éxito en Login
             storage.setItem('email_confirmed', 'true');
-            
+
             // NO establecer sesión, dejar que el usuario inicie sesión manualmente
             setLoading(false);
             return;
           }
-          
+
           const { data: { session } } = await supabase.auth.getSession();
-          
+
           if (session?.user) {
             const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
-            
+
             // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
             if (profileError || !profile) {
               handleError(new Error('Usuario sin perfil detectado'), 'AuthWrapper - initAuth');
@@ -144,7 +145,7 @@ function AuthWrapper() {
               setLoading(false);
               return;
             }
-            
+
             const userData = authService.buildUserData(session.user, profile);
             setUser(userData);
           }
@@ -167,7 +168,7 @@ function AuthWrapper() {
           async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
               const { data: profile, error: profileError } = await userService.getProfile(session.user.id);
-              
+
               // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
               if (profileError || !profile) {
                 handleError(new Error('Usuario sin perfil detectado'), 'AuthWrapper - SIGNED_IN');
@@ -177,7 +178,7 @@ function AuthWrapper() {
                 setUser(null);
                 return;
               }
-              
+
               const userData = authService.buildUserData(session.user, profile);
               setUser(userData);
             } else if (event === 'SIGNED_OUT') {
@@ -214,7 +215,7 @@ function AuthWrapper() {
   // Login con Supabase
   const handleSupabaseLogin = async (email, password) => {
     const { data, error } = await authService.signIn(email, password);
-    
+
     if (error) {
       throw error;
     }
@@ -228,13 +229,13 @@ function AuthWrapper() {
   // Registro con Supabase (memoizado)
   const handleSupabaseSignUp = useCallback(async (email, password, name) => {
     const { data, error } = await authService.signUp(email, password, name);
-    
+
     if (error) {
       throw error;
     }
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: 'Cuenta creada. Revisa tu email para confirmar.',
       needsConfirmation: true
     };
@@ -249,7 +250,7 @@ function AuthWrapper() {
       authStorage.setAuth(userData);
       authStorage.setToken('demo_token_' + Date.now());
     }
-    
+
     setUser(userData);
   }, []);
 
@@ -258,22 +259,22 @@ function AuthWrapper() {
   const handleLogout = useCallback(() => {
     console.log('handleLogout ejecutándose');
     try {
-    // Limpiar todo inmediatamente usando servicio centralizado
-    authStorage.clearAll();
-    sessionStorage.clear();
+      // Limpiar todo inmediatamente usando servicio centralizado
+      authStorage.clearAll();
+      sessionStorage.clear();
       localStorage.clear();
-    
-    // Logout de Supabase en background (no esperamos)
-    if (useSupabase) {
+
+      // Logout de Supabase en background (no esperamos)
+      if (useSupabase) {
         authService.signOut().catch((err) => {
           console.error('Error en signOut:', err);
         });
-    }
-      
+      }
+
       // Limpiar estado del usuario
       setUser(null);
-    
-    // Redirigir inmediatamente
+
+      // Redirigir inmediatamente
       window.location.href = '/';
     } catch (error) {
       console.error('Error en handleLogout:', error);
@@ -323,7 +324,7 @@ function AuthWrapper() {
   // Las funciones ya están memoizadas con useCallback, así que el objeto se recrea pero las funciones son estables
   const loginFn = useSupabase ? handleSupabaseLogin : handleDemoLogin;
   const signUpFn = useSupabase ? handleSupabaseSignUp : null;
-  
+
   const authValue = {
     user,
     isAuthenticated: !!user,
@@ -339,77 +340,78 @@ function AuthWrapper() {
   const LoadingFallback = () => {
     // Show Skeleton only for landing page
     if (window.location.pathname === '/landing') {
-        return <LandingSkeleton />;
+      return <LandingSkeleton />;
     }
 
     return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#0f172a',
-      color: 'white',
-      fontFamily: 'Inter, -apple-system, sans-serif'
-    }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{
-          width: '48px',
-          height: '48px',
-          border: '3px solid rgba(255, 255, 255, 0.1)',
-          borderTopColor: '#ffffff',
-          borderRadius: '50%',
-          animation: 'spin 0.8s linear infinite',
-          margin: '0 auto 16px'
-        }} />
-        <p style={{ opacity: 0.7 }}>Cargando...</p>
-        <style>{`
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#0f172a',
+        color: 'white',
+        fontFamily: 'Inter, -apple-system, sans-serif'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            border: '3px solid rgba(255, 255, 255, 0.1)',
+            borderTopColor: '#ffffff',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+            margin: '0 auto 16px'
+          }} />
+          <p style={{ opacity: 0.7 }}>Cargando...</p>
+          <style>{`
           @keyframes spin {
             to { transform: rotate(360deg); }
           }
         `}</style>
+        </div>
       </div>
-    </div>
-  );
+    );
   };
 
   return (
     <AuthContext.Provider value={authValue}>
       <BrowserRouter>
         <Suspense fallback={<LoadingFallback />}>
-        {user ? (
-          <Routes>
-            <Route path="/landing" element={<LandingPage />} />
-            <Route path="/profile" element={
-              <div className="app pro-theme">
-                <ProBackground />
-                <Navbar />
-                <main className="main-content">
-                  <UserProfile />
-                </main>
-              </div>
-            } />
-            <Route path="/backoffice" element={<AdminLayout />}>
+          {user ? (
+            <Routes>
+              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/payment" element={<PaymentPage />} />
+              <Route path="/profile" element={
+                <div className="app pro-theme">
+                  <ProBackground />
+                  <Navbar />
+                  <main className="main-content">
+                    <UserProfile />
+                  </main>
+                </div>
+              } />
+              <Route path="/backoffice" element={<AdminLayout />}>
                 <Route index element={<Navigate to="/backoffice/users" replace />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="users/:id" element={<AdminUserDetail />} />
                 <Route path="api-usage" element={<ApiUsageDashboard />} />
               </Route>
-            {/* Main App Route - Only matches root */}
-            <Route path="/" element={<AppB2B />} />
-            <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
-            {/* 404 Route - Catch all unknown */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        ) : (
-          <Routes>
-            <Route path="/landing" element={<LandingPage />} />
-            <Route path="/" element={<Login onLogin={handleDemoLogin} />} />
-            {/* 404 Route for unauthenticated users too */}
-            <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        )}
+              {/* Main App Route - Only matches root */}
+              <Route path="/" element={<AppB2B />} />
+              <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
+              {/* 404 Route - Catch all unknown */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          ) : (
+            <Routes>
+              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/" element={<Login onLogin={handleDemoLogin} />} />
+              {/* 404 Route for unauthenticated users too */}
+              <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          )}
         </Suspense>
       </BrowserRouter>
     </AuthContext.Provider>

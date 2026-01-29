@@ -302,7 +302,8 @@
 }
 
 
-:root {
+/* --- SCOPED VARIABLES FOR LANDING PAGE --- */
+.landing-page {
     --bg-dark: #020617;
     /* Slate 950 - Deepest Dark */
     --bg-card: #0f172a;
@@ -330,40 +331,36 @@
     box-sizing: border-box;
 }
 
-body {
-    margin: 0;
-    font-family: var(--font-body);
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
-    overflow-x: hidden;
-}
+/* Scoped body logic moved to .landing-page main selector below */
 
-h1,
-h2,
-h3,
-h4 {
+.landing-page h1,
+.landing-page h2,
+.landing-page h3,
+.landing-page h4 {
     margin: 0;
     font-family: var(--font-heading);
     font-weight: 400;
+    color: var(--text-primary);
+    /* FORCE WHITE ON HEADERS */
 }
 
-p {
+.landing-page p {
     margin: 0;
     line-height: 1.6;
     color: var(--text-secondary);
 }
 
-button {
+.landing-page button {
     font-family: var(--font-body);
 }
 
-ul {
+.landing-page ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-a {
+.landing-page a {
     text-decoration: none;
     color: inherit;
     transition: color 0.2s;
@@ -446,7 +443,7 @@ a {
     background: none;
     border: none;
     font-family: var(--font-body);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     /* Slight increase for readability */
     color: #ffffff;
     /* FORCE WHITE */
@@ -614,7 +611,9 @@ a {
 .trust-logos {
     display: flex;
     gap: 24px;
-    opacity: 0.5;
+    opacity: 0.8;
+    color: #94a3b8;
+    /* Slate 400 - Visible on dark */
     font-weight: 600;
     font-size: 1.1rem;
 }
@@ -1179,7 +1178,10 @@ a {
 }
 
 .stream-item {
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15, 23, 42, 0.95);
+    /* More opaque */
+    color: white;
+    /* Force white text */
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.05);
     padding: 12px 24px;
@@ -2180,5 +2182,261 @@ a {
     .roi-summary-banner p {
         font-size: 0.95rem;
         /* Reduced from 1.2rem */
+    }
+}
+
+/* --- NEW PRICING SECTION (Dynamic) --- */
+.landing-page .pricing-section-new {
+    padding: 120px 0;
+    position: relative;
+    background: #020617;
+    /* Ensure bg match */
+}
+
+/* Controls */
+.landing-page .pricing-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 60px;
+}
+
+.landing-page .toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(30, 41, 59, 0.5);
+    padding: 6px;
+    border-radius: 99px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.landing-page .toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 99px;
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+}
+
+.landing-page .toggle-btn.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.landing-page .save-badge {
+    font-size: 0.75rem;
+    color: #4ade80;
+    font-weight: 700;
+    background: rgba(74, 222, 128, 0.1);
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-left: 6px;
+}
+
+/* Grid */
+.landing-page .pricing-grid-new {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    align-items: flex-start;
+}
+
+/* Cards */
+.landing-page .plan-card-new {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    padding: 24px;
+    position: relative;
+    transition: transform 0.3s, border-color 0.3s;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.landing-page .plan-card-new:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.landing-page .plan-card-new.popular {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.9) 0%, #0f172a 100%);
+    border-color: var(--primary-glow);
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
+    transform: scale(1.05);
+    z-index: 2;
+}
+
+.landing-page .plan-card-new.popular:hover {
+    transform: scale(1.05) translateY(-5px);
+}
+
+.landing-page .popular-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.landing-page .plan-header-new h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.landing-page .plan-header-new p {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    height: 48px;
+    /* Alignment fix */
+}
+
+/* Price */
+.landing-page .plan-price-new {
+    margin-top: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    color: white;
+}
+
+.landing-page .plan-price-new .currency {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+.landing-page .plan-price-new .amount {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1;
+    font-family: var(--font-body);
+    /* Modern sans for numbers */
+}
+
+.landing-page .plan-price-new .period {
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.landing-page .iva-note {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: -16px;
+    margin-bottom: 24px;
+    font-style: italic;
+}
+
+/* Features */
+.landing-page .plan-features-new {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 32px 0;
+    flex-grow: 1;
+}
+
+.landing-page .plan-features-new li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+    color: #cbd5e1;
+    font-size: 1rem;
+}
+
+.landing-page .plan-features-new li svg {
+    color: var(--primary);
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+.landing-page .plan-features-new li.disabled {
+    color: #475569;
+}
+
+.landing-page .plan-features-new li.disabled svg {
+    color: #475569;
+}
+
+/* Buttons */
+.landing-page .plan-btn-new {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    text-transform: uppercase;
+}
+
+.landing-page .plan-btn-new.primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.landing-page .plan-btn-new.primary:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.landing-page .plan-btn-new.secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.landing-page .plan-btn-new.secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .landing-page .pricing-grid-new {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .landing-page .plan-card-new.popular {
+        grid-column: span 2;
+        transform: scale(1);
+    }
+
+    .landing-page .plan-card-new.popular:hover {
+        transform: translateY(-5px);
+    }
+}
+
+@media (max-width: 768px) {
+    .landing-page .pricing-grid-new {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-page .plan-card-new.popular {
+        grid-column: auto;
     }
 }
