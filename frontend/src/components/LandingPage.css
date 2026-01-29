@@ -405,7 +405,7 @@ a {
 }
 
 .landing-header:hover {
-    border-color: rgba(255, 255, 255, 0.2);
+    /* border-color: rgba(255, 255, 255, 0.2); REMOVED per user request */
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -446,15 +446,25 @@ a {
     background: none;
     border: none;
     font-family: var(--font-body);
-    font-size: 0.9rem;
-    color: var(--text-secondary);
+    font-size: 0.95rem;
+    /* Slight increase for readability */
+    color: #ffffff;
+    /* FORCE WHITE */
     cursor: pointer;
     transition: color 0.2s;
-    padding: 4px 8px;
+    padding: 4px 12px;
+    font-weight: 500;
+    opacity: 0.9;
 }
 
 .main-nav button:hover {
-    color: white;
+    color: #38bdf8;
+    /* Celeste / Light Blue */
+    opacity: 1;
+    border: none !important;
+    /* Explicitly prevent border */
+    background: none !important;
+    /* Explicitly prevent background */
 }
 
 .btn-primary-small {
