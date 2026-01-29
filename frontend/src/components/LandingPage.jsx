@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FiArrowRight,
@@ -20,68 +20,105 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Pricing State
+  // Pricing state
   const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' | 'yearly'
-  const [currency, setCurrency] = useState('ARS'); // 'ARS' | 'USD'
+  const [currency, setCurrency] = useState('USD'); // Default a USD como pidió
+  const [exchangeRate, setExchangeRate] = useState(1200); 
+  
   const isYearly = billingCycle === 'yearly';
+
+  // Fetch Dolar Blue
+  useEffect(() => {
+    const fetchDolar = async () => {
+      try {
+        const res = await fetch('https://api.bluelytics.com.ar/v2/latest');
+        const data = await res.json();
+        if (data && data.blue && data.blue.value_sell) {
+            // Dolar Blue PURO (sin recargo, a pedido del usuario)
+            const blueRate = data.blue.value_sell;
+            setExchangeRate(blueRate);
+            console.log(`Dolar Blue: ${blueRate}`);
+        }
+      } catch (e) {
+        console.warn('Error fetching dolar blue:', e);
+      }
+    };
+    fetchDolar();
+  }, []);
 
   const plans = [
     {
-      id: 'trial',
-      name: 'Plan Gratuito',
-      description: 'Para probar la plataforma sin riesgos.',
-      price: { USD: 0, ARS: 0 },
-      credits: 50,
+      id: 'starter',
+      name: 'Starter',
+      description: 'Para freelancers que recién empiezan.',
+      price: { USD: 26, localUSD: 20 },
+      credits: 1000,
       features: [
-        { text: '50 Créditos de prueba', included: true },
-        { text: 'Búsqueda básica', included: true },
-        { text: 'Acceso a Google Places', included: false },
-        { text: 'Exportación de datos', included: false },
+        { text: '1,000 Créditos mensuales', included: true },
+        { text: 'Expectativa de cerrar ~200 clientes', included: true },
+        { text: 'Acceso a Búsqueda Local', included: true },
       ],
-      buttonText: 'Comenzar Gratis',
+      buttonText: 'Comenzar Starter',
       buttonClass: 'btn-secondary',
       popular: false
     },
     {
-      id: 'starter',
-      name: 'Starter',
-      description: 'Ideal para emprendedores.',
-      price: { USD: 29, ARS: 29000 },
-      credits: 1000,
+      id: 'growth',
+      name: 'Growth',
+      description: 'El plan ideal para PYMES.',
+      price: { USD: 49, localUSD: 40 },
+      credits: 3000,
       features: [
-        { text: '1,000 Créditos mensuales', included: true },
-        { text: 'Acceso a Google Maps API', included: true },
-        { text: 'Exportación CSV', included: true },
-        { text: 'Soporte por email', included: true },
+        { text: '3,000 Créditos mensuales', included: true },
+        { text: 'Expectativa de cerrar ~600 clientes', included: true },
+        { text: 'Prioridad en búsquedas', included: true },
+        { text: 'Próximamente: Nuevas funciones', included: true },
       ],
-      buttonText: 'Suscribirse',
+      buttonText: 'Elegir Growth',
       buttonClass: 'btn-primary',
       popular: true
     },
     {
-      id: 'pro',
-      name: 'Pro Agency',
-      description: 'Para agencias que buscan escalar.',
-      price: { USD: 79, ARS: 79000 },
-      credits: 5000,
+      id: 'scale',
+      name: 'Scale',
+      description: 'Volumen alto para Agencias.',
+      price: { USD: 149, localUSD: 120 },
+      credits: 10000,
       features: [
-        { text: '5,000 Créditos mensuales', included: true },
-        { text: 'Prioridad en búsquedas', included: true },
-        { text: 'Exportación CSV y PDF', included: true },
-        { text: 'Enriquecimiento (Redes)', included: true },
+        { text: '10,000 Créditos mensuales', included: true },
+        { text: 'Expectativa de cerrar ~2,000 clientes', included: true },
+        { text: 'API Access (Beta)', included: true },
+        { text: 'Próximamente: Nuevas funciones', included: true },
       ],
-      buttonText: 'Mejorar a Pro',
+      buttonText: 'Contactar Ventas',
       buttonClass: 'btn-secondary',
       popular: false
     }
   ];
 
   const getPrice = (plan) => {
-    let basePrice = plan.price[currency];
-    if (isYearly) {
-      basePrice = basePrice * 0.8; // 20% descuento
+    let finalPrice;
+
+    if (currency === 'ARS') {
+        // Precio en ARS = Valor Local en USD * Dolar Blue
+        // Si no hay localUSD definido (fallback), usa el USD global, pero con el cambio del día.
+        finalPrice = (plan.price.localUSD || plan.price.USD) * exchangeRate;
+    } else {
+        // Precio en USD Global
+        finalPrice = plan.price.USD;
     }
-    return isYearly ? Math.floor(basePrice) : basePrice;
+    
+    // Si es anual, descuento del 20%
+    if (isYearly) {
+      finalPrice = finalPrice * 0.8;
+    }
+
+    if (currency === 'ARS') {
+        // Redondear a miles más cercanos para estética en pesos
+        return Math.floor(finalPrice / 100) * 100; 
+    } else {
+        return Math.ceil(finalPrice);
+    }
   };
 
   const handlePlanSelect = (planId) => {
@@ -652,37 +689,38 @@ const LandingPage = () => {
           <div className="section-header center" style={{ marginBottom: '40px' }}>
             <h2>Elige el plan para tu crecimiento</h2>
             <p>
-              Comienza gratis, escala cuando lo necesites. Cancela en cualquier momento.
+              Escala cuando lo necesites. Cancela en cualquier momento.
             </p>
           </div>
 
           <div className="pricing-controls">
-            {/* Currency Toggle */}
-            <div className="toggle-group">
-              <button
-                className={`toggle-btn ${currency === 'ARS' ? 'active' : ''}`}
+            {/* Currency Toggle (Minimal Text Tabs) */}
+            <div className="currency-selector">
+              <button 
+                className={currency === 'ARS' ? 'active' : ''} 
                 onClick={() => setCurrency('ARS')}
               >
-                🇦🇷 ARS
+                 🇦🇷 ARS
               </button>
-              <button
-                className={`toggle-btn ${currency === 'USD' ? 'active' : ''}`}
+              <span className="divider">|</span>
+              <button 
+                className={currency === 'USD' ? 'active' : ''} 
                 onClick={() => setCurrency('USD')}
               >
-                🌎 USD
+                 🌎 USD
               </button>
             </div>
-
-            {/* Cycle Toggle */}
-            <div className="toggle-group">
+            
+            {/* Cycle Toggle (Prominent Pill) */}
+            <div className="billing-toggle-pill">
               <button
-                className={`toggle-btn ${!isYearly ? 'active' : ''}`}
+                className={!isYearly ? 'active' : ''}
                 onClick={() => setBillingCycle('monthly')}
               >
                 Mensual
               </button>
               <button
-                className={`toggle-btn ${isYearly ? 'active' : ''}`}
+                className={isYearly ? 'active' : ''}
                 onClick={() => setBillingCycle('yearly')}
               >
                 Anual <span className="save-badge">-20%</span>
@@ -690,46 +728,59 @@ const LandingPage = () => {
             </div>
           </div>
 
-          <div className="pricing-grid-new">
-            {plans.map((plan) => (
-              <div key={plan.id} className={`plan-card-new ${plan.popular ? 'popular' : ''}`}>
-                {plan.popular && <div className="popular-badge">MÁS ELEGIDO</div>}
+            {/* Wrapper for Grid + Bubble to align bubble to grid */}
+            <div className="pricing-content-wrapper" style={{ position: 'relative' }}>
+              
+              <div className="pricing-grid-new">
+                {plans.map((plan) => (
+                  <div key={plan.id} className={`plan-card-new ${plan.popular ? 'popular' : ''}`}>
+                    {plan.popular && <div className="popular-badge">MÁS ELEGIDO</div>}
 
-                <div className="plan-header-new">
-                  <h3>{plan.name}</h3>
-                  <p>{plan.description}</p>
-                </div>
+                    <div className="plan-header-new">
+                      <h3>{plan.name}</h3>
+                      <p>{plan.description}</p>
+                    </div>
 
-                <div className="plan-price-new">
-                  <span className="currency">{currency === 'USD' ? '$' : '$'}</span>
-                  <span className="amount">{getPrice(plan).toLocaleString()}</span>
-                  <span className="period">/{isYearly ? 'mes' : 'mes'}</span>
-                </div>
+                    <div className="plan-price-new">
+                      <span className="currency">{currency === 'USD' ? '$' : '$'}</span>
+                      <span className="amount">{getPrice(plan).toLocaleString()}</span>
+                      <span className="period">/{isYearly ? 'mes' : 'mes'}</span>
+                    </div>
 
-                {currency === 'ARS' && plan.price.ARS > 0 && (
-                  <p className="iva-note">+ IVA (21%)</p>
-                )}
+                    <ul className="plan-features-new">
+                      {plan.features.map((feature, idx) => (
+                        <li key={idx} className={!feature.included ? 'disabled' : ''}>
+                          {feature.included ? <FiCheck /> : <FiX style={{ opacity: 0.5 }} />}
+                          {feature.text}
+                        </li>
+                      ))}
+                    </ul>
 
-                <ul className="plan-features-new">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className={!feature.included ? 'disabled' : ''}>
-                      {feature.included ? <FiCheck /> : <FiX style={{ opacity: 0.5 }} />}
-                      {feature.text}
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  className={`plan-btn-new ${plan.buttonClass === 'btn-primary' ? 'primary' : 'secondary'}`}
-                  onClick={() => handlePlanSelect(plan.id)}
-                >
-                  {plan.buttonText}
-                </button>
+                    <button
+                      className={`plan-btn-new ${plan.buttonClass === 'btn-primary' ? 'primary' : 'secondary'}`}
+                      onClick={() => handlePlanSelect(plan.id)}
+                    >
+                      {plan.buttonText}
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+
+              {/* Extra Credits Text Line */}
+              <div className="extra-credits-text" style={{ 
+                  textAlign: 'center', 
+                  marginTop: '40px', 
+                  color: 'white',
+                  fontSize: '0.9rem'
+              }}>
+                <p>¿Necesitas más capacidad? Packs de créditos extra disponibles desde <strong style={{ color: '#4ade80' }}>$1 USD</strong>.</p>
+              </div>
+            
+            </div>
+
         </div>
       </section>
+
 
       {/* --- FOOTER --- */}
       <footer className="footer-section">

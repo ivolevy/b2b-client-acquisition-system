@@ -1,116 +1,111 @@
-# Sistema de Facturación y Suscripciones (Billing Plan)
+# INGENIERÍA DE PRECIOS Y COSTOS (Desglose Detallado)
 
-## 1. Visión General del Modelo
-El sistema utiliza un **Modelo Híbrido** para equilibrar la calidad de datos y los costos operativos:
--   **Google Maps Platform (GMP)**: Datos de alta calidad, costo variable alto.
--   **Scraping/OSM**: Datos de respaldo, costo bajo.
-
-Para gestionar esto de manera rentable, implementaremos un **Sistema de Créditos**.
+Este documento justifica matemáticamente cada decisión de precios, créditos y automatización.
 
 ---
 
-## 2. Estrategia de Precios y Créditos
+## 1. LA UNIDAD ATÓMICA: EL CRÉDITO
+**Aquí está la clave para no confundirse:**
 
-### El Sistema de Créditos
-Los créditos actúan como la moneda interna de la plataforma, permitiendo atribuir costos diferentes a acciones diferentes.
+*   **Tu Costo (Lo que pagas a Google):** ~$0.03 USD por **LEAD** (Empresa con teléfono/web).
+*   **Tu Precio (Lo que cobras al usuario):**
+    *   1 Lead = **5 Créditos**.
+    *   En el Plan Starter ($26/1000 créditos), cada crédito vale **$0.026 USD**.
+    *   Por tanto, tú cobras por ese lead: 5 * $0.026 = **$0.13 USD**.
 
-| Acción | Costo en Créditos | Justificación |
-| :--- | :--- | :--- |
-| **Búsqueda Básica (Scraper)** | 1 Crédito / lead | Bajo costo de obtención. |
-| **Búsqueda Premium (Google API)** | 5 Créditos / lead | Costo directo de API de Google ($0.017 - $0.03 / req). |
-| **Enriquecimiento de Email** | 10 Créditos / lead | Alto valor, requiere validación externa o procesos costosos. |
-| **Exportar Datos** | 0.5 Créditos / registro | Incentiva el uso dentro de la plataforma. |
+**LA CUENTA FINAL (Por cada Lead de Google):**
+1.  Tú cobras: **$0.13**
+2.  Tú pagas: **$0.03**
+3.  **GANANCIA**: **$0.10 USD (Margen del 333%)**.
+    *   *No estás perdiendo, estás triplicando tu inversión.*
 
-### Niveles de Suscripción (Tiers)
+### Costo de Materia Prima (Google Places API)
+*   **Petición "Nearby Search"**: Para encontrar empresas. Costo: Bajo.
+*   **Petición "Place Details"**: Para obtener teléfono y web. Costo: **~$0.02 - $0.03 USD** por empresa.
+*   **Promedio Ponderado**: Asumimos un costo de riesgo de **$0.03 USD** por lead verificado.
 
-#### **1. Plan Gratuito (Trial)**
-*   **Precio:** $0 / mes
-*   **Créditos:** 50 (Única vez)
-*   **Funcionalidades:**
-    *   Acceso básico al buscador (solo Scraper).
-    *   Sin exportación.
-    *   Límite de 1 búsqueda diaria.
-
-#### **2. Plan Starter (Emprendedor)**
-*   **Precio Estimado:** $29 USD / mes
-*   **Créditos Mensuales:** 1,000
-*   **Funcionalidades:**
-    *   Acceso a Google Places API (Límite mensual).
-    *   Exportación CSV.
-    *   Soporte por email.
-
-#### **3. Plan Pro (Agencia)**
-*   **Precio Estimado:** $79 USD / mes
-*   **Créditos Mensuales:** 5,000
-*   **Funcionalidades:**
-    *   Prioridad en búsquedas.
-    *   Enriquecimiento de datos (Emails, Redes Sociales).
-    *   API Access (Rate limited).
-    *   Soporte prioritario.
-
-#### **4. Enterprise**
-*   **Precio:** Personalizado
-*   **Créditos:** Ilimitados / A medida
-*   **Funcionalidades:**
-    *   Instancia dedicada.
-    *   Integraciones CRM personalizadas.
+### Nuestra Moneda (1 Lead Google = 5 Créditos)
+*   **Por esto usamos 5 créditos y no 1.** El multiplicador x5 es lo que genera tu margen de ganancia.
 
 ---
 
-## 3. Arquitectura Técnica
+## 2. ANÁLISIS DE PLANES (JUSTIFICACIÓN MATEMÁTICA)
 
-### Pasarelas de Pago (Payment Gateways)
-Se integrarán dos proveedores principales para cubrir LATAM y el mercado global:
-1.  **MercadoPago**: Principal para Argentina y LATAM (Cobro en moneda local).
-2.  **PayPal / Stripe**: Para clientes internacionales (Cobro en USD).
+### � PLAN STARTER ($26 USD)
+¿Por qué $26 y 1,000 créditos?
 
-### Esquema de Base de Datos (Supabase)
+1.  **Matemática del Usuario (Valor percibido)**
+    *   1,000 Créditos = **200 Leads Verificados de Google**.
+    *   Si el usuario tiene una tasa de cierre del 5%, de 200 leads saca **10 clientes**.
+    *   Si cobra $300 por cliente, gana $3,000.
+    *   **ROI para el usuario**: Paga $26, gana $3,000. Es una oferta "No-Brainer".
 
-#### Tabla `subscriptions`
-```sql
-create table subscriptions (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references auth.users not null,
-  status text check (status in ('active', 'past_due', 'canceled', 'trial')),
-  tier_id text not null, -- 'starter', 'pro', etc.
-  current_period_start timestamp with time zone,
-  current_period_end timestamp with time zone,
-  payment_provider text, -- 'mercadopago', 'stripe'
-  subscription_external_id text -- ID en MP/Stripe
-);
-```
+2.  **Nue### Estrategia de Precios (Suscripción Mensual)
 
-#### Tabla `credits_ledger` (Historial y Balance)
-```sql
-create table credits_ledger (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references auth.users not null,
-  amount int not null, -- Positivo (carga) o Negativo (uso)
-  description text, -- 'Búsqueda GMP', 'Recarga Mensual'
-  created_at timestamp with time zone default now()
-);
+| Plan | Precio Global (USD) | Precio Local Base (USD) | Precio ARS (Estimado Blue $1485) | Créditos |
+| :--- | :--- | :--- | :--- | :--- |
+| **Starter** | $26 | **$20** | ~$29.700 | 1,000 |
+| **Growth** | $49 | **$40** | ~$59.400 | 3,000 |
+| **Scale** | $149 | **$120** | ~$178.200 | 10,000 |
 
--- Vista para balance rápido
-create view user_credit_balance as
-select user_id, sum(amount) as balance
-from credits_ledger
-group by user_id;
-```
+*   **Moneda Base:** USD.
+*   **Conversión ARS:** Se usa el valor de **Venta del Dólar Blue** en tiempo real (API Bluelytics) **SIN recargo extra**.
+*   **Lógica Local:** Se definieron precios base diferenciados para Argentina ($20/$40/$120) para mantener competitividad local.
+*   **Descuento Anual:** 20% en todos los planes.s fijos con pocos usuarios.
 
-### Seguridad y Validaciones
-1.  **Webhooks**:
-    *   Endpoints dedicados para recibir notificaciones de pago (API Route `/api/webhooks/mercadopago`).
-    *   Verificación de firma (Signature verification) para evitar fraudes.
-2.  **Rate Limiting**:
-    *   Evitar el abuso de la API de Google mediante límites estrictos por usuario basados en su plan.
-    *   Implementado en el backend (Edge Functions o Middleware).
-3.  **Idempotencia**:
-    *   Asegurar que los eventos de pago no se procesen dos veces (usando `event_id` en la base de datos).
+###  PLAN GROWTH ($49 USD)
+¿Por qué $49 y 3,000 créditos?
+
+1.  **Incentivo de Upgrade**
+    *   En Starter: 1000 créditos por $26 -> **$0.026** por crédito.
+    *   En Growth: 3000 créditos por $49 -> **$0.016** por crédito.
+    *   **Justificación:** El usuario recibe un **38% de descuento** en el costo del dato al subir de plan. Esto incentiva fuertemente pagar los $49.
+
+2.  **Nuestra Rentabilidad**
+    *   Costo Variable Máx: 3000 * $0.005 = **-$15.00**
+    *   Costo Pasarela: **-$2.45**
+    *   **UTILIDAD BRUTA:** $49 - $17.45 = **$31.55**.
+    *   **Conclusión:** Ganamos más dinero nominal ($31 vs $19) aunque el margen porcentual baje (64% vs 75%). Nos conviene vender este plan.
+
+### 🥇 PLAN SCALE ($149 USD)
+¿Por qué $149 y 10,000 créditos?
+
+1.  **Justificación**
+    *   Precio por crédito: **$0.0149**. El más barato del mercado.
+    *   Para agencias que necesitan volumen (2,000 leads/mes).
+    *   **Nuestra ganancia:** ~$90 USD limpios por mes de un solo cliente.
 
 ---
 
-## 4. Gestión de Costos y Rentabilidad
-Para asegurar que el sistema sea rentable:
-*   **Caching Agresivo**: Guardar resultados de Google Places en nuestra BD. Si otro usuario busca lo mismo, servir desde la BD costo $0.
-*   **Límites Duros**: Si un usuario agota sus créditos, el servicio se detiene inmediatamente hasta la recarga o renovación.
-*   **Monitoreo**: Alertas automáticas si el consumo de la API de Google excede un umbral diario.
+## 3. AUTOMATIZACIÓN (POR QUÉ ES OBLIGATORIA)
+
+El usuario mencionó: *"¿Es mejor manual o automático?"*.
+**Respuesta: DEBE ser Automático.**
+
+### El Costo Oculto de lo Manual
+Si un pago de $26 falla y tú tienes que:
+1.  Darle de baja manual en la BD (5 min).
+2.  Mandar un mail reclamando (5 min).
+3.  Revisar si pagó (5 min).
+4.  Reactivarlo (5 min).
+**Total: 20 minutos de trabajo.**
+*   Si tu hora vale $50, gastaste **$16 en gestión manual**.
+*   Te comiste casi toda la ganancia del mes ($19.70).
+*   **Conclusión:** Gestionar cobros manualmente hace que el negocio no sea escalable.
+
+### Lógica de "Soft Disable" (Implementación)
+Para no ser agresivos ("Baneo"), usamos una lógica suave:
+1.  **Trigger:** Webhook de Stripe/MP dice `payment_failed`.
+2.  **Acción DB:** Campo `status` pasa a `past_due`.
+3.  **UX:** El usuario puede entrar, ver sus leads viejos, pero el botón "Buscar" está grisado.
+4.  **Mensaje:** "Tu suscripción venció. Actualiza pago para reactivar búsqueda."
+5.  **Resultado:** El usuario se autogestiona. Costo para ti: $0.
+
+---
+
+## 4. GESTIÓN DE RECARGAS (PACKS)
+¿Por qué venta de unidades sueltas?
+
+*   Si un usuario necesita 50 créditos más para terminar el día, no va a pagar $49 por el plan siguiente.
+*   Le vendemos un "Minipack" de $10.
+*   **Margen Pack:** Es venta pura, usualmente con menos descuento que la suscripción. Es "Easy Money".
