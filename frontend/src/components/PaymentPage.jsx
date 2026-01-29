@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import { FaArrowLeft, FaCheckCircle, FaLock, FaCreditCard, FaPaypal } from 'react-icons/fa';
-import './PaymentPage.css'; // We will create this next
+
 
 const PaymentPage = () => {
     const [searchParams] = useSearchParams();
