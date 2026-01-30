@@ -22,7 +22,7 @@ const LandingPage = () => {
 
   // Pricing state
   const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' | 'yearly'
-  const [currency, setCurrency] = useState('USD'); // Default a USD como pidió
+  const [currency, setCurrency] = useState('ARS'); // Default a ARS como pidió
   const [exchangeRate, setExchangeRate] = useState(1200); 
   
   const isYearly = billingCycle === 'yearly';
@@ -122,7 +122,8 @@ const LandingPage = () => {
   };
 
   const handlePlanSelect = (planId) => {
-    navigate(`/payment?plan=${planId}&cycle=${billingCycle}&currency=${currency}`);
+    // Redirect to public checkout page with params
+    navigate(`/checkout?plan=${planId}&cycle=${billingCycle}&currency=${currency}`);
   };
 
   const scrollToSection = (id) => {

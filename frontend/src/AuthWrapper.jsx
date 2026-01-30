@@ -20,6 +20,8 @@ const ApiUsageDashboard = lazy(() => import('./components/admin/ApiUsageDashboar
 const NotFound = lazy(() => import('./components/NotFound'));
 const OAuthCallback = lazy(() => import('./components/OAuthCallback'));
 const PaymentPage = lazy(() => import('./components/PaymentPage'));
+const CheckoutPage = lazy(() => import('./components/CheckoutPage'));
+const PaymentSuccessPage = lazy(() => import('./components/PaymentSuccessPage'));
 import LandingSkeleton from './components/LandingSkeleton'; // Eager load for instant feedback
 
 // Contexto de autenticación
@@ -378,40 +380,44 @@ function AuthWrapper() {
     <AuthContext.Provider value={authValue}>
       <BrowserRouter>
         <Suspense fallback={<LoadingFallback />}>
-          {user ? (
-            <Routes>
-              <Route path="/landing" element={<LandingPage />} />
-              <Route path="/payment" element={<PaymentPage />} />
-              <Route path="/profile" element={
-                <div className="app pro-theme">
-                  <ProBackground />
-                  <Navbar />
-                  <main className="main-content">
-                    <UserProfile />
-                  </main>
-                </div>
-              } />
-              <Route path="/backoffice" element={<AdminLayout />}>
-                <Route index element={<Navigate to="/backoffice/users" replace />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="users/:id" element={<AdminUserDetail />} />
-                <Route path="api-usage" element={<ApiUsageDashboard />} />
-              </Route>
-              {/* Main App Route - Only matches root */}
-              <Route path="/" element={<AppB2B />} />
-              <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
-              {/* 404 Route - Catch all unknown */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          ) : (
-            <Routes>
-              <Route path="/landing" element={<LandingPage />} />
-              <Route path="/" element={<Login onLogin={handleDemoLogin} />} />
-              {/* 404 Route for unauthenticated users too */}
-              <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          )}
+          <Routes>
+            {/* PUBLIC ROUTES (Accessible to everyone) */}
+            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/payment-success" element={<PaymentSuccessPage />} />
+            <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
+
+            {/* AUTHENTICATED ROUTES */}
+            {user ? (
+              <>
+                <Route path="/profile" element={
+                  <div className="app pro-theme">
+                    <ProBackground />
+                    <Navbar />
+                    <main className="main-content">
+                      <UserProfile />
+                    </main>
+                  </div>
+                } />
+                <Route path="/backoffice" element={<AdminLayout />}>
+                  <Route index element={<Navigate to="/backoffice/users" replace />} />
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route path="users/:id" element={<AdminUserDetail />} />
+                  <Route path="api-usage" element={<ApiUsageDashboard />} />
+                </Route>
+                {/* Main App Route - Only matches root */}
+                <Route path="/" element={<AppB2B />} />
+              </>
+            ) : (
+              /* GUEST ROUTES */
+              <>
+                <Route path="/" element={<Login onLogin={handleDemoLogin} />} />
+              </>
+            )}
+
+            {/* 404 Route - Catch all unknown */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </Suspense>
       </BrowserRouter>
     </AuthContext.Provider>

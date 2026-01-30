@@ -108,4 +108,82 @@ Para no ser agresivos ("Baneo"), usamos una lógica suave:
 
 *   Si un usuario necesita 50 créditos más para terminar el día, no va a pagar $49 por el plan siguiente.
 *   Le vendemos un "Minipack" de $10.
-*   **Margen Pack:** Es venta pura, usualmente con menos descuento que la suscripción. Es "Easy Money".
+---
+
+## 5. CÓMO FUNCIONA EL SISTEMA (Simple)
+
+### Suscripción vs. Créditos
+Hay dos reglas de oro para entender si un usuario puede usar el sistema:
+
+1.  **¿Pagó el mes? (Estado de Cuenta)**
+    *   **Al día**: Puede usar todo.
+    *   **Vencido**: Si el pago falló, la cuenta se **congela**. No puede buscar nada hasta que regularice (aunque le sobren créditos).
+
+2.  **¿Tiene saldo? (Créditos)**
+    *   **Tiene saldo**: Busca y revela datos normalmente.
+    *   **Saldo 0**: La cuenta sigue activa (puede entrar y ver historial), pero no puede revelar *nuevos* contactos.
+    *   **Solución**: Compra un "Pack de Recargas" o espera al mes siguiente.
+
+---
+
+### Tecnología de Pagos y Comisiones
+
+Elegimos lo mejor para cada región y detallamos sus costos:
+
+#### 🇦🇷 Para Argentina: **MercadoPago**
+*   **Moneda**: Pesos (ARS).
+*   **Ventaja**: El usuario paga en su moneda local.
+*   **Método**: Débito automático (Suscripción).
+*   **Costo para vos**: **~7% a 8%** (Comisión 6.99% + IVA por liquidez inmediata).
+
+#### 🌍 Para el Mundo: **Stripe**
+*   **Moneda**: Dólares (USD).
+*   **Ventaja**: Estándar mundial, acepta todas las tarjetas.
+*   **Método**: Stripe Checkout.
+*   **Costo para vos**: **~3.5%** (2.9% + USD 0.30 fijos). **Es la opción más barata.**
+
+### Rentabilidad: Factores Clave (Bonus)
+
+Tus números reales van a ser **MEJORES** que los de arriba por dos razones:
+
+#### 1. El Bono de Google ($200 USD Gratis)
+Google Cloud te regala $200 USD de crédito todos los meses.
+*   Esto cubre el costo API de tus primeros **~40 Clientes Starter**.
+*   **Significado**: Hasta que no tengas 40 clientes, **tu costo de API es $0**. Todo el ingreso es ganancia pura (menos comisión pasarela).
+
+#### 2. Tasa de Uso (No todos gastan todo)
+El cálculo de arriba es el "Peor Caso" (consumen al 100%).
+*   La realidad es que muchos usuarios consumen el 40-60% de sus créditos.
+*   Si un usuario Starter solo gasta 500 créditos (en vez de 1000), tu costo baja a la mitad ($2.50) y tu ganancia sube a **$22.45**.
+
+---
+
+### Rentabilidad Real (Escenario PEOR CASO - 100% Consumo)
+
+> [!WARNING]
+> **IMPORTANTE: Estos números son una SIMULACIÓN de MÁXIMO costo.**
+> Asumen que el usuario gasta el 100% de sus créditos.
+> En la vida real, el consumo variará. En el Dashboard se trackeará el **Costo Real Exacto** por usuario basado en su consumo de API verídico, no en este promedio.
+
+Aquí diferenciamos el precio Internacional vs. el precio Local (Argentina). Asumimos que **YA GASTASTE** tu bono gratis y que el usuario **SE GASTÓ TODO**.
+
+#### 1. Plan Starter
+*   **INTERNACIONAL ($26 USD)**
+    *   **Stripe**: $26.00 - $1.05 (Fee) - $5.00 (Google) = **$19.95** (Margen 76%)
+    *   **PayPal**: $26.00 - $1.70 (Fee) - $5.00 (Google) = **$19.30** (Margen 74%)
+*   **ARGENTINA ($20 USD)**
+    *   **MercadoPago**: $20.00 - $1.60 (Fee) - $5.00 (Google) = **$13.40** (Margen 67%)
+
+#### 2. Plan Growth
+*   **INTERNACIONAL ($49 USD)**
+    *   **Stripe**: $49.00 - $1.72 (Fee) - $15.00 (Google) = **$32.28** (Margen 66%)
+    *   **PayPal**: $49.00 - $2.95 (Fee) - $15.00 (Google) = **$31.05** (Margen 63%)
+*   **ARGENTINA ($40 USD)**
+    *   **MercadoPago**: $40.00 - $3.20 (Fee) - $15.00 (Google) = **$21.80** (Margen 54%)
+
+#### 3. Plan Scale
+*   **INTERNACIONAL ($149 USD)**
+    *   **Stripe**: $149.00 - $4.62 (Fee) - $50.00 (Google) = **$94.38** (Margen 63%)
+    *   **PayPal**: $149.00 - $8.35 (Fee) - $50.00 (Google) = **$90.65** (Margen 60%)
+*   **ARGENTINA ($120 USD)**
+    *   **MercadoPago**: $120.00 - $9.60 (Fee) - $50.00 (Google) = **$60.40** (Margen 50%)
