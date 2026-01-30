@@ -529,6 +529,14 @@ async def create_mp_preference(req: MPPreferenceRequest):
                     "currency_id": "ARS"
                 }
             ],
+            "payer": {
+                "email": req.email,
+                "first_name": req.name,
+                "phone": {
+                    "area_code": "",
+                    "number": req.phone
+                }
+            },
             "back_urls": {
                 "success": f"{os.getenv('FRONTEND_URL')}/payment-success",
                 "failure": f"{os.getenv('FRONTEND_URL')}/landing",
