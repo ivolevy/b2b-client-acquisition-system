@@ -12,6 +12,8 @@ const CheckoutPage = () => {
   const currency = searchParams.get('currency') || 'ARS'; // 'ARS' or 'USD'
 
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
 
@@ -20,6 +22,20 @@ const CheckoutPage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       if (user?.email) setEmail(user.email);
+      
+      if (user) {
+        // Fetch profile data for name and phone
+        const { data: profile } = await supabase
+          .from('users')
+          .select('name, phone')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          if (profile.name) setName(profile.name);
+          if (profile.phone) setPhone(profile.phone);
+        }
+      }
     };
     fetchUser();
   }, []);
@@ -58,8 +74,8 @@ const CheckoutPage = () => {
   const cycleLabel = cycle === 'yearly' ? 'anual' : 'mensual';
 
   const handlePayment = async () => {
-    if (!email) {
-      alert("Por favor ingresá tu email para continuar.");
+    if (!email || !name || !phone) {
+      alert("Por favor completá todos los campos para continuar.");
       return;
     }
     
@@ -73,6 +89,9 @@ const CheckoutPage = () => {
         body: JSON.stringify({
           plan_id: planId,
           user_id: user?.id || 'anonymous',
+          email: email,
+          name: name,
+          phone: phone,
           amount: finalPrice,
           description: `Suscripción B2B - ${selectedPlan.name}`
         })
@@ -146,6 +165,52 @@ const CheckoutPage = () => {
             <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <FiLock size={12} /> Tus datos están encriptados y seguros.
             </p>
+          </div>
+
+          {/* Name Input */}
+          <div style={{ marginBottom: '30px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
+              Nombre Completo
+            </label>
+            <input 
+              type="text" 
+              placeholder="Ej: Juan Pérez" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '16px 20px',
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
+                fontSize: '16px',
+                background: '#f8fafc',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
+            />
+          </div>
+
+          {/* Phone Input */}
+          <div style={{ marginBottom: '30px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
+              Teléfono de Contacto
+            </label>
+            <input 
+              type="tel" 
+              placeholder="Ej: +54 9 11 1234-5678" 
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '16px 20px',
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
+                fontSize: '16px',
+                background: '#f8fafc',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
+            />
           </div>
 
           {/* Payment Method Display (Locked based on logic) */}

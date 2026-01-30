@@ -633,6 +633,129 @@ def get_current_month_usage() -> float:
         logger.error(f"Error obteniendo uso mensual: {e}")
         return 0.0
 
+async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, external_id: str, email: str = None, name: str = None, phone: str = None):
+    """
+    Registra el pago, acredita puntos y CREA el usuario si no existe.
+    """
+    try:
+        admin_client = get_supabase_admin()
+        if not admin_client:
+            logger.error("No se pudo obtener el cliente admin")
+            return False
+            
+        # 1. ¿El usuario ya es real en Auth?
+        final_user_id = user_id
+        is_new_user = False
+        
+        # Si vino como 'anonymous' o no tenemos un UUID válido, buscamos por email
+        if user_id == 'anonymous' or not user_id:
+            # Buscar si el email ya existe en public.users
+            res_user = admin_client.table("users").select("id").eq("email", email).execute()
+            if res_user.data:
+                final_user_id = res_user.data[0]["id"]
+            else:
+                # CREAR NUEVO USUARIO EN AUTH
+                import secrets
+                import string
+                temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+                
+                logger.info(f"Creando nuevo usuario para {email}...")
+                new_user = admin_client.auth.admin.create_user({
+                    "email": email,
+                    "password": temp_password,
+                    "email_confirm": True,
+                    "user_metadata": {"full_name": name}
+                })
+                
+                if new_user.user:
+                    final_user_id = new_user.user.id
+                    is_new_user = True
+                    logger.info(f"Usuario creado con ID: {final_user_id}")
+                else:
+                    logger.error(f"Error creando usuario: {new_user}")
+                    return False
+
+        # 2. Definir créditos
+        credits_map = {'starter': 1000, 'growth': 3000, 'scale': 10000}
+        credits_to_add = credits_map.get(plan_id.lower(), 0)
+        
+        # 3. Registrar Pago
+        admin_client.table("payments").insert({
+            "user_id": final_user_id,
+            "amount": float(amount),
+            "platform": "mercadopago",
+            "external_id": str(external_id),
+            "status": "approved",
+            "plan_id": plan_id
+        }).execute()
+        
+        # 4. Actualizar Perfil (Créditos, Plan, Datos)
+        # Obtenemos actuales para no pisar
+        user_res = admin_client.table("users").select("credits").eq("id", final_user_id).execute()
+        current_credits = user_res.data[0].get("credits", 0) or 0 if user_res.data else 0
+        
+        admin_client.table("users").update({
+            "name": name,
+            "phone": phone,
+            "credits": current_credits + credits_to_add,
+            "plan": plan_id,
+            "subscription_status": "active",
+            "updated_at": datetime.now().isoformat()
+        }).eq("id", final_user_id).execute()
+        
+        # 5. Si es nuevo, mandar mail para setear password
+        if is_new_user:
+            try:
+                # Generamos link de recuperación (que sirve para setear password la primera vez)
+                recovery_res = admin_client.auth.admin.generate_link({
+                    "type": "recovery",
+                    "email": email
+                })
+                
+                recovery_link = recovery_res.properties.action_link
+                
+                # Mandar email usando nuestro servicio interno
+                from backend.email_service import enviar_email, wrap_premium_template
+                
+                subject = "¡Bienvenido a Smart Leads! Activá tu cuenta"
+                content = f"""
+                Hola {name},
+                
+                ¡Gracias por tu compra! Tu suscripción al <strong>Plan {plan_id.capitalize()}</strong> ya está activa y hemos acreditado {credits_to_add} créditos en tu cuenta.
+                
+                Para empezar a usar la plataforma, por favor hacé click en el siguiente botón para establecer tu contraseña:
+                
+                <div style="margin: 30px 0; text-align: center;">
+                    <a href="{recovery_link}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                        Establecer mi Contraseña
+                    </a>
+                </div>
+                
+                Si el botón no funciona, podés copiar y pegar este link en tu navegador:
+                {recovery_link}
+                
+                ¡Estamos emocionados de tenerte con nosotros!
+                """
+                
+                html_body = wrap_premium_template(content, "Ivan Levy", "solutionsdota@gmail.com")
+                
+                enviar_email(
+                    destinatario=email,
+                    asunto=subject,
+                    cuerpo_html=html_body,
+                    cuerpo_texto=content.replace('<strong>', '').replace('</strong>', '').replace('<div style="margin: 30px 0; text-align: center;">', '').replace('</div>', '').replace('<a href="{recovery_link}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">', '').replace('</a>', '')
+                )
+                
+                logger.info(f"✅ Email de bienvenida y password enviado a {email}")
+            except Exception as e:
+                 logger.error(f"❌ Error enviando email de password: {e}")
+
+        logger.info(f"✅ Proceso completado para {email}. Nuevo usuario: {is_new_user}")
+        return True
+    except Exception as e:
+        logger.error(f"❌ Error en registrar_pago_exitoso: {e}")
+        return False
+
 def log_api_call(
     provider: str,
     endpoint: str,

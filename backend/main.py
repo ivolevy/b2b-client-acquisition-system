@@ -507,6 +507,9 @@ class EnviarEmailRequest(BaseModel):
 class MPPreferenceRequest(BaseModel):
     plan_id: str
     user_id: str
+    email: str
+    name: str
+    phone: str
     amount: float
     description: str
 
@@ -533,6 +536,13 @@ async def create_mp_preference(req: MPPreferenceRequest):
             },
             "auto_return": "approved",
             "external_reference": f"{req.user_id}:{req.plan_id}",
+            "metadata": {
+                "user_id": req.user_id,
+                "plan_id": req.plan_id,
+                "email": req.email,
+                "name": req.name,
+                "phone": req.phone
+            },
             "notification_url": f"{os.getenv('BACKEND_URL', 'https://b2b-client-acquisition-system.railway.app')}/api/webhooks/mercadopago"
         }
 
@@ -571,24 +581,30 @@ async def mp_webhook(request: Request):
             payment_data = payment_info["response"]
             
             if payment_data.get("status") == "approved":
-                external_reference = payment_data.get("external_reference", "")
-                if ":" in external_reference:
-                    user_id, plan_id = external_reference.split(":")
-                    amount = payment_data.get("transaction_amount")
-                    
-                    # Logica de acreditación
-                    logger.info(f"¡Pago APROBADO! User: {user_id}, Plan: {plan_id}, Monto: {amount}")
-                    
-                    # Aquí llamaríamos a db_supabase para:
-                    # 1. Registrar el pago en public.payments
-                    # 2. Aumentar créditos en public.users
-                    # 3. Actualizar plan
-                    
-                    try:
-                        from backend.db_supabase import registrar_pago_exitoso
-                        await registrar_pago_exitoso(user_id, plan_id, amount, resource_id)
-                    except Exception as db_err:
-                        logger.error(f"Error registrando pago en DB: {db_err}")
+                metadata = payment_data.get("metadata", {})
+                user_id = metadata.get("user_id")
+                plan_id = metadata.get("plan_id")
+                email = metadata.get("email")
+                name = metadata.get("name")
+                phone = metadata.get("phone")
+                amount = payment_data.get("transaction_amount")
+                
+                # Logica de acreditación
+                logger.info(f"¡Pago APROBADO! User: {user_id}, Email: {email}, Plan: {plan_id}, Monto: {amount}")
+                
+                try:
+                    from backend.db_supabase import registrar_pago_exitoso
+                    await registrar_pago_exitoso(
+                        user_id=user_id, 
+                        plan_id=plan_id, 
+                        amount=amount, 
+                        external_id=resource_id,
+                        email=email,
+                        name=name,
+                        phone=phone
+                    )
+                except Exception as db_err:
+                    logger.error(f"Error registrando pago en DB: {db_err}")
                         
         return {"status": "ok"}
     except Exception as e:
