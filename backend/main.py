@@ -595,11 +595,6 @@ async def mp_webhook(request: Request):
         logger.error(f"Error procesando webhook MP: {e}")
         # Respondemos 200 para evitar que MP siga reintentando si es un error de nuestra lógica
         return {"status": "error", "detail": str(e)}
-    template_id: int
-    asunto_personalizado: Optional[str] = None
-    user_id: Optional[str] = None
-    empresa_data: Optional[Dict[str, Any]] = None
-    provider: Optional[str] = None
 
 class EnviarEmailMasivoRequest(BaseModel):
     empresa_ids: List[int]
