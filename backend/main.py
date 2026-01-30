@@ -1716,7 +1716,8 @@ async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
             template=template,
             asunto_personalizado=request.asunto_personalizado,
             delay_segundos=request.delay_segundos,
-            user_id=request.user_id
+            user_id=request.user_id,
+            provider=request.provider
         )
         
         # Guardar en historial

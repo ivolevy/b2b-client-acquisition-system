@@ -74,6 +74,37 @@ const OutlookConnection = ({ user, onSuccess, onError, variant = 'default', mini
     </svg>
   );
 
+  if (variant === 'link') {
+    return (
+      <button 
+        onClick={handleConnect}
+        disabled={loading}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#0078D4',
+          fontSize: '0.95rem',
+          fontWeight: '500',
+          cursor: 'pointer',
+          padding: '4px 8px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          textDecoration: 'none',
+          transition: 'all 0.2s'
+        }}
+        onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+        onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+      >
+        {loading ? 'Conectando...' : (
+          <>
+            <MicrosoftIcon /> <span style={{ marginLeft: '6px' }}>Vincular Outlook</span>
+          </>
+        )}
+      </button>
+    );
+  }
+
   if (variant === 'simple') {
     return (
       <>
@@ -126,11 +157,12 @@ const OutlookConnection = ({ user, onSuccess, onError, variant = 'default', mini
   return (
     <>
       <div className="outlook-connection-card" style={{
-        background: 'rgba(255, 255, 255, 0.05)',
+        background: '#f8fafc',
         borderRadius: '12px',
-        padding: '20px',
+        padding: '24px',
         marginTop: '20px',
-        border: '1px solid rgba(255, 255, 255, 0.1)'
+        border: '1px solid #e2e8f0',
+        textAlign: 'left'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
           <div style={{ 
@@ -140,13 +172,14 @@ const OutlookConnection = ({ user, onSuccess, onError, variant = 'default', mini
             borderRadius: '8px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
           }}>
             <MicrosoftIcon />
           </div>
           <div>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'white' }}>Outlook / Microsoft 365</h3>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>Outlook / Microsoft 365</h3>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
               Envía emails desde tu cuenta corporativa
             </p>
           </div>
