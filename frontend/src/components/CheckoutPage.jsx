@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiLock, FiCheck } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const CheckoutPage = () => {
   const [searchParams] = useSearchParams();
@@ -12,6 +13,16 @@ const CheckoutPage = () => {
 
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      if (user?.email) setEmail(user.email);
+    };
+    fetchUser();
+  }, []);
 
   // Mock Plan Data
   const plans = {
@@ -46,7 +57,7 @@ const CheckoutPage = () => {
   const currencySymbol = isARS ? '$' : 'USD';
   const cycleLabel = cycle === 'yearly' ? 'anual' : 'mensual';
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (!email) {
       alert("Por favor ingresá tu email para continuar.");
       return;
@@ -54,10 +65,30 @@ const CheckoutPage = () => {
     
     setLoading(true);
     
-    // Simulation: In real app, redirect to MP or Stripe URL
-    setTimeout(() => {
-        navigate('/payment-success');
-    }, 1500);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/payments/mercadopago/create_preference`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan_id: planId,
+          user_id: user?.id || 'anonymous',
+          amount: finalPrice,
+          description: `Suscripción B2B - ${selectedPlan.name}`
+        })
+      });
+
+      if (!response.ok) throw new Error('Error al crear la preferencia de pago');
+
+      const { init_point } = await response.json();
+      
+      // Redirigir a MercadoPago
+      window.location.href = init_point;
+    } catch (err) {
+      console.error(err);
+      alert("Hubo un error al procesar el pago. Por favor intentá de nuevo.");
+      setLoading(false);
+    }
   };
 
   return (

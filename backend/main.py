@@ -18,6 +18,7 @@ import math
 import json
 import random
 import string
+import mercadopago
 from datetime import datetime, timedelta
 
 try:
@@ -82,6 +83,9 @@ global _memoria_codigos_validacion
 
 _memoria_empresas = []
 _empresa_counter = 0
+# MercadoPago SDK
+sdk = mercadopago.SDK(os.getenv("MP_ACCESS_TOKEN"))
+
 _memoria_templates = []
 _template_counter = 0
 _memoria_email_history = []
@@ -498,6 +502,99 @@ class TemplateUpdateRequest(BaseModel):
 
 class EnviarEmailRequest(BaseModel):
     empresa_id: int
+    template_id: int
+
+class MPPreferenceRequest(BaseModel):
+    plan_id: str
+    user_id: str
+    amount: float
+    description: str
+
+# Endpoints de Pagos
+@app.post("/api/payments/mercadopago/create_preference")
+async def create_mp_preference(req: MPPreferenceRequest):
+    """
+    Crea una preferencia de pago en MercadoPago y devuelve el ID y el punto de inicio.
+    """
+    try:
+        preference_data = {
+            "items": [
+                {
+                    "title": req.description,
+                    "quantity": 1,
+                    "unit_price": float(req.amount),
+                    "currency_id": "ARS"
+                }
+            ],
+            "back_urls": {
+                "success": f"{os.getenv('FRONTEND_URL')}/payment-success",
+                "failure": f"{os.getenv('FRONTEND_URL')}/landing",
+                "pending": f"{os.getenv('FRONTEND_URL')}/landing"
+            },
+            "auto_return": "approved",
+            "external_reference": f"{req.user_id}:{req.plan_id}",
+            "notification_url": f"{os.getenv('BACKEND_URL', 'https://b2b-client-acquisition-system.railway.app')}/api/webhooks/mercadopago"
+        }
+
+        preference_response = sdk.preference().create(preference_data)
+        preference = preference_response["response"]
+        
+        logger.info(f"Preferencia MP creada: {preference['id']} para user {req.user_id}")
+        return {"id": preference["id"], "init_point": preference["init_point"]}
+    except Exception as e:
+        logger.error(f"Error creando preferencia de MP: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/webhooks/mercadopago")
+async def mp_webhook(request: Request):
+    """
+    Webhook para recibir notificaciones de pago de MercadoPago.
+    """
+    try:
+        # Algunos webhooks vienen como query params (topic=payment&id=123)
+        # Otros vienen en el body.
+        query_params = request.query_params
+        topic = query_params.get("topic") or query_params.get("type")
+        resource_id = query_params.get("id") or query_params.get("data.id")
+        
+        if not topic or not resource_id:
+            # Reintentar obtener del body si no está en params
+            body = await request.json()
+            topic = body.get("type")
+            if body.get("data"):
+                resource_id = body["data"].get("id")
+        
+        logger.info(f"MP Webhook received: topic={topic}, id={resource_id}")
+        
+        if topic == "payment" and resource_id:
+            payment_info = sdk.payment().get(resource_id)
+            payment_data = payment_info["response"]
+            
+            if payment_data.get("status") == "approved":
+                external_reference = payment_data.get("external_reference", "")
+                if ":" in external_reference:
+                    user_id, plan_id = external_reference.split(":")
+                    amount = payment_data.get("transaction_amount")
+                    
+                    # Logica de acreditación
+                    logger.info(f"¡Pago APROBADO! User: {user_id}, Plan: {plan_id}, Monto: {amount}")
+                    
+                    # Aquí llamaríamos a db_supabase para:
+                    # 1. Registrar el pago en public.payments
+                    # 2. Aumentar créditos en public.users
+                    # 3. Actualizar plan
+                    
+                    try:
+                        from backend.db_supabase import registrar_pago_exitoso
+                        await registrar_pago_exitoso(user_id, plan_id, amount, resource_id)
+                    except Exception as db_err:
+                        logger.error(f"Error registrando pago en DB: {db_err}")
+                        
+        return {"status": "ok"}
+    except Exception as e:
+        logger.error(f"Error procesando webhook MP: {e}")
+        # Respondemos 200 para evitar que MP siga reintentando si es un error de nuestra lógica
+        return {"status": "error", "detail": str(e)}
     template_id: int
     asunto_personalizado: Optional[str] = None
     user_id: Optional[str] = None
