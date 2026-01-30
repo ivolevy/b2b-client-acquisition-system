@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiLock, FiCheck } from 'react-icons/fi';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabase';
 
 const CheckoutPage = () => {
   const [searchParams] = useSearchParams();
