@@ -93,23 +93,23 @@ const GmailConnection = ({ user, onSuccess, onError, variant = 'default', minima
   }
 
   if (minimalist) {
+    if (status.connected) {
+      return (
+        <div style={{ color: '#10b981', fontWeight: '600', fontSize: '0.85rem' }}>
+          ✓ Conectado
+        </div>
+      );
+    }
+
     return (
-      <>
-        {status.connected ? (
-          <div style={{ color: '#10b981', fontWeight: '600', fontSize: '0.85rem' }}>
-            ✓ Conectado
-          </div>
-        ) : (
-          <button 
-            id="gmail-connect-trigger"
-            onClick={(e) => { e.stopPropagation(); handleConnect(); }}
-            disabled={loading}
-            className="gmail-connect-mini"
-          >
-            {loading ? '...' : 'Conectar'}
-          </button>
-        )}
-      </>
+      <button 
+        id="gmail-connect-trigger"
+        onClick={(e) => { e.stopPropagation(); handleConnect(); }}
+        disabled={loading}
+        className="gmail-connect-btn-mini"
+      >
+        {loading ? '...' : 'Conectar Gmail'}
+      </button>
     );
   }
 

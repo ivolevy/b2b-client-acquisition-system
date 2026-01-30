@@ -103,23 +103,23 @@ const OutlookConnection = ({ user, onSuccess, onError, variant = 'default', mini
   }
 
   if (minimalist) {
+    if (status.connected) {
+      return (
+        <div style={{ color: '#0078D4', fontWeight: '600', fontSize: '0.85rem' }}>
+          ✓ Conectado
+        </div>
+      );
+    }
+
     return (
-      <>
-        {status.connected ? (
-          <div style={{ color: '#0078D4', fontWeight: '600', fontSize: '0.85rem' }}>
-            ✓ Conectado
-          </div>
-        ) : (
-          <button 
-            id="outlook-connect-trigger"
-            onClick={(e) => { e.stopPropagation(); handleConnect(); }}
-            disabled={loading}
-            className="outlook-connect-mini"
-          >
-            {loading ? '...' : 'Conectar'}
-          </button>
-        )}
-      </>
+      <button 
+        id="outlook-connect-trigger"
+        onClick={(e) => { e.stopPropagation(); handleConnect(); }}
+        disabled={loading}
+        className="outlook-connect-btn-mini"
+      >
+        {loading ? '...' : 'Conectar Outlook'}
+      </button>
     );
   }
 

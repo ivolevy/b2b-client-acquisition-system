@@ -86,7 +86,9 @@ const checkLocalAuth = () => {
   return null;
 };
 
-function AuthWrapper() {
+const AdminFinancials = React.lazy(() => import('./components/admin/AdminFinancials'));
+
+const AuthWrapper = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   // useSupabase es constante durante la ejecución, no necesita memoización
@@ -404,6 +406,7 @@ function AuthWrapper() {
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="users/:id" element={<AdminUserDetail />} />
                   <Route path="api-usage" element={<ApiUsageDashboard />} />
+                  <Route path="financials" element={<AdminFinancials />} />
                 </Route>
                 {/* Main App Route - Only matches root */}
                 <Route path="/" element={<AppB2B />} />

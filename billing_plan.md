@@ -130,17 +130,15 @@ Hay dos reglas de oro para entender si un usuario puede usar el sistema:
 
 Elegimos lo mejor para cada región y detallamos sus costos:
 
-#### 🇦🇷 Para Argentina: **MercadoPago**
-*   **Moneda**: Pesos (ARS).
-*   **Ventaja**: El usuario paga en su moneda local.
-*   **Método**: Débito automático (Suscripción).
-*   **Costo para vos**: **~7% a 8%** (Comisión 6.99% + IVA por liquidez inmediata).
+#### �🇷 Mercado Local (Argentina): **Pesos (ARS)**
+*   **Método**: MercadoPago (Suscripción).
+*   **Objetivo**: Estabilidad para el usuario final. El usuario paga un precio fijo en su moneda.
+*   **Gestión Interna**: Los ingresos en Pesos se **convierten a USD en la instancia de reporte** para evaluar la ganancia real del negocio frente a los costos (Google API).
 
-#### 🌍 Para el Mundo: **Stripe**
-*   **Moneda**: Dólares (USD).
-*   **Ventaja**: Estándar mundial, acepta todas las tarjetas.
-*   **Método**: Stripe Checkout.
-*   **Costo para vos**: **~3.5%** (2.9% + USD 0.30 fijos). **Es la opción más barata.**
+#### 🌍 Mercado Global: **Dólares (USD)**
+*   **Método**: Stripe / PayPal.
+*   **Moneda de Referencia**: USD.
+*   **Consolidación**: Al final del día, el negocio busca tener un balance neto dolarizado ("Dolarización en instancia final").
 
 ### Rentabilidad: Factores Clave (Bonus)
 
@@ -158,32 +156,12 @@ El cálculo de arriba es el "Peor Caso" (consumen al 100%).
 
 ---
 
-### Rentabilidad Real (Escenario PEOR CASO - 100% Consumo)
+### Estrategia de Precios (Suscripción Mensual)
 
-> [!WARNING]
-> **IMPORTANTE: Estos números son una SIMULACIÓN de MÁXIMO costo.**
-> Asumen que el usuario gasta el 100% de sus créditos.
-> En la vida real, el consumo variará. En el Dashboard se trackeará el **Costo Real Exacto** por usuario basado en su consumo de API verídico, no en este promedio.
+| Plan | Precio Global (USD) | Precio Local (ARS) | Créditos |
+| :--- | :--- | :--- | :--- |
+| **Starter** | $26 | **$ 29.700** | 1,000 |
+| **Growth** | $49 | **$ 59.400** | 3,000 |
+| **Scale** | $149 | **$ 178.200** | 10,000 |
 
-Aquí diferenciamos el precio Internacional vs. el precio Local (Argentina). Asumimos que **YA GASTASTE** tu bono gratis y que el usuario **SE GASTÓ TODO**.
-
-#### 1. Plan Starter
-*   **INTERNACIONAL ($26 USD)**
-    *   **Stripe**: $26.00 - $1.05 (Fee) - $5.00 (Google) = **$19.95** (Margen 76%)
-    *   **PayPal**: $26.00 - $1.70 (Fee) - $5.00 (Google) = **$19.30** (Margen 74%)
-*   **ARGENTINA ($20 USD)**
-    *   **MercadoPago**: $20.00 - $1.60 (Fee) - $5.00 (Google) = **$13.40** (Margen 67%)
-
-#### 2. Plan Growth
-*   **INTERNACIONAL ($49 USD)**
-    *   **Stripe**: $49.00 - $1.72 (Fee) - $15.00 (Google) = **$32.28** (Margen 66%)
-    *   **PayPal**: $49.00 - $2.95 (Fee) - $15.00 (Google) = **$31.05** (Margen 63%)
-*   **ARGENTINA ($40 USD)**
-    *   **MercadoPago**: $40.00 - $3.20 (Fee) - $15.00 (Google) = **$21.80** (Margen 54%)
-
-#### 3. Plan Scale
-*   **INTERNACIONAL ($149 USD)**
-    *   **Stripe**: $149.00 - $4.62 (Fee) - $50.00 (Google) = **$94.38** (Margen 63%)
-    *   **PayPal**: $149.00 - $8.35 (Fee) - $50.00 (Google) = **$90.65** (Margen 60%)
-*   **ARGENTINA ($120 USD)**
-    *   **MercadoPago**: $120.00 - $9.60 (Fee) - $50.00 (Google) = **$60.40** (Margen 50%)
+*   **Lógica de Conversión**: El precio en ARS es fijo para el usuario, pero nosotros lo trackeamos como "USD Equivalente" en el panel financiero al tipo de cambio actual.
