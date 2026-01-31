@@ -252,6 +252,19 @@ RUBROS_DISPONIBLES = {
             '["office"="environmental"]',
             '["office"="waste_management"]'
         ]
+    },
+    "cotillones_y_reposteria": {
+        "nombre": "Cotillón, Disfraces y Repostería",
+        "tags": [
+            '["shop"="party"]',
+            '["shop"="costumes"]',
+            '["shop"="confectionery"]',
+            '["shop"="bakery"]'
+        ],
+        "keywords": [
+            "Cotillón", "Disfraz", "Repostería", 
+            "Candy Bar", "Globos", "Souvenirs", "Insumos para tortas"
+        ]
     }
 }
 
