@@ -543,8 +543,24 @@ async def create_mp_preference(req: MPPreferenceRequest):
                 "name": req.name,
                 "phone": req.phone
             },
-            "notification_url": f"{os.getenv('BACKEND_URL', 'https://b2b-client-acquisition-system.railway.app')}/api/webhooks/mercadopago"
+            "notification_url": f"{os.getenv('BACKEND_URL', os.getenv('FRONTEND_URL', 'https://b2b-client-acquisition-system.vercel.app'))}/api/webhooks/mercadopago"
         }
+        
+        # LOG URL CHOICE TO SUPABASE FOR DEBUGGING
+        try:
+            from backend.db_supabase import get_supabase_admin
+            admin = get_supabase_admin()
+            if admin:
+                admin.table("debug_logs").insert({
+                    "event_name": "MP_DEBUG_URL",
+                    "payload": {
+                        "notification_url": preference_data['notification_url'],
+                        "BACKEND_URL_ENV": os.getenv('BACKEND_URL'),
+                        "FRONTEND_URL_ENV": os.getenv('FRONTEND_URL')
+                    }
+                }).execute()
+        except:
+            pass
         
         if not os.getenv('BACKEND_URL'):
             logger.warning("⚠️ BACKEND_URL no configurado. Usando default de Railway para el webhook.")
