@@ -142,53 +142,54 @@ const CheckoutPage = () => {
             <p style={{ color: '#64748b' }}>Completá tus datos para activar tu cuenta.</p>
           </div>
 
-          {/* Email Input */}
-          <div style={{ marginBottom: '30px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
-              Email Profesional
-            </label>
-            <input 
-              type="email" 
-              placeholder="nombre@empresa.com" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '16px 20px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                fontSize: '16px',
-                background: '#f8fafc',
-                outline: 'none',
-                transition: 'border-color 0.2s'
-              }}
-            />
-            <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <FiLock size={12} /> Tus datos están encriptados y seguros.
-            </p>
-          </div>
+          {/* Email and Name Inputs in one row */}
+          <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
+                Email Profesional
+              </label>
+              <input 
+                type="email" 
+                placeholder="nombre@empresa.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '16px 20px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  fontSize: '16px',
+                  background: '#f8fafc',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+              />
+              <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <FiLock size={12} /> Tus datos están encriptados y seguros.
+              </p>
+            </div>
 
-          {/* Name Input */}
-          <div style={{ marginBottom: '30px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
-              Nombre Completo
-            </label>
-            <input 
-              type="text" 
-              placeholder="Ej: Juan Pérez" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '16px 20px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                fontSize: '16px',
-                background: '#f8fafc',
-                outline: 'none',
-                transition: 'border-color 0.2s'
-              }}
-            />
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
+                Nombre Completo
+              </label>
+              <input 
+                type="text" 
+                placeholder="Ej: Juan Pérez" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '16px 20px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  fontSize: '16px',
+                  background: '#f8fafc',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+              />
+            </div>
           </div>
 
           {/* Phone Input */}
