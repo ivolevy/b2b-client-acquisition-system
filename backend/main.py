@@ -545,11 +545,33 @@ async def create_mp_preference(req: MPPreferenceRequest):
             },
             "notification_url": f"{os.getenv('BACKEND_URL', 'https://b2b-client-acquisition-system.railway.app')}/api/webhooks/mercadopago"
         }
+        
+        if not os.getenv('BACKEND_URL'):
+            logger.warning("⚠️ BACKEND_URL no configurado. Usando default de Railway para el webhook.")
+        else:
+            logger.info(f"Webhook URL configurada: {preference_data['notification_url']}")
 
         preference_response = sdk.preference().create(preference_data)
         preference = preference_response["response"]
         
         logger.info(f"Preferencia MP creada: {preference['id']} para user {req.user_id}")
+        
+        # LOG TO SUPABASE FOR PRODUCTION DEBUGGING
+        try:
+            from backend.db_supabase import get_supabase_admin
+            admin = get_supabase_admin()
+            if admin:
+                admin.table("debug_logs").insert({
+                    "event_name": "MP_PREFERENCE_CREATED",
+                    "payload": {
+                        "preference_id": preference['id'],
+                        "notification_url": preference_data['notification_url'],
+                        "user_id": req.user_id
+                    }
+                }).execute()
+        except:
+            pass
+            
         return {"id": preference["id"], "init_point": preference["init_point"]}
     except Exception as e:
         logger.error(f"Error creando preferencia de MP: {e}")
@@ -575,6 +597,18 @@ async def mp_webhook(request: Request):
                 resource_id = body["data"].get("id")
         
         logger.info(f"MP Webhook received: topic={topic}, id={resource_id}")
+        
+        # LOG TO SUPABASE FOR PRODUCTION DEBUGGING
+        try:
+            from backend.db_supabase import get_supabase_admin
+            admin = get_supabase_admin()
+            if admin:
+                admin.table("debug_logs").insert({
+                    "event_name": f"MP_WEBHOOK_{topic}",
+                    "payload": {"id": resource_id, "params": str(query_params)}
+                }).execute()
+        except:
+            pass
         
         if topic == "payment" and resource_id:
             payment_info = sdk.payment().get(resource_id)
@@ -609,7 +643,16 @@ async def mp_webhook(request: Request):
         return {"status": "ok"}
     except Exception as e:
         logger.error(f"Error procesando webhook MP: {e}")
-        # Respondemos 200 para evitar que MP siga reintentando si es un error de nuestra lógica
+        try:
+            from backend.db_supabase import get_supabase_admin
+            admin = get_supabase_admin()
+            if admin:
+                admin.table("debug_logs").insert({
+                    "event_name": "MP_WEBHOOK_ERROR",
+                    "payload": {"error": str(e)}
+                }).execute()
+        except:
+            pass
         return {"status": "error", "detail": str(e)}
 
 class EnviarEmailMasivoRequest(BaseModel):

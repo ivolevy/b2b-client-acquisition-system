@@ -731,7 +731,10 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
                 
                 recovery_link = recovery_res.properties.action_link
                 
-                from backend.email_service import enviar_email, wrap_premium_template
+                try:
+                    from backend.email_service import enviar_email, wrap_premium_template
+                except ImportError:
+                    from email_service import enviar_email, wrap_premium_template
                 
                 subject = "¡Bienvenido a Smart Leads! Activá tu cuenta"
                 content = f"""
@@ -756,7 +759,7 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
                 
                 html_body = wrap_premium_template(content, "Ivan Levy", "solutionsdota@gmail.com")
                 
-                enviar_email(
+                res_email = enviar_email(
                     destinatario=email,
                     asunto=subject,
                     cuerpo_html=html_body,
@@ -764,17 +767,24 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
                     user_id=None # Enviar vía SMTP global
                 )
                 
-                logger.info(f"✅ Email de bienvenida y password enviado a {email}")
+                with open("email_debug.log", "a") as f:
+                    f.write(f"{datetime.now().isoformat()} - Email to {email}: {res_email}\n")
+                
+                if res_email.get('success'):
+                    logger.info(f"✅ Email de bienvenida y password enviado a {email}")
+                else:
+                    logger.error(f"❌ Falló envío de email a {email}: {res_email}")
             except Exception as e:
                  logger.error(f"❌ Error enviando email de password: {e}")
+                 with open("email_debug.log", "a") as f:
+                    f.write(f"{datetime.now().isoformat()} - EXCEPTION in email: {str(e)}\n")
 
         logger.info(f"✅ Proceso completado exitosamente para {email}")
         return True
     except Exception as e:
         logger.error(f"❌ Error crítico en registrar_pago_exitoso: {e}", exc_info=True)
-        return False
-    except Exception as e:
-        logger.error(f"❌ Error en registrar_pago_exitoso: {e}")
+        with open("email_debug.log", "a") as f:
+            f.write(f"{datetime.now().isoformat()} - CRITICAL ERROR: {str(e)}\n")
         return False
 
 def log_api_call(
