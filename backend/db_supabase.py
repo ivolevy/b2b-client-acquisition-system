@@ -767,8 +767,20 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
                     user_id=None # Enviar vía SMTP global
                 )
                 
-                with open("email_debug.log", "a") as f:
-                    f.write(f"{datetime.now().isoformat()} - Email to {email}: {res_email}\n")
+                # LOG TO SUPABASE (Vercel has read-only filesystem, can't use local files)
+                try:
+                    admin = get_supabase_admin()
+                    if admin:
+                        admin.table("debug_logs").insert({
+                            "event_name": "EMAIL_SENT_STATUS",
+                            "payload": {
+                                "email": email,
+                                "success": res_email.get('success'),
+                                "response": res_email
+                            }
+                        }).execute()
+                except Exception as log_err:
+                    logger.error(f"Error logging email status to Supabase: {log_err}")
                 
                 if res_email.get('success'):
                     logger.info(f"✅ Email de bienvenida y password enviado a {email}")
@@ -776,15 +788,31 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
                     logger.error(f"❌ Falló envío de email a {email}: {res_email}")
             except Exception as e:
                  logger.error(f"❌ Error enviando email de password: {e}")
-                 with open("email_debug.log", "a") as f:
-                    f.write(f"{datetime.now().isoformat()} - EXCEPTION in email: {str(e)}\n")
+                 # LOG TO SUPABASE
+                 try:
+                     admin = get_supabase_admin()
+                     if admin:
+                         admin.table("debug_logs").insert({
+                             "event_name": "EMAIL_EXCEPTION",
+                             "payload": {"error": str(e), "email": email}
+                         }).execute()
+                 except:
+                     pass
 
         logger.info(f"✅ Proceso completado exitosamente para {email}")
         return True
     except Exception as e:
         logger.error(f"❌ Error crítico en registrar_pago_exitoso: {e}", exc_info=True)
-        with open("email_debug.log", "a") as f:
-            f.write(f"{datetime.now().isoformat()} - CRITICAL ERROR: {str(e)}\n")
+        # LOG TO SUPABASE
+        try:
+            admin = get_supabase_admin()
+            if admin:
+                admin.table("debug_logs").insert({
+                    "event_name": "CRITICAL_PAYMENT_ERROR",
+                    "payload": {"error": str(e)}
+                }).execute()
+        except:
+            pass
         return False
 
 def log_api_call(

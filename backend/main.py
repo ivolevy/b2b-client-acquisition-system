@@ -543,7 +543,7 @@ async def create_mp_preference(req: MPPreferenceRequest):
                 "name": req.name,
                 "phone": req.phone
             },
-            "notification_url": f"{os.getenv('BACKEND_URL', os.getenv('FRONTEND_URL', 'https://b2b-client-acquisition-system.vercel.app'))}/api/webhooks/mercadopago"
+            "notification_url": f"{os.getenv('BACKEND_URL', os.getenv('FRONTEND_URL', 'https://b2b-client-acquisition-system.vercel.app')).rstrip('/')}/api/webhooks/mercadopago"
         }
         
         # LOG URL CHOICE TO SUPABASE FOR DEBUGGING
@@ -563,7 +563,7 @@ async def create_mp_preference(req: MPPreferenceRequest):
             pass
         
         if not os.getenv('BACKEND_URL'):
-            logger.warning("⚠️ BACKEND_URL no configurado. Usando default de Railway para el webhook.")
+            logger.warning("⚠️ BACKEND_URL no configurado. Usando fallback automático de Vercel para el webhook.")
         else:
             logger.info(f"Webhook URL configurada: {preference_data['notification_url']}")
 
