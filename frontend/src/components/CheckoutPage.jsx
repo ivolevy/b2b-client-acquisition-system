@@ -14,6 +14,7 @@ const CheckoutPage = () => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('+54');
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
 
@@ -91,7 +92,7 @@ const CheckoutPage = () => {
           user_id: user?.id || 'anonymous',
           email: email,
           name: name,
-          phone: phone,
+          phone: `${countryCode} ${phone}`,
           amount: finalPrice,
           description: `Suscripción B2B - ${selectedPlan.name}`
         })
@@ -195,22 +196,47 @@ const CheckoutPage = () => {
             <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
               Teléfono de Contacto
             </label>
-            <input 
-              type="tel" 
-              placeholder="Ej: +54 9 11 1234-5678" 
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '16px 20px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                fontSize: '16px',
-                background: '#f8fafc',
-                outline: 'none',
-                transition: 'border-color 0.2s'
-              }}
-            />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <select 
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                style={{
+                  width: '100px',
+                  padding: '16px 10px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  fontSize: '15px',
+                  background: '#f8fafc',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="+54">🇦🇷 +54</option>
+                <option value="+55">🇧🇷 +55</option>
+                <option value="+56">🇨🇱 +56</option>
+                <option value="+57">🇨🇴 +57</option>
+                <option value="+598">🇺🇾 +598</option>
+                <option value="+52">🇲🇽 +52</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+34">🇪🇸 +34</option>
+              </select>
+              <input 
+                type="tel" 
+                placeholder="Ej: 11 1234-5678" 
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: '16px 20px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  fontSize: '16px',
+                  background: '#f8fafc',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+              />
+            </div>
           </div>
 
           {/* Payment Method Display (Locked based on logic) */}

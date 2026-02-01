@@ -643,42 +643,67 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
             logger.error("No se pudo obtener el cliente admin")
             return False
             
-        # 1. ¿El usuario ya es real en Auth?
         final_user_id = user_id
         is_new_user = False
         
-        # Si vino como 'anonymous' o no tenemos un UUID válido, buscamos por email
-        if user_id == 'anonymous' or not user_id:
-            # Buscar si el email ya existe en public.users
-            res_user = admin_client.table("users").select("id").eq("email", email).execute()
-            if res_user.data:
-                final_user_id = res_user.data[0]["id"]
+        logger.info(f"Procesando pago exitoso: user_id={user_id}, email={email}, amount={amount}")
+
+        # 1. Asegurar que el usuario existe en Auth y public.users
+        if user_id == 'anonymous' or not user_id or user_id == 'None':
+            # Buscar por email
+            user_auth_res = admin_client.auth.admin.list_users()
+            existing_auth_user = next((u for u in user_auth_res if u.email == email), None)
+            
+            if existing_auth_user:
+                final_user_id = existing_auth_user.id
+                logger.info(f"Usuario existente encontrado en Auth: {final_user_id}")
             else:
                 # CREAR NUEVO USUARIO EN AUTH
                 import secrets
                 import string
-                temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+                temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
                 
-                logger.info(f"Creando nuevo usuario para {email}...")
-                new_user = admin_client.auth.admin.create_user({
+                logger.info(f"Creando nuevo usuario Auth para {email}...")
+                new_user_res = admin_client.auth.admin.create_user({
                     "email": email,
                     "password": temp_password,
                     "email_confirm": True,
-                    "user_metadata": {"full_name": name}
+                    "user_metadata": {"full_name": name, "phone": phone}
                 })
                 
-                if new_user.user:
-                    final_user_id = new_user.user.id
+                if hasattr(new_user_res, 'user') and new_user_res.user:
+                    final_user_id = new_user_res.user.id
                     is_new_user = True
-                    logger.info(f"Usuario creado con ID: {final_user_id}")
+                    logger.info(f"Usuario Auth creado con ID: {final_user_id}")
                 else:
-                    logger.error(f"Error creando usuario: {new_user}")
+                    logger.error(f"Error fatal creando usuario Auth: {new_user_res}")
                     return False
 
-        # 2. Definir créditos
+        # 2. Sincronizar con public.users (UPSERT)
+        # Esto asegura que si el trigger falló o el registro de Auth existe pero no el de public, se cree/actualice
+        upsert_data = {
+            "id": final_user_id,
+            "email": email,
+            "name": name or email.split('@')[0],
+            "phone": phone,
+            "plan": plan_id,
+            "subscription_status": "active",
+            "updated_at": datetime.now().isoformat()
+        }
+        
+        # Obtener créditos actuales si existe
+        user_res = admin_client.table("users").select("credits").eq("id", final_user_id).execute()
+        current_credits = 0
+        if user_res.data:
+            current_credits = user_res.data[0].get("credits", 0) or 0
+            
         credits_map = {'starter': 1000, 'growth': 3000, 'scale': 10000}
         credits_to_add = credits_map.get(plan_id.lower(), 0)
+        upsert_data["credits"] = current_credits + credits_to_add
         
+        logger.info(f"Sincronizando public.users para {final_user_id} (Credits: {upsert_data['credits']})")
+        admin_client.table("users").upsert(upsert_data).execute()
+
         # 3. Registrar Pago
         admin_client.table("payments").insert({
             "user_id": final_user_id,
@@ -686,40 +711,31 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
             "platform": "mercadopago",
             "external_id": str(external_id),
             "status": "approved",
-            "plan_id": plan_id
+            "plan_id": plan_id,
+            "currency": "ARS"
         }).execute()
         
-        # 4. Actualizar Perfil (Créditos, Plan, Datos)
-        # Obtenemos actuales para no pisar
-        user_res = admin_client.table("users").select("credits").eq("id", final_user_id).execute()
-        current_credits = user_res.data[0].get("credits", 0) or 0 if user_res.data else 0
-        
-        admin_client.table("users").update({
-            "name": name,
-            "phone": phone,
-            "credits": current_credits + credits_to_add,
-            "plan": plan_id,
-            "subscription_status": "active",
-            "updated_at": datetime.now().isoformat()
-        }).eq("id", final_user_id).execute()
-        
-        # 5. Si es nuevo, mandar mail para setear password
+        # 4. Si es nuevo, mandar mail para setear password
         if is_new_user:
             try:
-                # Generamos link de recuperación (que sirve para setear password la primera vez)
+                # Generamos link de recuperación (set password)
+                # IMPORTANTE: Asegurarnos que el redirect_to apunte al frontend
+                frontend_url = os.getenv("FRONTEND_URL", "https://b2b-client-acquisition-system.vercel.app")
                 recovery_res = admin_client.auth.admin.generate_link({
                     "type": "recovery",
-                    "email": email
+                    "email": email,
+                    "options": {
+                        "redirect_to": f"{frontend_url}/profile"
+                    }
                 })
                 
                 recovery_link = recovery_res.properties.action_link
                 
-                # Mandar email usando nuestro servicio interno
                 from backend.email_service import enviar_email, wrap_premium_template
                 
                 subject = "¡Bienvenido a Smart Leads! Activá tu cuenta"
                 content = f"""
-                Hola {name},
+                Hola {name or 'cliente'},
                 
                 ¡Gracias por tu compra! Tu suscripción al <strong>Plan {plan_id.capitalize()}</strong> ya está activa y hemos acreditado {credits_to_add} créditos en tu cuenta.
                 
@@ -732,6 +748,7 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
                 </div>
                 
                 Si el botón no funciona, podés copiar y pegar este link en tu navegador:
+                <br/>
                 {recovery_link}
                 
                 ¡Estamos emocionados de tenerte con nosotros!
@@ -743,15 +760,19 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
                     destinatario=email,
                     asunto=subject,
                     cuerpo_html=html_body,
-                    cuerpo_texto=content.replace('<strong>', '').replace('</strong>', '').replace('<div style="margin: 30px 0; text-align: center;">', '').replace('</div>', '').replace('<a href="{recovery_link}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">', '').replace('</a>', '')
+                    cuerpo_texto=content.replace('<br/>', '\n'),
+                    user_id=None # Enviar vía SMTP global
                 )
                 
                 logger.info(f"✅ Email de bienvenida y password enviado a {email}")
             except Exception as e:
                  logger.error(f"❌ Error enviando email de password: {e}")
 
-        logger.info(f"✅ Proceso completado para {email}. Nuevo usuario: {is_new_user}")
+        logger.info(f"✅ Proceso completado exitosamente para {email}")
         return True
+    except Exception as e:
+        logger.error(f"❌ Error crítico en registrar_pago_exitoso: {e}", exc_info=True)
+        return False
     except Exception as e:
         logger.error(f"❌ Error en registrar_pago_exitoso: {e}")
         return False
