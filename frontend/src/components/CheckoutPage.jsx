@@ -164,9 +164,6 @@ const CheckoutPage = () => {
                   transition: 'border-color 0.2s'
                 }}
               />
-              <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <FiLock size={12} /> Tus datos están encriptados y seguros.
-              </p>
             </div>
 
             <div style={{ flex: 1, minWidth: '150px' }}>
@@ -267,6 +264,10 @@ const CheckoutPage = () => {
                 </div>
             </div>
           </div>
+          
+          <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+            <FiLock size={12} /> Tus datos están encriptados y seguros.
+          </p>
 
           <button 
             onClick={handlePayment}
