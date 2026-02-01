@@ -143,8 +143,8 @@ const CheckoutPage = () => {
           </div>
 
           {/* Email and Name Inputs in one row */}
-          <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '300px' }}>
+          <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+            <div style={{ flex: 1, minWidth: '150px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
                 Email Profesional <span style={{ color: '#ef4444' }}>*</span>
               </label>
@@ -169,7 +169,7 @@ const CheckoutPage = () => {
               </p>
             </div>
 
-            <div style={{ flex: 1, minWidth: '300px' }}>
+            <div style={{ flex: 1, minWidth: '150px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
                 Nombre Completo <span style={{ color: '#ef4444' }}>*</span>
               </label>

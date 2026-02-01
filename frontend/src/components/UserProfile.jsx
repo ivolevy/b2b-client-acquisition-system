@@ -630,7 +630,7 @@ function UserProfile() {
                         }
                         setShowPhoneModal(true);
                       }}
-                      style={{ marginLeft: '8px', color: '#94a3b8' }}
+                      style={{ marginLeft: '8px', color: '#3b82f6' }}
                       title="Editar teléfono"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
