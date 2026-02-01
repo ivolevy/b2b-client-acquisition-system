@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FiCheck, FiArrowRight, FiMail, FiZap, FiShield, FiExternalLink } from 'react-icons/fi';
+import { FiCheck, FiArrowRight, FiMail, FiZap, FiShield, FiExternalLink, FiLoader } from 'react-icons/fi';
+import { authService, supabase } from '../lib/supabase';
 
 const PaymentSuccessPage = () => {
     const navigate = useNavigate();
@@ -10,16 +11,62 @@ const PaymentSuccessPage = () => {
     // Extrar data de la URL si MP la manda de vuelta (opcional)
     const paymentId = searchParams.get('payment_id') || 'ORD-' + Math.floor(100000 + Math.random() * 900000);
 
+    const [resending, setResending] = useState(false);
+    const [sent, setSent] = useState(false);
+    const [countdown, setCountdown] = useState(0);
+    const [user, setUser] = useState(null);
+
     useEffect(() => {
         const timer = setTimeout(() => setShow(true), 100);
+        
+        // Cargar usuario actual si existe para obtener su email
+        const fetchUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+        };
+        fetchUser();
+
         return () => clearTimeout(timer);
     }, []);
+
+    // Timer para la cuenta regresiva
+    useEffect(() => {
+        let interval;
+        if (countdown > 0) {
+            interval = setInterval(() => {
+                setCountdown(prev => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [countdown]);
+
+    const handleResendEmail = async () => {
+        if (!user?.email) {
+            toast.info("Por favor, revisá tu casilla de correo. Si no lo encontrás, el soporte puede ayudarte.");
+            return;
+        }
+
+        if (resending || countdown > 0) return;
+
+        setResending(true);
+        try {
+            const { error } = await authService.resendConfirmationEmail(user.email);
+            if (error) throw error;
+            setSent(true);
+            setCountdown(60); // Iniciar cuenta regresiva de 1 minuto
+            setTimeout(() => setSent(false), 5000); 
+        } catch (error) {
+            console.error('Error reenviando email:', error);
+        } finally {
+            setResending(false);
+        }
+    };
 
     return (
         <div className="payment-success-page" style={{ 
             minHeight: '100vh', 
-            background: '#020617', // Deeper blue/black for premium feel
-            color: 'white',
+            background: '#f8fafc', // Minimalist light background
+            color: '#0f172a', // Dark typography
             fontFamily: "'Outfit', 'Inter', sans-serif",
             display: 'flex',
             alignItems: 'center',
@@ -29,16 +76,16 @@ const PaymentSuccessPage = () => {
             overflow: 'hidden'
         }}>
             
-            {/* Mesh Gradient Background */}
+            {/* Subtle Gradient Background */}
             <div style={{
                 position: 'absolute', top: '-10%', left: '-10%', width: '50%', height: '50%',
-                background: 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)',
-                filter: 'blur(80px)', zIndex: 0, animation: 'float 20s infinite alternate'
+                background: 'radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%)',
+                filter: 'blur(80px)', zIndex: 0
             }} />
             <div style={{
                 position: 'absolute', bottom: '-10%', right: '-10%', width: '60%', height: '60%',
-                background: 'radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%)',
-                filter: 'blur(100px)', zIndex: 0, animation: 'float 25s infinite alternate-reverse'
+                background: 'radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%)',
+                filter: 'blur(100px)', zIndex: 0
             }} />
 
             <div style={{ 
@@ -75,47 +122,45 @@ const PaymentSuccessPage = () => {
                 <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <h1 style={{ 
                         fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: '800', marginBottom: '16px', letterSpacing: '-0.02em',
-                        background: 'linear-gradient(to bottom, #ffffff, #94a3b8)',
-                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+                        color: '#0f172a'
                     }}>
                         ¡Pago Procesado!
                     </h1>
-                    <p style={{ fontSize: '18px', color: '#94a3b8', lineHeight: '1.6' }}>
+                    <p style={{ fontSize: '18px', color: '#64748b', lineHeight: '1.6' }}>
                         Tu suscripción ya está activa. Hemos acreditado tus créditos y desbloqueado todas las funciones premium.
                     </p>
                 </div>
 
-                {/* Elegant Glass Card */}
+                {/* Elegant White Card */}
                 <div style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    background: 'white',
+                    border: '1px solid #e2e8f0',
                     borderRadius: '28px',
                     padding: '32px',
                     marginBottom: '40px',
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.05)'
                 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
                         <div>
-                            <span style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>ID Transacción</span>
-                            <div style={{ fontSize: '15px', fontWeight: '600', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                {paymentId} <FiShield size={14} color="#10b981" />
+                            <span style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em' }}>ID Transacción</span>
+                            <div style={{ fontSize: '13px', fontWeight: '600', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a' }}>
+                                {paymentId} <FiShield size={12} color="#10b981" />
                             </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Estado</span>
-                            <div style={{ fontSize: '15px', fontWeight: '600', marginTop: '4px', color: '#10b981' }}>Completado ✓</div>
+                            <span style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Estado</span>
+                            <div style={{ fontSize: '13px', fontWeight: '600', marginTop: '4px', color: '#10b981' }}>Completado ✓</div>
                         </div>
                     </div>
 
-                    <div style={{ background: 'rgba(255, 255, 255, 0.02)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '40px', height: '40px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <FiZap color="#10b981" />
+                            <div style={{ width: '48px', height: '48px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FiZap color="#10b981" size={20} />
                             </div>
                             <div>
-                                <strong style={{ display: 'block', fontSize: '14px' }}>¿Qué sigue?</strong>
-                                <span style={{ fontSize: '13px', color: '#64748b' }}>Revisá tu mail para setear tu contraseña de acceso.</span>
+                                <strong style={{ display: 'block', fontSize: '18px', color: '#0f172a', marginBottom: '4px' }}>¿Qué sigue?</strong>
+                                <span style={{ fontSize: '15px', color: '#64748b' }}>Revisá tu mail para setear tu contraseña de acceso.</span>
                             </div>
                         </div>
                     </div>
@@ -127,8 +172,8 @@ const PaymentSuccessPage = () => {
                         onClick={() => navigate('/')}
                         style={{
                             width: '100%',
-                            background: 'white',
-                            color: '#020617',
+                            background: '#0f172a',
+                            color: 'white',
                             border: 'none',
                             padding: '20px',
                             borderRadius: '16px',
@@ -136,24 +181,48 @@ const PaymentSuccessPage = () => {
                             fontWeight: '700',
                             cursor: 'pointer',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
-                            boxShadow: '0 20px 40px rgba(255, 255, 255, 0.1)',
+                            boxShadow: '0 20px 40px rgba(15, 23, 42, 0.15)',
                             transition: 'all 0.3s ease'
                         }}
                         onMouseOver={(e) => {
                             e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 25px 50px rgba(255, 255, 255, 0.15)';
+                            e.currentTarget.style.boxShadow = '0 25px 50px rgba(15, 23, 42, 0.2)';
                         }}
                         onMouseOut={(e) => {
                             e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 20px 40px rgba(255, 255, 255, 0.1)';
+                            e.currentTarget.style.boxShadow = '0 20px 40px rgba(15, 23, 42, 0.15)';
                         }}
                     >
                         Ir al Dashboard <FiArrowRight />
                     </button>
                     
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
-                        <FiMail /> ¿No recibiste el email? 
-                        <span style={{ color: '#10b981', cursor: 'pointer', fontWeight: '500' }}>Reenviar ahora</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
+                            <FiMail /> ¿No recibiste el email? 
+                            <span 
+                                onClick={handleResendEmail}
+                                style={{ 
+                                    color: (resending || countdown > 0) ? '#94a3b8' : '#10b981', 
+                                    cursor: (resending || countdown > 0) ? 'not-allowed' : 'pointer', 
+                                    fontWeight: '500',
+                                    textDecoration: (resending || countdown > 0) ? 'none' : 'underline',
+                                    textUnderlineOffset: '4px'
+                                }}
+                            >
+                                {resending ? 'Reenviando...' : countdown > 0 ? `Reenviar en ${countdown}s` : 'Reenviar ahora'}
+                            </span>
+                        </div>
+                        
+                        {sent && (
+                            <div style={{ 
+                                fontSize: '13px', 
+                                color: '#10b981', 
+                                fontWeight: '500',
+                                animation: 'fadeIn 0.3s ease'
+                            }}>
+                                Email enviado correctamente ✓
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -170,6 +239,11 @@ const PaymentSuccessPage = () => {
                     0% { transform: scale(1); opacity: 0.5; }
                     50% { transform: scale(1.1); opacity: 0.2; }
                     100% { transform: scale(1); opacity: 0.5; }
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-5px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
 
                 .payment-success-page * {
