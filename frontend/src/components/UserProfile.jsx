@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useToast } from '../hooks/useToast';
 import ToastContainer from './ToastContainer';
 import './UserProfile.css';
+import { validatePhone } from '../utils/validators';
 
 function UserProfile() {
   const navigate = useNavigate();
@@ -508,8 +509,9 @@ function UserProfile() {
   };
 
   const handleUpdatePhone = async () => {
-    if (!phoneForm.number) {
-      setPhoneError('Por favor ingresá un número de teléfono');
+    const phoneVal = validatePhone(phoneForm.number, phoneForm.countryCode);
+    if (!phoneVal.isValid) {
+      setPhoneError(phoneVal.message);
       return;
     }
     
@@ -1121,7 +1123,7 @@ function UserProfile() {
                     flex: 1,
                     padding: '12px',
                     borderRadius: '8px',
-                    border: '1px solid #e2e8f0',
+                    border: phoneError ? '1px solid #ef4444' : '1px solid #e2e8f0',
                     fontSize: '14px',
                     background: '#f8fafc',
                     outline: 'none'

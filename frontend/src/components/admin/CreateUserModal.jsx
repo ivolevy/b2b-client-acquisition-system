@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { adminService } from '../../lib/supabase';
 import './CreateUserModal.css';
+import { validateEmail, validateName, validatePhone, validatePassword } from '../../utils/validators';
 import { createPortal } from 'react-dom';
 
 // Lista de países con prefijos telefónicos
@@ -85,47 +86,19 @@ function CreateUserModal({ onClose, onSuccess }) {
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
 
-  // Validations matched to Login.jsx
-  const validateEmail = (email) => {
-    if (!email || email.trim() === '') return false;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) throw new Error('El formato del email no es válido');
-    if (email.length > 255) throw new Error('El email es demasiado largo');
-    return true;
-  };
-
-  const validateName = (name) => {
-    if (!name || name.trim() === '') throw new Error('El nombre es requerido');
-    const trimmedName = name.trim();
-    if (trimmedName.length < 2) throw new Error('El nombre debe tener al menos 2 caracteres');
-    if (trimmedName.length > 20) throw new Error('El nombre es demasiado largo (máximo 20 caracteres)');
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/;
-    if (!nameRegex.test(trimmedName)) throw new Error('El nombre solo puede contener letras, espacios y guiones');
-    return true;
-  };
-
-  const validatePhone = (phone) => {
-    if (!phone) return true; // Optional
-    const cleanPhone = phone.replace(/[^\d]/g, '');
-    if (cleanPhone.length > 0) {
-      if (cleanPhone.length < 8) throw new Error('El número debe tener al menos 8 dígitos');
-      if (cleanPhone.length > 12) throw new Error('El número es demasiado largo (máx 12 dígitos)');
-    }
-    return true;
-  };
-
-  const validatePassword = (password) => {
-    if (!password || password.length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres');
-    if (!/[a-zA-Z]/.test(password)) throw new Error('Al menos una letra');
-    if (!/\d/.test(password)) throw new Error('Al menos un número');
-    return true;
-  };
-
+  // Unified Validations
   const validateForm = () => {
-    validateEmail(formData.email);
-    validatePhone(formData.phone);
-    validateName(formData.name);
-    validatePassword(formData.password);
+    const emailVal = validateEmail(formData.email);
+    if (!emailVal.isValid) throw new Error(emailVal.message);
+
+    const phoneVal = validatePhone(formData.phone, selectedCountry.prefix);
+    if (!phoneVal.isValid) throw new Error(phoneVal.message);
+
+    const nameVal = validateName(formData.name);
+    if (!nameVal.isValid) throw new Error(nameVal.message);
+
+    const passwordVal = validatePassword(formData.password, true); // Admin requires complexity
+    if (!passwordVal.isValid) throw new Error(passwordVal.message);
   };
   
   // Filter countries

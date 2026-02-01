@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiLock, FiCheck } from 'react-icons/fi';
 import { supabase } from '../lib/supabase';
+import { validateEmail, validateName, validatePhone } from '../utils/validators';
 
 const CheckoutPage = () => {
   const [searchParams] = useSearchParams();
@@ -17,6 +18,11 @@ const CheckoutPage = () => {
   const [countryCode, setCountryCode] = useState('+54');
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [errors, setErrors] = useState({
+    email: '',
+    name: '',
+    phone: ''
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -75,8 +81,17 @@ const CheckoutPage = () => {
   const cycleLabel = cycle === 'yearly' ? 'anual' : 'mensual';
 
   const handlePayment = async () => {
-    if (!email || !name || !phone) {
-      alert("Por favor completá todos los campos para continuar.");
+    const emailVal = validateEmail(email);
+    const nameVal = validateName(name);
+    const phoneVal = validatePhone(phone, countryCode);
+
+    setErrors({
+      email: emailVal.message,
+      name: nameVal.message,
+      phone: phoneVal.message
+    });
+
+    if (!emailVal.isValid || !nameVal.isValid || !phoneVal.isValid) {
       return;
     }
     
@@ -157,13 +172,14 @@ const CheckoutPage = () => {
                   width: '100%',
                   padding: '16px 20px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
+                  border: errors.email ? '1px solid #ef4444' : '1px solid #e2e8f0',
                   fontSize: '16px',
                   background: '#f8fafc',
                   outline: 'none',
                   transition: 'border-color 0.2s'
                 }}
               />
+              {errors.email && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>{errors.email}</p>}
             </div>
 
             <div style={{ flex: 1, minWidth: '150px' }}>
@@ -179,13 +195,14 @@ const CheckoutPage = () => {
                   width: '100%',
                   padding: '16px 20px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
+                  border: errors.name ? '1px solid #ef4444' : '1px solid #e2e8f0',
                   fontSize: '16px',
                   background: '#f8fafc',
                   outline: 'none',
                   transition: 'border-color 0.2s'
                 }}
               />
+              {errors.name && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>{errors.name}</p>}
             </div>
           </div>
 
@@ -227,7 +244,7 @@ const CheckoutPage = () => {
                   flex: 1,
                   padding: '16px 20px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
+                  border: errors.phone ? '1px solid #ef4444' : '1px solid #e2e8f0',
                   fontSize: '16px',
                   background: '#f8fafc',
                   outline: 'none',
@@ -235,6 +252,7 @@ const CheckoutPage = () => {
                 }}
               />
             </div>
+            {errors.phone && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>{errors.phone}</p>}
           </div>
 
           {/* Payment Method Display (Locked based on logic) */}

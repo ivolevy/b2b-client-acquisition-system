@@ -6,6 +6,7 @@ import { rateLimiter, debounce } from '../utils/rateLimiter';
 import { handleError } from '../utils/errorHandler';
 import { API_URL } from '../config';
 import axios from 'axios';
+import { validateEmail, validateName, validatePhone, validatePassword } from '../utils/validators';
 
 // Credenciales de prueba (modo demo cuando Supabase no está configurado)
 const DEMO_USERS = [
@@ -92,87 +93,9 @@ const COUNTRIES = [
   { code: 'VN', name: 'Vietnam', flag: '🇻🇳', prefix: '+84' },
 ];
 
-// Funciones de validación
-const validateEmail = (email) => {
-  if (!email || email.trim() === '') {
-    return { isValid: false, message: 'El email es requerido' };
-  }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email.trim())) {
-    return { isValid: false, message: 'El formato del email no es válido' };
-  }
-  if (email.length > 255) {
-    return { isValid: false, message: 'El email es demasiado largo (máximo 255 caracteres)' };
-  }
-  return { isValid: true, message: '' };
-};
-
-const validateName = (name) => {
-  if (!name || name.trim() === '') {
-    return { isValid: false, message: 'El nombre es requerido' };
-  }
-  const trimmedName = name.trim();
-  if (trimmedName.length < 2) {
-    return { isValid: false, message: 'El nombre debe tener al menos 2 caracteres' };
-  }
-  if (trimmedName.length > 20) {
-    return { isValid: false, message: 'El nombre es demasiado largo (máximo 20 caracteres)' };
-  }
-  // Permitir letras, espacios, acentos y caracteres especiales comunes
-  const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/;
-  if (!nameRegex.test(trimmedName)) {
-    return { isValid: false, message: 'El nombre solo puede contener letras, espacios y guiones' };
-  }
-  return { isValid: true, message: '' };
-};
-
-const validatePhone = (phone, countryPrefix = '') => {
-  // El teléfono es opcional, si está vacío es válido
-  if (!phone || phone.trim() === '') {
-    return { isValid: true, message: '' };
-  }
-  
-  // Extraer solo los números del número local (sin el prefijo)
-  const cleanPhone = phone.replace(/[^\d]/g, '');
-  
-  // Validar que solo contenga números después de limpiar
-  if (cleanPhone.length === 0) {
-    return { isValid: false, message: 'El teléfono debe contener al menos un número' };
-  }
-  
-  // Validar longitud del número local (8-12 dígitos, sin contar el prefijo del país)
-  if (cleanPhone.length < 8) {
-    return { isValid: false, message: 'El número debe tener al menos 8 dígitos (sin contar el prefijo del país)' };
-  }
-  if (cleanPhone.length > 12) {
-    return { isValid: false, message: 'El número es demasiado largo (máximo 12 dígitos sin contar el prefijo)' };
-  }
-  
-  return { isValid: true, message: '' };
-};
-
-const validatePassword = (password, mode) => {
-  if (!password || password.trim() === '') {
-    return { isValid: false, message: 'La contraseña es requerida' };
-  }
-  // Validar longitud mínima según el modo (ambos requieren 8 caracteres ahora)
-  const minLength = 8;
-  if (password.length < minLength) {
-    return { isValid: false, message: `La contraseña debe tener al menos ${minLength} caracteres` };
-  }
-  if (password.length > 128) {
-    return { isValid: false, message: 'La contraseña es demasiado larga (máximo 128 caracteres)' };
-  }
-  // Validar que tenga al menos una letra y un número (solo en modo registro)
-  if (mode === 'register') {
-    const hasLetter = /[a-zA-Z]/.test(password);
-    const hasNumber = /\d/.test(password);
-    if (!hasLetter || !hasNumber) {
-      return { isValid: false, message: 'La contraseña debe contener al menos una letra y un número' };
-    }
-  }
-  return { isValid: true, message: '' };
-};
+// Local implementation of validatePassword depends on mode, 
+// so we'll wrap the unified validator inside the component or keep it here if needed.
+// However, since we unified it, we can just use the import.
 
 function Login({ onLogin }) {
   const [mode, setMode] = useState('login'); // 'login' o 'register'
@@ -285,7 +208,7 @@ function Login({ onLogin }) {
   // Validar formulario completo (función simple, sin memoizar para evitar problemas)
   const isFormValid = () => {
     const emailValidation = validateEmail(email);
-    const passwordValidation = validatePassword(password, mode);
+    const passwordValidation = validatePassword(password, mode === 'register');
     // Validar solo el número local (sin el prefijo)
     const phoneValidation = mode === 'register' ? validatePhone(phone, selectedCountry.prefix) : { isValid: true };
     const nameValidation = mode === 'register' ? validateName(name) : { isValid: true };
@@ -319,7 +242,7 @@ function Login({ onLogin }) {
     }, 300);
 
     debouncedPasswordValidationRef.current = debounce((value) => {
-      const validation = validatePassword(value, modeRef.current);
+      const validation = validatePassword(value, modeRef.current === 'register');
       setPasswordError(validation.message);
     }, 300);
 
@@ -471,7 +394,7 @@ function Login({ onLogin }) {
   
   const handlePasswordBlur = () => {
     setTouched({ ...touched, password: true });
-    const validation = validatePassword(password, mode);
+    const validation = validatePassword(password, mode === 'register');
     setPasswordError(validation.message);
   };
 
@@ -485,7 +408,7 @@ function Login({ onLogin }) {
     
     // Validar todos los campos
     const emailValidation = validateEmail(email);
-    const passwordValidation = validatePassword(password, mode);
+    const passwordValidation = validatePassword(password, mode === 'register');
     const fullPhone = mode === 'register' ? `${selectedCountry.prefix}${phone}` : '';
     // Validar solo el número local (sin el prefijo)
     const phoneValidation = mode === 'register' ? validatePhone(phone, selectedCountry.prefix) : { isValid: true };
