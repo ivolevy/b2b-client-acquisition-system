@@ -146,7 +146,7 @@ const CheckoutPage = () => {
           <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: '300px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
-                Email Profesional
+                Email Profesional <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input 
                 type="email" 
@@ -171,7 +171,7 @@ const CheckoutPage = () => {
 
             <div style={{ flex: 1, minWidth: '300px' }}>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
-                Nombre Completo
+                Nombre Completo <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input 
                 type="text" 
@@ -195,7 +195,7 @@ const CheckoutPage = () => {
           {/* Phone Input */}
           <div style={{ marginBottom: '30px' }}>
             <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
-              Teléfono de Contacto
+              Teléfono de Contacto <span style={{ color: '#ef4444' }}>*</span>
             </label>
             <div style={{ display: 'flex', gap: '10px' }}>
               <select 

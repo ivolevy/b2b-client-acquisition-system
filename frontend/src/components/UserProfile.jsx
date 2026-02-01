@@ -42,6 +42,13 @@ function UserProfile() {
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false } });
   const [authLoading, setAuthLoading] = useState(false);
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+  const [phoneForm, setPhoneForm] = useState({
+    countryCode: '+54',
+    number: ''
+  });
   
   // Custom Rubros State
   const [availableRubros, setAvailableRubros] = useState({});
@@ -74,7 +81,7 @@ function UserProfile() {
       document.body.classList.remove('modal-open');
       document.body.style.top = '';
     };
-  }, [showDeleteModal, showPasswordModal, showDeleteSuccessModal]);
+  }, [showDeleteModal, showPasswordModal, showDeleteSuccessModal, showPhoneModal]);
 
 
   // Countdown para reenviar código de cambio de contraseña
@@ -500,6 +507,37 @@ function UserProfile() {
     }
   };
 
+  const handleUpdatePhone = async () => {
+    if (!phoneForm.number) {
+      setPhoneError('Por favor ingresá un número de teléfono');
+      return;
+    }
+    
+    setPhoneLoading(true);
+    setPhoneError('');
+    
+    try {
+      const fullPhone = `${phoneForm.countryCode} ${phoneForm.number}`;
+      const { error } = await supabase
+        .from('users')
+        .update({ phone: fullPhone })
+        .eq('id', user.id);
+        
+      if (error) throw error;
+      
+      // Actualizar el objeto user localmente
+      toastSuccess?.('Teléfono actualizado correctamente');
+      setShowPhoneModal(false);
+      // Recargar la página o actualizar el estado global si es necesario
+      window.location.reload(); 
+    } catch (err) {
+      console.error('Error updating phone:', err);
+      setPhoneError('No se pudo actualizar el teléfono. Intentá de nuevo.');
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
+
   return (
     <div className="user-profile-container">
       <div className="user-profile-header">
@@ -575,7 +613,28 @@ function UserProfile() {
                 <div className="profile-field">
                   <label className="profile-field-label">Teléfono</label>
                   <div className="profile-field-value">
-                    {user?.phone && user.phone.length > 6 ? user.phone : <span className="text-muted">No especificado</span>}
+                    <span>
+                      {user?.phone && user.phone.length > 6 ? user.phone : <span className="text-muted">No especificado</span>}
+                    </span>
+                    <button 
+                      className="profile-inline-link"
+                      onClick={() => {
+                        // Intentar parsear el teléfono actual para precargar el modal
+                        if (user?.phone) {
+                          const parts = user.phone.split(' ');
+                          if (parts.length > 1) {
+                            setPhoneForm({ countryCode: parts[0], number: parts.slice(1).join('') });
+                          } else {
+                            setPhoneForm({ ...phoneForm, number: user.phone });
+                          }
+                        }
+                        setShowPhoneModal(true);
+                      }}
+                      style={{ fontSize: '1.2rem', marginLeft: '5px' }}
+                      title="Editar teléfono"
+                    >
+                      ✏️
+                    </button>
                   </div>
                 </div>
                 <div className="profile-field">
@@ -801,17 +860,17 @@ function UserProfile() {
                     Para cambiar tu contraseña, necesitamos verificar tu identidad. 
                     Te enviaremos un código de validación a tu email.
                   </p>
-              <div className="password-input-group">
+                  <div className="password-input-group">
                     <label>Email</label>
-                <input
+                    <input
                       type="email"
                       value={passwordChangeEmail || user?.email || ''}
                       onChange={(e) => setPasswordChangeEmail(e.target.value)}
                       placeholder="Ingresá tu email"
                       disabled={codeLoading}
-                  autoFocus
-                />
-              </div>
+                      autoFocus
+                    />
+                  </div>
                 </>
               )}
 
@@ -869,16 +928,15 @@ function UserProfile() {
                             const value = e.target.value.replace(/\D/g, '');
                             if (value) {
                               const newCode = verificationCode.split('');
+                              // Asegurar que el array tenga longitud suficiente
+                              while(newCode.length <= index) newCode.push('');
                               newCode[index] = value;
                               const updatedCode = newCode.join('').slice(0, 6);
                               setVerificationCode(updatedCode);
                               
-                              // Mover al siguiente input si hay valor
-                              if (index < 5 && value) {
-                                const nextInput = e.target.parentElement?.children[index + 1];
-                                if (nextInput) {
-                                  nextInput.focus();
-                                }
+                              if (index < 5) {
+                                const nextInput = e.target.parentElement.querySelectorAll('input')[index + 1];
+                                if (nextInput) nextInput.focus();
                               }
                             }
                           }}
@@ -887,120 +945,47 @@ function UserProfile() {
                               e.preventDefault();
                               const newCode = verificationCode.split('');
                               
-                              if (newCode[index]) {
-                                // Si hay un valor en el campo actual, borrarlo
+                              if (verificationCode[index]) {
                                 newCode[index] = '';
                                 setVerificationCode(newCode.join(''));
                               } else if (index > 0) {
-                                // Si el campo está vacío, ir al anterior y borrarlo
                                 newCode[index - 1] = '';
                                 setVerificationCode(newCode.join(''));
-                                const prevInput = e.target.parentElement?.children[index - 1];
-                                if (prevInput) {
-                                  prevInput.focus();
-                                }
-                              }
-                            }
-                          }}
-                          onPaste={(e) => {
-                            e.preventDefault();
-                            const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-                            setVerificationCode(pastedData);
-                            if (pastedData.length === 6) {
-                              const lastInput = e.target.parentElement?.children[5];
-                              if (lastInput) {
-                                lastInput.focus();
+                                const prevInput = e.target.parentElement.querySelectorAll('input')[index - 1];
+                                if (prevInput) prevInput.focus();
                               }
                             }
                           }}
                           disabled={codeLoading}
                           autoFocus={index === 0}
                           style={{ 
-                            width: '48px',
-                            height: '56px',
+                            width: '44px',
+                            height: '52px',
                             textAlign: 'center', 
-                            fontSize: '24px', 
-                            fontFamily: 'monospace',
-                            border: '2px solid #e5e7eb',
-                            borderRadius: '8px',
-                            outline: 'none',
-                            transition: 'all 0.2s'
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = '#81D4FA';
-                            e.target.style.boxShadow = '0 0 0 3px rgba(129, 212, 250, 0.1)';
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = '#e5e7eb';
-                            e.target.style.boxShadow = 'none';
+                            fontSize: '20px', 
+                            border: '2px solid #e2e8f0',
+                            borderRadius: '10px',
+                            outline: 'none'
                           }}
                         />
                       ))}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', flexWrap: 'wrap', gap: '8px' }}>
-                      <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>
-                        El código expira en 10 minutos
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                      <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
+                        Expira en 10 min
                       </p>
                       {canResendCode ? (
                         <button
                           type="button"
-                          onClick={async () => {
-                            if (!user?.email) {
-                              setPasswordError('No se encontró el email del usuario');
-                              return;
-                            }
-
-                            setCodeLoading(true);
-                            setPasswordError('');
-                            setCanResendCode(false);
-
-                            try {
-                              const emailToUse = passwordChangeEmail || user?.email;
-                              if (!emailToUse) {
-                                setPasswordError('Por favor, ingresá un email');
-                                setCodeLoading(false);
-                                return;
-                              }
-
-                              const response = await axios.post(`${API_URL}/auth/solicitar-codigo-cambio-password`, {
-                                email: emailToUse,
-                                user_id: user.id
-                              });
-
-                              if (response.data.success) {
-                                setCodeSent(true);
-                                setVerificationCode(''); // Limpiar código anterior
-                                setResendCountdown(60); // Reiniciar countdown a 60 segundos
-                                setPasswordError('');
-                              } else {
-                                setPasswordError(response.data.message || 'Error al solicitar el código');
-                                setCanResendCode(true);
-                              }
-                            } catch (error) {
-                              const errorMsg = error.response?.data?.detail || error.message || 'Error al solicitar el código';
-                              setPasswordError(errorMsg);
-                              setCanResendCode(true);
-                            } finally {
-                              setCodeLoading(false);
-                            }
-                          }}
-                          disabled={codeLoading}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#81D4FA',
-                            cursor: 'pointer',
-                            fontSize: '12px',
-                            textDecoration: 'underline',
-                            padding: 0,
-                            margin: 0
-                          }}
+                          onClick={handleRequestCode}
+                          className="profile-inline-link"
+                          style={{ fontSize: '12px' }}
                         >
                           Reenviar código
                         </button>
                       ) : (
-                        <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>
-                          Reenviar código en {resendCountdown}s
+                        <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
+                          Reenviar en {resendCountdown}s
                         </p>
                       )}
                     </div>
@@ -1018,30 +1003,29 @@ function UserProfile() {
                     marginBottom: '20px',
                     color: '#155724'
                   }}>
-                    ✓ Código verificado correctamente. Ahora podés cambiar tu contraseña.
+                    ✓ Código verificado. Ahora podés cambiar tu contraseña.
                   </div>
-              <div className="password-input-group">
-                <label>Nueva contraseña</label>
-                <input
-                  type="password"
-                  value={passwordForm.newPassword}
-                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                  placeholder="Ingresá tu nueva contraseña"
-                  disabled={passwordLoading}
+                  <div className="password-input-group">
+                    <label>Nueva contraseña</label>
+                    <input
+                      type="password"
+                      value={passwordForm.newPassword}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                      placeholder="Ingresá tu nueva contraseña"
+                      disabled={passwordLoading}
                       autoFocus
-                />
-              </div>
-
-              <div className="password-input-group">
-                <label>Confirmar nueva contraseña</label>
-                <input
-                  type="password"
-                  value={passwordForm.confirmPassword}
-                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                  placeholder="Confirmá tu nueva contraseña"
-                  disabled={passwordLoading}
-                />
-              </div>
+                    />
+                  </div>
+                  <div className="password-input-group">
+                    <label>Confirmar nueva contraseña</label>
+                    <input
+                      type="password"
+                      value={passwordForm.confirmPassword}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                      placeholder="Confirmá tu nueva contraseña"
+                      disabled={passwordLoading}
+                    />
+                  </div>
                 </>
               )}
             </div>
@@ -1051,45 +1035,117 @@ function UserProfile() {
                 className="cancel-btn"
                 onClick={() => {
                   setShowPasswordModal(false);
-                  setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
                   setPasswordStep('request');
                   setVerificationCode('');
-                  setCodeSent(false);
-                  setPasswordError('');
-                  setResendCountdown(0);
-                  setCanResendCode(false);
                 }}
                 disabled={passwordLoading || codeLoading}
               >
                 Cancelar
               </button>
               {passwordStep === 'request' && (
-                <button 
-                  className="password-save-btn"
-                  onClick={handleRequestCode}
-                  disabled={codeLoading}
-                >
+                <button className="password-save-btn" onClick={handleRequestCode} disabled={codeLoading}>
                   {codeLoading ? 'Enviando...' : 'Enviar código'}
                 </button>
               )}
               {passwordStep === 'verify' && (
                 <button 
-                  className="password-save-btn"
-                  onClick={handleVerifyCode}
+                  className="password-save-btn" 
+                  onClick={handleVerifyCode} 
                   disabled={codeLoading || verificationCode.length !== 6}
                 >
                   {codeLoading ? 'Verificando...' : 'Verificar código'}
                 </button>
               )}
               {passwordStep === 'change' && (
+                <button className="password-save-btn" onClick={handleChangePassword} disabled={passwordLoading}>
+                  {passwordLoading ? 'Guardando...' : 'Guardar contraseña'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para editar teléfono */}
+      {showPhoneModal && (
+        <div className="password-modal-overlay">
+          <div className="password-modal">
+            <div className="password-modal-header">
+              <h3>Actualizar Teléfono</h3>
+            </div>
+            
+            <div className="password-modal-body">
+              {phoneError && (
+                <div className="password-error">
+                  {phoneError}
+                </div>
+              )}
+              
+              <p style={{ marginBottom: '20px', color: '#64748b', fontSize: '14px' }}>
+                Ingresá tu número de teléfono de contacto para que podamos comunicarnos con vos.
+              </p>
+
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <select 
+                  value={phoneForm.countryCode}
+                  onChange={(e) => setPhoneForm({ ...phoneForm, countryCode: e.target.value })}
+                  style={{
+                    width: '100px',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '14px',
+                    background: '#f8fafc',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="+54">🇦🇷 +54</option>
+                  <option value="+55">🇧🇷 +55</option>
+                  <option value="+56">🇨🇱 +56</option>
+                  <option value="+57">🇨🇴 +57</option>
+                  <option value="+598">🇺🇾 +598</option>
+                  <option value="+52">🇲🇽 +52</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+34">🇪🇸 +34</option>
+                </select>
+                <input 
+                  type="tel" 
+                  placeholder="Ej: 11 1234-5678" 
+                  value={phoneForm.number}
+                  onChange={(e) => setPhoneForm({ ...phoneForm, number: e.target.value })}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '14px',
+                    background: '#f8fafc',
+                    outline: 'none'
+                  }}
+                  autoFocus
+                />
+              </div>
+            </div>
+            
+            <div className="password-modal-footer">
+              <button 
+                className="cancel-btn"
+                onClick={() => {
+                  setShowPhoneModal(false);
+                  setPhoneError('');
+                }}
+                disabled={phoneLoading}
+              >
+                Cancelar
+              </button>
               <button 
                 className="password-save-btn"
-                onClick={handleChangePassword}
-                disabled={passwordLoading}
+                onClick={handleUpdatePhone}
+                disabled={phoneLoading || !phoneForm.number}
               >
-                {passwordLoading ? 'Guardando...' : 'Guardar contraseña'}
+                {phoneLoading ? 'Guardando...' : 'Guardar'}
               </button>
-              )}
             </div>
           </div>
         </div>
