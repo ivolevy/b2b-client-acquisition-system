@@ -2331,6 +2331,31 @@
 .contact-option-info span {
   color: rgba(255, 255, 255, 0.4);
   font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.copy-feedback-bubble {
+  position: absolute;
+  right: 20px;
+  background: var(--login-success);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .modal-footer {
