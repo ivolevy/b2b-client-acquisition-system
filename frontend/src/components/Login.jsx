@@ -1107,6 +1107,10 @@ function Login({ onLogin }) {
                 <a 
                   href="mailto:solutionsdota@gmail.com?subject=Solicitud de ayuda - Smart Leads" 
                   className="contact-admin-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.href = "mailto:solutionsdota@gmail.com?subject=Solicitud de ayuda - Smart Leads";
+                  }}
                 >
                   Contactar administrador
                 </a>
