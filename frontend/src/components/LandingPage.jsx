@@ -23,8 +23,8 @@ const LandingPage = () => {
   // Pricing state
   const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' | 'yearly'
   const [currency, setCurrency] = useState('ARS'); // Default a ARS como pidió
-  const [exchangeRate, setExchangeRate] = useState(1200); 
-  
+  const [exchangeRate, setExchangeRate] = useState(1200);
+
   const isYearly = billingCycle === 'yearly';
 
   // Fetch Dolar Blue
@@ -34,10 +34,10 @@ const LandingPage = () => {
         const res = await fetch('https://api.bluelytics.com.ar/v2/latest');
         const data = await res.json();
         if (data && data.blue && data.blue.value_sell) {
-            // Dolar Blue PURO (sin recargo, a pedido del usuario)
-            const blueRate = data.blue.value_sell;
-            setExchangeRate(blueRate);
-            console.log(`Dolar Blue: ${blueRate}`);
+          // Dolar Blue PURO (sin recargo, a pedido del usuario)
+          const blueRate = data.blue.value_sell;
+          setExchangeRate(blueRate);
+          console.log(`Dolar Blue: ${blueRate}`);
         }
       } catch (e) {
         console.warn('Error fetching dolar blue:', e);
@@ -100,24 +100,24 @@ const LandingPage = () => {
     let finalPrice;
 
     if (currency === 'ARS') {
-        // Precio en ARS = Valor Local en USD * Dolar Blue
-        // Si no hay localUSD definido (fallback), usa el USD global, pero con el cambio del día.
-        finalPrice = (plan.price.localUSD || plan.price.USD) * exchangeRate;
+      // Precio en ARS = Valor Local en USD * Dolar Blue
+      // Si no hay localUSD definido (fallback), usa el USD global, pero con el cambio del día.
+      finalPrice = (plan.price.localUSD || plan.price.USD) * exchangeRate;
     } else {
-        // Precio en USD Global
-        finalPrice = plan.price.USD;
+      // Precio en USD Global
+      finalPrice = plan.price.USD;
     }
-    
+
     // Si es anual, descuento del 20%
     if (isYearly) {
       finalPrice = finalPrice * 0.8;
     }
 
     if (currency === 'ARS') {
-        // Redondear a miles más cercanos para estética en pesos
-        return Math.floor(finalPrice / 100) * 100; 
+      // Redondear a miles más cercanos para estética en pesos
+      return Math.floor(finalPrice / 100) * 100;
     } else {
-        return Math.ceil(finalPrice);
+      return Math.ceil(finalPrice);
     }
   };
 
@@ -135,7 +135,7 @@ const LandingPage = () => {
   };
 
   return (
-    <div className={`landing-page dark-theme ${mobileMenuOpen ? 'menu-open' : ''}`}>
+    <div className={`landing-page ${mobileMenuOpen ? 'menu-open' : ''}`}>
 
       {/* --- NAVBAR (Floating Pill Style) --- */}
       <header className="landing-header">
@@ -266,8 +266,8 @@ const LandingPage = () => {
               <div className="float-card card-2">
                 <FiMail className="icon-mail" />
                 <div>
-                  <strong>Campañas Activas</strong>
-                  <span>45% Open Rate</span>
+                  <strong>355 Emails</strong>
+                  <span>Enviados con éxito</span>
                 </div>
               </div>
             </div>
@@ -281,17 +281,15 @@ const LandingPage = () => {
           <div className="module-content">
             <div className="module-number">01</div>
             <h2>Motor de Búsqueda con IA</h2>
-            <p className="module-lead">
-              No más bases de datos genéricas. Nuestra IA escanea la web en tiempo real para encontrar leads frescos que tu competencia no tiene.
-            </p>
+            <div className="module-lead">
+              <p style={{ marginBottom: '16px' }}>Creamos una IA que busca leads nuevos en tiempo real en toda la web.</p>
+              <p style={{ margin: 0 }}>Solo ingresás rubro, dirección y radio, y el sistema encuentra empresas que coincidan.</p>
+            </div>
             <div className="module-details">
-              <p>
-                Ingresa <strong>Rubro, Radio y Dirección</strong>. Nuestro algoritmo recorre la web para encontrar empresas que coinciden con tu búsqueda.
-              </p>
               <ul className="detail-list">
-                <li><FiCheck /> <strong>Filtros Estrictos:</strong> Solo contactos con Email y Teléfono verificado</li>
-                <li><FiCheck /> <strong>Bot de Scrapeo Social:</strong> Detecta automáticamente redes sociales</li>
-                <li><FiCheck /> <strong>Parámetros Precisos:</strong> Define el radio exacto de búsqueda en km</li>
+                <li><FiCheck /> Opción de contactos con email y teléfono verificados</li>
+                <li><FiCheck /> Detección automática de redes sociales</li>
+                <li><FiCheck /> Definición exacta del radio de búsqueda en km</li>
               </ul>
             </div>
           </div>
@@ -315,23 +313,15 @@ const LandingPage = () => {
           <div className="module-content">
             <div className="module-number">02</div>
             <h2>Enriquecimiento de Datos</h2>
-            <p className="module-lead">
-              Un nombre y un teléfono no son suficientes. Transformamos datos crudos en inteligencia de negocio.
-            </p>
+            <div className="module-lead">
+              <p style={{ marginBottom: '16px' }}>Convertimos datos básicos en información útil para vender.</p>
+              <p style={{ margin: 0 }}>El sistema analiza la presencia digital de cada prospecto para validar su calidad antes de usar un crédito.</p>
+            </div>
             <div className="module-details">
-              <p>
-                Nuestro sistema analiza la presencia digital de cada prospecto para validar su calidad antes de que gastes un crédito.
-              </p>
-              <div className="enrichment-grid-text">
-                <div>
-                  <h4><FiShield /> Verificación Emails</h4>
-                  <p>Validación automática para proteger tu reputación y minimizar rebotes.</p>
-                </div>
-                <div>
-                  <h4><FiTrendingUp /> Social Score</h4>
-                  <p>Validación de perfiles en LinkedIn y actividad en redes.</p>
-                </div>
-              </div>
+              <ul className="detail-list">
+                <li><FiCheck /> Emails verificados para reducir rebotes</li>
+                <li><FiCheck /> <strong>Social Score:</strong> validación de LinkedIn y actividad en redes</li>
+              </ul>
             </div>
           </div>
           <div className="module-visual">
@@ -352,17 +342,15 @@ const LandingPage = () => {
           <div className="module-content">
             <div className="module-number">03</div>
             <h2>Infraestructura de Email Masivo</h2>
-            <p className="module-lead">
-              Llega a la bandeja de entrada, no al spam. Una suite completa de deliverability integrada.
-            </p>
+            <div className="module-lead">
+              <p style={{ marginBottom: '16px' }}>Emails que llegan a inbox, no a spam.</p>
+              <p style={{ margin: 0 }}>Conectá Google u Outlook por OAuth, sin configuraciones complejas.</p>
+            </div>
             <div className="module-details">
-              <p>
-                Conecta tus cuentas de Google y Outlook mediante protocolo OAuth. Máxima entregabilidad sin configuraciones complejas.
-              </p>
               <ul className="detail-list">
-                <li><FiCheck /> <strong>Warm-up Automático:</strong> Calentamos tus casillas gradualmente</li>
-                <li><FiCheck /> <strong>Rotación de Cuentas:</strong> Evita el spam alternando entre múltiples remitentes</li>
-                <li><FiCheck /> <strong>Spintax IA:</strong> Variamos el contenido de cada email para que sea único</li>
+                <li><FiCheck /> Warm-up automático de casillas</li>
+                <li><FiCheck /> Rotación de cuentas para evitar spam</li>
+                <li><FiCheck /> Spintax con IA: emails únicos en cada envío</li>
               </ul>
             </div>
           </div>
@@ -386,13 +374,11 @@ const LandingPage = () => {
           <div className="module-content">
             <div className="module-number">04</div>
             <h2>Exportación y Reportes</h2>
-            <p className="module-lead">
-              Tus datos son tuyos. Descarga listas limpias y listas para usar en cualquier plataforma.
-            </p>
+            <div className="module-lead">
+              <p style={{ marginBottom: '16px' }}>Tus datos son tuyos. Descargá listas limpias y listas para usar en cualquier plataforma.</p>
+              <p style={{ margin: 0 }}>Sin funciones innecesarias: bajás tu lista enriquecida y la usás cuando quieras.</p>
+            </div>
             <div className="module-details">
-              <p>
-                Sin funciones complejas que no usas. Simplemente descarga tu lista enriquecida y ponla a trabajar.
-              </p>
               <div className="crm-actions">
                 <div className="crm-tag">Excel (.xlsx)</div>
                 <div className="crm-tag">Archivo CSV</div>
@@ -419,6 +405,7 @@ const LandingPage = () => {
             <p className="spotlight-lead">
               Deja de desperdiciar leads. Nuestra tecnología asegura que tus correos lleguen directo a la bandeja de entrada, lejos de la carpeta de promociones.
             </p>
+            <br />
             <div className="spotlight-features-text">
               <p>
                 <strong>Escalabilidad Infinita:</strong> Conecta cientos de cuentas de Gmail y Outlook para multiplicar tu alcance al instante.
@@ -451,69 +438,80 @@ const LandingPage = () => {
           <div className="section-header center">
             <h2>Matemática Simple: Más Volumen = Más Ventas</h2>
             <p>
-              Deja de perder 35 horas semanales copiando y pegando datos. Dedícate a cerrar tratos.
+              Deja de perder horas copiando y pegando datos. Dedícate a cerrar tratos.
             </p>
           </div>
 
-          <div className="roi-comparison-grid">
-            {/* THE OLD WAY */}
+          <div className="roi-comparison-container">
+            {/* OLD WAY */}
             <div className="roi-card old-way">
-              <div className="roi-header">
-                <h3>Método Manual</h3>
-                <span className="roi-badge-neg">Lento & Costoso</span>
+              <div className="roi-card-header">
+                <h3>Tu Proceso Actual</h3>
+                <span className="badge-error">Lento & Manual</span>
               </div>
-              <div className="roi-stat-row">
-                <div className="stat-label">Leads por Semana</div>
-                <div className="stat-value neg">~50</div>
-              </div>
-              <div className="roi-stat-row">
-                <div className="stat-label">Tiempo Invertido</div>
-                <div className="stat-value neg">35+ Horas</div>
-              </div>
-              <div className="roi-stat-row">
-                <div className="stat-label">Costo Operativo</div>
-                <div className="stat-value neg">Alto (Tu Tiempo)</div>
-              </div>
-              <div className="roi-outcome">
-                Resultados limitados y burnout.
-              </div>
+              <ul className="roi-list">
+                <li>
+                  <span className="roi-icon-bad"><FiX /></span>
+                  <div>
+                    <strong>~50 Leads / semana</strong>
+                    <p>Contactando uno por uno manualmente.</p>
+                  </div>
+                </li>
+                <li>
+                  <span className="roi-icon-bad"><FiX /></span>
+                  <div>
+                    <strong>35+ Horas perdidas</strong>
+                    <p>Tareas repetitivas que no generan $$$.</p>
+                  </div>
+                </li>
+                <li>
+                  <span className="roi-icon-bad"><FiX /></span>
+                  <div>
+                    <strong>Resultados Bajos</strong>
+                    <p>Sin tiempo para vender de verdad.</p>
+                  </div>
+                </li>
+              </ul>
             </div>
 
-            {/* VS DIVIDER */}
-            <div className="roi-vs">
-              <span>VS</span>
-            </div>
+            {/* VS Badge */}
+            <div className="roi-vs-badge">VS</div>
 
-            {/* SMART LEADS WAY */}
+            {/* NEW WAY */}
             <div className="roi-card new-way">
-              <div className="roi-header">
-                <h3>Smart Leads</h3>
-                <span className="roi-badge-pos">Automático</span>
+              <div className="roi-card-header">
+                <h3>Con Smart Leads</h3>
+                <span className="badge-success">Automático 100%</span>
               </div>
-              <div className="roi-stat-row">
-                <div className="stat-label">Leads por Semana</div>
-                <div className="stat-value pos">1,000+</div>
-              </div>
-              <div className="roi-stat-row">
-                <div className="stat-label">Tiempo Invertido</div>
-                <div className="stat-value pos">10 Minutos</div>
-              </div>
-              <div className="roi-stat-row">
-                <div className="stat-label">Costo Operativo</div>
-                <div className="stat-value pos">Mínimo</div>
-              </div>
-              <div className="roi-outcome highlight">
-                <FiTrendingUp /> Escapabilidad Infinita.
+              <ul className="roi-list">
+                <li>
+                  <span className="roi-icon-good"><FiCheck /></span>
+                  <div>
+                    <strong>1,000+ Leads / semana</strong>
+                    <p>Campaña corriendo en piloto automático.</p>
+                  </div>
+                </li>
+                <li>
+                  <span className="roi-icon-good"><FiCheck /></span>
+                  <div>
+                    <strong>Leads Calificados</strong>
+                    <p>Solo hablas con quien quiere comprar.</p>
+                  </div>
+                </li>
+                <li>
+                  <span className="roi-icon-good"><FiCheck /></span>
+                  <div>
+                    <strong>MÁS PLATA</strong>
+                    <p>Más reuniones = más cierres = más facturación.</p>
+                  </div>
+                </li>
+              </ul>
+              <div className="roi-final-cta">
+                <button className="btn-primary full-width" onClick={() => navigate('/')}>
+                  Deja de llamar uno por uno <FiArrowRight />
+                </button>
               </div>
             </div>
-          </div>
-
-          <div className="roi-summary-banner">
-            <p>
-              Ahorras <strong>139+ horas al mes</strong>. Si tu hora vale $35, te estamos ahorrando <strong>$4,875/mes</strong>.
-              <br />
-              Y eso sin contar las ventas extra que generarás con 20x más leads.
-            </p>
           </div>
         </div>
       </section>
@@ -697,21 +695,21 @@ const LandingPage = () => {
           <div className="pricing-controls">
             {/* Currency Toggle (Minimal Text Tabs) */}
             <div className="currency-selector">
-              <button 
-                className={currency === 'ARS' ? 'active' : ''} 
+              <button
+                className={currency === 'ARS' ? 'active' : ''}
                 onClick={() => setCurrency('ARS')}
               >
-                 🇦🇷 ARS
+                🇦🇷 ARS
               </button>
               <span className="divider">|</span>
-              <button 
-                className={currency === 'USD' ? 'active' : ''} 
+              <button
+                className={currency === 'USD' ? 'active' : ''}
                 onClick={() => setCurrency('USD')}
               >
-                 🌎 USD
+                🌎 USD
               </button>
             </div>
-            
+
             {/* Cycle Toggle (Prominent Pill) */}
             <div className="billing-toggle-pill">
               <button
@@ -729,55 +727,55 @@ const LandingPage = () => {
             </div>
           </div>
 
-            {/* Wrapper for Grid + Bubble to align bubble to grid */}
-            <div className="pricing-content-wrapper" style={{ position: 'relative' }}>
-              
-              <div className="pricing-grid-new">
-                {plans.map((plan) => (
-                  <div key={plan.id} className={`plan-card-new ${plan.popular ? 'popular' : ''}`}>
-                    {plan.popular && <div className="popular-badge">MÁS ELEGIDO</div>}
+          {/* Wrapper for Grid + Bubble to align bubble to grid */}
+          <div className="pricing-content-wrapper" style={{ position: 'relative' }}>
 
-                    <div className="plan-header-new">
-                      <h3>{plan.name}</h3>
-                      <p>{plan.description}</p>
-                    </div>
+            <div className="pricing-grid-new">
+              {plans.map((plan) => (
+                <div key={plan.id} className={`plan-card-new ${plan.popular ? 'popular' : ''}`}>
+                  {plan.popular && <div className="popular-badge">MÁS ELEGIDO</div>}
 
-                    <div className="plan-price-new">
-                      <span className="currency">{currency === 'USD' ? '$' : '$'}</span>
-                      <span className="amount">{getPrice(plan).toLocaleString()}</span>
-                      <span className="period">/{isYearly ? 'mes' : 'mes'}</span>
-                    </div>
-
-                    <ul className="plan-features-new">
-                      {plan.features.map((feature, idx) => (
-                        <li key={idx} className={!feature.included ? 'disabled' : ''}>
-                          {feature.included ? <FiCheck /> : <FiX style={{ opacity: 0.5 }} />}
-                          {feature.text}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <button
-                      className={`plan-btn-new ${plan.buttonClass === 'btn-primary' ? 'primary' : 'secondary'}`}
-                      onClick={() => handlePlanSelect(plan.id)}
-                    >
-                      {plan.buttonText}
-                    </button>
+                  <div className="plan-header-new">
+                    <h3>{plan.name}</h3>
+                    <p>{plan.description}</p>
                   </div>
-                ))}
-              </div>
 
-              {/* Extra Credits Text Line */}
-              <div className="extra-credits-text" style={{ 
-                  textAlign: 'center', 
-                  marginTop: '40px', 
-                  color: 'white',
-                  fontSize: '0.9rem'
-              }}>
-                <p>¿Necesitas más capacidad? Packs de créditos extra disponibles desde <strong style={{ color: '#4ade80' }}>$1 USD</strong>.</p>
-              </div>
-            
+                  <div className="plan-price-new">
+                    <span className="currency">{currency === 'USD' ? '$' : '$'}</span>
+                    <span className="amount">{getPrice(plan).toLocaleString()}</span>
+                    <span className="period">/{isYearly ? 'mes' : 'mes'}</span>
+                  </div>
+
+                  <ul className="plan-features-new">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className={!feature.included ? 'disabled' : ''}>
+                        {feature.included ? <FiCheck /> : <FiX style={{ opacity: 0.5 }} />}
+                        {feature.text}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    className={`plan-btn-new ${plan.buttonClass === 'btn-primary' ? 'primary' : 'secondary'}`}
+                    onClick={() => handlePlanSelect(plan.id)}
+                  >
+                    {plan.buttonText}
+                  </button>
+                </div>
+              ))}
             </div>
+
+            {/* Extra Credits Text Line */}
+            <div className="extra-credits-text" style={{
+              textAlign: 'center',
+              marginTop: '40px',
+              color: 'white',
+              fontSize: '0.9rem'
+            }}>
+              <p>¿Necesitas más capacidad? Packs de créditos extra disponibles desde <strong style={{ color: '#4ade80' }}>$1 USD</strong>.</p>
+            </div>
+
+          </div>
 
         </div>
       </section>
