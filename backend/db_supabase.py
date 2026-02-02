@@ -698,8 +698,8 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
         if user_res.data:
             current_credits = user_res.data[0].get("credits", 0) or 0
             
-        credits_map = {'starter': 1000, 'growth': 3000, 'scale': 10000}
-        credits_to_add = credits_map.get(plan_id.lower(), 0)
+        credits_map = {'starter': 1500, 'growth': 3000, 'scale': 10000}
+        credits_to_add = credits_map.get(plan_id.lower(), 1500)
         upsert_data["credits"] = current_credits + credits_to_add
         
         logger.info(f"Sincronizando public.users para {final_user_id} (Credits: {upsert_data['credits']})")
@@ -881,13 +881,20 @@ def get_user_credits(user_id: str) -> Dict:
         return {"credits": 0, "next_reset": None}
         
     try:
-        res = client.table('users').select('credits, next_credit_reset').eq('id', user_id).execute()
+        res = client.table('users').select('credits, next_credit_reset, plan').eq('id', user_id).execute()
         if res.data:
+            user_data = res.data[0]
+            plan_id = user_data.get('plan', 'starter')
+            credits_map = {'starter': 1500, 'growth': 3000, 'scale': 10000}
+            total_credits = credits_map.get((plan_id or 'starter').lower(), 1500)
+            
             return {
-                "credits": res.data[0].get('credits', 0),
-                "next_reset": res.data[0].get('next_credit_reset')
+                "credits": user_data.get('credits', 0),
+                "next_reset": user_data.get('next_credit_reset'),
+                "total_credits": total_credits,
+                "plan": plan_id
             }
-        return {"credits": 0, "next_reset": None}
+        return {"credits": 0, "next_reset": None, "total_credits": 1500, "plan": "starter"}
     except Exception as e:
         logger.error(f"Error obteniendo créditos para {user_id}: {e}")
         return {"credits": 0, "next_reset": None}
@@ -939,10 +946,16 @@ def check_reset_monthly_credits(user_id: str) -> bool:
         if today >= next_reset:
             logger.info(f"🔄 Reseteando créditos para {user_id} (Billing cycle reach: {next_reset})")
             
-            # Reset a 1500 y nueva fecha (hoy + 30 días)
+            # Obtener plan para saber cuánto resetear
+            user_res = client.table('users').select('plan').eq('id', user_id).execute()
+            plan_id = user_res.data[0].get('plan', 'starter') if user_res.data else 'starter'
+            credits_map = {'starter': 1500, 'growth': 3000, 'scale': 10000}
+            reset_amount = credits_map.get((plan_id or 'starter').lower(), 1500)
+            
+            # Reset y nueva fecha (hoy + 30 días)
             new_reset = (today + timedelta(days=30)).isoformat()
             client.table('users').update({
-                "credits": 1500,
+                "credits": reset_amount,
                 "next_credit_reset": new_reset,
                 "subscription_status": "active"
             }).eq('id', user_id).execute()

@@ -53,7 +53,7 @@ const CheckoutPage = () => {
       name: 'Plan Starter', 
       priceUSD: 26, 
       priceARS: 20000, 
-      creditAmount: '1,000',
+      creditAmount: '1,500',
       features: ['Búsqueda Local', 'Verificación Básica'] 
     },
     growth: { 

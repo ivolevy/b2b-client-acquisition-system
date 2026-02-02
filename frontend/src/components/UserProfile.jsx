@@ -763,19 +763,19 @@ function UserProfile() {
                 <h3 className="profile-subsection-title">Créditos</h3>
                 <div className="minimalist-balance-row">
                   <span className="minimalist-balance-value">{creditsInfo.credits || 0}</span>
-                  <span className="minimalist-balance-label">/ 1500 disponibles</span>
+                  <span className="minimalist-balance-label">/ {creditsInfo.total_credits || 1500} disponibles</span>
                 </div>
               </div>
 
               <div className="minimalist-progress-wrapper">
                 <div className="minimalist-progress-track">
                   <div 
-                    className={`minimalist-progress-fill ${creditsInfo.credits < 300 ? 'low' : ''}`}
-                    style={{ width: `${Math.min(100, Math.round(((creditsInfo.credits || 0) / 1500) * 100))}%` }}
+                    className={`minimalist-progress-fill ${(creditsInfo.credits || 0) < ((creditsInfo.total_credits || 1500) * 0.2) ? 'low' : ''}`}
+                    style={{ width: `${Math.min(100, Math.round(((creditsInfo.credits || 0) / (creditsInfo.total_credits || 1500)) * 100))}%` }}
                   ></div>
                 </div>
                 <div className="minimalist-progress-info">
-                  <span>{100 - Math.round(((creditsInfo.credits || 0) / 1500) * 100)}% consumido</span>
+                  <span>{100 - Math.round(((creditsInfo.credits || 0) / (creditsInfo.total_credits || 1500)) * 100)}% consumido</span>
                   <span className="renewal-badge">
                     Próxima renovación: {creditsInfo.next_reset ? new Date(creditsInfo.next_reset).toLocaleDateString() : 'Pendiente'}
                   </span>
@@ -787,7 +787,7 @@ function UserProfile() {
                   <span className="alert-dot"></span>
                   Has agotado tus créditos para este mes.
                 </div>
-              ) : ((creditsInfo.credits || 0) < 450) && (
+              ) : ((creditsInfo.credits || 0) < ((creditsInfo.total_credits || 1500) * 0.3)) && (
                 <div className="minimalist-alert-simple warning">
                   <span className="alert-dot"></span>
                   Te estás quedando sin créditos para tus búsquedas.

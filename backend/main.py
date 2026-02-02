@@ -72,6 +72,76 @@ except ImportError as e:
 import math
 from typing import Dict, List, Optional
 
+# Inicializar FastAPI inmediatamente después de imports
+app = FastAPI(
+    title="B2B Client Acquisition API", 
+    version="2.0.0",
+    description="Sistema de captación de clientes B2B por rubro empresarial"
+)
+
+# CORS - Configuración robusta para producción y desarrollo
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
+)
+
+# Exception handler para HTTPException limpio
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Maneja HTTPException con headers CORS"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*"
+        }
+    )
+
+@app.get("/api/users/{user_id}/credits")
+async def api_get_user_credits(user_id: str):
+    """Obtiene créditos y próxima fecha de reset"""
+    # Primero verificar si corresponde reset
+    check_reset_monthly_credits(user_id)
+    return get_user_credits(user_id)
+
+# Exception handler global para asegurar que CORS siempre se incluya
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Maneja cualquier error no controlado con headers CORS"""
+    import traceback
+    logger.error(f"Error fatal: {exc}", exc_info=True)
+    
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Error interno del servidor",
+            "error": str(exc),
+            "trace": traceback.format_exc().split('\n')
+        },
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*"
+        }
+    )
+
+@app.get("/")
+def read_root():
+    return {
+        "status": "online",
+        "service": "B2B Client Acquisition API",
+        "documentation": "/docs",
+        "python_version": sys.version,
+        "version": "2.1.0 (Fixed NameError Vercel)"
+    }
+
 # Inicialización de variables en memoria
 # IMPORTANTE: Estas variables deben ser accesibles globalmente
 global _memoria_empresas
@@ -338,12 +408,6 @@ Sitio web: [Tu Sitio Web]'''
 
 # Endpoints Gmail OAuth
 # ...
-@app.get("/api/users/{user_id}/credits")
-async def api_get_user_credits(user_id: str):
-    """Obtiene créditos y próxima fecha de reset"""
-    # Primero verificar si corresponde reset
-    check_reset_monthly_credits(user_id)
-    return get_user_credits(user_id)
 _default_log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
 log_dir = os.getenv('LOG_DIR', _default_log_dir)
 
@@ -373,71 +437,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Inicializar FastAPI
-app = FastAPI(
-    title="B2B Client Acquisition API", 
-    version="2.0.0",
-    description="Sistema de captación de clientes B2B por rubro empresarial"
-)
-
-# CORS - Configuración robusta para producción y desarrollo
-# Usamos allow_origins=["*"] y allow_credentials=False para máxima compatibilidad con Vercel
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-    max_age=3600,
-)
-
-# Exception handler para HTTPException limpio
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    """Maneja HTTPException con headers CORS"""
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*"
-        }
-    )
-
-# Exception handler global para asegurar que CORS siempre se incluya
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    """Maneja cualquier error no controlado con headers CORS"""
-    import traceback
-    logger.error(f"Error fatal: {exc}", exc_info=True)
-    
-    return JSONResponse(
-        status_code=500,
-        content={
-            "detail": "Error interno del servidor",
-            "error": str(exc),
-            "trace": traceback.format_exc().split('\n')
-        },
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*"
-        }
-    )
-
 # Modelos
-
-@app.get("/")
-def read_root():
-    return {
-        "status": "online",
-        "service": "B2B Client Acquisition API",
-        "documentation": "/docs",
-        "python_version": sys.version,
-        "version": "2026-01-21 01:20 (Fix Revert desc=True)"
-    }
 
 async def get_current_admin(request: Request):
     """
