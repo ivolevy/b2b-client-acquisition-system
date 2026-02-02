@@ -51,7 +51,10 @@ try:
         delete_search_history,
         get_supabase,
         get_supabase_admin,
-        get_api_logs
+        get_api_logs,
+        get_user_credits,
+        check_reset_monthly_credits,
+        deduct_credits
     )
     from backend.auth_google import get_google_auth_url, exchange_code_for_token
     from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
