@@ -1105,9 +1105,7 @@ function Login({ onLogin }) {
               <p>
                 ¿No tienes una cuenta?{' '}
                 <a 
-                  href="https://dotasolutions.agency" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                  href="mailto:solutionsdota@gmail.com?subject=Solicitud de ayuda - Smart Leads" 
                   className="contact-admin-link"
                 >
                   Contactar administrador
