@@ -270,7 +270,7 @@
 
 /* --- NAVBAR (Floating Pill Style - Light Mode) --- */
 .landing-page {
-    background-color: var(--bg-dark) !important;
+    background-color: #f1f5f9 !important;
     color: var(--text-primary);
     min-height: 100vh;
     position: relative;
@@ -642,7 +642,7 @@
 /* --- FEATURES --- */
 .features-section {
     padding: 100px 0;
-    background: #020617;
+    /* background: #020617; REMOVED for light theme consistency */
 }
 
 /* bg-dark */
@@ -914,7 +914,7 @@
 /* --- BENTO TECH GRID --- */
 .features-section {
     padding: 100px 0;
-    background: #020617;
+    /* background: #020617; REMOVED for light theme consistency */
 }
 
 /* bg-dark */
@@ -1285,6 +1285,7 @@
 .footer-section {
     padding: 80px 0 32px;
     border-top: 1px solid var(--border);
+    background: #ffffff;
 }
 
 .footer-grid {
