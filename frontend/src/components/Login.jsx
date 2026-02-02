@@ -1728,7 +1728,7 @@ function Login({ onLogin }) {
               </a>
             </div>
             <div className="modal-footer">
-              <p>Horario de atención: Lunes a Viernes, 9hs a 18hs.</p>
+              <p>Atención 24/7, ¡tu consulta no molesta!</p>
             </div>
           </div>
         </div>
