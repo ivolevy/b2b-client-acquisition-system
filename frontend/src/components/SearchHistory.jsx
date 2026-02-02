@@ -143,7 +143,7 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12 6 12 12 16 14"/>
             </svg>
-            Últimas búsquedas
+            Historial (Próximamente)
           </h2>
           <button className="close-btn" onClick={onClose}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -177,8 +177,8 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
                 <circle cx="11" cy="11" r="8"/>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
-              <h3>Sin búsquedas recientes</h3>
-              <p>Tus búsquedas aparecerán aquí para que puedas repetirlas fácilmente.</p>
+              <h3>Función Próximamente</h3>
+              <p>El historial de búsquedas estará disponible muy pronto para que puedas repetir tus análisis fácilmente.</p>
             </div>
           ) : (
             <div className="history-list">
