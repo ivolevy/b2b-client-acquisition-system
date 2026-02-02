@@ -702,7 +702,7 @@ function UserProfile() {
                     </svg>
                   </div>
                   <div className="integration-info-simple">
-                    {authStatus.google.connected ? (
+                    {authStatus?.google?.connected ? (
                       <>
                         <span className="status-text-simple">Conectado</span>
                         <button 
@@ -731,7 +731,7 @@ function UserProfile() {
                     </svg>
                   </div>
                   <div className="integration-info-simple">
-                    {authStatus.outlook.connected ? (
+                    {authStatus?.outlook?.connected ? (
                       <>
                         <span className="status-text-simple">Conectado</span>
                         <button 
