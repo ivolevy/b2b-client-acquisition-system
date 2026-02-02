@@ -204,16 +204,22 @@
   border: 1px solid #e2e8f0;
 }
 
-.plan-badge.pro {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #dbeafe;
+.plan-badge.starter {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
 }
 
-.plan-badge.free {
-  background: #f8fafc;
-  color: #94a3b8;
-  border: 1px solid #e2e8f0;
+.plan-badge.growth {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #d1fae5;
+}
+
+.plan-badge.scale {
+  background: #fdf2f7;
+  color: #be185d;
+  border: 1px solid #fce7f3;
 }
 
 /* --- ACTION BUTTONS --- */

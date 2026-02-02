@@ -15,7 +15,9 @@ function UserDetailModal({ user, onClose, onUpdate }) {
     email: user?.email || '',
     name: user?.name || '',
     phone: user?.phone || '',
-    role: user?.role || 'user'
+    role: user?.role || 'user',
+    plan: user?.plan || 'starter',
+    credits: user?.credits || 0
   });
 
   // Remove fetch effect since we receive data via props
@@ -39,7 +41,9 @@ function UserDetailModal({ user, onClose, onUpdate }) {
         email: editForm.email,
         name: editForm.name,
         phone: editForm.phone,
-        role: editForm.role
+        role: editForm.role,
+        plan: editForm.plan,
+        credits: parseInt(editForm.credits) || 0
       };
 
       const { error: updateError } = await adminService.updateUser(currentUser.id, updates);
@@ -149,8 +153,29 @@ function UserDetailModal({ user, onClose, onUpdate }) {
               </div>
 
               <div className="form-section">
-                <h3>Rol del Usuario</h3>
+                <h3>Suscripción y Créditos</h3>
                 <div className="form-grid">
+                  <div className="form-group">
+                    <label>Plan</label>
+                    <select
+                      value={editForm.plan}
+                      onChange={(e) => setEditForm({ ...editForm, plan: e.target.value })}
+                      className="form-select"
+                    >
+                      <option value="starter">Plan Starter (1,500)</option>
+                      <option value="growth">Plan Growth (3,000)</option>
+                      <option value="scale">Plan Scale (10,000)</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Créditos Actuales</label>
+                    <input
+                      type="number"
+                      value={editForm.credits}
+                      onChange={(e) => setEditForm({ ...editForm, credits: e.target.value })}
+                      className="form-input"
+                    />
+                  </div>
                   <div className="form-group">
                     <label>Rol</label>
                     <select

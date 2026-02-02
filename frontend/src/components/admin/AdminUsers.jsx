@@ -157,6 +157,8 @@ function AdminUsers() {
               <th>Email</th>
               <th>Nombre</th>
               <th>Rol</th>
+              <th>Plan</th>
+              <th>Créditos</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -192,6 +194,12 @@ function AdminUsers() {
                       {user.role === 'admin' ? 'Admin' : 'Usuario'}
                     </span>
                   </td>
+                  <td>
+                    <span className={`plan-badge ${user.plan || 'starter'}`}>
+                      {user.plan || 'starter'}
+                    </span>
+                  </td>
+                  <td>{user.credits || 0}</td>
                   <td>
                     <div className="action-buttons">
                       <button

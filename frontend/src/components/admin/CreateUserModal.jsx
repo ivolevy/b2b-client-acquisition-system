@@ -75,7 +75,9 @@ function CreateUserModal({ onClose, onSuccess }) {
     password: '',
     name: '',
     phone: '',
-    role: 'user'
+    role: 'user',
+    plan: 'starter',
+    credits: 1500
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -266,6 +268,29 @@ function CreateUserModal({ onClose, onSuccess }) {
                   maxLength={12}
                 />
               </div>
+            </div>
+
+            <div className="form-group">
+              <label>Plan Inicial</label>
+              <select
+                value={formData.plan}
+                onChange={(e) => setFormData({ ...formData, plan: e.target.value, credits: e.target.value === 'starter' ? 1500 : e.target.value === 'growth' ? 3000 : 10000 })}
+                className="form-select"
+              >
+                <option value="starter">Plan Starter (1,500)</option>
+                <option value="growth">Plan Growth (3,000)</option>
+                <option value="scale">Plan Scale (10,000)</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Créditos</label>
+              <input
+                type="number"
+                value={formData.credits}
+                onChange={(e) => setFormData({ ...formData, credits: e.target.value })}
+                className="form-input"
+              />
             </div>
 
             <div className="form-group">

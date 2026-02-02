@@ -135,6 +135,12 @@ def admin_update_user(user_id: str, updates: Dict) -> Dict:
         if 'role' in updates: public_updates['role'] = updates['role']
         if 'name' in updates: public_updates['name'] = updates['name']
         if 'phone' in updates: public_updates['phone'] = updates['phone']
+        if 'plan' in updates: public_updates['plan'] = updates['plan'].lower()
+        if 'credits' in updates: 
+            try:
+                public_updates['credits'] = int(updates['credits'])
+            except:
+                pass
         
         # 2. Actualizar Auth si es necesario
         if auth_updates:

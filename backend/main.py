@@ -2602,6 +2602,8 @@ class AdminCreateUserRequest(BaseModel):
     name: str
     phone: Optional[str] = None
     role: Optional[str] = 'user'
+    plan: Optional[str] = 'starter'
+    credits: Optional[int] = 1500
 
 @app.post("/admin/create-user")
 async def admin_create_user(user_data: AdminCreateUserRequest):
@@ -2623,6 +2625,14 @@ async def admin_create_user(user_data: AdminCreateUserRequest):
             if "SERVICE_ROLE_KEY" in result["error"]:
                  raise HTTPException(status_code=500, detail="Configuración de servidor incompleta: falta SERVICE_ROLE_KEY")
             raise HTTPException(status_code=400, detail=result["error"])
+            
+        # Actualizar el perfil público con el plan y créditos si se crearon satisfactoriamente en Auth
+        new_user = result.get("data")
+        if new_user and hasattr(new_user, 'id'):
+            admin_update_user(new_user.id, {
+                "plan": user_data.plan,
+                "credits": user_data.credits
+            })
             
         return {"success": True, "data": result.get("data")}
         
