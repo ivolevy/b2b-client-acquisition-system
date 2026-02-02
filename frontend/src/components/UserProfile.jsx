@@ -796,9 +796,9 @@ function UserProfile() {
 
               <div className="minimalist-actions-grid">
                 <div className="minimalist-action-item">
-                  <h3>Upgrade de Plan</h3>
-                  <p>Aumenta tu cupo mensual de 1.500 a 5.000 créditos.</p>
-                  <button className="minimalist-btn-primary" onClick={() => navigate('/checkout')}>
+                  <h3>{creditsInfo.plan === 'starter' ? 'Upgrade a Growth' : 'Upgrade a Scale'}</h3>
+                  <p>Aumenta tu cupo mensual de {creditsInfo.total_credits || 1500} a {creditsInfo.plan === 'starter' ? '3,000' : '10,000'} créditos.</p>
+                  <button className="minimalist-btn-primary" onClick={() => navigate(`/checkout?plan=${creditsInfo.plan === 'starter' ? 'growth' : 'scale'}`)}>
                     Subir de Nivel
                   </button>
                 </div>
