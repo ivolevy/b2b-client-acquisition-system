@@ -79,13 +79,47 @@
   /* LandingPage uses .logo font-weight: 600 */
 }
 
-/* USER SECTION (Right Side) */
+/* RIGHT SECTION (Credits + User) */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-credits {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navbar-credits:hover {
+  background: rgba(37, 99, 235, 0.12);
+  transform: translateY(-1px);
+}
+
+.credits-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--lp-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+}
+
+.credits-badge svg {
+  opacity: 0.8;
+}
+
 .navbar-user {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-left: 24px;
-  /* Space between logo and user if they get close */
 }
 
 .user-info {

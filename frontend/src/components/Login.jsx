@@ -11,13 +11,15 @@ import { validateEmail, validateName, validatePhone, validatePassword } from '..
 // Credenciales de prueba (modo demo cuando Supabase no está configurado)
 const DEMO_USERS = [
   {
+    id: 'd6da6078-b335-43d3-8e06-4db0fb35fdb9', // Admin actual en la BD
     email: 'admin@admin.com',
     password: 'admin123',
     name: 'Administrador',
     role: 'admin',
-    plan: 'pro'
+    plan: 'starter'
   },
   {
+    id: 'user_demo_id',
     email: 'user@dotasolutions.com',
     password: 'User2024!',
     name: 'Usuario',
@@ -441,6 +443,7 @@ function Login({ onLogin }) {
         await new Promise(resolve => setTimeout(resolve, 800));
         
         const userData = {
+          id: demoUser.id,
           email: demoUser.email,
           name: demoUser.name || demoUser.email.split('@')[0],
           phone: demoUser.phone || '',
@@ -670,37 +673,21 @@ function Login({ onLogin }) {
             </div>
             
             <div className="branding-message">
-              <h2>Sistema de Captación de Clientes</h2>
-              <p>Encuentra empresas, valida contactos y automatiza tu prospección empresarial de manera inteligente.</p>
+              <h2>La nueva era de las ventas.</h2>
             </div>
 
             <div className="features-list">
               <div className="feature-item">
-                <div className="feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                </div>
-                <span>Búsqueda geolocalizada</span>
+                <span>Basta de perseguir clientes.</span>
               </div>
               <div className="feature-item">
-                <div className="feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <polyline points="22,4 12,14.01 9,11.01"/>
-                  </svg>
-                </div>
-                <span>Validación automática</span>
+                <span>Prospectos calificados en segundos.</span>
               </div>
               <div className="feature-item">
-                <div className="feature-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                    <polyline points="22,6 12,13 2,6"/>
-                  </svg>
-                </div>
-                <span>Envío masivo de emails</span>
+                <span>Contacto masivo sin spam.</span>
+              </div>
+              <div className="feature-item">
+                <span>Ganá tiempo, ganá dinero.</span>
               </div>
             </div>
 
@@ -746,16 +733,13 @@ function Login({ onLogin }) {
                 </div>
               )}
               {error && (
-                <div className="error-message">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <div className="error-message minimalist">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="12" r="10"/>
                     <line x1="12" y1="8" x2="12" y2="12"/>
                     <line x1="12" y1="16" x2="12.01" y2="16"/>
                   </svg>
-                  <div className="error-content">
-                    <strong>Error</strong>
-                  <span>{error}</span>
-                  </div>
+                  <span className="error-text">{error}</span>
                 </div>
               )}
 

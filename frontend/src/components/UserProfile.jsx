@@ -627,133 +627,127 @@ function UserProfile() {
           {activeTab === 'info' && (
             <div className="profile-section-fade-in">
               <h3 className="profile-section-title">Información de la cuenta</h3>
-              <div className="profile-info-grid">
-                <div className="profile-field">
-                  <label className="profile-field-label">Nombre</label>
-                  <div className="profile-field-value">{user?.name || 'Usuario'}</div>
-                </div>
-                <div className="profile-field">
-                  <label className="profile-field-label">Email</label>
-                  <div className="profile-field-value">{user?.email}</div>
-                </div>
-                <div className="profile-field">
-                  <label className="profile-field-label">Teléfono</label>
-                  <div className="profile-field-value">
-                    <span>
-                      {user?.phone && user.phone.length > 6 ? user.phone : <span className="text-muted">No especificado</span>}
-                    </span>
-                    <button 
-                      className="profile-inline-link"
-                      onClick={() => {
-                        // Intentar parsear el teléfono actual para precargar el modal
-                        if (user?.phone) {
-                          const parts = user.phone.split(' ');
-                          if (parts.length > 1) {
-                            setPhoneForm({ countryCode: parts[0], number: parts.slice(1).join('') });
-                          } else {
-                            setPhoneForm({ ...phoneForm, number: user.phone });
-                          }
-                        }
-                        setShowPhoneModal(true);
-                      }}
-                      style={{ marginLeft: '8px', color: '#3b82f6' }}
-                      title="Editar teléfono"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="profile-field">
-                  <label className="profile-field-label">Contraseña</label>
-                  <div className="profile-field-value">
-                    <button 
-                      className="profile-inline-link"
-                      onClick={() => {
-                        setShowPasswordModal(true);
-                        setPasswordStep('request');
-                        setPasswordChangeEmail(user?.email || '');
-                        setVerificationCode('');
-                        setCodeSent(false);
-                        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                      }}
-                    >
-                      Cambiar contraseña
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="profile-divider"></div>
               
-              <div className="integrations-stack" style={{ display: 'flex', flexDirection: 'row', gap: '1rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-                <div style={{ width: '100%', marginBottom: '0.5rem' }}>
-                  <p style={{ fontSize: '0.9rem', fontWeight: '400', color: '#64748b', margin: '0' }}>
-                    Conectá tu correo para gestionar tus campañas de Email Marketing
-                  </p>
-                </div>
-                {/* Gmail Row */}
-                <div className="integration-row-simple">
-                  <div className="integration-logo-box">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" fill="#EA4335"/>
-                    </svg>
-                  </div>
-                  <div className="integration-info-simple">
-                    {authStatus?.google?.connected ? (
-                      <>
-                        <span className="status-text-simple">Conectado</span>
+              <div className="profile-split-container">
+                {/* Left Column: User Data */}
+                <div className="profile-data-column">
+                  <div className="profile-info-stack">
+                    <div className="profile-field-vertical">
+                      <label className="profile-field-label">Nombre</label>
+                      <div className="profile-field-value">{user?.name || 'Usuario'}</div>
+                    </div>
+                    
+                    <div className="profile-field-vertical">
+                      <label className="profile-field-label">Email</label>
+                      <div className="profile-field-value">{user?.email}</div>
+                    </div>
+                    
+                    <div className="profile-field-vertical">
+                      <label className="profile-field-label">Teléfono</label>
+                      <div className="profile-field-value">
+                        <span>
+                          {user?.phone && user.phone.length > 6 ? user.phone : <span className="text-muted">No especificado</span>}
+                        </span>
                         <button 
-                          onClick={() => handleDisconnectProvider('google')}
-                          className="btn-link-disconnect"
+                          className="profile-inline-link"
+                          onClick={() => {
+                            if (user?.phone) {
+                              const parts = user.phone.split(' ');
+                              if (parts.length > 1) {
+                                setPhoneForm({ countryCode: parts[0], number: parts.slice(1).join('') });
+                              } else {
+                                setPhoneForm({ ...phoneForm, number: user.phone });
+                              }
+                            }
+                            setShowPhoneModal(true);
+                          }}
+                          style={{ marginLeft: '8px' }}
+                          title="Editar teléfono"
                         >
-                          Desconectar
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
                         </button>
-                      </>
-                    ) : (
-                      <button 
-                        onClick={handleConnectGoogle}
-                        className="btn-link-connect gmail"
-                      >
-                        Conectar Gmail
-                      </button>
-                    )}
+                      </div>
+                    </div>
+                    
+                    <div className="profile-field-vertical">
+                      <label className="profile-field-label">Contraseña</label>
+                      <div className="profile-field-value">
+                        <button 
+                          className="profile-inline-link"
+                          onClick={() => {
+                            setShowPasswordModal(true);
+                            setPasswordStep('request');
+                            setPasswordChangeEmail(user?.email || '');
+                            setVerificationCode('');
+                            setCodeSent(false);
+                            setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                          }}
+                        >
+                          Cambiar contraseña
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Outlook Row */}
-                <div className="integration-row-simple">
-                  <div className="integration-logo-box">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 18L10.2 21.3V2.7L1 6V18ZM23 7.3V16.7L11.5 19.8V4.2L23 7.3ZM23 18.2L11 22V19.2L23 16.7V18.2ZM11 2V4.8L23 7.3V5.8L11 2Z" fill="#0078D4"/>
-                    </svg>
-                  </div>
-                  <div className="integration-info-simple">
-                    {authStatus?.outlook?.connected ? (
-                      <>
-                        <span className="status-text-simple">Conectado</span>
-                        <button 
-                          onClick={() => handleDisconnectProvider('outlook')}
-                          className="btn-link-disconnect"
-                        >
-                          Desconectar
-                        </button>
-                      </>
-                    ) : (
-                      <button 
-                        onClick={handleConnectOutlook}
-                        className="btn-link-connect outlook"
-                      >
-                        Conectar Outlook
-                      </button>
-                    )}
+                {/* Right Column: Connections */}
+                <div className="profile-connections-column">
+                  <div className="connections-card">
+                    <p className="connections-helper-text">
+                      Conectá tu correo para gestionar tus campañas de Email Marketing
+                    </p>
+                    
+                    <div className="integrations-list">
+                      {/* Gmail Connection */}
+                      <div className={`integration-item ${authStatus?.google?.connected ? 'connected' : ''}`}>
+                        <div className="integration-icon-bg gmail">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" fill="#EA4335"/>
+                          </svg>
+                        </div>
+                        <div className="integration-details">
+                          <span className="integration-name">Gmail</span>
+                          {authStatus?.google?.connected && <span className="integration-status">Conectado</span>}
+                        </div>
+                        {authStatus?.google?.connected ? (
+                          <button onClick={() => handleDisconnectProvider('google')} className="btn-disconnect-minimal">
+                            Desconectar
+                          </button>
+                        ) : (
+                          <button onClick={handleConnectGoogle} className="btn-connect-minimal gmail">
+                            Conectar
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Outlook Connection */}
+                      <div className={`integration-item ${authStatus?.outlook?.connected ? 'connected' : ''}`}>
+                        <div className="integration-icon-bg outlook">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 18L10.2 21.3V2.7L1 6V18ZM23 7.3V16.7L11.5 19.8V4.2L23 7.3ZM23 18.2L11 22V19.2L23 16.7V18.2ZM11 2V4.8L23 7.3V5.8L11 2Z" fill="#0078D4"/>
+                          </svg>
+                        </div>
+                        <div className="integration-details">
+                          <span className="integration-name">Outlook</span>
+                          {authStatus?.outlook?.connected && <span className="integration-status">Conectado</span>}
+                        </div>
+                        {authStatus?.outlook?.connected ? (
+                          <button onClick={() => handleDisconnectProvider('outlook')} className="btn-disconnect-minimal">
+                            Desconectar
+                          </button>
+                        ) : (
+                          <button onClick={handleConnectOutlook} className="btn-connect-minimal outlook">
+                            Conectar
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Eliminada la sección de gestión de planes */}
             </div>
           )}
 

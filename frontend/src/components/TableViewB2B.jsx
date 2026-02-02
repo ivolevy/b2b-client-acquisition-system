@@ -33,37 +33,6 @@ function TableViewB2B({
   const [filtroDistanciaOperador, setFiltroDistanciaOperador] = useState('mayor');
   const [filtroConRedes, setFiltroConRedes] = useState('todas');
   
-  // Estado para el dropdown de rubros con buscador
-  const [rubroDropdownOpen, setRubroDropdownOpen] = useState(false);
-  const [rubroBusqueda, setRubroBusqueda] = useState('');
-  const rubroDropdownRef = useRef(null);
-  
-  // Cerrar dropdown al hacer click fuera
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (rubroDropdownRef.current && !rubroDropdownRef.current.contains(event.target)) {
-        setRubroDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-  
-  // Filtrar rubros según búsqueda
-  const rubrosFiltrados = useMemo(() => {
-    const entries = Object.entries(rubros);
-    if (!rubroBusqueda) return entries;
-    return entries.filter(([key, nombre]) => 
-      nombre.toLowerCase().includes(rubroBusqueda.toLowerCase()) ||
-      key.toLowerCase().includes(rubroBusqueda.toLowerCase())
-    );
-  }, [rubros, rubroBusqueda]);
-  
-  const handleSelectRubro = (key) => {
-    setFiltroRubro(key);
-    setRubroDropdownOpen(false);
-    setRubroBusqueda('');
-  };
 
   // Aplicar filtros instantáneamente
   const empresasFiltradas = useMemo(() => {
@@ -253,66 +222,23 @@ function TableViewB2B({
       <div className="filters-inline-bar">
         
             {/* 1. Rubros (Grid Area: rubro) */}
-            <div className="rubro-dropdown filter-item-rubro" ref={rubroDropdownRef}>
-              <button 
-                type="button"
-                className={`rubro-dropdown-trigger ${filtroRubro ? 'has-value' : ''}`}
-                onClick={() => setRubroDropdownOpen(!rubroDropdownOpen)}
+            <div className="custom-select-wrapper filter-item-rubro">
+              <select
+                value={filtroRubro}
+                onChange={(e) => setFiltroRubro(e.target.value)}
+                className="filter-inline-input"
+                aria-label="Filtrar por rubro"
               >
-                <svg className="rubro-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-                  <line x1="7" y1="7" x2="7.01" y2="7"/>
-                </svg>
-                <span className="rubro-text">
-                  {filtroRubro ? rubros[filtroRubro] || filtroRubro : 'Todos los rubros'}
-                </span>
-                <svg className={`rubro-chevron ${rubroDropdownOpen ? 'open' : ''}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </button>
-              
-              {rubroDropdownOpen && (
-                <div className="rubro-dropdown-menu">
-                  <div className="rubro-search-container">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="11" cy="11" r="8"/>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input
-                      type="text"
-                      placeholder="Buscar rubro..."
-                      value={rubroBusqueda}
-                      onChange={(e) => setRubroBusqueda(e.target.value)}
-                      className="rubro-search-input"
-                      autoFocus
-                    />
-                  </div>
-                  <div className="rubro-options-list">
-                    <button
-                      type="button"
-                      className={`rubro-option ${!filtroRubro ? 'selected' : ''}`}
-                      onClick={() => handleSelectRubro('')}
-                    >
-                      Todos los rubros
-                    </button>
-                    {rubrosFiltrados.map(([key, nombre]) => (
-                      <button
-                        key={key}
-                        type="button"
-                        className={`rubro-option ${filtroRubro === key ? 'selected' : ''}`}
-                        onClick={() => handleSelectRubro(key)}
-                      >
-                        {nombre}
-                      </button>
-                    ))}
-                    {rubrosFiltrados.length === 0 && (
-                      <div className="rubro-no-results">
-                        No se encontraron rubros
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+                <option value="">Rubros: todos</option>
+                {Object.entries(rubros).map(([key, nombre]) => (
+                  <option key={key} value={key}>
+                    {nombre}
+                  </option>
+                ))}
+              </select>
+              <svg className="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
             </div>
 
             {/* 2. Ordenar (Grid Area: sort) */}

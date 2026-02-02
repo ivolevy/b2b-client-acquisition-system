@@ -39,13 +39,15 @@ export const useAuth = () => {
 // Credenciales de demo (fallback cuando Supabase no está configurado)
 const DEMO_USERS = [
   {
+    id: 'd6da6078-b335-43d3-8e06-4db0fb35fdb9',
     email: 'admin@admin.com',
     password: 'admin123',
     name: 'Administrador',
     role: 'admin',
-    plan: 'pro'
+    plan: 'starter'
   },
   {
+    id: 'user_demo_id',
     email: 'user@dotasolutions.com',
     password: 'User2024!',
     name: 'Usuario',

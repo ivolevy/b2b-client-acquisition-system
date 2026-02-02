@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import { useAuth } from '../AuthWrapper';
 
-function Navbar({ onNavigateToProfile }) {
+function Navbar({ onNavigateToProfile, creditsInfo }) {
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -50,8 +50,9 @@ function Navbar({ onNavigateToProfile }) {
             <span>Smart Leads</span>
           </div>
           
-          {/* Sección de usuario */}
-          <div className="navbar-user">
+          {/* Créditos y Sección de usuario */}
+          <div className="navbar-right">
+            <div className="navbar-user">
             {user && (
               <>
                 <div 
@@ -132,7 +133,8 @@ function Navbar({ onNavigateToProfile }) {
             )}
           </div>
         </div>
-      </nav>
+      </div>
+    </nav>
 
       {/* Modal de confirmación de logout */}
       {showLogoutModal && (

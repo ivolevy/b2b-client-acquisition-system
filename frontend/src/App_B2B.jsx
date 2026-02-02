@@ -24,18 +24,86 @@ import './components/TableView.css';
 function AppB2B() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [empresas, setEmpresas] = useState([]);
+  // Estados de carga
   const [loading, setLoading] = useState(false);
   const [blockingLoading, setBlockingLoading] = useState(false);
-  const [searchProgress, setSearchProgress] = useState({ percent: 0, message: '' });
-  const [displayProgress, setDisplayProgress] = useState(0); // Para animación suave
-  const loadingIntervalRef = useRef(null);
-  const loadingTimeoutRef = useRef(null); // Timeout de seguridad 
-
+  const [creditsLoading, setCreditsLoading] = useState(false);
   
+  // Estados de datos
+  const [empresas, setEmpresas] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [rubros, setRubros] = useState({});
+  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, total_credits: 0, next_reset: null });
+  
+  // UI States
+  const [searchProgress, setSearchProgress] = useState({ percent: 0, message: '' });
+  const [displayProgress, setDisplayProgress] = useState(0); 
+  const [showEmailSender, setShowEmailSender] = useState(false);
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [historySearchData, setHistorySearchData] = useState(null);
+  const [showAllResults, setShowAllResults] = useState(false);
+  const [isFromHistory, setIsFromHistory] = useState(false);
+
   // Determinar la vista basada en la ruta
   const isProfilePage = location.pathname === '/profile';
   const [view, setView] = useState(isProfilePage ? 'profile' : 'table');
+
+  const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
+  const { user } = useAuth();
+  const loadingIntervalRef = useRef(null);
+  const loadingTimeoutRef = useRef(null); 
+
+  const fetchCredits = async () => {
+    if (!user?.id) return;
+    setCreditsLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/users/${user.id}/credits`);
+      if (response.data) {
+        setCreditsInfo(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching credits in AppB2B:', error);
+    } finally {
+      setCreditsLoading(false);
+    }
+  };
+
+  const loadRubros = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/rubros`);
+      if (response.data && response.data.rubros) {
+        setRubros(response.data.rubros);
+      } else {
+        setRubros({});
+      }
+    } catch (error) {
+      console.error('Error al cargar rubros:', error);
+      setRubros({});
+    }
+  };
+
+  const loadEmpresas = async (showError = true) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/empresas`);
+      setEmpresas(response.data.data || []);
+    } catch (err) {
+      console.error('Error al cargar empresas:', err);
+      if (showError) {
+        const errorMsg = err.response?.data?.detail || err.message;
+        if (err.code === 'ERR_NETWORK' || err.response?.status >= 500) {
+          toastError(
+            <>
+              <strong>No se pudieron cargar las empresas</strong>
+              <p>{errorMsg}</p>
+            </>
+          );
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Sincronizar vista con la ruta cuando cambia
   useEffect(() => {
@@ -57,21 +125,14 @@ function AppB2B() {
       // Refrescar rubros al volver del perfil por si hubo cambios
       loadRubros();
     }
-  }, [location.pathname, view]);
-  const [stats, setStats] = useState(null);
-  const [rubros, setRubros] = useState({});
-  const [showEmailSender, setShowEmailSender] = useState(false);
-  const [showTemplateManager, setShowTemplateManager] = useState(false);
-  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, next_reset: null });
-  const [creditsLoading, setCreditsLoading] = useState(false);
-  
-  const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
-  const { user } = useAuth();
-  
+    
+    // Fetch credits whenever ID is available
+    if (user?.id) {
+      fetchCredits();
+    }
+  }, [location.pathname, view, user?.id]);
 
-  const [historySearchData, setHistorySearchData] = useState(null);
-  const [showAllResults, setShowAllResults] = useState(false);
-  const [isFromHistory, setIsFromHistory] = useState(false);
+  
 
   // Manejar feedback de Gmail OAuth redirect
   useEffect(() => {
@@ -239,46 +300,6 @@ function AppB2B() {
     );
   };
 
-  const loadRubros = async () => {
-    try {
-      // Cargar siempre TODOS los rubros disponibles (comportamiento original)
-      const response = await axios.get(`${API_URL}/rubros`);
-      if (response.data && response.data.rubros) {
-        setRubros(response.data.rubros);
-      } else {
-        setRubros({});
-      }
-    } catch (error) {
-      console.error('Error al cargar rubros:', error);
-      setRubros({});
-    }
-  };
-
-  const loadEmpresas = async (showError = true) => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${API_URL}/empresas`);
-      setEmpresas(response.data.data || []);
-    } catch (err) {
-      console.error('Error al cargar empresas:', err);
-      // Solo mostrar error si se solicita explícitamente (por ejemplo, después de una búsqueda)
-      // No mostrar error si simplemente no hay empresas en memoria
-      if (showError) {
-      const errorMsg = err.response?.data?.detail || err.message;
-        // Solo mostrar error si es un error de red real, no si simplemente no hay empresas
-        if (err.code === 'ERR_NETWORK' || err.response?.status >= 500) {
-      toastError(
-        <>
-          <strong>No se pudieron cargar las empresas</strong>
-          <p>{errorMsg}</p>
-        </>
-      );
-        }
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadStats = async () => {
     // Stats disabled per user request
@@ -760,7 +781,7 @@ function AppB2B() {
     <div className="app pro-theme">
       <ProBackground />
       
-      <Navbar />
+      <Navbar creditsInfo={creditsInfo} />
       
       <main className="main-content">
           <FiltersB2B 

@@ -4,8 +4,8 @@
 
 /* Variables CSS locales - Colores celeste Dota Solutions */
 .login-page {
-  --login-primary: #81D4FA;
-  --login-secondary: #4FC3F7;
+  --login-primary: #4FC3F7;
+  --login-secondary: #0288D1;
   --login-accent: #B3E5FC;
   --login-dark: #1a1a1a;
   --login-darker: #0f0f0f;
@@ -14,7 +14,7 @@
   --login-gray-light: #e2e8f0;
   --login-success: #10b981;
   --login-error: #ef4444;
-  --login-gradient: linear-gradient(135deg, var(--login-primary) 0%, var(--login-secondary) 100%);
+  --login-gradient: var(--login-secondary);
 }
 
 /* Página principal */
@@ -126,21 +126,32 @@
 /* Panel de Branding (izquierdo) */
 .login-branding {
   flex: 1;
-  background: var(--login-gradient);
-  padding: 40px;
+  background: var(--login-darker);
+  padding: 60px 48px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
   overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .login-branding::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  opacity: 0.3;
+  background: radial-gradient(circle at 0% 0%, rgba(129, 212, 250, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(79, 195, 247, 0.1) 0%, transparent 50%);
+  z-index: 0;
+}
+
+.login-branding::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 1;
+  z-index: 0;
 }
 
 .branding-content {
@@ -156,9 +167,10 @@
 }
 
 .logo-icon {
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.15);
+  width: 44px;
+  height: 44px;
+  background: rgba(129, 212, 250, 0.1);
+  border: 1px solid rgba(129, 212, 250, 0.2);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -172,10 +184,13 @@
 }
 
 .logo-text {
-  font-size: 1.4rem;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 600;
   color: white;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  transform: translateY(2px);
 }
 
 .branding-message {
@@ -183,20 +198,22 @@
 }
 
 .branding-message h2 {
-  font-size: 1.9rem;
-  font-weight: 500;
+  font-family: 'Instrument Serif', serif;
+  font-size: 3.2rem;
+  font-weight: 400;
   color: white;
-  line-height: 1.3;
-  margin-bottom: 12px;
-  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  letter-spacing: -0.03em;
+  font-style: italic;
 }
 
 .branding-message p {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.6;
-  max-width: 360px;
-  font-weight: 400;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+  max-width: 400px;
+  font-weight: 300;
 }
 
 .features-list {
@@ -208,29 +225,41 @@
 .feature-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   color: white;
-  font-size: 0.95rem;
-  font-weight: 400;
+  font-size: 1.1rem;
+  font-weight: 300;
+  padding: 4px 0;
+  transition: all 0.3s ease;
 }
 
-.feature-icon {
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(10px);
-  flex-shrink: 0;
+.feature-item::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--login-primary);
+  border-radius: 1px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
 }
 
-.feature-icon svg {
-  width: 18px;
-  height: 18px;
-  stroke: white;
-  opacity: 0.9;
+.feature-item:hover {
+  transform: translateX(6px);
+  color: white;
+}
+
+.feature-item:hover::before {
+  opacity: 1;
+  transform: scale(1.5);
+  box-shadow: 0 0 10px var(--login-primary);
+}
+
+.feature-item span {
+  opacity: 0.7;
+}
+
+.feature-item:hover span {
+  opacity: 1;
 }
 
 .branding-footer {
@@ -609,35 +638,22 @@
 
 .field-error {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  color: #991b1b;
-  font-size: 0.85rem;
-  margin-top: 8px;
+  align-items: center;
+  gap: 8px;
+  color: var(--login-error);
+  font-size: 0.825rem;
+  margin-top: 6px;
   margin-left: 2px;
-  padding: 10px 14px;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
-  border-left: 3px solid var(--login-error);
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.1);
+  padding: 4px 0;
+  border-left: 2px solid var(--login-error);
+  padding-left: 10px;
   animation: slideInError 0.3s ease-out;
   line-height: 1.4;
 }
 
 .field-error::before {
-  content: '⚠';
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  background: var(--login-error);
-  color: white;
-  border-radius: 50%;
-  font-size: 0.7rem;
-  font-weight: bold;
-  flex-shrink: 0;
-  margin-top: 1px;
+  content: '';
+  display: none;
 }
 
 @keyframes slideInError {
@@ -877,13 +893,13 @@
 }
 
 .forgot-password-error {
-  background: #fee2e2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
-  padding: 12px;
+  background: rgba(239, 68, 68, 0.03);
+  border-left: 3px solid var(--login-error);
+  color: #b91c1c;
+  padding: 10px 14px;
   border-radius: 8px;
   margin-bottom: 20px;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .forgot-password-input-group {
@@ -998,8 +1014,7 @@
 }
 
 .login-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 20, 147, 0.5);
+  box-shadow: 0 8px 25px rgba(129, 212, 250, 0.4);
 }
 
 .login-button:active:not(:disabled) {
@@ -1026,67 +1041,52 @@
 /* Mensaje de error */
 .error-message {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px 18px;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
-  border: 2px solid rgba(239, 68, 68, 0.3);
-  border-left: 4px solid var(--login-error);
-  border-radius: 12px;
-  color: #991b1b;
-  font-size: 0.9rem;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
-  animation: shakeError 0.4s ease-out;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.1);
+  border-left: 3px solid var(--login-error);
+  border-radius: 10px;
+  color: #b91c1c;
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  animation: slideInError 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.error-message.minimalist {
+  background: transparent;
+  border: none;
+  border-left: 2px solid var(--login-error);
+  padding: 8px 12px;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .error-message svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
   stroke: var(--login-error);
-  stroke-width: 2.5;
-  margin-top: 2px;
+  stroke-width: 2;
 }
 
-.error-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.error-text {
+  line-height: 1.4;
+  font-weight: 400;
 }
 
-.error-content strong {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.8;
-}
-
-.error-content span {
-  line-height: 1.5;
-  font-weight: 500;
-}
-
-@keyframes shakeError {
-
-  0%,
-  100% {
-    transform: translateX(0);
+/* Redefiniendo slideInError para que sea más suave */
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
 
-  10%,
-  30%,
-  50%,
-  70%,
-  90% {
-    transform: translateX(-4px);
-  }
-
-  20%,
-  40%,
-  60%,
-  80% {
-    transform: translateX(4px);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -1411,7 +1411,6 @@
 .resend-email-button:hover:not(:disabled) {
   background: rgba(16, 185, 129, 0.15);
   border-color: rgba(16, 185, 129, 0.5);
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
@@ -1439,8 +1438,7 @@
 }
 
 .back-to-login-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 20, 147, 0.4);
+  box-shadow: 0 6px 20px rgba(129, 212, 250, 0.4);
 }
 
 .back-to-login-button:active {
