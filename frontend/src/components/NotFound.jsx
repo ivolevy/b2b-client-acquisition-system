@@ -166,7 +166,7 @@ const NotFound = () => {
           </button>
 
           <button 
-            onClick={() => navigate('/landing')}
+            onClick={() => navigate('/')}
             style={{
               background: 'transparent',
               border: 'none',
@@ -188,7 +188,7 @@ const NotFound = () => {
               e.currentTarget.style.color = '#94a3b8';
             }}
           >
-            MÁS SOBRE NOSOTROS
+            VOLVER AL INICIO
           </button>
         </div>
       </div>

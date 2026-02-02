@@ -8,6 +8,7 @@ import { useToast } from '../hooks/useToast';
 import ToastContainer from './ToastContainer';
 import './UserProfile.css';
 import { validatePhone } from '../utils/validators';
+import { FiActivity, FiClock } from 'react-icons/fi';
 
 function UserProfile() {
   const navigate = useNavigate();
@@ -43,6 +44,8 @@ function UserProfile() {
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false } });
   const [authLoading, setAuthLoading] = useState(false);
+  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, next_reset: null });
+  const [creditsLoading, setCreditsLoading] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [phoneError, setPhoneError] = useState('');
@@ -102,8 +105,22 @@ function UserProfile() {
     if (user?.id) {
       fetchUserRubros();
       fetchAuthStatus();
+      fetchCredits();
     }
   }, [user?.id]);
+
+  const fetchCredits = async () => {
+    if (!user?.id) return;
+    setCreditsLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/users/${user.id}/credits`);
+      setCreditsInfo(response.data);
+    } catch (error) {
+      console.error('Error fetching credits:', error);
+    } finally {
+      setCreditsLoading(false);
+    }
+  };
 
   const fetchAuthStatus = async () => {
     if (!user?.id) return;
@@ -572,6 +589,13 @@ function UserProfile() {
               <span>Información básica</span>
             </button>
             <button 
+              className={`profile-nav-item ${activeTab === 'credits' ? 'active' : ''}`}
+              onClick={() => setActiveTab('credits')}
+            >
+              <FiActivity size={18} />
+              <span>Créditos</span>
+            </button>
+            <button 
               className={`profile-nav-item ${activeTab === 'rubros' ? 'active' : ''}`}
               onClick={() => setActiveTab('rubros')}
             >
@@ -730,6 +754,62 @@ function UserProfile() {
               </div>
 
               {/* Eliminada la sección de gestión de planes */}
+            </div>
+          )}
+
+          {activeTab === 'credits' && (
+            <div className="profile-section-fade-in minimalist-credits">
+              <div className="minimalist-credits-header">
+                <h3 className="profile-subsection-title">Créditos</h3>
+                <div className="minimalist-balance-row">
+                  <span className="minimalist-balance-value">{creditsInfo.credits || 0}</span>
+                  <span className="minimalist-balance-label">/ 1500 disponibles</span>
+                </div>
+              </div>
+
+              <div className="minimalist-progress-wrapper">
+                <div className="minimalist-progress-track">
+                  <div 
+                    className={`minimalist-progress-fill ${creditsInfo.credits < 300 ? 'low' : ''}`}
+                    style={{ width: `${Math.min(100, Math.round(((creditsInfo.credits || 0) / 1500) * 100))}%` }}
+                  ></div>
+                </div>
+                <div className="minimalist-progress-info">
+                  <span>{100 - Math.round(((creditsInfo.credits || 0) / 1500) * 100)}% consumido</span>
+                  <span className="renewal-badge">
+                    Próxima renovación: {creditsInfo.next_reset ? new Date(creditsInfo.next_reset).toLocaleDateString() : 'Pendiente'}
+                  </span>
+                </div>
+              </div>
+
+              {creditsInfo.credits === 0 ? (
+                <div className="minimalist-alert-simple exhausted">
+                  <span className="alert-dot"></span>
+                  Has agotado tus créditos para este mes.
+                </div>
+              ) : ((creditsInfo.credits || 0) < 450) && (
+                <div className="minimalist-alert-simple warning">
+                  <span className="alert-dot"></span>
+                  Te estás quedando sin créditos para tus búsquedas.
+                </div>
+              )}
+
+              <div className="minimalist-actions-grid">
+                <div className="minimalist-action-item">
+                  <h3>Upgrade de Plan</h3>
+                  <p>Aumenta tu cupo mensual de 1.500 a 5.000 créditos.</p>
+                  <button className="minimalist-btn-primary" onClick={() => navigate('/checkout')}>
+                    Subir de Nivel
+                  </button>
+                </div>
+                <div className="minimalist-action-item">
+                  <h3>Recargar Créditos</h3>
+                  <p>Adquiere un pack adicional para usar solo este mes.</p>
+                  <button className="minimalist-btn-secondary" onClick={() => navigate('/checkout')}>
+                    Ver Packs
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

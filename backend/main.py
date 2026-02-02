@@ -336,9 +336,14 @@ Sitio web: [Tu Sitio Web]'''
     except Exception as e:
         logger.error(f"Error inicializando templates por defecto: {e}")
 
-from backend.email_service import enviar_email_empresa, enviar_emails_masivo, enviar_email
-
-# Configurar logging
+# Endpoints Gmail OAuth
+# ...
+@app.get("/api/users/{user_id}/credits")
+async def api_get_user_credits(user_id: str):
+    """Obtiene créditos y próxima fecha de reset"""
+    # Primero verificar si corresponde reset
+    check_reset_monthly_credits(user_id)
+    return get_user_credits(user_id)
 _default_log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
 log_dir = os.getenv('LOG_DIR', _default_log_dir)
 
@@ -461,11 +466,12 @@ class BusquedaRubroRequest(BaseModel):
     busqueda_centro_lng: Optional[float] = None
     busqueda_radio_km: Optional[float] = None
     task_id: Optional[str] = None  # ID único de la tarea para tracking de progreso
+    user_id: Optional[str] = None # ID del usuario para créditos
 
 class BusquedaMultipleRequest(BaseModel):
-    rubros: List[str]
     pais: Optional[str] = None
     ciudad: Optional[str] = None
+    user_id: Optional[str] = None
 
 class FiltroRequest(BaseModel):
     rubro: Optional[str] = None
@@ -478,6 +484,7 @@ class ExportRequest(BaseModel):
     rubro: Optional[str] = None
     formato: str = "csv"  # csv o json
     solo_validas: bool = True
+    user_id: Optional[str] = None
 
 class ActualizarEstadoRequest(BaseModel):
     id: int
@@ -814,6 +821,20 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
     Busca empresas de un rubro específico con validación de contactos
     Puede buscar por bbox (bounding box) o por ciudad/país
     """
+    # Lógica de Créditos
+    user_id = request.user_id
+    if user_id and user_id != 'anonymous':
+        # 1. Verificar reset mensual
+        check_reset_monthly_credits(user_id)
+        
+        # 2. Deducir créditos (100 por búsqueda)
+        deduction = deduct_credits(user_id, 100)
+        if not deduction.get("success"):
+            raise HTTPException(
+                status_code=402, 
+                detail=f"Créditos insuficientes. Necesitás 100 créditos para buscar. Balance actual: {deduction.get('current', 0)}"
+            )
+            
     try:
         # Verificar que el parámetro se recibe correctamente
         solo_validadas = getattr(request, 'solo_validadas', False)
@@ -1182,6 +1203,20 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
 @app.post("/buscar-multiple")
 async def buscar_multiples_rubros(request: BusquedaMultipleRequest):
     """Busca empresas de múltiples rubros simultáneamente"""
+    # Lógica de Créditos
+    user_id = request.user_id
+    if user_id and user_id != 'anonymous':
+        # 1. Verificar reset mensual
+        check_reset_monthly_credits(user_id)
+        
+        # 2. Deducir créditos (100 por búsqueda multiple también)
+        deduction = deduct_credits(user_id, 100)
+        if not deduction.get("success"):
+            raise HTTPException(
+                status_code=402, 
+                detail=f"Créditos insuficientes. Necesitás 100 créditos para buscar. Balance actual: {deduction.get('current', 0)}"
+            )
+            
     try:
         resultados = buscar_empresas_multiples_rubros(
             rubros=request.rubros,
@@ -1363,6 +1398,18 @@ async def estadisticas():
 @app.post("/exportar")
 async def exportar(request: ExportRequest):
     """Exporta empresas a CSV o JSON"""
+    # Lógica de Créditos
+    # Por ahora cobramos 100 créditos por exportación (valor a ajustar según feedback)
+    user_id = getattr(request, 'user_id', None)
+    if user_id and user_id != 'anonymous':
+        check_reset_monthly_credits(user_id)
+        deduction = deduct_credits(user_id, 100)
+        if not deduction.get("success"):
+            raise HTTPException(
+                status_code=402, 
+                detail=f"Créditos insuficientes para exportar. Necesitás 100 créditos. Balance: {deduction.get('current', 0)}"
+            )
+
     try:
         if request.formato.lower() == "csv":
             archivo = exportar_a_csv(

@@ -688,6 +688,7 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
             "phone": phone,
             "plan": plan_id,
             "subscription_status": "active",
+            "next_credit_reset": (datetime.now() + timedelta(days=30)).date().isoformat(),
             "updated_at": datetime.now().isoformat()
         }
         
@@ -870,3 +871,84 @@ def get_api_logs(limit: int = 100, offset: int = 0) -> List[Dict]:
     except Exception as e:
         logger.error(f"Error obteniendo logs de API: {e}")
         return []
+
+# --- CREDIT MANAGEMENT FUNCTIONS ---
+
+def get_user_credits(user_id: str) -> Dict:
+    """Obtiene créditos actuales y fecha de próximo reset"""
+    client = get_supabase_admin()
+    if not client or not user_id:
+        return {"credits": 0, "next_reset": None}
+        
+    try:
+        res = client.table('users').select('credits, next_credit_reset').eq('id', user_id).execute()
+        if res.data:
+            return {
+                "credits": res.data[0].get('credits', 0),
+                "next_reset": res.data[0].get('next_credit_reset')
+            }
+        return {"credits": 0, "next_reset": None}
+    except Exception as e:
+        logger.error(f"Error obteniendo créditos para {user_id}: {e}")
+        return {"credits": 0, "next_reset": None}
+
+def deduct_credits(user_id: str, amount: int) -> Dict:
+    """Deduce créditos del usuario si tiene suficientes"""
+    client = get_supabase_admin()
+    if not client or not user_id:
+        return {"success": False, "error": "No hay cliente o user_id"}
+        
+    try:
+        # 1. Obtener créditos actuales
+        res = client.table('users').select('credits').eq('id', user_id).execute()
+        if not res.data:
+            return {"success": False, "error": "Usuario no encontrado"}
+            
+        current = res.data[0].get('credits', 0) or 0
+        if current < amount:
+            return {"success": False, "error": "Créditos insuficientes", "current": current}
+            
+        # 2. Descontar
+        new_balance = current - amount
+        client.table('users').update({"credits": new_balance}).eq('id', user_id).execute()
+        
+        logger.info(f"🪙 Créditos deducidos para {user_id}: -{amount} (Nuevo balance: {new_balance})")
+        return {"success": True, "new_balance": new_balance}
+    except Exception as e:
+        logger.error(f"Error deduciendo créditos para {user_id}: {e}")
+        return {"success": False, "error": str(e)}
+
+def check_reset_monthly_credits(user_id: str) -> bool:
+    """Verifica si corresponde resetear los créditos (billing cycle)"""
+    client = get_supabase_admin()
+    if not client or not user_id:
+        return False
+        
+    try:
+        res = client.table('users').select('next_credit_reset').eq('id', user_id).execute()
+        if not res.data:
+            return False
+            
+        next_reset_str = res.data[0].get('next_credit_reset')
+        if not next_reset_str:
+            return False
+            
+        next_reset = datetime.strptime(next_reset_str, '%Y-%m-%d').date()
+        today = datetime.now().date()
+        
+        if today >= next_reset:
+            logger.info(f"🔄 Reseteando créditos para {user_id} (Billing cycle reach: {next_reset})")
+            
+            # Reset a 1500 y nueva fecha (hoy + 30 días)
+            new_reset = (today + timedelta(days=30)).isoformat()
+            client.table('users').update({
+                "credits": 1500,
+                "next_credit_reset": new_reset,
+                "subscription_status": "active"
+            }).eq('id', user_id).execute()
+            
+            return True
+        return False
+    except Exception as e:
+        logger.error(f"Error verificando reset de créditos para {user_id}: {e}")
+        return False

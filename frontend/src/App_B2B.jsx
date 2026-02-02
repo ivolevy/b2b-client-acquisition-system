@@ -62,6 +62,8 @@ function AppB2B() {
   const [rubros, setRubros] = useState({});
   const [showEmailSender, setShowEmailSender] = useState(false);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, next_reset: null });
+  const [creditsLoading, setCreditsLoading] = useState(false);
   
   const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
   const { user } = useAuth();
@@ -368,7 +370,7 @@ function AppB2B() {
         }
       }, 200);
 
-      const paramsWithTask = { ...params, task_id: taskId };
+      const paramsWithTask = { ...params, task_id: taskId, user_id: user?.id };
       const response = await axios.post(`${API_URL}/buscar`, paramsWithTask);
       
       // Detener polling
@@ -523,7 +525,8 @@ function AppB2B() {
     try {
       const response = await axios.post(`${API_URL}/exportar`, {
         formato: 'csv',
-        solo_validas: true
+        solo_validas: true,
+        user_id: user?.id
       });
       
       if (response.data.success) {
