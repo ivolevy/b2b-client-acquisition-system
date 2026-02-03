@@ -1,41 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import ToastContainer from './ToastContainer';
-import { useToast } from '../hooks/useToast';
 import { API_URL } from '../config';
+import { FiSave, FiX, FiInfo, FiTag, FiType } from 'react-icons/fi';
 import './TemplateEditor.css';
 
 function TemplateEditor({ templateId, onClose, onSave, type = 'email' }) {
-  const [nombre, setNombre] = useState('');
-  const [subject, setSubject] = useState('');
-  const [bodyText, setBodyText] = useState('');
+  const [template, setTemplate] = useState({
+    nombre: '',
+    subject: '',
+    body_text: '',
+    body_html: '',
+    type: type
+  });
   const [loading, setLoading] = useState(false);
-  const [isNew, setIsNew] = useState(!templateId);
-  const { toasts, success, error: toastError, warning, removeToast } = useToast();
-
-  const variables = [
-    { label: 'Nombre Empresa', value: '{nombre_empresa}' },
-    { label: 'Rubro', value: '{rubro}' },
-    { label: 'Ciudad', value: '{ciudad}' },
-    { label: 'Dirección', value: '{direccion}' },
-    { label: 'Website', value: '{website}' },
-    { label: 'Fecha', value: '{fecha}' },
-  ];
-
-  // Bloquear scroll del body cuando el modal está abierto
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    document.body.classList.add('modal-open');
-    document.body.style.top = `-${scrollY}px`;
-    
-    return () => {
-      document.body.classList.remove('modal-open');
-      document.body.style.top = '';
-      if (scrollY) {
-        window.scrollTo(0, scrollY);
-      }
-    };
-  }, []);
+  const [saving, setSaving] = useState(false);
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     if (templateId) {
@@ -44,182 +23,149 @@ function TemplateEditor({ templateId, onClose, onSave, type = 'email' }) {
   }, [templateId]);
 
   const loadTemplate = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await axios.get(`${API_URL}/templates/${templateId}`);
-      const template = response.data.data;
-      setNombre(template.nombre);
-      setSubject(template.subject);
-      
-      // Limpieza agresiva de HTML para mostrar solo texto plano
-      let cleanBody = template.body_text || '';
-      
-      // Si body_text está vacío o parece HTML (contiene tags), intentar limpiar body_html
-      if (!cleanBody || cleanBody.trim().startsWith('<') || cleanBody.includes('</div>')) {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = template.body_html || template.body_text || '';
-        cleanBody = tempDiv.textContent || tempDiv.innerText || '';
+      if (response.data) {
+        setTemplate(response.data);
       }
-      
-      setBodyText(cleanBody.trim());
-    } catch (error) {
-      console.error('Error cargando template:', error);
-      toastError(
-        <>
-          <strong>No se pudo cargar el template</strong>
-          <p>{error.response?.data?.detail || error.message}</p>
-        </>
-      );
+    } catch (err) {
+      console.error('Error al cargar la plantilla:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    success(
-      <span style={{ fontSize: '0.9rem' }}>
-        <strong>Copiado</strong>: {text}
-      </span>
-    );
-  };
-
-  const handleSave = async () => {
-    if (!nombre || !subject || !bodyText) {
-      warning(
-        <>
-          <strong>Campos obligatorios</strong>
-          <p>Nombre, asunto y cuerpo del mensaje son requeridos.</p>
-        </>
-      );
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!template.nombre || !template.body_text) {
+      alert('Por favor complete el nombre y el cuerpo del mensaje.');
       return;
     }
 
-    setLoading(true);
-
+    setSaving(true);
     try {
-      const payload = {
-        nombre,
-        subject,
-        body_html: bodyText,
-        body_text: bodyText,
-        type: type // send type (email/whatsapp)
-      };
-
-      if (isNew) {
-        const response = await axios.post(`${API_URL}/templates`, payload);
-        if (response.data.success) {
-          success(<strong>Template de {type} creado</strong>);
-          onSave && onSave();
-          onClose();
-        }
+      const dataToSave = { ...template, type: type };
+      if (templateId) {
+        await axios.put(`${API_URL}/templates/${templateId}`, dataToSave);
       } else {
-        const response = await axios.put(`${API_URL}/templates/${templateId}`, payload);
-        if (response.data.success) {
-          success(<strong>Cambios guardados</strong>);
-          onSave && onSave();
-          onClose();
-        }
+        await axios.post(`${API_URL}/templates`, dataToSave);
       }
-    } catch (error) {
-      console.error('Error guardando template:', error);
-      const errorMsg = error.response?.data?.detail || error.message;
-      toastError(
-        <>
-          <strong>No se pudo guardar</strong>
-          <p>{errorMsg}</p>
-        </>
-      );
+      onSave();
+    } catch (err) {
+      console.error('Error al guardar la plantilla:', err);
+      alert('Error al guardar la plantilla.');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
+  const insertVariable = (variable) => {
+    if (!textareaRef.current) return;
+    
+    // For WhatsApp we use {var}, for Email we use {{var}}
+    const varTag = type === 'whatsapp' ? `{${variable}}` : `{{${variable}}}`;
+    
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    const text = template.body_text;
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    
+    const newText = before + varTag + after;
+    setTemplate({ ...template, body_text: newText });
+
+    // Focus and move cursor
+    setTimeout(() => {
+      textareaRef.current.focus();
+      const newPos = start + varTag.length;
+      textareaRef.current.setSelectionRange(newPos, newPos);
+    }, 0);
+  };
+
+  if (loading) {
+    return (
+      <div className="template-editor-overlay">
+        <div className="template-editor-modal" style={{ alignItems: 'center', justifyContent: 'center', padding: '60px' }}>
+          <div className="spinner"></div>
+          <p style={{ color: '#94a3b8', marginTop: '20px' }}>Cargando editor...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <div className="template-editor-overlay" onClick={onClose}>
-        <div className="template-editor-modal" onClick={(e) => e.stopPropagation()}>
-          <div className="template-editor-header">
-            <h2>{isNew ? `Nuevo Template (${type})` : `Editar Template (${type})`}</h2>
-            <button className="close-btn" onClick={onClose}>×</button>
+    <div className="template-editor-overlay">
+      <form className="template-editor-modal" onSubmit={handleSave}>
+        <div className="template-editor-header">
+          <FiType size={20} color="#3b82f6" />
+          <h2>{templateId ? 'Editar Plantilla' : 'Nueva Plantilla'}</h2>
+          <button type="button" onClick={onClose} className="btn-editor-cancel" style={{ padding: '8px' }}>
+            <FiX size={20} />
+          </button>
+        </div>
+
+        <div className="template-editor-content">
+          <div className="form-group">
+            <label>Nombre de la Plantilla</label>
+            <input 
+              type="text" 
+              placeholder="Ej: Seguimiento Post-Reunión"
+              value={template.nombre}
+              onChange={e => setTemplate({...template, nombre: e.target.value})}
+              required
+            />
           </div>
 
-          <div className="template-editor-content">
-            <div className="form-grid">
-              <div className="form-group">
-                <label>Nombre del Template</label>
-                <input
-                  type="text"
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  disabled={loading}
-                  placeholder="Ej: Primer contacto"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Asunto del Email</label>
-                <input
-                  type="text"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  disabled={loading}
-                  placeholder="Ej: Propuesta para {nombre_empresa}"
-                />
-              </div>
-            </div>
-
+          {type === 'email' && (
             <div className="form-group">
-              <div className="label-with-actions">
-                <label>Cuerpo del Mensaje</label>
-                <div className="variable-buttons">
-                  {variables.map(v => (
-                    <span 
-                      key={v.value} 
-                      className="variable-chip"
-                      onClick={() => copyToClipboard(v.value)}
-                      title="Click para copiar variable"
-                    >
-                      {v.value}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <textarea
-                value={bodyText}
-                onChange={(e) => setBodyText(e.target.value)}
-                rows={12}
-                disabled={loading}
-                placeholder="Escribe tu mensaje aquí..."
+              <label>Asunto del Correo</label>
+              <input 
+                type="text" 
+                placeholder="Introduzca el asunto del correo..."
+                value={template.subject}
+                onChange={e => setTemplate({...template, subject: e.target.value})}
               />
-              <p className="editor-hint">
-                Haz click en las variables de arriba para copiarlas.
-              </p>
             </div>
+          )}
 
-            <div className="template-editor-actions">
-              <button
-                className="btn-cancel"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Cancelar
-              </button>
-              <button
-                className="btn-save-premium"
-                onClick={handleSave}
-                disabled={loading}
-              >
-                {loading ? 'Guardando...' : (isNew ? 'Crear' : 'Guardar Template')}
-              </button>
+          <div className="variables-section">
+            <label>Inserción de Variables</label>
+            <div className="variable-chips-container">
+              <button type="button" className="variable-chip" onClick={() => insertVariable('nombre')}>Nombre</button>
+              <button type="button" className="variable-chip" onClick={() => insertVariable('empresa')}>Empresa</button>
+              <button type="button" className="variable-chip" onClick={() => insertVariable('rubro')}>Rubro</button>
+              <button type="button" className="variable-chip" onClick={() => insertVariable('ciudad')}>Ciudad</button>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Cuerpo del Mensaje</label>
+            <textarea 
+              ref={textareaRef}
+              placeholder="Escriba su mensaje aquí..."
+              value={template.body_text}
+              onChange={e => setTemplate({...template, body_text: e.target.value})}
+              required
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', color: '#64748b', fontSize: '0.75rem' }}>
+              <FiInfo size={14} />
+              <span>Las variables se reemplazarán automáticamente al enviar.</span>
             </div>
           </div>
         </div>
-      </div>
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
-    </>
+
+        <div className="template-editor-footer">
+          <button type="button" className="btn-editor-cancel" onClick={onClose}>
+            Descartar
+          </button>
+          <button type="submit" className="btn-editor-save" disabled={saving}>
+            {saving ? 'Guardando...' : <><FiSave /> Guardar Plantilla</>}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 
 export default TemplateEditor;
-

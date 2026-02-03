@@ -1,412 +1,505 @@
-/* WhatsAppSender.css - Adapted from EmailSender.css */
+/* WhatsAppSender.css - Adapted from EmailSender.css with WhatsApp Branding */
 
 :root {
     --ws-sidebar-w: 320px;
     --ws-accent: #25D366;
     /* WhatsApp Green */
-    --ws-dark: #0f172a;
-    --ws-border: #e2e8f0;
-    --ws-bg-soft: #f0fdf4;
-    /* Green tint */
-}
+    --ws-accent-dark: #075E54;
+    --ws-accent-light: #dcf8c6;
+    --ws-bg: #f8f9fa;
+    --ws-card-bg: #ffffff;
+    --ws-text-main: #111827;
+    --ws-text-muted: #6b7280;
+    --ws-border: #e5e7eb;
+    --ws-radius-lg: 16px;
+    --ws-radius-md: 12px;
+    --ws-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --ws-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --ws-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
-/* Modal Pro & Layout */
-.whatsapp-sender-modal-pro {
-    width: 95%;
-    max-width: 1400px;
-    height: 90vh;
-    background: white !important;
-    color: var(--ws-dark) !important;
-    border-radius: 24px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.whatsapp-sender-embedded {
-    width: 100%;
-    height: 100%;
-    background: transparent;
-    display: flex;
-    flex-direction: column;
-}
-
-.whatsapp-sender-layout-pro {
-    width: 100%;
-    height: 100%;
-    background: white !important;
-    color: var(--ws-dark) !important;
-    border-radius: 0 0 24px 24px !important;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    /* HSL Tokens for dynamic usage */
+    --wa-h: 142;
+    --wa-s: 70%;
+    --wa-l: 49%;
+    --wa-primary: hsl(var(--wa-h), var(--wa-s), var(--wa-l));
+    --wa-primary-soft: hsl(var(--wa-h), var(--wa-s), 95%);
 }
 
 .whatsapp-sender-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(15, 23, 42, 0.4);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
     display: flex;
+    align-items: center;
     justify-content: center;
-    align-items: center;
-    z-index: 9999;
+    z-index: 1000;
+    padding: 20px;
+    animation: esFadeIn 0.3s ease-out;
 }
 
-.whatsapp-header-simple {
-    height: 64px;
-    padding: 0 24px;
+.whatsapp-sender-modal-pro {
+    width: 100%;
+    max-width: 1200px;
+    height: 90vh;
+    background: var(--ws-bg);
+    border-radius: var(--ws-radius-lg);
+    box-shadow: var(--ws-shadow-lg);
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--ws-border);
-    background: #fff;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-.ws-header-title {
+/* Layout Split */
+.whatsapp-sender-split {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: #128C7E;
-    /* WhatsApp Dark Green */
+    flex: 1;
+    overflow: hidden;
 }
 
+/* Sidebar */
 .ws-sidebar {
     width: var(--ws-sidebar-w);
-    background: var(--ws-bg-soft);
+    background: #ffffff;
     border-right: 1px solid var(--ws-border);
     display: flex;
     flex-direction: column;
     padding: 24px;
-    gap: 32px;
 }
 
+.section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--ws-text-muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.sidebar-field {
+    margin-bottom: 24px;
+}
+
+.field-label-small {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ws-text-main);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.ws-select-modern,
+.ws-input-modern {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--ws-radius-md);
+    border: 1px solid var(--ws-border);
+    background: #fdfdfd;
+    font-size: 0.9375rem;
+    color: var(--ws-text-main);
+    transition: all 0.2s;
+    outline: none;
+}
+
+.ws-select-modern:focus,
+.ws-input-modern:focus {
+    border-color: var(--ws-accent);
+    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+}
+
+.btn-start-campaign {
+    margin-top: auto;
+    width: 100%;
+    padding: 14px;
+    background: var(--ws-accent);
+    color: white;
+    border: none;
+    border-radius: var(--ws-radius-md);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(37, 211, 102, 0.2);
+}
+
+.btn-start-campaign:hover {
+    background: var(--ws-accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(37, 211, 102, 0.3);
+}
+
+.btn-start-campaign:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Main Content */
 .ws-main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: white;
-    overflow: hidden;
+    background: #ffffff;
 }
 
 .ws-nav-tabs {
     display: flex;
-    padding: 0 32px;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #fdfdfd;
     border-bottom: 1px solid var(--ws-border);
-    gap: 24px;
 }
 
 .ws-nav-tabs button {
-    background: none;
+    padding: 8px 16px;
+    border-radius: 8px;
     border: none;
-    padding: 16px 0;
-    font-size: 0.85rem;
+    background: transparent;
+    color: var(--ws-text-muted);
     font-weight: 600;
-    color: #64748b;
+    font-size: 0.875rem;
     cursor: pointer;
-    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
     transition: all 0.2s;
 }
 
+.ws-nav-tabs button:hover {
+    background: #f3f4f6;
+    color: var(--ws-text-main);
+}
+
 .ws-nav-tabs button.active {
-    color: var(--ws-accent);
+    background: var(--wa-primary-soft);
+    color: var(--ws-accent-dark);
 }
 
-.ws-nav-tabs button.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--ws-accent);
+.ws-tab-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
 }
 
-.btn-send-whatsapp {
-    margin-top: 8px;
-    width: 100%;
-    padding: 14px;
-    background: var(--ws-accent);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
+/* Template Cards */
+.templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.template-pro-card {
+    background: white;
+    border: 1px solid var(--ws-border);
+    border-radius: var(--ws-radius-md);
+    padding: 20px;
     transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
-.btn-send-whatsapp:hover:not(:disabled) {
-    background: #128C7E;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(18, 140, 126, 0.4);
-}
-
-.btn-send-whatsapp:disabled {
-    background: #cbd5e1;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-.ws-input-modern {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid var(--ws-border);
-    font-size: 1rem;
-}
-
-.ws-textarea-modern {
-    width: 100%;
-    min-height: 200px;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid var(--ws-border);
-    font-size: 1rem;
-    font-family: inherit;
-    resize: vertical;
-}
-
-.ws-textarea-modern:focus {
-    outline: none;
+.template-pro-card:hover {
     border-color: var(--ws-accent);
-    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+    box-shadow: var(--ws-shadow-md);
+    transform: translateY(-2px);
 }
 
-/* Reuse some general classes from EmailSender to avoid duplication if possible, 
-   but specific ones here for safety */
-.ws-select-modern {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid var(--ws-border);
-    font-size: 0.95rem;
+.template-pro-card.active {
+    border-color: var(--ws-accent);
+    background: var(--wa-primary-soft);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 12px;
 }
 
-/* Progress Modal - Premium Redesign */
-.sending-progress-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 50;
-    flex-direction: column;
-    animation: fadeIn 0.3s ease-out;
+.card-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ws-text-main);
 }
 
-@keyframes fadeIn {
+.card-body-preview {
+    font-size: 0.875rem;
+    color: var(--ws-text-muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Sending Progress Visualization - THE COMMAND CENTER */
+.sending-progress-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    animation: esFadeIn 0.3s ease-out;
+}
+
+.command-center {
+    width: 100%;
+    max-width: 800px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--ws-border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.cc-header {
+    padding: 32px;
+    background: linear-gradient(135deg, var(--ws-accent), var(--ws-accent-dark));
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cc-status-group h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.cc-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 8px;
+    text-transform: uppercase;
+}
+
+.cc-body {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+}
+
+/* Progress Wheel */
+.progress-container {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-circle-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.progress-circle-bg {
+    fill: none;
+    stroke: #f3f4f6;
+    stroke-width: 8;
+}
+
+.progress-circle-fill {
+    fill: none;
+    stroke: var(--ws-accent);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease-out;
+}
+
+.progress-text {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.progress-percent {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--ws-text-main);
+}
+
+.progress-label {
+    font-size: 0.75rem;
+    color: var(--ws-text-muted);
+    font-weight: 600;
+}
+
+/* Next Action Area */
+.cc-action-zone {
+    width: 100%;
+    text-align: center;
+}
+
+.current-recipient-card {
+    background: #f9fafb;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--ws-border);
+}
+
+.recipient-name {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ws-text-main);
+    margin-bottom: 4px;
+}
+
+.recipient-phone {
+    color: var(--ws-text-muted);
+    font-size: 0.9375rem;
+}
+
+.btn-cc-primary {
+    width: 100%;
+    max-width: 320px;
+    padding: 18px;
+    background: var(--ws-accent);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 1.125rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.btn-cc-primary:hover {
+    background: var(--ws-accent-dark);
+    transform: scale(1.02);
+    box-shadow: 0 15px 30px rgba(37, 211, 102, 0.3);
+}
+
+.cc-hotkey-hint {
+    display: block;
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: var(--ws-text-muted);
+    font-weight: 500;
+}
+
+.btn-cc-cancel {
+    margin-top: 24px;
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.btn-cc-cancel:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+/* Animations */
+@keyframes esFadeIn {
     from {
         opacity: 0;
+        transform: translateY(10px);
     }
 
     to {
         opacity: 1;
+        transform: translateY(0);
     }
 }
 
-.sending-progress-card {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 40px;
-    border-radius: 24px;
-    box-shadow:
-        0 20px 50px -12px rgba(0, 0, 0, 0.1),
-        0 0 0 1px rgba(37, 211, 102, 0.1);
-    /* Subtle WhatsApp green border */
-    text-align: center;
-    max-width: 420px;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Add a subtle top accent line */
-.sending-progress-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, #25D366, #128C7E);
-}
-
-.progress-spinner {
-    width: 60px;
-    height: 60px;
-    margin: 0 auto 24px;
-    position: relative;
-}
-
-.progress-spinner::before,
-.progress-spinner::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
-}
-
-.progress-spinner::before {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 3px solid rgba(37, 211, 102, 0.1);
-}
-
-.progress-spinner::after {
-    top: -3px;
-    left: -3px;
-    width: 100%;
-    height: 100%;
-    border: 3px solid transparent;
-    border-top-color: var(--ws-accent);
-    animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
+/* Responsive */
+@media (max-width: 768px) {
+    .whatsapp-sender-split {
+        flex-direction: column;
     }
 
-    100% {
-        transform: rotate(360deg);
+    .ws-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--ws-border);
+    }
+
+    .whatsapp-sender-modal-pro {
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
     }
 }
 
-.sending-progress-card h3 {
-    margin: 0 0 8px;
-    color: var(--ws-dark);
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.btn-next-lead {
-    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-    color: white;
-    padding: 16px 32px;
-    border-radius: 16px;
-    border: none;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 24px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 20px -5px rgba(37, 211, 102, 0.4);
-}
-
-.btn-next-invalid {
-    background: #fff;
-    color: #64748b;
-    border: 1px solid #cbd5e1;
-    padding: 16px 8px;
-    /* Compact padding */
-    border-radius: 16px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.2s;
-}
-
-.btn-next-invalid:hover {
-    background: #f1f5f9;
-    color: #ef4444;
-    border-color: #ef4444;
-}
-
-.btn-next-lead:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 30px -5px rgba(37, 211, 102, 0.5);
-    filter: brightness(1.05);
-}
-
-.btn-next-lead:active {
-    transform: translateY(0);
-}
-
-.current-lead-info {
-    margin: 20px 0;
-    padding: 16px;
-    background: linear-gradient(to right, #f0fdf4, #fff);
-    border-radius: 16px;
-    border: 1px solid rgba(37, 211, 102, 0.2);
-    text-align: left;
+/* Recipient Table Utility */
+.ws-list-container {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.current-lead-info strong {
-    color: var(--ws-dark);
-    font-size: 1.1rem;
-}
-
-.current-lead-info small {
-    color: #64748b;
-    font-size: 0.9rem;
+.ws-row {
     display: flex;
     align-items: center;
-    gap: 6px;
-}
-
-/* Actions Stack */
-.sending-actions-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 24px;
-}
-
-.btn-next-lead {
-    margin-top: 0;
-    /* Override generic margin */
-}
-
-.btn-cancel-sending {
-    background: transparent;
-    color: #ef4444;
-    border: none;
-    font-weight: 600;
+    padding: 12px 16px;
+    border-radius: 10px;
+    transition: all 0.2s;
     cursor: pointer;
-    font-size: 0.9rem;
-    padding: 8px;
-    opacity: 0.8;
-    transition: opacity 0.2s;
+    border: 1px solid transparent;
 }
 
-.btn-cancel-sending:hover {
-    opacity: 1;
-    text-decoration: underline;
+.ws-row:hover {
+    background: #f9fafb;
 }
 
-/* Instruction text specific styling */
-.sending-progress-card p {
-    line-height: 1.5;
-    color: #475569;
+.ws-row.selected {
+    background: var(--wa-primary-soft);
+    border-color: rgba(37, 211, 102, 0.2);
+}
+
+.row-check-area {
+    margin-right: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.row-name {
+    font-weight: 600;
+    color: var(--ws-text-main);
+    font-size: 0.9375rem;
+    display: block;
+}
+
+.row-phone {
+    font-size: 0.8125rem;
+    color: var(--ws-text-muted);
 }

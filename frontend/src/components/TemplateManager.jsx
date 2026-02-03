@@ -1,60 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import TemplateEditor from './TemplateEditor';
-import ToastContainer from './ToastContainer';
-import { useToast } from '../hooks/useToast';
 import { API_URL } from '../config';
+import TemplateEditor from './TemplateEditor';
+import { 
+    FiPlus, FiEdit2, FiTrash2, FiX, FiMail, 
+    FiMessageSquare, FiLayout, FiSearch, FiLayers 
+} from 'react-icons/fi';
 import './TemplateManager.css';
 
 function TemplateManager({ onClose, type = 'email', embedded = false }) {
   const [templates, setTemplates] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
   const [editingTemplateId, setEditingTemplateId] = useState(null);
-  const { toasts, success, error: toastError, removeToast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Bloquear scroll del body cuando el modal está abierto (solo si no es embedded)
-  useEffect(() => {
-    if (embedded) return;
-    const scrollY = window.scrollY;
-    document.body.classList.add('modal-open');
-    document.body.style.top = `-${scrollY}px`;
-    
-    return () => {
-      document.body.classList.remove('modal-open');
-      document.body.style.top = '';
-      if (scrollY) {
-        window.scrollTo(0, scrollY);
+  const loadTemplates = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/templates?type=${type}`);
+      if (response.data && response.data.data) {
+        setTemplates(response.data.data);
       }
-    };
-  }, [embedded]);
+    } catch (err) {
+      console.error('Error al cargar plantillas:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadTemplates();
   }, [type]);
 
-  // ... (keep existing functions)
-
-  const loadTemplates = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${API_URL}/templates?type=${type}`);
-      setTemplates(response.data.data || []);
-    } catch (error) {
-      console.error('Error cargando templates:', error);
-      toastError(
-        <>
-          <strong>No se pudieron cargar los templates</strong>
-          <p>{error.response?.data?.detail || error.message}</p>
-        </>
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // ... (keep handlers)
-    const handleNewTemplate = () => {
+  const handleNewTemplate = () => {
     setEditingTemplateId(null);
     setShowEditor(true);
   };
@@ -65,97 +44,105 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
   };
 
   const handleDeleteTemplate = async (templateId) => {
-    if (!window.confirm('¿Eliminar este template?')) {
-      return;
-    }
-
-    try {
-      const response = await axios.delete(`${API_URL}/templates/${templateId}`);
-      if (response.data.success) {
-        success(
-          <>
-            <strong>Template eliminado</strong>
-            <p>El template fue borrado correctamente.</p>
-          </>
-        );
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta plantilla?')) {
+      try {
+        await axios.delete(`${API_URL}/templates/${templateId}`);
         loadTemplates();
+      } catch (err) {
+        console.error('Error al eliminar plantilla:', err);
       }
-    } catch (error) {
-      console.error('Error eliminando template:', error);
-      toastError(
-        <>
-          <strong>No se pudo eliminar</strong>
-          <p>{error.response?.data?.detail || error.message}</p>
-        </>
-      );
     }
   };
 
+  const filteredTemplates = templates.filter(t => 
+    t.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (t.subject && t.subject.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   if (showEditor) {
     return (
-      <TemplateEditor
-        templateId={editingTemplateId}
-        type={type}
-        onClose={() => {
-          setShowEditor(false);
-          setEditingTemplateId(null);
-        }}
+      <TemplateEditor 
+        templateId={editingTemplateId} 
+        onClose={() => setShowEditor(false)} 
         onSave={() => {
-          loadTemplates();
           setShowEditor(false);
-          setEditingTemplateId(null);
+          loadTemplates();
         }}
+        type={type}
       />
     );
   }
 
-  const content = (
-      <div className={embedded ? "template-manager-embedded" : "template-manager-modal"} onClick={(e) => !embedded && e.stopPropagation()}>
-        <div className="template-manager-header" style={embedded ? {borderRadius: '12px 12px 0 0'} : {}}>
-          <h2>Gestionar Templates ({type})</h2>
-          {!embedded && <button className="close-btn" onClick={onClose}>×</button>}
+  const containerClass = embedded ? "template-manager-embedded" : "template-manager-overlay";
+
+  return (
+    <div className={containerClass}>
+      <div className="template-manager-modal">
+        <div className="template-manager-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <FiLayers size={24} color="#3b82f6" />
+            <h2>Gestión de Plantillas</h2>
+          </div>
+          {!embedded && (
+            <button onClick={onClose} className="btn-action-icon">
+              <FiX size={20} />
+            </button>
+          )}
         </div>
 
         <div className="template-manager-content">
-          <div className="template-manager-actions">
-            <button className="btn-new" onClick={handleNewTemplate}>
-              + Nuevo Template
+          <div className="template-manager-actions" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <button className="btn-new-template" onClick={handleNewTemplate}>
+              <FiPlus /> Nueva Plantilla
             </button>
+            <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
+              <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+              <input 
+                type="text" 
+                placeholder="Buscar plantillas..." 
+                className="ws-input-modern" 
+                style={{ paddingLeft: '38px' }}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
 
           {loading ? (
-            <div className="loading">Cargando templates...</div>
-          ) : templates.length === 0 ? (
-            <div className="empty-state">
-              <p>No hay templates. Crea uno nuevo para empezar.</p>
+            <div style={{ textAlign: 'center', padding: '60px' }}>
+              <div className="spinner"></div>
+              <p style={{ marginTop: '16px', color: '#64748b' }}>Cargando plantillas...</p>
+            </div>
+          ) : filteredTemplates.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px', background: 'white', borderRadius: '16px', border: '1px dashed #e2e8f0' }}>
+              <FiLayout size={48} style={{ opacity: 0.2, marginBottom: '16px' }} />
+              <h3 style={{ color: '#0f172a', margin: '0 0 8px 0' }}>No hay plantillas</h3>
+              <p style={{ color: '#64748b', margin: 0 }}>Comenzá creando tu primera plantilla personalizada.</p>
             </div>
           ) : (
-            <div className="templates-list">
-              {templates.map(template => (
-                <div key={template.id} className="template-item">
-                  <div className="template-info">
+            <div className="templates-list-grid">
+              {filteredTemplates.map(template => (
+                <div key={template.id} className="template-item-pro">
+                  <div className="template-info-pro">
                     <h3>{template.nombre}</h3>
-                    <div className="template-subject">{template.subject}</div>
-                    <div className="template-meta">
-                      Creado: {new Date(template.created_at).toLocaleDateString()}
-                      {template.es_default && <span className="badge-default">Por defecto</span>}
+                    <div className="template-subject-pill">
+                      {type === 'email' ? <FiMail size={12} style={{ marginRight: '6px' }} /> : <FiMessageSquare size={12} style={{ marginRight: '6px' }} />}
+                      {template.subject || (type === 'whatsapp' ? 'Mensaje WhatsApp' : 'Sin asunto')}
                     </div>
                   </div>
-                  <div className="template-actions">
-                    <button
-                      className="btn-edit"
-                      onClick={() => handleEditTemplate(template.id)}
-                    >
-                      Editar
-                    </button>
-                    {!template.es_default && (
-                      <button
-                        className="btn-delete"
-                        onClick={() => handleDeleteTemplate(template.id)}
-                      >
-                        Eliminar
+                  
+                  <div className="template-footer-pro">
+                    <span className={`type-badge type-${type}`}>
+                      {type === 'email' ? 'Email' : 'WhatsApp'}
+                    </span>
+                    <div className="template-actions-btn-group">
+                      <button className="btn-action-icon" onClick={() => handleEditTemplate(template.id)} title="Editar">
+                        <FiEdit2 size={16} />
                       </button>
-                    )}
+                      <button className="btn-action-icon delete" onClick={() => handleDeleteTemplate(template.id)} title="Eliminar">
+                        <FiTrash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -163,26 +150,8 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
           )}
         </div>
       </div>
-  );
-
-  if (embedded) {
-      return (
-          <>
-             {content}
-             <ToastContainer toasts={toasts} onRemove={removeToast} />
-          </>
-      );
-  }
-
-  return (
-    <>
-      <div className="template-manager-overlay" onClick={onClose}>
-        {content}
-      </div>
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
-    </>
+    </div>
   );
 }
 
 export default TemplateManager;
-

@@ -1,86 +1,54 @@
+/* TemplateEditor.css - Refined Dark Pro */
+
 .template-editor-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(2, 6, 23, 0.7);
+    inset: 0;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 1100;
     padding: 20px;
-    backdrop-filter: blur(4px);
+    animation: esFadeIn 0.2s ease-out;
 }
 
 .template-editor-modal {
     background: #0f172a;
-    width: 95%;
-    max-width: 700px;
+    width: 100%;
+    max-width: 750px;
     max-height: 90vh;
-    border-radius: 16px;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    animation: modalFadeIn 0.2s ease-out;
-}
-
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .template-editor-header {
-    padding: 20px 24px;
+    padding: 24px 32px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     background: rgba(255, 255, 255, 0.02);
 }
 
-.header-icon {
-    display: none;
-    /* Minimalist: Remove unnecessary icons */
-}
-
 .template-editor-header h2 {
     margin: 0;
-    font-size: 1.1rem;
-    /* Smaller, cleaner font */
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 700;
     color: #f8fafc;
-    flex-grow: 1;
+    flex: 1;
 }
 
 .template-editor-content {
-    padding: 24px;
+    padding: 32px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    /* Single column looked better for minimalist forms generally, but preserving existing behavior */
-    gap: 20px;
-}
-
-@media (min-width: 640px) {
-    .form-grid {
-        grid-template-columns: 1fr 1fr;
-    }
+    gap: 24px;
 }
 
 .form-group {
@@ -90,166 +58,130 @@
 }
 
 .form-group label {
-    font-size: 0.85rem;
-    font-weight: 500;
+    font-size: 0.875rem;
+    font-weight: 600;
     color: #94a3b8;
-    /* Slate-400 */
 }
 
 .form-group input,
 .form-group textarea {
-    background: rgba(255, 255, 255, 0.03);
-    /* Subtle dark inputs */
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    padding: 10px 12px;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 16px;
     color: #f1f5f9;
-    font-size: 0.95rem;
+    font-size: 0.9375rem;
     transition: all 0.2s;
     width: 100%;
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-    color: #475569;
+    outline: none;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-    outline: none;
-    background: rgba(255, 255, 255, 0.05);
     border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    background: rgba(30, 41, 59, 0.8);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .form-group textarea {
-    font-family: inherit;
+    min-height: 250px;
     line-height: 1.6;
-    min-height: 200px;
     resize: vertical;
+    font-family: inherit;
 }
 
-.label-with-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-    gap: 12px;
+/* Variable Insertion Bar */
+.variables-section {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.variable-buttons {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-/* New Chip Style */
-.variable-chip {
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px dashed rgba(148, 163, 184, 0.4);
-    color: #94a3b8;
-    padding: 4px 8px;
-    border-radius: 6px;
+.variables-section label {
     font-size: 0.75rem;
-    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.variable-chips-container {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.variable-chip {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.15s ease;
-    user-select: none;
+    transition: all 0.2s;
 }
 
 .variable-chip:hover {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-    border-color: #3b82f6;
-    border-style: solid;
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-1px);
 }
 
 .variable-chip:active {
-    transform: scale(0.95);
-}
-
-.editor-hint {
-    font-size: 0.8rem;
-    color: #475569;
-    margin-top: 8px;
-    text-align: right;
+    transform: translateY(0);
 }
 
 /* Footer Actions */
-.template-editor-actions {
-    margin-top: 10px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+.template-editor-footer {
+    padding: 24px 32px;
     display: flex;
-    flex-direction: row;
     justify-content: flex-end;
-    align-items: center;
     gap: 12px;
-    width: 100%;
+    background: rgba(255, 255, 255, 0.01);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.btn-cancel {
+.btn-editor-cancel {
+    padding: 10px 20px;
     background: transparent;
     color: #94a3b8;
-    border: 1px solid transparent;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 500;
+    border: none;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    width: auto;
-    /* Ensure it doesn't grow */
 }
 
-.btn-cancel:hover {
-    color: #e2e8f0;
-    background: rgba(255, 255, 255, 0.03);
+.btn-editor-cancel:hover {
+    color: #f8fafc;
 }
 
-.btn-save-premium {
-    padding: 8px 16px;
+.btn-editor-save {
+    padding: 10px 24px;
     background: #3b82f6;
     color: white;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    width: fit-content;
-    min-width: 140px;
-    margin-top: 0;
-}
-
-.btn-save-premium:hover {
-    background: #2563eb;
-    transform: none;
-    /* Removed translation to be more minimalist/stable */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn-save-premium:active {
-    background: #1d4ed8;
-}
-
-.close-btn {
-    background: transparent;
     border: none;
-    font-size: 1.2rem;
-    color: #64748b;
+    border-radius: 10px;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
-    padding: 4px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    border-radius: 4px;
+    gap: 8px;
 }
 
-.close-btn:hover {
-    color: #e2e8f0;
-    background: rgba(255, 255, 255, 0.05);
+.btn-editor-save:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-editor-save:disabled {
+    background: #475569;
+    cursor: not-allowed;
+    transform: none;
 }

@@ -20,7 +20,7 @@ function AdminEmailCenter() {
 
   // Filters
   const [searchText, setSearchText] = useState('');
-  const [filterRole, setFilterRole] = useState('all');
+  const [filterPlan, setFilterPlan] = useState('all');
   const [itemsPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -46,8 +46,8 @@ function AdminEmailCenter() {
   // Filter Logic
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      // Role Filter
-      if (filterRole !== 'all' && user.role !== filterRole) return false;
+      // Plan Filter
+      if (filterPlan !== 'all' && user.plan !== filterPlan) return false;
       
       // Search Filter
       if (searchText) {
@@ -59,7 +59,7 @@ function AdminEmailCenter() {
       
       return true;
     });
-  }, [users, filterRole, searchText]);
+  }, [users, filterPlan, searchText]);
 
   // Pagination
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -105,14 +105,14 @@ function AdminEmailCenter() {
       nombre: u.name || u.email.split('@')[0],
       email: u.email,
       telefono: u.phone,
-      rubro: u.role === 'admin' ? 'Admin' : 'Usuario',
+      rubro: u.plan?.toUpperCase() || 'GRATIS',
       ciudad: 'N/A'
     }));
   };
 
   const handleClearFilters = () => {
     setSearchText('');
-    setFilterRole('all');
+    setFilterPlan('all');
   };
 
   const tableContainerRef = useRef(null);
@@ -164,23 +164,25 @@ function AdminEmailCenter() {
                     </div>
                 </div>
 
-                {/* Role Filter */}
+                {/* Plan Filter */}
                 <div className="custom-select-wrapper filter-item-rubro">
                 <select
-                    value={filterRole}
-                    onChange={(e) => setFilterRole(e.target.value)}
+                    value={filterPlan}
+                    onChange={(e) => setFilterPlan(e.target.value)}
                     className="filter-inline-input"
                 >
-                    <option value="all">Rol: Todos</option>
-                    <option value="user">Usuario</option>
-                    <option value="admin">Admin</option>
+                    <option value="all">Plan: Todos</option>
+                    <option value="free">Gratis</option>
+                    <option value="starter">Starter</option>
+                    <option value="growth">Growth</option>
+                    <option value="scale">Scale</option>
                 </select>
                 <svg className="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="6 9 12 15 18 9"/>
                 </svg>
                 </div>
 
-                {(searchText || filterRole !== 'all') && (
+                {(searchText || filterPlan !== 'all') && (
                 <button 
                     type="button" 
                     className="btn-clear-filters filter-item-clear"
@@ -231,6 +233,7 @@ function AdminEmailCenter() {
                         {isAllPageSelected ? <FiCheckSquare color="#3b82f6"/> : <FiSquare />}
                         </th>
                         <th>Nombre</th>
+                        <th>Plan</th>
                         <th>Email</th>
                     </tr>
                     </thead>
@@ -242,8 +245,21 @@ function AdminEmailCenter() {
                             <td style={{textAlign: 'center'}}>
                             {isSelected ? <FiCheckSquare color="#3b82f6"/> : <FiSquare color="#cbd5e1"/>}
                             </td>
-                            <td className="name-cell">
+                             <td className="name-cell">
                             <span style={{fontWeight: 500}}>{user.name || 'Sin nombre'}</span>
+                            </td>
+                            <td>
+                            <span className={`plan-badge plan-${user.plan || 'free'}`} style={{
+                                textTransform: 'uppercase',
+                                fontSize: '0.75rem',
+                                fontWeight: '700',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                background: user.plan === 'scale' ? '#fde68a' : user.plan === 'growth' ? '#bfdbfe' : user.plan === 'starter' ? '#bbf7d0' : '#f1f5f9',
+                                color: user.plan === 'scale' ? '#92400e' : user.plan === 'growth' ? '#1e40af' : user.plan === 'starter' ? '#166534' : '#64748b'
+                            }}>
+                                {user.plan || 'free'}
+                            </span>
                             </td>
                             <td>
                             <span style={{color: '#666'}}>{user.email}</span>

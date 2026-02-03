@@ -10,132 +10,65 @@ import {
 } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa6';
 
-const ITEMS_PER_PAGE = 10;
-
 const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
     const { user } = useAuth();
     const { success, error, warning, info } = useToast();
     const [activeTab, setActiveTab] = useState('list'); // list, templates
     const [selectedEmpresas, setSelectedEmpresas] = useState([]);
     const [templates, setTemplates] = useState([]);
-    
     const [sendingState, setSendingState] = useState({
         active: false,
         currentIndex: 0,
-        completed: 0
+        completed: 0,
+        total: 0,
+        isPaused: false
     });
 
-    const [currentPage, setCurrentPage] = useState(1);
-
-    // Template Editing State
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentTemplate, setCurrentTemplate] = useState({ id: null, nombre: '', body_text: '' });
+    const [editingTemplate, setEditingTemplate] = useState(null);
     const [selectedTemplateId, setSelectedTemplateId] = useState('');
-    
-    const textareaRef = useRef(null);
-
-    // Filter companies with phone numbers only
-    const validEmpresas = empresas.filter(e => e.telefono && e.telefono.length > 5);
 
     useEffect(() => {
-        setSelectedEmpresas(validEmpresas);
-        loadTemplates();
-    }, []); // Run once on mount
-
-    // Prevent scrolling when sending overlay is active
-    useEffect(() => {
-        if (sendingState.active) {
-            document.body.style.overflow = 'hidden';
+        const saved = localStorage.getItem('whatsapp_templates');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            setTemplates(parsed);
+            if (parsed.length > 0) setSelectedTemplateId(parsed[0].id);
         } else {
-            document.body.style.overflow = 'unset';
+            const defaultTemplates = [
+                { id: '1', name: 'Primer Contacto', body: 'Hola {nombre}, ¿cómo estás? Vi tu empresa {empresa} y me interesó mucho el rubro {rubro}.' },
+                { id: '2', name: 'Seguimiento', body: 'Hola {nombre}, te escribo para dar seguimiento a mi mensaje anterior sobre {rubro}.' }
+            ];
+            setTemplates(defaultTemplates);
+            localStorage.setItem('whatsapp_templates', JSON.stringify(defaultTemplates));
+            setSelectedTemplateId('1');
         }
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [sendingState.active]);
+    }, []);
 
-    const loadTemplates = () => {
-        try {
-            const stored = localStorage.getItem('whatsapp_templates');
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                setTemplates(parsed);
-                if (parsed.length > 0 && !selectedTemplateId) {
-                    setSelectedTemplateId(parsed[0].id.toString());
+    useEffect(() => {
+        // Only select those with phone numbers
+        setSelectedEmpresas(empresas.filter(e => e.telefono && e.telefono.trim() !== ''));
+    }, [empresas]);
+
+    // Keyboard Shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (sendingState.active) {
+                if (e.key === 'Enter') {
+                    // Prevent default to avoid clicking other things
+                    e.preventDefault();
+                    handleNext();
+                } else if (e.key === 'Escape') {
+                    handleCancel();
                 }
-            } else {
-                // Default template
-                const defaultTemplate = {
-                    id: Date.now(),
-                    nombre: 'Saludo Inicial',
-                    body_text: 'Hola {nombre}, te contacto de...'
-                };
-                setTemplates([defaultTemplate]);
-                localStorage.setItem('whatsapp_templates', JSON.stringify([defaultTemplate]));
-                setSelectedTemplateId(defaultTemplate.id.toString());
             }
-        } catch (err) {
-            console.error('Error loading templates:', err);
-        }
-    };
-
-    const insertVariable = (variable) => {
-        if (!textareaRef.current) return;
-        const start = textareaRef.current.selectionStart;
-        const end = textareaRef.current.selectionEnd;
-        const text = currentTemplate.body_text;
-        const before = text.substring(0, start);
-        const after = text.substring(end);
-        const newText = `${before}{${variable}}${after}`; // Use single curly braces for simplicity
-        
-        setCurrentTemplate({ ...currentTemplate, body_text: newText });
-        
-        setTimeout(() => {
-            textareaRef.current.focus();
-            const cursorPos = start + variable.length + 2;
-            textareaRef.current.setSelectionRange(cursorPos, cursorPos);
-        }, 0);
-    };
-
-    const formatPhoneNumber = (phone) => {
-        if (!phone) return '';
-        // 1. Remove non-numeric chars except +
-        let cleaned = phone.replace(/[^0-9+]/g, '');
-
-        // 2. If it doesn't start with +, assume Argentina (+549)
-        // Many local numbers come as "11 1234..." or "011 1234..."
-        if (!cleaned.startsWith('+')) {
-            // Remove leading 0 if present (common in Argentina area codes)
-            if (cleaned.startsWith('0')) {
-                cleaned = cleaned.substring(1);
-            }
-            // Remove 15 prefix if present (old mobile prefix)
-            // This is tricky as 15 could be part of a real number, but in Arg usually 11-15-xxxx
-            // Safer to just prepend 549 which works for mobile
-            cleaned = '549' + cleaned;
-        } else {
-            // If it starts with +, remove only the + for the final URL if using wa.me, 
-            // but web.whatsapp.com usually expects purely numeric or with +?
-            // Actually web.whatsapp expects numeric country code without + usually, but acts smart.
-            // Let's strip the + to be safe for the URL param
-            cleaned = cleaned.replace('+', '');
-        }
-
-        return cleaned;
-    };
-
-    const prepareMessage = (templateBody, empresa) => {
-        let msg = templateBody;
-        msg = msg.replace(/{nombre}/g, empresa.nombre || 'Hola'); // Fallback if name is empty
-        msg = msg.replace(/{empresa}/g, empresa.nombre || '');
-        msg = msg.replace(/{rubro}/g, empresa.rubro || '');
-        msg = msg.replace(/{ciudad}/g, empresa.ciudad || '');
-        return encodeURIComponent(msg);
-    };
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [sendingState]);
 
     const startCampaign = () => {
         if (selectedEmpresas.length === 0) {
-            warning("Seleccioná al menos un contacto.");
+            warning("No hay destinatarios con teléfono seleccionados.");
             return;
         }
         if (!selectedTemplateId) {
@@ -146,349 +79,276 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         setSendingState({
             active: true,
             currentIndex: 0,
-            completed: 0
+            completed: 0,
+            total: selectedEmpresas.length,
+            isPaused: false
         });
-        
-        // Start first one immediately
         processResult(0);
     };
 
     const processResult = (index) => {
         if (index >= selectedEmpresas.length) {
-            success("Campaña finalizada.");
-            setSendingState({ active: false, currentIndex: 0, completed: 0 });
+            finishCampaign();
             return;
         }
 
         const empresa = selectedEmpresas[index];
-        const template = templates.find(t => t.id.toString() === selectedTemplateId.toString());
-        const message = prepareMessage(template.body_text, empresa);
-        const phone = formatPhoneNumber(empresa.telefono);
+        const template = templates.find(t => t.id === selectedTemplateId);
         
-        if (phone.length < 10) {
-           error("El teléfono parece inválido.");
-           return;
-        }
+        let message = template ? template.body : '';
+        // Replace variables
+        message = message.replace(/{nombre}/g, empresa.nombre || 'cliente');
+        message = message.replace(/{empresa}/g, empresa.nombre || '');
+        message = message.replace(/{rubro}/g, empresa.rubro || '');
 
-        const url = `https://web.whatsapp.com/send?phone=${phone}&text=${message}`;
+        // Basic phone cleaning
+        const phone = empresa.telefono.replace(/\D/g, '');
+        const url = `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
+        
         window.open(url, '_blank');
     };
 
-    const handleCancel = () => {
-        if (window.confirm("¿Detener el envío masivo?")) {
-            setSendingState({ active: false, currentIndex: 0, completed: 0 });
-            info("Envío cancelado.");
-        }
-    };
-
     const handleNext = () => {
-        advanceQueue(true);
-    };
-
-    const handleNextInvalid = () => {
-        advanceQueue(false);
-    };
-
-    const advanceQueue = (wasSent) => {
-        // Here we could track stats: wasSent ? success++ : failed++
         const nextIndex = sendingState.currentIndex + 1;
-        if (nextIndex < selectedEmpresas.length) {
-            setSendingState({
-                ...sendingState,
+        if (nextIndex < sendingState.total) {
+            setSendingState(prev => ({
+                ...prev,
                 currentIndex: nextIndex,
-                completed: sendingState.completed + (wasSent ? 1 : 0)
-            });
+                completed: prev.completed + 1
+            }));
             processResult(nextIndex);
         } else {
-            // Finished
-            setSendingState({ active: false, currentIndex: 0, completed: 0 });
-            success("¡Todos los mensajes han sido procesados!");
+            setSendingState(prev => ({
+                ...prev,
+                completed: prev.completed + 1
+            }));
+            setTimeout(finishCampaign, 500);
         }
     };
 
-    const handleSaveTemplate = () => {
-        if (!currentTemplate.nombre || !currentTemplate.body_text) {
-            warning("Completá nombre y mensaje.");
-            return;
-        }
-
-        let newTemplates = [...templates];
-        if (currentTemplate.id) {
-            const index = newTemplates.findIndex(t => t.id === currentTemplate.id);
-            if (index !== -1) newTemplates[index] = currentTemplate;
-        } else {
-            newTemplates.push({ ...currentTemplate, id: Date.now() });
-        }
-
-        setTemplates(newTemplates);
-        localStorage.setItem('whatsapp_templates', JSON.stringify(newTemplates));
-        setIsEditing(false);
-        success("Plantilla guardada.");
+    const handleCancel = () => {
+        setSendingState({ active: false, currentIndex: 0, completed: 0, total: 0, isPaused: false });
+        info("Campaña cancelada.");
     };
 
-    const handleDeleteTemplate = (id) => {
-        if (window.confirm("¿Eliminar esta plantilla?")) {
-            const newTemplates = templates.filter(t => t.id !== id);
-            setTemplates(newTemplates);
-            localStorage.setItem('whatsapp_templates', JSON.stringify(newTemplates));
-            if (selectedTemplateId === id.toString()) setSelectedTemplateId('');
-        }
+    const finishCampaign = () => {
+        setSendingState(prev => ({ ...prev, active: false }));
+        success("¡Campaña finalizada exitosamente!");
     };
 
     const toggleEmpresa = (id) => {
         if (selectedEmpresas.find(e => e.id === id)) {
             setSelectedEmpresas(selectedEmpresas.filter(e => e.id !== id));
         } else {
-            const empresa = validEmpresas.find(e => e.id === id);
+            const empresa = empresas.find(e => e.id === id);
             if (empresa) setSelectedEmpresas([...selectedEmpresas, empresa]);
         }
     };
 
-    const toggleAllEmpresas = () => {
-        if (selectedEmpresas.length === validEmpresas.length) {
-            setSelectedEmpresas([]);
-        } else {
-            setSelectedEmpresas([...validEmpresas]);
-        }
-    };
+    const progressPercent = sendingState.total > 0 
+        ? Math.round((sendingState.completed / sendingState.total) * 100) 
+        : 0;
 
-    // Pagination
-    const totalPages = Math.ceil(validEmpresas.length / ITEMS_PER_PAGE);
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const paginatedEmpresas = validEmpresas.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-    const goToPage = (page) => {
-        if (page >= 1 && page <= totalPages) setCurrentPage(page);
-    };
+    // SVG Circle math: Circumference = 2 * PI * R. If R=70, C ≈ 440
+    const strokeDashoffset = 440 - (440 * progressPercent) / 100;
 
     return (
         <div className={embedded ? "whatsapp-sender-embedded" : "whatsapp-sender-overlay"}>
             <div className={embedded ? "whatsapp-sender-layout-pro" : "whatsapp-sender-modal-pro"}>
+                
+                {/* Header for Modal Mode */}
                 {!embedded && (
-                    <div className="whatsapp-header-simple">
-                        <div className="ws-header-title">
-                            <FaWhatsapp size={24} />
-                            <span>Centro de Comunicación WhatsApp</span>
+                    <div className="whatsapp-header-refined" style={{ padding: '16px 24px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <FaWhatsapp size={24} color="#25D366" />
+                            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>WhatsApp Business</h2>
                         </div>
-                        <button onClick={onClose} className="close-btn-minimal"><FiX /></button>
+                        <button onClick={onClose} className="btn-close-minimal" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}><FiX size={24} /></button>
                     </div>
                 )}
 
-                <div className="email-sender-split">
+                <div className="whatsapp-sender-split">
                     {/* SIDEBAR */}
                     <aside className="ws-sidebar">
-                        <div className="sidebar-section">
-                            <label className="section-label">Configuración del Envío</label>
-                            
-                            <div className="sidebar-field">
-                                <label className="field-label-small">Plantilla Activa</label>
-                                <select 
-                                    className="ws-select-modern" 
-                                    value={selectedTemplateId} 
-                                    onChange={(e) => setSelectedTemplateId(e.target.value)}
-                                >
-                                    <option value="">Seleccionar Plantilla...</option>
-                                    {templates.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-                                </select>
-                            </div>
-
-                            <div className="sending-summary-minimal">
-                                <span>{selectedEmpresas.length} seleccionados</span>
-                                <small>Solo contactos con teléfono visible</small>
-                            </div>
-
-                            <button 
-                                className="btn-send-whatsapp" 
-                                onClick={startCampaign}
-                                disabled={sendingState.active || selectedEmpresas.length === 0}
+                        <span className="section-label">Configuración</span>
+                        
+                        <div className="sidebar-field">
+                            <label className="field-label-small">Plantilla de Mensaje</label>
+                            <select 
+                                className="ws-select-modern"
+                                value={selectedTemplateId}
+                                onChange={(e) => setSelectedTemplateId(e.target.value)}
                             >
-                                {sendingState.active ? 'Campaña en curso...' : 'Iniciar Campaña'}
-                            </button>
+                                <option value="">Seleccionar plantilla...</option>
+                                {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="sidebar-field">
+                            <label className="field-label-small">Resumen</label>
+                            <div style={{ background: 'var(--wa-primary-soft)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#075E54' }}>{selectedEmpresas.length}</div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#075E54', opacity: 0.8 }}>PROSPECTOS LISTOS</div>
+                            </div>
+                        </div>
+
+                        <button 
+                            className="btn-start-campaign"
+                            onClick={startCampaign}
+                            disabled={selectedEmpresas.length === 0 || !selectedTemplateId}
+                        >
+                            <FiSend /> Iniciar Campaña
+                        </button>
+                        
+                        <div style={{ marginTop: '20px', fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center' }}>
+                            Asegurate de tener WhatsApp Web abierto en otra pestaña.
                         </div>
                     </aside>
 
-                    {/* MAIN */}
+                    {/* MAIN CONTENT */}
                     <main className="ws-main">
                         <nav className="ws-nav-tabs">
                             <button className={activeTab === 'list' ? 'active' : ''} onClick={() => setActiveTab('list')}>
-                                <FiUsers /> Destinatarios ({validEmpresas.length})
+                                <FiUsers /> Destinatarios
                             </button>
                             <button className={activeTab === 'templates' ? 'active' : ''} onClick={() => setActiveTab('templates')}>
-                                <FiMessageCircle /> Plantillas
+                                <FiTag /> Mis Plantillas
                             </button>
                         </nav>
 
-                        <div className="es-tab-panel">
+                        <div className="ws-tab-panel">
                             {activeTab === 'list' && (
-                                <div className="recipients-view" style={{display:'flex', flexDirection:'column', height:'100%'}}>
-                                     <div className="view-toolbar">
-                                        <button className="btn-check-all" onClick={toggleAllEmpresas}>
-                                            {selectedEmpresas.length === validEmpresas.length ? <FiCheckSquare size={14} /> : <FiSquare size={14} />}
-                                            {selectedEmpresas.length === validEmpresas.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
-                                        </button>
-                                        <div className="stats-selected-badge">{selectedEmpresas.length} seleccionados</div>
+                                <div className="ws-list-container">
+                                    <div style={{ marginBottom: '16px', fontSize: '0.875rem', color: '#64748b' }}>
+                                        Mostrando {empresas.length} resultados. Solo los que tienen teléfono son elegibles.
                                     </div>
-                                    
-                                    <div className="es-list-container">
-                                        {paginatedEmpresas.map(empresa => (
-                                            <div 
-                                                key={empresa.id} 
-                                                className={`es-row ${selectedEmpresas.find(e => e.id === empresa.id) ? 'selected' : ''}`}
-                                                onClick={() => toggleEmpresa(empresa.id)}
-                                            >
-                                                <div className="row-check-area">
-                                                   {selectedEmpresas.find(e => e.id === empresa.id) ? <FiCheckSquare color="#25D366" /> : <FiSquare color="#cbd5e1" />}
-                                                </div>
-                                                <div className="row-main-info">
-                                                    <span className="row-name">{empresa.nombre}</span>
-                                                    <span className="row-email">{empresa.telefono}</span>
-                                                </div>
-                                                <div className="row-meta">
-                                                    <span className="meta-badge">{empresa.rubro}</span>
-                                                </div>
+                                    {empresas.map(empresa => (
+                                        <div 
+                                            key={empresa.id} 
+                                            className={`ws-row ${selectedEmpresas.find(e => e.id === empresa.id) ? 'selected' : ''} ${!empresa.telefono ? 'disabled' : ''}`}
+                                            onClick={() => empresa.telefono && toggleEmpresa(empresa.id)}
+                                            style={{ opacity: empresa.telefono ? 1 : 0.5, cursor: empresa.telefono ? 'pointer' : 'not-allowed' }}
+                                        >
+                                            <div className="row-check-area">
+                                                {selectedEmpresas.find(e => e.id === empresa.id) ? 
+                                                    <FiCheckSquare size={18} color="#25D366" /> : 
+                                                    <FiSquare size={18} color="#cbd5e1" />
+                                                }
                                             </div>
-                                        ))}
-                                        {validEmpresas.length === 0 && (
-                                            <div style={{padding: '40px', textAlign: 'center', color: '#64748b'}}>
-                                                <p>No hay empresas con teléfono en la selección actual.</p>
+                                            <div className="row-content">
+                                                <span className="row-name">{empresa.nombre}</span>
+                                                <span className="row-phone">{empresa.telefono || 'Sin teléfono'}</span>
                                             </div>
-                                        )}
-                                    </div>
-
-                                    {totalPages > 1 && (
-                                        <div className="es-pagination">
-                                            <button 
-                                                className="btn-page-nav" 
-                                                onClick={() => goToPage(currentPage - 1)}
-                                                disabled={currentPage === 1}
-                                            >
-                                                <FiChevronLeft /> Anterior
-                                            </button>
-                                            <span style={{fontSize:'0.85rem', color:'#64748b'}}>Página {currentPage} de {totalPages}</span>
-                                            <button 
-                                                className="btn-page-nav" 
-                                                onClick={() => goToPage(currentPage + 1)}
-                                                disabled={currentPage === totalPages}
-                                            >
-                                                Siguiente <FiChevronRight />
-                                            </button>
+                                            <div style={{ marginLeft: 'auto' }}>
+                                                <span style={{ fontSize: '0.75rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '10px', color: '#64748b' }}>
+                                                    {empresa.rubro}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {empresas.length === 0 && (
+                                        <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                                            <FiUsers size={40} style={{ marginBottom: '16px', opacity: 0.5 }} />
+                                            <p>No hay destinatarios en la lista.</p>
                                         </div>
                                     )}
                                 </div>
                             )}
 
                             {activeTab === 'templates' && (
-                                <div className="templates-view" style={{padding:'24px', height:'100%', overflowY:'auto'}}>
-                                    {isEditing ? (
-                                        <div className="pro-editor">
-                                            <div className="editor-header-actions">
-                                                <h3>{currentTemplate.id ? 'Editar Plantilla' : 'Nueva Plantilla'}</h3>
-                                                <button className="btn-icon" onClick={() => setIsEditing(false)}><FiX /></button>
-                                            </div>
-                                            <div className="editor-form">
-                                                <input 
-                                                    className="ws-input-modern" 
-                                                    placeholder="Nombre de la plantilla" 
-                                                    value={currentTemplate.nombre} 
-                                                    onChange={e => setCurrentTemplate({...currentTemplate, nombre: e.target.value})} 
-                                                />
-                                                
-                                                <div className="variable-picker">
-                                                    <label>Insertar Variable:</label>
-                                                    <div className="var-buttons" style={{display:'flex', gap:'8px'}}>
-                                                        <button className="select-link-btn" onClick={() => insertVariable('nombre')}>Nombre</button>
-                                                        <button className="select-link-btn" onClick={() => insertVariable('empresa')}>Empresa</button>
-                                                        <button className="select-link-btn" onClick={() => insertVariable('rubro')}>Rubro</button>
-                                                        <button className="select-link-btn" onClick={() => insertVariable('ciudad')}>Ciudad</button>
-                                                    </div>
-                                                </div>
-
-                                                <textarea 
-                                                    ref={textareaRef}
-                                                    className="ws-textarea-modern" 
-                                                    placeholder="Escribí tu mensaje de WhatsApp aquí..." 
-                                                    value={currentTemplate.body_text} 
-                                                    onChange={e => setCurrentTemplate({...currentTemplate, body_text: e.target.value})} 
-                                                />
-                                                
-                                                <div className="editor-footer" style={{display:'flex', justifyContent:'flex-end', gap:'12px', marginTop:'20px'}}>
-                                                    <button className="btn-cancel" style={{padding:'8px 16px', background:'none', border:'none', cursor:'pointer'}} onClick={() => setIsEditing(false)}>Descartar</button>
-                                                    <button className="btn-save" style={{padding:'8px 24px', background:'#25D366', color:'white', border:'none', borderRadius:'8px', cursor:'pointer'}} onClick={handleSaveTemplate}><FiSave /> Guardar Cambios</button>
+                                <div className="templates-grid">
+                                    {templates.map(t => (
+                                        <div 
+                                            key={t.id} 
+                                            className={`template-pro-card ${selectedTemplateId === t.id ? 'active' : ''}`}
+                                            onClick={() => setSelectedTemplateId(t.id)}
+                                        >
+                                            <div className="card-header">
+                                                <h4>{t.name}</h4>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button className="btn-tiny" onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        // logic for edit would go here
+                                                    }}><FiEdit2 size={12} /></button>
                                                 </div>
                                             </div>
+                                            <p className="card-body-preview">{t.body}</p>
                                         </div>
-                                    ) : (
-                                        <div className="templates-directory">
-                                            <button className="btn-add-template-minimal" onClick={() => {
-                                                setCurrentTemplate({ nombre: '', body_text: '' });
-                                                setIsEditing(true);
-                                            }}>
-                                                <FiPlus /> Nueva Plantilla
-                                            </button>
-                                            
-                                            <div style={{marginTop:'20px', display:'grid', gap:'16px'}}>
-                                                {templates.map(t => (
-                                                    <div key={t.id} className="pro-template-card" style={{padding:'16px', border:'1px solid #e2e8f0', borderRadius:'12px'}}>
-                                                        <div className="card-top" style={{display:'flex', justifyContent:'space-between', marginBottom:'8px'}}>
-                                                            <h4 style={{margin:0}}>{t.nombre}</h4>
-                                                            <div className="card-actions" style={{display:'flex', gap:'8px'}}>
-                                                                <button className="btn-tiny" onClick={() => {
-                                                                    setCurrentTemplate(t);
-                                                                    setIsEditing(true);
-                                                                }}><FiEdit2 /></button>
-                                                                <button className="btn-tiny" style={{color:'#ef4444'}} onClick={() => handleDeleteTemplate(t.id)}><FiTrash2 /></button>
-                                                            </div>
-                                                        </div>
-                                                        <p style={{fontSize:'0.85rem', color:'#64748b', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{t.body_text}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                    ))}
+                                    <div className="template-pro-card add-new" style={{ borderStyle: 'dashed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <FiPlus size={24} />
+                                            <div style={{ fontSize: '0.75rem', marginTop: '4px', fontWeight: 600 }}>NUEVA</div>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             )}
                         </div>
                     </main>
                 </div>
-            </div>
 
-            {/* SENDING PROGRESS MODAL */}
-            {sendingState.active && (
-                <div className="sending-progress-overlay">
-                    <div className="sending-progress-card">
-                        <div className="progress-spinner"></div>
-                        <h3>Enviando Campaña</h3>
-                        <p style={{color:'#64748b', margin:'8px 0'}}>
-                            Procesando contacto {sendingState.currentIndex + 1} de {selectedEmpresas.length}
-                        </p>
-                        
-                        <div className="current-lead-info">
-                            <strong>{selectedEmpresas[sendingState.currentIndex]?.nombre}</strong>
-                            <br/>
-                            <small>{selectedEmpresas[sendingState.currentIndex]?.telefono}</small>
-                        </div>
-                        
-                        <p style={{fontSize:'0.85rem'}}>
-                            Se abrió una pestaña de WhatsApp Web. <br/>
-                            Enviá el mensaje y luego hacé clic aquí.
-                        </p>
-
-                        <div className="sending-actions-stack">
-                            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px'}}>
-                                <button className="btn-next-lead" onClick={handleNext}>
-                                    Enviado <FiCheckSquare style={{marginLeft:'8px'}}/>
-                                </button>
-                                <button className="btn-next-invalid" onClick={handleNextInvalid}>
-                                    No tiene WA <FiX style={{marginLeft:'8px'}}/>
-                                </button>
+                {/* COMMAND CENTER DASHBOARD (Progress) */}
+                {sendingState.active && (
+                    <div className="sending-progress-overlay">
+                        <div className="command-center">
+                            <div className="cc-header">
+                                <div className="cc-status-group">
+                                    <h2>Centro de Comando</h2>
+                                    <span className="cc-status-badge">Enviando...</span>
+                                </div>
+                                <div className="cc-stats-minimal">
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{sendingState.completed} / {sendingState.total}</div>
+                                        <div style={{ fontSize: '0.75rem', opacity: 0.8, letterSpacing: '0.05em' }}>PROGRESO TOTAL</div>
+                                    </div>
+                                </div>
                             </div>
-                            <button className="btn-cancel-sending" onClick={handleCancel}>
-                                Cancelar Campaña
-                            </button>
+
+                            <div className="cc-body">
+                                <div className="progress-container">
+                                    <svg className="progress-circle-svg">
+                                        <circle className="progress-circle-bg" cx="80" cy="80" r="70" />
+                                        <circle 
+                                            className="progress-circle-fill" 
+                                            cx="80" cy="80" r="70" 
+                                            style={{ 
+                                                strokeDasharray: 440,
+                                                strokeDashoffset: strokeDashoffset 
+                                            }}
+                                        />
+                                    </svg>
+                                    <div className="progress-text">
+                                        <span className="progress-percent">{progressPercent}%</span>
+                                        <span className="progress-label">COMPLETO</span>
+                                    </div>
+                                </div>
+
+                                <div className="cc-action-zone">
+                                    {sendingState.currentIndex < sendingState.total && (
+                                        <div className="current-recipient-card">
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#25D366', textTransform: 'uppercase', marginBottom: '8px', display: 'block', letterSpacing: '0.05em' }}>Próximo Destinatario</span>
+                                            <span className="recipient-name">{selectedEmpresas[sendingState.currentIndex].nombre}</span>
+                                            <span className="recipient-phone">{selectedEmpresas[sendingState.currentIndex].telefono}</span>
+                                        </div>
+                                    )}
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                        <button className="btn-cc-primary" onClick={handleNext}>
+                                            Siguiente (Enter) <FiChevronRight />
+                                        </button>
+                                        
+                                        <span className="cc-hotkey-hint">Presioná <strong>Enter</strong> para abrir el chat y avanzar</span>
+                                        
+                                        <button className="btn-cc-cancel" onClick={handleCancel}>
+                                            Cancelar Campaña
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
