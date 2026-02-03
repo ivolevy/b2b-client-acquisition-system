@@ -909,7 +909,7 @@ function AppB2B() {
                 navigate('/');
                 setView('table');
               }}
-              embedded={true}
+              embedded={false}
             />
           )}
       </main>
