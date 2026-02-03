@@ -1,7 +1,7 @@
 import os
 import requests
 import urllib.parse
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
@@ -83,26 +83,57 @@ def send_outlook_email(
     to_email: str, 
     subject: str, 
     body_html: str, 
-    from_email: Optional[str] = None
+    from_email: Optional[str] = None,
+    attachments: Optional[List[Any]] = None
 ) -> Dict[str, Any]:
     """Envía un correo usando Microsoft Graph API"""
     
-    # Construir el mensaje
-    message = {
-        "message": {
-            "subject": subject,
-            "body": {
-                "contentType": "HTML",
-                "content": body_html
-            },
-            "toRecipients": [
-                {
-                    "emailAddress": {
-                        "address": to_email
-                    }
-                }
-            ]
+    # Construir el mensaje base
+    msg_payload = {
+        "subject": subject,
+        "body": {
+            "contentType": "HTML",
+            "content": body_html
         },
+        "toRecipients": [
+            {
+                "emailAddress": {
+                    "address": to_email
+                }
+            }
+        ]
+    }
+
+    # Procesar adjuntos
+    if attachments:
+        formatted_attachments = []
+        for attachment in attachments:
+            try:
+                # Soporte para dicts u objetos (Pydantic)
+                if isinstance(attachment, dict):
+                    filename = attachment.get('filename')
+                    content_b64 = attachment.get('content_base64')
+                    content_type = attachment.get('content_type')
+                else:
+                    filename = getattr(attachment, 'filename', None)
+                    content_b64 = getattr(attachment, 'content_base64', None)
+                    content_type = getattr(attachment, 'content_type', None)
+
+                if filename and content_b64:
+                    formatted_attachments.append({
+                        "@odata.type": "#microsoft.graph.fileAttachment",
+                        "name": filename,
+                        "contentBytes": content_b64,
+                        "contentType": content_type or "application/octet-stream"
+                    })
+            except Exception as e:
+                pass # Ignorar adjuntos mal formados
+
+        if formatted_attachments:
+            msg_payload["attachments"] = formatted_attachments
+
+    message = {
+        "message": msg_payload,
         "saveToSentItems": "true"
     }
     

@@ -68,8 +68,8 @@ except ImportError as e:
     from scraper_parallel import *
     from validators import *
     from db_supabase import *
-    from auth_google import *
-    from auth_outlook import *
+    from auth_google import get_google_auth_url, exchange_code_for_token
+    from auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
 # Todas las funciones trabajan con datos en memoria durante la sesión
 
 import math
@@ -510,9 +510,20 @@ class TemplateUpdateRequest(BaseModel):
     body_html: Optional[str] = None
     body_text: Optional[str] = None
 
+
+class EmailAttachment(BaseModel):
+    filename: str
+    content_base64: str
+    content_type: str
+
 class EnviarEmailRequest(BaseModel):
     empresa_id: int
     template_id: int
+    empresa_data: Optional[Dict[str, Any]] = None
+    asunto_personalizado: Optional[str] = None
+    user_id: Optional[str] = None
+    provider: Optional[str] = None
+    attachments: Optional[List[EmailAttachment]] = None
 
 class MPPreferenceRequest(BaseModel):
     plan_id: str
@@ -688,6 +699,7 @@ class EnviarEmailMasivoRequest(BaseModel):
     delay_segundos: float = 3.0
     user_id: Optional[str] = None
     provider: Optional[str] = None
+    attachments: Optional[List[EmailAttachment]] = None
 
 # Modelos Gmail OAuth
 class GoogleAuthURLRequest(BaseModel):
@@ -1876,7 +1888,8 @@ async def enviar_email_individual(request: EnviarEmailRequest):
             template=template,
             asunto_personalizado=request.asunto_personalizado,
             user_id=request.user_id,
-            provider=request.provider
+            provider=request.provider,
+            attachments=request.attachments
         )
         
         # Guardar en historial
@@ -1934,7 +1947,8 @@ async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
             asunto_personalizado=request.asunto_personalizado,
             delay_segundos=request.delay_segundos,
             user_id=request.user_id,
-            provider=request.provider
+            provider=request.provider,
+            attachments=request.attachments
         )
         
         # Guardar en historial

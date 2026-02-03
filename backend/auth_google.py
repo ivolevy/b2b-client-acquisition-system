@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Any
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -112,7 +112,7 @@ def get_gmail_service(token_data: Dict):
     
     return build('gmail', 'v1', credentials=creds), None
 
-def send_gmail_api(token_data: Dict, to: str, subject: str, body_html: str):
+def send_gmail_api(token_data: Dict, to: str, subject: str, body_html: str, attachments: Optional[List[Any]] = None):
     """Envía un email usando la Gmail API"""
     service, new_creds = get_gmail_service(token_data)
     
@@ -124,6 +124,37 @@ def send_gmail_api(token_data: Dict, to: str, subject: str, body_html: str):
     message['From'] = token_data.get('account_email')
     message['Subject'] = subject
     
+    # Procesar adjuntos
+    if attachments:
+        for attachment in attachments:
+            try:
+                # Soporte para dicts u objetos (Pydantic)
+                if isinstance(attachment, dict):
+                    filename = attachment.get('filename')
+                    content_b64 = attachment.get('content_base64')
+                    content_type = attachment.get('content_type')
+                else:
+                    filename = getattr(attachment, 'filename', None)
+                    content_b64 = getattr(attachment, 'content_base64', None)
+                    content_type = getattr(attachment, 'content_type', None)
+
+                if filename and content_b64:
+                    file_data = base64.b64decode(content_b64)
+                    
+                    # Determinar tipo MIME
+                    maintype, subtype = 'application', 'octet-stream'
+                    if content_type and '/' in content_type:
+                        maintype, subtype = content_type.split('/', 1)
+                    
+                    message.add_attachment(
+                        file_data,
+                        maintype=maintype,
+                        subtype=subtype,
+                        filename=filename
+                    )
+            except Exception as e:
+                logger.error(f"Error agregando adjunto {getattr(attachment, 'filename', 'desconocido')}: {e}")
+
     # Codificar mensaje en base64url
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
     create_message = {'raw': raw_message}

@@ -10,7 +10,7 @@ import {
     FiPlus, FiEdit2, FiTrash2, FiSave, FiX, 
     FiCheckSquare, FiSquare, FiSend, 
     FiMail, FiUsers, FiSettings, FiTag, FiClock, FiLink,
-    FiChevronLeft, FiChevronRight
+    FiChevronLeft, FiChevronRight, FiPaperclip
 } from 'react-icons/fi';
 
 const ITEMS_PER_PAGE = 10;
@@ -32,6 +32,9 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     const [currentTemplate, setCurrentTemplate] = useState({ id: null, nombre: '', subject: '', body_text: '' });
     const [selectedTemplateId, setSelectedTemplateId] = useState('');
     
+    // Attachments State
+    const [files, setFiles] = useState([]);
+    const fileInputRef = useRef(null);
     const textareaRef = useRef(null);
 
     const isAnyConnected = authStatus.google || authStatus.outlook;
@@ -98,6 +101,46 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
         }, 0);
     };
 
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
+        const newFiles = [];
+        
+        selectedFiles.forEach(file => {
+            if (file.size > MAX_SIZE) {
+                warning(`El archivo ${file.name} supera los 5MB.`);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                newFiles.push({
+                    name: file.name,
+                    type: file.type,
+                    // Remove 'data:*/*;base64,' prefix
+                    base64: reader.result.split(',')[1],
+                    preview: reader.result
+                });
+                
+                // If this is the last one being processed, update state
+                // Note: accurate if synchronous-style but FileReader is async. 
+                // A better way is Promise.all but for simplicity/speed in React state loop:
+                if (newFiles.length === selectedFiles.filter(f => f.size <= MAX_SIZE).length) {
+                   setFiles(prev => [...prev, ...newFiles]);
+                }
+            };
+        });
+        
+        // Reset input
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const removeFile = (index) => {
+        setFiles(files.filter((_, i) => i !== index));
+    };
+
     const handleSendCampaign = async () => {
         const targets = mode === 'masivo' ? selectedEmpresas : (selectedEmpresas.length > 0 ? [selectedEmpresas[0]] : []);
         
@@ -126,7 +169,12 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                 template_id: parseInt(selectedTemplateId),
                 user_id: user.id,
                 provider: senderProvider,
-                delay_segundos: 2.0
+                delay_segundos: 2.0,
+                attachments: files.map(f => ({
+                    filename: f.name,
+                    content_base64: f.base64,
+                    content_type: f.type
+                }))
             });
 
             if (response.data) {
@@ -248,6 +296,33 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                                     <option value="">Seleccionar Plantilla...</option>
                                     {templates.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
                                 </select>
+                            </div>
+
+                            <div className="sidebar-field">
+                                <label className="field-label-small">Adjuntos</label>
+                                <input 
+                                    type="file" 
+                                    multiple 
+                                    onChange={handleFileChange} 
+                                    style={{display: 'none'}} 
+                                    ref={fileInputRef} 
+                                />
+                                <button className="file-upload-trigger" onClick={() => fileInputRef.current.click()}>
+                                    <FiPaperclip /> Adjuntar archivos
+                                </button>
+                                
+                                {files.length > 0 && (
+                                    <div className="files-list">
+                                        {files.map((f, i) => (
+                                            <div key={i} className="file-chip">
+                                                <span>{f.name}</span>
+                                                <button className="file-chip-remove" onClick={() => removeFile(i)}>
+                                                    <FiX />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="sending-summary-minimal">

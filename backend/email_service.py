@@ -7,7 +7,7 @@ import smtplib
 import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import os
 from datetime import datetime
 from dotenv import load_dotenv
@@ -88,7 +88,8 @@ def enviar_email(
     cuerpo_html: str,
     cuerpo_texto: Optional[str] = None,
     user_id: Optional[str] = None,
-    provider: Optional[str] = None
+    provider: Optional[str] = None,
+    attachments: Optional[List[Any]] = None
 ) -> Dict:
     """
     Envía un email individual. Prioriza Gmail API si el usuario está conectado.
@@ -116,7 +117,8 @@ def enviar_email(
                 token_data=token_data,
                 to=destinatario,
                 subject=asunto,
-                body_html=cuerpo_html
+                body_html=cuerpo_html,
+                attachments=attachments
             )
             
             # Si se refrescó el token, guardarlo
@@ -151,7 +153,8 @@ def enviar_email(
                 token_data=token_data_outlook,
                 to=destinatario,
                 subject=asunto,
-                body_html=cuerpo_html
+                body_html=cuerpo_html,
+                attachments=attachments
             )
             
             if new_tokens:
@@ -269,7 +272,8 @@ def enviar_email_empresa(
     template: Dict,
     asunto_personalizado: Optional[str] = None,
     user_id: Optional[str] = None,
-    provider: Optional[str] = None
+    provider: Optional[str] = None,
+    attachments: Optional[List[Any]] = None
 ) -> Dict:
     """
     Envía email a una empresa usando un template
@@ -340,7 +344,8 @@ def enviar_email_empresa(
         cuerpo_html=cuerpo_html,
         cuerpo_texto=cuerpo_texto,
         user_id=user_id,
-        provider=provider
+        provider=provider,
+        attachments=attachments
     )
     
     # Agregar info de la empresa al resultado
@@ -356,7 +361,8 @@ def enviar_emails_masivo(
     asunto_personalizado: Optional[str] = None,
     delay_segundos: float = 3.0,
     user_id: Optional[str] = None,
-    provider: Optional[str] = None
+    provider: Optional[str] = None,
+    attachments: Optional[List[Any]] = None
 ) -> Dict:
     """
     Envía emails a múltiples empresas
@@ -414,7 +420,7 @@ def enviar_emails_masivo(
             })
             continue
         
-        resultado = enviar_email_empresa(empresa, template, asunto_personalizado, user_id=user_id, provider=provider)
+        resultado = enviar_email_empresa(empresa, template, asunto_personalizado, user_id=user_id, provider=provider, attachments=attachments)
         
         if resultado['success']:
             resultados['exitosos'] += 1
