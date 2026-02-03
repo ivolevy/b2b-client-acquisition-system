@@ -92,7 +92,30 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         // Assuming user input is messy.
         // If no country code (doesn't start with +), maybe assume Argentina (+54)? 
         // For now, let's just strip non-numeric except +
-        cleaned = cleaned.replace(/[^0-9+]/g, '');
+    const formatPhoneNumber = (phone) => {
+        if (!phone) return '';
+        // 1. Remove non-numeric chars except +
+        let cleaned = phone.replace(/[^0-9+]/g, '');
+
+        // 2. If it doesn't start with +, assume Argentina (+549)
+        // Many local numbers come as "11 1234..." or "011 1234..."
+        if (!cleaned.startsWith('+')) {
+            // Remove leading 0 if present (common in Argentina area codes)
+            if (cleaned.startsWith('0')) {
+                cleaned = cleaned.substring(1);
+            }
+            // Remove 15 prefix if present (old mobile prefix)
+            // This is tricky as 15 could be part of a real number, but in Arg usually 11-15-xxxx
+            // Safer to just prepend 549 which works for mobile
+            cleaned = '549' + cleaned;
+        } else {
+            // If it starts with +, remove only the + for the final URL if using wa.me, 
+            // but web.whatsapp.com usually expects purely numeric or with +?
+            // Actually web.whatsapp expects numeric country code without + usually, but acts smart.
+            // Let's strip the + to be safe for the URL param
+            cleaned = cleaned.replace('+', '');
+        }
+
         return cleaned;
     };
 
@@ -137,8 +160,20 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         const message = prepareMessage(template.body_text, empresa);
         const phone = formatPhoneNumber(empresa.telefono);
         
+        if (phone.length < 10) {
+           error("El teléfono parece inválido.");
+           return;
+        }
+
         const url = `https://web.whatsapp.com/send?phone=${phone}&text=${message}`;
         window.open(url, '_blank');
+    };
+
+    const handleCancel = () => {
+        if (window.confirm("¿Detener el envío masivo?")) {
+            setSendingState({ active: false, currentIndex: 0, completed: 0 });
+            info("Envío cancelado.");
+        }
     };
 
     const handleNext = () => {
@@ -424,9 +459,14 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
                             Enviá el mensaje y luego hacé clic aquí.
                         </p>
 
-                        <button className="btn-next-lead" onClick={handleNext}>
-                            Siguiente Contacto <FiPlay style={{marginLeft:'8px'}}/>
-                        </button>
+                        <div className="sending-actions-stack">
+                            <button className="btn-next-lead" onClick={handleNext}>
+                                Siguiente Contacto <FiPlay style={{marginLeft:'8px'}}/>
+                            </button>
+                            <button className="btn-cancel-sending" onClick={handleCancel}>
+                                Cancelar
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -352,6 +352,36 @@
     gap: 6px;
 }
 
+/* Actions Stack */
+.sending-actions-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-next-lead {
+    margin-top: 0;
+    /* Override generic margin */
+}
+
+.btn-cancel-sending {
+    background: transparent;
+    color: #ef4444;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 8px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.btn-cancel-sending:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
 /* Instruction text specific styling */
 .sending-progress-card p {
     line-height: 1.5;
