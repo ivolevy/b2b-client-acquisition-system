@@ -39,13 +39,18 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
 
     const isAnyConnected = authStatus.google || authStatus.outlook;
 
+    // Filter valid companies (must have email)
+    const validEmpresas = React.useMemo(() => {
+        return empresas.filter(e => e.email && e.email.trim() !== '' && e.email.includes('@'));
+    }, [empresas]);
+
     useEffect(() => {
-        if (empresas) {
-            setSelectedEmpresas(empresas);
+        if (validEmpresas) {
+            setSelectedEmpresas(validEmpresas);
         }
         loadTemplates();
         checkAuthStatus();
-    }, [empresas]);
+    }, [validEmpresas]);
 
     const loadTemplates = async () => {
         try {
@@ -209,10 +214,10 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     };
 
     const toggleAllEmpresas = () => {
-        if (selectedEmpresas.length === empresas.length) {
+        if (selectedEmpresas.length === validEmpresas.length) {
             setSelectedEmpresas([]);
         } else {
-            setSelectedEmpresas([...empresas]);
+            setSelectedEmpresas([...validEmpresas]);
         }
     };
 
@@ -226,9 +231,9 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     };
 
     // --- PAGINATION LOGIC ---
-    const totalPages = Math.ceil(empresas.length / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(validEmpresas.length / ITEMS_PER_PAGE);
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const paginatedEmpresas = empresas.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    const paginatedEmpresas = validEmpresas.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
     const goToPage = (page) => {
         if (page >= 1 && page <= totalPages) {
@@ -359,8 +364,8 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                                 <div className="recipients-view">
                                     <div className="view-toolbar">
                                         <button className="btn-check-all" onClick={toggleAllEmpresas}>
-                                            {selectedEmpresas.length === empresas.length ? <FiCheckSquare size={14} /> : <FiSquare size={14} />}
-                                            {selectedEmpresas.length === empresas.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
+                                            {selectedEmpresas.length === validEmpresas.length ? <FiCheckSquare size={14} /> : <FiSquare size={14} />}
+                                            {selectedEmpresas.length === validEmpresas.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
                                         </button>
                                         <div className="stats-selected-badge">{selectedEmpresas.length} seleccionados</div>
                                     </div>
