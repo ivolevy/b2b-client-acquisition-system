@@ -137,7 +137,7 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         const message = prepareMessage(template.body_text, empresa);
         const phone = formatPhoneNumber(empresa.telefono);
         
-        const url = `https://wa.me/${phone}?text=${message}`;
+        const url = `https://web.whatsapp.com/send?phone=${phone}&text=${message}`;
         window.open(url, '_blank');
     };
 
