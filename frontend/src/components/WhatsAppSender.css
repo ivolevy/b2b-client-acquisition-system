@@ -1,0 +1,267 @@
+/* WhatsAppSender.css - Adapted from EmailSender.css */
+
+:root {
+    --ws-sidebar-w: 320px;
+    --ws-accent: #25D366;
+    /* WhatsApp Green */
+    --ws-dark: #0f172a;
+    --ws-border: #e2e8f0;
+    --ws-bg-soft: #f0fdf4;
+    /* Green tint */
+}
+
+/* Modal Pro & Layout */
+.whatsapp-sender-modal-pro {
+    width: 95%;
+    max-width: 1400px;
+    height: 90vh;
+    background: white !important;
+    color: var(--ws-dark) !important;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.whatsapp-sender-embedded {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.whatsapp-sender-layout-pro {
+    width: 100%;
+    height: 100%;
+    background: white !important;
+    color: var(--ws-dark) !important;
+    border-radius: 0 0 24px 24px !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.whatsapp-sender-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.whatsapp-header-simple {
+    height: 64px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--ws-border);
+    background: #fff;
+}
+
+.ws-header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #128C7E;
+    /* WhatsApp Dark Green */
+}
+
+.ws-sidebar {
+    width: var(--ws-sidebar-w);
+    background: var(--ws-bg-soft);
+    border-right: 1px solid var(--ws-border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    gap: 32px;
+}
+
+.ws-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    overflow: hidden;
+}
+
+.ws-nav-tabs {
+    display: flex;
+    padding: 0 32px;
+    border-bottom: 1px solid var(--ws-border);
+    gap: 24px;
+}
+
+.ws-nav-tabs button {
+    background: none;
+    border: none;
+    padding: 16px 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.ws-nav-tabs button.active {
+    color: var(--ws-accent);
+}
+
+.ws-nav-tabs button.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--ws-accent);
+}
+
+.btn-send-whatsapp {
+    margin-top: 8px;
+    width: 100%;
+    padding: 14px;
+    background: var(--ws-accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.btn-send-whatsapp:hover:not(:disabled) {
+    background: #128C7E;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(18, 140, 126, 0.4);
+}
+
+.btn-send-whatsapp:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.ws-input-modern {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--ws-border);
+    font-size: 1rem;
+}
+
+.ws-textarea-modern {
+    width: 100%;
+    min-height: 200px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--ws-border);
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.ws-textarea-modern:focus {
+    outline: none;
+    border-color: var(--ws-accent);
+    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+}
+
+/* Reuse some general classes from EmailSender to avoid duplication if possible, 
+   but specific ones here for safety */
+.ws-select-modern {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--ws-border);
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+}
+
+/* Progress Modal */
+.sending-progress-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    flex-direction: column;
+}
+
+.sending-progress-card {
+    background: white;
+    padding: 32px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    border: 1px solid var(--ws-border);
+}
+
+.progress-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f0fdf4;
+    border-top: 4px solid var(--ws-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-next-lead {
+    background: var(--ws-accent);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 16px;
+    width: 100%;
+}
+
+.btn-next-lead:hover {
+    background: #128C7E;
+}
+
+.current-lead-info {
+    margin: 16px 0;
+    padding: 12px;
+    background: #f0fdf4;
+    border-radius: 8px;
+    border: 1px dashed var(--ws-accent);
+}

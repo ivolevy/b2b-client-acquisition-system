@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './TableView.css';
 import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok, FaLocationDot, FaFilePdf } from 'react-icons/fa6';
+import EmailSender from './EmailSender';
+import WhatsAppSender from './WhatsAppSender';
 import { useAuth } from '../AuthWrapper';
 
 function TableViewB2B({ 
