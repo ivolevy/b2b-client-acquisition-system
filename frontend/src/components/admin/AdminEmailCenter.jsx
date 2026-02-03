@@ -217,9 +217,6 @@ function AdminEmailCenter() {
                 </th>
                 <th>Nombre</th>
                 <th>Email</th>
-                <th>Rol</th>
-                <th>ID</th>
-                <th style={{textAlign: 'center', width: '80px'}}>Acción</th>
               </tr>
             </thead>
             <tbody>
@@ -235,25 +232,6 @@ function AdminEmailCenter() {
                     </td>
                     <td>
                       <span style={{color: '#666'}}>{user.email}</span>
-                    </td>
-                    <td>
-                      <span className={`role-badge ${user.role}`}>{user.role}</span>
-                    </td>
-                    <td>
-                      <span style={{fontSize: '0.75rem', color: '#999', fontFamily: 'monospace'}}>{user.id.substring(0,8)}...</span>
-                    </td>
-                    <td style={{textAlign: 'center'}}>
-                      <button 
-                        className="btn-icon-action"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedUsers([user]);
-                          setShowEmailModal(true);
-                        }}
-                        title="Enviar Email Individual"
-                      >
-                        <FiMail />
-                      </button>
                     </td>
                   </tr>
                 );

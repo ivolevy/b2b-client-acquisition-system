@@ -234,9 +234,7 @@ function AdminWhatsAppCenter() {
                 </th>
                 <th>Nombre</th>
                 <th>Teléfono</th>
-                <th>Rol</th>
                 <th>Email</th>
-                <th style={{textAlign: 'center', width: '80px'}}>Acción</th>
               </tr>
             </thead>
             <tbody>
@@ -255,25 +253,8 @@ function AdminWhatsAppCenter() {
                         <FiMessageCircle size={12}/> {user.phone}
                       </span>
                     </td>
-                    <td>
-                      <span className={`role-badge ${user.role}`}>{user.role}</span>
-                    </td>
                      <td>
                       <span style={{color: '#666', fontSize: '0.9em'}}>{user.email}</span>
-                    </td>
-                    <td style={{textAlign: 'center'}}>
-                      <button 
-                        className="btn-icon-action"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedUsers([user]);
-                          setShowWhatsAppModal(true);
-                        }}
-                        title="Enviar WhatsApp Individual"
-                        style={{color: '#25D366'}}
-                      >
-                        <FiMessageCircle />
-                      </button>
                     </td>
                   </tr>
                 );
