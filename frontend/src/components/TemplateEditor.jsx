@@ -5,7 +5,7 @@ import { useToast } from '../hooks/useToast';
 import { API_URL } from '../config';
 import './TemplateEditor.css';
 
-function TemplateEditor({ templateId, onClose, onSave }) {
+function TemplateEditor({ templateId, onClose, onSave, type = 'email' }) {
   const [nombre, setNombre] = useState('');
   const [subject, setSubject] = useState('');
   const [bodyText, setBodyText] = useState('');
@@ -102,13 +102,14 @@ function TemplateEditor({ templateId, onClose, onSave }) {
         nombre,
         subject,
         body_html: bodyText,
-        body_text: bodyText
+        body_text: bodyText,
+        type: type // send type (email/whatsapp)
       };
 
       if (isNew) {
         const response = await axios.post(`${API_URL}/templates`, payload);
         if (response.data.success) {
-          success(<strong>Template creado</strong>);
+          success(<strong>Template de {type} creado</strong>);
           onSave && onSave();
           onClose();
         }
@@ -139,7 +140,7 @@ function TemplateEditor({ templateId, onClose, onSave }) {
       <div className="template-editor-overlay" onClick={onClose}>
         <div className="template-editor-modal" onClick={(e) => e.stopPropagation()}>
           <div className="template-editor-header">
-            <h2>{isNew ? 'Nuevo Template' : 'Editar Template'}</h2>
+            <h2>{isNew ? `Nuevo Template (${type})` : `Editar Template (${type})`}</h2>
             <button className="close-btn" onClick={onClose}>×</button>
           </div>
 

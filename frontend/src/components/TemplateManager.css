@@ -185,3 +185,10 @@
   color: var(--gray-900);
 }
 
+.template-manager-embedded {
+  background: white;
+  border-radius: var(--radius-xl);
+  width: 100%;
+  box-shadow: none;
+  border: 1px solid var(--gray-200);
+}

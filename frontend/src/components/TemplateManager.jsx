@@ -6,15 +6,16 @@ import { useToast } from '../hooks/useToast';
 import { API_URL } from '../config';
 import './TemplateManager.css';
 
-function TemplateManager({ onClose }) {
+function TemplateManager({ onClose, type = 'email', embedded = false }) {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [editingTemplateId, setEditingTemplateId] = useState(null);
   const { toasts, success, error: toastError, removeToast } = useToast();
 
-  // Bloquear scroll del body cuando el modal está abierto
+  // Bloquear scroll del body cuando el modal está abierto (solo si no es embedded)
   useEffect(() => {
+    if (embedded) return;
     const scrollY = window.scrollY;
     document.body.classList.add('modal-open');
     document.body.style.top = `-${scrollY}px`;
@@ -26,16 +27,18 @@ function TemplateManager({ onClose }) {
         window.scrollTo(0, scrollY);
       }
     };
-  }, []);
+  }, [embedded]);
 
   useEffect(() => {
     loadTemplates();
-  }, []);
+  }, [type]);
+
+  // ... (keep existing functions)
 
   const loadTemplates = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/templates`);
+      const response = await axios.get(`${API_URL}/templates?type=${type}`);
       setTemplates(response.data.data || []);
     } catch (error) {
       console.error('Error cargando templates:', error);
@@ -49,8 +52,9 @@ function TemplateManager({ onClose }) {
       setLoading(false);
     }
   };
-
-  const handleNewTemplate = () => {
+  
+  // ... (keep handlers)
+    const handleNewTemplate = () => {
     setEditingTemplateId(null);
     setShowEditor(true);
   };
@@ -91,6 +95,7 @@ function TemplateManager({ onClose }) {
     return (
       <TemplateEditor
         templateId={editingTemplateId}
+        type={type}
         onClose={() => {
           setShowEditor(false);
           setEditingTemplateId(null);
@@ -104,13 +109,11 @@ function TemplateManager({ onClose }) {
     );
   }
 
-  return (
-    <>
-      <div className="template-manager-overlay" onClick={onClose}>
-        <div className="template-manager-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="template-manager-header">
-          <h2>Gestionar Templates</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+  const content = (
+      <div className={embedded ? "template-manager-embedded" : "template-manager-modal"} onClick={(e) => !embedded && e.stopPropagation()}>
+        <div className="template-manager-header" style={embedded ? {borderRadius: '12px 12px 0 0'} : {}}>
+          <h2>Gestionar Templates ({type})</h2>
+          {!embedded && <button className="close-btn" onClick={onClose}>×</button>}
         </div>
 
         <div className="template-manager-content">
@@ -159,7 +162,22 @@ function TemplateManager({ onClose }) {
             </div>
           )}
         </div>
-        </div>
+      </div>
+  );
+
+  if (embedded) {
+      return (
+          <>
+             {content}
+             <ToastContainer toasts={toasts} onRemove={removeToast} />
+          </>
+      );
+  }
+
+  return (
+    <>
+      <div className="template-manager-overlay" onClick={onClose}>
+        {content}
       </div>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </>
