@@ -17,7 +17,7 @@ const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
 const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'));
 const AdminEmailCenter = lazy(() => import('./components/admin/AdminEmailCenter'));
 const AdminWhatsAppCenter = lazy(() => import('./components/admin/AdminWhatsAppCenter'));
-const AdminTemplates = lazy(() => import('./components/admin/AdminTemplates'));
+
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const ApiUsageDashboard = lazy(() => import('./components/admin/ApiUsageDashboard'));
 const NotFound = lazy(() => import('./components/NotFound'));
@@ -412,7 +412,7 @@ const AuthWrapper = () => {
                   <Route path="users/:id" element={<AdminUserDetail />} />
                   <Route path="email" element={<AdminEmailCenter />} />
                   <Route path="whatsapp" element={<AdminWhatsAppCenter />} />
-                  <Route path="templates" element={<AdminTemplates />} />
+
                   <Route path="api-usage" element={<ApiUsageDashboard />} />
                   <Route path="financials" element={<AdminFinancials />} />
                 </Route>
