@@ -226,8 +226,10 @@ def limpiar_base_datos() -> bool:
     logger.warning("Intento de limpiar base de datos bloqueado en modo Supabase")
     return False
 
-def obtener_templates() -> List[Dict]:
-    """Obtiene todos los templates de memoria"""
+def obtener_templates(tipo: Optional[str] = None) -> List[Dict]:
+    """Obtiene todos los templates de memoria, opcionalmente filtrados por tipo"""
+    if tipo:
+        return [t.copy() for t in _memoria_templates if t.get('type') == tipo]
     return _memoria_templates.copy()
 
 def obtener_template(template_id: int) -> Optional[Dict]:
@@ -237,14 +239,14 @@ def obtener_template(template_id: int) -> Optional[Dict]:
             return t.copy()
     return None
 
-def crear_template(nombre: str, subject: str, body_html: str, body_text: Optional[str] = None) -> Optional[int]:
+def crear_template(nombre: str, subject: str, body_html: str, body_text: Optional[str] = None, tipo: str = 'email') -> Optional[int]:
     """Crea un nuevo template en memoria"""
     global _template_counter
     _template_counter += 1
     
     # Verificar si ya existe
-    if any(t.get('nombre') == nombre for t in _memoria_templates):
-        logger.error(f"Template '{nombre}' ya existe")
+    if any(t.get('nombre') == nombre and t.get('type', 'email') == tipo for t in _memoria_templates):
+        logger.error(f"Template '{nombre}' de tipo '{tipo}' ya existe")
         return None
     
     template = {
@@ -253,19 +255,20 @@ def crear_template(nombre: str, subject: str, body_html: str, body_text: Optiona
         'subject': subject,
         'body_html': body_html,
         'body_text': body_text,
+        'type': tipo, # email | whatsapp
         'es_default': 0,
         'created_at': datetime.now().isoformat(),
         'updated_at': datetime.now().isoformat()
     }
     _memoria_templates.append(template)
-    logger.info(f" Template creado en memoria: {nombre} (ID: {_template_counter})")
+    logger.info(f" Template creado en memoria: {nombre} ({tipo}) (ID: {_template_counter})")
     return _template_counter
 
 def actualizar_template(template_id: int, nombre: Optional[str] = None, subject: Optional[str] = None,
-                       body_html: Optional[str] = None, body_text: Optional[str] = None) -> bool:
+                       body_html: Optional[str] = None, body_text: Optional[str] = None, tipo: Optional[str] = None) -> bool:
     """Actualiza un template en memoria"""
     # Validar que al menos un campo se actualice
-    if not any([nombre, subject, body_html, body_text is not None]):
+    if not any([nombre, subject, body_html, body_text is not None, tipo]):
         logger.warning(f"Intento de actualizar template {template_id} sin campos")
         return False
     
@@ -284,6 +287,9 @@ def actualizar_template(template_id: int, nombre: Optional[str] = None, subject:
             if body_text is not None:
                 _memoria_templates[i]['body_text'] = body_text if body_text else None
                 cambios = True
+            if tipo and tipo in ['email', 'whatsapp']:
+                 _memoria_templates[i]['type'] = tipo
+                 cambios = True
             
             if cambios:
                 _memoria_templates[i]['updated_at'] = datetime.now().isoformat()
@@ -503,12 +509,88 @@ class TemplateRequest(BaseModel):
     subject: str
     body_html: str
     body_text: Optional[str] = None
+    type: str = 'email'  # email | whatsapp
 
 class TemplateUpdateRequest(BaseModel):
     nombre: Optional[str] = None
     subject: Optional[str] = None
     body_html: Optional[str] = None
     body_text: Optional[str] = None
+    type: Optional[str] = None
+
+
+class EmailAttachment(BaseModel):
+# ... existing code ...
+
+# ========== ENDPOINTS DE EMAIL TEMPLATES ==========
+
+@app.get("/templates")
+async def listar_templates(type: Optional[str] = None):
+    """Lista todos los templates, opcionalmente filtrados por tipo"""
+    try:
+        templates = obtener_templates(tipo=type)
+        return {
+            "success": True,
+            "total": len(templates),
+            "data": templates
+        }
+    except Exception as e:
+        logger.error(f"Error listando templates: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/templates/{template_id}")
+async def obtener_template_endpoint(template_id: int):
+    """Obtiene un template por ID"""
+    try:
+        template = obtener_template(template_id)
+        if not template:
+            raise HTTPException(status_code=404, detail="Template no encontrado")
+        return {
+            "success": True,
+            "data": template
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error obteniendo template: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/templates")
+async def crear_template_endpoint(request: TemplateRequest):
+    """Crea un nuevo template"""
+    try:
+        template_id = crear_template(
+            nombre=request.nombre,
+            subject=request.subject,
+            body_html=request.body_html,
+            body_text=request.body_text,
+            tipo=request.type
+        )
+        if not template_id:
+            raise HTTPException(status_code=400, detail="Error creando template. Verifica que el nombre no exista.")
+        return {
+            "success": True,
+            "message": "Template creado exitosamente",
+            "template_id": template_id
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creando template: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/templates/{template_id}")
+async def actualizar_template_endpoint(template_id: int, request: TemplateUpdateRequest):
+    """Actualiza un template"""
+    try:
+        success = actualizar_template(
+            template_id=template_id,
+            nombre=request.nombre,
+            subject=request.subject,
+            body_html=request.body_html,
+            body_text=request.body_text,
+            tipo=request.type
+        )
 
 
 class EmailAttachment(BaseModel):
@@ -1583,10 +1665,10 @@ async def actualizar_notas(request: ActualizarNotasRequest):
 # ========== ENDPOINTS DE EMAIL TEMPLATES ==========
 
 @app.get("/templates")
-async def listar_templates():
-    """Lista todos los templates de email"""
+async def listar_templates(type: Optional[str] = None):
+    """Lista todos los templates, opcionalmente filtrados por tipo"""
     try:
-        templates = obtener_templates()
+        templates = obtener_templates(tipo=type)
         return {
             "success": True,
             "total": len(templates),
@@ -1621,7 +1703,8 @@ async def crear_template_endpoint(request: TemplateRequest):
             nombre=request.nombre,
             subject=request.subject,
             body_html=request.body_html,
-            body_text=request.body_text
+            body_text=request.body_text,
+            tipo=request.type
         )
         if not template_id:
             raise HTTPException(status_code=400, detail="Error creando template. Verifica que el nombre no exista.")
@@ -1642,6 +1725,12 @@ async def actualizar_template_endpoint(template_id: int, request: TemplateUpdate
     try:
         success = actualizar_template(
             template_id=template_id,
+            nombre=request.nombre,
+            subject=request.subject,
+            body_html=request.body_html,
+            body_text=request.body_text,
+            tipo=request.type
+        )
             nombre=request.nombre,
             subject=request.subject,
             body_html=request.body_html,
