@@ -157,7 +157,16 @@ global _memoria_codigos_validacion
 _memoria_empresas = []
 _empresa_counter = 0
 # MercadoPago SDK
-sdk = mercadopago.SDK(os.getenv("MP_ACCESS_TOKEN"))
+mp_token = os.getenv("MP_ACCESS_TOKEN")
+if mp_token:
+    try:
+        sdk = mercadopago.SDK(mp_token)
+    except Exception as e:
+        logging.error(f"Error configurando MercadoPago: {e}")
+        sdk = None
+else:
+    logging.warning("MP_ACCESS_TOKEN no configurado. Pagos no disponibles.")
+    sdk = None
 
 _memoria_templates = []
 _template_counter = 0
@@ -519,78 +528,6 @@ class TemplateUpdateRequest(BaseModel):
     type: Optional[str] = None
 
 
-class EmailAttachment(BaseModel):
-# ... existing code ...
-
-# ========== ENDPOINTS DE EMAIL TEMPLATES ==========
-
-@app.get("/templates")
-async def listar_templates(type: Optional[str] = None):
-    """Lista todos los templates, opcionalmente filtrados por tipo"""
-    try:
-        templates = obtener_templates(tipo=type)
-        return {
-            "success": True,
-            "total": len(templates),
-            "data": templates
-        }
-    except Exception as e:
-        logger.error(f"Error listando templates: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/templates/{template_id}")
-async def obtener_template_endpoint(template_id: int):
-    """Obtiene un template por ID"""
-    try:
-        template = obtener_template(template_id)
-        if not template:
-            raise HTTPException(status_code=404, detail="Template no encontrado")
-        return {
-            "success": True,
-            "data": template
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error obteniendo template: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/templates")
-async def crear_template_endpoint(request: TemplateRequest):
-    """Crea un nuevo template"""
-    try:
-        template_id = crear_template(
-            nombre=request.nombre,
-            subject=request.subject,
-            body_html=request.body_html,
-            body_text=request.body_text,
-            tipo=request.type
-        )
-        if not template_id:
-            raise HTTPException(status_code=400, detail="Error creando template. Verifica que el nombre no exista.")
-        return {
-            "success": True,
-            "message": "Template creado exitosamente",
-            "template_id": template_id
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error creando template: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.put("/templates/{template_id}")
-async def actualizar_template_endpoint(template_id: int, request: TemplateUpdateRequest):
-    """Actualiza un template"""
-    try:
-        success = actualizar_template(
-            template_id=template_id,
-            nombre=request.nombre,
-            subject=request.subject,
-            body_html=request.body_html,
-            body_text=request.body_text,
-            tipo=request.type
-        )
 
 
 class EmailAttachment(BaseModel):
@@ -1731,11 +1668,7 @@ async def actualizar_template_endpoint(template_id: int, request: TemplateUpdate
             body_text=request.body_text,
             tipo=request.type
         )
-            nombre=request.nombre,
-            subject=request.subject,
-            body_html=request.body_html,
-            body_text=request.body_text
-        )
+
         if not success:
             raise HTTPException(status_code=404, detail="Template no encontrado")
         return {
