@@ -1308,27 +1308,49 @@ async def filtrar(request: FiltroRequest):
 
 @app.get("/admin/users")
 async def list_users(admin: Dict = Depends(get_current_admin)):
-    """Lista todos los usuarios usando Service Role (bypass RLS)"""
+    """Lista todos los usuarios usando Service Role y combina con Auth data"""
     client = None
     try:
         client = get_supabase_admin()
         if not client:
             return {"success": False, "error": "Supabase Admin (Service Role) not configured. Check env vars."}
             
+        # 1. Obtener perfiles públicos
         res = client.table('users').select('*').order('created_at', desc=True).execute()
-        return {"success": True, "users": res.data}
+        public_users = res.data
+        
+        # 2. Obtener usuarios de Auth (para asegurar email)
+        # Nota: list_users() puede tener paginación, por ahora traemos la primera página (default 50)
+        # Si tienes muchos usuarios, deberías paginar esto.
+        auth_users_res = client.auth.admin.list_users(page=1, per_page=1000)
+        auth_users_map = {u.id: u.email for u in auth_users_res}
+        
+        # 3. Combinar datos
+        final_users = []
+        for p_user in public_users:
+            user_id = p_user.get('id')
+            # Si el perfil no tiene email, tomamos de Auth
+            if not p_user.get('email') and user_id in auth_users_map:
+                p_user['email'] = auth_users_map[user_id]
+            
+            # Si el email de Auth es diferente (más actual), priorizar Auth?
+            # Generalmente auth es la fuente de verdad para login.
+            if user_id in auth_users_map:
+                 p_user['email'] = auth_users_map[user_id]
+            
+            final_users.append(p_user)
+            
+        return {"success": True, "users": final_users}
     except Exception as e:
         import traceback
         error_detail = str(e)
         logger.error(f"Error in /admin/users: {error_detail}")
-        # Retornamos error con 200 y success: false para que el frontend pueda capturar el mensaje JSON
-        # o 500 pero con el detalle real en el mensaje
         return JSONResponse(
             status_code=500,
             content={
                 "success": False, 
                 "error": error_detail,
-                "trace": traceback.format_exc().split('\n')[-5:] # Últimas 5 líneas de trace
+                "trace": traceback.format_exc().split('\n')[-5:]
             }
         )
 
