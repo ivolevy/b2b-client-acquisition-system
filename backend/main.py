@@ -1322,8 +1322,21 @@ async def list_users(admin: Dict = Depends(get_current_admin)):
         # 2. Obtener usuarios de Auth (para asegurar email)
         # Nota: list_users() puede tener paginación, por ahora traemos la primera página (default 50)
         # Si tienes muchos usuarios, deberías paginar esto.
-        auth_users_res = client.auth.admin.list_users(page=1, per_page=1000)
-        auth_users_map = {u.id: u.email for u in auth_users_res}
+        try:
+            auth_users_res = client.auth.admin.list_users(page=1, per_page=1000)
+            # Handle different return types (UserList object or raw list)
+            if hasattr(auth_users_res, 'users'):
+                auth_users_list = auth_users_res.users
+            elif isinstance(auth_users_res, list):
+                auth_users_list = auth_users_res
+            else:
+                logger.warning(f"Unexpected type from auth.admin.list_users: {type(auth_users_res)}")
+                auth_users_list = []
+
+            auth_users_map = {u.id: u.email for u in auth_users_list if hasattr(u, 'id') and hasattr(u, 'email')}
+        except Exception as e_auth:
+            logger.error(f"Error fetching auth users: {e_auth}")
+            auth_users_map = {}
         
         # 3. Combinar datos
         final_users = []
