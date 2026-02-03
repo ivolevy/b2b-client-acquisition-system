@@ -317,6 +317,29 @@
     box-shadow: 0 10px 20px -5px rgba(37, 211, 102, 0.4);
 }
 
+.btn-next-invalid {
+    background: #fff;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    padding: 16px 8px;
+    /* Compact padding */
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-next-invalid:hover {
+    background: #f1f5f9;
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
 .btn-next-lead:hover {
     transform: translateY(-2px);
     box-shadow: 0 15px 30px -5px rgba(37, 211, 102, 0.5);

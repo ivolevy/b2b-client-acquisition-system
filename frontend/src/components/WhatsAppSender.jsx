@@ -42,6 +42,18 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         loadTemplates();
     }, []); // Run once on mount
 
+    // Prevent scrolling when sending overlay is active
+    useEffect(() => {
+        if (sendingState.active) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [sendingState.active]);
+
     const loadTemplates = () => {
         try {
             const stored = localStorage.getItem('whatsapp_templates');
@@ -85,13 +97,6 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         }, 0);
     };
 
-    const formatPhoneNumber = (phone) => {
-        // Basic cleanup: remove spaces, dashes, parentheses
-        let cleaned = phone.replace(/[\s\-\(\)]/g, '');
-        // If it starts with 0 (e.g. 011...), remove it? Depends on country.
-        // Assuming user input is messy.
-        // If no country code (doesn't start with +), maybe assume Argentina (+54)? 
-        // For now, let's just strip non-numeric except +
     const formatPhoneNumber = (phone) => {
         if (!phone) return '';
         // 1. Remove non-numeric chars except +
@@ -177,12 +182,21 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
     };
 
     const handleNext = () => {
+        advanceQueue(true);
+    };
+
+    const handleNextInvalid = () => {
+        advanceQueue(false);
+    };
+
+    const advanceQueue = (wasSent) => {
+        // Here we could track stats: wasSent ? success++ : failed++
         const nextIndex = sendingState.currentIndex + 1;
         if (nextIndex < selectedEmpresas.length) {
             setSendingState({
                 ...sendingState,
                 currentIndex: nextIndex,
-                completed: sendingState.completed + 1
+                completed: sendingState.completed + (wasSent ? 1 : 0)
             });
             processResult(nextIndex);
         } else {
@@ -460,11 +474,16 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
                         </p>
 
                         <div className="sending-actions-stack">
-                            <button className="btn-next-lead" onClick={handleNext}>
-                                Siguiente Contacto <FiPlay style={{marginLeft:'8px'}}/>
-                            </button>
+                            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px'}}>
+                                <button className="btn-next-lead" onClick={handleNext}>
+                                    Enviado <FiCheckSquare style={{marginLeft:'8px'}}/>
+                                </button>
+                                <button className="btn-next-invalid" onClick={handleNextInvalid}>
+                                    No tiene WA <FiX style={{marginLeft:'8px'}}/>
+                                </button>
+                            </div>
                             <button className="btn-cancel-sending" onClick={handleCancel}>
-                                Cancelar
+                                Cancelar Campaña
                             </button>
                         </div>
                     </div>
