@@ -66,6 +66,10 @@
 .name-cell {
     font-weight: 500;
     color: var(--gray-900);
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .category-badge {
