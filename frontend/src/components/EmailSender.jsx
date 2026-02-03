@@ -185,7 +185,9 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
 
             if (response.data) {
                 success(`Campaña finalizada: ${response.data.exitosos} enviados.`);
-                if (onClose && !embedded) onClose();
+                if (onClose && !embedded) {
+                    setTimeout(() => onClose(), 2500);
+                }
             }
         } catch (err) {
             error(err.response?.data?.detail || "Error en el envío.");
@@ -500,7 +502,8 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                             {activeTab === 'history' && (
                                 <div className="history-placeholder">
                                     <FiClock size={40} opacity={0.3} />
-                                    <p>El historial de comunicación aparecerá aquí pronto.</p>
+                                    <h3>Próximamente</h3>
+                                    <p>El historial de comunicación estará disponible en futuras actualizaciones.</p>
                                 </div>
                             )}
                         </div>
