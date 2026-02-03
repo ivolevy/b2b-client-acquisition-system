@@ -887,6 +887,9 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
 
         try:
             # Intentar primero con Google Places
+            # TEMP FIX: Deshabilitar Google Places por defecto ya que no devuelve emails y el scraping falla
+            # Comentar esta línea para reactivar Google Places
+            raise Exception("Trigger OSM Fallback")
             logger.info(f" Intentando búsqueda con Google Places API (New)...")
             
             # Mapear bbox si existe
