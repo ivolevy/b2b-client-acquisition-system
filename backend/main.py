@@ -59,6 +59,7 @@ try:
     from backend.auth_google import get_google_auth_url, exchange_code_for_token
     from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
     from backend.google_places_client import google_client
+    from backend.email_service import enviar_email, enviar_emails_masivo
 except ImportError as e:
     logging.error(f"Error importando módulos del backend: {e}")
     # Solo para desarrollo local si el paquete no está instalado

@@ -112,34 +112,34 @@ def enviar_email(
     if user_id and (provider is None or provider == 'google'):
         try:
             token_data = get_user_oauth_token(user_id)
-        if token_data:
-            logger.info(f" Intentando enviar vía Gmail API para usuario {user_id}")
-            success_gmail, new_creds = send_gmail_api(
-                token_data=token_data,
-                to=destinatario,
-                subject=asunto,
-                body_html=cuerpo_html,
-                attachments=attachments
-            )
-            
-            # Si se refrescó el token, guardarlo
-            if new_creds:
-                logger.info(f" Actualizando token refrescado para usuario {user_id}")
-                save_user_oauth_token(user_id, {
-                    'access_token': new_creds.token,
-                    'refresh_token': new_creds.refresh_token,
-                    'expiry': new_creds.expiry.isoformat() if new_creds.expiry else None,
-                    'scope': new_creds.scopes,
-                    'account_email': token_data.get('account_email')
-                })
+            if token_data:
+                logger.info(f" Intentando enviar vía Gmail API para usuario {user_id}")
+                success_gmail, new_creds = send_gmail_api(
+                    token_data=token_data,
+                    to=destinatario,
+                    subject=asunto,
+                    body_html=cuerpo_html,
+                    attachments=attachments
+                )
+                
+                # Si se refrescó el token, guardarlo
+                if new_creds:
+                    logger.info(f" Actualizando token refrescado para usuario {user_id}")
+                    save_user_oauth_token(user_id, {
+                        'access_token': new_creds.token,
+                        'refresh_token': new_creds.refresh_token,
+                        'expiry': new_creds.expiry.isoformat() if new_creds.expiry else None,
+                        'scope': new_creds.scopes,
+                        'account_email': token_data.get('account_email')
+                    })
 
-            if success_gmail:
-                return {
-                    'success': True,
-                    'message': f'Email enviado vía Gmail API a {destinatario}',
-                    'error': None,
-                    'via': 'gmail_api'
-                }
+                if success_gmail:
+                    return {
+                        'success': True,
+                        'message': f'Email enviado vía Gmail API a {destinatario}',
+                        'error': None,
+                        'via': 'gmail_api'
+                    }
         except Exception as e:
             logger.error(f"Error enviando vía Gmail API para {destinatario}: {e}")
             # No retornamos error fatal para permitir fallback a SMTP o siguiente provider si hubiera
