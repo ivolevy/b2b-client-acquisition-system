@@ -713,6 +713,7 @@ async def mp_webhook(request: Request):
 
 class EnviarEmailMasivoRequest(BaseModel):
     empresa_ids: List[int]
+    empresas_data: Optional[List[Dict[str, Any]]] = None
     template_id: int
     asunto_personalizado: Optional[str] = None
     delay_segundos: float = 3.0
@@ -1983,17 +1984,26 @@ async def enviar_email_individual(request: EnviarEmailRequest):
 async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
     """Envía emails a múltiples empresas"""
     try:
-        # Buscar empresas en memoria
+        # Priorizar datos enviados explícitamente (Stateless mode for Vercel)
         empresas = []
-        empresas_dict = {e.get('id'): e for e in _memoria_empresas}
         
-        for empresa_id in request.empresa_ids:
-            if empresa_id in empresas_dict:
-                empresas.append(empresas_dict[empresa_id].copy())
-        
-        if len(empresas) != len(request.empresa_ids):
-            missing = set(request.empresa_ids) - set(e.get('id') for e in empresas)
-            raise HTTPException(status_code=404, detail=f"Algunas empresas no fueron encontradas: {missing}")
+        if request.empresas_data and len(request.empresas_data) > 0:
+             empresas = request.empresas_data
+             logger.info(f"Usando {len(empresas)} empresas enviadas en payload (Stateless)")
+        else:
+            # Buscar empresas en memoria (Fallback local)
+            empresas_dict = {e.get('id'): e for e in _memoria_empresas}
+            
+            for empresa_id in request.empresa_ids:
+                if empresa_id in empresas_dict:
+                    empresas.append(empresas_dict[empresa_id].copy())
+            
+            if len(empresas) != len(request.empresa_ids):
+                missing = set(request.empresa_ids) - set(e.get('id') for e in empresas)
+                # En Vercel esto fallará si no se envían datos, pero dejamos el warning/error
+                logger.warning(f"Algunas empresas no encontradas en memoria: {missing}")
+                if not empresas:
+                     raise HTTPException(status_code=404, detail=f"Empresas no encontradas en memoria. Serverless requiere enviar datos completos.")
         
         # Obtener template
         template = obtener_template(request.template_id)
