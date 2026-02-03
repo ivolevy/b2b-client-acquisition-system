@@ -110,7 +110,8 @@ def enviar_email(
 
     # 1. Intentar enviar vía Gmail API si tenemos user_id (y provider es None o 'google')
     if user_id and (provider is None or provider == 'google'):
-        token_data = get_user_oauth_token(user_id)
+        try:
+            token_data = get_user_oauth_token(user_id)
         if token_data:
             logger.info(f" Intentando enviar vía Gmail API para usuario {user_id}")
             success_gmail, new_creds = send_gmail_api(
@@ -139,38 +140,46 @@ def enviar_email(
                     'error': None,
                     'via': 'gmail_api'
                 }
+        except Exception as e:
+            logger.error(f"Error enviando vía Gmail API para {destinatario}: {e}")
+            # No retornamos error fatal para permitir fallback a SMTP o siguiente provider si hubiera
+            # Pero en este caso, si falla Gmail configurado, probablemente sea un error real.
+            # Aun así, dejamos que falle y continúe el flujo (posible fallback SMTP)
 
 
 
 
     # 1.5. Intentar enviar vía Outlook API (si no se usó Gmail y provider es None o 'outlook')
     if user_id and (provider is None or provider == 'outlook'):
-        token_data_outlook = get_user_oauth_token(user_id, 'outlook')
-        if token_data_outlook:
-            logger.info(f" Intentando enviar vía Outlook API para usuario {user_id}")
-            # send_outlook_email retorna (success, new_tokens_dict_or_None)
-            success_outlook, new_tokens = send_outlook_email(
-                token_data=token_data_outlook,
-                to=destinatario,
-                subject=asunto,
-                body_html=cuerpo_html,
-                attachments=attachments
-            )
-            
-            if new_tokens:
-                logger.info(f" Actualizando token Outlook refrescado para usuario {user_id}")
-                # new_tokens ya trae todo lo necesario mergeado
-                save_user_oauth_token(user_id, new_tokens, provider='outlook')
+        try:
+            token_data_outlook = get_user_oauth_token(user_id, 'outlook')
+            if token_data_outlook:
+                logger.info(f" Intentando enviar vía Outlook API para usuario {user_id}")
                 
-            if success_outlook:
-                return {
-                    'success': True,
-                    'message': f'Email enviado vía Outlook API a {destinatario}',
-                    'error': None,
-                    'via': 'outlook_api'
-                }
-            else:
-                logger.warning(f" Falló envío vía Outlook API, reintentando con SMTP global...")
+                # Obtener access token
+                access_token = token_data_outlook.get('access_token')
+                
+                # send_outlook_email retorna un dict con "success"
+                result_outlook = send_outlook_email(
+                    access_token=access_token,
+                    to_email=destinatario,
+                    subject=asunto,
+                    body_html=cuerpo_html,
+                    attachments=attachments
+                )
+                
+                if result_outlook.get("success"):
+                    return {
+                        'success': True,
+                        'message': f'Email enviado vía Outlook API a {destinatario}',
+                        'error': None,
+                        'via': 'outlook_api'
+                    }
+                else:
+                    logger.warning(f" Falló envío vía Outlook API: {result_outlook.get('error')}")
+        except Exception as e:
+            logger.error(f"Error inesperado en envío Outlook: {e}")
+            # Continuar al fallback SMTP
 
     # 2. Fallback a SMTP Global
     if not SMTP_PASSWORD or SMTP_PASSWORD.strip() == '':
@@ -420,14 +429,25 @@ def enviar_emails_masivo(
             })
             continue
         
-        resultado = enviar_email_empresa(empresa, template, asunto_personalizado, user_id=user_id, provider=provider, attachments=attachments)
-        
-        if resultado['success']:
-            resultados['exitosos'] += 1
-        else:
+        try:
+            resultado = enviar_email_empresa(empresa, template, asunto_personalizado, user_id=user_id, provider=provider, attachments=attachments)
+            
+            if resultado['success']:
+                resultados['exitosos'] += 1
+            else:
+                resultados['fallidos'] += 1
+            
+            resultados['detalles'].append(resultado)
+        except Exception as e:
+            logger.error(f"Error crítico enviando a empresa {empresa.get('id')}: {e}")
             resultados['fallidos'] += 1
-        
-        resultados['detalles'].append(resultado)
+            resultados['detalles'].append({
+                'empresa_id': empresa.get('id'),
+                'empresa_nombre': empresa.get('nombre'),
+                'success': False,
+                'message': f'Error interno: {str(e)}',
+                'error': 'CRITICAL_ERROR'
+            })
         
         # Delay entre envíos (siempre aplicar delay mínimo de 1 segundo)
         if delay_segundos > 0:
