@@ -15,7 +15,8 @@ const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
 const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'));
-const ContactCenter = lazy(() => import('./components/admin/ContactCenter'));
+const AdminEmailCenter = lazy(() => import('./components/admin/AdminEmailCenter'));
+const AdminWhatsAppCenter = lazy(() => import('./components/admin/AdminWhatsAppCenter'));
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const ApiUsageDashboard = lazy(() => import('./components/admin/ApiUsageDashboard'));
 const NotFound = lazy(() => import('./components/NotFound'));
@@ -408,7 +409,8 @@ const AuthWrapper = () => {
                   <Route index element={<Navigate to="/backoffice/users" replace />} />
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="users/:id" element={<AdminUserDetail />} />
-                  <Route path="contact-center" element={<ContactCenter />} />
+                  <Route path="email" element={<AdminEmailCenter />} />
+                  <Route path="whatsapp" element={<AdminWhatsAppCenter />} />
                   <Route path="api-usage" element={<ApiUsageDashboard />} />
                   <Route path="financials" element={<AdminFinancials />} />
                 </Route>
