@@ -652,7 +652,7 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
         final_user_id = user_id
         is_new_user = False
         
-        logger.info(f"Procesando pago exitoso: user_id={user_id}, email={email}, amount={amount}")
+        logger.info(f"Procesando pago exitoso (INICIO): user_id={user_id}, email={email}, amount={amount}")
 
         # 1. Asegurar que el usuario existe en Auth y public.users
         if user_id == 'anonymous' or not user_id or user_id == 'None':
@@ -663,6 +663,12 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
             if existing_auth_user:
                 final_user_id = existing_auth_user.id
                 logger.info(f"Usuario existente encontrado en Auth: {final_user_id}")
+                
+                # Si el usuario existe pero NUNCA se logueó, asumimos que puede necesitar el mail de activación
+                # Esto ayuda en pruebas y si el usuario quedó a medias
+                if not existing_auth_user.last_sign_in_at:
+                    logger.info("Usuario existente pero sin login previo. Se considerará como NUEVO para reenviar email.")
+                    is_new_user = True
             else:
                 # CREAR NUEVO USUARIO EN AUTH
                 import secrets
@@ -684,6 +690,8 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
                 else:
                     logger.error(f"Error fatal creando usuario Auth: {new_user_res}")
                     return False
+        
+        logger.info(f"PASO 2: Sincronizando usuario {final_user_id} en public.users (is_new_user={is_new_user})")
 
         # 2. Sincronizar con public.users (UPSERT)
         # Esto asegura que si el trigger falló o el registro de Auth existe pero no el de public, se cree/actualice
@@ -723,7 +731,9 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
         }).execute()
         
         # 4. Si es nuevo, mandar mail para setear password
+        logger.info(f"PASO 4: Verificando si enviar email. is_new_user={is_new_user}")
         if is_new_user:
+            logger.info(f"Intentando enviar email de bienvenida a {email}")
             try:
                 # Generamos link de recuperación (set password)
                 # IMPORTANTE: Asegurarnos que el redirect_to apunte al frontend
@@ -737,6 +747,7 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
                 })
                 
                 recovery_link = recovery_res.properties.action_link
+                logger.info(f"Link generado: {recovery_link}")
                 
                 try:
                     from backend.email_service import enviar_email, wrap_premium_template
