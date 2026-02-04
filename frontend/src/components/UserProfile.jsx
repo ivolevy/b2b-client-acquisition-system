@@ -363,6 +363,25 @@ function UserProfile() {
     }
   };
 
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    
+    if (pastedData) {
+      setVerificationCode(pastedData);
+      
+      // Enfocar el último input llenado o el siguiente vacío si no está completo
+      // Esperamos un ciclo de renderizado para enfocar
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('.password-input-group input[inputmode="numeric"]');
+        if (inputs && inputs.length > 0) {
+          const indexToFocus = Math.min(pastedData.length, 5);
+          inputs[indexToFocus]?.focus();
+        }
+      }, 0);
+    }
+  };
+
   const handleChangePassword = async () => {
     if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
       setPasswordError('Completá todos los campos');
@@ -406,17 +425,8 @@ function UserProfile() {
         new_password: passwordForm.newPassword
       });
 
-      if (resetResponse.data.success) {
-        // Éxito - contraseña actualizada directamente por el backend
-        setShowPasswordModal(false);
-        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        setPasswordStep('request');
-        setPasswordChangeEmail(user?.email || '');
-        setVerificationCode('');
-        setCodeSent(false);
-        setResendCountdown(0);
         setCanResendCode(false);
-        alert(resetResponse.data.message || 'Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
+        setPasswordStep('success'); // Cambiamos a paso de éxito personalizado
       } else {
         // Si falla, verificar si requiere reset desde el frontend
         if (resetResponse.data.requires_frontend_reset) {
@@ -450,15 +460,13 @@ function UserProfile() {
               }
 
         // Éxito
-        setShowPasswordModal(false);
         setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-              setPasswordStep('request');
-              setPasswordChangeEmail(user?.email || '');
-              setVerificationCode('');
-              setCodeSent(false);
-              setResendCountdown(0);
-              setCanResendCode(false);
-              alert('Tu contraseña ha sido actualizada correctamente. Podés iniciar sesión con tu nueva contraseña.');
+        setPasswordChangeEmail(user?.email || '');
+        setVerificationCode('');
+        setCodeSent(false);
+        setResendCountdown(0);
+        setCanResendCode(false);
+        setPasswordStep('success'); // Cambiamos a paso de éxito personalizado
       } else {
         setPasswordError('Cambio de contraseña no disponible en modo demo');
               setPasswordLoading(false);
@@ -1046,6 +1054,7 @@ function UserProfile() {
                             borderRadius: '10px',
                             outline: 'none'
                           }}
+                          onPaste={handlePaste}
                         />
                       ))}
                     </div>
@@ -1107,8 +1116,42 @@ function UserProfile() {
                   </div>
                 </>
               )}
+
+              {passwordStep === 'success' && (
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                  <div style={{ 
+                    width: '60px', 
+                    height: '60px', 
+                    background: '#dcfce7', 
+                    borderRadius: '50%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    margin: '0 auto 20px auto' 
+                  }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                  <h3 style={{ fontSize: '1.5rem', marginBottom: '10px', color: '#0f172a' }}>¡Contraseña actualizada!</h3>
+                  <p style={{ color: '#64748b', marginBottom: '24px' }}>
+                    Tu contraseña ha sido cambiada exitosamente. La próxima vez que inicies sesión, debés usar tu nueva clave.
+                  </p>
+                  <button 
+                    className="password-save-btn"
+                    onClick={() => {
+                      setShowPasswordModal(false);
+                      setPasswordStep('request');
+                    }}
+                    style={{ width: '100%', padding: '12px' }}
+                  >
+                    Entendido
+                  </button>
+                </div>
+              )}
             </div>
             
+            {passwordStep !== 'success' && (
             <div className="password-modal-footer">
               <button 
                 className="cancel-btn"
@@ -1141,6 +1184,7 @@ function UserProfile() {
                 </button>
               )}
             </div>
+            )}
           </div>
         </div>
       )}
