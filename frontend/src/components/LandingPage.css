@@ -462,8 +462,8 @@
 .hero-buttons {
     display: flex;
     gap: 16px;
-    margin-top: 24px;
-    /* Added top spacing */
+    margin-top: 48px;
+    /* Increased top spacing */
     margin-bottom: 48px;
 }
 
@@ -488,21 +488,20 @@
 }
 
 .btn-secondary {
-    background: rgba(15, 23, 42, 0.05);
-    /* Darker transparent bg for light mode */
-    color: var(--text-primary);
-    /* Dark text color instead of white */
-    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, 0.08) !important;
+    color: #0f172a !important;
+    /* Explicitly forced dark color */
+    border: 1px solid rgba(15, 23, 42, 0.2) !important;
     border-radius: 99px;
     padding: 12px 24px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .btn-secondary:hover {
-    background: rgba(15, 23, 42, 0.1);
-    border-color: var(--text-primary);
+    background: rgba(15, 23, 42, 0.15) !important;
+    border-color: #0f172a !important;
 }
 
 .hero-trust p {
@@ -2455,15 +2454,17 @@
 .landing-page .plan-price-new .currency {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: #475569 !important;
+    /* Slate 600 */
 }
 
 .landing-page .plan-price-new .amount {
     font-size: 2.8rem;
     font-weight: 800;
     line-height: 1;
+    color: #0f172a !important;
+    /* Slate 900 */
     font-family: var(--font-body);
-    /* Modern sans for numbers */
 }
 
 .landing-page .plan-price-new .period {
