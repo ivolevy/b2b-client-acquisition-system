@@ -14,7 +14,7 @@ import {
   FiX
 } from 'react-icons/fi';
 import { FaLinkedin, FaTwitter, FaGithub, FaGoogle } from 'react-icons/fa';
-import heroImg from '../assets/hero.png';
+
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -250,7 +250,7 @@ const LandingPage = () => {
                 <div className="dots"><span></span><span></span><span></span></div>
                 <div className="bar">smartleads.ai/dashboard</div>
               </div>
-              <img src={heroImg} alt="Dashboard Interface" className="mockup-img" onError={(e) => {
+              <img src="/images/hero.png" alt="Dashboard Interface" className="mockup-img" onError={(e) => {
                 e.target.onerror = null;
                 e.target.style.display = 'none';
                 e.target.parentElement.innerHTML += '<div class="fallback-mockup">Dashboard Preview</div>';
