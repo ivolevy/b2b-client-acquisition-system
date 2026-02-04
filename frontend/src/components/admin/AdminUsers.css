@@ -27,28 +27,20 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  /* Ensure it floats above table content */
-  background: rgba(255, 255, 255, 0.95);
-  /* Less transparency for legibility when sticky */
-  backdrop-filter: blur(12px);
+  background: white;
   padding: 16px 24px;
   border-radius: 12px 12px 0 0;
-  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
   display: flex;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-start;
 }
 
 .filter-group {
   flex: 0 1 auto;
-  /* Don't grow indefinitely */
-  min-width: 200px;
-  max-width: 300px;
-  /* Cap width */
+  min-width: 150px;
 }
 
 .filter-input,
@@ -90,10 +82,7 @@
 }
 
 .btn-create {
-  margin-left: auto;
-  /* Push to right if desired, or keep next to filters */
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  /* Clean blue gradient */
   color: white;
   border: none;
   border-radius: 8px;
@@ -107,9 +96,6 @@
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  min-width: auto;
-  /* Allow it to shrink */
-  flex: 0 0 auto;
 }
 
 .btn-create:hover {

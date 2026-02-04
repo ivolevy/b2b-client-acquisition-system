@@ -16,6 +16,7 @@ function AdminUsers() {
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({
     role: '',
+    plan: '',
     search: ''
   });
   const [selectedUser, setSelectedUser] = useState(null);
@@ -113,7 +114,7 @@ function AdminUsers() {
     <div className="admin-users">
       {/* Filtros y búsqueda */}
       <div className="users-filters">
-        <div className="filter-group">
+        <div className="filter-group" style={{ flex: '0 1 400px', maxWidth: '400px' }}>
           <input
             type="text"
             placeholder="Buscar por email o nombre..."
@@ -122,8 +123,19 @@ function AdminUsers() {
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           />
         </div>
-        {/* Eliminado filtro de plan */}
-        <div className="filter-group">
+        <div className="filter-group" style={{ flex: '0 0 160px' }}>
+          <select
+            className="filter-select"
+            value={filters.plan}
+            onChange={(e) => setFilters({ ...filters, plan: e.target.value })}
+          >
+            <option value="">Todos los planes</option>
+            <option value="starter">Starter</option>
+            <option value="growth">Growth</option>
+            <option value="scale">Scale</option>
+          </select>
+        </div>
+        <div className="filter-group" style={{ flex: '0 0 160px' }}>
           <select
             className="filter-select"
             value={filters.role}
@@ -137,6 +149,7 @@ function AdminUsers() {
         <button 
           className="btn-primary btn-create"
           onClick={() => setShowCreateModal(true)}
+          style={{ marginLeft: 'auto' }}
         >
           + Crear Usuario
         </button>
@@ -163,29 +176,31 @@ function AdminUsers() {
             </tr>
           </thead>
           <tbody>
-            {users.filter(user => {
-               // Client-side filtering because backend returns all users
-               const matchRole = !filters.role || user.role === filters.role;
-               const searchLower = filters.search.toLowerCase().trim();
-               const matchSearch = !searchLower || 
-                 (user.email && user.email.toLowerCase().includes(searchLower)) ||
-                 (user.name && user.name.toLowerCase().includes(searchLower));
-               return matchRole && matchSearch;
-            }).length === 0 ? (
+             {users.filter(user => {
+                // Client-side filtering because backend returns all users
+                const matchRole = !filters.role || user.role === filters.role;
+                const matchPlan = !filters.plan || user.plan === filters.plan;
+                const searchLower = filters.search.toLowerCase().trim();
+                const matchSearch = !searchLower || 
+                  (user.email && user.email.toLowerCase().includes(searchLower)) ||
+                  (user.name && user.name.toLowerCase().includes(searchLower));
+                return matchRole && matchPlan && matchSearch;
+             }).length === 0 ? (
               <tr>
                 <td colSpan="5" className="no-data">
                   {loading ? 'Cargando...' : 'No se encontraron usuarios coincidentes'}
                 </td>
               </tr>
             ) : (
-              users.filter(user => {
-                 const matchRole = !filters.role || user.role === filters.role;
-                 const searchLower = filters.search.toLowerCase().trim();
-                 const matchSearch = !searchLower || 
-                   (user.email && user.email.toLowerCase().includes(searchLower)) ||
-                   (user.name && user.name.toLowerCase().includes(searchLower));
-                 return matchRole && matchSearch;
-              }).map((user) => (
+               users.filter(user => {
+                  const matchRole = !filters.role || user.role === filters.role;
+                  const matchPlan = !filters.plan || user.plan === filters.plan;
+                  const searchLower = filters.search.toLowerCase().trim();
+                  const matchSearch = !searchLower || 
+                    (user.email && user.email.toLowerCase().includes(searchLower)) ||
+                    (user.name && user.name.toLowerCase().includes(searchLower));
+                  return matchRole && matchPlan && matchSearch;
+               }).map((user) => (
                 <tr key={user.id}>
                   <td>{user.email}</td>
                   <td>{user.name || '-'}</td>

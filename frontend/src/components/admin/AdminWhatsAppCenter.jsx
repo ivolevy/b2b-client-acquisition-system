@@ -152,14 +152,14 @@ function AdminWhatsAppCenter() {
             {/* Inline Filters Bar */}
             <div className="filters-inline-bar">
                 {/* Search */}
-                <div className="filter-distance-group" style={{flex: 2, minWidth: '200px'}}>
-                    <div style={{position: 'relative', width: '100%'}}>
-                    <FiSearch style={{position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#666'}} />
+                <div className="filter-distance-group" style={{ flex: '0 1 400px', minWidth: '200px' }}>
+                    <div style={{ position: 'relative', width: '100%' }}>
+                    <FiSearch style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#666' }} />
                     <input
                         type="text"
                         placeholder="Buscar por nombre, tel o email..."
                         className="filter-inline-input"
-                        style={{width: '100%', paddingLeft: '32px'}}
+                        style={{ width: '100%', paddingLeft: '32px' }}
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                     />
@@ -173,9 +173,10 @@ function AdminWhatsAppCenter() {
                     onChange={(e) => setFilterRole(e.target.value)}
                     className="filter-inline-input"
                 >
-                    <option value="all">Rol: Todos</option>
-                    <option value="user">Usuario</option>
-                    <option value="admin">Admin</option>
+                    <option value="all">Plan: Todos</option>
+                    <option value="starter">Starter</option>
+                    <option value="growth">Growth</option>
+                    <option value="scale">Scale</option>
                 </select>
                 <svg className="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="6 9 12 15 18 9"/>
@@ -207,17 +208,19 @@ function AdminWhatsAppCenter() {
                     disabled={selectedUsers.length === 0}
                     style={{ 
                         height: '36px', 
-                        padding: '0 16px', 
+                        padding: '0 20px', 
                         display: 'flex', 
                         alignItems: 'center', 
                         gap: '8px',
-                        background: '#25D366',
+                        background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
                         color: 'white',
                         border: 'none',
-                        borderRadius: '6px',
-                        fontWeight: 500,
+                        borderRadius: '8px',
+                        fontWeight: 600,
                         opacity: selectedUsers.length === 0 ? 0.6 : 1,
-                        cursor: selectedUsers.length === 0 ? 'not-allowed' : 'pointer'
+                        cursor: selectedUsers.length === 0 ? 'not-allowed' : 'pointer',
+                        boxShadow: selectedUsers.length > 0 ? '0 2px 4px rgba(37, 211, 102, 0.2)' : 'none',
+                        transition: 'all 0.2s'
                     }}
                     >
                     <FiMessageCircle />

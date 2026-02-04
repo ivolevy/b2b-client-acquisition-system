@@ -150,14 +150,14 @@ function AdminEmailCenter() {
             {/* Inline Filters Bar */}
             <div className="filters-inline-bar">
                 {/* Search */}
-                <div className="filter-distance-group" style={{flex: 2, minWidth: '200px'}}>
-                    <div style={{position: 'relative', width: '100%'}}>
-                    <FiSearch style={{position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#666'}} />
+                <div className="filter-distance-group" style={{ flex: '0 1 400px', minWidth: '200px' }}>
+                    <div style={{ position: 'relative', width: '100%' }}>
+                    <FiSearch style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#666' }} />
                     <input
                         type="text"
                         placeholder="Buscar por nombre o email..."
                         className="filter-inline-input"
-                        style={{width: '100%', paddingLeft: '32px'}}
+                        style={{ width: '100%', paddingLeft: '32px' }}
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                     />
@@ -172,7 +172,6 @@ function AdminEmailCenter() {
                     className="filter-inline-input"
                 >
                     <option value="all">Plan: Todos</option>
-                    <option value="free">Gratis</option>
                     <option value="starter">Starter</option>
                     <option value="growth">Growth</option>
                     <option value="scale">Scale</option>
