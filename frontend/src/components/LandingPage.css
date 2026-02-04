@@ -282,8 +282,8 @@
     top: 24px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.8);
-    /* Light Glass */
+    background: rgba(255, 255, 255, 0.9);
+    /* More opaque for better readability */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     width: auto;
@@ -1848,8 +1848,26 @@
     }
 
     .hero-section {
-        padding-top: 220px;
-        /* Increased separation */
+        padding-top: 140px;
+        /* Adjusted to prevent excessive gap but clear header */
+        padding-bottom: 60px;
+        /* Balanced bottom padding */
+    }
+
+    /* Fixed Landing Header on Mobile */
+    .landing-header {
+        width: 90%;
+        min-width: unset;
+        /* Remove fixed width constraint */
+        max-width: 400px;
+        top: 16px;
+        padding: 8px 16px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .header-container {
+        gap: 12px;
     }
 
     .spotlight-content h2 {
@@ -1919,8 +1937,11 @@
         display: flex;
         justify-content: flex-start;
         /* Align drawer to LEFT */
-
+        overscroll-behavior: contain;
+        /* Prevent body scroll chaining if supported */
     }
+
+
 
     .mobile-nav.active {
         opacity: 1;
