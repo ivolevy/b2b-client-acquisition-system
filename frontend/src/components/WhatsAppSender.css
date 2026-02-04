@@ -504,3 +504,191 @@
     font-size: 0.8125rem;
     color: var(--ws-text-muted);
 }
+/* Modern Progress Modal Refinement */
+.whats-progress-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.85); /* Lighter, cleaner backdrop */
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: esFadeIn 0.2s ease-out;
+}
+
+.whats-progress-card {
+    width: 420px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.progress-card-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.progress-card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.btn-icon-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-icon-close:hover {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.progress-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px 24px 8px 24px;
+}
+
+.progress-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 2px;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.progress-stat-divider {
+    font-size: 1.5rem;
+    color: #cbd5e1;
+    font-weight: 300;
+    margin-top: 10px;
+}
+
+.progress-bar-modern-container {
+    margin: 16px 24px;
+    height: 6px;
+    background: #f1f5f9;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar-modern-fill {
+    height: 100%;
+    background: #25D366;
+    border-radius: 3px;
+    transition: width 0.3s ease-out;
+}
+
+.current-action-area {
+    padding: 0 24px 24px 24px;
+    text-align: center;
+}
+
+.next-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+}
+
+.next-target {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.next-target strong {
+    color: #334155;
+    font-size: 1rem;
+}
+
+.next-target span {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.btn-whatsapp-action {
+    width: 100%;
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(37, 211, 102, 0.2);
+    transition: all 0.2s;
+}
+
+.btn-whatsapp-action:hover {
+    background: #128C7E;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 10px rgba(37, 211, 102, 0.25);
+}
+
+.hint-text {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.completion-state {
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    animation: esFadeIn 0.3s ease-out;
+}
+
+.check-circle {
+    width: 60px;
+    height: 60px;
+    background: #dcfce7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #22c55e;
+}
+

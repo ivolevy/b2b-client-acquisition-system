@@ -16,7 +16,7 @@ function AdminWhatsAppCenter() {
   const [selectedUsers, setSelectedUsers] = useState([]);
 
   // Modals
-  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'compose'
 
   // Filters
   const [searchText, setSearchText] = useState('');
@@ -149,6 +149,9 @@ function AdminWhatsAppCenter() {
 
       {activeTab === 'prospectos' ? (
         <>
+           {/* Only show Filters and Table if in list mode */}
+           {viewMode === 'list' && (
+             <>
             {/* Inline Filters Bar */}
             <div className="filters-inline-bar">
                 {/* Search */}
@@ -204,7 +207,7 @@ function AdminWhatsAppCenter() {
                     <button 
                     type="button" 
                     className="btn-whatsapp"
-                    onClick={() => setShowWhatsAppModal(true)}
+                    onClick={() => setViewMode('compose')}
                     disabled={selectedUsers.length === 0}
                     style={{ 
                         height: '36px', 
@@ -300,6 +303,8 @@ function AdminWhatsAppCenter() {
                 </button>
                 </div>
             )}
+            </>
+          )}
         </>
       ) : (
         /* Templates Tab Content */
@@ -308,11 +313,32 @@ function AdminWhatsAppCenter() {
         </div>
       )}
 
-      {showWhatsAppModal && (
-        <WhatsAppSender 
-          empresas={getSelectedAsEmpresas()}
-          onClose={() => setShowWhatsAppModal(false)}
-        />
+      {viewMode === 'compose' && (
+        <div style={{ marginTop: '24px' }}>
+          <div style={{ marginBottom: '16px' }}>
+             <button 
+                onClick={() => setViewMode('list')}
+                style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: '#666', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px', 
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: 500
+                }}
+             >
+                ← Volver a la lista
+             </button>
+          </div>
+          <WhatsAppSender 
+            empresas={getSelectedAsEmpresas()}
+            onClose={() => setViewMode('list')}
+            embedded={true}
+          />
+        </div>
       )}
     </div>
   );

@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import axios from 'axios';
+import { API_URL } from '../config';
 import './WhatsAppSender.css';
 import { useAuth } from '../AuthWrapper';
 import { useToast } from '../hooks/useToast';
+import TemplateEditor from './TemplateEditor';
 import { 
     FiPlus, FiEdit2, FiTrash2, FiSave, FiX, 
     FiCheckSquare, FiSquare, FiSend, 
     FiUsers, FiTag, FiClock, FiMessageCircle,
-    FiChevronLeft, FiChevronRight, FiPlay
+    FiChevronLeft, FiChevronRight, FiPlay,
+    FiLoader, FiCheck
 } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa6';
 
@@ -27,23 +31,47 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
 
     const [editingTemplate, setEditingTemplate] = useState(null);
     const [selectedTemplateId, setSelectedTemplateId] = useState('');
+    const [templatesLoading, setTemplatesLoading] = useState(false);
+    const [showTemplateEditor, setShowTemplateEditor] = useState(false);
+    const [currentTemplateIdToEdit, setCurrentTemplateIdToEdit] = useState(null);
+
+    const loadTemplates = async () => {
+        setTemplatesLoading(true);
+        try {
+            const response = await axios.get(`${API_URL}/templates?type=whatsapp`);
+            if (response.data && response.data.data) {
+                setTemplates(response.data.data);
+                if (response.data.data.length > 0 && !selectedTemplateId) {
+                    // Preselect first if none selected
+                    // setSelectedTemplateId(response.data.data[0].id);
+                }
+            }
+        } catch (err) {
+            console.error('Error loading templates:', err);
+        } finally {
+            setTemplatesLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const saved = localStorage.getItem('whatsapp_templates');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            setTemplates(parsed);
-            if (parsed.length > 0) setSelectedTemplateId(parsed[0].id);
-        } else {
-            const defaultTemplates = [
-                { id: '1', name: 'Primer Contacto', body: 'Hola {nombre}, ¿cómo estás? Vi tu empresa {empresa} y me interesó mucho el rubro {rubro}.' },
-                { id: '2', name: 'Seguimiento', body: 'Hola {nombre}, te escribo para dar seguimiento a mi mensaje anterior sobre {rubro}.' }
-            ];
-            setTemplates(defaultTemplates);
-            localStorage.setItem('whatsapp_templates', JSON.stringify(defaultTemplates));
-            setSelectedTemplateId('1');
-        }
+        loadTemplates();
     }, []);
+
+    const handleNewTemplate = () => {
+        setCurrentTemplateIdToEdit(null);
+        setShowTemplateEditor(true);
+    };
+
+    const handleEditTemplate = (id, e) => {
+        if (e) e.stopPropagation();
+        setCurrentTemplateIdToEdit(id);
+        setShowTemplateEditor(true);
+    };
+
+    const handleTemplateSaved = () => {
+        setShowTemplateEditor(false);
+        loadTemplates();
+    };
 
     useEffect(() => {
         // Only select those with phone numbers
@@ -96,11 +124,13 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         const empresa = selectedEmpresas[index];
         const template = templates.find(t => t.id === selectedTemplateId);
         
-        let message = template ? template.body : '';
+        // Use logic from TemplateEditor variables (body_text)
+        let message = template ? (template.body_text || template.body) : '';
         // Replace variables
         message = message.replace(/{nombre}/g, empresa.nombre || 'cliente');
-        message = message.replace(/{empresa}/g, empresa.nombre || '');
+        message = message.replace(/{empresa}/g, empresa.nombre || ''); // Assuming nombre is company name in some contexts, or handle separately
         message = message.replace(/{rubro}/g, empresa.rubro || '');
+        message = message.replace(/{ciudad}/g, empresa.ciudad || '');
 
         // Basic phone cleaning
         const phone = empresa.telefono.replace(/\D/g, '');
@@ -175,14 +205,19 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
                         
                         <div className="sidebar-field">
                             <label className="field-label-small">Plantilla de Mensaje</label>
-                            <select 
-                                className="ws-select-modern"
-                                value={selectedTemplateId}
-                                onChange={(e) => setSelectedTemplateId(e.target.value)}
-                            >
-                                <option value="">Seleccionar plantilla...</option>
-                                {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                            </select>
+                            <label className="field-label-small">Plantilla de Mensaje</label>
+                            {templatesLoading ? (
+                                <div style={{ fontSize: '0.8rem', color: '#666' }}>Cargando plantillas...</div>
+                            ) : (
+                                <select 
+                                    className="ws-select-modern"
+                                    value={selectedTemplateId}
+                                    onChange={(e) => setSelectedTemplateId(e.target.value)}
+                                >
+                                    <option value="">Seleccionar plantilla...</option>
+                                    {templates.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+                                </select>
+                            )}
                         </div>
 
                         <div className="sidebar-field">
@@ -258,25 +293,28 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
 
                             {activeTab === 'templates' && (
                                 <div className="templates-grid">
-                                    {templates.map(t => (
+                                    {templatesLoading ? (
+                                        <div style={{gridColumn: '1/-1', textAlign: 'center', padding: '40px'}}>Cargando...</div>
+                                    ) : templates.map(t => (
                                         <div 
                                             key={t.id} 
                                             className={`template-pro-card ${selectedTemplateId === t.id ? 'active' : ''}`}
                                             onClick={() => setSelectedTemplateId(t.id)}
                                         >
                                             <div className="card-header">
-                                                <h4>{t.name}</h4>
+                                                <h4>{t.nombre}</h4>
                                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <button className="btn-tiny" onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        // logic for edit would go here
-                                                    }}><FiEdit2 size={12} /></button>
+                                                    <button className="btn-tiny" onClick={(e) => handleEditTemplate(t.id, e)}><FiEdit2 size={12} /></button>
                                                 </div>
                                             </div>
-                                            <p className="card-body-preview">{t.body}</p>
+                                            <p className="card-body-preview">{t.body_text}</p>
                                         </div>
                                     ))}
-                                    <div className="template-pro-card add-new" style={{ borderStyle: 'dashed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                                    <div 
+                                        className="template-pro-card add-new" 
+                                        style={{ borderStyle: 'dashed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', cursor: 'pointer' }}
+                                        onClick={handleNewTemplate}
+                                    >
                                         <div style={{ textAlign: 'center' }}>
                                             <FiPlus size={24} />
                                             <div style={{ fontSize: '0.75rem', marginTop: '4px', fontWeight: 600 }}>NUEVA</div>
@@ -288,68 +326,67 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
                     </main>
                 </div>
 
-                {/* COMMAND CENTER DASHBOARD (Progress) */}
+                {/* Refined Progress Overlay */}
                 {sendingState.active && (
-                    <div className="sending-progress-overlay">
-                        <div className="command-center">
-                            <div className="cc-header">
-                                <div className="cc-status-group">
-                                    <h2>Centro de Comando</h2>
-                                    <span className="cc-status-badge">Enviando...</span>
+                    <div className="whats-progress-backdrop">
+                        <div className="whats-progress-card">
+                            <div className="progress-card-header">
+                                <h3>Enviando Campaña</h3>
+                                <button onClick={handleCancel} className="btn-icon-close"><FiX /></button>
+                            </div>
+                            
+                            <div className="progress-status-row">
+                                <div className="progress-stat">
+                                    <span className="stat-label">Enviados</span>
+                                    <span className="stat-value">{sendingState.completed}</span>
                                 </div>
-                                <div className="cc-stats-minimal">
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{sendingState.completed} / {sendingState.total}</div>
-                                        <div style={{ fontSize: '0.75rem', opacity: 0.8, letterSpacing: '0.05em' }}>PROGRESO TOTAL</div>
-                                    </div>
+                                <div className="progress-stat-divider">/</div>
+                                <div className="progress-stat">
+                                    <span className="stat-label">Total</span>
+                                    <span className="stat-value">{sendingState.total}</span>
                                 </div>
                             </div>
 
-                            <div className="cc-body">
-                                <div className="progress-container">
-                                    <svg className="progress-circle-svg">
-                                        <circle className="progress-circle-bg" cx="80" cy="80" r="70" />
-                                        <circle 
-                                            className="progress-circle-fill" 
-                                            cx="80" cy="80" r="70" 
-                                            style={{ 
-                                                strokeDasharray: 440,
-                                                strokeDashoffset: strokeDashoffset 
-                                            }}
-                                        />
-                                    </svg>
-                                    <div className="progress-text">
-                                        <span className="progress-percent">{progressPercent}%</span>
-                                        <span className="progress-label">COMPLETO</span>
-                                    </div>
-                                </div>
+                            <div className="progress-bar-modern-container">
+                                <div className="progress-bar-modern-fill" style={{ width: `${progressPercent}%` }}></div>
+                            </div>
 
-                                <div className="cc-action-zone">
-                                    {sendingState.currentIndex < sendingState.total && (
-                                        <div className="current-recipient-card">
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#25D366', textTransform: 'uppercase', marginBottom: '8px', display: 'block', letterSpacing: '0.05em' }}>Próximo Destinatario</span>
-                                            <span className="recipient-name">{selectedEmpresas[sendingState.currentIndex].nombre}</span>
-                                            <span className="recipient-phone">{selectedEmpresas[sendingState.currentIndex].telefono}</span>
+                            <div className="current-action-area">
+                                {sendingState.currentIndex < sendingState.total ? (
+                                    <>
+                                        <p className="next-label">Próximo destinatario:</p>
+                                        <div className="next-target">
+                                            <strong>{selectedEmpresas[sendingState.currentIndex].nombre}</strong>
+                                            <span>{selectedEmpresas[sendingState.currentIndex].telefono}</span>
                                         </div>
-                                    )}
-
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                                        <button className="btn-cc-primary" onClick={handleNext}>
-                                            Siguiente (Enter) <FiChevronRight />
-                                        </button>
                                         
-                                        <span className="cc-hotkey-hint">Presioná <strong>Enter</strong> para abrir el chat y avanzar</span>
-                                        
-                                        <button className="btn-cc-cancel" onClick={handleCancel}>
-                                            Cancelar Campaña
-                                        </button>
+                                        <div className="action-buttons-row">
+                                            <button className="btn-whatsapp-action" onClick={handleNext}>
+                                                <FaWhatsapp /> Abrir Chat y Enviar
+                                            </button>
+                                            <p className="hint-text">Presioná <strong>Enter</strong> para continuar</p>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="completion-state">
+                                        <div className="check-circle"><FiCheck size={32} /></div>
+                                        <p>¡Campaña finalizada!</p>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
                 )}
             </div>
+
+            {showTemplateEditor && (
+                <TemplateEditor
+                    templateId={currentTemplateIdToEdit}
+                    onClose={() => setShowTemplateEditor(false)}
+                    onSave={handleTemplateSaved}
+                    type="whatsapp"
+                />
+            )}
         </div>
     );
 
