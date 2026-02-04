@@ -97,7 +97,11 @@ function TemplateEditor({ templateId, onClose, onSave, type = 'email' }) {
 
   const content = (
     <div className="template-editor-overlay">
-      <form className="template-editor-modal" onSubmit={handleSave}>
+      <form 
+        className="template-editor-modal" 
+        onSubmit={handleSave}
+        style={{ '--editor-accent': type === 'whatsapp' ? '#25D366' : '#3b82f6' }}
+      >
         <div className="template-editor-header">
           <FiType size={20} color="#3b82f6" />
           <h2>{templateId ? 'Editar Plantilla' : 'Nueva Plantilla'}</h2>

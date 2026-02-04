@@ -274,7 +274,7 @@ function ApiUsageDashboard() {
         }
         
         .header-content p { color: #64748b; margin: 0.25rem 0 0 0; font-size: 0.9rem; }
-        .header-icon { color: #3b82f6; }
+        .header-icon { color: var(--primary); }
         
         .header-actions { display: flex; gap: 1rem; }
         
@@ -344,7 +344,7 @@ function ApiUsageDashboard() {
         
         .progress-fill-large {
           height: 100%;
-          background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+          background: linear-gradient(90deg, var(--primary), #8b5cf6);
           border-radius: 8px;
           position: relative;
           transition: width 0.8s ease-out;
@@ -391,7 +391,7 @@ function ApiUsageDashboard() {
         .hover-row:hover { background: rgba(255,255,255,0.03); }
 
         .sku-name { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: #fff; }
-        .premium-pill { background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .premium-pill { background: linear-gradient(90deg, var(--primary), #8b5cf6); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
         .tags-row { display: flex; gap: 0.5rem; }
         .mini-tag { font-size: 0.75rem; padding: 2px 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #cbd5e1; }
@@ -478,7 +478,7 @@ function ApiUsageDashboard() {
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
         .dashboard-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: #64748b; gap: 1rem; }
-        .spinner-ring { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+        .spinner-ring { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         
         .dashboard-error { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: #ef4444; gap: 1rem; text-align: center; }
         .retry-btn { padding: 0.5rem 1.5rem; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 6px; cursor: pointer; transition: all 0.2s; }

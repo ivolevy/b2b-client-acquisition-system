@@ -1,7 +1,7 @@
 /* TemplateManager.css - High-Contrast Pro Light */
 
 :root {
-  --tm-accent: #3b82f6;
+  --tm-accent: var(--primary);
   --tm-bg: #f8fafc;
   --tm-card-bg: #ffffff;
   --tm-text-main: #0f172a;
@@ -50,8 +50,9 @@
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--tm-text-main);
-  background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, var(--gray-800) 0%, var(--primary) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -82,7 +83,7 @@
 }
 
 .btn-new-template:hover {
-  background: #2563eb;
+  background: var(--primary-dark);
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
 }

@@ -1,5 +1,5 @@
 /* ============================================
-   PRO BACKGROUND - Fondo Animado Premium
+   PRO BACKGROUND - Fondo Animado Premium Dark
    ============================================ */
 
 .pro-background {
@@ -7,44 +7,41 @@
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background: linear-gradient(135deg, #0f0f1a 0%, #1a0a1a 50%, #0a0a0f 100%);
+  /* Deepest black/slate background matching Login */
+  background: radial-gradient(circle at 50% 50%, #172554 0%, #000000 100%);
 }
 
 .pro-gradient-sphere {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.5;
+  filter: blur(120px);
+  opacity: 0.15;
+  /* Very subtle like Login */
   animation: proFloat 25s ease-in-out infinite;
 }
 
 .pro-sphere-1 {
-  width: 700px;
-  height: 700px;
-  background: linear-gradient(135deg, #4FC3F7 0%, #81D4FA 100%);
-  top: -250px;
-  left: -150px;
+  width: 800px;
+  height: 800px;
+  background: #1d4ed8;
+  /* Dark Blue */
+  top: -200px;
+  left: -200px;
   animation-delay: 0s;
 }
 
 .pro-sphere-2 {
-  width: 600px;
-  height: 600px;
-  background: linear-gradient(135deg, #81D4FA 0%, #B3E5FC 100%);
+  width: 700px;
+  height: 700px;
+  background: #1e3a8a;
+  /* Darker Blue */
   bottom: -200px;
-  right: -150px;
+  right: -200px;
   animation-delay: -8s;
 }
 
 .pro-sphere-3 {
-  width: 500px;
-  height: 500px;
-  background: linear-gradient(135deg, #C71585 0%, #4FC3F7 100%);
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation-delay: -16s;
-  opacity: 0.3;
+  display: none;
 }
 
 @keyframes proFloat {
@@ -55,36 +52,20 @@
   }
 
   25% {
-    transform: translate(40px, -40px) scale(1.05);
+    transform: translate(30px, -30px) scale(1.05);
   }
 
   50% {
-    transform: translate(-30px, 30px) scale(0.95);
+    transform: translate(-20px, 20px) scale(0.95);
   }
 
   75% {
-    transform: translate(30px, 40px) scale(1.02);
+    transform: translate(20px, 30px) scale(1.02);
   }
 }
 
 .pro-grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(129, 212, 250, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(129, 212, 250, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  animation: gridShift 20s linear infinite;
-}
-
-@keyframes gridShift {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  100% {
-    transform: translate(60px, 60px);
-  }
+  display: none;
 }
 
 /* Ajustes para que el contenido sea legible */
@@ -97,38 +78,81 @@
   z-index: 1;
 }
 
+/* Update containers to be professional cards on dark background */
+/* Navbar Glassmorphism Dark */
 .app.pro-theme .navbar {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(20px);
-  box-shadow: 0 4px 30px rgba(129, 212, 250, 0.1);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  /* Override variables for dark mode text */
+  --lp-dark: #ffffff;
+  --lp-text: #e2e8f0;
+  --lp-text-light: #94a3b8;
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+.app.pro-theme .navbar-brand .nav-logo-icon {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.app.pro-theme .navbar-brand .nav-logo-icon img {
+  /* Filter removed to show original logo */
+  filter: none;
+}
+
+/* Fix Dropdown Colors for Dark Theme */
+.app.pro-theme .navbar .user-dropdown {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.app.pro-theme .navbar .dropdown-item {
+  color: #e2e8f0;
+  /* Light text */
+}
+
+.app.pro-theme .navbar .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.app.pro-theme .navbar .dropdown-divider {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .app.pro-theme .filter-section {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(129, 212, 250, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .app.pro-theme .results-module {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(129, 212, 250, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .app.pro-theme .table-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(129, 212, 250, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Badge PRO flotante */
+/* Badge PRO flotante - Update to match blue theme */
 .pro-floating-badge {
   position: fixed;
   bottom: 24px;
@@ -137,14 +161,12 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   border-radius: 50px;
   color: white;
   font-size: 0.75rem;
   font-weight: 600;
-  box-shadow:
-    0 4px 20px rgba(129, 212, 250, 0.4),
-    0 0 40px rgba(255, 20, 147, 0.2);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
   z-index: 1000;
   animation: badgeGlow 2s ease-in-out infinite;
 }
@@ -157,15 +179,11 @@
 
   0%,
   100% {
-    box-shadow:
-      0 4px 20px rgba(129, 212, 250, 0.4),
-      0 0 40px rgba(255, 20, 147, 0.2);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
   }
 
   50% {
-    box-shadow:
-      0 4px 30px rgba(129, 212, 250, 0.6),
-      0 0 60px rgba(255, 20, 147, 0.3);
+    box-shadow: 0 4px 30px rgba(59, 130, 246, 0.6);
   }
 }
 
@@ -179,11 +197,6 @@
   .pro-sphere-2 {
     width: 350px;
     height: 350px;
-  }
-
-  .pro-sphere-3 {
-    width: 300px;
-    height: 300px;
   }
 
   .pro-floating-badge {

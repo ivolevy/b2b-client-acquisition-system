@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './TableView.css';
 import { FaInstagram, FaFacebook, FaXTwitter, FaLinkedin, FaYoutube, FaTiktok, FaLocationDot, FaFilePdf } from 'react-icons/fa6';
-import EmailSender from './EmailSender';
-import WhatsAppSender from './WhatsAppSender';
-import { useAuth } from '../AuthWrapper';
+
+import { useAuth } from '../context/AuthContext';
 
 function TableViewB2B({ 
   empresas, 
@@ -463,7 +462,7 @@ function TableViewB2B({
           <tbody>
             {currentItems.map((empresa, index) => (
               <tr key={empresa.id}>
-                    <td style={{ textAlign: 'center', fontWeight: '600', color: '#3b82f6' }}>
+                    <td style={{ textAlign: 'center', fontWeight: '600', color: 'var(--primary)' }}>
                       {indexOfFirstItem + index + 1}
                     </td>
                 <td className="name-cell">
@@ -475,7 +474,7 @@ function TableViewB2B({
                 </td>
                 <td>
                   {empresa.distancia_km !== null && empresa.distancia_km !== undefined ? (
-                        <span style={{ fontSize: '12px', fontWeight: '500', color: '#3b82f6' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--primary)' }}>
                           {empresa.distancia_km.toFixed(1)} km
                         </span>
                   ) : (

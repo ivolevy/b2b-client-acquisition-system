@@ -16,7 +16,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useToast } from './hooks/useToast';
-import { useAuth } from './AuthWrapper';
+import { useAuth } from './context/AuthContext';
 import { searchHistoryService } from './lib/supabase';
 import { API_URL } from './config';
 import './App.css';
@@ -909,7 +909,7 @@ function AppB2B() {
                 navigate('/');
                 setView('table');
               }}
-              embedded={false}
+              embedded={true}
             />
           )}
       </main>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, createContext, useContext, lazy, Suspense, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, lazy, Suspense, useCallback } from 'react';
+import { AuthContext } from './context/AuthContext';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase, authService, userService, adminService } from './lib/supabase';
 import { authStorage, storage } from './utils/storage';
@@ -27,17 +28,7 @@ const CheckoutPage = lazy(() => import('./components/CheckoutPage'));
 const PaymentSuccessPage = lazy(() => import('./components/PaymentSuccessPage'));
 import LandingSkeleton from './components/LandingSkeleton'; // Eager load for instant feedback
 
-// Contexto de autenticación
-const AuthContext = createContext(null);
 
-// Hook para usar el contexto de autenticación
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth debe usarse dentro de un AuthProvider');
-  }
-  return context;
-};
 
 // Credenciales de demo (fallback cuando Supabase no está configurado)
 const DEMO_USERS = [

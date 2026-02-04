@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { searchHistoryService } from '../lib/supabase';
-import { useAuth } from '../AuthWrapper';
+import { useAuth } from '../context/AuthContext';
 import './SearchHistory.css';
 
 function SearchHistory({ isOpen, onClose, onSelectSearch }) {

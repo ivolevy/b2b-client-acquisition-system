@@ -6,7 +6,7 @@
   --admin-sidebar-bg: #111827;
   /* Dark sidebar */
   --admin-sidebar-text: #e5e7eb;
-  --admin-sidebar-active: #2563eb;
+  --admin-sidebar-active: var(--primary);
   /* Primary blue */
   --admin-text: #1f2937;
   --radius-sm: 6px;

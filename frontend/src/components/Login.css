@@ -1,20 +1,23 @@
 /* ============================================
-   LOGIN PAGE - Diseño Profesional y Moderno
+   LOGIN PAGE - Diseño Profesional Dark 
    ============================================ */
 
-/* Variables CSS locales - Colores celeste Dota Solutions */
+/* Variables CSS locales - Dark Theme Professional */
 .login-page {
-  --login-primary: #4FC3F7;
-  --login-secondary: #0288D1;
-  --login-accent: #B3E5FC;
-  --login-dark: #1a1a1a;
-  --login-darker: #0f0f0f;
+  --login-primary: #3b82f6;
+  /* Blue Professional */
+  --login-secondary: #1e40af;
+  /* Dark Blue */
+  --login-accent: #60a5fa;
+  --login-dark: #1e293b;
+  /* Slate 800 */
+  --login-darker: #0f172a;
+  /* Slate 900 */
   --login-light: #ffffff;
-  --login-gray: #a0aec0;
+  --login-gray: #64748b;
   --login-gray-light: #e2e8f0;
   --login-success: #10b981;
   --login-error: #ef4444;
-  --login-gradient: var(--login-secondary);
 }
 
 /* Página principal */
@@ -23,86 +26,56 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--login-darker);
+  background: #000000;
+  /* Deepest black/slate */
   position: relative;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   font-weight: 400;
 }
 
-/* Fondo animado */
+/* Fondo animado - Sutil y Profesional (Sin Grilla) */
 .login-background {
   position: absolute;
   inset: 0;
   z-index: 0;
-  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, #172554 0%, #000000 100%);
+  opacity: 0.6;
 }
 
+/* Removed Grid Overlay */
+.grid-overlay {
+  display: none;
+}
+
+/* Removed Bright Spheres - replaced with subtle glow */
 .gradient-sphere {
   position: absolute;
   border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.5;
-  animation: float 20s ease-in-out infinite;
+  filter: blur(120px);
+  opacity: 0.15;
+  /* Very subtle */
+  animation: float 25s ease-in-out infinite;
 }
 
 .sphere-1 {
-  width: 600px;
-  height: 600px;
-  background: var(--login-secondary);
+  width: 800px;
+  height: 800px;
+  background: #1d4ed8;
   top: -200px;
-  left: -100px;
-  animation-delay: 0s;
+  left: -200px;
 }
 
 .sphere-2 {
-  width: 500px;
-  height: 500px;
-  background: var(--login-primary);
-  bottom: -150px;
-  right: -100px;
-  animation-delay: -7s;
+  width: 700px;
+  height: 700px;
+  background: #1e3a8a;
+  bottom: -200px;
+  right: -200px;
 }
 
 .sphere-3 {
-  width: 400px;
-  height: 400px;
-  background: var(--login-accent);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation-delay: -14s;
-  opacity: 0.4;
-}
-
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  25% {
-    transform: translate(30px, -30px) scale(1.05);
-  }
-
-  50% {
-    transform: translate(-20px, 20px) scale(0.95);
-  }
-
-  75% {
-    transform: translate(20px, 30px) scale(1.02);
-  }
-}
-
-.grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
-  opacity: 0.5;
+  display: none;
 }
 
 /* Container principal */
@@ -126,7 +99,8 @@
 /* Panel de Branding (izquierdo) */
 .login-branding {
   flex: 1;
-  background: var(--login-darker);
+  background: #0f172a;
+  /* Slate 900 */
   padding: 60px 48px;
   display: flex;
   flex-direction: column;
@@ -140,18 +114,13 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 0% 0%, rgba(129, 212, 250, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(79, 195, 247, 0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
   z-index: 0;
 }
 
 .login-branding::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  opacity: 1;
-  z-index: 0;
+  content: 'none';
+  display: none;
 }
 
 .branding-content {
@@ -932,8 +901,8 @@
 
 .forgot-password-input-group input:focus {
   outline: none;
-  border-color: #81D4FA;
-  box-shadow: 0 0 0 3px rgba(129, 212, 250, 0.1);
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
 .forgot-password-input-group input:disabled {
@@ -972,7 +941,7 @@
 
 .forgot-password-save-btn {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #81D4FA 0%, #4FC3F7 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   border: none;
   border-radius: 8px;
   color: white;
@@ -998,7 +967,7 @@
 .login-button {
   width: 100%;
   padding: 14px 24px;
-  background: var(--login-gradient);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
   color: white;
   border: none;
   border-radius: 10px;

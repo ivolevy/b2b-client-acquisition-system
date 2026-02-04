@@ -169,7 +169,7 @@
   gap: 6px;
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--primary);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -180,18 +180,19 @@
 }
 
 .btn-location-link-compact:hover {
-  background: rgba(59, 130, 246, 0.05);
+  background: rgba(44, 82, 130, 0.05);
   border-radius: 6px;
   text-decoration: none;
+  color: var(--primary-dark);
 }
 
 /* Search Button */
 .btn-search-address {
   width: 36px;
   height: 36px;
-  background: #6366f1;
+  background: var(--primary);
   /* Indigo color from image? or stick to blue */
-  background: #3b82f6;
+  background: var(--primary);
   border-radius: 8px;
   /* Square with rounded corners */
   color: white;
@@ -203,7 +204,7 @@
 
 .btn-search-address:hover {
   transform: scale(1.05);
-  background: #2563eb;
+  background: var(--primary-dark);
 }
 
 /* Address input group */
@@ -544,7 +545,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%);
+  background: #0f172a;
+  /* Slate 900 - Very dark */
   color: white;
   border: none;
   border-radius: 999px;
@@ -552,7 +554,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.2);
   transition: all 0.2s ease;
   white-space: nowrap;
 }
@@ -867,6 +869,8 @@ select.filter-input {
   transform: none;
 }
 
+
+
 @media (max-width: 768px) {
   .filter-section {
     padding: var(--spacing-md);
@@ -1114,9 +1118,9 @@ select.filter-input {
     margin: 0;
   }
 
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--gray-200);
+
 }
+
 
 /* --- FIX COMPACT TOGGLES (Email/Phone) --- */
 .form-row-compact .checkbox-inline {
@@ -1342,7 +1346,7 @@ select.filter-input {
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1.25rem;
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: var(--radius-pill);

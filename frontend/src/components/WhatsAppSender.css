@@ -1,28 +1,12 @@
-/* WhatsAppSender.css - Adapted from EmailSender.css with WhatsApp Branding */
+/* WhatsAppSender.css - Adapted from EmailSender.css for Pixel-Perfect Consistency */
 
 :root {
     --ws-sidebar-w: 320px;
     --ws-accent: #25D366;
     /* WhatsApp Green */
-    --ws-accent-dark: #075E54;
-    --ws-accent-light: #dcf8c6;
-    --ws-bg: #f8f9fa;
-    --ws-card-bg: #ffffff;
-    --ws-text-main: #111827;
-    --ws-text-muted: #6b7280;
-    --ws-border: #e5e7eb;
-    --ws-radius-lg: 16px;
-    --ws-radius-md: 12px;
-    --ws-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --ws-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --ws-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-
-    /* HSL Tokens for dynamic usage */
-    --wa-h: 142;
-    --wa-s: 70%;
-    --wa-l: 49%;
-    --wa-primary: hsl(var(--wa-h), var(--wa-s), var(--wa-l));
-    --wa-primary-soft: hsl(var(--wa-h), var(--wa-s), 95%);
+    --ws-dark: #0f172a;
+    --ws-border: #e2e8f0;
+    --ws-bg-soft: #f8fafc;
 }
 
 .whatsapp-sender-overlay {
@@ -38,395 +22,424 @@
     animation: esFadeIn 0.3s ease-out;
 }
 
+/* Modal Pro & Layout */
 .whatsapp-sender-modal-pro {
-    width: 100%;
-    max-width: 1200px;
+    width: 95%;
+    max-width: 1400px;
     height: 90vh;
-    background: var(--ws-bg);
-    border-radius: var(--ws-radius-lg);
-    box-shadow: var(--ws-shadow-lg);
+    background: white !important;
+    color: var(--ws-dark) !important;
+    border-radius: 24px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-/* Layout Split */
+.whatsapp-sender-embedded {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.whatsapp-sender-full-refined,
+.whatsapp-sender-layout-pro {
+    width: 100%;
+    height: 100%;
+    background: white !important;
+    color: var(--ws-dark) !important;
+    border-radius: 0 0 24px 24px !important;
+    /* Bottom rounded, top square */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
 .whatsapp-sender-split {
     display: flex;
     flex: 1;
     overflow: hidden;
 }
 
-/* Sidebar */
+/* Header Simple */
+.whatsapp-header-simple {
+    height: 64px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--ws-border);
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.close-btn-minimal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #94a3b8;
+}
+
+/* Sidebar Dashboard */
 .ws-sidebar {
     width: var(--ws-sidebar-w);
-    background: #ffffff;
+    background: var(--ws-bg-soft);
     border-right: 1px solid var(--ws-border);
     display: flex;
     flex-direction: column;
     padding: 24px;
+    gap: 32px;
 }
 
 .section-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--ws-text-muted);
-    letter-spacing: 0.05em;
-    margin-bottom: 16px;
     display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: #94a3b8;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+}
+
+.mode-pill-toggle {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.mode-pill-toggle button {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 7px;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s;
+}
+
+.mode-pill-toggle button.active {
+    background: white;
+    color: #0f172a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-field {
-    margin-bottom: 24px;
+    margin-top: 16px;
 }
 
 .field-label-small {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
+    color: #64748b;
     font-weight: 600;
-    color: var(--ws-text-main);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     display: block;
 }
 
-.ws-select-modern,
-.ws-input-modern {
+.ws-select-modern {
     width: 100%;
-    padding: 12px 16px;
-    border-radius: var(--ws-radius-md);
+    padding: 10px 12px;
+    border-radius: 12px;
     border: 1px solid var(--ws-border);
-    background: #fdfdfd;
-    font-size: 0.9375rem;
-    color: var(--ws-text-main);
-    transition: all 0.2s;
-    outline: none;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
 }
 
-.ws-select-modern:focus,
-.ws-input-modern:focus {
-    border-color: var(--ws-accent);
-    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+.sidebar-section {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.btn-start-campaign {
-    margin-top: auto;
+.sending-summary-minimal {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sending-summary-minimal span {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.sending-summary-minimal small {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.btn-send-main {
+    margin-top: 8px;
     width: 100%;
     padding: 14px;
     background: var(--ws-accent);
     color: white;
     border: none;
-    border-radius: var(--ws-radius-md);
-    font-weight: 700;
-    font-size: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 6px rgba(37, 211, 102, 0.2);
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
 }
 
-.btn-start-campaign:hover {
-    background: var(--ws-accent-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(37, 211, 102, 0.3);
+.btn-send-main:hover:not(:disabled) {
+    background: #128C7E;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
 }
 
-.btn-start-campaign:disabled {
+.btn-send-main:disabled {
     background: #cbd5e1;
     cursor: not-allowed;
-    transform: none;
     box-shadow: none;
 }
 
-/* Main Content */
+/* Main Content Area Refined */
 .ws-main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: #ffffff;
+    background: white;
+    overflow: hidden;
 }
 
 .ws-nav-tabs {
     display: flex;
-    gap: 8px;
-    padding: 12px 24px;
-    background: #fdfdfd;
-    border-bottom: 1px solid var(--ws-border);
+    padding: 0 32px;
+    border-bottom: 1px solid var(--ws-bg-soft);
+    gap: 24px;
 }
 
 .ws-nav-tabs button {
-    padding: 8px 16px;
-    border-radius: 8px;
+    background: none;
     border: none;
-    background: transparent;
-    color: var(--ws-text-muted);
+    padding: 16px 0;
+    font-size: 0.85rem;
     font-weight: 600;
-    font-size: 0.875rem;
+    color: #64748b;
     cursor: pointer;
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
     transition: all 0.2s;
 }
 
-.ws-nav-tabs button:hover {
-    background: #f3f4f6;
-    color: var(--ws-text-main);
+.ws-nav-tabs button.active {
+    color: #0f172a;
 }
 
-.ws-nav-tabs button.active {
-    background: var(--wa-primary-soft);
-    color: var(--ws-accent-dark);
+.ws-nav-tabs button.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--ws-accent);
 }
 
 .ws-tab-panel {
     flex: 1;
-    overflow-y: auto;
-    padding: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Template Cards */
-.templates-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+/* List View Toolbar Refined */
+.view-toolbar {
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fdfdfe;
+    border-bottom: 1px solid #f1f5f9;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-.template-pro-card {
+.btn-check-all {
     background: white;
-    border: 1px solid var(--ws-border);
-    border-radius: var(--ws-radius-md);
-    padding: 20px;
-    transition: all 0.2s;
+    border: 1px solid #e2e8f0;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
     cursor: pointer;
     display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.template-pro-card:hover {
-    border-color: var(--ws-accent);
-    box-shadow: var(--ws-shadow-md);
-    transform: translateY(-2px);
-}
-
-.template-pro-card.active {
-    border-color: var(--ws-accent);
-    background: var(--wa-primary-soft);
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-}
-
-.card-header h4 {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--ws-text-main);
-}
-
-.card-body-preview {
-    font-size: 0.875rem;
-    color: var(--ws-text-muted);
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-/* Sending Progress Visualization - THE COMMAND CENTER */
-.sending-progress-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    z-index: 100;
-    display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 40px;
-    animation: esFadeIn 0.3s ease-out;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.command-center {
-    width: 100%;
-    max-width: 800px;
-    background: white;
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--ws-border);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+.btn-check-all:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
 }
 
-.cc-header {
-    padding: 32px;
-    background: linear-gradient(135deg, var(--ws-accent), var(--ws-accent-dark));
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.cc-status-group h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 800;
-}
-
-.cc-status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    background: rgba(255, 255, 255, 0.2);
+.stats-selected-badge {
+    background: #dcfce7;
+    /* Green light */
+    color: #166534;
+    /* Green dark */
+    padding: 4px 10px;
     border-radius: 20px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    margin-top: 8px;
     text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
-.cc-body {
-    padding: 40px;
+/* Pagination Refined */
+.ws-pagination {
+    padding: 16px 24px;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    gap: 32px;
+    border-top: 1px solid #f1f5f9;
+    background: #fdfdfe;
 }
 
-/* Progress Wheel */
-.progress-container {
-    position: relative;
-    width: 160px;
-    height: 160px;
+.page-numbers {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    gap: 6px;
 }
 
-.progress-circle-svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-}
-
-.progress-circle-bg {
-    fill: none;
-    stroke: #f3f4f6;
-    stroke-width: 8;
-}
-
-.progress-circle-fill {
-    fill: none;
-    stroke: var(--ws-accent);
-    stroke-width: 8;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 0.5s ease-out;
-}
-
-.progress-text {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.progress-percent {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--ws-text-main);
-}
-
-.progress-label {
-    font-size: 0.75rem;
-    color: var(--ws-text-muted);
-    font-weight: 600;
-}
-
-/* Next Action Area */
-.cc-action-zone {
-    width: 100%;
-    text-align: center;
-}
-
-.current-recipient-card {
-    background: #f9fafb;
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    border: 1px solid var(--ws-border);
-}
-
-.recipient-name {
-    display: block;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--ws-text-main);
-    margin-bottom: 4px;
-}
-
-.recipient-phone {
-    color: var(--ws-text-muted);
-    font-size: 0.9375rem;
-}
-
-.btn-cc-primary {
-    width: 100%;
-    max-width: 320px;
-    padding: 18px;
-    background: var(--ws-accent);
-    color: white;
-    border: none;
-    border-radius: 16px;
-    font-size: 1.125rem;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-}
-
-.btn-cc-primary:hover {
-    background: var(--ws-accent-dark);
-    transform: scale(1.02);
-    box-shadow: 0 15px 30px rgba(37, 211, 102, 0.3);
-}
-
-.cc-hotkey-hint {
-    display: block;
-    margin-top: 12px;
-    font-size: 0.75rem;
-    color: var(--ws-text-muted);
+.btn-page-nav {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
     font-weight: 500;
-}
-
-.btn-cc-cancel {
-    margin-top: 24px;
-    background: none;
-    border: none;
-    color: #ef4444;
-    font-weight: 600;
-    font-size: 0.875rem;
+    color: #64748b;
     cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
 }
 
-.btn-cc-cancel:hover {
-    opacity: 1;
-    text-decoration: underline;
+.btn-page-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-page-nav:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+.btn-page-num {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-page-num:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.btn-page-num.active {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #86efac;
+    font-weight: 700;
+}
+
+/* List Rows Refined */
+.ws-list-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px 16px;
+    background: var(--ws-bg-soft);
+}
+
+.ws-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: white;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    gap: 16px;
+}
+
+.ws-row:hover {
+    transform: translateX(4px);
+    border-color: #cbd5e1;
+}
+
+.ws-row.selected {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.row-check-area {
+    margin-right: 0;
+    display: flex;
+    align-items: center;
+}
+
+.row-main-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.row-name {
+    font-weight: 600;
+    color: var(--ws-dark);
+}
+
+.row-phone {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.meta-badge {
+    font-size: 0.75rem;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 6px;
 }
 
 /* Animations */
@@ -442,7 +455,6 @@
     }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .whatsapp-sender-split {
         flex-direction: column;
@@ -453,83 +465,38 @@
         border-right: none;
         border-bottom: 1px solid var(--ws-border);
     }
-
-    .whatsapp-sender-modal-pro {
-        height: 100vh;
-        max-height: 100vh;
-        border-radius: 0;
-    }
 }
 
-/* Recipient Table Utility */
-.ws-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.ws-row {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-radius: 10px;
-    transition: all 0.2s;
-    cursor: pointer;
-    border: 1px solid transparent;
-}
-
-.ws-row:hover {
-    background: #f9fafb;
-}
-
-.ws-row.selected {
-    background: var(--wa-primary-soft);
-    border-color: rgba(37, 211, 102, 0.2);
-}
-
-.row-check-area {
-    margin-right: 16px;
-    display: flex;
-    align-items: center;
-}
-
-.row-name {
-    font-weight: 600;
-    color: var(--ws-text-main);
-    font-size: 0.9375rem;
-    display: block;
-}
-
-.row-phone {
-    font-size: 0.8125rem;
-    color: var(--ws-text-muted);
-}
-/* Modern Progress Modal Refinement */
+/* 
+   PROGRESS OVERLAY (Keep original functionality but styled to match)
+   Reusing classes from previous step that worked well, but ensuring colors match 
+*/
 .whats-progress-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.85); /* Lighter, cleaner backdrop */
-    backdrop-filter: blur(4px);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
     z-index: 50;
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: esFadeIn 0.2s ease-out;
+    animation: esFadeIn 0.3s ease-out;
+    border-radius: 0 0 24px 24px;
 }
 
 .whats-progress-card {
-    width: 420px;
+    width: 440px;
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
-    border: 1px solid #f1f5f9;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
 .progress-card-header {
-    padding: 16px 24px;
+    background: #fafafa;
+    padding: 20px 24px;
     border-bottom: 1px solid #f1f5f9;
     display: flex;
     justify-content: space-between;
@@ -540,7 +507,87 @@
     margin: 0;
     font-size: 1.1rem;
     font-weight: 700;
+    color: #1e293b;
+}
+
+.progress-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    padding: 32px 24px 16px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
     color: #0f172a;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+}
+
+.progress-bar-modern-container {
+    margin: 20px 32px;
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-modern-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #25D366, #128C7E);
+    border-radius: 4px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.current-action-area {
+    padding: 0 32px 32px;
+    text-align: center;
+}
+
+.next-target {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-whatsapp-action {
+    width: 100%;
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-whatsapp-action:hover {
+    background: #128C7E;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(37, 211, 102, 0.35);
 }
 
 .btn-icon-close {
@@ -558,137 +605,73 @@
     color: #64748b;
 }
 
-.progress-status-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 24px 24px 8px 24px;
+/* Template Pro Card (Ported from Email/WhatsApp merge) */
+.templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 24px;
 }
 
-.progress-stat {
+.template-pro-card {
+    background: white;
+    border: 1px solid var(--ws-border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    position: relative;
+    height: 180px;
 }
 
-.stat-label {
-    font-size: 0.75rem;
-    color: #64748b;
-    margin-bottom: 2px;
-    font-weight: 500;
+.template-pro-card:hover {
+    border-color: var(--ws-accent);
+    box-shadow: 0 10px 20px -5px rgba(37, 211, 102, 0.15);
+    transform: translateY(-4px);
 }
 
-.stat-value {
-    font-size: 1.5rem;
+.template-pro-card.active {
+    border-color: var(--ws-accent);
+    background: #f0fdf4;
+    box-shadow: 0 0 0 2px var(--ws-accent);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.card-header h4 {
+    margin: 0;
+    font-size: 1.05rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--ws-dark);
 }
 
-.progress-stat-divider {
-    font-size: 1.5rem;
-    color: #cbd5e1;
-    font-weight: 300;
-    margin-top: 10px;
-}
-
-.progress-bar-modern-container {
-    margin: 16px 24px;
-    height: 6px;
-    background: #f1f5f9;
-    border-radius: 3px;
+.card-body-preview {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
-.progress-bar-modern-fill {
-    height: 100%;
-    background: #25D366;
-    border-radius: 3px;
-    transition: width 0.3s ease-out;
-}
-
-.current-action-area {
-    padding: 0 24px 24px 24px;
-    text-align: center;
-}
-
-.next-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: #94a3b8;
-    letter-spacing: 0.05em;
-    margin: 0 0 8px 0;
-    font-weight: 600;
-}
-
-.next-target {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 12px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.next-target strong {
-    color: #334155;
-    font-size: 1rem;
-}
-
-.next-target span {
-    color: #64748b;
-    font-size: 0.85rem;
-}
-
-.btn-whatsapp-action {
-    width: 100%;
-    background: #25D366;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 1rem;
-    display: flex;
+.template-pro-card.add-new {
+    border: 2px dashed #cbd5e1;
+    background: #fafafa;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(37, 211, 102, 0.2);
-    transition: all 0.2s;
-}
-
-.btn-whatsapp-action:hover {
-    background: #128C7E;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 10px rgba(37, 211, 102, 0.25);
-}
-
-.hint-text {
-    margin-top: 12px;
-    font-size: 0.75rem;
     color: #94a3b8;
 }
 
-.completion-state {
-    padding: 20px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    animation: esFadeIn 0.3s ease-out;
+.template-pro-card.add-new:hover {
+    border-color: var(--ws-accent);
+    background: #f0fdf4;
+    color: var(--ws-accent);
 }
-
-.check-circle {
-    width: 60px;
-    height: 60px;
-    background: #dcfce7;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #22c55e;
-}
-

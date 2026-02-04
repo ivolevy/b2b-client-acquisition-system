@@ -6,7 +6,7 @@
 
 :root {
   /* Exact Palette from LandingPage.css */
-  --lp-primary: #2563EB;
+  --lp-primary: var(--primary);
   --lp-primary-hover: #1d4ed8;
   --lp-dark: #0f172a;
   --lp-text: #334155;

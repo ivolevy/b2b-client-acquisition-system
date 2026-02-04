@@ -63,7 +63,7 @@
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
   /* Blue-500 */
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
@@ -82,7 +82,7 @@
 }
 
 .btn-create {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -257,7 +257,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid #e2e8f0;
-  border-top-color: #3b82f6;
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 12px;
@@ -550,7 +550,7 @@
   }
 
   .btn-view {
-    color: #3b82f6;
+    color: var(--primary);
     border: 1px solid #dbeafe;
   }
 

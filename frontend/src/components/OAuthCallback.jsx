@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { API_URL } from '../config';
-import { useAuth } from '../AuthWrapper';
+import { useAuth } from '../context/AuthContext';
 
 const OAuthCallback = () => {
     const { provider } = useParams(); // 'google' or 'outlook'

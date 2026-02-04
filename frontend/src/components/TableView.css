@@ -631,7 +631,7 @@
 
 .count-filtered {
     font-weight: 700;
-    color: #3b82f6;
+    color: var(--primary);
     /* Blue to match profilea */
     font-size: 1.1rem;
 }
@@ -674,7 +674,7 @@
 }
 
 .view-toggle-inline button.active {
-    color: #3b82f6;
+    color: var(--primary);
     /* Blue */
     background: #eff6ff;
     /* Light blue bg */
@@ -816,7 +816,7 @@
 
 .filter-inline-input:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--primary);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
@@ -891,8 +891,8 @@
 
 .filter-toggle-btn.active {
     background: #eff6ff;
-    color: #3b82f6;
-    border-color: #3b82f6;
+    color: var(--primary);
+    border-color: var(--primary);
     z-index: 2;
 }
 
@@ -954,7 +954,7 @@
 }
 
 .filter-checkbox-inline input[type="checkbox"] {
-    accent-color: #3b82f6;
+    accent-color: var(--primary);
     width: 16px;
     height: 16px;
 }
@@ -1017,30 +1017,20 @@
     transition: all 0.2s;
 }
 
-.btn-export {
-    background: white;
-    border: 1px solid #10b981;
-    color: #10b981;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
+.btn-export,
 .btn-export-pdf {
-    background: white;
-    border: 1px solid #ef4444;
-    color: #ef4444;
+    background: white !important;
+    border: 1px solid var(--primary) !important;
+    color: var(--primary) !important;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border-radius: 8px !important;
 }
 
-.btn-export:hover:not(:disabled) {
-    background: #10b981;
-    color: white;
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-}
-
+.btn-export:hover:not(:disabled),
 .btn-export-pdf:hover:not(:disabled) {
-    background: #ef4444;
-    color: white;
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    background: var(--primary) !important;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(44, 82, 130, 0.2);
 }
 
 .btn-delete {

@@ -145,7 +145,7 @@ const RevenueView = ({ overview, mrrData, growthData, formatCurrency }) => (
                         <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
                         <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} tickFormatter={(val) => `$${val/1000}k`} />
                         <Tooltip formatter={(value) => formatCurrency(value)} cursor={{fill: '#f8fafc'}} />
-                        <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="revenue" fill="var(--primary)" radius={[4, 4, 0, 0]} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
@@ -158,7 +158,7 @@ const RevenueView = ({ overview, mrrData, growthData, formatCurrency }) => (
                         <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="active" name="Pagos" stroke="#3b82f6" strokeWidth={2} dot={{r: 4}} />
+                        <Line type="monotone" dataKey="active" name="Pagos" stroke="var(--primary)" strokeWidth={2} dot={{r: 4}} />
                         <Line type="monotone" dataKey="free" name="Gratuitos" stroke="#94a3b8" strokeWidth={2} dot={{r: 4}} />
                     </LineChart>
                 </ResponsiveContainer>
@@ -199,7 +199,7 @@ const CostsView = ({ overview, formatUSD }) => {
                         {formatUSD(freeTierRemaining)} <span style={{ fontSize: '14px', fontWeight: '400', color: '#94a3b8' }}>disp.</span>
                     </div>
                     <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                        <div style={{ width: `${Math.min(100, (overview.grossApiCostUSD / FREE_TIER) * 100)}%`, height: '100%', background: '#3b82f6' }}></div>
+                        <div style={{ width: `${Math.min(100, (overview.grossApiCostUSD / FREE_TIER) * 100)}%`, height: '100%', background: 'var(--primary)' }}></div>
                     </div>
                 </div>
 
@@ -225,7 +225,7 @@ const CostsView = ({ overview, formatUSD }) => {
                 {/* 2. UNIT ECONOMICS (THE "CORE") */}
                 <div style={{ background: 'white', padding: '25px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
                     <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ background: '#eff6ff', color: '#3b82f6', padding: '4px 8px', borderRadius: '6px' }}>📊</span> 
+                        <span style={{ background: '#eff6ff', color: 'var(--primary)', padding: '4px 8px', borderRadius: '6px' }}>📊</span> 
                         Unit Economics (Por Lead)
                     </h3>
                     
@@ -256,21 +256,21 @@ const CostsView = ({ overview, formatUSD }) => {
                 </div>
 
                 {/* 3. SCALABILITY PREDICTOR */}
-                <div style={{ background: 'white', padding: '25px', borderRadius: '16px', border: '2px solid #3b82f6' }}>
+                <div style={{ background: 'white', padding: '25px', borderRadius: '16px', border: '2px solid var(--primary)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
                         <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>Simulador de Escala (Predicción)</h3>
-                        <span style={{ background: '#3b82f6', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>PROYECCIÓN LTM</span>
+                        <span style={{ background: 'var(--primary)', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>PROYECCIÓN LTM</span>
                     </div>
 
                     <div style={{ marginBottom: '30px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                             <label style={{ fontSize: '14px', color: '#475569', fontWeight: '600' }}>Volumen de Extracciones Mensuales (Leads)</label>
-                            <span style={{ fontWeight: '800', color: '#3b82f6', fontSize: '18px' }}>{targetLeadsVolume.toLocaleString()}</span>
+                            <span style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '18px' }}>{targetLeadsVolume.toLocaleString()}</span>
                         </div>
                         <input 
                             type="range" min="1000" max="100000" step="1000" value={targetLeadsVolume} 
                             onChange={(e) => setTargetLeadsVolume(Number(e.target.value))}
-                            style={{ width: '100%', accentColor: '#3b82f6', height: '6px' }} 
+                            style={{ width: '100%', accentColor: 'var(--primary)', height: '6px' }} 
                         />
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
                             <span style={{ fontSize: '10px', color: '#94a3b8' }}>Low Volume (1k)</span>
@@ -366,12 +366,12 @@ const TransactionsView = ({ txsARS, txsUSD, exchangeRates, formatCurrency, forma
                         <div style={{ display: 'flex', gap: '5px' }}>
                             <button 
                                 onClick={() => handleRateChange('official')}
-                                style={{ padding: '6px 12px', borderRadius: '6px', border: rateType === 'official' ? '1px solid #3b82f6' : '1px solid #cbd5e1', background: rateType === 'official' ? '#eff6ff' : 'white', color: rateType === 'official' ? '#1d4ed8' : '#64748b', cursor: 'pointer', fontSize: '13px' }}>
+                                style={{ padding: '6px 12px', borderRadius: '6px', border: rateType === 'official' ? '1px solid var(--primary)' : '1px solid #cbd5e1', background: rateType === 'official' ? '#eff6ff' : 'white', color: rateType === 'official' ? 'var(--primary-dark)' : '#64748b', cursor: 'pointer', fontSize: '13px' }}>
                                 Oficial (${exchangeRates?.official || 850})
                             </button>
                             <button 
                                 onClick={() => handleRateChange('blue')}
-                                style={{ padding: '6px 12px', borderRadius: '6px', border: rateType === 'blue' ? '1px solid #3b82f6' : '1px solid #cbd5e1', background: rateType === 'blue' ? '#eff6ff' : 'white', color: rateType === 'blue' ? '#1d4ed8' : '#64748b', cursor: 'pointer', fontSize: '13px' }}>
+                                style={{ padding: '6px 12px', borderRadius: '6px', border: rateType === 'blue' ? '1px solid var(--primary)' : '1px solid #cbd5e1', background: rateType === 'blue' ? '#eff6ff' : 'white', color: rateType === 'blue' ? 'var(--primary-dark)' : '#64748b', cursor: 'pointer', fontSize: '13px' }}>
                                 Blue (${exchangeRates?.blue || 1200})
                             </button>
                             <input 

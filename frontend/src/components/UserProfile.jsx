@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../AuthWrapper';
+import { useAuth } from '../context/AuthContext';
 import { authService, supabase } from '../lib/supabase';
 import { API_URL } from '../config';
 import axios from 'axios';

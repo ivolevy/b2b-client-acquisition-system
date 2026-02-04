@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../AuthWrapper';
+import { useAuth } from '../../context/AuthContext';
 import { adminService } from '../../lib/supabase';
 import './AdminLayout.css';
 

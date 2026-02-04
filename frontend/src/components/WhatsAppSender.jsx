@@ -1,19 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { API_URL } from '../config';
 import './WhatsAppSender.css';
-import { useAuth } from '../AuthWrapper';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../hooks/useToast';
 import TemplateEditor from './TemplateEditor';
 import { 
-    FiPlus, FiEdit2, FiTrash2, FiSave, FiX, 
-    FiCheckSquare, FiSquare, FiSend, 
-    FiUsers, FiTag, FiClock, FiMessageCircle,
-    FiChevronLeft, FiChevronRight, FiPlay,
-    FiLoader, FiCheck
+    FiPlus, FiEdit2, FiTrash2, FiX, 
+    FiCheckSquare, FiSquare, 
+    FiUsers, FiTag, FiClock,
+    FiChevronLeft, FiChevronRight, FiCheck
 } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa6';
+
+const ITEMS_PER_PAGE = 10;
 
 const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
     const { user } = useAuth();
@@ -29,11 +30,11 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         isPaused: false
     });
 
-    const [editingTemplate, setEditingTemplate] = useState(null);
     const [selectedTemplateId, setSelectedTemplateId] = useState('');
     const [templatesLoading, setTemplatesLoading] = useState(false);
     const [showTemplateEditor, setShowTemplateEditor] = useState(false);
     const [currentTemplateIdToEdit, setCurrentTemplateIdToEdit] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
     const loadTemplates = async () => {
         setTemplatesLoading(true);
@@ -41,9 +42,9 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
             const response = await axios.get(`${API_URL}/templates?type=whatsapp`);
             if (response.data && response.data.data) {
                 setTemplates(response.data.data);
+                // Auto-select first template if available and none selected
                 if (response.data.data.length > 0 && !selectedTemplateId) {
-                    // Preselect first if none selected
-                    // setSelectedTemplateId(response.data.data[0].id);
+                    setSelectedTemplateId(response.data.data[0].id);
                 }
             }
         } catch (err) {
@@ -73,17 +74,24 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         loadTemplates();
     };
 
-    useEffect(() => {
-        // Only select those with phone numbers
-        setSelectedEmpresas(empresas.filter(e => e.telefono && e.telefono.trim() !== ''));
+    // Filter valid companies (must have phone)
+    const validEmpresas = React.useMemo(() => {
+        return empresas.filter(e => e.telefono && e.telefono.trim().length > 5);
     }, [empresas]);
+
+    useEffect(() => {
+        // Auto-select valid ones initially or just keep state clean
+        // Strategy: Start with none selected, or all? EmailSender selects all valid by default in some versions, 
+        // but let's stick to user explicit selection or just filtering valid.
+        // For now, let's just ensure selectedEmpresas are valid.
+        setSelectedEmpresas(prev => prev.filter(p => validEmpresas.find(v => v.id === p.id)));
+    }, [validEmpresas]);
 
     // Keyboard Shortcuts
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (sendingState.active) {
                 if (e.key === 'Enter') {
-                    // Prevent default to avoid clicking other things
                     e.preventDefault();
                     handleNext();
                 } else if (e.key === 'Escape') {
@@ -126,13 +134,11 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         
         // Use logic from TemplateEditor variables (body_text)
         let message = template ? (template.body_text || template.body) : '';
-        // Replace variables
         message = message.replace(/{nombre}/g, empresa.nombre || 'cliente');
-        message = message.replace(/{empresa}/g, empresa.nombre || ''); // Assuming nombre is company name in some contexts, or handle separately
+        message = message.replace(/{empresa}/g, empresa.nombre || ''); 
         message = message.replace(/{rubro}/g, empresa.rubro || '');
         message = message.replace(/{ciudad}/g, empresa.ciudad || '');
 
-        // Basic phone cleaning
         const phone = empresa.telefono.replace(/\D/g, '');
         const url = `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
         
@@ -167,6 +173,14 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         success("¡Campaña finalizada exitosamente!");
     };
 
+    const toggleAllEmpresas = () => {
+        if (selectedEmpresas.length === validEmpresas.length) {
+            setSelectedEmpresas([]);
+        } else {
+            setSelectedEmpresas([...validEmpresas]);
+        }
+    };
+
     const toggleEmpresa = (id) => {
         if (selectedEmpresas.find(e => e.id === id)) {
             setSelectedEmpresas(selectedEmpresas.filter(e => e.id !== id));
@@ -180,8 +194,16 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         ? Math.round((sendingState.completed / sendingState.total) * 100) 
         : 0;
 
-    // SVG Circle math: Circumference = 2 * PI * R. If R=70, C ≈ 440
-    const strokeDashoffset = 440 - (440 * progressPercent) / 100;
+    // --- PAGINATION LOGIC ---
+    const totalPages = Math.ceil(validEmpresas.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedEmpresas = validEmpresas.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+    const goToPage = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
 
     const content = (
         <div className={embedded ? "whatsapp-sender-embedded" : "whatsapp-sender-overlay"}>
@@ -189,55 +211,53 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
                 
                 {/* Header for Modal Mode */}
                 {!embedded && (
-                    <div className="whatsapp-header-refined" style={{ padding: '16px 24px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div className="whatsapp-header-simple">
+                        <div className="header-title">
                             <FaWhatsapp size={24} color="#25D366" />
-                            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>WhatsApp Business</h2>
+                            <span>WhatsApp Business</span>
                         </div>
-                        <button onClick={onClose} className="btn-close-minimal" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}><FiX size={24} /></button>
+                        <button onClick={onClose} className="close-btn-minimal"><FiX /></button>
                     </div>
                 )}
 
                 <div className="whatsapp-sender-split">
                     {/* SIDEBAR */}
                     <aside className="ws-sidebar">
-                        <span className="section-label">Configuración</span>
-                        
-                        <div className="sidebar-field">
-                            <label className="field-label-small">Plantilla de Mensaje</label>
-                            <label className="field-label-small">Plantilla de Mensaje</label>
-                            {templatesLoading ? (
-                                <div style={{ fontSize: '0.8rem', color: '#666' }}>Cargando plantillas...</div>
-                            ) : (
-                                <select 
-                                    className="ws-select-modern"
-                                    value={selectedTemplateId}
-                                    onChange={(e) => setSelectedTemplateId(e.target.value)}
-                                >
-                                    <option value="">Seleccionar plantilla...</option>
-                                    {templates.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-                                </select>
-                            )}
-                        </div>
-
-                        <div className="sidebar-field">
-                            <label className="field-label-small">Resumen</label>
-                            <div style={{ background: 'var(--wa-primary-soft)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
-                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#075E54' }}>{selectedEmpresas.length}</div>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#075E54', opacity: 0.8 }}>PROSPECTOS LISTOS</div>
+                        <div className="sidebar-section">
+                            <span className="section-label">Configuración de Envío</span>
+                            
+                            <div className="sidebar-field">
+                                <label className="field-label-small">Plantilla Activa</label>
+                                {templatesLoading ? (
+                                    <div style={{ fontSize: '0.8rem', color: '#666' }}>Cargando...</div>
+                                ) : (
+                                    <select 
+                                        className="ws-select-modern"
+                                        value={selectedTemplateId}
+                                        onChange={(e) => setSelectedTemplateId(e.target.value)}
+                                    >
+                                        <option value="">Seleccionar plantilla...</option>
+                                        {templates.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+                                    </select>
+                                )}
                             </div>
-                        </div>
 
-                        <button 
-                            className="btn-start-campaign"
-                            onClick={startCampaign}
-                            disabled={selectedEmpresas.length === 0 || !selectedTemplateId}
-                        >
-                            <FiSend /> Iniciar Campaña
-                        </button>
-                        
-                        <div style={{ marginTop: '20px', fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center' }}>
-                            Asegurate de tener WhatsApp Web abierto en otra pestaña.
+                            <div className="sending-summary-minimal">
+                                <span>{selectedEmpresas.length} prospectos</span>
+                                <small>Listos para enviar</small>
+                            </div>
+
+                            <button 
+                                className="btn-send-main"
+                                onClick={startCampaign}
+                                disabled={selectedEmpresas.length === 0 || !selectedTemplateId}
+                            >
+                                <FaWhatsapp /> Iniciar Campaña
+                            </button>
+                            
+                            <div style={{ marginTop: '16px', fontSize: '0.75rem', color: '#94a3b8', lineHeight: '1.4' }}>
+                                <strong>Nota:</strong> Asegurate de tener WhatsApp Web abierto en otra pestaña del navegador.
+                            </div>
                         </div>
                     </aside>
 
@@ -254,38 +274,83 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
 
                         <div className="ws-tab-panel">
                             {activeTab === 'list' && (
-                                <div className="ws-list-container">
-                                    <div style={{ marginBottom: '16px', fontSize: '0.875rem', color: '#64748b' }}>
-                                        Mostrando {empresas.length} resultados. Solo los que tienen teléfono son elegibles.
+                                <div className="recipients-view" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                    <div className="view-toolbar">
+                                        <button className="btn-check-all" onClick={toggleAllEmpresas}>
+                                            {selectedEmpresas.length === validEmpresas.length && validEmpresas.length > 0 ? <FiCheckSquare size={14} /> : <FiSquare size={14} />}
+                                            {selectedEmpresas.length === validEmpresas.length && validEmpresas.length > 0 ? 'Deseleccionar todos' : 'Seleccionar todos'}
+                                        </button>
+                                        <div className="stats-selected-badge">{selectedEmpresas.length} seleccionados</div>
                                     </div>
-                                    {empresas.map(empresa => (
-                                        <div 
-                                            key={empresa.id} 
-                                            className={`ws-row ${selectedEmpresas.find(e => e.id === empresa.id) ? 'selected' : ''} ${!empresa.telefono ? 'disabled' : ''}`}
-                                            onClick={() => empresa.telefono && toggleEmpresa(empresa.id)}
-                                            style={{ opacity: empresa.telefono ? 1 : 0.5, cursor: empresa.telefono ? 'pointer' : 'not-allowed' }}
-                                        >
-                                            <div className="row-check-area">
-                                                {selectedEmpresas.find(e => e.id === empresa.id) ? 
-                                                    <FiCheckSquare size={18} color="#25D366" /> : 
-                                                    <FiSquare size={18} color="#cbd5e1" />
-                                                }
+
+                                    <div className="ws-list-container">
+                                        {/* Empty State in List */}
+                                        {validEmpresas.length === 0 && (
+                                            <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                                                <FiUsers size={40} style={{ marginBottom: '16px', opacity: 0.5 }} />
+                                                <p>No hay destinatarios con teléfono válido.</p>
                                             </div>
-                                            <div className="row-content">
-                                                <span className="row-name">{empresa.nombre}</span>
-                                                <span className="row-phone">{empresa.telefono || 'Sin teléfono'}</span>
+                                        )}
+
+                                        {paginatedEmpresas.map(empresa => (
+                                            <div 
+                                                key={empresa.id} 
+                                                className={`ws-row ${selectedEmpresas.find(e => e.id === empresa.id) ? 'selected' : ''}`}
+                                                onClick={() => toggleEmpresa(empresa.id)}
+                                            >
+                                                <div className="row-check-area">
+                                                    {selectedEmpresas.find(e => e.id === empresa.id) ? 
+                                                        <FiCheckSquare size={18} color="#25D366" /> : 
+                                                        <FiSquare size={18} color="#cbd5e1" />
+                                                    }
+                                                </div>
+                                                <div className="row-main-info">
+                                                    <span className="row-name">{empresa.nombre}</span>
+                                                    <span className="row-phone">{empresa.telefono || 'Sin teléfono'}</span>
+                                                </div>
+                                                <div className="row-meta">
+                                                    <span className="meta-badge">{empresa.rubro}</span>
+                                                </div>
                                             </div>
-                                            <div style={{ marginLeft: 'auto' }}>
-                                                <span style={{ fontSize: '0.75rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '10px', color: '#64748b' }}>
-                                                    {empresa.rubro}
-                                                </span>
+                                        ))}
+                                    </div>
+
+                                    {totalPages > 1 && (
+                                        <div className="ws-pagination">
+                                            <button 
+                                                className="btn-page-nav" 
+                                                onClick={() => goToPage(currentPage - 1)}
+                                                disabled={currentPage === 1}
+                                            >
+                                                <FiChevronLeft /> Anterior
+                                            </button>
+                                            
+                                            <div className="page-numbers">
+                                                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                                    // Simple pagination logic for display (show first 5 or logic)
+                                                    // For exact clone, simplistic is fine
+                                                    let p = i + 1;
+                                                    if (totalPages > 5 && currentPage > 3) p = currentPage - 2 + i;
+                                                    if (p > totalPages) return null;
+                                                    return (
+                                                        <button 
+                                                            key={p} 
+                                                            className={`btn-page-num ${currentPage === p ? 'active' : ''}`}
+                                                            onClick={() => goToPage(p)}
+                                                        >
+                                                            {p}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
-                                        </div>
-                                    ))}
-                                    {empresas.length === 0 && (
-                                        <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-                                            <FiUsers size={40} style={{ marginBottom: '16px', opacity: 0.5 }} />
-                                            <p>No hay destinatarios en la lista.</p>
+
+                                            <button 
+                                                className="btn-page-nav" 
+                                                onClick={() => goToPage(currentPage + 1)}
+                                                disabled={currentPage === totalPages}
+                                            >
+                                                Siguiente <FiChevronRight />
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -312,7 +377,6 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
                                     ))}
                                     <div 
                                         className="template-pro-card add-new" 
-                                        style={{ borderStyle: 'dashed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', cursor: 'pointer' }}
                                         onClick={handleNewTemplate}
                                     >
                                         <div style={{ textAlign: 'center' }}>
@@ -326,7 +390,7 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
                     </main>
                 </div>
 
-                {/* Refined Progress Overlay */}
+                {/* Progress Overlay - Kept logic but matches container style */}
                 {sendingState.active && (
                     <div className="whats-progress-backdrop">
                         <div className="whats-progress-card">
@@ -354,18 +418,15 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
                             <div className="current-action-area">
                                 {sendingState.currentIndex < sendingState.total ? (
                                     <>
-                                        <p className="next-label">Próximo destinatario:</p>
+                                        <p className="stat-label" style={{marginBottom: '12px'}}>Próximo destinatario:</p>
                                         <div className="next-target">
                                             <strong>{selectedEmpresas[sendingState.currentIndex].nombre}</strong>
                                             <span>{selectedEmpresas[sendingState.currentIndex].telefono}</span>
                                         </div>
                                         
-                                        <div className="action-buttons-row">
-                                            <button className="btn-whatsapp-action" onClick={handleNext}>
-                                                <FaWhatsapp /> Abrir Chat y Enviar
-                                            </button>
-                                            <p className="hint-text">Presioná <strong>Enter</strong> para continuar</p>
-                                        </div>
+                                        <button className="btn-whatsapp-action" onClick={handleNext}>
+                                            <FaWhatsapp /> Abrir Chat y Enviar
+                                        </button>
                                     </>
                                 ) : (
                                     <div className="completion-state">

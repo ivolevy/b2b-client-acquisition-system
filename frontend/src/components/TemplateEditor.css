@@ -1,9 +1,9 @@
-/* TemplateEditor.css - Refined Dark Pro */
+/* TemplateEditor.css - Refined Light Pro */
 
 .template-editor-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.7);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
@@ -14,7 +14,7 @@
 }
 
 .template-editor-modal {
-    background: #0f172a;
+    background: #ffffff;
     width: 100%;
     max-width: 750px;
     max-height: 90vh;
@@ -22,8 +22,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: none;
 }
 
 .template-editor-header {
@@ -31,15 +31,15 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid #e2e8f0;
+    background: white;
 }
 
 .template-editor-header h2 {
     margin: 0;
     font-size: 1.25rem;
     font-weight: 700;
-    color: #f8fafc;
+    color: #0f172a;
     flex: 1;
 }
 
@@ -49,6 +49,7 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+    background: white;
 }
 
 .form-group {
@@ -60,27 +61,29 @@
 .form-group label {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #94a3b8;
+    color: #64748b;
 }
 
 .form-group input,
 .form-group textarea {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 12px 16px;
-    color: #f1f5f9;
+    color: #0f172a;
     font-size: 0.9375rem;
     transition: all 0.2s;
     width: 100%;
     outline: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    /* Slight shadow for depth */
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-    border-color: #3b82f6;
-    background: rgba(30, 41, 59, 0.8);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    border-color: var(--editor-accent);
+    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.15);
+    /* Fallback or calculate opacity if possible, for now let's keep it generic or use accent */
 }
 
 .form-group textarea {
@@ -88,14 +91,16 @@
     line-height: 1.6;
     resize: vertical;
     font-family: inherit;
+    background-color: #fcfcfc;
+    /* Slightly off-white for text area */
 }
 
 /* Variable Insertion Bar */
 .variables-section {
-    background: rgba(255, 255, 255, 0.03);
+    background: #f8fafc;
     padding: 16px;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid #e2e8f0;
 }
 
 .variables-section label {
@@ -115,20 +120,22 @@
 }
 
 .variable-chip {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: var(--editor-accent);
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 0.8125rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .variable-chip:hover {
-    background: #3b82f6;
-    color: white;
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: var(--editor-accent);
     transform: translateY(-1px);
 }
 
@@ -142,27 +149,29 @@
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    background: rgba(255, 255, 255, 0.01);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: #fdfdfe;
+    border-top: 1px solid #e2e8f0;
 }
 
 .btn-editor-cancel {
     padding: 10px 20px;
     background: transparent;
-    color: #94a3b8;
+    color: #64748b;
     border: none;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    border-radius: 8px;
 }
 
 .btn-editor-cancel:hover {
-    color: #f8fafc;
+    background: #f1f5f9;
+    color: #0f172a;
 }
 
 .btn-editor-save {
     padding: 10px 24px;
-    background: #3b82f6;
+    background: var(--editor-accent);
     color: white;
     border: none;
     border-radius: 10px;
@@ -172,16 +181,19 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
 }
 
 .btn-editor-save:hover {
-    background: #2563eb;
+    background: var(--editor-accent);
+    filter: brightness(0.9);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-editor-save:disabled {
-    background: #475569;
+    background: #cbd5e1;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }

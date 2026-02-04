@@ -2,7 +2,7 @@
 
 :root {
   --es-sidebar-w: 320px;
-  --es-accent: #3b82f6;
+  --es-accent: var(--primary);
   --es-dark: #0f172a;
   --es-border: #e2e8f0;
   --es-bg-soft: #f8fafc;
@@ -266,7 +266,7 @@
 }
 
 .auth-link-row .active-icon {
-  color: #3b82f6;
+  color: var(--primary);
   font-size: 1rem;
 }
 
@@ -456,7 +456,7 @@
   margin-top: 8px;
   width: 100%;
   padding: 14px;
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 12px;
@@ -468,7 +468,7 @@
 }
 
 .btn-send-main:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primary-dark);
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
@@ -1014,11 +1014,13 @@
 .file-chip-remove:hover {
   color: #ef4444;
 }
+
 @keyframes esFadeIn {
   from {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

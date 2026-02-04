@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Navbar.css';
-import { useAuth } from '../AuthWrapper';
+import { useAuth } from '../context/AuthContext';
 
 function Navbar({ onNavigateToProfile, creditsInfo }) {
   const navigate = useNavigate();

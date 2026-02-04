@@ -5,12 +5,13 @@ import { API_URL } from '../config';
 import './EmailSender.css';
 import GmailConnection from './GmailConnection';
 import OutlookConnection from './OutlookConnection';
-import { useAuth } from '../AuthWrapper';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../hooks/useToast';
+import TemplateEditor from './TemplateEditor';
 import { 
-    FiPlus, FiEdit2, FiTrash2, FiSave, FiX, 
+    FiPlus, FiEdit2, FiTrash2, FiX, 
     FiCheckSquare, FiSquare, FiSend, 
-    FiMail, FiUsers, FiSettings, FiTag, FiClock, FiLink,
+    FiUsers, FiTag, FiClock,
     FiChevronLeft, FiChevronRight, FiPaperclip
 } from 'react-icons/fi';
 
@@ -29,14 +30,13 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     const [currentPage, setCurrentPage] = useState(1);
 
     // Template Editing State
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentTemplate, setCurrentTemplate] = useState({ id: null, nombre: '', subject: '', body_text: '' });
     const [selectedTemplateId, setSelectedTemplateId] = useState('');
+    const [showTemplateEditor, setShowTemplateEditor] = useState(false);
+    const [currentTemplateIdToEdit, setCurrentTemplateIdToEdit] = useState(null);
     
     // Attachments State
     const [files, setFiles] = useState([]);
     const fileInputRef = useRef(null);
-    const textareaRef = useRef(null);
 
     const isAnyConnected = authStatus.google || authStatus.outlook;
 
@@ -55,7 +55,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
 
     const loadTemplates = async () => {
         try {
-            const response = await axios.get(`${API_URL}/templates`);
+            const response = await axios.get(`${API_URL}/templates?type=email`);
             if (response.data && response.data.data) {
                 setTemplates(response.data.data);
                 if (response.data.data.length > 0 && !selectedTemplateId) {
@@ -64,6 +64,35 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
             }
         } catch (err) {
             console.error('Error loading templates:', err);
+        }
+    };
+
+    const handleNewTemplate = () => {
+        setCurrentTemplateIdToEdit(null);
+        setShowTemplateEditor(true);
+    };
+
+    const handleEditTemplate = (id, e) => {
+        if (e) e.stopPropagation();
+        setCurrentTemplateIdToEdit(id);
+        setShowTemplateEditor(true);
+    };
+
+    const handleTemplateSaved = () => {
+        setShowTemplateEditor(false);
+        loadTemplates(); // reload to get updates
+    };
+
+    const deleteTemplate = async (id, e) => {
+        if (e) e.stopPropagation();
+        if (window.confirm("¿Eliminar plantilla?")) {
+            try {
+                await axios.delete(`${API_URL}/templates/${id}`);
+                loadTemplates();
+                success("Plantilla eliminada.");
+            } catch (err) {
+                error("Error al eliminar.");
+            }
         }
     };
 
@@ -86,25 +115,6 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
             console.error('Error checking auth status:', err);
             setAuthStatus(prev => ({ ...prev, loading: false }));
         }
-    };
-
-    const insertVariable = (variable) => {
-        if (!textareaRef.current) return;
-        const start = textareaRef.current.selectionStart;
-        const end = textareaRef.current.selectionEnd;
-        const text = currentTemplate.body_text;
-        const before = text.substring(0, start);
-        const after = text.substring(end);
-        const newText = `${before}{{${variable}}}${after}`;
-        
-        setCurrentTemplate({ ...currentTemplate, body_text: newText });
-        
-        // Return focus and move cursor
-        setTimeout(() => {
-            textareaRef.current.focus();
-            const cursorPos = start + variable.length + 4;
-            textareaRef.current.setSelectionRange(cursorPos, cursorPos);
-        }, 0);
     };
 
     const handleFileChange = (e) => {
@@ -194,26 +204,6 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
             error(err.response?.data?.detail || "Error en el envío.");
         } finally {
             setSending(false);
-        }
-    };
-
-    const handleSaveTemplate = async () => {
-        if (!currentTemplate.nombre || !currentTemplate.subject || !currentTemplate.body_text) {
-            warning("Completá todos los campos.");
-            return;
-        }
-        try {
-            if (currentTemplate.id) {
-                await axios.put(`${API_URL}/templates/${currentTemplate.id}`, currentTemplate);
-                success("Plantilla actualizada.");
-            } else {
-                await axios.post(`${API_URL}/templates`, currentTemplate);
-                success("Plantilla creada.");
-            }
-            setIsEditing(false);
-            loadTemplates();
-        } catch (err) {
-            error("Error al guardar.");
         }
     };
 
@@ -429,74 +419,52 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                             )}
 
                             {activeTab === 'templates' && (
-                                <div className="templates-view">
-                                    {isEditing ? (
-                                        <div className="pro-editor">
-                                            <div className="editor-header-actions">
-                                                <h3>{currentTemplate.id ? 'Editar Plantilla' : 'Nueva Plantilla'}</h3>
-                                                <button className="btn-icon" onClick={() => setIsEditing(false)}><FiX /></button>
-                                            </div>
-                                            <div className="editor-form">
-                                                <input 
-                                                    className="es-input-modern" 
-                                                    placeholder="Nombre de la plantilla" 
-                                                    value={currentTemplate.nombre} 
-                                                    onChange={e => setCurrentTemplate({...currentTemplate, nombre: e.target.value})} 
-                                                />
-                                                <input 
-                                                    className="es-input-modern" 
-                                                    placeholder="Asunto del correo" 
-                                                    value={currentTemplate.subject} 
-                                                    onChange={e => setCurrentTemplate({...currentTemplate, subject: e.target.value})} 
-                                                />
-                                                
-                                                <div className="variable-picker">
-                                                    <label>Insertar Variable:</label>
-                                                    <div className="var-buttons">
-                                                        <button onClick={() => insertVariable('nombre')}>Nombre</button>
-                                                        <button onClick={() => insertVariable('empresa')}>Empresa</button>
-                                                        <button onClick={() => insertVariable('rubro')}>Rubro</button>
-                                                        <button onClick={() => insertVariable('ciudad')}>Ciudad</button>
+                                <div className="templates-view" style={{ padding: '24px' }}>
+                                    <div className="templates-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+                                        <div 
+                                            className="template-pro-card add-new" 
+                                            onClick={handleNewTemplate}
+                                            style={{ border: '2px dashed #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '180px', borderRadius: '16px', cursor: 'pointer', background: '#fafafa', flexDirection: 'column', color: '#94a3b8' }}
+                                        >
+                                            <FiPlus size={24} />
+                                            <span style={{ marginTop: '8px', fontWeight: 600, fontSize: '0.85rem' }}>NUEVA PLANTILLA</span>
+                                        </div>
+                                        
+                                        {templates.map(t => (
+                                            <div 
+                                                key={t.id} 
+                                                className={`template-pro-card ${selectedTemplateId === t.id ? 'active' : ''}`}
+                                                onClick={() => setSelectedTemplateId(t.id)}
+                                                style={{ border: selectedTemplateId === t.id ? '1px solid #3b82f6' : '1px solid #e2e8f0', background: selectedTemplateId === t.id ? '#eff6ff' : 'white', borderRadius: '16px', padding: '24px', cursor: 'pointer', minHeight: '180px', display: 'flex', flexDirection: 'column' }}
+                                            >
+                                                <div className="card-top" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                                                    <h4 style={{ margin: 0, fontWeight: 700, color: '#0f172a' }}>{t.nombre}</h4>
+                                                    <div className="card-actions" style={{ display: 'flex', gap: '8px' }}>
+                                                        <button 
+                                                            className="btn-tiny" 
+                                                            onClick={(e) => handleEditTemplate(t.id, e)}
+                                                            style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b' }}
+                                                        >
+                                                            <FiEdit2 />
+                                                        </button>
+                                                        <button 
+                                                            className="btn-tiny btn-danger" 
+                                                            onClick={(e) => deleteTemplate(t.id, e)}
+                                                            style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#ef4444' }}
+                                                        >
+                                                            <FiTrash2 />
+                                                        </button>
                                                     </div>
                                                 </div>
-
-                                                <textarea 
-                                                    ref={textareaRef}
-                                                    className="es-textarea-modern" 
-                                                    placeholder="Escribí tu mensaje aquí..." 
-                                                    value={currentTemplate.body_text} 
-                                                    onChange={e => setCurrentTemplate({...currentTemplate, body_text: e.target.value})} 
-                                                />
-                                                
-                                                <div className="editor-footer">
-                                                    <button className="btn-cancel" onClick={() => setIsEditing(false)}>Descartar</button>
-                                                    <button className="btn-save" onClick={handleSaveTemplate}><FiSave /> Guardar Cambios</button>
-                                                </div>
+                                                <p className="card-subject" style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, marginBottom: '8px' }}>
+                                                    {t.subject || 'Sin asunto'}
+                                                </p>
+                                                <p className="card-body-preview" style={{ fontSize: '0.85rem', color: '#64748b', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                                                    {t.body_text}
+                                                </p>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="templates-directory">
-                                            {templates.map(t => (
-                                                <div key={t.id} className="pro-template-card">
-                                                    <div className="card-top">
-                                                        <h4>{t.nombre}</h4>
-                                                        <div className="card-actions">
-                                                            <button className="btn-tiny" onClick={() => {
-                                                                setCurrentTemplate({ id: t.id, nombre: t.nombre, subject: t.subject || '', body_text: t.body_text || t.body_html || ''});
-                                                                setIsEditing(true);
-                                                            }}><FiEdit2 /></button>
-                                                            <button className="btn-tiny btn-danger" onClick={() => {
-                                                                if(window.confirm("¿Eliminar plantilla?")) {
-                                                                    axios.delete(`${API_URL}/templates/${t.id}`).then(() => loadTemplates());
-                                                                }
-                                                            }}><FiTrash2 /></button>
-                                                        </div>
-                                                    </div>
-                                                    <p className="card-subject">{t.subject || 'Sin asunto'}</p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 
@@ -511,6 +479,15 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                     </main>
                 </div>
             </div>
+
+            {showTemplateEditor && (
+                <TemplateEditor
+                    templateId={currentTemplateIdToEdit}
+                    onClose={() => setShowTemplateEditor(false)}
+                    onSave={handleTemplateSaved}
+                    type="email"
+                />
+            )}
         </div>
     );
 
@@ -519,5 +496,3 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
 };
 
 export default EmailSender;
-
-

@@ -229,7 +229,7 @@ function AdminEmailCenter() {
                     <thead>
                     <tr>
                         <th style={{width: '40px', textAlign: 'center'}} onClick={toggleAllPage} className="th-check cursor-pointer">
-                        {isAllPageSelected ? <FiCheckSquare color="#3b82f6"/> : <FiSquare />}
+                        {isAllPageSelected ? <FiCheckSquare color="var(--primary)"/> : <FiSquare />}
                         </th>
                         <th>Nombre</th>
                         <th>Plan</th>
@@ -242,7 +242,7 @@ function AdminEmailCenter() {
                         return (
                         <tr key={user.id} onClick={() => toggleUser(user)} className={isSelected ? 'selected-row' : ''} style={{cursor: 'pointer', background: isSelected ? 'rgba(59, 130, 246, 0.05)' : ''}}>
                             <td style={{textAlign: 'center'}}>
-                            {isSelected ? <FiCheckSquare color="#3b82f6"/> : <FiSquare color="#cbd5e1"/>}
+                            {isSelected ? <FiCheckSquare color="var(--primary)"/> : <FiSquare color="#cbd5e1"/>}
                             </td>
                              <td className="name-cell">
                             <span style={{fontWeight: 500}}>{user.name || 'Sin nombre'}</span>

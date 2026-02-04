@@ -207,7 +207,7 @@
     --text-secondary: #475569;
     /* Slate 600 */
 
-    --primary: #2563eb;
+    --primary: var(--primary);
     /* Blue 600 - Slightly darker for contrast on white */
     --primary-glow: rgba(37, 99, 235, 0.2);
     --accent: #7c3aed;
@@ -468,7 +468,7 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary), #2563eb);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
     border: none;
     border-radius: 99px;
@@ -1436,7 +1436,7 @@
     font-size: 3.5rem;
     line-height: 1.1;
     margin-bottom: 24px;
-    background: linear-gradient(to right, #1e293b, #3b82f6);
+    background: linear-gradient(to right, #1e293b, var(--primary));
     /* Dark Slate to Blue */
     -webkit-background-clip: text;
     background-clip: text;
@@ -1786,7 +1786,7 @@
 }
 
 .author-avatar.blue {
-    background: #3b82f6;
+    background: var(--primary);
 }
 
 .author-avatar.violet {
@@ -2555,7 +2555,7 @@
 }
 
 .landing-page .plan-btn-new.primary:hover {
-    background: #2563eb;
+    background: var(--primary);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
 }

@@ -141,6 +141,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       setSuggestions([]);
       setIsSearching(false);
       setShowSuggestions(false);
+      return;
     }
 
     if (isSelectionUpdate.current) {

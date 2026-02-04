@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import GoogleLocationPicker from './GoogleLocationPicker';
 import LocationPicker from './LocationPicker';
-import { useAuth } from '../AuthWrapper';
+import { useAuth } from '../context/AuthContext';
 import SearchHistory from './SearchHistory';
 import './Filters.css';
 
@@ -40,7 +40,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
     }
   }, [historySearchData]);
   
-  const [scrapearWebsites, setScrapearWebsites] = useState(true);
+  const [scrapearWebsites, setScrapearWebsites] = useState(false);
   const [soloValidadas, setSoloValidadas] = useState(false);
   const [modoBusqueda, setModoBusqueda] = useState('nueva');
   
