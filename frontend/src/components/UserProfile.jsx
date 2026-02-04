@@ -425,6 +425,7 @@ function UserProfile() {
         new_password: passwordForm.newPassword
       });
 
+      if (resetResponse.data.success) {
         setCanResendCode(false);
         setPasswordStep('success'); // Cambiamos a paso de éxito personalizado
       } else {
