@@ -462,6 +462,8 @@
 .hero-buttons {
     display: flex;
     gap: 16px;
+    margin-top: 24px;
+    /* Added top spacing */
     margin-bottom: 48px;
 }
 
@@ -486,8 +488,10 @@
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
+    background: rgba(15, 23, 42, 0.05);
+    /* Darker transparent bg for light mode */
+    color: var(--text-primary);
+    /* Dark text color instead of white */
     border: 1px solid var(--border);
     border-radius: 99px;
     padding: 12px 24px;
@@ -497,8 +501,8 @@
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
+    background: rgba(15, 23, 42, 0.1);
+    border-color: var(--text-primary);
 }
 
 .hero-trust p {
@@ -2445,7 +2449,7 @@
     display: flex;
     align-items: baseline;
     gap: 4px;
-    color: white;
+    color: var(--text-primary);
 }
 
 .landing-page .plan-price-new .currency {

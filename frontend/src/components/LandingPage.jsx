@@ -769,10 +769,10 @@ const LandingPage = () => {
             <div className="extra-credits-text" style={{
               textAlign: 'center',
               marginTop: '40px',
-              color: 'white',
+              color: 'var(--text-primary)',
               fontSize: '0.9rem'
             }}>
-              <p>¿Necesitas más capacidad? Packs de créditos extra disponibles desde <strong style={{ color: '#4ade80' }}>$1 USD</strong>.</p>
+              <p>¿Necesitas más capacidad? Packs de créditos extra disponibles desde <strong style={{ color: '#2563eb' }}>$1 USD</strong>.</p>
             </div>
 
           </div>
