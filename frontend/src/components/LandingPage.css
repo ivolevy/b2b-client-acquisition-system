@@ -1933,8 +1933,8 @@
         max-width: 400px;
         /* Detailed constraint */
         height: 100%;
-        background: rgba(2, 6, 23, 0.95);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        background: #ffffff;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
         /* Border on right */
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
@@ -1965,8 +1965,8 @@
     .drawer-close-btn {
         background: transparent;
         border: none;
-        color: white;
-        /* Or slightly dimmed default */
+        color: var(--text-primary);
+        /* Dark text for white background */
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -1980,8 +1980,8 @@
     }
 
     .drawer-close-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
+        background: rgba(0, 0, 0, 0.05);
+        color: var(--primary);
         opacity: 1;
     }
 
@@ -1994,7 +1994,7 @@
     .mobile-nav-links button {
         background: transparent;
         border: none;
-        color: white;
+        color: var(--text-primary);
         font-family: var(--font-heading);
         font-size: 2rem;
         /* Slightly smaller for drawer */
@@ -2008,7 +2008,7 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .active .mobile-nav-links button {
@@ -2042,7 +2042,7 @@
     }
 
     .mobile-nav-footer {
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
         padding-top: 30px;
         opacity: 0;
     }
@@ -2064,7 +2064,7 @@
     }
 
     .mobile-socials a:hover {
-        color: white;
+        color: var(--primary);
     }
 
     .mobile-nav-footer p {
