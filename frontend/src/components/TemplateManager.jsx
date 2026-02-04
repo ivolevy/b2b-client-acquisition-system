@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { API_URL } from '../config';
 import TemplateEditor from './TemplateEditor';
@@ -75,7 +76,7 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
 
   const containerClass = embedded ? "template-manager-embedded" : "template-manager-overlay";
 
-  return (
+  const content = (
     <div className={containerClass}>
       <div className="template-manager-modal">
         <div className="template-manager-header">
@@ -152,6 +153,9 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
       </div>
     </div>
   );
+
+  if (embedded) return content;
+  return createPortal(content, document.body);
 }
 
 export default TemplateManager;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { API_URL } from '../config';
 import { FiSave, FiX, FiInfo, FiTag, FiType } from 'react-icons/fi';
@@ -94,7 +95,7 @@ function TemplateEditor({ templateId, onClose, onSave, type = 'email' }) {
     );
   }
 
-  return (
+  const content = (
     <div className="template-editor-overlay">
       <form className="template-editor-modal" onSubmit={handleSave}>
         <div className="template-editor-header">
@@ -166,6 +167,8 @@ function TemplateEditor({ templateId, onClose, onSave, type = 'email' }) {
       </form>
     </div>
   );
+
+  return createPortal(content, document.body);
 }
 
 export default TemplateEditor;

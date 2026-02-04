@@ -6,7 +6,7 @@ Reemplaza la implementación local de SQLite
 import os
 import logging
 from typing import List, Dict, Optional, Any
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from supabase import create_client, Client
 from dotenv import load_dotenv

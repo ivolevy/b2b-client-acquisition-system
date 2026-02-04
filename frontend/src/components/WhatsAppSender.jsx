@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import './WhatsAppSender.css';
 import { useAuth } from '../AuthWrapper';
 import { useToast } from '../hooks/useToast';
@@ -152,7 +153,7 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
     // SVG Circle math: Circumference = 2 * PI * R. If R=70, C ≈ 440
     const strokeDashoffset = 440 - (440 * progressPercent) / 100;
 
-    return (
+    const content = (
         <div className={embedded ? "whatsapp-sender-embedded" : "whatsapp-sender-overlay"}>
             <div className={embedded ? "whatsapp-sender-layout-pro" : "whatsapp-sender-modal-pro"}>
                 
@@ -351,6 +352,9 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
             </div>
         </div>
     );
+
+    if (embedded) return content;
+    return createPortal(content, document.body);
 };
 
 export default WhatsAppSender;

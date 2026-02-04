@@ -8,6 +8,19 @@
   --es-bg-soft: #f8fafc;
 }
 
+.email-sender-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: esFadeIn 0.3s ease-out;
+}
+
 /* Modal Pro & Layout */
 .email-sender-modal-pro {
   width: 95%;
@@ -1000,4 +1013,14 @@
 
 .file-chip-remove:hover {
   color: #ef4444;
+}
+@keyframes esFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

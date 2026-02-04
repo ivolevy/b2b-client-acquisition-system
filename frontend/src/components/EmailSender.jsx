@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { API_URL } from '../config';
 import './EmailSender.css';
@@ -270,7 +271,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
         );
     }
 
-    return (
+    const content = (
         <div className={embedded ? "email-sender-embedded" : "email-sender-overlay"}>
             <div className={embedded ? "email-sender-layout-pro" : "email-sender-modal-pro"}>
                 {!embedded && (
@@ -512,6 +513,9 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
             </div>
         </div>
     );
+
+    if (embedded) return content;
+    return createPortal(content, document.body);
 };
 
 export default EmailSender;
