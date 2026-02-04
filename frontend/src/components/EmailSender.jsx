@@ -26,7 +26,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     const [senderProvider, setSenderProvider] = useState('google'); // google or outlook
     const [sending, setSending] = useState(false);
     const [authStatus, setAuthStatus] = useState({ google: false, outlook: false, loading: true });
-    const [mode, setMode] = useState('masivo'); // individual, masivo
+    const [mode, setMode] = useState('individual'); // individual, masivo
     const [currentPage, setCurrentPage] = useState(1);
 
     // Template Editing State
@@ -46,9 +46,9 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     }, [empresas]);
 
     useEffect(() => {
-        if (validEmpresas) {
+        /* if (validEmpresas) {
             setSelectedEmpresas(validEmpresas);
-        }
+        } */
         loadTemplates();
         checkAuthStatus();
     }, [validEmpresas]);
@@ -324,10 +324,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                                 )}
                             </div>
 
-                            <div className="sending-summary-minimal">
-                                <span>{mode === 'masivo' ? selectedEmpresas.length : (selectedEmpresas.length > 0 ? 1 : 0)} prospectos</span>
-                                <small>Modo: {mode.toUpperCase()}</small>
-                            </div>
+                            {/* Summary Removed as requested */}
 
                             <button 
                                 className="btn-send-main" 

@@ -456,7 +456,7 @@
   margin-top: 8px;
   width: 100%;
   padding: 14px;
-  background: var(--primary);
+  background: var(--primary) !important;
   color: white;
   border: none;
   border-radius: 12px;
