@@ -87,6 +87,7 @@ const AdminFinancials = React.lazy(() => import('./components/admin/AdminFinanci
 
 const AuthWrapper = () => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   // useSupabase es constante durante la ejecución, no necesita memoización
   const useSupabase = isSupabaseConfigured();
@@ -100,6 +101,7 @@ const AuthWrapper = () => {
         const isDemoUser = DEMO_USERS.some(u => u.email === demoUserData.email);
         if (isDemoUser) {
           setUser(demoUserData);
+          setToken(authStorage.getToken());
           setLoading(false);
           return;
         }
@@ -149,6 +151,7 @@ const AuthWrapper = () => {
 
             const userData = authService.buildUserData(session.user, profile);
             setUser(userData);
+            setToken(session.access_token);
           }
         } catch (error) {
           handleError(error, 'AuthWrapper - initAuth');
@@ -182,8 +185,10 @@ const AuthWrapper = () => {
 
               const userData = authService.buildUserData(session.user, profile);
               setUser(userData);
+              setToken(session.access_token);
             } else if (event === 'SIGNED_OUT') {
               setUser(null);
+              setToken(null);
             }
           }
         );
@@ -223,6 +228,7 @@ const AuthWrapper = () => {
 
     const userData = authService.buildUserData(data.user, data.profile);
     setUser(userData);
+    setToken(data.session?.access_token || null);
 
     return userData;
   };
@@ -253,6 +259,7 @@ const AuthWrapper = () => {
     }
 
     setUser(userData);
+    setToken(authStorage.getToken());
   }, []);
 
 
@@ -328,6 +335,7 @@ const AuthWrapper = () => {
 
   const authValue = {
     user,
+    token, // Proporcionar token a los componentes
     isAuthenticated: !!user,
     isPro: true,
     useSupabase,

@@ -359,21 +359,6 @@ const LandingPage = () => {
             e.target.parentElement.innerHTML += '<div class="fallback-mockup">Dashboard Preview</div>';
           }} />
 
-          {/* Floating Cards (Decorations) */}
-          <div className="float-card card-1" style={{animationDelay: '0.2s'}}>
-            <FiCheck className="icon-success" />
-            <div>
-              <strong>1,240 Leads</strong>
-              <span>Extraídos hoy</span>
-            </div>
-          </div>
-          <div className="float-card card-2" style={{animationDelay: '1.2s'}}>
-            <FiMail className="icon-mail" />
-            <div>
-              <strong>355 Emails</strong>
-              <span>Enviados con éxito</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

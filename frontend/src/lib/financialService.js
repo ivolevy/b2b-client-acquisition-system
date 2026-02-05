@@ -1,7 +1,5 @@
-/**
- * Mock Financial Service
- * Simulates data that will eventually come from Supabase + Stripe/MercadoPago Webhooks
- */
+import { API_URL } from '../config';
+import { supabase } from './supabase';
 
 export const financialService = {
     // Get Monthly Recurring Revenue (MRR) History (Last 6 Months)
@@ -46,9 +44,8 @@ export const financialService = {
     // Get Current Month Overview
     getCurrentOverview: async () => {
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
             // Get session for auth
-            const { data: { session } } = await import('./supabase').then(m => m.supabase.auth.getSession());
+            const { data: { session } } = await supabase.auth.getSession();
 
             if (!session) throw new Error('No session');
 
@@ -136,9 +133,8 @@ export const financialService = {
     // Recent Transactions (Real from API)
     getRecentTransactions: async (currency = 'ALL') => {
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
             // Get session for auth
-            const { data: { session } } = await import('./supabase').then(m => m.supabase.auth.getSession());
+            const { data: { session } } = await supabase.auth.getSession();
 
             if (!session) return [];
 

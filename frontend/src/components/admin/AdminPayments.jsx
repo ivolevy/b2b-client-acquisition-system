@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './AdminPayments.css';
 import { useAuth } from '../../context/AuthContext';
+import { API_URL } from '../../config';
 import { FaMoneyBillWave, FaCreditCard, FaCalendarAlt, FaSearch, FaFilter, FaDownload } from 'react-icons/fa';
 
 const AdminPayments = () => {
@@ -16,7 +17,7 @@ const AdminPayments = () => {
 
     const fetchPayments = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-hlll.vercel.app'}/api/admin/payments`, {
+            const response = await fetch(`${API_URL}/api/admin/payments`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

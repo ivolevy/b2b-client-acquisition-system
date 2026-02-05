@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from '../../config';
+import { useAuth } from '../../context/AuthContext';
 import { 
   FiActivity, 
   FiDollarSign, 
@@ -16,20 +17,22 @@ import {
 import './AdminDashboard.css';
 
 function ApiUsageDashboard() {
+  const { token } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    fetchStats();
-    fetchLogs();
-  }, []);
+    if (token) {
+      fetchStats();
+      fetchLogs();
+    }
+  }, [token]);
 
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('supabase.auth.token');
       const response = await axios.get(`${API_URL}/admin/usage-stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
