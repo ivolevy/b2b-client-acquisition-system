@@ -20,10 +20,7 @@ function UserProfile() {
     document.body.classList.add('profile-page-active');
     return () => document.body.classList.remove('profile-page-active');
   }, []);
-  useEffect(() => {
-    document.body.classList.add('profile-page-active');
-    return () => document.body.classList.remove('profile-page-active');
-  }, []);
+
   const [activeTab, setActiveTab] = useState('info'); // 'info', 'plan', 'rubros', 'danger'
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -48,8 +45,7 @@ function UserProfile() {
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false } });
   const [authLoading, setAuthLoading] = useState(false);
-  const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false } });
-  const [authLoading, setAuthLoading] = useState(false);
+
   const [creditsInfo, setCreditsInfo] = useState({ credits: 0, next_reset: null, subscription_status: 'active' });
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
