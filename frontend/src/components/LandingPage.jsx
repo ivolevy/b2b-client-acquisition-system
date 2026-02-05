@@ -13,7 +13,7 @@ import {
   FiMenu,
   FiX
 } from 'react-icons/fi';
-import { FaLinkedin, FaTwitter, FaGithub, FaGoogle, FaMicrosoft, FaEnvelope } from 'react-icons/fa';
+import { FaLinkedin, FaTwitter, FaGithub, FaGoogle, FaMicrosoft, FaEnvelope, FaWhatsapp } from 'react-icons/fa';
 import AnimatedBackground from './AnimatedBackground';
 
 import './LandingPage.css';
@@ -262,7 +262,7 @@ const LandingPage = () => {
           </div>
 
           <nav className="main-nav desktop-nav">
-            <button onClick={() => scrollToSection('search-engine')}>Módulos</button>
+            <button onClick={() => scrollToSection('features')}>Módulos</button>
             <button onClick={() => scrollToSection('pricing')}>Precios</button>
             <button onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}>Contactanos</button>
           </nav>
@@ -296,7 +296,7 @@ const LandingPage = () => {
           </div>
 
           <div className="mobile-nav-links">
-            <button onClick={() => scrollToSection('search-engine')}>
+            <button onClick={() => scrollToSection('features')}>
               <span className="nav-num">01</span> Módulos
             </button>
             <button onClick={() => scrollToSection('pricing')}>
@@ -749,6 +749,33 @@ const LandingPage = () => {
         </div>
       </section>
 
+
+      {/* --- SIMPLE CONTACT SECTION --- */}
+      <section id="contact-simple" className="contact-simple-section">
+        <div className="container">
+           <div className="contact-simple-content">
+              <h2>¿Tenés dudas? Hablemos.</h2>
+              <div className="contact-links-row">
+                  <a href="mailto:hola@smartleads.ai" className="contact-link-item">
+                      <div className="icon-box"><FiMail /></div>
+                      <span>hola@smartleads.ai</span>
+                  </a>
+                  <a href="https://wa.me/5491112345678" target="_blank" rel="noopener noreferrer" className="contact-link-item">
+                      <div className="icon-box"><FaWhatsapp /></div>
+                      <span>WhatsApp Soporte</span>
+                  </a>
+              </div>
+              <div className="social-simple-row">
+                  <p>Seguinos en:</p>
+                  <div className="social-icons">
+                    <a href="#"><FaTwitter /></a>
+                    <a href="#"><FaLinkedin /></a>
+                    <a href="#"><FaGithub /></a>
+                  </div>
+              </div>
+           </div>
+        </div>
+      </section>
 
       {/* --- FOOTER --- */}
       <footer className="footer-section">
