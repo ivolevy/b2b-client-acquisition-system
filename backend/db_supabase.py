@@ -948,7 +948,6 @@ def get_user_credits(user_id: str) -> Dict:
         return {"credits": 0, "next_reset": None}
         
     try:
-    try:
         res = client.table('users').select('credits, next_credit_reset, plan, subscription_status').eq('id', user_id).execute()
         if res.data:
             user_data = res.data[0]
