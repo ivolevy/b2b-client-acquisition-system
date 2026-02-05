@@ -45,30 +45,79 @@ export const financialService = {
 
     // Get Current Month Overview
     getCurrentOverview: async () => {
-        // Re-using logic for current month (Jan/Ene)
-        // Revenue: $350,000 ARS
-        // API Calls: 18,000
-        // Cost: 18000 * 0.017 = $306 USD
-        // Free Tier: -$200 USD
-        // Net Cost USD: $106 USD
-        // Net Cost ARS: 106 * 1200 = $127,200 ARS
+        try {
+            const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
+            // Get session for auth
+            const { data: { session } } = await import('./supabase').then(m => m.supabase.auth.getSession());
 
-        return {
-            mrr: 350000, // Bruto
-            activeSubscribers: 142,
-            newSubscribers: 27, // New this month
-            churnRate: 2.4, // %
+            if (!session) throw new Error('No session');
+
+            // Parallel fetch: Payments and Usage
+            const [paymentsRes, usageRes] = await Promise.all([
+                fetch(`${API_URL}/api/admin/payments`, { headers: { 'Authorization': `Bearer ${session.access_token}` } }),
+                fetch(`${API_URL}/api/admin/usage`, { headers: { 'Authorization': `Bearer ${session.access_token}` } })
+            ]);
+
+            const payments = paymentsRes.ok ? await paymentsRes.json() : [];
+            const usage = usageRes.ok ? await usageRes.json() : { current_month_cost_usd: 0 };
+
+            // Calculate MRR (Gross Revenue from Active Subscriptions)
+            // For simplicity, we sum up all 'approved' payments from the last 30 days
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            const recentRevenueARS = payments
+                .filter(p => new Date(p.created_at) > thirtyDaysAgo && p.status === 'approved' && p.currency === 'ARS')
+                .reduce((acc, p) => acc + p.amount, 0);
+
+            const recentRevenueUSD = payments
+                .filter(p => new Date(p.created_at) > thirtyDaysAgo && p.status === 'approved' && p.currency === 'USD')
+                .reduce((acc, p) => acc + p.amount, 0);
+
+            // Estimated Exchange Rate (Mocked or fetched elsewhere, hardcoded fallback for stability)
+            const USD_TO_ARS = 1200;
+
+            const mrrUSD = recentRevenueUSD + (recentRevenueARS / USD_TO_ARS);
+            const mrrARS = recentRevenueARS + (recentRevenueUSD * USD_TO_ARS); // Gross MRR in ARS
 
             // Cost Logic
-            totalApiCalls: 18000,
-            grossApiCostUSD: 306,
-            freeTierCreditUSD: 200,
-            netApiCostUSD: 106,
-            netApiCostARS: 127200,
+            const grossApiCostUSD = usage.current_month_cost_usd || 0;
+            const FREE_TIER_USD = 200;
+            const netApiCostUSD = Math.max(0, grossApiCostUSD - FREE_TIER_USD);
+            const netApiCostARS = netApiCostUSD * USD_TO_ARS;
 
-            // Profit logic
-            netProfit: 350000 - 127200,
-        };
+            return {
+                mrr: Math.round(mrrARS), // Displaying in ARS mostly
+                activeSubscribers: new Set(payments.map(p => p.user_id)).size,
+                newSubscribers: payments.filter(p => new Date(p.created_at) > thirtyDaysAgo).length, // Proxy
+                churnRate: 2.4, // Keep static for now
+
+                // Real Cost Data
+                totalApiCalls: 0, // Not actively returned by usage endpoint yet, relying on cost
+                grossApiCostUSD,
+                freeTierCreditUSD: FREE_TIER_USD,
+                netApiCostUSD,
+                netApiCostARS,
+
+                // Net Profit (Gross Revenue - Net API Cost)
+                netProfit: Math.round(mrrARS - netApiCostARS),
+            };
+
+        } catch (error) {
+            console.error("Error fetching overview:", error);
+            // Fallback to 0
+            return {
+                mrr: 0,
+                activeSubscribers: 0,
+                newSubscribers: 0,
+                churnRate: 0,
+                grossApiCostUSD: 0,
+                freeTierCreditUSD: 200,
+                netApiCostUSD: 0,
+                netApiCostARS: 0,
+                netProfit: 0,
+            };
+        }
     },
     // Get User Growth (Active vs Free vs Churned)
     getUserGrowth: async () => {
@@ -84,20 +133,43 @@ export const financialService = {
 
     // Recent Transactions (Mock)
     // extended to support filters
+    // Recent Transactions (Real from API)
     getRecentTransactions: async (currency = 'ALL') => {
-        const allTxs = [
-            { id: 101, user: 'juan@empresa.com', plan: 'Starter', amount: 20000, currency: 'ARS', date: '2024-01-30', status: 'approved' },
-            { id: 102, user: 'marketing@agencia.com', plan: 'Growth', amount: 49, currency: 'USD', date: '2024-01-30', status: 'approved' },
-            { id: 103, user: 'info@startup.com', plan: 'Starter', amount: 20000, currency: 'ARS', date: '2024-01-29', status: 'approved' },
-            { id: 104, user: 'admin@consultora.com', plan: 'Scale', amount: 149, currency: 'USD', date: '2024-01-29', status: 'approved' },
-            { id: 105, user: 'ventas@local.com', plan: 'Starter', amount: 20000, currency: 'ARS', date: '2024-01-28', status: 'approved' },
-            { id: 106, user: 'soporte@tech.com', plan: 'Growth', amount: 49, currency: 'USD', date: '2024-01-28', status: 'approved' },
-            { id: 107, user: 'contacto@bio.com', plan: 'Growth', amount: 49000, currency: 'ARS', date: '2024-01-27', status: 'approved' },
-            { id: 108, user: 'ceo@fintech.com', plan: 'Scale', amount: 149, currency: 'USD', date: '2024-01-27', status: 'approved' },
-        ];
+        try {
+            const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
+            // Get session for auth
+            const { data: { session } } = await import('./supabase').then(m => m.supabase.auth.getSession());
 
-        if (currency === 'ALL') return allTxs;
-        return allTxs.filter(tx => tx.currency === currency);
+            if (!session) return [];
+
+            const response = await fetch(`${API_URL}/api/admin/payments`, {
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch payments');
+
+            const payments = await response.json();
+
+            // Map backend format to frontend format
+            const mappedTxs = payments.map(p => ({
+                id: p.id,
+                user: p.email || p.user_id, // Fallback if email not populated
+                plan: p.plan_id ? p.plan_id.charAt(0).toUpperCase() + p.plan_id.slice(1) : 'Unknown',
+                amount: p.amount,
+                net_amount: p.net_amount, // Critical for user request
+                currency: p.currency || 'ARS',
+                date: new Date(p.created_at).toISOString().split('T')[0],
+                status: p.status
+            }));
+
+            if (currency === 'ALL') return mappedTxs;
+            return mappedTxs.filter(tx => tx.currency === currency);
+        } catch (error) {
+            console.error("Error fetching transactions:", error);
+            return [];
+        }
     },
 
     getExchangeRates: async () => {

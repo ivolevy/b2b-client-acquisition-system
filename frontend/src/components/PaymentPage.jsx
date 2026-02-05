@@ -35,14 +35,46 @@ const PaymentPage = () => {
     const taxAmount = price * taxRate;
     const total = price + taxAmount;
 
-    const handleMercadoPagoPayment = () => {
+    const handleMercadoPagoPayment = async () => {
         setLoading(true);
-        // Simulate backend call
-        setTimeout(() => {
+        try {
+            // Obtener user info desde localStorage o contexto (simulado si no hay auth real en este componente aun)
+            const userStr = localStorage.getItem('user');
+            const user = userStr ? JSON.parse(userStr) : { id: 'anonymous', email: 'guest@example.com' };
+
+            // Llamada al backend real
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-hlll.vercel.app'}/api/payments/mercadopago/create_preference`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    plan_id: planId, // 'starter', 'pro' (mapped to growth), 'agency' (mapped to scale)
+                    user_id: user.id || 'anonymous',
+                    email: user.email || 'guest@example.com', 
+                    name: user.name || 'Cliente',
+                    phone: user.phone || '',
+                    amount: total, // El total calculado con impuestos
+                    description: `Suscripción ${selectedPlan.name} (${cycle === 'yearly' ? 'Anual' : 'Mensual'})`
+                })
+            });
+
+            if (!response.ok) throw new Error('Error al crear preferencia');
+
+            const data = await response.json();
+            
+            if (data.init_point) {
+                // Redirigir a MercadoPago
+                window.location.href = data.init_point;
+            } else {
+                alert('Error: No se recibió link de pago');
+                setLoading(false);
+            }
+        } catch (error) {
+            console.error('Payment Error:', error);
+            alert('Hubo un error al iniciar el pago. Por favor intenta nuevamente.');
             setLoading(false);
-            alert('Simulación: Redirigiendo a MercadoPago...');
-            // Here we would redirect to the preference URL
-        }, 1500);
+        }
     };
 
     const handlePayPalPayment = () => {

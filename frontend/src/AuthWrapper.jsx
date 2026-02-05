@@ -18,6 +18,7 @@ const AdminUsers = lazy(() => import('./components/admin/AdminUsers'));
 const AdminUserDetail = lazy(() => import('./components/admin/AdminUserDetail'));
 const AdminEmailCenter = lazy(() => import('./components/admin/AdminEmailCenter'));
 const AdminWhatsAppCenter = lazy(() => import('./components/admin/AdminWhatsAppCenter'));
+const AdminPayments = lazy(() => import('./components/admin/AdminPayments'));
 
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const ApiUsageDashboard = lazy(() => import('./components/admin/ApiUsageDashboard'));

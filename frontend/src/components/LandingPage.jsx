@@ -98,28 +98,19 @@ const LandingPage = () => {
   ];
 
   const getPrice = (plan) => {
-    let finalPrice;
-
+    // Override requested by user: All plans 100 ARS
     if (currency === 'ARS') {
-      // Precio en ARS = Valor Local en USD * Dolar Blue
-      // Si no hay localUSD definido (fallback), usa el USD global, pero con el cambio del día.
-      finalPrice = (plan.price.localUSD || plan.price.USD) * exchangeRate;
-    } else {
-      // Precio en USD Global
-      finalPrice = plan.price.USD;
+      return 100;
     }
+
+    let finalPrice = plan.price.USD;
 
     // Si es anual, descuento del 20%
     if (isYearly) {
       finalPrice = finalPrice * 0.8;
     }
 
-    if (currency === 'ARS') {
-      // Redondear a miles más cercanos para estética en pesos
-      return Math.floor(finalPrice / 100) * 100;
-    } else {
-      return Math.ceil(finalPrice);
-    }
+    return Math.ceil(finalPrice);
   };
 
   const handlePlanSelect = (planId) => {

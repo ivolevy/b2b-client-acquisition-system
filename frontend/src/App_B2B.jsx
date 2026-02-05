@@ -11,6 +11,7 @@ import TemplateManager from './components/TemplateManager';
 import UserProfile from './components/UserProfile';
 import ToastContainer from './components/ToastContainer';
 import ProBackground from './components/ProBackground';
+const AdminPayments = React.lazy(() => import('./components/admin/AdminPayments'));
 import { ToastContainer as ReactToastifyContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
@@ -550,13 +551,7 @@ function AppB2B() {
       'Instagram',
       'Facebook',
       'LinkedIn',
-      'Twitter',
-      'YouTube',
-      'TikTok',
-      'Distancia (km)',
-      'Latitud',
-      'Longitud',
-      'Fecha Captura'
+      'Distancia (km)'
     ];
 
     const rows = empresasToExport.map(e => [
@@ -572,13 +567,7 @@ function AppB2B() {
       e.instagram || '',
       e.facebook || '',
       e.linkedin || '',
-      e.twitter || '',
-      e.youtube || '',
-      e.tiktok || '',
-      e.distancia_km !== null ? e.distancia_km.toFixed(2) : '',
-      e.latitud || '',
-      e.longitud || '',
-      e.created_at || e.fecha_creacion || e.fecha_registro || new Date().toISOString()
+      e.distancia_km !== null ? e.distancia_km.toFixed(2) : ''
     ]);
 
     const separator = ';';
@@ -640,7 +629,7 @@ function AppB2B() {
       doc.text(`Total empresas: ${empresasToExport.length}`, 260, 22, { align: 'right' });
 
       // Columnas para PDF (más columnas aprovechando landscape)
-      const tableHead = [['Empresa', 'Rubro', 'Web', 'Email', 'Teléfono', 'Ubicación', 'Estado']];
+      const tableHead = [['Empresa', 'Rubro', 'Web', 'Email', 'Teléfono', 'Ubicación']];
       
       const tableRows = empresasToExport.map(empresa => [
         empresa.nombre || '',
@@ -648,8 +637,7 @@ function AppB2B() {
         empresa.sitio_web || empresa.website || '',
         empresa.email || '',
         empresa.telefono || '',
-        empresa.direccion || [empresa.ciudad, empresa.pais].filter(Boolean).join(', ') || '',
-        empresa.validada ? 'Validada' : 'Pendiente'
+        empresa.direccion || [empresa.ciudad, empresa.pais].filter(Boolean).join(', ') || ''
       ]);
 
       autoTable(doc, {
@@ -660,11 +648,10 @@ function AppB2B() {
         columnStyles: {
           0: { cellWidth: 45 }, // Nombre
           1: { cellWidth: 35 }, // Rubro
-          2: { cellWidth: 40 }, // Web
-          3: { cellWidth: 45 }, // Email
+          2: { cellWidth: 50 }, // Web
+          3: { cellWidth: 55 }, // Email
           4: { cellWidth: 35 }, // Telefono
-          5: { cellWidth: 40 }, // Ubicacion
-          6: { cellWidth: 20 }  // Estado
+          5: { cellWidth: 40 }  // Ubicacion
         },
         headStyles: { fillColor: [233, 30, 99] }, // Pink color matching theme
         alternateRowStyles: { fillColor: [245, 245, 245] },

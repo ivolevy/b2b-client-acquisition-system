@@ -207,8 +207,9 @@
     --text-secondary: #475569;
     /* Slate 600 */
 
-    --primary: var(--primary);
-    /* Blue 600 - Slightly darker for contrast on white */
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    /* Blue 600 & 700 */
     --primary-glow: rgba(37, 99, 235, 0.2);
     --accent: #7c3aed;
     /* Violet 600 */
@@ -429,6 +430,7 @@
     background: var(--primary);
     border-radius: 50%;
     box-shadow: 0 0 8px var(--primary);
+    display: block;
 }
 
 .badge-text {

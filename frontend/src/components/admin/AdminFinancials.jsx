@@ -48,7 +48,7 @@ const AdminFinancials = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', margin: 0 }}>Panel Financiero</h1>
                 <div style={{ background: '#f1f5f9', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
-                    {['overview', 'revenue', 'costs', 'transactions'].map(tab => (
+                    {['overview', 'transactions', 'revenue', 'costs'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -323,11 +323,13 @@ const TransactionsView = ({ txsARS, txsUSD, exchangeRates, formatCurrency, forma
     }, [exchangeRates, rateType]);
 
     // Calculate Totals per Currency
-    const totalARS = txsARS.reduce((acc, tx) => acc + tx.amount, 0);
+    // Use net_amount if available, otherwise amount.
+    const totalNetARS = txsARS.reduce((acc, tx) => acc + (tx.net_amount || tx.amount), 0);
     const totalUSD = txsUSD.reduce((acc, tx) => acc + tx.amount, 0);
 
     // Calculate Grand Total (All in USD - The "Final Instance")
-    const grandTotalUSD = totalUSD + (totalARS / conversionRate);
+    // NOTE: Using Net ARS for this calculation to be conservative/real
+    const grandTotalUSD = totalUSD + (totalNetARS / conversionRate);
 
     const handleRateChange = (type) => {
         setRateType(type);
@@ -344,7 +346,7 @@ const TransactionsView = ({ txsARS, txsUSD, exchangeRates, formatCurrency, forma
                 <div>
                     <h3 style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 10px 0', color: '#0f172a' }}>Total Bruto Consolidado</h3>
                     <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>
-                        Suma de USD + (ARS / Cotización {rateType === 'custom' ? 'Manual' : rateType === 'blue' ? 'Blue' : 'Oficial'})
+                        Suma de USD + (ARS Neto / Cotización {rateType === 'custom' ? 'Manual' : rateType === 'blue' ? 'Blue' : 'Oficial'})
                     </p>
                 </div>
 
@@ -401,9 +403,12 @@ const TransactionsView = ({ txsARS, txsUSD, exchangeRates, formatCurrency, forma
                             <img src="https://logotipoz.com/wp-content/uploads/2021/10/version-horizontal-large-logo-mercado-pago.webp" alt="MP" style={{ height: '20px' }} />
                             <h3 style={{ fontSize: '16px', fontWeight: '600', margin: 0 }}>Pesos (ARS)</h3>
                         </div>
-                        <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '4px 12px', borderRadius: '20px', fontWeight: '700', fontSize: '14px' }}>
-                            Total: {formatCurrency(totalARS)}
-                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '4px 12px', borderRadius: '20px', fontWeight: '700', fontSize: '14px' }}>
+                                Total Neto: {formatCurrency(totalNetARS)}
+                            </span>
+                            <span style={{ fontSize: '10px', color: '#64748b', marginTop: '4px' }}>Post-comisiones MP</span>
+                        </div>
                     </div>
                     <TransactionsTable transactions={txsARS} currencySymbol="$" />
                 </div>

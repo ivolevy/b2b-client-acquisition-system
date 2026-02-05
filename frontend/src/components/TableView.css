@@ -59,9 +59,9 @@
     background: var(--gray-50);
 }
 
-.properties-table tbody tr:last-child td {
+/* .properties-table tbody tr:last-child td {
     border-bottom: none;
-}
+} */
 
 .name-cell {
     font-weight: 500;
