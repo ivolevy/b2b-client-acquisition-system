@@ -345,19 +345,6 @@ const LandingPage = () => {
                 Ver Demo
               </button>
             </div>
-            <div style={{ marginTop: '24px' }}>
-              <span style={{ 
-                background: 'rgba(37, 99, 235, 0.1)', 
-                color: '#2563eb', 
-                padding: '6px 12px', 
-                borderRadius: '8px', 
-                fontSize: '0.9rem', 
-                fontWeight: '600',
-                border: '1px solid rgba(37, 99, 235, 0.2)'
-              }}>
-                🔥 1000 LEADS AL COSTO DE 1
-              </span>
-            </div>
             <div className="hero-trust">
               <p>Confiado por +500 empresas</p>
               <div className="trust-logos">
