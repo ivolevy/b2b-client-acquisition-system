@@ -3060,6 +3060,7 @@
 /* Dual Split Visual for Module 3 */
 .dual-split {
     display: flex !important;
+    flex-direction: column;
     gap: 20px;
     align-items: stretch;
     /* Stretch to equal height */
