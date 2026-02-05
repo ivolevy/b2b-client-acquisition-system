@@ -326,10 +326,6 @@ const LandingPage = () => {
         <AnimatedBackground />
         <div className="container hero-content">
           <div className="hero-text">
-            <div className="badge-pill clickable-badge" onClick={() => navigate('/dashboard')}>
-              <span className="badge-dot"></span>
-              <span className="badge-text">1000 LEADS AL COSTO DE 1</span>
-            </div>
             <h1>
               Gana mas dinero <br />
               <span className="text-gradient">con menos esfuerzo</span>
