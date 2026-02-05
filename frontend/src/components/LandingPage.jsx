@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FiArrowRight,
@@ -28,6 +28,36 @@ const LandingPage = () => {
   const [exchangeRate, setExchangeRate] = useState(1200);
 
   const isYearly = billingCycle === 'yearly';
+
+  // Scroll-linked Animation
+  const mockupRef = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!mockupRef.current) return;
+      
+      const scrollY = window.scrollY;
+      // Complete animation by 400px scroll
+      const progress = Math.min(scrollY / 400, 1);
+      
+      // Interpolate values
+      // Rotate: 50deg -> 0deg
+      // Scale: 0.9 -> 1.0
+      // TranslateY: 40px -> 0px
+      
+      const rot = 50 - (progress * 50);
+      const scale = 0.9 + (progress * 0.1);
+      const y = 40 - (progress * 40);
+      
+      mockupRef.current.style.transform = `perspective(2000px) rotateX(${rot}deg) scale(${scale}) translateY(${y}px)`;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Trigger once on mount
+    handleScroll();
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch Dolar Blue
   useEffect(() => {
@@ -228,41 +258,48 @@ const LandingPage = () => {
             </div>
           </div>
 
-          <div className="hero-visual">
-            <div className="dashboard-mockup-3d">
-              <div className="mockup-header">
-                <div className="dots"><span></span><span></span><span></span></div>
-                <div className="bar">smartleads.ai/dashboard</div>
-              </div>
-              <img src="/images/hero 2.png" alt="Dashboard Interface" className="mockup-img" onError={(e) => {
-                e.target.onerror = null;
-                e.target.style.display = 'none';
-                e.target.parentElement.innerHTML += '<div class="fallback-mockup">Dashboard Preview</div>';
-              }} />
+      <div className="hero-visual">
+        <div 
+          className="dashboard-mockup-3d" 
+          ref={mockupRef}
+          style={{ 
+            willChange: 'transform',
+            transform: 'perspective(2000px) rotateX(50deg) scale(0.9) translateY(40px)' // Initial state
+          }}
+        >
+          <div className="mockup-header">
+            <div className="dots"><span></span><span></span><span></span></div>
+            <div className="bar">smartleads.ai/dashboard</div>
+          </div>
+          <img src="/images/hero 2.png" alt="Dashboard Interface" className="mockup-img" onError={(e) => {
+            e.target.onerror = null;
+            e.target.style.display = 'none';
+            e.target.parentElement.innerHTML += '<div class="fallback-mockup">Dashboard Preview</div>';
+          }} />
 
-              {/* Floating Cards (Decorations) */}
-              <div className="float-card card-1">
-                <FiCheck className="icon-success" />
-                <div>
-                  <strong>1,240 Leads</strong>
-                  <span>Extraídos hoy</span>
-                </div>
-              </div>
-              <div className="float-card card-2">
-                <FiMail className="icon-mail" />
-                <div>
-                  <strong>355 Emails</strong>
-                  <span>Enviados con éxito</span>
-                </div>
-              </div>
+          {/* Floating Cards (Decorations) */}
+          <div className="float-card card-1" style={{animationDelay: '0.2s'}}>
+            <FiCheck className="icon-success" />
+            <div>
+              <strong>1,240 Leads</strong>
+              <span>Extraídos hoy</span>
+            </div>
+          </div>
+          <div className="float-card card-2" style={{animationDelay: '1.2s'}}>
+            <FiMail className="icon-mail" />
+            <div>
+              <strong>355 Emails</strong>
+              <span>Enviados con éxito</span>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  </section>
 
-      {/* --- MODULE 1: DATA EXTRACTION (Full Width) --- */}
-      <section id="search-engine" className="product-module-section">
-        <div className="container module-layout">
+  {/* --- MODULE 1: DATA EXTRACTION (Full Width) --- */}
+  <section id="search-engine" className="product-module-section">
+    <div className="container module-layout">
           <div className="module-content">
             <div className="module-number">01</div>
             <h2>Motor de Búsqueda con IA</h2>
@@ -271,11 +308,8 @@ const LandingPage = () => {
               <p style={{ margin: 0 }}>Solo ingresás rubro, dirección y radio, y el sistema encuentra empresas que coincidan.</p>
             </div>
             <div className="module-details">
-              <ul className="detail-list">
-                <li><FiCheck /> Opción de contactos con email y teléfono verificados</li>
-                <li><FiCheck /> Detección automática de redes sociales</li>
-                <li><FiCheck /> Definición exacta del radio de búsqueda en km</li>
-              </ul>
+                
+
             </div>
           </div>
           <div className="module-visual">
@@ -299,14 +333,10 @@ const LandingPage = () => {
             <div className="module-number">02</div>
             <h2>Enriquecimiento de Datos</h2>
             <div className="module-lead">
-              <p style={{ marginBottom: '16px' }}>Convertimos datos básicos en información útil para vender.</p>
-              <p style={{ margin: 0 }}>El sistema analiza la presencia digital de cada prospecto para validar su calidad antes de usar un crédito.</p>
+              <p style={{ marginBottom: '16px' }}>El sistema analiza la presencia digital de cada prospecto para validar la calidad de sus datos antes de procesarlo.</p>
+              <p style={{ margin: 0 }}>Emails verificados para reducir rebotes, teléfonos existentes y demás.</p>
             </div>
             <div className="module-details">
-              <ul className="detail-list">
-                <li><FiCheck /> Emails verificados para reducir rebotes</li>
-                <li><FiCheck /> <strong>Social Score:</strong> validación de LinkedIn y actividad en redes</li>
-              </ul>
             </div>
           </div>
           <div className="module-visual">
@@ -332,11 +362,6 @@ const LandingPage = () => {
               <p style={{ margin: 0 }}>Conectá Google u Outlook por OAuth, sin configuraciones complejas.</p>
             </div>
             <div className="module-details">
-              <ul className="detail-list">
-                <li><FiCheck /> Warm-up automático de casillas</li>
-                <li><FiCheck /> Rotación de cuentas para evitar spam</li>
-                <li><FiCheck /> Spintax con IA: emails únicos en cada envío</li>
-              </ul>
             </div>
           </div>
           <div className="module-visual">
@@ -360,15 +385,9 @@ const LandingPage = () => {
             <div className="module-number">04</div>
             <h2>Exportación y Reportes</h2>
             <div className="module-lead">
-              <p style={{ marginBottom: '16px' }}>Tus datos son tuyos. Descargá listas limpias y listas para usar en cualquier plataforma.</p>
-              <p style={{ margin: 0 }}>Sin funciones innecesarias: bajás tu lista enriquecida y la usás cuando quieras.</p>
+              <p style={{ margin: 0 }}>Tus datos son tuyos. Descargá listas de los leads obtenidos limpias y listas para usar en cualquier plataforma.</p>
             </div>
             <div className="module-details">
-              <div className="crm-actions">
-                <div className="crm-tag">Excel (.xlsx)</div>
-                <div className="crm-tag">Archivo CSV</div>
-                <div className="crm-tag">Reporte PDF</div>
-              </div>
             </div>
           </div>
           <div className="module-visual">

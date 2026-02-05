@@ -134,7 +134,9 @@ const AnimatedBackground = () => {
                 height: '100%',
                 zIndex: -1,
                 background: 'linear-gradient(to bottom, #ffffff 0%, #f1f5f9 100%)', // subtle gradient background
-                pointerEvents: 'none' // Let clicks pass through
+                pointerEvents: 'none', // Let clicks pass through
+                WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
+                maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)'
             }}
         />
     );
