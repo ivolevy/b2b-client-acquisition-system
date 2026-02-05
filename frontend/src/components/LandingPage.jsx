@@ -13,7 +13,7 @@ import {
   FiMenu,
   FiX
 } from 'react-icons/fi';
-import { FaLinkedin, FaTwitter, FaGithub, FaGoogle } from 'react-icons/fa';
+import { FaLinkedin, FaTwitter, FaGithub, FaGoogle, FaMicrosoft } from 'react-icons/fa';
 import AnimatedBackground from './AnimatedBackground';
 
 import './LandingPage.css';
@@ -90,6 +90,13 @@ const LandingPage = () => {
             <p className="channel-desc">
               Infraestructura OAuth de alta entregabilidad. Evita la carpeta de spam y llegá directo a la bandeja de entrada principal.
             </p>
+            <div className="integrations-row">
+              <span className="integrations-label">Conexión nativa:</span>
+              <div className="integration-badges">
+                <span className="integration-tag"><FaGoogle /> Gmail</span>
+                <span className="integration-tag"><FaMicrosoft /> Outlook</span>
+              </div>
+            </div>
           </div>
           <div className="split-side whatsapp-side">
             <div className="icon-header">
@@ -632,7 +639,7 @@ const LandingPage = () => {
           <div className="section-header center" style={{ marginBottom: '40px' }}>
             <h2>Elige el plan para tu crecimiento</h2>
             <p>
-              Escala cuando lo necesites. Cancela en cualquier momento.
+
             </p>
           </div>
 

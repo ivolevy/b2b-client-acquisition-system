@@ -3142,3 +3142,39 @@
         width: 100%;
     }
 }
+
+.integrations-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.integrations-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.integration-badges {
+    display: flex;
+    gap: 8px;
+}
+
+.integration-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.integration-tag svg {
+    color: var(--primary);
+}
