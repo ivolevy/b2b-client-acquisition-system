@@ -485,8 +485,8 @@
 }
 
 .hero-subtext {
-    font-size: 1.1rem;
-    margin-bottom: 40px;
+    font-size: 1.25rem;
+    margin-bottom: 60px;
     max-width: 680px;
     color: var(--text-secondary);
     font-weight: 400;
