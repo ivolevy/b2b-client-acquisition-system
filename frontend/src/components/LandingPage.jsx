@@ -331,12 +331,11 @@ const LandingPage = () => {
               <span className="badge-text">VERSION 2.0 DISPONIBLE</span>
             </div>
             <h1>
-              Consigue Clientes B2B <br />
-              <span className="text-gradient">100x Más Rápido con IA</span>
+              Gana más dinero <br />
+              <span className="text-gradient">con menos esfuerzo</span>
             </h1>
             <p className="hero-subtext">
-              Tu máquina de ventas autónoma. Extrae leads de Google Maps, enriquecelos con Inteligencia Artificial
-              y contáctalos masivamente. <strong>100% Automático. Calidad Militar.</strong>
+              Extrae leads de Google Maps enriquecelos con IA y contáctalos masivamente. <strong>100% Automático.</strong>
             </p>
             <div className="hero-buttons">
               <button className="btn-primary btn-lg" onClick={() => navigate('/')}>
@@ -346,8 +345,21 @@ const LandingPage = () => {
                 Ver Demo
               </button>
             </div>
+            <div style={{ marginTop: '24px' }}>
+              <span style={{ 
+                background: 'rgba(37, 99, 235, 0.1)', 
+                color: '#2563eb', 
+                padding: '6px 12px', 
+                borderRadius: '8px', 
+                fontSize: '0.9rem', 
+                fontWeight: '600',
+                border: '1px solid rgba(37, 99, 235, 0.2)'
+              }}>
+                🔥 1000 LEADS AL COSTO DE 1
+              </span>
+            </div>
             <div className="hero-trust">
-              <p>Confiado por +500 empresas modernas</p>
+              <p>Confiado por +500 empresas</p>
               <div className="trust-logos">
                 <span>ACME Corp</span>
                 <span>Stark Ind</span>

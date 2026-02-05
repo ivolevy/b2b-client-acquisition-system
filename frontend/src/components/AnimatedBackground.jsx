@@ -10,7 +10,7 @@ const AnimatedBackground = () => {
         let particles = [];
 
         // Configuration
-        const PARTICLE_COUNT = 60; // Slightly reduced for cleaner look
+        let PARTICLE_COUNT = window.innerWidth < 768 ? 20 : 60; // Mobile: 20, Desktop: 60
         const CONNECTION_DISTANCE = 150;
         const MOUSE_DISTANCE = 200;
 
@@ -18,6 +18,13 @@ const AnimatedBackground = () => {
         const resizeCanvas = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            // Update particle count on substantial resize if needed, 
+            // but for simplicity we'll just check it here and re-init if drastic change
+            const newCount = window.innerWidth < 768 ? 20 : 60;
+            if (newCount !== PARTICLE_COUNT) {
+                 PARTICLE_COUNT = newCount;
+                 init(); // Re-initialize with new count
+            }
         };
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();

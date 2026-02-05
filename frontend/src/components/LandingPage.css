@@ -419,7 +419,6 @@
     align-items: center;
     gap: 8px;
     padding: 6px 16px;
-    padding: 6px 16px;
     background: rgba(255, 255, 255, 0.05);
     /* Semitransparent background */
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -427,10 +426,14 @@
     border-radius: 99px;
     margin-bottom: 24px;
     cursor: pointer;
+    cursor: pointer;
     transition: all 0.2s ease;
     color: var(--primary);
     /* Blue text for contrast on white/light bg */
-    font-weight: 600;
+    font-weight: 500;
+    /* Lighter than 600 */
+    font-size: 0.8rem;
+    /* Smaller text */
 }
 
 .badge-pill:hover {
@@ -441,7 +444,8 @@
 .badge-dot {
     width: 8px;
     height: 8px;
-    background: #ffffff;
+    background: var(--primary);
+    /* Blue circle */
     border-radius: 50%;
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
     display: block;
@@ -643,7 +647,7 @@
 .bar {
     flex: 1;
     height: 24px;
-    background: #2563eb;
+    background: #2563eb !important;
     /* Strong Blue */
     border-radius: 6px;
     border: none;
@@ -651,7 +655,7 @@
     align-items: center;
     justify-content: center;
     font-size: 0.75rem;
-    color: white;
+    color: white !important;
     /* White text */
     text-indent: 0;
     max-width: 400px;
@@ -1971,8 +1975,8 @@
 }
 
 .testimonial-card {
-    min-width: 320px;
-    width: 320px;
+    min-width: 450px;
+    width: 450px;
     /* Fixed width for consistency */
     background: #ffffff;
     /* Explicit white */
