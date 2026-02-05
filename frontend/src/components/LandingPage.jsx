@@ -52,7 +52,7 @@ const LandingPage = () => {
       id: 'starter',
       name: 'Starter',
       description: 'Para freelancers que recién empiezan.',
-      price: { USD: 26, localUSD: 20 },
+      price: { USD: 100, localUSD: 100 },
       credits: 1000,
       features: [
         { text: '1,000 Créditos mensuales', included: true },
@@ -67,7 +67,7 @@ const LandingPage = () => {
       id: 'growth',
       name: 'Growth',
       description: 'El plan ideal para PYMES.',
-      price: { USD: 49, localUSD: 40 },
+      price: { USD: 100, localUSD: 100 },
       credits: 3000,
       features: [
         { text: '3,000 Créditos mensuales', included: true },
@@ -83,7 +83,7 @@ const LandingPage = () => {
       id: 'scale',
       name: 'Scale',
       description: 'Volumen alto para Agencias.',
-      price: { USD: 149, localUSD: 120 },
+      price: { USD: 100, localUSD: 100 },
       credits: 10000,
       features: [
         { text: '10,000 Créditos mensuales', included: true },
@@ -98,19 +98,11 @@ const LandingPage = () => {
   ];
 
   const getPrice = (plan) => {
-    // Override requested by user: All plans 100 ARS
+    // Override requested by user: All plans 100 USD / 100,000 ARS
     if (currency === 'ARS') {
-      return 100;
+      return 100000;
     }
-
-    let finalPrice = plan.price.USD;
-
-    // Si es anual, descuento del 20%
-    if (isYearly) {
-      finalPrice = finalPrice * 0.8;
-    }
-
-    return Math.ceil(finalPrice);
+    return 100;
   };
 
   const handlePlanSelect = (planId) => {
