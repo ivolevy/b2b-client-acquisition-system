@@ -1964,7 +1964,11 @@
 }
 
 .testimonial-card {
-    min-width: 320px;
+    min-width: 260px;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background: #ffffff;
     /* Explicit white */
     border-radius: 20px;
@@ -3122,6 +3126,14 @@
     justify-content: center;
 }
 
+.email-icon-mini {
+    color: var(--primary);
+    filter: drop-shadow(0 0 8px rgba(var(--primary-rgb), 0.3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Ensure consistent icon sizing */
 .split-side .hero-icon-faded {
     margin: 0;
@@ -3131,7 +3143,8 @@
     /* Ensure visual balance */
 }
 
-.whatsapp-icon-mini svg {
+.whatsapp-icon-mini svg,
+.email-icon-mini svg {
     width: 20px;
     height: 20px;
 }

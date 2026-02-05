@@ -13,7 +13,7 @@ import {
   FiMenu,
   FiX
 } from 'react-icons/fi';
-import { FaLinkedin, FaTwitter, FaGithub, FaGoogle, FaMicrosoft } from 'react-icons/fa';
+import { FaLinkedin, FaTwitter, FaGithub, FaGoogle, FaMicrosoft, FaEnvelope } from 'react-icons/fa';
 import AnimatedBackground from './AnimatedBackground';
 
 import './LandingPage.css';
@@ -84,7 +84,9 @@ const LandingPage = () => {
         <div className="visual-display-open dual-split">
           <div className="split-side email-side">
             <div className="icon-header">
-              <FiMail className="hero-icon-faded violet" />
+              <div className="email-icon-mini">
+                <FaEnvelope />
+              </div>
               <span className="channel-title">Email Marketing</span>
             </div>
             <p className="channel-desc">
