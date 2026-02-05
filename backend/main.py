@@ -54,7 +54,8 @@ try:
         get_api_logs,
         get_user_credits,
         check_reset_monthly_credits,
-        deduct_credits
+        deduct_credits,
+        cancel_user_plan
     )
     from backend.auth_google import get_google_auth_url, exchange_code_for_token
     from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
@@ -114,6 +115,14 @@ async def api_get_user_credits(user_id: str):
     # Primero verificar si corresponde reset
     check_reset_monthly_credits(user_id)
     return get_user_credits(user_id)
+
+@app.post("/api/users/{user_id}/cancel-plan")
+async def api_cancel_user_plan(user_id: str):
+    """Cancela el plan activo del usuario"""
+    success = cancel_user_plan(user_id)
+    if not success:
+        raise HTTPException(status_code=400, detail="No se pudo cancelar el plan")
+    return {"success": True, "message": "Plan cancelado correctamente"}
 
 # Exception handler global para asegurar que CORS siempre se incluya
 @app.exception_handler(Exception)

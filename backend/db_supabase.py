@@ -948,7 +948,8 @@ def get_user_credits(user_id: str) -> Dict:
         return {"credits": 0, "next_reset": None}
         
     try:
-        res = client.table('users').select('credits, next_credit_reset, plan').eq('id', user_id).execute()
+    try:
+        res = client.table('users').select('credits, next_credit_reset, plan, subscription_status').eq('id', user_id).execute()
         if res.data:
             user_data = res.data[0]
             plan_id = user_data.get('plan', 'starter')
@@ -959,9 +960,10 @@ def get_user_credits(user_id: str) -> Dict:
                 "credits": user_data.get('credits', 0),
                 "next_reset": user_data.get('next_credit_reset'),
                 "total_credits": total_credits,
-                "plan": plan_id
+                "plan": plan_id,
+                "subscription_status": user_data.get('subscription_status', 'active')
             }
-        return {"credits": 0, "next_reset": None, "total_credits": 1500, "plan": "starter"}
+        return {"credits": 0, "next_reset": None, "total_credits": 1500, "plan": "starter", "subscription_status": "inactive"}
     except Exception as e:
         logger.error(f"Error obteniendo créditos para {user_id}: {e}")
         return {"credits": 0, "next_reset": None}
@@ -1031,4 +1033,25 @@ def check_reset_monthly_credits(user_id: str) -> bool:
         return False
     except Exception as e:
         logger.error(f"Error verificando reset de créditos para {user_id}: {e}")
+        return False
+
+def cancel_user_plan(user_id: str) -> bool:
+    """Cancela el plan del usuario (subscription_status = 'cancelled')"""
+    client = get_supabase_admin()
+    if not client or not user_id:
+        return False
+
+    try:
+        logger.info(f"🚫 Cancelando plan para usuario {user_id}")
+        
+        # Actualizar estado a cancelled
+        client.table('users').update({
+            "subscription_status": "cancelled",
+            # Opcional: Podríamos borrar next_credit_reset si queremos que no se renueve más ni siquiera al final del ciclo
+            # "next_credit_reset": None 
+        }).eq('id', user_id).execute()
+        
+        return True
+    except Exception as e:
+        logger.error(f"Error cancelando plan para {user_id}: {e}")
         return False

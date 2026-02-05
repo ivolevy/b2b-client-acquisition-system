@@ -20,7 +20,11 @@ function UserProfile() {
     document.body.classList.add('profile-page-active');
     return () => document.body.classList.remove('profile-page-active');
   }, []);
-  const [activeTab, setActiveTab] = useState('info'); // 'info', 'rubros', 'danger'
+  useEffect(() => {
+    document.body.classList.add('profile-page-active');
+    return () => document.body.classList.remove('profile-page-active');
+  }, []);
+  const [activeTab, setActiveTab] = useState('info'); // 'info', 'plan', 'rubros', 'danger'
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -44,7 +48,9 @@ function UserProfile() {
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false } });
   const [authLoading, setAuthLoading] = useState(false);
-  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, next_reset: null });
+  const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false } });
+  const [authLoading, setAuthLoading] = useState(false);
+  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, next_reset: null, subscription_status: 'active' });
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
@@ -566,6 +572,52 @@ function UserProfile() {
     }
   };
 
+  const handleCancelPlan = async () => {
+    if (!confirm('¿Estás seguro que querés cancelar tu plan? Perderás el acceso al finalizar el período.')) return;
+    
+    try {
+      const response = await axios.post(`${API_URL}/api/users/${user.id}/cancel-plan`);
+      if (response.data.success) {
+        toastSuccess?.('Plan cancelado correctamente');
+        fetchCredits(); // Recargar datos para actualizar la UI
+      }
+    } catch (error) {
+      console.error('Error cancelling plan:', error);
+      toastError?.('No se pudo cancelar el plan');
+    }
+  };
+    
+  const handleSelectPlan = async (planId, price, priceArs) => {
+      // Redirigir al checkout logic o reutilizar PricingSection logic
+      // Como esto es un componente separado, y LandingPage tiene la logica de checkout, 
+      // lo ideal sería mover el usuario a la landing o integrar aquí.
+      // Por simplicidad en este MVP, vamos a usar MP directamente o redirigir.
+      // Pero mejor, reutilizamos la lógica de MP si podemos importarla o simplemente redirigimos
+      // a la landing page pasándole el plan pre-seleccionado en query params?
+      // O copiamos la lógica básica de creación de preferencia.
+      
+      try {
+        const mpResponse = await axios.post(`${API_URL}/api/payments/mercadopago/create_preference`, {
+          plan_id: planId,
+          user_id: user.id || 'anonymous',
+          email: user.email,
+          name: user.name || 'Usuario',
+          phone: user.phone || 'No phone',
+          amount: parseFloat(priceArs),
+          description: `Suscripción Smart Leads - Plan ${planId.charAt(0).toUpperCase() + planId.slice(1)}`
+        });
+        
+        if (mpResponse.data && mpResponse.data.init_point) {
+           window.location.href = mpResponse.data.init_point;
+        } else {
+           toastError?.('Error al iniciar el pago');
+        }
+      } catch (e) {
+         console.error(e);
+         toastError?.('Error de conexión con pagos');
+      }
+  };
+
   return (
     <div className="user-profile-container">
       <div className="user-profile-header">
@@ -598,11 +650,11 @@ function UserProfile() {
               <span>Información básica</span>
             </button>
             <button 
-              className={`profile-nav-item ${activeTab === 'credits' ? 'active' : ''}`}
-              onClick={() => setActiveTab('credits')}
+              className={`profile-nav-item ${activeTab === 'plan' ? 'active' : ''}`}
+              onClick={() => setActiveTab('plan')}
             >
               <FiActivity size={18} />
-              <span>Créditos</span>
+              <span>Mi Plan</span>
             </button>
             <button 
               className={`profile-nav-item ${activeTab === 'rubros' ? 'active' : ''}`}
@@ -760,44 +812,116 @@ function UserProfile() {
             </div>
           )}
 
-          {activeTab === 'credits' && (
+          {activeTab === 'plan' && (
             <div className="profile-section-fade-in minimalist-credits">
+              
+              {/* HEADER PLAN */}
               <div className="minimalist-credits-header">
-                <h3 className="profile-subsection-title">Créditos</h3>
-                <div className="minimalist-balance-row">
-                  <span className="minimalist-balance-value">{creditsInfo.credits || 0}</span>
-                  <span className="minimalist-balance-label">/ {creditsInfo.total_credits || 1500} disponibles</span>
-                </div>
+                <h3 className="profile-subsection-title">
+                  {creditsInfo.subscription_status === 'active' ? 'Tu Plan Activo' : 'Elegí tu Plan'}
+                </h3>
+                  {creditsInfo.subscription_status === 'active' && (
+                    <div className="minimalist-balance-row">
+                      <span className="minimalist-balance-value">{creditsInfo.credits || 0}</span>
+                      <span className="minimalist-balance-label">/ {creditsInfo.total_credits || 1500} créditos</span>
+                    </div>
+                  )}
               </div>
 
-              <div className="minimalist-progress-wrapper">
-                <div className="minimalist-progress-track">
-                  <div 
-                    className={`minimalist-progress-fill ${(creditsInfo.credits || 0) < ((creditsInfo.total_credits || 1500) * 0.2) ? 'low' : ''}`}
-                    style={{ width: `${Math.min(100, Math.round(((creditsInfo.credits || 0) / (creditsInfo.total_credits || 1500)) * 100))}%` }}
-                  ></div>
-                </div>
-                <div className="minimalist-progress-info">
-                  <span>{100 - Math.round(((creditsInfo.credits || 0) / (creditsInfo.total_credits || 1500)) * 100)}% consumido</span>
-                  <span className="renewal-badge">
-                    Próxima renovación: {creditsInfo.next_reset ? new Date(creditsInfo.next_reset).toLocaleDateString() : 'Pendiente'}
-                  </span>
-                </div>
-              </div>
+              {/* SI EL PLAN ESTÁ ACTIVO: MOSTRAR CRÉDITOS Y BOTÓN CANCELAR */}
+              {creditsInfo.subscription_status === 'active' ? (
+                <>
+                  <div className="minimalist-progress-wrapper">
+                    <div className="minimalist-progress-track">
+                      <div 
+                        className={`minimalist-progress-fill ${(creditsInfo.credits || 0) < ((creditsInfo.total_credits || 1500) * 0.2) ? 'low' : ''}`}
+                        style={{ width: `${Math.min(100, Math.round(((creditsInfo.credits || 0) / (creditsInfo.total_credits || 1500)) * 100))}%` }}
+                      ></div>
+                    </div>
+                    <div className="minimalist-progress-info">
+                      <span>{100 - Math.round(((creditsInfo.credits || 0) / (creditsInfo.total_credits || 1500)) * 100)}% consumido</span>
+                      <span className="renewal-badge">
+                        Renovación: {creditsInfo.next_reset ? new Date(creditsInfo.next_reset).toLocaleDateString() : 'Pendiente'}
+                      </span>
+                    </div>
+                  </div>
 
-              {creditsInfo.credits === 0 ? (
-                <div className="minimalist-alert-simple exhausted">
-                  <span className="alert-dot"></span>
-                  Has agotado tus créditos para este mes.
-                </div>
-              ) : ((creditsInfo.credits || 0) < ((creditsInfo.total_credits || 1500) * 0.3)) && (
-                <div className="minimalist-alert-simple warning">
-                  <span className="alert-dot"></span>
-                  Te estás quedando sin créditos para tus búsquedas.
+                  {creditsInfo.credits === 0 && (
+                    <div className="minimalist-alert-simple exhausted">
+                      <span className="alert-dot"></span>
+                      Has agotado tus créditos para este mes.
+                    </div>
+                  )}
+
+                  <div className="minimalist-actions-grid" style={{ marginTop: '40px', borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                        <div>
+                            <h4 style={{ fontSize: '1rem', marginBottom: '4px' }}>Plan {creditsInfo.plan ? creditsInfo.plan.charAt(0).toUpperCase() + creditsInfo.plan.slice(1) : 'Actual'}</h4>
+                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Tu suscripción está activa.</p>
+                        </div>
+                        <button 
+                            onClick={handleCancelPlan}
+                            className="btn-danger-text"
+                            style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                        >
+                            Cancelar suscripción
+                        </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* SI NO HAY PLAN ACTIVO: MOSTRAR PRICING CARDS */
+                <div className="pricing-grid-profile">
+                   {/* STARTER */}
+                   <div className="pricing-card-profile">
+                      <h3>Starter</h3>
+                      <div className="price-profile">$35 USD <span>/mes</span></div>
+                      <p className="price-ars-profile">$40,000 ARS</p>
+                      <ul className="profile-pkg-features">
+                        <li>1,500 Créditos mensuales</li>
+                        <li>Búsqueda por Mapa</li>
+                        <li>Soporte básico</li>
+                      </ul>
+                      <button className="btn-profile-subscribe" onClick={() => handleSelectPlan('starter', 35, 40000)}>
+                        Elegir Starter
+                      </button>
+                   </div>
+
+                   {/* GROWTH */}
+                   <div className="pricing-card-profile featured">
+                      <h3>Growth</h3>
+                      <div className="price-profile">$100 USD <span>/mes</span></div>
+                      <p className="price-ars-profile">$100,000 ARS</p>
+                      <ul className="profile-pkg-features">
+                        <li>5,000 Créditos mensuales</li>
+                        <li>Búsqueda Avanzada</li>
+                        <li>Soporte prioritario</li>
+                      </ul>
+                      <button className="btn-profile-subscribe primary" onClick={() => handleSelectPlan('growth', 100, 100000)}>
+                        Elegir Growth
+                      </button>
+                   </div>
+
+                   {/* SCALE */}
+                   <div className="pricing-card-profile">
+                      <h3>Scale</h3>
+                      <div className="price-profile">$200 USD <span>/mes</span></div>
+                      <p className="price-ars-profile">$220,000 ARS</p>
+                      <ul className="profile-pkg-features">
+                        <li>10,000 Créditos mensuales</li>
+                        <li>API Access (Beta)</li>
+                        <li>Soporte 24/7</li>
+                      </ul>
+                      <button className="btn-profile-subscribe" onClick={() => handleSelectPlan('scale', 200, 220000)}>
+                        Elegir Scale
+                      </button>
+                   </div>
                 </div>
               )}
 
-              <div className="minimalist-actions-grid">
+              {/* Keep existing logic structure if needed but wrapped */}
+              {false && ( // Disabled old view safely
+                 <div className="minimalist-actions-grid">
                 <div className="minimalist-action-item">
                   <h3>{creditsInfo.plan === 'starter' ? 'Upgrade a Growth' : 'Upgrade a Scale'}</h3>
                   <p>Aumenta tu cupo mensual de {creditsInfo.total_credits || 1500} a {creditsInfo.plan === 'starter' ? '3,000' : '10,000'} créditos.</p>
@@ -812,7 +936,8 @@ function UserProfile() {
                     Ver Packs
                   </button>
                 </div>
-              </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1274,6 +1399,7 @@ function UserProfile() {
           </div>
         </div>
       )}
+
 
 
       {/* Modal de éxito al eliminar cuenta */}

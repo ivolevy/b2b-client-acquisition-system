@@ -383,7 +383,7 @@ const LandingPage = () => {
         <h2>Simples 4 pasos que te hacen ganar mas plata con menos esfuerzo</h2>
       </div>
       {/* Desktop View */}
-      <div className="selector-grid desktop-only">
+      <div className="selector-grid">
         {/* Nav Tabs */}
         <div className="selector-nav">
           {modules.map((mod, idx) => (
