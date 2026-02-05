@@ -10,7 +10,8 @@ const AnimatedBackground = () => {
         let particles = [];
 
         // Configuration
-        const PARTICLE_COUNT = 60; // Slightly reduced for cleaner look
+        const isMobile = window.innerWidth < 768;
+        const PARTICLE_COUNT = isMobile ? 15 : 60; // Reduced for mobile per user request
         const CONNECTION_DISTANCE = 150;
         const MOUSE_DISTANCE = 200;
 

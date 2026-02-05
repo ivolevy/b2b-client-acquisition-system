@@ -382,7 +382,8 @@ const LandingPage = () => {
       <div className="section-header center">
         <h2>Simples 4 pasos que te hacen ganar mas plata con menos esfuerzo</h2>
       </div>
-      <div className="selector-grid">
+      {/* Desktop View */}
+      <div className="selector-grid desktop-only">
         {/* Nav Tabs */}
         <div className="selector-nav">
           {modules.map((mod, idx) => (
@@ -419,6 +420,37 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Mobile Accordion View */}
+      <div className="accordion-mobile mobile-only">
+        {modules.map((mod, idx) => (
+          <div key={mod.id} className={`accordion-item ${activeModule === idx ? 'expanded' : ''}`}>
+             <div className="accordion-header" onClick={() => setActiveModule(idx === activeModule ? -1 : idx)}>
+                <div className="header-left">
+                   <span className="accordion-num">0{idx + 1}</span>
+                   <h3>{mod.title}</h3>
+                </div>
+                <div className="header-icon">
+                   {activeModule === idx ? <div className="minus-icon">−</div> : <div className="plus-icon">+</div>}
+                </div>
+             </div>
+             
+             <div className={`accordion-body ${activeModule === idx ? 'open' : ''}`}>
+                <div className="module-content-mobile">
+                   <div className="module-lead-mobile">
+                     {mod.lead}
+                   </div>
+                   <button className="btn-primary btn-sm btn-mobile-accordion" onClick={() => navigate('/register')}>
+                     Empezar
+                   </button>
+                   <div className="module-visual-mobile">
+                      {mod.visual}
+                   </div>
+                </div>
+             </div>
+          </div>
+        ))}
       </div>
     </div>
   </section>
