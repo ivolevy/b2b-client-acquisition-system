@@ -31,6 +31,88 @@ const LandingPage = () => {
 
   // Scroll-linked Animation
   const mockupRef = useRef(null);
+  const [activeModule, setActiveModule] = useState(0);
+
+  const modules = [
+    {
+      id: 'search',
+      title: 'Motor de Búsqueda con IA',
+      icon: <FiMapPin />,
+      lead: (
+        <>
+          <p style={{ marginBottom: '16px' }}>Creamos una IA que busca leads nuevos en tiempo real en toda la web.</p>
+          <p style={{ margin: 0 }}>Solo ingresás rubro, dirección y radio, y el sistema encuentra empresas que coincidan.</p>
+        </>
+      ),
+      visual: (
+        <div className="visual-display-open">
+          <FiMapPin className="hero-icon-faded" />
+          <div className="data-stream-vertical">
+            <div className="stream-item"><span>Consultora Tech</span> <small>Buenos Aires</small></div>
+            <div className="stream-item"><span>Estudio Jurídico</span> <small>CABA</small></div>
+            <div className="stream-item"><span>Agencia Marketing</span> <small>Córdoba</small></div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'enrich',
+      title: 'Enriquecimiento de Datos',
+      icon: <FiDatabase />,
+      lead: (
+        <>
+          <p style={{ marginBottom: '16px' }}>El sistema analiza la presencia digital de cada prospecto para validar la calidad de sus datos antes de procesarlo.</p>
+          <p style={{ margin: 0 }}>Emails verificados para reducir rebotes, teléfonos existentes y demás.</p>
+        </>
+      ),
+      visual: (
+        <div className="visual-display-open">
+          <FiDatabase className="hero-icon-faded blue" />
+          <div className="verification-pulse">
+            <div className="pulse-ring"></div>
+            <span className="verified-badge">VERIFICADO</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'reach',
+      title: 'Email Masivo OAuth',
+      icon: <FiMail />,
+      lead: (
+        <>
+          <p style={{ marginBottom: '16px' }}>Emails que llegan a inbox, no a spam.</p>
+          <p style={{ margin: 0 }}>Conectá Google u Outlook por OAuth, sin configuraciones complejas.</p>
+        </>
+      ),
+      visual: (
+        <div className="visual-display-open">
+          <FiMail className="hero-icon-faded violet" />
+          <div className="email-success-graph">
+            <div className="bar b1"></div>
+            <div className="bar b2"></div>
+            <div className="bar b3"></div>
+            <div className="bar b4"></div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'export',
+      title: 'Exportación y Reportes',
+      icon: <FiZap />,
+      lead: (
+        <>
+          <p style={{ margin: 0 }}>Tus datos son tuyos. Descargá listas de los leads obtenidos limpias y listas para usar en cualquier plataforma.</p>
+        </>
+      ),
+      visual: (
+        <div className="visual-display-open">
+          <FiZap className="hero-icon-faded green" />
+        </div>
+      )
+    }
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -297,106 +379,52 @@ const LandingPage = () => {
     </div>
   </section>
 
-  {/* --- MODULE 1: DATA EXTRACTION (Full Width) --- */}
-  <section id="search-engine" className="product-module-section">
-    <div className="container module-layout">
-          <div className="module-content">
-            <div className="module-number">01</div>
-            <h2>Motor de Búsqueda con IA</h2>
-            <div className="module-lead">
-              <p style={{ marginBottom: '16px' }}>Creamos una IA que busca leads nuevos en tiempo real en toda la web.</p>
-              <p style={{ margin: 0 }}>Solo ingresás rubro, dirección y radio, y el sistema encuentra empresas que coincidan.</p>
-            </div>
-            <div className="module-details">
-                
-
-            </div>
-          </div>
-          <div className="module-visual">
-            {/* Open Visual - No Card */}
-            <div className="visual-display-open">
-              <FiMapPin className="hero-icon-faded" />
-              <div className="data-stream-vertical">
-                <div className="stream-item"><span>Consultora Tech</span> <small>Buenos Aires</small></div>
-                <div className="stream-item"><span>Estudio Jurídico</span> <small>CABA</small></div>
-                <div className="stream-item"><span>Agencia Marketing</span> <small>Córdoba</small></div>
+  {/* --- NEW COMPACT FEATURES SELECTOR (Option B) --- */}
+  <section id="features" className="features-selector-section">
+    <div className="container">
+      <div className="section-header center">
+        <h2>Simples 4 pasos que te hacen ganar mas plata con menos esfuerzo</h2>
+      </div>
+      <div className="selector-grid">
+        {/* Nav Tabs */}
+        <div className="selector-nav">
+          {modules.map((mod, idx) => (
+            <div 
+              key={mod.id}
+              className={`selector-tab ${activeModule === idx ? 'active' : ''}`}
+              onClick={() => setActiveModule(idx)}
+              onMouseEnter={() => setActiveModule(idx)}
+            >
+              <div className="tab-icon">{mod.icon}</div>
+              <div className="tab-text">
+                <h3>{mod.title}</h3>
+                <div className="tab-indicator"></div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
-      </section>
 
-      {/* --- MODULE 2: VERIFICATION & ENRICHMENT (Full Width - Reversed) --- */}
-      <section className="product-module-section">
-        <div className="container module-layout reverse">
-          <div className="module-content">
-            <div className="module-number">02</div>
-            <h2>Enriquecimiento de Datos</h2>
-            <div className="module-lead">
-              <p style={{ marginBottom: '16px' }}>El sistema analiza la presencia digital de cada prospecto para validar la calidad de sus datos antes de procesarlo.</p>
-              <p style={{ margin: 0 }}>Emails verificados para reducir rebotes, teléfonos existentes y demás.</p>
-            </div>
-            <div className="module-details">
-            </div>
-          </div>
-          <div className="module-visual">
-            <div className="visual-display-open">
-              <FiDatabase className="hero-icon-faded blue" />
-              <div className="verification-pulse">
-                <div className="pulse-ring"></div>
-                <span className="verified-badge">VERIFICADO</span>
+        {/* Content Area */}
+        <div className="selector-content-wrapper">
+          <div className="selector-content-inner" key={activeModule}>
+            <div className="module-content">
+              <div className="module-number">0{activeModule + 1}</div>
+              <h2>{modules[activeModule].title}</h2>
+              <div className="module-lead">
+                {modules[activeModule].lead}
               </div>
+              <button className="btn-primary" style={{ marginTop: '32px' }} onClick={() => navigate('/register')}>
+                Empezar Ahora <FiArrowRight />
+              </button>
+            </div>
+            <div className="module-visual">
+              {modules[activeModule].visual}
             </div>
           </div>
         </div>
-      </section>
-
-      {/* --- MODULE 3: SMART OUTREACH (Full Width) --- */}
-      <section className="product-module-section">
-        <div className="container module-layout">
-          <div className="module-content">
-            <div className="module-number">03</div>
-            <h2>Infraestructura de Email Masivo</h2>
-            <div className="module-lead">
-              <p style={{ marginBottom: '16px' }}>Emails que llegan a inbox, no a spam.</p>
-              <p style={{ margin: 0 }}>Conectá Google u Outlook por OAuth, sin configuraciones complejas.</p>
-            </div>
-            <div className="module-details">
-            </div>
-          </div>
-          <div className="module-visual">
-            <div className="visual-display-open">
-              <FiMail className="hero-icon-faded violet" />
-              <div className="email-success-graph">
-                <div className="bar b1"></div>
-                <div className="bar b2"></div>
-                <div className="bar b3"></div>
-                <div className="bar b4"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* --- MODULE 4: CRM & EXPORT (Full Width - Reversed) --- */}
-      <section className="product-module-section">
-        <div className="container module-layout reverse">
-          <div className="module-content">
-            <div className="module-number">04</div>
-            <h2>Exportación y Reportes</h2>
-            <div className="module-lead">
-              <p style={{ margin: 0 }}>Tus datos son tuyos. Descargá listas de los leads obtenidos limpias y listas para usar en cualquier plataforma.</p>
-            </div>
-            <div className="module-details">
-            </div>
-          </div>
-          <div className="module-visual">
-            <div className="visual-display-open">
-              <FiZap className="hero-icon-faded green" />
-            </div>
-          </div>
-        </div>
-      </section>
+      </div>
+    </div>
+  </section>
 
 
 
