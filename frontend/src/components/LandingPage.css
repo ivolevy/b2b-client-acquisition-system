@@ -1975,8 +1975,8 @@
 }
 
 .testimonial-card {
-    min-width: 320px;
-    width: 320px;
+    min-width: 450px;
+    width: 450px;
     /* Fixed width for consistency */
     background: #ffffff;
     /* Explicit white */
