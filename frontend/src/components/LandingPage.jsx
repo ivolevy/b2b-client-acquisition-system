@@ -403,22 +403,25 @@ const LandingPage = () => {
         </div>
 
         {/* Content Area */}
+        {/* Content Area */}
         <div className="selector-content-wrapper">
-          <div className="selector-content-inner" key={activeModule}>
-            <div className="module-content">
-              <div className="module-number">0{activeModule + 1}</div>
-              <h2>{modules[activeModule].title}</h2>
-              <div className="module-lead">
-                {modules[activeModule].lead}
+          {modules[activeModule] && (
+            <div className="selector-content-inner" key={activeModule}>
+              <div className="module-content">
+                <div className="module-number">0{activeModule + 1}</div>
+                <h2>{modules[activeModule].title}</h2>
+                <div className="module-lead">
+                  {modules[activeModule].lead}
+                </div>
+                <button className="btn-primary" style={{ marginTop: '32px' }} onClick={() => navigate('/register')}>
+                  Empezar Ahora <FiArrowRight />
+                </button>
               </div>
-              <button className="btn-primary" style={{ marginTop: '32px' }} onClick={() => navigate('/register')}>
-                Empezar Ahora <FiArrowRight />
-              </button>
+              <div className="module-visual">
+                {modules[activeModule].visual}
+              </div>
             </div>
-            <div className="module-visual">
-              {modules[activeModule].visual}
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
