@@ -427,6 +427,7 @@
     margin-bottom: 24px;
     cursor: pointer;
     transition: all 0.2s ease;
+    color: white;
 }
 
 .badge-pill:hover {
@@ -1964,19 +1965,20 @@
 }
 
 .testimonial-card {
-    min-width: 220px;
-    width: 220px;
-    height: 220px;
+    min-width: 280px;
+    width: 280px;
+    /* Fixed width for consistency */
     background: #ffffff;
     /* Explicit white */
     border-radius: 20px;
-    padding: 24px;
+    padding: 32px;
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: flex-start;
     text-align: left;
+    height: auto;
     color: var(--text-primary);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(226, 232, 240, 0.8);
