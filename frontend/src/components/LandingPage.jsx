@@ -98,9 +98,9 @@ const LandingPage = () => {
   ];
 
   const getPrice = (plan) => {
-    // Override requested by user: All plans 100 USD / 100,000 ARS
+    // Override requested by user: All plans 100 USD / 100 ARS
     if (currency === 'ARS') {
-      return 100000;
+      return 100;
     }
     return 100;
   };
