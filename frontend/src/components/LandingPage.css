@@ -1948,7 +1948,7 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 150px;
+    width: 80px;
     z-index: 5;
     pointer-events: none;
 }
@@ -3055,11 +3055,14 @@
         transform: none;
     }
 }
+
+/* Dual Split Visual for Module 3 */
 /* Dual Split Visual for Module 3 */
 .dual-split {
     display: flex !important;
     gap: 20px;
-    align-items: center;
+    align-items: stretch;
+    /* Stretch to equal height */
     justify-content: center;
     height: 100%;
 }
@@ -3067,14 +3070,17 @@
 .split-side {
     flex: 1;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* Glass card look */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     border-radius: 16px;
     padding: 24px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
+    align-items: flex-start;
+    /* Left align content */
+    justify-content: flex-start;
+    gap: 16px;
     transition: all 0.3s ease;
 }
 
@@ -3082,20 +3088,56 @@
     background: rgba(37, 99, 235, 0.05);
     transform: translateY(-5px);
     border-color: var(--primary);
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.15);
 }
 
-.split-side span {
-    font-size: 0.9rem;
+.icon-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.split-side .channel-title {
+    font-size: 1.1rem;
     font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.split-side .channel-desc {
+    font-size: 0.95rem;
+    line-height: 1.5;
     color: var(--text-secondary);
+    margin: 0;
+    text-align: left;
 }
 
 .whatsapp-icon-mini {
     color: #25D366;
     filter: drop-shadow(0 0 8px rgba(37, 211, 102, 0.3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.email-side .hero-icon-faded {
+/* Ensure consistent icon sizing */
+.split-side .hero-icon-faded {
     margin: 0;
-    opacity: 0.8;
+    opacity: 1;
+    /* Make it pop more */
+    font-size: 24px;
+    /* Ensure visual balance */
+}
+
+/* Responsive: Stack on mobile */
+@media (max-width: 768px) {
+    .dual-split {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .split-side {
+        width: 100%;
+    }
 }
