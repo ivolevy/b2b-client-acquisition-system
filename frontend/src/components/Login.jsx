@@ -1079,7 +1079,7 @@ function Login({ onLogin }) {
               <button 
                 type="submit" 
                 className="login-button"
-                disabled={loading || !isFormValid()}
+                disabled={loading}
                 aria-busy={loading}
               >
                 {loading ? (

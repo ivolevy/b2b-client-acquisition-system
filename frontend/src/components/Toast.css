@@ -1,150 +1,135 @@
+/* Minimalist & Aesthetic Toast CSS */
 .toast {
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  /* More standard radius, less rounded */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   background: white;
-  border: 1px solid var(--gray-200);
-  min-width: 320px;
-  max-width: 480px;
-  animation: toastSlideIn 0.3s ease-out;
+  border: 1px solid #e2e8f0;
+  min-width: unset;
+  /* Remove fixed min-width */
+  max-width: 380px;
+  /* Limit width */
+  width: auto;
+  animation: toastPopIn 0.2s cubic-bezier(0.2, 0, 0.2, 1);
   position: relative;
   z-index: 10000;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .toast-exiting {
-  animation: toastSlideOut 0.3s ease-in forwards;
+  animation: toastFadeOut 0.2s ease-in forwards;
 }
 
-@keyframes toastSlideIn {
+@keyframes toastPopIn {
   from {
-    transform: translateX(100%);
+    transform: scale(0.95);
     opacity: 0;
   }
+
   to {
-    transform: translateX(0);
+    transform: scale(1);
     opacity: 1;
   }
 }
 
-@keyframes toastSlideOut {
+@keyframes toastFadeOut {
   from {
-    transform: translateX(0);
     opacity: 1;
   }
+
   to {
-    transform: translateX(100%);
     opacity: 0;
   }
 }
 
 .toast-icon {
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  /* Smaller icon */
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 2px;
 }
 
 .toast-content {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
 }
 
 .toast-message {
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: var(--gray-900);
-  white-space: pre-line;
+  font-size: 0.85rem;
+  /* Smaller font */
+  font-weight: 500;
+  line-height: 1.4;
+  color: #1e293b;
+  /* Dark slate */
+  white-space: normal;
 }
 
+/* Remove paragraphs margin inside message */
 .toast-message p {
   margin: 0;
 }
 
-.toast-message ul {
-  margin: var(--spacing-xs) 0 0 0;
-  padding-left: var(--spacing-lg);
-}
-
-.toast-message li {
-  margin: var(--spacing-xs) 0;
-}
-
 .toast-close {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gray-500);
-  transition: color 0.2s ease;
-  border-radius: var(--radius-sm);
-  margin-top: -2px;
+  display: none;
+  /* Hide close button for cleaner look (auto-dismiss handles it) */
 }
 
-.toast-close:hover {
-  color: var(--gray-700);
-  background: var(--gray-100);
-}
-
-/* Success Toast */
+/* Success Toast - Minimal Green */
 .toast-success {
-  border-left: 4px solid var(--success);
-  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  border-left: 3px solid #10b981;
 }
 
 .toast-success .toast-icon {
-  color: var(--success);
+  color: #10b981;
 }
 
-/* Error Toast */
+/* Error Toast - Minimal Red */
 .toast-error {
-  border-left: 4px solid var(--danger);
-  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+  border-left: 3px solid #ef4444;
 }
 
 .toast-error .toast-icon {
-  color: var(--danger);
+  color: #ef4444;
 }
 
-/* Warning Toast */
+/* Warning Toast - Minimal Amber */
 .toast-warning {
-  border-left: 4px solid var(--warning);
-  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  border-left: 3px solid #f59e0b;
 }
 
 .toast-warning .toast-icon {
-  color: var(--warning);
+  color: #f59e0b;
 }
 
-/* Info Toast */
+/* Info Toast - Minimal Blue */
 .toast-info {
-  border-left: 4px solid var(--primary);
-  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  border-left: 3px solid #3b82f6;
 }
 
 .toast-info .toast-icon {
-  color: var(--primary);
+  color: #3b82f6;
 }
 
-/* Toast Container */
+/* Toast Container Position */
 .toast-container {
   position: fixed;
-  top: var(--spacing-lg);
-  right: var(--spacing-lg);
+  top: 20px;
+  right: 20px;
   z-index: 10000;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: 8px;
+  /* Closer gap */
   pointer-events: none;
 }
 
@@ -154,15 +139,12 @@
 
 @media (max-width: 768px) {
   .toast-container {
-    top: var(--spacing-md);
-    right: var(--spacing-md);
-    left: var(--spacing-md);
+    top: 10px;
+    right: 10px;
+    left: 10px;
   }
 
   .toast {
-    min-width: auto;
     max-width: 100%;
   }
 }
-
-

@@ -77,32 +77,17 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
     e.preventDefault();
     
     if (!rubro) {
-      toastWarning?.(
-        <>
-          <strong>Selecciona un rubro</strong>
-          <p>Necesitas elegir un rubro antes de lanzar la búsqueda.</p>
-        </>
-      );
+      toastWarning?.("Selecciona un rubro");
       return;
     }
 
     if (!locationData) {
-      toastWarning?.(
-        <>
-          <strong>Ubicación requerida</strong>
-          <p>Marca un punto en el mapa para definir el área a analizar.</p>
-        </>
-      );
+      toastWarning?.("Selecciona una ubicación");
       return;
     }
 
     if (!locationData.radius) {
-      toastWarning?.(
-        <>
-          <strong>Selecciona un radio</strong>
-          <p>Indica el radio de búsqueda (en km) para la zona seleccionada.</p>
-        </>
-      );
+      toastWarning?.("Selecciona un radio");
       return;
     }
 

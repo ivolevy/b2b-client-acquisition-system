@@ -93,12 +93,7 @@ function AppB2B() {
       if (showError) {
         const errorMsg = err.response?.data?.detail || err.message;
         if (err.code === 'ERR_NETWORK' || err.response?.status >= 500) {
-          toastError(
-            <>
-              <strong>No se pudieron cargar las empresas</strong>
-              <p>{errorMsg}</p>
-            </>
-          );
+          toastError("Error al cargar empresas");
         }
       }
     } finally {
@@ -142,20 +137,20 @@ function AppB2B() {
     const outlookStatus = params.get('outlook');
     
     if (gmailStatus === 'success') {
-      success("✓ Gmail conectado correctamente. Ya podés enviar correos.");
+      success("Gmail conectado correctamente.");
       navigate('/', { replace: true });
     } else if (gmailStatus === 'error') {
       const reason = params.get('reason');
-      toastError(`✗ Error al conectar con Gmail: ${reason || 'Error desconocido'}`);
+      toastError("Error al conectar Gmail");
       navigate('/', { replace: true });
     }
 
     if (outlookStatus === 'success') {
-      success("✓ Outlook conectado correctamente. Ya podés enviar correos.");
+      success("Outlook conectado correctamente.");
       navigate('/', { replace: true });
     } else if (outlookStatus === 'error') {
       const reason = params.get('reason');
-      toastError(`✗ Error al conectar con Outlook: ${reason || 'Error desconocido'}`);
+      toastError("Error al conectar Outlook");
       navigate('/', { replace: true });
     }
   }, [location.search, navigate, success, toastError]);
@@ -293,12 +288,7 @@ function AppB2B() {
   const handleSelectFromHistory = (searchData) => {
     setIsFromHistory(true);
     setHistorySearchData(searchData);
-    info(
-      <>
-        <strong>Búsqueda cargada</strong>
-        <p>Se cargó "{searchData.rubro}" - {searchData.ubicacion_nombre || 'ubicación personalizada'}</p>
-      </>
-    );
+      info("Búsqueda cargada del historial");
   };
 
 
@@ -350,7 +340,7 @@ function AppB2B() {
           console.warn('Safety timeout reached for search loading');
           setBlockingLoading(false);
           setLoading(false);
-          toastError?.('La búsqueda está tardando más de lo esperado. Se canceló la espera visual, pero los resultados podrían aparecer en breve.');
+          toastError?.('Tiempo de espera agotado');
         }
       }, 60000); 
 
@@ -437,49 +427,16 @@ function AppB2B() {
         }
         
         if (total === 0) {
-          warning(
-            <>
-              <strong>No se encontraron empresas en esa área</strong>
-              <ul>
-                <li>Aumentar el radio de búsqueda</li>
-                <li>Elegir otra ubicación</li>
-                <li>Probar otro rubro</li>
-              </ul>
-            </>
-          );
+          warning("No se encontraron resultados");
         } else if (validas === 0 && params.solo_validadas) {
-          warning(
-            <>
-              <strong>Se encontraron {total} prospectos brutos</strong>
-              <p>Ninguno cumple los criterios de contacto verificado.</p>
-              <p>Desmarca "Solo empresas con email..." para ver resultados con datos parciales.</p>
-            </>
-          );
+          warning("Sin resultados validados");
         } else {
           const descartadas = total - guardadas;
           
-          if (params.solo_validadas) {
-             success(
-               <>
-                 <strong>Resultados de la búsqueda</strong>
-                 <p><strong>{guardadas} empresas guardadas</strong> (de {total} rastro)</p>
-                 <p style={{ marginTop: '4px' }}>✓ 100% con contacto verificado</p>
-               </>
-             );
+           if (params.solo_validadas) {
+             success("Búsqueda completada con éxito");
           } else {
-             success(
-               <>
-                 <strong>Resultados de la búsqueda</strong>
-                 <p><strong>{guardadas} empresas guardadas</strong> de {total} detectadas</p>
-                 <ul style={{ margin: '8px 0 0 0', paddingLeft: '15px' }}>
-                    <li>{validas} con contacto verificado</li>
-                    <li>{guardadas - validas} con datos básicos</li>
-                    {descartadas > 0 && (
-                        <li style={{ opacity: 0.75 }}>{descartadas} descartadas (fuera de radio / sin nombre)</li>
-                    )}
-                 </ul>
-               </>
-             );
+             success("Búsqueda completada con éxito");
           }
         }
         
@@ -504,12 +461,7 @@ function AppB2B() {
       // Si fue cancelado manualmente, no mostrar error
       if (err.message === 'Canceled') return;
 
-      toastError(
-        <>
-          <strong>Error al buscar empresas</strong>
-          <p>{errorMsg}</p>
-        </>
-      );
+      toastError("Error en la búsqueda");
     } finally {
       // Limpiar estados y polling
       setBlockingLoading(false);
@@ -539,7 +491,7 @@ function AppB2B() {
     setDisplayProgress(0);
 
     // 3. Notificar al usuario (opcional, o simplemente cerrar silenciosamente)
-    info("Búsqueda cancelada por el usuario");
+    info("Búsqueda cancelada");
   };
 
 
@@ -552,33 +504,18 @@ function AppB2B() {
       });
       
       if (response.data.success) {
-        success(
-          <>
-            <strong>Exportación backend lista</strong>
-            <p>Archivo generado: {response.data.archivo}</p>
-          </>
-        );
+        success("Archivo exportado");
       }
     } catch (err) {
       console.error('Error al exportar:', err);
       const errorMsg = err.response?.data?.detail || err.message;
-      toastError(
-        <>
-          <strong>Error al exportar datos</strong>
-          <p>{errorMsg}</p>
-        </>
-      );
+      toastError("Error al exportar");
     }
   };
 
   const exportToCSVFrontend = (empresasToExport = empresas) => {
     if (empresasToExport.length === 0) {
-      warning(
-        <>
-          <strong>No hay datos para exportar</strong>
-          <p>Realiza una búsqueda o quita filtros antes de exportar.</p>
-        </>
-      );
+      warning("Sin datos para exportar");
       return;
     }
 
@@ -668,22 +605,12 @@ function AppB2B() {
     
     setTimeout(() => URL.revokeObjectURL(url), 100);
     
-    success(
-      <>
-        <strong>Exportación completada</strong>
-        <p>Se exportaron {empresasToExport.length} empresas.</p>
-      </>
-    );
+    success("Archivo exportado");
   };
 
   const handleExportPDF = (empresasToExport = empresas) => {
     if (empresasToExport.length === 0) {
-      warning(
-        <>
-          <strong>No hay datos para exportar</strong>
-          <p>Realiza una búsqueda o quita filtros antes de exportar.</p>
-        </>
-      );
+      warning("Sin datos para exportar");
       return;
     }
 
@@ -746,20 +673,10 @@ function AppB2B() {
 
       doc.save(filename);
 
-      success(
-        <>
-          <strong>Exportación PDF completada</strong>
-          <p>Se generó el archivo {filename}</p>
-        </>
-      );
+      success("Archivo exportado");
     } catch (err) {
       console.error('Error generando PDF:', err);
-       toastError(
-        <>
-          <strong>Error al generar PDF</strong>
-          <p>{err.message}</p>
-        </>
-      );
+       toastError("Error al generar PDF");
     }
   };
 
@@ -770,12 +687,7 @@ function AppB2B() {
     // Limpiar también sessionStorage
     sessionStorage.removeItem('b2b_empresas_cache');
     sessionStorage.removeItem('b2b_stats_cache');
-    success(
-      <>
-        <strong>Resultados limpiados</strong>
-        <p>Tu vista ha sido reiniciada.</p>
-      </>
-    );
+    success("Resultados limpiados: Vista reiniciada.");
   };
 
   return (
