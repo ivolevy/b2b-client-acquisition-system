@@ -204,8 +204,8 @@
 
     --text-primary: #0f172a;
     /* Slate 900 */
-    --text-secondary: #475569;
-    /* Slate 600 */
+    --text-secondary: #334155;
+    /* Slate 700 - Darker for better contrast against animated bg */
 
     --primary: #2563eb;
     --primary-dark: #1d4ed8;
@@ -386,11 +386,12 @@
 
 /* --- HERO --- */
 .hero-section {
-    padding-top: 180px;
-    /* More space for floating header */
-    padding-bottom: 100px;
+    padding-top: 160px;
+    padding-bottom: 120px;
     position: relative;
     overflow: hidden;
+    /* Ensure content is above canvas */
+    z-index: 1;
 }
 
 .hero-bg-glow {
@@ -440,25 +441,35 @@
 }
 
 .hero-text h1 {
-    font-size: 4rem;
-    line-height: 1.1;
+    font-size: 4.5rem;
+    /* Increased size */
+    line-height: 1.05;
     margin-bottom: 24px;
+    letter-spacing: -0.02em;
+    font-weight: 500;
+    /* Instrument Serif looks better regular/medium */
 }
 
 .text-gradient {
-    background: linear-gradient(135deg, #0f172a 0%, #475569 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    /* More vibrant Blue to Violet */
     -webkit-background-clip: text;
-    background-clip: text;
     background-clip: text;
     /* Standard property */
     -webkit-text-fill-color: transparent;
     font-style: italic;
+    font-weight: 400;
+    /* Keep italic sleek */
+    padding-right: 0.1em;
+    /* Fix italic clipping */
 }
 
 .hero-subtext {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     margin-bottom: 40px;
-    max-width: 500px;
+    max-width: 540px;
+    color: var(--text-secondary);
+    font-weight: 400;
 }
 
 .hero-buttons {

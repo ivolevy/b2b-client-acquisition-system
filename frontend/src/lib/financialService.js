@@ -90,7 +90,7 @@ export const financialService = {
                 mrr: Math.round(mrrARS), // Displaying in ARS mostly
                 activeSubscribers: new Set(payments.map(p => p.user_id)).size,
                 newSubscribers: payments.filter(p => new Date(p.created_at) > thirtyDaysAgo).length, // Proxy
-                churnRate: 2.4, // Keep static for now
+                churnRate: 0, // Hardcoded to 0 as per user request (no cancellations yet)
 
                 // Real Cost Data
                 totalApiCalls: 0, // Not actively returned by usage endpoint yet, relying on cost
@@ -122,12 +122,12 @@ export const financialService = {
     // Get User Growth (Active vs Free vs Churned)
     getUserGrowth: async () => {
         return [
-            { month: 'Ago', active: 40, free: 120 },
-            { month: 'Sep', active: 55, free: 180 },
-            { month: 'Oct', active: 78, free: 250 },
-            { month: 'Nov', active: 95, free: 310 },
-            { month: 'Dic', active: 115, free: 400 },
-            { month: 'Ene', active: 142, free: 520 },
+            { month: 'Ago', active: 0, free: 0 },
+            { month: 'Sep', active: 0, free: 0 },
+            { month: 'Oct', active: 0, free: 0 },
+            { month: 'Nov', active: 0, free: 0 },
+            { month: 'Dic', active: 0, free: 0 },
+            { month: 'Ene', active: 1, free: 0 }, // 1 Active user (current reality)
         ];
     },
 

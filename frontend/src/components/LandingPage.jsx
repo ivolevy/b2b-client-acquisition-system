@@ -14,6 +14,7 @@ import {
   FiX
 } from 'react-icons/fi';
 import { FaLinkedin, FaTwitter, FaGithub, FaGoogle } from 'react-icons/fa';
+import AnimatedBackground from './AnimatedBackground';
 
 import './LandingPage.css';
 
@@ -193,7 +194,7 @@ const LandingPage = () => {
 
       {/* --- HERO SECTION --- */}
       <section className="hero-section">
-        <div className="hero-bg-glow"></div>
+        <AnimatedBackground />
         <div className="container hero-content">
           <div className="hero-text">
             <div className="badge-pill">

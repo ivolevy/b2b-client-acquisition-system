@@ -41,6 +41,7 @@ const AdminFinancials = () => {
 
     const { overview, mrr, growth, txsARS, txsUSD, exchangeRates } = data;
     const formatCurrency = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val);
+    const formatCurrencyExact = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
     const formatUSD = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
     return (
@@ -90,6 +91,7 @@ const AdminFinancials = () => {
                     txsUSD={txsUSD} 
                     exchangeRates={exchangeRates}
                     formatCurrency={formatCurrency} 
+                    formatCurrencyExact={formatCurrencyExact}
                     formatUSD={formatUSD} 
                 />
             )}
@@ -136,7 +138,7 @@ const RevenueView = ({ overview, mrrData, growthData, formatCurrency }) => (
             <KpiCard title="Churn Rate (Cancelaciones)" value={`${overview.churnRate}%`} subtitle="Promedio mensual" trend="-0.5%" positive />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
             <div style={{ background: 'white', padding: '25px', borderRadius: '16px', border: '1px solid #e2e8f0', height: '350px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '20px', color: '#334155' }}>Evolución de Ingresos</h3>
                 <ResponsiveContainer width="100%" height="85%">
@@ -147,20 +149,6 @@ const RevenueView = ({ overview, mrrData, growthData, formatCurrency }) => (
                         <Tooltip formatter={(value) => formatCurrency(value)} cursor={{fill: '#f8fafc'}} />
                         <Bar dataKey="revenue" fill="var(--primary)" radius={[4, 4, 0, 0]} />
                     </BarChart>
-                </ResponsiveContainer>
-            </div>
-            <div style={{ background: 'white', padding: '25px', borderRadius: '16px', border: '1px solid #e2e8f0', height: '350px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '20px', color: '#334155' }}>Usuarios Activos vs Gratuitos</h3>
-                <ResponsiveContainer width="100%" height="85%">
-                    <LineChart data={growthData}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="active" name="Pagos" stroke="var(--primary)" strokeWidth={2} dot={{r: 4}} />
-                        <Line type="monotone" dataKey="free" name="Gratuitos" stroke="#94a3b8" strokeWidth={2} dot={{r: 4}} />
-                    </LineChart>
                 </ResponsiveContainer>
             </div>
         </div>
@@ -310,7 +298,7 @@ const CostsView = ({ overview, formatUSD }) => {
     );
 };
 
-const TransactionsView = ({ txsARS, txsUSD, exchangeRates, formatCurrency, formatUSD }) => {
+const TransactionsView = ({ txsARS, txsUSD, exchangeRates, formatCurrency, formatCurrencyExact, formatUSD }) => {
     // State for currency conversion
     // Default to Blue rate fetched from API, or fallback 1200
     const [conversionRate, setConversionRate] = useState(exchangeRates?.blue || 1200); 
@@ -405,7 +393,7 @@ const TransactionsView = ({ txsARS, txsUSD, exchangeRates, formatCurrency, forma
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                             <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '4px 12px', borderRadius: '20px', fontWeight: '700', fontSize: '14px' }}>
-                                Total Neto: {formatCurrency(totalNetARS)}
+                                Total Neto: {formatCurrencyExact(totalNetARS)}
                             </span>
                             <span style={{ fontSize: '10px', color: '#64748b', marginTop: '4px' }}>Post-comisiones MP</span>
                         </div>
@@ -448,7 +436,7 @@ const TransactionsTable = ({ transactions, currencySymbol }) => (
                         <td style={{ padding: '12px 0', color: '#64748b' }}>{tx.date}</td>
                         <td style={{ padding: '12px 0', color: '#334155' }}>{tx.user.split('@')[0]}</td>
                         <td style={{ padding: '12px 0', fontWeight: '600' }}>
-                            {currencySymbol} {tx.amount.toLocaleString()}
+                            {currencySymbol} {(tx.net_amount || tx.amount).toLocaleString()}
                         </td>
                         <td style={{ padding: '12px 0' }}>
                             <span style={{ background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', color: '#475569' }}>
