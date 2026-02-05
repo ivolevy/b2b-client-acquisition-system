@@ -3,7 +3,7 @@ import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, Cartesia
 import { financialService } from '../../lib/financialService';
 
 const AdminFinancials = () => {
-    const [activeTab, setActiveTab] = useState('overview'); // overview, revenue, costs, transactions
+    const [activeTab, setActiveTab] = useState('transactions'); // revenue, costs, transactions (overview removed)
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState({
         mrr: [],
@@ -49,7 +49,7 @@ const AdminFinancials = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', margin: 0 }}>Panel Financiero</h1>
                 <div style={{ background: '#f1f5f9', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
-                    {['overview', 'transactions', 'revenue', 'costs'].map(tab => (
+                    {['transactions', 'revenue', 'costs'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -66,16 +66,14 @@ const AdminFinancials = () => {
                                 transition: 'all 0.2s'
                             }}
                         >
-                            {tab === 'overview' ? 'Resumen' : tab === 'revenue' ? 'Ingresos' : tab === 'costs' ? 'Costos' : 'Transacciones'}
+                            {tab === 'revenue' ? 'Ingresos' : tab === 'costs' ? 'Costos' : 'Transacciones'}
                         </button>
                     ))}
                 </div>
             </div>
 
             {/* VIEWS */}
-            {activeTab === 'overview' && (
-                <OverviewView overview={overview} mrrData={mrr} formatCurrency={formatCurrency} formatUSD={formatUSD} />
-            )}
+            {/* VIEWS */}
 
             {activeTab === 'revenue' && (
                 <RevenueView overview={overview} mrrData={mrr} growthData={growth} formatCurrency={formatCurrency} />
