@@ -760,10 +760,13 @@ const LandingPage = () => {
                       <div className="icon-box"><FiMail /></div>
                       <span>solutionsdota@gmail.com</span>
                   </a>
-                  <a href="mailto:ivo.levy03@gmail.com" className="contact-link-item">
-                      <div className="icon-box"><FiMail /></div>
-                      <span>Ivan Levy (CTO)</span>
-                  </a>
+                  <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+                      <span style={{fontSize:'0.85rem', marginBottom:'8px', fontWeight:'600', color:'var(--text-secondary)'}}>Ivan Levy - CTO</span>
+                      <a href="mailto:ivo.levy03@gmail.com" className="contact-link-item">
+                          <div className="icon-box"><FiMail /></div>
+                          <span>ivo.levy03@gmail.com</span>
+                      </a>
+                  </div>
                   <a href="https://wa.me/5491138240929" target="_blank" rel="noopener noreferrer" className="contact-link-item">
                       <div className="icon-box"><FaWhatsapp /></div>
                       <span>+54 9 11 3824-0929</span>
