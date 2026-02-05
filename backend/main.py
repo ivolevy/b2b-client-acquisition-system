@@ -683,6 +683,12 @@ async def mp_webhook(request: Request):
                 # Logica de acreditación
                 logger.info(f"¡Pago APROBADO! User: {user_id}, Email: {email}, Plan: {plan_id}, Monto: {amount}")
                 
+                # Extraer detalles financieros
+                payment_method_id = payment_data.get("payment_method_id")
+                payment_type_id = payment_data.get("payment_type_id")
+                net_amount = payment_data.get("transaction_details", {}).get("net_received_amount")
+                fee_details = payment_data.get("fee_details", [])
+
                 try:
                     from backend.db_supabase import registrar_pago_exitoso
                     await registrar_pago_exitoso(
@@ -692,7 +698,11 @@ async def mp_webhook(request: Request):
                         external_id=resource_id,
                         email=email,
                         name=name,
-                        phone=phone
+                        phone=phone,
+                        payment_method_id=payment_method_id,
+                        payment_type_id=payment_type_id,
+                        net_amount=net_amount,
+                        fee_details=fee_details
                     )
                 except Exception as db_err:
                     logger.error(f"Error registrando pago en DB: {db_err}")
@@ -711,6 +721,33 @@ async def mp_webhook(request: Request):
         except:
             pass
         return {"status": "error", "detail": str(e)}
+
+@app.get("/api/admin/payments")
+async def admin_get_payments(request: Request, admin=Depends(get_current_admin)):
+    """
+    Obtiene el historial completo de pagos para el dashboard de finanzas.
+    """
+    try:
+        from backend.db_supabase import get_supabase_admin
+        admin_client = get_supabase_admin()
+        
+        # Obtener pagos + datos básicos de usuario si es posible
+        response = admin_client.table("payments").select("*").order("created_at", desc=True).limit(500).execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Error obteniendo pagos admin: {e}")
+        return []
+
+@app.get("/api/admin/usage")
+async def admin_get_usage(request: Request, admin=Depends(get_current_admin)):
+    """Obtiene el uso y costos de API del mes actual"""
+    try:
+        from backend.db_supabase import get_current_month_usage
+        usage_usd = get_current_month_usage()
+        return {"current_month_cost_usd": usage_usd}
+    except Exception as e:
+        logger.error(f"Error admin usage: {e}")
+        return {"current_month_cost_usd": 0.0}
 
 class EnviarEmailMasivoRequest(BaseModel):
     empresa_ids: List[int]

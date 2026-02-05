@@ -17,8 +17,8 @@ const PaymentPage = () => {
     // MOCK DATA - In real app, fetch from backend or efficient lookup
     const PLANS = {
         'trial': { name: 'Plan Gratuito', price: { ARS: 0, USD: 0 } },
-        'starter': { name: 'Plan Starter', price: { ARS: 29000, USD: 29 } },
-        'pro': { name: 'Plan Pro Agency', price: { ARS: 79000, USD: 79 } }
+        'starter': { name: 'Plan Starter', price: { ARS: 100000, USD: 100 } },
+        'pro': { name: 'Plan Pro Agency', price: { ARS: 100000, USD: 100 } }
     };
 
     const selectedPlan = PLANS[planId] || PLANS['starter'];

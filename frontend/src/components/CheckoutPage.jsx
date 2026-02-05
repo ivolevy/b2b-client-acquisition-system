@@ -51,22 +51,22 @@ const CheckoutPage = () => {
   const plans = {
     starter: { 
       name: 'Plan Starter', 
-      priceUSD: 26, 
-      priceARS: 20000, 
+      priceUSD: 100, 
+      priceARS: 100000, 
       creditAmount: '1,500',
       features: ['Búsqueda Local', 'Verificación Básica'] 
     },
     growth: { 
       name: 'Plan Growth', 
-      priceUSD: 49, 
-      priceARS: 49000, 
+      priceUSD: 100, 
+      priceARS: 100000, 
       creditAmount: '3,000',
       features: ['Prioridad de Soporte', 'Verificación Avanzada']
     },
     scale: { 
       name: 'Plan Scale', 
-      priceUSD: 149, 
-      priceARS: 149000, 
+      priceUSD: 100, 
+      priceARS: 100000, 
       creditAmount: '10,000',
       features: ['API Access', 'Soporte Dedicado']
     }

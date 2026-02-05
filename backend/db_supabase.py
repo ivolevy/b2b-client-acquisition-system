@@ -639,7 +639,19 @@ def get_current_month_usage() -> float:
         logger.error(f"Error obteniendo uso mensual: {e}")
         return 0.0
 
-async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, external_id: str, email: str = None, name: str = None, phone: str = None):
+async def registrar_pago_exitoso(
+    user_id: str, 
+    plan_id: str, 
+    amount: float, 
+    external_id: str, 
+    email: str = None, 
+    name: str = None, 
+    phone: str = None,
+    payment_method_id: str = None,
+    payment_type_id: str = None,
+    net_amount: float = None,
+    fee_details: Any = None
+):
     """
     Registra el pago, acredita puntos y CREA el usuario si no existe.
     """
@@ -652,7 +664,7 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
         final_user_id = user_id
         is_new_user = False
         
-        logger.info(f"Procesando pago exitoso (INICIO): user_id={user_id}, email={email}, amount={amount}")
+        logger.info(f"Procesando pago exitoso (INICIO): user_id={user_id}, email={email}, amount={amount}, method={payment_method_id}")
 
         # 1. Asegurar que el usuario existe en Auth y public.users
         if user_id == 'anonymous' or not user_id or user_id == 'None':
@@ -694,13 +706,18 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
         logger.info(f"PASO 2: Sincronizando usuario {final_user_id} en public.users (is_new_user={is_new_user})")
 
         # 2. Sincronizar con public.users (UPSERT)
-        # Esto asegura que si el trigger falló o el registro de Auth existe pero no el de public, se cree/actualice
+        # Normalizar plan_id (frontend envía 'pro', backend usa 'growth'/'scale')
+        # Mapeo: starter->starter, pro->growth, agency->scale
+        normalized_plan = plan_id.lower()
+        if normalized_plan == 'pro': normalized_plan = 'growth'
+        if normalized_plan == 'agency': normalized_plan = 'scale'
+
         upsert_data = {
             "id": final_user_id,
             "email": email,
             "name": name or email.split('@')[0],
             "phone": phone,
-            "plan": plan_id,
+            "plan": normalized_plan,
             "subscription_status": "active",
             "next_credit_reset": (datetime.now() + timedelta(days=30)).date().isoformat(),
             "updated_at": datetime.now().isoformat()
@@ -712,23 +729,29 @@ async def registrar_pago_exitoso(user_id: str, plan_id: str, amount: float, exte
         if user_res.data:
             current_credits = user_res.data[0].get("credits", 0) or 0
             
-        credits_map = {'starter': 1500, 'growth': 3000, 'scale': 10000}
-        credits_to_add = credits_map.get(plan_id.lower(), 1500)
+        credits_map = {'starter': 1500, 'growth': 5000, 'scale': 10000}
+        credits_to_add = credits_map.get(normalized_plan, 1500)
         upsert_data["credits"] = current_credits + credits_to_add
         
-        logger.info(f"Sincronizando public.users para {final_user_id} (Credits: {upsert_data['credits']})")
+        logger.info(f"Sincronizando public.users para {final_user_id} (Plan: {normalized_plan}, Credits: {upsert_data['credits']})")
         admin_client.table("users").upsert(upsert_data).execute()
 
         # 3. Registrar Pago
-        admin_client.table("payments").insert({
+        payment_record = {
             "user_id": final_user_id,
             "amount": float(amount),
             "platform": "mercadopago",
             "external_id": str(external_id),
             "status": "approved",
-            "plan_id": plan_id,
-            "currency": "ARS"
-        }).execute()
+            "plan_id": normalized_plan,
+            "currency": "ARS",
+            "payment_method_id": payment_method_id,
+            "payment_type_id": payment_type_id,
+            "net_amount": float(net_amount) if net_amount is not None else None,
+            "fee_details": fee_details
+        }
+        
+        admin_client.table("payments").insert(payment_record).execute()
         
         # 4. Si es nuevo, mandar mail para setear password
         logger.info(f"PASO 4: Verificando si enviar email. is_new_user={is_new_user}")
