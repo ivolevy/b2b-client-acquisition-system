@@ -211,9 +211,6 @@ export const authService = {
 
       const token = session.access_token;
 
-      // Obtener URL de API desde config o environment
-      const API_URL = import.meta.env.VITE_API_URL || 'https://b2b-client-acquisition-system-4u9f.vercel.app';
-
       // Llamar al endpoint del backend
       const response = await fetch(`${API_URL}/auth/delete-account`, {
         method: 'DELETE',

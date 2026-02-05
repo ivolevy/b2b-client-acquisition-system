@@ -584,7 +584,8 @@
     border-radius: 0 0 32px 32px;
     /* Updated to 32px */
     box-shadow: var(--shadow-lg);
-    /* overflow: hidden; Removed to allow dropdowns to overflow */
+    overflow: hidden;
+    /* Added to allow border-radius to clip children */
     margin-top: 0;
 }
 

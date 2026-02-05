@@ -1031,11 +1031,15 @@ body.profile-page-active .main-content {
 
 .password-modal-header,
 .delete-modal-header {
-  border-bottom: 1px solid #e2e8f0;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .password-modal-header h3,
 .delete-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #0f172a;
 }
 
@@ -1056,7 +1060,14 @@ body.profile-page-active .main-content {
 
 .password-modal-footer,
 .delete-modal-footer {
-  border-top: 1px solid #e2e8f0;
+  padding: 1.25rem 2rem;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: #f8fafc;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
 .cancel-btn {
@@ -1156,6 +1167,12 @@ body.profile-page-active .main-content {
   transition: all 0.2s;
 }
 
+/* Specific fix for numeric code inputs being clipped */
+.password-input-group input[inputmode="numeric"] {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 .password-input-group input:focus {
   border-color: #3b82f6;
   background: white;
@@ -1244,4 +1261,81 @@ body.profile-page-active .main-content {
   margin: 3rem 0;
   /* Significant spacing between sections */
   width: 100%;
+}
+
+/* Delete Modal Specific Styles */
+.delete-modal-subtitle {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.delete-modal-body {
+  padding: 1.5rem 2rem;
+}
+
+.delete-warning-box {
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.delete-warning-title {
+  color: #c53030;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0 0 0.75rem 0;
+}
+
+.delete-warning-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #9b2c2c;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.confirm-input {
+  margin-top: 1.5rem;
+}
+
+.confirm-input label {
+  display: block;
+  font-size: 0.9rem;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+}
+
+.confirm-input label strong {
+  color: #dc2626;
+}
+
+.delete-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.delete-btn:disabled {
+  background: #fecaca;
+  color: #f87171;
+  cursor: not-allowed;
+  box-shadow: none;
 }

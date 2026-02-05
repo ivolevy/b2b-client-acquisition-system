@@ -611,7 +611,15 @@ async def create_mp_preference(req: MPPreferenceRequest):
         preference_response = sdk.preference().create(preference_data)
         preference = preference_response["response"]
         
+        init_point = preference["init_point"]
         logger.info(f"Preferencia MP creada: {preference['id']} para user {req.user_id}")
+        logger.info(f"MP Init Point: {init_point}")
+        
+        # Check for sandbox in URL
+        if "sandbox" in init_point:
+            logger.warning(f"⚠️ ATENCIÓN: Se generó una URL de SANDBOX: {init_point}")
+        else:
+            logger.info(f"✅ URL de Producción generada: {init_point}")
         
         # LOG TO SUPABASE FOR PRODUCTION DEBUGGING
         try:
