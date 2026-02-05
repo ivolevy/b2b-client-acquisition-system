@@ -13,7 +13,7 @@ import {
   FiMenu,
   FiX
 } from 'react-icons/fi';
-import { FaLinkedin, FaTwitter, FaGithub, FaGoogle, FaMicrosoft, FaEnvelope, FaWhatsapp } from 'react-icons/fa';
+import { FaLinkedin, FaTwitter, FaGithub, FaGoogle, FaMicrosoft, FaEnvelope, FaWhatsapp, FaInstagram } from 'react-icons/fa';
 import AnimatedBackground from './AnimatedBackground';
 
 import './LandingPage.css';
@@ -756,21 +756,24 @@ const LandingPage = () => {
            <div className="contact-simple-content">
               <h2>¿Tenés dudas? Hablemos.</h2>
               <div className="contact-links-row">
-                  <a href="mailto:hola@smartleads.ai" className="contact-link-item">
+                  <a href="mailto:solutionsdota@gmail.com" className="contact-link-item">
                       <div className="icon-box"><FiMail /></div>
-                      <span>hola@smartleads.ai</span>
+                      <span>solutionsdota@gmail.com</span>
                   </a>
-                  <a href="https://wa.me/5491112345678" target="_blank" rel="noopener noreferrer" className="contact-link-item">
+                  <a href="mailto:ivo.levy03@gmail.com" className="contact-link-item">
+                      <div className="icon-box"><FiMail /></div>
+                      <span>Ivan Levy (CTO)</span>
+                  </a>
+                  <a href="https://wa.me/5491138240929" target="_blank" rel="noopener noreferrer" className="contact-link-item">
                       <div className="icon-box"><FaWhatsapp /></div>
-                      <span>WhatsApp Soporte</span>
+                      <span>+54 9 11 3824-0929</span>
                   </a>
               </div>
               <div className="social-simple-row">
                   <p>Seguinos en:</p>
                   <div className="social-icons">
-                    <a href="#"><FaTwitter /></a>
-                    <a href="#"><FaLinkedin /></a>
-                    <a href="#"><FaGithub /></a>
+                    <a href="https://www.linkedin.com/company/dota-solutions/" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
+                    <a href="https://www.instagram.com/dota.solutions/" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
                   </div>
               </div>
            </div>
