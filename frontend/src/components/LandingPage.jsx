@@ -328,14 +328,14 @@ const LandingPage = () => {
           <div className="hero-text">
             <div className="badge-pill clickable-badge" onClick={() => navigate('/dashboard')}>
               <span className="badge-dot"></span>
-              <span className="badge-text">VERSION 2.0 DISPONIBLE</span>
+              <span className="badge-text">1000 LEADS AL COSTO DE 1</span>
             </div>
             <h1>
-              Gana más dinero <br />
+              Gana mas dinero <br />
               <span className="text-gradient">con menos esfuerzo</span>
             </h1>
             <p className="hero-subtext">
-              Extrae leads de Google Maps enriquecelos con IA y contáctalos masivamente. <strong>100% Automático.</strong>
+              Extrae leads de Google Maps enriquecelos con IA y contáctalos masivamente. 100% Automático.
             </p>
             <div className="hero-buttons">
               <button className="btn-primary btn-lg" onClick={() => navigate('/')}>
@@ -346,7 +346,7 @@ const LandingPage = () => {
               </button>
             </div>
             <div className="hero-trust">
-              <p>Confiado por +500 empresas</p>
+              <p>Confiado por +500 empresas modernas</p>
               <div className="trust-logos">
                 <span>ACME Corp</span>
                 <span>Stark Ind</span>
