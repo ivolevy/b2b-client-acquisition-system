@@ -363,7 +363,7 @@ const LandingPage = () => {
         >
           <div className="mockup-header">
             <div className="dots"><span></span><span></span><span></span></div>
-            <div className="bar">smartleads.ai/dashboard</div>
+            <div className="bar">smartleads - dashboard</div>
           </div>
           <img src="/images/hero 2.png" alt="Dashboard Interface" className="mockup-img" onError={(e) => {
             e.target.onerror = null;
