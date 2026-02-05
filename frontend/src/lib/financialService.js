@@ -151,7 +151,7 @@ export const financialService = {
             // Map backend format to frontend format
             const mappedTxs = payments.map(p => ({
                 id: p.id,
-                user: p.email || p.user_id, // Fallback if email not populated
+                user: p.user_email || p.email || p.user_id || 'Usuario Anonimo',
                 plan: p.plan_id ? p.plan_id.charAt(0).toUpperCase() + p.plan_id.slice(1) : 'Unknown',
                 amount: p.amount,
                 net_amount: p.net_amount, // Critical for user request

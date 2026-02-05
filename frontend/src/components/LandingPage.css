@@ -419,19 +419,27 @@
     align-items: center;
     gap: 8px;
     padding: 6px 16px;
-    background: white;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background: var(--primary);
+    /* Blue background */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
     border-radius: 99px;
     margin-bottom: 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.badge-pill:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
 }
 
 .badge-dot {
     width: 8px;
     height: 8px;
-    background: var(--primary);
+    background: #ffffff;
     border-radius: 50%;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
     display: block;
 }
 
@@ -564,15 +572,19 @@
     width: 100%;
     max-width: 1000px;
     background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 24px;
-    /* Apple-style deep shadow */
+    /* More pronounced "Apple-style" borders */
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    border-radius: 28px;
+    /* Sharper and deeper Apple-style shadow pop */
     box-shadow:
-        0 50px 100px -20px rgba(50, 50, 93, 0.25),
-        0 30px 60px -30px rgba(0, 0, 0, 0.3);
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 50px 100px -20px rgba(0, 0, 0, 0.3),
+        0 30px 60px -30px rgba(0, 0, 0, 0.4),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 
     /* Transition only shadow for hover effect, transform is JS handled */
-    transition: box-shadow 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
     position: relative;
     overflow: hidden;
@@ -3042,4 +3054,48 @@
     .roi-card.new-way {
         transform: none;
     }
+}
+/* Dual Split Visual for Module 3 */
+.dual-split {
+    display: flex !important;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.split-side {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.split-side:hover {
+    background: rgba(37, 99, 235, 0.05);
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.split-side span {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.whatsapp-icon-mini {
+    color: #25D366;
+    filter: drop-shadow(0 0 8px rgba(37, 211, 102, 0.3));
+}
+
+.email-side .hero-icon-faded {
+    margin: 0;
+    opacity: 0.8;
 }

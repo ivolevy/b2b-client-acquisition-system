@@ -11,8 +11,9 @@ import json
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
-# Cargar variables de entorno
-load_dotenv()
+# Cargar variables de entorno (asegurando ruta correcta si se inicia desde la raíz)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -669,39 +670,60 @@ async def registrar_pago_exitoso(
         # 1. Asegurar que el usuario existe en Auth y public.users
         if user_id == 'anonymous' or not user_id or user_id == 'None':
             # Buscar por email
+            # El list_users de gotrue-python por defecto es paginado
             user_auth_res = admin_client.auth.admin.list_users()
-            existing_auth_user = next((u for u in user_auth_res if u.email == email), None)
+            # list_users returns a list of users directly in some versions, or an object in others.
+            # Usually it's a list.
+            existing_auth_user = None
+            if isinstance(user_auth_res, list):
+                existing_auth_user = next((u for u in user_auth_res if u.email == email), None)
             
             if existing_auth_user:
                 final_user_id = existing_auth_user.id
                 logger.info(f"Usuario existente encontrado en Auth: {final_user_id}")
-                
-                # Si el usuario existe pero NUNCA se logueó, asumimos que puede necesitar el mail de activación
-                # Esto ayuda en pruebas y si el usuario quedó a medias
-                if not existing_auth_user.last_sign_in_at:
-                    logger.info("Usuario existente pero sin login previo. Se considerará como NUEVO para reenviar email.")
+                if not getattr(existing_auth_user, 'last_sign_in_at', None):
+                    logger.info("Usuario existente pero sin login previo. Se considerará como NUEVO.")
                     is_new_user = True
             else:
-                # CREAR NUEVO USUARIO EN AUTH
+                # Intentar crear
                 import secrets
                 import string
                 temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
                 
-                logger.info(f"Creando nuevo usuario Auth para {email}...")
-                new_user_res = admin_client.auth.admin.create_user({
-                    "email": email,
-                    "password": temp_password,
-                    "email_confirm": True,
-                    "user_metadata": {"full_name": name, "phone": phone}
-                })
-                
-                if hasattr(new_user_res, 'user') and new_user_res.user:
-                    final_user_id = new_user_res.user.id
-                    is_new_user = True
-                    logger.info(f"Usuario Auth creado con ID: {final_user_id}")
-                else:
-                    logger.error(f"Error fatal creando usuario Auth: {new_user_res}")
-                    return False
+                try:
+                    logger.info(f"Intentando crear usuario Auth para {email}...")
+                    new_user_res = admin_client.auth.admin.create_user({
+                        "email": email,
+                        "password": temp_password,
+                        "email_confirm": True,
+                        "user_metadata": {"full_name": name, "phone": phone}
+                    })
+                    
+                    if hasattr(new_user_res, 'user') and new_user_res.user:
+                        final_user_id = new_user_res.user.id
+                        is_new_user = True
+                        logger.info(f"Usuario Auth creado con ID: {final_user_id}")
+                    else:
+                        # Si falló, intentar buscar una última vez por si se creó entre medio o el error es "email taken"
+                        logger.warning(f"Respuesta inesperada al crear usuario: {new_user_res}. Buscando de nuevo...")
+                        user_auth_res_retry = admin_client.auth.admin.list_users()
+                        existing_retry = next((u for u in user_auth_res_retry if u.email == email), None)
+                        if existing_retry:
+                            final_user_id = existing_retry.id
+                            logger.info(f"Usuario encontrado después de fallo en creación: {final_user_id}")
+                        else:
+                            logger.error(f"No se pudo crear ni encontrar el usuario para {email}")
+                            # NO RETORNAMOS FALSE AQUÍ. Procederemos con final_user_id = user_id (que puede ser anonymous)
+                            # para al menos guardar el pago.
+                except Exception as auth_err:
+                    logger.error(f"Excepción creando usuario Auth: {auth_err}")
+                    # Verificar si el error es de usuario ya existente
+                    if "already" in str(auth_err).lower():
+                        user_auth_res_retry = admin_client.auth.admin.list_users()
+                        existing_retry = next((u for u in user_auth_res_retry if u.email == email), None)
+                        if existing_retry:
+                            final_user_id = existing_retry.id
+                            logger.info(f"Usuario recuperado tras conflicto: {final_user_id}")
         
         logger.info(f"PASO 2: Sincronizando usuario {final_user_id} en public.users (is_new_user={is_new_user})")
 
@@ -733,12 +755,17 @@ async def registrar_pago_exitoso(
         credits_to_add = credits_map.get(normalized_plan, 1500)
         upsert_data["credits"] = current_credits + credits_to_add
         
-        logger.info(f"Sincronizando public.users para {final_user_id} (Plan: {normalized_plan}, Credits: {upsert_data['credits']})")
-        admin_client.table("users").upsert(upsert_data).execute()
+        try:
+            logger.info(f"Sincronizando public.users para {final_user_id} (Plan: {normalized_plan}, Credits: {upsert_data['credits']})")
+            admin_client.table("users").upsert(upsert_data).execute()
+        except Exception as upsert_err:
+            logger.error(f"Error sincronizando perfil en public.users: {upsert_err}")
+            # Continuamos para al menos guardar el pago
 
         # 3. Registrar Pago
         payment_record = {
             "user_id": final_user_id,
+            "user_email": email, # Nuevo campo para persistencia post-borrado
             "amount": float(amount),
             "platform": "mercadopago",
             "external_id": str(external_id),

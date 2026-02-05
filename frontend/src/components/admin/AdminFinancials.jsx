@@ -434,7 +434,9 @@ const TransactionsTable = ({ transactions, currencySymbol }) => (
                 {transactions.map((tx) => (
                     <tr key={tx.id} style={{ borderBottom: '1px solid #f8fafc', fontSize: '13px' }}>
                         <td style={{ padding: '12px 0', color: '#64748b' }}>{tx.date}</td>
-                        <td style={{ padding: '12px 0', color: '#334155' }}>{tx.user.split('@')[0]}</td>
+                        <td style={{ padding: '12px 0', color: '#334155' }}>
+                            {tx.user && typeof tx.user === 'string' && tx.user.includes('@') ? tx.user.split('@')[0] : (tx.user || 'Anon')}
+                        </td>
                         <td style={{ padding: '12px 0', fontWeight: '600' }}>
                             {currencySymbol} {(tx.net_amount || tx.amount).toLocaleString()}
                         </td>
