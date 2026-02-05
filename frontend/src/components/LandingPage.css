@@ -1964,22 +1964,19 @@
 }
 
 .testimonial-card {
-    min-width: 260px;
-    aspect-ratio: 1/1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    min-width: 220px;
+    width: 220px;
+    height: 220px;
     background: #ffffff;
     /* Explicit white */
     border-radius: 20px;
-    padding: 32px;
+    padding: 24px;
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: flex-start;
     text-align: left;
-    height: 100%;
     color: var(--text-primary);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(226, 232, 240, 0.8);
