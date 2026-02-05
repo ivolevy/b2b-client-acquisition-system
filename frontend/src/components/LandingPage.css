@@ -486,7 +486,7 @@
 
 .hero-subtext {
     font-size: 1.25rem;
-    margin-bottom: 80px;
+    margin-bottom: 120px;
     max-width: 680px;
     color: var(--text-secondary);
     font-weight: 400;
@@ -496,7 +496,7 @@
 .hero-buttons {
     display: flex;
     gap: 16px;
-    margin-top: 10px;
+    margin-top: 40px;
     margin-bottom: 60px;
     justify-content: center;
 }
