@@ -428,41 +428,7 @@ const LandingPage = () => {
 
 
 
-      {/* --- EMAIL MARKETING SPOTLIGHT SECTION --- */}
-      <section className="email-spotlight-section">
-        <div className="container spotlight-layout">
-          <div className="spotlight-content">
-            <span className="spotlight-badge">INFRAESTRUCTURA DE ENVÍO MASIVO</span>
-            <h2>Email Marketing Efectivo,<br />Sin Caer en Spam</h2>
-            <p className="spotlight-lead">
-              Deja de desperdiciar leads. Nuestra tecnología asegura que tus correos lleguen directo a la bandeja de entrada, lejos de la carpeta de promociones.
-            </p>
-            <br />
-            <div className="spotlight-features-text">
-              <p>
-                <strong>Escalabilidad Infinita:</strong> Conecta cientos de cuentas de Gmail y Outlook para multiplicar tu alcance al instante.
-              </p>
-              <p>
-                <strong>Motor Anti-Spam:</strong> Nuestra rotación inteligente de IPs y Spintax asegura que tus campañas masivas lleguen siempre a la bandeja de entrada.
-              </p>
-            </div>
-          </div>
 
-          <div className="spotlight-visual">
-            {/* CSS Art: Connected System */}
-            <div className="system-visual">
-              <div className="central-node">
-                <FiZap />
-              </div>
-              <div className="orbit-node n1"><FiMail /></div>
-              <div className="orbit-node n2"><FiMail /></div>
-              <div className="orbit-node n3"><FiMail /></div>
-              <div className="orbit-ring"></div>
-              <div className="orbit-ring-outer"></div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* --- ROI / EFFICIENCY IMPACT SECTION --- */}
 
@@ -551,6 +517,34 @@ const LandingPage = () => {
                   </p>
                 </div>
 
+                <div className="testimonial-card">
+                  <div className="testimonial-header">
+                    <div className="author-avatar green">DK</div>
+                    <div className="author-info">
+                      <h4>David K.</h4>
+                      <span>CTO @ DevSolutions</span>
+                    </div>
+                  </div>
+                  <div className="testimonial-stars">★★★★★</div>
+                  <p className="testimonial-text">
+                    "La integración API nos ahorró semanas de desarrollo. Excelente documentación."
+                  </p>
+                </div>
+
+                <div className="testimonial-card">
+                  <div className="testimonial-header">
+                    <div className="author-avatar blue">LM</div>
+                    <div className="author-info">
+                      <h4>Lucia M.</h4>
+                      <span>Founder @ DesignStudio</span>
+                    </div>
+                  </div>
+                  <div className="testimonial-stars">★★★★★</div>
+                  <p className="testimonial-text">
+                    "Encontramos el 80% de nuestros clientes actuales gracias a esta plataforma."
+                  </p>
+                </div>
+
                 {/* DUPLICATE SET FOR LOOP */}
                 <div className="testimonial-card">
                   <div className="testimonial-header">
@@ -618,7 +612,34 @@ const LandingPage = () => {
                   </div>
                   <div className="testimonial-stars">★★★★★</div>
                   <p className="testimonial-text">
-                    "Una máquina de generar reuniones. Pasamos de 5 a 25 demos semanales en un solo mes."
+                  </p>
+                </div>
+
+                <div className="testimonial-card">
+                  <div className="testimonial-header">
+                    <div className="author-avatar green">DK</div>
+                    <div className="author-info">
+                      <h4>David K.</h4>
+                      <span>CTO @ DevSolutions</span>
+                    </div>
+                  </div>
+                  <div className="testimonial-stars">★★★★★</div>
+                  <p className="testimonial-text">
+                    "La integración API nos ahorró semanas de desarrollo. Excelente documentación."
+                  </p>
+                </div>
+
+                <div className="testimonial-card">
+                  <div className="testimonial-header">
+                    <div className="author-avatar blue">LM</div>
+                    <div className="author-info">
+                      <h4>Lucia M.</h4>
+                      <span>Founder @ DesignStudio</span>
+                    </div>
+                  </div>
+                  <div className="testimonial-stars">★★★★★</div>
+                  <p className="testimonial-text">
+                    "Encontramos el 80% de nuestros clientes actuales gracias a esta plataforma."
                   </p>
                 </div>
               </div>

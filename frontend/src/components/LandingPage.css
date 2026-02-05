@@ -1964,7 +1964,7 @@
 }
 
 .testimonial-card {
-    min-width: 380px;
+    min-width: 320px;
     background: #ffffff;
     /* Explicit white */
     border-radius: 20px;
@@ -3127,8 +3127,13 @@
     margin: 0;
     opacity: 1;
     /* Make it pop more */
-    font-size: 24px;
+    font-size: 20px;
     /* Ensure visual balance */
+}
+
+.whatsapp-icon-mini svg {
+    width: 20px;
+    height: 20px;
 }
 
 /* Responsive: Stack on mobile */
