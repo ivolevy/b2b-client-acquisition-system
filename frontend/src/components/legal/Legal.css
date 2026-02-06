@@ -1,0 +1,129 @@
+.legal-page {
+    min-height: 100vh;
+    background: #020617;
+    color: #f1f5f9;
+    font-family: 'Inter', -apple-system, sans-serif;
+    line-height: 1.6;
+}
+
+.legal-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 80px 24px;
+}
+
+.legal-header {
+    margin-bottom: 60px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 40px;
+}
+
+.legal-back-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+}
+
+.legal-back-btn:hover {
+    color: #fff;
+}
+
+.legal-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+}
+
+.legal-header p {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+.legal-content {
+    background: rgba(30, 41, 59, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    padding: 60px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.legal-section {
+    margin-bottom: 40px;
+}
+
+.legal-section h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.legal-section h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin: 30px 0 15px;
+}
+
+.legal-section p {
+    color: #cbd5e1;
+    font-size: 1.05rem;
+    margin-bottom: 20px;
+}
+
+.legal-section ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.legal-section li {
+    position: relative;
+    padding-left: 24px;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+}
+
+.legal-section li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #3b82f6;
+    font-weight: bold;
+}
+
+.legal-footer {
+    margin-top: 60px;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+    .legal-container {
+        padding: 40px 20px;
+    }
+
+    .legal-content {
+        padding: 30px 20px;
+    }
+
+    .legal-header h1 {
+        font-size: 2rem;
+    }
+}

@@ -43,6 +43,12 @@ function UserProfile() {
   const [canResendCode, setCanResendCode] = useState(false);
   const [passwordChangeEmail, setPasswordChangeEmail] = useState('');
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
+  const [showCancelPlanModal, setShowCancelPlanModal] = useState(false);
+  const [cancelPlanLoading, setCancelPlanLoading] = useState(false);
+  const [showRechargeModal, setShowRechargeModal] = useState(false);
+  const [selectedRechargePack, setSelectedRechargePack] = useState(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [selectedUpgradePlan, setSelectedUpgradePlan] = useState(null);
   const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false } });
   const [authLoading, setAuthLoading] = useState(false);
 
@@ -568,29 +574,36 @@ function UserProfile() {
     }
   };
 
-  const handleCancelPlan = async () => {
-    if (!confirm('¿Estás seguro que querés cancelar tu plan? Perderás el acceso al finalizar el período.')) return;
-    
+  const handleCancelPlan = () => {
+    setShowCancelPlanModal(true);
+  };
+
+  const confirmCancelPlan = async () => {
+    setCancelPlanLoading(true);
     try {
       const response = await axios.post(`${API_URL}/api/users/${user.id}/cancel-plan`);
       if (response.data.success) {
         toastSuccess?.('Plan cancelado correctamente');
         fetchCredits(); // Recargar datos para actualizar la UI
+        setShowCancelPlanModal(false);
       }
     } catch (error) {
       console.error('Error cancelling plan:', error);
       toastError?.('No se pudo cancelar el plan');
+    } finally {
+      setCancelPlanLoading(false);
     }
   };
     
+  const handleBuyPack = () => {
+    if (!selectedRechargePack) return;
+    navigate(`/checkout?type=credits&amount=${selectedRechargePack.amount}&price=${selectedRechargePack.price}`);
+  };
+
   const handleSelectPlan = async (planId, price, priceArs) => {
       // Redirigir al checkout logic o reutilizar PricingSection logic
       // Como esto es un componente separado, y LandingPage tiene la logica de checkout, 
       // lo ideal sería mover el usuario a la landing o integrar aquí.
-      // Por simplicidad en este MVP, vamos a usar MP directamente o redirigir.
-      // Pero mejor, reutilizamos la lógica de MP si podemos importarla o simplemente redirigimos
-      // a la landing page pasándole el plan pre-seleccionado en query params?
-      // O copiamos la lógica básica de creación de preferencia.
       
       try {
         const mpResponse = await axios.post(`${API_URL}/api/payments/mercadopago/create_preference`, {
@@ -853,14 +866,14 @@ function UserProfile() {
                     <div className="minimalist-action-item">
                       <h3>{creditsInfo.plan === 'starter' ? 'Upgrade a Growth' : 'Upgrade a Scale'}</h3>
                       <p>Aumenta tu cupo mensual de {creditsInfo.total_credits || 1500} a {creditsInfo.plan === 'starter' ? '3,000' : '10,000'} créditos.</p>
-                      <button className="minimalist-btn-primary" onClick={() => navigate(`/checkout?plan=${creditsInfo.plan === 'starter' ? 'growth' : 'scale'}`)}>
+                      <button className="minimalist-btn-primary" onClick={() => setShowUpgradeModal(true)}>
                         Subir de Nivel
                       </button>
                     </div>
                     <div className="minimalist-action-item">
                       <h3>Recargar Créditos</h3>
                       <p>Adquiere un pack adicional para usar solo este mes.</p>
-                      <button className="minimalist-btn-secondary" onClick={() => navigate('/checkout')}>
+                      <button className="minimalist-btn-secondary" onClick={() => setShowRechargeModal(true)}>
                         Ver Packs
                       </button>
                     </div>
@@ -1428,6 +1441,302 @@ function UserProfile() {
                 }}
               >
                 Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
+      {/* Modal de recarga de créditos */}
+      {showRechargeModal && (
+        <div className="password-modal-overlay">
+          <div className="password-modal">
+            <div className="password-modal-header">
+              <h3>Recargar Créditos</h3>
+            </div>
+            
+            <div className="password-modal-body">
+              <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+                Seleccioná el pack de créditos que mejor se adapte a tus necesidades.
+              </p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '1rem' }}>
+                {/* Pack 1 */}
+                <button 
+                  onClick={() => setSelectedRechargePack({ amount: 1000, price: 2 })}
+                  className="recharge-pack-card"
+                  style={{
+                    background: selectedRechargePack?.amount === 1000 ? '#f0f9ff' : 'white',
+                    border: selectedRechargePack?.amount === 1000 ? '2px solid #0f172a' : '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '1.25rem 1rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>1,000</div>
+                  <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
+                  <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 1000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 1000 ? 'white' : '#0f172a' }}>
+                    $2 USD
+                  </div>
+                </button>
+
+                {/* Pack 2 */}
+                <button 
+                  onClick={() => setSelectedRechargePack({ amount: 5000, price: 4 })}
+                  className="recharge-pack-card"
+                  style={{
+                    background: selectedRechargePack?.amount === 5000 ? '#f0f9ff' : 'white',
+                    border: selectedRechargePack?.amount === 5000 ? '2px solid #0f172a' : '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '1.25rem 1rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '8px',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div style={{ position: 'absolute', top: 0, right: 0, background: '#0f172a', color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px', borderBottomLeftRadius: '8px' }}>POPULAR</div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>5,000</div>
+                  <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
+                  <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 5000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 5000 ? 'white' : '#0f172a' }}>
+                    $4 USD
+                  </div>
+                </button>
+
+                {/* Pack 3 */}
+                <button 
+                  onClick={() => setSelectedRechargePack({ amount: 10000, price: 7 })}
+                  className="recharge-pack-card"
+                  style={{
+                    background: selectedRechargePack?.amount === 10000 ? '#f0f9ff' : 'white',
+                    border: selectedRechargePack?.amount === 10000 ? '2px solid #0f172a' : '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '1.25rem 1rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>10,000</div>
+                  <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
+                  <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 10000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 10000 ? 'white' : '#0f172a' }}>
+                    $7 USD
+                  </div>
+                </button>
+              </div>
+            </div>
+            
+            <div className="password-modal-footer">
+              <button 
+                className="cancel-btn"
+                onClick={() => {
+                  setShowRechargeModal(false);
+                  setSelectedRechargePack(null);
+                }}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="password-save-btn"
+                onClick={handleBuyPack}
+                disabled={!selectedRechargePack}
+                style={{ opacity: !selectedRechargePack ? 0.5 : 1 }}
+              >
+                Comprar Pack
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Upgrade de Plan */}
+      {showUpgradeModal && (
+        <div className="password-modal-overlay">
+          <div className="password-modal" style={{ maxWidth: '600px' }}>
+            <div className="password-modal-header">
+              <h3>Mejorar tu Plan</h3>
+              <p className="delete-modal-subtitle">Elegí el plan que mejor se adapte a tu crecimiento</p>
+            </div>
+            
+            <div className="password-modal-body">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '1.5rem' }}>
+                {/* Growth Plan */}
+                {creditsInfo.plan === 'starter' && (
+                  <button 
+                    onClick={() => setSelectedUpgradePlan({ id: 'growth', name: 'Growth', price: 100, credits: 5000 })}
+                    className="recharge-pack-card"
+                    style={{
+                      background: selectedUpgradePlan?.id === 'growth' ? '#f0f9ff' : 'white',
+                      border: selectedUpgradePlan?.id === 'growth' ? '2px solid #0f172a' : '1px solid #e2e8f0',
+                      borderRadius: '16px',
+                      padding: '1.5rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      textAlign: 'left',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                      position: 'relative'
+                    }}
+                  >
+                    {selectedUpgradePlan?.id === 'growth' && (
+                      <div style={{ position: 'absolute', top: '12px', right: '12px', color: '#0f172a' }}>
+                        <FiCheck size={20} />
+                      </div>
+                    )}
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>Growth</div>
+                    <div style={{ fontSize: '0.9rem', color: '#64748b', lineHeight: '1.4' }}>
+                      Ideal para escalar tu prospección con 5,000 créditos mensuales.
+                    </div>
+                    <div style={{ marginTop: 'auto', paddingTop: '12px' }}>
+                      <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>$100</span>
+                      <span style={{ fontSize: '0.85rem', color: '#64748b' }}> /mes</span>
+                    </div>
+                  </button>
+                )}
+
+                {/* Scale Plan */}
+                <button 
+                  onClick={() => setSelectedUpgradePlan({ id: 'scale', name: 'Scale', price: 200, credits: 10000 })}
+                  className="recharge-pack-card"
+                  style={{
+                    background: selectedUpgradePlan?.id === 'scale' ? '#f0f9ff' : 'white',
+                    border: selectedUpgradePlan?.id === 'scale' ? '2px solid #0f172a' : '1px solid #e2e8f0',
+                    borderRadius: '16px',
+                    padding: '1.5rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    textAlign: 'left',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    position: 'relative'
+                  }}
+                >
+                  {selectedUpgradePlan?.id === 'scale' && (
+                    <div style={{ position: 'absolute', top: '12px', right: '12px', color: '#0f172a' }}>
+                      <FiCheck size={20} />
+                    </div>
+                  )}
+                  <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>Scale</div>
+                  <div style={{ fontSize: '0.9rem', color: '#64748b', lineHeight: '1.4' }}>
+                    Máximo volumen con 10,000 créditos y acceso a API.
+                  </div>
+                  <div style={{ marginTop: 'auto', paddingTop: '12px' }}>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>$200</span>
+                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}> /mes</span>
+                  </div>
+                </button>
+              </div>
+
+              {selectedUpgradePlan && (
+                <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>
+                    Pasarás de {creditsInfo.total_credits || 1500} a <strong>{selectedUpgradePlan.credits.toLocaleString()} créditos</strong> mensuales.
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <div className="password-modal-footer">
+              <button 
+                className="cancel-btn"
+                onClick={() => {
+                  setShowUpgradeModal(false);
+                  setSelectedUpgradePlan(null);
+                }}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="password-save-btn"
+                onClick={() => {
+                  if (selectedUpgradePlan) {
+                    navigate(`/checkout?plan=${selectedUpgradePlan.id}`);
+                    setShowUpgradeModal(false);
+                    setSelectedUpgradePlan(null);
+                  }
+                }}
+                disabled={!selectedUpgradePlan}
+                style={{ 
+                  opacity: !selectedUpgradePlan ? 0.5 : 1,
+                  cursor: !selectedUpgradePlan ? 'not-allowed' : 'pointer'
+                }}
+              >
+                Mejorar Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación cancelar plan */}
+      {showCancelPlanModal && (
+        <div className="password-modal-overlay">
+          <div className="password-modal">
+            <div className="password-modal-header">
+              <h3>Cancelar Suscripción</h3>
+            </div>
+            
+            <div className="password-modal-body">
+              <div style={{ 
+                background: '#fff5f5', 
+                border: '1px solid #feb2b2', 
+                borderRadius: '12px', 
+                padding: '1.25rem',
+                marginBottom: '1.5rem' 
+              }}>
+                <h4 style={{ 
+                  color: '#c53030', 
+                  fontSize: '0.95rem', 
+                  fontWeight: 600, 
+                  margin: '0 0 0.75rem 0' 
+                }}>
+                  ¿Estás seguro de que deseas cancelar?
+                </h4>
+                <p style={{ 
+                  color: '#9b2c2c', 
+                  fontSize: '0.9rem', 
+                  margin: 0, 
+                  lineHeight: '1.5' 
+                }}>
+                  Al cancelar tu suscripción, perderás el acceso a la plataforma al finalizar el período actual de facturación.
+                </p>
+              </div>
+            </div>
+            
+            <div className="password-modal-footer">
+              <button 
+                className="cancel-btn"
+                onClick={() => setShowCancelPlanModal(false)}
+                disabled={cancelPlanLoading}
+              >
+                Mantener mi plan
+              </button>
+              <button 
+                className="password-save-btn"
+                onClick={confirmCancelPlan}
+                disabled={cancelPlanLoading}
+                style={{ background: '#dc2626' }}
+              >
+                {cancelPlanLoading ? 'Cancelando...' : 'Sí, cancelar suscripción'}
               </button>
             </div>
           </div>

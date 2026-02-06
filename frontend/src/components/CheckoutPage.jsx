@@ -11,6 +11,9 @@ const CheckoutPage = () => {
   const planId = searchParams.get('plan') || 'starter';
   const cycle = searchParams.get('cycle') || 'monthly';
   const currency = searchParams.get('currency') || 'ARS'; // 'ARS' or 'USD'
+  const type = searchParams.get('type') || 'plan'; // 'plan' or 'credits'
+  const amount = searchParams.get('amount'); // used if type === 'credits'
+  const price = searchParams.get('price'); // used if type === 'credits'
 
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -72,7 +75,15 @@ const CheckoutPage = () => {
     }
   };
 
-  const selectedPlan = plans[planId] || plans.starter;
+  const selectedPlan = type === 'credits' 
+    ? { 
+        name: `Pack ${amount} Créditos`, 
+        priceUSD: Number(price), 
+        priceARS: Number(price), 
+        creditAmount: amount,
+        features: ['Créditos inmediatos', 'Sin expiración'] 
+      }
+    : (plans[planId] || plans.starter);
   
   // Calculate final price based on currency decision made in Landing
   const isARS = currency === 'ARS';
@@ -103,13 +114,18 @@ const CheckoutPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          plan_id: planId,
+          plan_id: type === 'credits' ? `credits_${amount}` : planId,
           user_id: user?.id || 'anonymous',
           email: email,
           name: name,
           phone: `${countryCode} ${phone}`,
           amount: finalPrice,
-          description: `Suscripción B2B - ${selectedPlan.name}`
+          description: type === 'credits' ? `Compra de ${amount} Créditos - Smart Leads` : `Suscripción B2B - ${selectedPlan.name}`,
+          metadata: {
+            type: type,
+            amount: amount,
+            price: price
+          }
         })
       });
 
@@ -330,7 +346,9 @@ const CheckoutPage = () => {
                 }}>📦</div>
                 <div>
                     <h4 style={{ margin: '0 0 5px 0', fontSize: '16px' }}>{selectedPlan.name}</h4>
-                    <span style={{ fontSize: '14px', color: '#64748b', textTransform: 'capitalize' }}>Facturación {cycleLabel}</span>
+                    <span style={{ fontSize: '14px', color: '#64748b', textTransform: 'capitalize' }}>
+                        {type === 'credits' ? 'Pago único' : `Facturación ${cycleLabel}`}
+                    </span>
                 </div>
             </div>
 

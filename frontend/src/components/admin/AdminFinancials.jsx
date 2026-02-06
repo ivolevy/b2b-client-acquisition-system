@@ -49,7 +49,7 @@ const AdminFinancials = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', margin: 0 }}>Panel Financiero</h1>
                 <div style={{ background: '#f1f5f9', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
-                    {['transactions', 'revenue', 'costs'].map(tab => (
+                    {['transactions', 'costs'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -66,7 +66,7 @@ const AdminFinancials = () => {
                                 transition: 'all 0.2s'
                             }}
                         >
-                            {tab === 'revenue' ? 'Ingresos' : tab === 'costs' ? 'Costos' : 'Transacciones'}
+                            {tab === 'costs' ? 'Costos' : 'Transacciones'}
                         </button>
                     ))}
                 </div>
@@ -75,9 +75,6 @@ const AdminFinancials = () => {
             {/* VIEWS */}
             {/* VIEWS */}
 
-            {activeTab === 'revenue' && (
-                <RevenueView overview={overview} mrrData={mrr} growthData={growth} formatCurrency={formatCurrency} />
-            )}
 
             {activeTab === 'costs' && (
                 <CostsView overview={overview} formatUSD={formatUSD} formatCurrency={formatCurrency} />
@@ -129,29 +126,6 @@ const OverviewView = ({ overview, mrrData, formatCurrency, formatUSD }) => (
     </>
 );
 
-const RevenueView = ({ overview, mrrData, growthData, formatCurrency }) => (
-    <>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '30px' }}>
-            <KpiCard title="Nuevas Suscripciones" value={overview.newSubscribers} subtitle="Este mes" trend="+5%" positive />
-            <KpiCard title="Churn Rate (Cancelaciones)" value={`${overview.churnRate}%`} subtitle="Promedio mensual" trend="-0.5%" positive />
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            <div style={{ background: 'white', padding: '25px', borderRadius: '16px', border: '1px solid #e2e8f0', height: '350px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '20px', color: '#334155' }}>Evolución de Ingresos</h3>
-                <ResponsiveContainer width="100%" height="85%">
-                    <BarChart data={mrrData}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} tickFormatter={(val) => `$${val/1000}k`} />
-                        <Tooltip formatter={(value) => formatCurrency(value)} cursor={{fill: '#f8fafc'}} />
-                        <Bar dataKey="revenue" fill="var(--primary)" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
-        </div>
-    </>
-);
 
 const CostsView = ({ overview, formatUSD }) => {
     // Volume Simulator State

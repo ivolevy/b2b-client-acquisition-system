@@ -24,9 +24,13 @@ const LandingPage = lazy(() => import('./components/LandingPage'));
 const ApiUsageDashboard = lazy(() => import('./components/admin/ApiUsageDashboard'));
 const NotFound = lazy(() => import('./components/NotFound'));
 const OAuthCallback = lazy(() => import('./components/OAuthCallback'));
+const Privacy = lazy(() => import('./components/legal/Privacy'));
+const Terms = lazy(() => import('./components/legal/Terms'));
+const Security = lazy(() => import('./components/legal/Security'));
 const PaymentPage = lazy(() => import('./components/PaymentPage'));
 const CheckoutPage = lazy(() => import('./components/CheckoutPage'));
 const PaymentSuccessPage = lazy(() => import('./components/PaymentSuccessPage'));
+const SetPassword = lazy(() => import('./components/SetPassword'));
 import LandingSkeleton from './components/LandingSkeleton'; // Eager load for instant feedback
 
 
@@ -393,6 +397,10 @@ const AuthWrapper = () => {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/payment-success" element={<PaymentSuccessPage />} />
             <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
+            <Route path="/set-password" element={<SetPassword />} />
+            <Route path="/privacidad" element={<Privacy />} />
+            <Route path="/terminos" element={<Terms />} />
+            <Route path="/seguridad" element={<Security />} />
 
             {/* AUTHENTICATED ROUTES */}
             {user ? (

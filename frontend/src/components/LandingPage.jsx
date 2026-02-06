@@ -264,7 +264,7 @@ const LandingPage = () => {
           <nav className="main-nav desktop-nav">
             <button onClick={() => scrollToSection('features')}>Módulos</button>
             <button onClick={() => scrollToSection('pricing')}>Precios</button>
-            <button onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}>Contactanos</button>
+            <button onClick={() => scrollToSection('contact-simple')}>Contactanos</button>
           </nav>
 
           <div className="header-actions">
@@ -304,7 +304,7 @@ const LandingPage = () => {
             </button>
             <button onClick={() => {
               setMobileMenuOpen(false);
-              document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' });
+              scrollToSection('contact-simple');
             }}>
               <span className="nav-num">03</span> Contactanos
             </button>
@@ -334,8 +334,8 @@ const LandingPage = () => {
               Extrae leads de Google Maps enriquecelos con IA y contáctalos masivamente. 100% Automático.
             </p>
             <div className="hero-buttons">
-              <button className="btn-primary btn-lg" onClick={() => navigate('/')}>
-                Empieza Gratis <FiArrowRight />
+              <button className="btn-primary btn-lg" onClick={() => scrollToSection('pricing')}>
+                Empieza Ahora <FiArrowRight />
               </button>
               <button className="btn-secondary btn-lg" onClick={() => scrollToSection('features')}>
                 Ver Demo
@@ -413,7 +413,7 @@ const LandingPage = () => {
                 <div className="module-lead">
                   {modules[activeModule].lead}
                 </div>
-                <button className="btn-primary" style={{ marginTop: '32px' }} onClick={() => navigate('/register')}>
+                <button className="btn-primary" style={{ marginTop: '32px' }} onClick={() => scrollToSection('pricing')}>
                   Empezar Ahora <FiArrowRight />
                 </button>
               </div>
@@ -444,8 +444,8 @@ const LandingPage = () => {
                    <div className="module-lead-mobile">
                      {mod.lead}
                    </div>
-                   <button className="btn-primary btn-sm btn-mobile-accordion" onClick={() => navigate('/register')}>
-                     Empezar
+                   <button className="btn-primary btn-sm btn-mobile-accordion" onClick={() => scrollToSection('pricing')}>
+                     Empezar Ahora
                    </button>
                    <div className="module-visual-mobile">
                       {mod.visual}
@@ -805,6 +805,10 @@ const LandingPage = () => {
                   <a href="https://wa.me/5491138240929" target="_blank" rel="noopener noreferrer" className="contact-link-item">
                       <div className="icon-box"><FaWhatsapp /></div>
                       <span>+54 9 11 3824-0929</span>
+                  </a>
+                  <a href="https://dotasolutions.agency" target="_blank" rel="noopener noreferrer" className="contact-link-item">
+                      <div className="icon-box"><FiGlobe /></div>
+                      <span>Visitanos en nuestro sitio web</span>
                   </a>
               </div>
               <div className="social-simple-row">

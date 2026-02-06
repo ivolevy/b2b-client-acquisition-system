@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { FiMail, FiPhone, FiLinkedin, FiX } from 'react-icons/fi';
 
 const NotFound = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
 
   // Helper for contact items
@@ -166,7 +168,7 @@ const NotFound = () => {
           </button>
 
           <button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate(user ? '/' : '/landing')}
             style={{
               background: 'transparent',
               border: 'none',
