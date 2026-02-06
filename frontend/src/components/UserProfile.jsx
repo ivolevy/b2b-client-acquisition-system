@@ -849,6 +849,23 @@ function UserProfile() {
                     </div>
                   )}
 
+                  <div className="minimalist-actions-grid">
+                    <div className="minimalist-action-item">
+                      <h3>{creditsInfo.plan === 'starter' ? 'Upgrade a Growth' : 'Upgrade a Scale'}</h3>
+                      <p>Aumenta tu cupo mensual de {creditsInfo.total_credits || 1500} a {creditsInfo.plan === 'starter' ? '3,000' : '10,000'} créditos.</p>
+                      <button className="minimalist-btn-primary" onClick={() => navigate(`/checkout?plan=${creditsInfo.plan === 'starter' ? 'growth' : 'scale'}`)}>
+                        Subir de Nivel
+                      </button>
+                    </div>
+                    <div className="minimalist-action-item">
+                      <h3>Recargar Créditos</h3>
+                      <p>Adquiere un pack adicional para usar solo este mes.</p>
+                      <button className="minimalist-btn-secondary" onClick={() => navigate('/checkout')}>
+                        Ver Packs
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="minimalist-actions-grid" style={{ marginTop: '40px', borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                         <div>
@@ -915,25 +932,7 @@ function UserProfile() {
                 </div>
               )}
 
-              {/* Keep existing logic structure if needed but wrapped */}
-              {false && ( // Disabled old view safely
-                 <div className="minimalist-actions-grid">
-                <div className="minimalist-action-item">
-                  <h3>{creditsInfo.plan === 'starter' ? 'Upgrade a Growth' : 'Upgrade a Scale'}</h3>
-                  <p>Aumenta tu cupo mensual de {creditsInfo.total_credits || 1500} a {creditsInfo.plan === 'starter' ? '3,000' : '10,000'} créditos.</p>
-                  <button className="minimalist-btn-primary" onClick={() => navigate(`/checkout?plan=${creditsInfo.plan === 'starter' ? 'growth' : 'scale'}`)}>
-                    Subir de Nivel
-                  </button>
-                </div>
-                <div className="minimalist-action-item">
-                  <h3>Recargar Créditos</h3>
-                  <p>Adquiere un pack adicional para usar solo este mes.</p>
-                  <button className="minimalist-btn-secondary" onClick={() => navigate('/checkout')}>
-                    Ver Packs
-                  </button>
-                </div>
-                </div>
-              )}
+
             </div>
           )}
 
