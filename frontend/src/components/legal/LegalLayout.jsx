@@ -9,6 +9,9 @@ const LegalLayout = ({ title, lastUpdated, children }) => {
   const { user } = useAuth();
 
   useEffect(() => {
+    // Force scroll to top on mount
+    window.scrollTo(0, 0);
+
     // Add noindex meta tag dynamically
     let meta = document.querySelector('meta[name="robots"]');
     if (!meta) {
