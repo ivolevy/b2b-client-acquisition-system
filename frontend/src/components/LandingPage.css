@@ -3441,3 +3441,60 @@
 .desktop-only {
     display: block;
 }
+/* Agency Link Styles */
+.agency-link-container {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.agency-link-container p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.agency-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 10px 20px;
+    border-radius: 50px;
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.agency-link:hover {
+    color: var(--primary);
+    background: rgba(59, 130, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+.agency-name {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* Footer Link Button Styles */
+.footer-link-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    padding: 0;
+    margin-bottom: 12px;
+    cursor: pointer;
+    text-align: left;
+    display: block;
+    transition: color 0.2s;
+    font-family: inherit;
+}
+
+.footer-link-btn:hover {
+    color: var(--primary);
+}

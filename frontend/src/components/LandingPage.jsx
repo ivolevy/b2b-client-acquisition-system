@@ -806,9 +806,11 @@ const LandingPage = () => {
                       <div className="icon-box"><FaWhatsapp /></div>
                       <span>+54 9 11 3824-0929</span>
                   </a>
-                  <a href="https://dotasolutions.agency" target="_blank" rel="noopener noreferrer" className="contact-link-item">
-                      <div className="icon-box"><FiGlobe /></div>
-                      <span>Visitanos en nuestro sitio web</span>
+              </div>
+              <div className="agency-link-container">
+                  <p>Conocé más sobre nuestra agencia:</p>
+                  <a href="https://dotasolutions.agency" target="_blank" rel="noopener noreferrer" className="agency-link">
+                      Visitanos en <span className="agency-name">Dota Solutions</span> <FiArrowRight />
                   </a>
               </div>
               <div className="social-simple-row">
@@ -857,9 +859,9 @@ const LandingPage = () => {
 
             <div className="footer-col">
               <h4>Legal</h4>
-              <a href="#">Privacidad</a>
-              <a href="#">Términos</a>
-              <a href="#">Seguridad</a>
+              <button onClick={() => navigate('/privacidad')} className="footer-link-btn">Privacidad</button>
+              <button onClick={() => navigate('/terminos')} className="footer-link-btn">Términos</button>
+              <button onClick={() => navigate('/seguridad')} className="footer-link-btn">Seguridad</button>
             </div>
           </div>
 
