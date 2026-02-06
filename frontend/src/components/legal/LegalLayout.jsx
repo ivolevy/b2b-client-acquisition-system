@@ -34,7 +34,7 @@ const LegalLayout = ({ title, lastUpdated, children }) => {
       <div className="legal-container">
         <button 
           className="legal-back-btn" 
-          onClick={() => navigate(user ? '/' : '/landing')}
+          onClick={() => navigate('/landing')}
         >
           <FiArrowLeft /> Volver al Inicio
         </button>
