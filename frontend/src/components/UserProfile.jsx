@@ -51,6 +51,7 @@ function UserProfile() {
   const [selectedUpgradePlan, setSelectedUpgradePlan] = useState(null);
   const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false } });
   const [authLoading, setAuthLoading] = useState(false);
+  const [rechargeCurrency, setRechargeCurrency] = useState('ARS'); // 'ARS' or 'USD'
 
   const [creditsInfo, setCreditsInfo] = useState({ credits: 0, next_reset: null, subscription_status: 'active' });
   const [creditsLoading, setCreditsLoading] = useState(false);
@@ -597,7 +598,7 @@ function UserProfile() {
     
   const handleBuyPack = () => {
     if (!selectedRechargePack) return;
-    navigate(`/checkout?type=credits&amount=${selectedRechargePack.amount}&price=${selectedRechargePack.price}`);
+    navigate(`/checkout?type=credits&amount=${selectedRechargePack.amount}&price=${selectedRechargePack.price}&currency=${rechargeCurrency}`);
   };
 
   const handleSelectPlan = async (planId, price, priceArs) => {
@@ -1461,11 +1462,34 @@ function UserProfile() {
               <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.5' }}>
                 Seleccioná el pack de créditos que mejor se adapte a tus necesidades.
               </p>
+              {/* Currency Toggle */}
+              <div className="currency-toggle-container">
+                <div className="currency-toggle">
+                  <button 
+                    className={`currency-btn ${rechargeCurrency === 'ARS' ? 'active' : ''}`}
+                    onClick={() => {
+                        setRechargeCurrency('ARS');
+                        setSelectedRechargePack(null);
+                    }}
+                  >
+                    ARS
+                  </button>
+                  <button 
+                    className={`currency-btn ${rechargeCurrency === 'USD' ? 'active' : ''}`}
+                    onClick={() => {
+                        setRechargeCurrency('USD');
+                        setSelectedRechargePack(null);
+                    }}
+                  >
+                    USD
+                  </button>
+                </div>
+              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '1.5rem' }}>
                 {/* Pack 1 */}
                 <button 
-                  onClick={() => setSelectedRechargePack({ amount: 1000, price: 2 })}
+                  onClick={() => setSelectedRechargePack({ amount: 1000, price: rechargeCurrency === 'ARS' ? 1499 : 4 })}
                   className="recharge-pack-card"
                   style={{
                     background: selectedRechargePack?.amount === 1000 ? '#f0f9ff' : 'white',
@@ -1484,13 +1508,13 @@ function UserProfile() {
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>1,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 1000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 1000 ? 'white' : '#0f172a' }}>
-                    $2 USD
+                    {rechargeCurrency === 'ARS' ? '$1.499' : '$4'} {rechargeCurrency}
                   </div>
                 </button>
 
                 {/* Pack 2 */}
                 <button 
-                  onClick={() => setSelectedRechargePack({ amount: 5000, price: 4 })}
+                  onClick={() => setSelectedRechargePack({ amount: 5000, price: rechargeCurrency === 'ARS' ? 4999 : 6 })}
                   className="recharge-pack-card"
                   style={{
                     background: selectedRechargePack?.amount === 5000 ? '#f0f9ff' : 'white',
@@ -1512,13 +1536,13 @@ function UserProfile() {
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>5,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 5000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 5000 ? 'white' : '#0f172a' }}>
-                    $4 USD
+                    {rechargeCurrency === 'ARS' ? '$4.999' : '$6'} {rechargeCurrency}
                   </div>
                 </button>
 
                 {/* Pack 3 */}
                 <button 
-                  onClick={() => setSelectedRechargePack({ amount: 10000, price: 7 })}
+                  onClick={() => setSelectedRechargePack({ amount: 10000, price: rechargeCurrency === 'ARS' ? 8999 : 7 })}
                   className="recharge-pack-card"
                   style={{
                     background: selectedRechargePack?.amount === 10000 ? '#f0f9ff' : 'white',
@@ -1537,7 +1561,7 @@ function UserProfile() {
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>10,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 10000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 10000 ? 'white' : '#0f172a' }}>
-                    $7 USD
+                    {rechargeCurrency === 'ARS' ? '$8.999' : '$7'} {rechargeCurrency}
                   </div>
                 </button>
               </div>

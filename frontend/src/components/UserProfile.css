@@ -1449,3 +1449,111 @@ body.profile-page-active .main-content {
 .btn-profile-subscribe.primary:hover {
   background: var(--primary-dark);
 }
+
+/* Currency Toggle Styles */
+.currency-toggle-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.currency-toggle {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 100px;
+  border: 1px solid #e2e8f0;
+}
+
+.currency-btn {
+  padding: 8px 24px;
+  border: none;
+  background: transparent;
+  border-radius: 100px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.currency-btn.active {
+  background: #0f172a;
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.currency-btn:not(.active):hover {
+  color: #0f172a;
+  background: rgba(15, 23, 42, 0.05);
+}
+/* Recharge Pack Card Styles */
+.recharge-pack-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.recharge-pack-card:hover {
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.recharge-pack-card.selected {
+    background: #f0f9ff;
+    border: 2px solid #0f172a;
+    padding: calc(1.25rem - 1px) calc(1rem - 1px); /* Compensa el borde más grueso */
+}
+
+.pack-amount {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.pack-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.pack-price-tag {
+    margin-top: 0.5rem;
+    background: #f1f5f9;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: nowrap;
+    display: inline-block;
+    transition: all 0.2s;
+}
+
+.recharge-pack-card.selected .pack-price-tag {
+    background: #0f172a;
+    color: white;
+}
+
+.pack-popular-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #0f172a;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-bottom-left-radius: 8px;
+}

@@ -149,7 +149,7 @@ const CheckoutPage = () => {
       {/* Absolute Back Button */}
       <div style={{ position: 'absolute', top: '40px', left: '40px' }}>
         <button 
-          onClick={() => navigate('/landing')}
+          onClick={() => user ? navigate('/profile') : navigate('/landing')}
           style={{ 
             display: 'flex', alignItems: 'center', gap: '8px',
             background: 'none', border: 'none', cursor: 'pointer',
@@ -170,106 +170,145 @@ const CheckoutPage = () => {
         <div className="checkout-form">
           <div style={{ marginBottom: '40px' }}>
             <h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '10px' }}>Finalizar Compra</h1>
-            <p style={{ color: '#64748b' }}>Completá tus datos para activar tu cuenta.</p>
+            {!user && <p style={{ color: '#64748b' }}>Completá tus datos para activar tu cuenta.</p>}
           </div>
 
-          {/* Email and Name Inputs in one row */}
-          <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
-            <div style={{ flex: 1, minWidth: '150px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
-                Email Profesional <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input 
-                type="email" 
-                placeholder="nombre@empresa.com" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '16px 20px',
-                  borderRadius: '12px',
-                  border: errors.email ? '1px solid #ef4444' : '1px solid #e2e8f0',
-                  fontSize: '16px',
-                  background: '#f8fafc',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-              />
-              {errors.email && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>{errors.email}</p>}
+          {/* Conditionally show form or profile summary */}
+          {user ? (
+            <div style={{ 
+              marginBottom: '30px', 
+              padding: '24px', 
+              borderRadius: '16px', 
+              background: '#f8fafc', 
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px'
+            }}>
+              <div style={{ 
+                width: '50px', 
+                height: '50px', 
+                borderRadius: '50%', 
+                background: '#0f172a', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '20px',
+                fontWeight: '700'
+              }}>
+                {name ? name.charAt(0).toUpperCase() : email.charAt(0).toUpperCase()}
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b', fontWeight: '500' }}>Comprando como</p>
+                <h4 style={{ margin: '2px 0 0 0', fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>{name || 'Usuario'}</h4>
+                <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}>{email} • {phone || 'Sin teléfono'}</p>
+              </div>
+              <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <FiCheck size={14} /> Cuenta Activa
+              </div>
             </div>
+          ) : (
+            <>
+              {/* Email and Name Inputs in one row */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+                <div style={{ flex: 1, minWidth: '150px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
+                    Email Profesional <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <input 
+                    type="email" 
+                    placeholder="nombre@empresa.com" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '16px 20px',
+                      borderRadius: '12px',
+                      border: errors.email ? '1px solid #ef4444' : '1px solid #e2e8f0',
+                      fontSize: '16px',
+                      background: '#f8fafc',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                  />
+                  {errors.email && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>{errors.email}</p>}
+                </div>
 
-            <div style={{ flex: 1, minWidth: '150px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
-                Nombre Completo <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input 
-                type="text" 
-                placeholder="Ej: Juan Pérez" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '16px 20px',
-                  borderRadius: '12px',
-                  border: errors.name ? '1px solid #ef4444' : '1px solid #e2e8f0',
-                  fontSize: '16px',
-                  background: '#f8fafc',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-              />
-              {errors.name && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>{errors.name}</p>}
-            </div>
-          </div>
+                <div style={{ flex: 1, minWidth: '150px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
+                    Nombre Completo <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="Ej: Juan Pérez" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '16px 20px',
+                      borderRadius: '12px',
+                      border: errors.name ? '1px solid #ef4444' : '1px solid #e2e8f0',
+                      fontSize: '16px',
+                      background: '#f8fafc',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                  />
+                  {errors.name && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>{errors.name}</p>}
+                </div>
+              </div>
 
-          {/* Phone Input */}
-          <div style={{ marginBottom: '30px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
-              Teléfono de Contacto <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <select 
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-                style={{
-                  width: '100px',
-                  padding: '16px 10px',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  fontSize: '15px',
-                  background: '#f8fafc',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="+54">🇦🇷 +54</option>
-                <option value="+55">🇧🇷 +55</option>
-                <option value="+56">🇨🇱 +56</option>
-                <option value="+57">🇨🇴 +57</option>
-                <option value="+598">🇺🇾 +598</option>
-                <option value="+52">🇲🇽 +52</option>
-                <option value="+1">🇺🇸 +1</option>
-                <option value="+34">🇪🇸 +34</option>
-              </select>
-              <input 
-                type="tel" 
-                placeholder="Ej: 11 1234-5678" 
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: '16px 20px',
-                  borderRadius: '12px',
-                  border: errors.phone ? '1px solid #ef4444' : '1px solid #e2e8f0',
-                  fontSize: '16px',
-                  background: '#f8fafc',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-              />
-            </div>
-            {errors.phone && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>{errors.phone}</p>}
-          </div>
+              {/* Phone Input */}
+              <div style={{ marginBottom: '30px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
+                  Teléfono de Contacto <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <select 
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    style={{
+                      width: '100px',
+                      padding: '16px 10px',
+                      borderRadius: '12px',
+                      border: '1px solid #e2e8f0',
+                      fontSize: '15px',
+                      background: '#f8fafc',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="+54">🇦🇷 +54</option>
+                    <option value="+55">🇧🇷 +55</option>
+                    <option value="+56">🇨🇱 +56</option>
+                    <option value="+57">🇨🇴 +57</option>
+                    <option value="+598">🇺🇾 +598</option>
+                    <option value="+52">🇲🇽 +52</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+34">🇪🇸 +34</option>
+                  </select>
+                  <input 
+                    type="tel" 
+                    placeholder="Ej: 11 1234-5678" 
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: '16px 20px',
+                      borderRadius: '12px',
+                      border: errors.phone ? '1px solid #ef4444' : '1px solid #e2e8f0',
+                      fontSize: '16px',
+                      background: '#f8fafc',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                  />
+                </div>
+                {errors.phone && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>{errors.phone}</p>}
+              </div>
+            </>
+          )}
 
           {/* Payment Method Display (Locked based on logic) */}
           <div style={{ marginBottom: '40px' }}>
