@@ -67,11 +67,6 @@ const LandingPage = () => {
       ),
       visual: (
         <div className="visual-display-open">
-          <FiDatabase className="hero-icon-faded blue" />
-          <div className="verification-pulse">
-            <div className="pulse-ring"></div>
-            <span className="verified-badge">VERIFICADO</span>
-          </div>
         </div>
       )
     },
@@ -125,7 +120,6 @@ const LandingPage = () => {
       ),
       visual: (
         <div className="visual-display-open">
-          <FiZap className="hero-icon-faded green" />
         </div>
       )
     }
@@ -334,10 +328,10 @@ const LandingPage = () => {
               Extrae leads de Google Maps enriquecelos con IA y contáctalos masivamente. 100% Automático.
             </p>
             <div className="hero-buttons">
-              <button className="btn-primary btn-lg" onClick={() => scrollToSection('pricing')}>
+              <button className="btn-primary btn-lg">
                 Empieza Ahora <FiArrowRight />
               </button>
-              <button className="btn-secondary btn-lg" onClick={() => scrollToSection('features')}>
+              <button className="btn-secondary btn-lg">
                 Ver Demo
               </button>
             </div>
@@ -413,7 +407,7 @@ const LandingPage = () => {
                 <div className="module-lead">
                   {modules[activeModule].lead}
                 </div>
-                <button className="btn-primary" style={{ marginTop: '32px' }} onClick={() => scrollToSection('pricing')}>
+                <button className="btn-primary" style={{ marginTop: '32px' }}>
                   Empezar Ahora <FiArrowRight />
                 </button>
               </div>
@@ -444,9 +438,9 @@ const LandingPage = () => {
                    <div className="module-lead-mobile">
                      {mod.lead}
                    </div>
-                   <button className="btn-primary btn-sm btn-mobile-accordion" onClick={() => scrollToSection('pricing')}>
-                     Empezar Ahora
-                   </button>
+                    <button className="btn-primary btn-sm btn-mobile-accordion">
+                      Empezar Ahora
+                    </button>
                    <div className="module-visual-mobile">
                       {mod.visual}
                    </div>
@@ -848,25 +842,18 @@ const LandingPage = () => {
                 <span>Smart Leads</span>
               </div>
               <p>Tu motor de crecimiento B2B.</p>
-              <div className="social-links">
-                <a href="#"><FaTwitter /></a>
-                <a href="#"><FaLinkedin /></a>
-                <a href="#"><FaGithub /></a>
-              </div>
             </div>
 
             <div className="footer-col">
               <h4>Producto</h4>
-              <a href="#features">Características</a>
-              <a href="#pricing">Precios</a>
-              <a href="#">Roadmap</a>
+              <button onClick={() => scrollToSection('features')} className="footer-link-btn">Módulos</button>
+              <button onClick={() => scrollToSection('pricing')} className="footer-link-btn">Precios</button>
+              <button onClick={() => scrollToSection('contact-simple')} className="footer-link-btn">Contactanos</button>
             </div>
 
             <div className="footer-col">
               <h4>Compañía</h4>
               <a href="#">Sobre Nosotros</a>
-              <a href="#">Blog</a>
-              <a href="#">Carreras</a>
             </div>
 
             <div className="footer-col">
