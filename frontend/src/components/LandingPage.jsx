@@ -709,8 +709,15 @@ const LandingPage = () => {
               <button
                 className={currency === 'USD' ? 'active' : ''}
                 onClick={() => setCurrency('USD')}
+                style={{ position: 'relative' }}
               >
-                🌎 USD
+                🌎 USD <span style={{ 
+                  fontSize: '0.65rem', 
+                  opacity: 0.8, 
+                  fontWeight: 400,
+                  marginLeft: '4px',
+                  verticalAlign: 'middle'
+                }}>(Próximamente)</span>
               </button>
             </div>
 
@@ -761,9 +768,14 @@ const LandingPage = () => {
 
                   <button
                     className={`plan-btn-new ${plan.buttonClass === 'btn-primary' ? 'primary' : 'secondary'}`}
-                    onClick={() => handlePlanSelect(plan.id)}
+                    onClick={() => currency !== 'USD' && handlePlanSelect(plan.id)}
+                    disabled={currency === 'USD'}
+                    style={{
+                      opacity: currency === 'USD' ? 0.6 : 1,
+                      cursor: currency === 'USD' ? 'not-allowed' : 'pointer'
+                    }}
                   >
-                    {plan.buttonText}
+                    {currency === 'USD' ? 'Próximamente' : plan.buttonText}
                   </button>
                 </div>
               ))}

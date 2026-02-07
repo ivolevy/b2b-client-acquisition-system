@@ -1481,7 +1481,12 @@ function UserProfile() {
                         setSelectedRechargePack(null);
                     }}
                   >
-                    USD
+                    USD <span style={{ 
+                      fontSize: '0.6rem', 
+                      opacity: 0.7, 
+                      fontWeight: 400,
+                      marginLeft: '2px'
+                    }}>(Soon)</span>
                   </button>
                 </div>
               </div>
@@ -1502,13 +1507,16 @@ function UserProfile() {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    opacity: rechargeCurrency === 'USD' ? 0.65 : 1,
+                    cursor: rechargeCurrency === 'USD' ? 'not-allowed' : 'pointer',
+                    pointerEvents: rechargeCurrency === 'USD' ? 'none' : 'auto'
                   }}
                 >
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>1,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 1000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 1000 ? 'white' : '#0f172a' }}>
-                    {rechargeCurrency === 'ARS' ? '$1499' : '$4'}
+                    {rechargeCurrency === 'ARS' ? '$1499' : '$4 (Soon)'}
                   </div>
                 </button>
 
@@ -1529,14 +1537,17 @@ function UserProfile() {
                     alignItems: 'center',
                     gap: '8px',
                     position: 'relative',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    opacity: rechargeCurrency === 'USD' ? 0.65 : 1,
+                    cursor: rechargeCurrency === 'USD' ? 'not-allowed' : 'pointer',
+                    pointerEvents: rechargeCurrency === 'USD' ? 'none' : 'auto'
                   }}
                 >
                   <div style={{ position: 'absolute', top: 0, right: 0, background: '#0f172a', color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px', borderBottomLeftRadius: '8px' }}>POPULAR</div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>5,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 5000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 5000 ? 'white' : '#0f172a' }}>
-                    {rechargeCurrency === 'ARS' ? '$4999' : '$6'}
+                    {rechargeCurrency === 'ARS' ? '$4999' : '$6 (Soon)'}
                   </div>
                 </button>
 
@@ -1555,13 +1566,16 @@ function UserProfile() {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    opacity: rechargeCurrency === 'USD' ? 0.65 : 1,
+                    cursor: rechargeCurrency === 'USD' ? 'not-allowed' : 'pointer',
+                    pointerEvents: rechargeCurrency === 'USD' ? 'none' : 'auto'
                   }}
                 >
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>10,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 10000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 10000 ? 'white' : '#0f172a' }}>
-                    {rechargeCurrency === 'ARS' ? '$8999' : '$7'}
+                    {rechargeCurrency === 'ARS' ? '$8999' : '$7 (Soon)'}
                   </div>
                 </button>
               </div>
