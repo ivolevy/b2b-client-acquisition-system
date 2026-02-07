@@ -62,6 +62,11 @@ const PaymentSuccessPage = () => {
         }
     };
 
+    const planIdParam = searchParams.get('plan_id');
+    const isCreditPack = planIdParam?.startsWith('credits_');
+    const creditAmountMatch = planIdParam?.match(/credits_(\d+)/);
+    const creditAmount = creditAmountMatch ? creditAmountMatch[1] : null;
+
     return (
         <div className="payment-success-page" style={{ 
             minHeight: '100vh', 
@@ -124,10 +129,13 @@ const PaymentSuccessPage = () => {
                         fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: '800', marginBottom: '16px', letterSpacing: '-0.02em',
                         color: '#0f172a'
                     }}>
-                        ¡Pago Procesado!
+                        {isCreditPack ? '¡Créditos Cargados!' : '¡Pago Procesado!'}
                     </h1>
                     <p style={{ fontSize: '18px', color: '#64748b', lineHeight: '1.6' }}>
-                        Tu suscripción ya está activa. Hemos acreditado tus créditos y desbloqueado todas las funciones premium.
+                        {isCreditPack 
+                            ? `Hemos acreditado los ${creditAmount || ''} créditos en tu cuenta. Ya podés seguir extrayendo leads sin límites.`
+                            : 'Tu suscripción ya está activa. Hemos acreditado tus créditos y desbloqueado todas las funciones premium.'
+                        }
                     </p>
                 </div>
 
@@ -160,7 +168,12 @@ const PaymentSuccessPage = () => {
                             </div>
                             <div>
                                 <strong style={{ display: 'block', fontSize: '18px', color: '#0f172a', marginBottom: '4px' }}>¿Qué sigue?</strong>
-                                <span style={{ fontSize: '15px', color: '#64748b' }}>Revisá tu mail para setear tu contraseña de acceso.</span>
+                                <span style={{ fontSize: '15px', color: '#64748b' }}>
+                                    {isCreditPack 
+                                        ? 'Tus créditos ya están disponibles en tu perfil. Ya podés volver para ver tu nuevo balance.'
+                                        : 'Revisá tu mail para confirmar los datos y descargar tu factura si la necesitás.'
+                                    }
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -169,7 +182,7 @@ const PaymentSuccessPage = () => {
                 {/* Footer Actions */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
                     <button 
-                        onClick={() => navigate('/')}
+                        onClick={() => navigate('/profile')}
                         style={{
                             width: '100%',
                             background: '#0f172a',
@@ -193,12 +206,12 @@ const PaymentSuccessPage = () => {
                             e.currentTarget.style.boxShadow = '0 20px 40px rgba(15, 23, 42, 0.15)';
                         }}
                     >
-                        Ir al Dashboard <FiArrowRight />
+                        {isCreditPack ? 'Volver a mi Perfil' : 'Ir a mi Panel'} <FiArrowRight />
                     </button>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
-                            <FiMail /> ¿No recibiste el email? 
+                            <FiMail /> ¿No recibiste el email de confirmación? 
                             <span 
                                 onClick={handleResendEmail}
                                 style={{ 

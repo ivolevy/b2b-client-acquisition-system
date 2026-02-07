@@ -102,8 +102,11 @@ const CheckoutPage = () => {
       phone: phoneVal.message
     });
 
-    if (!emailVal.isValid || !nameVal.isValid || !phoneVal.isValid) {
-      return;
+    // Only perform strict validation if user is NOT logged in
+    if (!user) {
+      if (!emailVal.isValid || !nameVal.isValid || !phoneVal.isValid) {
+        return;
+      }
     }
     
     setLoading(true);

@@ -1508,7 +1508,7 @@ function UserProfile() {
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>1,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 1000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 1000 ? 'white' : '#0f172a' }}>
-                    {rechargeCurrency === 'ARS' ? '$1.499' : '$4'} {rechargeCurrency}
+                    {rechargeCurrency === 'ARS' ? '$1499' : '$4'}
                   </div>
                 </button>
 
@@ -1536,7 +1536,7 @@ function UserProfile() {
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>5,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 5000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 5000 ? 'white' : '#0f172a' }}>
-                    {rechargeCurrency === 'ARS' ? '$4.999' : '$6'} {rechargeCurrency}
+                    {rechargeCurrency === 'ARS' ? '$4999' : '$6'}
                   </div>
                 </button>
 
@@ -1561,7 +1561,7 @@ function UserProfile() {
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>10,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 10000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 10000 ? 'white' : '#0f172a' }}>
-                    {rechargeCurrency === 'ARS' ? '$8.999' : '$7'} {rechargeCurrency}
+                    {rechargeCurrency === 'ARS' ? '$8999' : '$7'}
                   </div>
                 </button>
               </div>
