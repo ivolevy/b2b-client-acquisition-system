@@ -749,6 +749,24 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
         # Centro de búsqueda para cálculo manual de distancia si falla el mapeo
         c_lat, c_lng = request.busqueda_centro_lat, request.busqueda_centro_lng
 
+        # Parsear bbox si viene como string
+        google_bbox = None
+        if request.bbox and isinstance(request.bbox, str):
+            try:
+                partes = request.bbox.split(',')
+                if len(partes) == 4:
+                    google_bbox = {
+                        "south": float(partes[0]),
+                        "west": float(partes[1]),
+                        "north": float(partes[2]),
+                        "east": float(partes[3])
+                    }
+            except Exception as e:
+                logger.error(f"Error parseando bbox en stream: {e}")
+
+        # Asegurar radio válido
+        radius_m = (request.busqueda_radio_km * 1000) if request.busqueda_radio_km else None
+
         yield f"data: {json.dumps({'type': 'status', 'message': f'Búsqueda optimizada (Límite estricto: {MAX_LEADS})...'})}\n\n"
 
         for query in search_queries:
@@ -764,8 +782,8 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                     rubro_key=request.rubro.lower(),
                     lat=c_lat,
                     lng=c_lng,
-                    radius=request.busqueda_radio_km * 1000,
-                    bbox=request.bbox,
+                    radius=radius_m,
+                    bbox=google_bbox,
                     max_total_results=MAX_LEADS 
                 )
                 

@@ -99,11 +99,11 @@ class GooglePlacesClient:
             payload["pageToken"] = page_token
 
         # Configurar restricciones geográficas
-        if bbox:
+        if bbox and isinstance(bbox, dict):
             payload["locationRestriction"] = {
                 "rectangle": {
-                    "low": {"latitude": bbox["south"], "longitude": bbox["west"]},
-                    "high": {"latitude": bbox["north"], "longitude": bbox["east"]}
+                    "low": {"latitude": bbox.get("south", 0), "longitude": bbox.get("west", 0)},
+                    "high": {"latitude": bbox.get("north", 0), "longitude": bbox.get("east", 0)}
                 }
             }
         elif lat is not None and lng is not None and radius:
