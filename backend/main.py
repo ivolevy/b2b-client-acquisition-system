@@ -624,9 +624,6 @@ async def startup():
     logger.info(" Iniciando API B2B...")
     try:
         # Intentar conectar a DB pero no bloquear si falla
-        logger.info("Verificando templates...")
-        _init_default_templates()
-        
         logger.info("Verificando conexión DB...")
         if init_db_b2b():
             logger.info(" Sistema B2B listo (Conectado a Supabase)")
@@ -743,9 +740,11 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
         emitted_count = 0
         MAX_LEADS = 100
         
-        rubro_obj = RUBROS_CONFIG.get(request.rubro.lower())
+        rubro_obj = RUBROS_DISPONIBLES.get(request.rubro.lower())
         keywords = rubro_obj["keywords"] if rubro_obj else [request.rubro]
         search_queries = [f"{kw} en {request.busqueda_ubicacion_nombre}" for kw in keywords]
+
+        logger.info(f"Iniciando búsqueda stream para: {request.rubro} | Keywords: {keywords}")
 
         # Centro de búsqueda para cálculo manual de distancia si falla el mapeo
         c_lat, c_lng = request.busqueda_centro_lat, request.busqueda_centro_lng
@@ -765,11 +764,13 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                     rubro_key=request.rubro.lower(),
                     lat=c_lat,
                     lng=c_lng,
-                    radius_km=request.busqueda_radio_km,
+                    radius=request.busqueda_radio_km * 1000,
                     bbox=request.bbox,
                     max_total_results=MAX_LEADS 
                 )
                 
+                found_in_query = len(results)
+                skipped_contacts = 0
                 for r in results:
                     if emitted_count >= MAX_LEADS: 
                         break
@@ -780,6 +781,7 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                     # FILTRO DE CONTACTO ESTRICTO
                     has_contact = any([r.get('email'), r.get('telefono'), r.get('website')])
                     if not has_contact: 
+                        skipped_contacts += 1
                         continue
 
                     # ASEGURAR DISTANCIA (Fail-safe)
@@ -789,6 +791,8 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                     seen_ids.add(r['google_id'])
                     yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
                     emitted_count += 1
+                
+                logger.info(f"Query '{query}': Encontrados {found_in_query}, Filtrados por falta de contacto: {skipped_contacts}, Emitidos total: {emitted_count}")
             except Exception as e:
                 logger.error(f"Error en query {query}: {e}")
 
