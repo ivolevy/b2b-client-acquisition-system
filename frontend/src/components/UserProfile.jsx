@@ -8,7 +8,7 @@ import { useToast } from '../hooks/useToast';
 import ToastContainer from './ToastContainer';
 import './UserProfile.css';
 import { validatePhone } from '../utils/validators';
-import { FiActivity, FiClock } from 'react-icons/fi';
+import { FiActivity, FiClock, FiCheck } from 'react-icons/fi';
 
 function UserProfile() {
   const navigate = useNavigate();
