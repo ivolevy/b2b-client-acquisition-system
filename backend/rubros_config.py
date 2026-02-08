@@ -7,9 +7,10 @@ RUBROS_DISPONIBLES = {
     "colegios": {
         "nombre": "Colegios e Instituciones Educativas",
         "keywords": [
-            "Colegio", "Escuela", "Secundario", "Primaria", "Jardín de infantes", 
-            "Jardin maternal", "Universidad", "Facultad", "Instituto", "Educación", 
-            "Centro educativo", "Preescolar", "Sala de 5"
+            "Colegio", "Colegio Primario", "Colegio Secundario", "Escuela Primaria", 
+            "Escuela Secundaria", "Jardín de infantes", "Institución Educativa",
+            "Jardin maternal", "Universidad", "Facultad", "Instituto Superior", 
+            "Centro educativo", "Preescolar", "Liceo"
         ]
     },
     "metalurgicas": {

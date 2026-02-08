@@ -20,38 +20,40 @@ class ScraperSession:
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (compatible; B2BDataCollectorBot/1.0)',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
         })
         self._robots_cache = {}
 
     def check_robots(self, url: str) -> bool:
-        """Verifica robots.txt con cache por dominio"""
+        """Verifica robots.txt con cache por dominio. Perfeccionado para B2B."""
         try:
             parsed = urlparse(url)
-            if not parsed.netloc: return False
+            if not parsed.netloc: return True # Si no hay netloc, permitimos (ej: paths relativos)
             
             domain = parsed.netloc
             if domain in self._robots_cache:
-                return self._robots_cache[domain].can_fetch("B2BDataCollectorBot/1.0", url)
+                return self._robots_cache[domain].can_fetch("*", url) # Usar "*" para ser más amplio
             
             robots_url = f"{parsed.scheme}://{domain}/robots.txt"
             rp = RobotFileParser()
             rp.set_url(robots_url)
             try:
-                # Usar la sesión para leer robots.txt también
-                resp = self.session.get(robots_url, timeout=5)
+                # Usar timeout corto para robots.txt
+                resp = self.session.get(robots_url, timeout=3)
                 if resp.status_code == 200:
                     rp.parse(resp.text.splitlines())
                 else:
-                    return True # Permitir si no hay robots.txt
-            except:
+                    # Si no hay 200 (404, 500, etc), permitimos por defecto
+                    return True
+            except Exception:
+                # Ante cualquier error de conexión para el robots.txt, permitimos
                 return True
                 
             self._robots_cache[domain] = rp
-            return rp.can_fetch("B2BDataCollectorBot/1.0", url)
-        except Exception as e:
-            logger.warning(f"Error robots.txt para {url}: {e}")
+            return rp.can_fetch("*", url)
+        except Exception:
             return True
 
     def get_soup(self, url: str, timeout: int = 10) -> Optional[BeautifulSoup]:
@@ -81,13 +83,16 @@ def extraer_emails_b2b(soup: BeautifulSoup, text: str) -> List[str]:
     # Buscar en texto con patrón mejorado (soporta formatos comunes de ofuscación simple)
     patrones_email = [
         r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b',
-        r'\b[a-zA-Z0-9._%+-]+\s*\[at\]\s*[a-zA-Z0-9.-]+\s*\.\s*[a-zA-Z]{2,}\b', # [at] format
+        r'\b[a-zA-Z0-9._%+-]+\s*\[at\]\s*[a-zA-Z0-9.-]+\s*\.\s*[a-zA-Z]{2,}\b', 
+        r'\b[a-zA-Z0-9._%+-]+\s*\(at\)\s*[a-zA-Z0-9.-]+\s*\.\s*[a-zA-Z]{2,}\b',
+        r'\b[a-zA-Z0-9._%+-]+\s*@\s*[a-zA-Z0-9.-]+\s*\.\s*[a-zA-Z]{2,}\b',
     ]
     
     for patron in patrones_email:
-        found = re.findall(patron, text)
+        found = re.findall(patron, text, re.IGNORECASE)
         for e in found:
-            emails.append(e.replace(' [at] ', '@').replace(' ', '').lower())
+            email_limpio = e.replace(' [at] ', '@').replace(' (at) ', '@').replace('[at]', '@').replace('(at)', '@').replace(' ', '').lower()
+            emails.append(email_limpio)
     
     # Priorizar emails corporativos
     emails_validos = []
@@ -171,15 +176,23 @@ def buscar_en_paginas_adicionales(base_url: str, soup: BeautifulSoup, session: O
             if full_url != base_url and urlparse(full_url).netloc == urlparse(base_url).netloc:
                 urls_a_escanear.append(full_url)
     
-    # Tomar las 3 más prometedoras para no sobrecargar
-    urls_a_escanear = list(dict.fromkeys(urls_a_escanear))[:3]
+    # Priorizar y limpiar URLs
+    # 1. Eliminar duplicados manteniendo orden
+    urls_a_escanear = list(dict.fromkeys(urls_a_escanear))
+    
+    # 2. Priorizar URLs que tengan 'contacto' o 'contact'
+    urls_a_escanear.sort(key=lambda u: 0 if any(k in u.lower() for k in ['contact', 'contacto']) else 1)
+    
+    # 3. Tomar las 5 más prometedoras
+    urls_a_escanear = urls_a_escanear[:5]
     
     emails_totales = []
     telefonos_totales = []
     
     for url in urls_a_escanear:
-        logger.info(f"  Escanenando sub-página: {url}")
-        soup_sub = session.get_soup(url, timeout=10)
+        logger.info(f"  Escaneando sub-página: {url}")
+        # Usar un timeout un poco más corto para sub-páginas
+        soup_sub = session.get_soup(url, timeout=7)
         if soup_sub:
             text_sub = soup_sub.get_text()
             emails_totales.extend(extraer_emails_b2b(soup_sub, text_sub))

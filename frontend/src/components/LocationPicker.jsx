@@ -67,7 +67,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
       const { lat, lng, name, radius: initialRadius } = initialLocation;
       const location = { lat, lng };
 
-      const effectiveRadius = initialRadius || radius || 5000;
+      const effectiveRadius = Math.min(initialRadius || radius || 3000, 3000);
 
       // Configurar radio
       setRadius(effectiveRadius);
@@ -593,7 +593,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           aria-label="Seleccionar radio de búsqueda"
         >
           <option value="" disabled>-- Selecciona un radio --</option>
-          {[1, 2, 3, 4, 5].map((km) => (
+          {[1, 2, 3].map((km) => (
             <option key={km} value={km * 1000}>
               {km} km
             </option>

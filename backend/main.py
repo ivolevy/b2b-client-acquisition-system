@@ -796,7 +796,7 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                         seen_ids.add(r['google_id'])
                         all_candidates.append(r)
             
-            # --- PRIORIZACIÓN DE LEADS ---
+            # --- PRIORIZACIÓN Y FILTRADO DE LEADS ---
             def lead_score(lead):
                 score = 0
                 if lead.get('email'): score += 100
@@ -804,6 +804,24 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                 if lead.get('website'): score += 20
                 if lead.get('rating'): score += (lead.get('rating') * 2)
                 return score
+
+            # Filtro específico para "colegios" para evitar escuelas de fútbol/manejo/idiomas
+            if request.rubro.lower() == "colegios":
+                logger.info("Aplicando filtro de exclusión educativo...")
+                unwanted_terms = ["futbol", "soccer", "tenis", "deportes", "manejo", "conducir", "danza", "baile", "musica"]
+                candidates_filtered = []
+                for lead in all_candidates:
+                    nombre_lower = lead.get('nombre', '').lower()
+                    if any(term in nombre_lower for term in unwanted_terms):
+                        logger.info(f"Excluyendo lead no educativo: {lead.get('nombre')}")
+                        continue
+                    candidates_filtered = all_candidates # Fallback if no filter needed, but here we rebuild
+                
+                # Reconstruir lista filtrada
+                all_candidates = [
+                    l for l in all_candidates 
+                    if not any(term in l.get('nombre', '').lower() for term in ["futbol", "soccer", "tenis", "natacion", "deportiva", "conducir", "manejo"])
+                ]
 
             # Ordenar por puntaje (mejor primero)
             all_candidates.sort(key=lead_score, reverse=True)
@@ -1002,11 +1020,17 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 logger.error(f"Error en enriquecimiento paralelo: {e}, usando empresas originales")
                 # Continuar con empresas sin enriquecer
         
-        # Agregar información de búsqueda y calcular distancias
+        # Agregar información de búsqueda
+        # Validar y limitar radio (Máximo 3km según solicitud del usuario)
+        radio_solicitado = request.busqueda_radio_km or 1.0
+        radius = min(float(radio_solicitado), 3.0)
+        
+        logger.info(f"Iniciando búsqueda: {request.rubro} en {request.ubicacion_nombre} (Radio: {radius}km, Bbox: {bool(request.bbox)})")
+
         if request.busqueda_centro_lat and request.busqueda_centro_lng:
             logger.info(f" Calculando distancias desde ubicación: {request.busqueda_ubicacion_nombre or 'Sin nombre'}")
-            # El radio ya viene en kilómetros desde el frontend
-            radio_km = request.busqueda_radio_km if request.busqueda_radio_km else None
+            # El radio ya viene en kilómetros desde el frontend, ahora limitado por 'radius'
+            radio_km = radius
             
             empresas_con_distancia = []
             for empresa in empresas:
