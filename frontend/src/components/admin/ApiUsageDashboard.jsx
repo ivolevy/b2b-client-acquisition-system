@@ -181,7 +181,7 @@ function ApiUsageDashboard() {
                     <td>
                       <div className="sku-info-simple">
                          <span className="sku-primary">
-                            {s.sku === 'pro' ? 'Búsqueda, Ubicación y Contacto' : 'Información Geográfica'}
+                            {s.sku === 'pro' ? 'Nombre, Dirección, Teléfono, Web, Ratings y GPS' : 'Nombre, Coordenadas y Categoría básica'}
                           </span>
                       </div>
                     </td>
