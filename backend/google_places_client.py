@@ -261,6 +261,7 @@ class GooglePlacesClient:
                 {"south": s, "west": mid_lng, "north": mid_lat, "east": e}, # SE
                 {"south": mid_lat, "west": w, "north": n, "east": mid_lng}, # NW
                 {"south": mid_lat, "west": mid_lng, "north": n, "east": e}  # NE
+            ]
             for sub_bbox in sub_bboxes:
                 if len(all_results) >= max_total_results:
                     break
