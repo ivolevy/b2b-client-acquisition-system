@@ -94,6 +94,10 @@ function ApiUsageDashboard() {
            <span className={`status-badge ${isFallback ? 'warning' : 'success'}`}>
             {isFallback ? 'Modo Ahorro (OSM)' : 'Google Places Activo'}
           </span>
+          <span className="reset-badge">
+             <FiClock size={12} style={{ marginRight: '4px' }} />
+             Reset: Día 1
+          </span>
           <span className="date-badge">
             {stats?.month || new Date().toISOString().slice(0, 7)}
           </span>
@@ -101,14 +105,6 @@ function ApiUsageDashboard() {
       </header>
 
       <div className="credit-tracker-box glass-panel">
-        <div className="tracker-header">
-          <div className="tracker-title-group">
-            <FiShield className="tracker-icon" />
-            <span className="tracker-title">TRACKEO DE CRÉDITOS GRATIS</span>
-          </div>
-          <span className="tracker-provider-badge">Google Cloud Platform</span>
-        </div>
-        
         <div className="tracker-main-row">
           <div className="tracker-cell">
             <span className="tracker-label">GASTO ACUMULADO</span>
@@ -297,51 +293,25 @@ function ApiUsageDashboard() {
         .status-badge.success { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
         .status-badge.warning { background: rgba(234, 179, 8, 0.1); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.2); }
         .date-badge { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+        .reset-badge {
+          background: rgba(96, 165, 250, 0.05);
+          color: #60a5fa;
+          border: 1px solid rgba(96, 165, 250, 0.1);
+          font-size: 0.65rem;
+          font-weight: 700;
+          padding: 4px 10px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
 
         /* --- Credit Tracker Module --- */
         .credit-tracker-box {
-          padding: 1.25rem 1.75rem;
+          padding: 1.5rem 1.75rem;
           margin-bottom: 2rem;
           background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.4)) !important;
-        }
-
-        .tracker-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1.25rem;
-          padding-bottom: 0.75rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .tracker-title-group {
-          display: flex;
-          align-items: center;
-          gap: 0.6rem;
-        }
-
-        .tracker-icon { 
-          color: #60a5fa; 
-          font-size: 0.9rem;
-          filter: drop-shadow(0 0 5px rgba(96, 165, 250, 0.4));
-        }
-
-        .tracker-title {
-          font-size: 0.7rem;
-          font-weight: 800;
-          color: #94a3b8;
-          letter-spacing: 0.15em;
-        }
-
-        .tracker-provider-badge {
-          background: rgba(255, 255, 255, 0.03);
-          padding: 2px 8px;
-          border-radius: 4px;
-          font-size: 0.6rem;
-          color: #475569;
-          font-weight: 600;
-          letter-spacing: 0.05em;
-          border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .tracker-main-row {
