@@ -20,56 +20,31 @@ logger = logging.getLogger(__name__)
 
 # Configuración de Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-
-logger.info(f"Supabase Init - URL present: {bool(SUPABASE_URL)}, Key present: {bool(SUPABASE_KEY)}")
-
-supabase: Optional[Client] = None
-# Variable privada para el módulo, inicializada aquí
-_supabase_client: Optional[Client] = None
-
-try:
-    if SUPABASE_URL and SUPABASE_KEY:
-        _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
-        supabase = _supabase_client
-        logger.info("✅ Cliente Supabase inicializado correctamente")
-    else:
-        logger.warning("⚠️ Faltan credenciales de Supabase (SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY)")
-except Exception as e:
-    logger.error(f"❌ Error FATAL inicializando cliente Supabase: {e}")
-    # Asegurar que quedan como None en caso de error
-    _supabase_client = None
-    supabase = None
-
-def get_supabase() -> Optional[Client]:
-    """Obtiene o inicializa el cliente de Supabase"""
-    global _supabase_client, supabase
-    # Retornar el cliente ya inicializado a nivel de módulo
-    if _supabase_client:
-        return _supabase_client
-        
-    # Si no está inicializado, intentar verificar credenciales
-    if not SUPABASE_URL or not SUPABASE_KEY:
-        logger.error("Faltan credenciales de Supabase (SUPABASE_URL o SUPABASE_KEY). No se puede inicializar el cliente.")
-        return None
-        
-    # Si las credenciales están presentes pero el cliente no está inicializado (ej. falló la primera vez)
-    try:
-        _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
-        supabase = _supabase_client
-        logger.info("✅ Cliente Supabase re-inicializado correctamente en get_supabase()")
-        return _supabase_client
-    except Exception as e:
-        logger.error(f"Error re-inicializando Supabase en get_supabase(): {e}")
-        _supabase_client = None
-        supabase = None
-        return None
-
-# Intentar obtener Service Role Key para operaciones administrativas
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
-# Caching para el cliente admin
+logger.info(f"Supabase Init - URL present: {bool(SUPABASE_URL)}, Anon Key: {bool(SUPABASE_ANON_KEY)}, Admin Key: {bool(SUPABASE_SERVICE_ROLE_KEY)}")
+
+_supabase_public_client: Optional[Client] = None
 _supabase_admin_client: Optional[Client] = None
+
+def get_supabase() -> Optional[Client]:
+    """Obtiene el cliente público de Supabase (respeta RLS)"""
+    global _supabase_public_client
+    if _supabase_public_client:
+        return _supabase_public_client
+        
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        logger.error("Faltan credenciales de Supabase (SUPABASE_URL o SUPABASE_ANON_KEY).")
+        return None
+        
+    try:
+        _supabase_public_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+        logger.info("✅ Cliente Supabase PÚBLICO inicializado")
+        return _supabase_public_client
+    except Exception as e:
+        logger.error(f"Error inicializando Supabase público: {e}")
+        return None
 
 def get_supabase_admin() -> Optional[Client]:
     """Obtiene cliente con privilegios de admin (Service Role) - Singleton"""
@@ -84,6 +59,7 @@ def get_supabase_admin() -> Optional[Client]:
         
     try:
         _supabase_admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+        logger.info("🔑 Cliente Supabase ADMIN inicializado")
         return _supabase_admin_client
     except Exception as e:
         logger.error(f"Error creando cliente admin: {e}")
@@ -373,91 +349,87 @@ def exportar_a_json(rubro: Optional[str] = None, solo_validas: bool = True) -> O
         return None
 
 
-# --- GMAIL OAUTH FUNCTIONS ---
+# --- EMAIL TEMPLATE FUNCTIONS (Supabase Persistence) ---
 
-def save_user_oauth_token(user_id: str, token_data: Dict, provider: str = 'google') -> bool:
-    """Guarda o actualiza tokens OAuth de un usuario"""
-    admin_client = get_supabase_admin()
-    if not admin_client:
-        return False
-        
+def db_get_templates(user_id: str, tipo: Optional[str] = None) -> List[Dict]:
+    """Obtiene templates desde la base de datos Supabase filtrados por usuario y tipo"""
+    client = get_supabase_admin() # Usar admin para ver templates de sistema + usuario si es necesario
+    if not client: return []
     try:
-        data = {
-            'user_id': user_id,
-            'provider': provider,
-            'access_token': token_data.get('access_token'),
-            'refresh_token': token_data.get('refresh_token'),
-            'token_expiry': token_data.get('expiry'), # ISO string from google-auth
-            'scope': token_data.get('scope'),
-            'token_type': token_data.get('token_type', 'Bearer'),
-            'account_email': token_data.get('account_email'),
-            'updated_at': datetime.now().isoformat()
+        query = client.table('email_templates').select('*').or_(f"user_id.eq.{user_id},is_default.eq.true")
+        if tipo:
+            query = query.eq('type', tipo)
+        res = query.execute()
+        return res.data or []
+    except Exception as e:
+        logger.error(f"Error db_get_templates: {e}")
+        return []
+
+def db_create_template(user_id: str, data: Dict) -> Optional[int]:
+    """Crea un nuevo template en la base de datos"""
+    client = get_supabase_admin()
+    if not client: return None
+    try:
+        insert_data = {
+            "user_id": user_id,
+            "name": data.get('nombre'),
+            "subject": data.get('subject'),
+            "body_html": data.get('body_html'),
+            "body_text": data.get('body_text'),
+            "type": data.get('type', 'email'),
+            "is_default": False,
+            "updated_at": datetime.now().isoformat()
         }
-        
-        # Eliminar nulos
-        data = {k: v for k, v in data.items() if v is not None}
-        
-        response = admin_client.table('user_oauth_tokens').upsert(data, on_conflict='user_id,provider').execute()
-        return bool(response.data)
+        res = client.table('email_templates').insert(insert_data).execute()
+        return res.data[0]['id'] if res.data else None
     except Exception as e:
-        logger.error(f"Error guardando token OAuth para {user_id}: {e}")
-        return False
-
-def get_user_oauth_token(user_id: str, provider: str = 'google') -> Optional[Dict]:
-    """Recupera los tokens OAuth de un usuario"""
-    admin_client = get_supabase_admin()
-    if not admin_client:
-        return None
-        
-    try:
-        response = admin_client.table('user_oauth_tokens')\
-            .select('*')\
-            .eq('user_id', user_id)\
-            .eq('provider', provider)\
-            .execute()
-            
-        if response.data:
-            return response.data[0]
-        return None
-    except Exception as e:
-        logger.error(f"Error obteniendo token OAuth para {user_id}: {e}")
+        logger.error(f"Error db_create_template: {e}")
         return None
 
-def delete_user_oauth_token(user_id: str, provider: str = 'google') -> bool:
-    """Elimina la conexión OAuth de un usuario"""
-    admin_client = get_supabase_admin()
-    if not admin_client:
-        return False
-        
+def db_update_template(template_id: int, user_id: str, updates: Dict) -> bool:
+    """Actualiza un template existente si pertenece al usuario"""
+    client = get_supabase_admin()
+    if not client: return False
     try:
-        response = admin_client.table('user_oauth_tokens')\
-            .delete()\
-            .eq('user_id', user_id)\
-            .eq('provider', provider)\
-            .execute()
+        updates['updated_at'] = datetime.now().isoformat()
+        res = client.table('email_templates').update(updates).eq('id', template_id).eq('user_id', user_id).execute()
+        return bool(res.data)
+    except Exception as e:
+        logger.error(f"Error db_update_template: {e}")
+        return False
+
+def db_delete_template(template_id: int, user_id: str) -> bool:
+    """Elimina un template si pertenece al usuario"""
+    client = get_supabase_admin()
+    if not client: return False
+    try:
+        res = client.table('email_templates').delete().eq('id', template_id).eq('user_id', user_id).execute()
         return True
     except Exception as e:
-        logger.error(f"Error eliminando token OAuth para {user_id}: {e}")
+        logger.error(f"Error db_delete_template: {e}")
         return False
 
-def obtener_perfil_usuario(user_id: str) -> Optional[Dict]:
-    """Obtiene el perfil de usuario (nombre, plan, etc) de Supabase"""
-    # Usar admin client para asegurar acceso
-    client = get_supabase_admin() or get_supabase()
-    if not client or not user_id:
-        return None
-        
+def db_log_email_history(user_id: str, history_data: Dict) -> bool:
+    """Registra un envío de email en el historial persistente"""
+    client = get_supabase_admin()
+    if not client: return False
     try:
-        # Intentar obtener de la tabla 'users' (perfiles públicos)
-        response = client.table('users').select('*').eq('id', user_id).execute()
-        
-        if response.data and len(response.data) > 0:
-            return response.data[0]
-            
-        return None
+        insert_data = {
+            "user_id": user_id,
+            "company_id": history_data.get('empresa_id'),
+            "company_name": history_data.get('empresa_nombre'),
+            "company_email": history_data.get('empresa_email'),
+            "template_id": history_data.get('template_id'),
+            "subject": history_data.get('subject'),
+            "status": history_data.get('status'),
+            "error_message": history_data.get('error_message'),
+            "sent_at": datetime.now().isoformat()
+        }
+        res = client.table('email_history').insert(insert_data).execute()
+        return bool(res.data)
     except Exception as e:
-        logger.error(f"Error obteniendo perfil de usuario {user_id}: {e}")
-        return None
+        logger.error(f"Error db_log_email_history: {e}")
+        return False
 def eliminar_usuario_totalmente(user_id: str) -> Dict:
     """
     Elimina un usuario y todos sus datos relacionados usando privilegios de admin.

@@ -153,17 +153,6 @@ def read_root():
         "version": "2.1.0 (Fixed NameError Vercel)"
     }
 
-# Inicialización de variables en memoria
-# IMPORTANTE: Estas variables deben ser accesibles globalmente
-global _memoria_empresas
-global _empresa_counter
-global _memoria_templates
-global _template_counter
-global _memoria_email_history
-global _memoria_codigos_validacion
-
-_memoria_empresas = []
-_empresa_counter = 0
 # MercadoPago SDK
 mp_token = os.getenv("MP_ACCESS_TOKEN")
 if mp_token:
@@ -176,9 +165,6 @@ else:
     logging.warning("MP_ACCESS_TOKEN no configurado. Pagos no disponibles.")
     sdk = None
 
-_memoria_templates = []
-_template_counter = 0
-_memoria_email_history = []
 _memoria_codigos_validacion = {}
 SEARCH_PROGRESS = {}  # Diccionario global para guardar el progreso de las búsquedas: {task_id: {progress: int, message: str}}
 
@@ -243,194 +229,14 @@ def limpiar_base_datos() -> bool:
     logger.warning("Intento de limpiar base de datos bloqueado en modo Supabase")
     return False
 
-def obtener_templates(tipo: Optional[str] = None) -> List[Dict]:
-    """Obtiene todos los templates de memoria, opcionalmente filtrados por tipo"""
-    if tipo:
-        return [t.copy() for t in _memoria_templates if t.get('type') == tipo]
-    return _memoria_templates.copy()
-
-def obtener_template(template_id: int) -> Optional[Dict]:
-    """Obtiene un template por ID de memoria"""
-    for t in _memoria_templates:
-        if t.get('id') == template_id:
-            return t.copy()
-    return None
-
-def crear_template(nombre: str, subject: str, body_html: str, body_text: Optional[str] = None, tipo: str = 'email') -> Optional[int]:
-    """Crea un nuevo template en memoria"""
-    global _template_counter
-    _template_counter += 1
-    
-    # Verificar si ya existe
-    if any(t.get('nombre') == nombre and t.get('type', 'email') == tipo for t in _memoria_templates):
-        logger.error(f"Template '{nombre}' de tipo '{tipo}' ya existe")
-        return None
-    
-    template = {
-        'id': _template_counter,
-        'nombre': nombre,
-        'subject': subject,
-        'body_html': body_html,
-        'body_text': body_text,
-        'type': tipo, # email | whatsapp
-        'es_default': 0,
-        'created_at': datetime.now().isoformat(),
-        'updated_at': datetime.now().isoformat()
-    }
-    _memoria_templates.append(template)
-    logger.info(f" Template creado en memoria: {nombre} ({tipo}) (ID: {_template_counter})")
-    return _template_counter
-
-def actualizar_template(template_id: int, nombre: Optional[str] = None, subject: Optional[str] = None,
-                       body_html: Optional[str] = None, body_text: Optional[str] = None, tipo: Optional[str] = None) -> bool:
-    """Actualiza un template en memoria"""
-    # Validar que al menos un campo se actualice
-    if not any([nombre, subject, body_html, body_text is not None, tipo]):
-        logger.warning(f"Intento de actualizar template {template_id} sin campos")
-        return False
-    
-    for i, t in enumerate(_memoria_templates):
-        if t.get('id') == template_id:
-            cambios = False
-            if nombre and isinstance(nombre, str) and nombre.strip():
-                _memoria_templates[i]['nombre'] = nombre.strip()
-                cambios = True
-            if subject and isinstance(subject, str) and subject.strip():
-                _memoria_templates[i]['subject'] = subject
-                cambios = True
-            if body_html and isinstance(body_html, str) and body_html.strip():
-                _memoria_templates[i]['body_html'] = body_html
-                cambios = True
-            if body_text is not None:
-                _memoria_templates[i]['body_text'] = body_text if body_text else None
-                cambios = True
-            if tipo and tipo in ['email', 'whatsapp']:
-                 _memoria_templates[i]['type'] = tipo
-                 cambios = True
-            
-            if cambios:
-                _memoria_templates[i]['updated_at'] = datetime.now().isoformat()
-                logger.info(f" Template actualizado en memoria: ID {template_id}")
-                return True
-            else:
-                logger.warning(f"No se aplicaron cambios válidos al template {template_id}")
-                return False
-    return False
-
-def eliminar_template(template_id: int) -> bool:
-    """Elimina un template de memoria"""
-    global _memoria_templates
-    
-    # Verificar si el template está en uso (búsqueda simple en historial)
-    # Nota: En producción debería verificar en base de datos
-    template_en_uso = False
-    for hist in _memoria_email_history:
-        if hist.get('template_id') == template_id:
-            template_en_uso = True
-            break
-    
-    if template_en_uso:
-        logger.warning(f"Template {template_id} está en uso en historial, no se puede eliminar")
-        return False
-    
-    original_len = len(_memoria_templates)
-    _memoria_templates = [t for t in _memoria_templates if t.get('id') != template_id]
-    deleted = len(_memoria_templates) < original_len
-    if deleted:
-        logger.info(f" Template eliminado de memoria: ID {template_id}")
-    return deleted
-
-def guardar_email_history(empresa_id: int, empresa_nombre: str, empresa_email: str,
-                         template_id: int, template_nombre: str, subject: str,
-                         status: str, error_message: Optional[str] = None) -> bool:
-    """Guarda historial de email en memoria"""
-    # Validar datos antes de guardar
-    if not isinstance(empresa_id, int) or empresa_id <= 0:
-        logger.warning(f"empresa_id inválido: {empresa_id}")
-        return False
-    
-    if not isinstance(template_id, int) or template_id <= 0:
-        logger.warning(f"template_id inválido: {template_id}")
-        return False
-    
-    if not status or status not in ['success', 'error']:
-        logger.warning(f"status inválido: {status}")
-        return False
-    
-    try:
-        _memoria_email_history.append({
-            'id': len(_memoria_email_history) + 1,
-            'empresa_id': empresa_id,
-            'empresa_nombre': str(empresa_nombre) if empresa_nombre else '',
-            'empresa_email': str(empresa_email) if empresa_email else '',
-            'template_id': template_id,
-            'template_nombre': str(template_nombre) if template_nombre else '',
-            'subject': str(subject) if subject else '',
-            'status': status,
-            'error_message': str(error_message) if error_message else None,
-            'sent_at': datetime.now().isoformat()
-        })
-        return True
-    except Exception as e:
-        logger.error(f"Error guardando historial de email: {e}")
-        return False
-
-def obtener_email_history(empresa_id: Optional[int] = None, template_id: Optional[int] = None,
-                         limit: int = 100) -> List[Dict]:
-    """Obtiene historial de emails de memoria"""
-    resultado = _memoria_email_history.copy()
-    
-    if empresa_id:
-        resultado = [h for h in resultado if h.get('empresa_id') == empresa_id]
-    
-    if template_id:
-        resultado = [h for h in resultado if h.get('template_id') == template_id]
-    
-    return resultado[-limit:]
-
-# Inicializar templates por defecto
-def _init_default_templates():
-    """Inicializa templates por defecto en memoria"""
-    try:
-        if len(_memoria_templates) == 0:
-            # Template por defecto: Primer contacto (Simple y Profesional)
-            template_id = crear_template(
-            nombre='Primer contacto (Ejemplo)',
-            subject='Contacto: {nombre_empresa} - Posible colaboración',
-            body_html='''<html>
-<body style="font-family: Arial, sans-serif; line-height: 1.8; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: #ffffff; border-radius: 8px; padding: 30px;">
-        <p style="font-size: 16px; margin-bottom: 20px;">Hola, espero que estén muy bien.</p>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">Nos ponemos en contacto con ustedes porque vimos su trabajo en el rubro <strong>{rubro}</strong> y nos pareció muy interesante.</p>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">Creemos que tienen un gran potencial para seguir creciendo y nos gustaría charlar brevemente para explorar cómo podríamos colaborar y aportar valor a su negocio.</p>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">Quedo a la espera de su respuesta.</p>
-        
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-            <p style="font-size: 16px; margin-bottom: 5px;">Saludos cordiales,</p>
-            <p style="font-size: 14px; margin-bottom: 0;">
-                <a href="#" style="color: #2563eb; text-decoration: none;">[Tu Sitio Web]</a>
-            </p>
-        </div>
-    </div>
-</body>
-</html>''',
-            body_text='''Hola, espero que estén muy bien.
-
-Nos ponemos en contacto con ustedes porque vimos su trabajo en el rubro {rubro} y nos pareció muy interesante.
-
-Creemos que tienen un gran potencial para seguir creciendo y nos gustaría charlar brevemente para explorar cómo podríamos colaborar y aportar valor a su negocio.
-
-Quedo a la espera de su respuesta.
-
-Saludos cordiales.
-
-Sitio web: [Tu Sitio Web]'''
-        )
-    except Exception as e:
-        logger.error(f"Error inicializando templates por defecto: {e}")
+# Funciones de persistencia delegadas a db_supabase
+from backend.db_supabase import (
+    db_get_templates,
+    db_create_template,
+    db_update_template,
+    db_delete_template,
+    db_log_email_history
+)
 
 # Endpoints Gmail OAuth
 # ...
@@ -1645,10 +1451,13 @@ async def listar_templates(type: Optional[str] = None):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/templates/{template_id}")
-async def obtener_template_endpoint(template_id: int):
-    """Obtiene un template por ID"""
+async def obtener_template_endpoint(template_id: int, user_id: str):
+    """Obtiene un template por ID (validando pertenencia o default)"""
     try:
-        template = obtener_template(template_id)
+        # Reutilizamos db_get_templates y filtramos localmente para simplicidad o agregamos db_get_template_by_id
+        templates = db_get_templates(user_id)
+        template = next((t for t in templates if t['id'] == template_id), None)
+        
         if not template:
             raise HTTPException(status_code=404, detail="Template no encontrado")
         return {
@@ -1663,17 +1472,20 @@ async def obtener_template_endpoint(template_id: int):
 
 @app.post("/templates")
 async def crear_template_endpoint(request: TemplateRequest):
-    """Crea un nuevo template"""
+    """Crea un nuevo template persistente"""
     try:
-        template_id = crear_template(
-            nombre=request.nombre,
-            subject=request.subject,
-            body_html=request.body_html,
-            body_text=request.body_text,
-            tipo=request.type
+        template_id = db_create_template(
+            user_id=request.user_id,
+            data={
+                "nombre": request.nombre,
+                "subject": request.subject,
+                "body_html": request.body_html,
+                "body_text": request.body_text,
+                "type": request.type
+            }
         )
         if not template_id:
-            raise HTTPException(status_code=400, detail="Error creando template. Verifica que el nombre no exista.")
+            raise HTTPException(status_code=400, detail="Error creando template.")
         return {
             "success": True,
             "message": "Template creado exitosamente",
@@ -1687,19 +1499,22 @@ async def crear_template_endpoint(request: TemplateRequest):
 
 @app.put("/templates/{template_id}")
 async def actualizar_template_endpoint(template_id: int, request: TemplateUpdateRequest):
-    """Actualiza un template"""
+    """Actualiza un template persistente"""
     try:
-        success = actualizar_template(
+        success = db_update_template(
             template_id=template_id,
-            nombre=request.nombre,
-            subject=request.subject,
-            body_html=request.body_html,
-            body_text=request.body_text,
-            tipo=request.type
+            user_id=request.user_id,
+            updates={
+                "name": request.nombre,
+                "subject": request.subject,
+                "body_html": request.body_html,
+                "body_text": request.body_text,
+                "type": request.type
+            }
         )
 
         if not success:
-            raise HTTPException(status_code=404, detail="Template no encontrado")
+            raise HTTPException(status_code=404, detail="Template no encontrado o sin permisos")
         return {
             "success": True,
             "message": "Template actualizado exitosamente"
@@ -2612,25 +2427,12 @@ async def delete_account(request: Request):
         try:
              # En Vercel las variables ya están en el entorno, no cargamos .env local
              
-             # Diagnóstico para Vercel Logs
-             url_env = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
-             key_env = os.getenv("SUPABASE_KEY") or os.getenv("VITE_SUPABASE_ANON_KEY")
-             service_key_env = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-             
-             logger.info(f"🔍 Vercel Env Check: URL={'OK' if url_env else 'MISSING'}, KEY={'OK' if key_env else 'MISSING'}, SERVICE_KEY={'OK' if service_key_env else 'MISSING'}")
-             
-             from db_supabase import get_supabase
+             # Carga el cliente de Supabase estandarizado
+             from backend.db_supabase import get_supabase
              supabase = get_supabase()
              
              if not supabase:
-                 # Si db_supabase falla, intentamos inicializar directo con lo que hayamos encontrado
-                 if url_env and key_env:
-                     logger.warning("⚠️ get_supabase() falló. Intentando inicializar manual con variables encontradas.")
-                     from supabase import create_client
-                     supabase = create_client(url_env, key_env)
-             
-             if not supabase:
-                 raise HTTPException(status_code=500, detail="Error interno: No se pudo conectar a Supabase. Revisa las Variables de Entorno en Vercel.")
+                  raise HTTPException(status_code=500, detail="Error interno: No se pudo conectar a Supabase.")
 
              logger.info(f"🔄 delete_account: Verificando token con Supabase...")
              user_response = supabase.auth.get_user(token)

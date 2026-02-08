@@ -59,7 +59,7 @@ function AppB2B() {
     if (!user?.id) return;
     setCreditsLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/users/${user.id}/credits`);
+      const response = await axios.get(`${API_URL}/api/users/${user.id}/credits`);
       if (response.data) {
         setCreditsInfo(response.data);
       }
