@@ -14,7 +14,7 @@ import {
   FiShield,
   FiChevronDown
 } from 'react-icons/fi';
-import './AdminDashboard.css';
+// import './AdminDashboard.css'; // Removed to prevent conflicts with dark theme
 
 function ApiUsageDashboard() {
   const { token } = useAuth();
@@ -187,7 +187,7 @@ function ApiUsageDashboard() {
                     <td className="text-right">
                       <div className="val-stack">
                         <span className="val-main text-accent">${parseFloat(s.estimated_cost_usd).toFixed(2)}</span>
-                        <span className="val-sub">{s.sku === 'pro' ? '$0.032/u' : 'Gratis'}</span>
+                        <span className="val-sub">{s.sku === 'pro' ? '$0.032/u' : 'Gratuitos'}</span>
                       </div>
                     </td>
                   </tr>
@@ -270,6 +270,19 @@ function ApiUsageDashboard() {
           min-height: 100vh;
         }
 
+        .glass-panel {
+          background: rgba(30, 41, 59, 0.45) !important;
+          border: 1px solid rgba(255, 255, 255, 0.08) !important;
+          border-radius: 16px;
+          backdrop-filter: blur(12px);
+          padding: 1.5rem;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-section {
+          margin-bottom: 2rem;
+        }
+
         .dashboard-header {
           display: flex;
           justify-content: space-between;
@@ -329,19 +342,21 @@ function ApiUsageDashboard() {
         }
 
         .metric-summary-icon-bg {
-          width: 52px;
-          height: 52px;
-          border-radius: 12px;
+          width: 58px;
+          height: 58px;
+          border-radius: 14px;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .metric-summary-icon-bg.cost { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
-        .metric-summary-icon-bg.calls { background: rgba(139, 92, 246, 0.1); color: #a78bfa; }
-        .metric-summary-icon-bg.status { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
-        .metric-summary-icon-bg.status.warning { background: rgba(234, 179, 8, 0.1); color: #facc15; }
+        .metric-summary-icon-bg.cost { color: #60a5fa; background: rgba(59, 130, 246, 0.08); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1); }
+        .metric-summary-icon-bg.calls { color: #a78bfa; background: rgba(139, 92, 246, 0.08); box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1); }
+        .metric-summary-icon-bg.status { color: #4ade80; background: rgba(34, 197, 94, 0.08); box-shadow: 0 4px 20px rgba(34, 197, 94, 0.1); }
+        .metric-summary-icon-bg.status.warning { color: #facc15; background: rgba(234, 179, 8, 0.08); box-shadow: 0 4px 20px rgba(234, 179, 8, 0.1); }
 
         .metric-summary-details {
           flex: 1;
@@ -358,48 +373,53 @@ function ApiUsageDashboard() {
         }
 
         .metric-summary-main-value {
-          font-size: 1.5rem;
-          font-weight: 700;
+          font-size: 1.85rem;
+          font-weight: 800;
           color: #fff;
+          letter-spacing: -0.02em;
+          line-height: 1.2;
         }
 
         .metric-summary-value-row {
           display: flex;
           align-items: baseline;
-          gap: 0.5rem;
+          gap: 0.6rem;
         }
 
         .metric-summary-sub-value {
-          font-size: 0.9rem;
-          color: #64748b;
+          font-size: 1rem;
+          color: rgba(148, 163, 184, 0.7);
+          font-weight: 500;
         }
 
         .metric-summary-sub-text {
-          font-size: 0.8rem;
-          color: #64748b;
-          margin-top: 0.25rem;
+          font-size: 0.85rem;
+          color: #94a3b8;
+          margin-top: 0.35rem;
+          font-weight: 500;
         }
 
         .metric-summary-mini-progress {
-          margin-top: 0.75rem;
+          margin-top: 1rem;
           width: 100%;
         }
 
         .mini-progress-track {
-          height: 6px;
-          background: rgba(0,0,0,0.2);
-          border-radius: 3px;
+          height: 8px;
+          background: rgba(0,0,0,0.3);
+          border-radius: 4px;
           overflow: hidden;
         }
 
         .mini-progress-fill {
           height: 100%;
-          background: #60a5fa;
-          border-radius: 3px;
+          background: linear-gradient(90deg, #3b82f6, #60a5fa);
+          border-radius: 4px;
+          box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
         }
 
-        .mini-progress-fill.warning { background: #f59e0b; }
-        .mini-progress-fill.critical { background: #ef4444; }
+        .mini-progress-fill.warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .mini-progress-fill.critical { background: linear-gradient(90deg, #ef4444, #f87171); }
 
         /* --- SKU Styles --- */
         .sku-group {
@@ -435,25 +455,51 @@ function ApiUsageDashboard() {
           color: #64748b;
         }
 
-        .val-stack {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .val-main {
-          font-weight: 600;
-          color: #e2e8f0;
-          font-family: 'Space Mono', monospace;
-        }
-
-        .val-sub {
-          font-size: 0.75rem;
-          color: #64748b;
+        .clean-table th {
+          text-align: left;
+           padding: 1.25rem 1rem;
+          color: #94a3b8;
+          font-weight: 700;
+          font-size: 0.85rem;
           text-transform: uppercase;
+          letter-spacing: 0.08em;
+          border-bottom: 2px solid rgba(255, 255, 255, 0.05);
         }
 
-        .text-success { color: #4ade80; }
-        .text-warning { color: #facc15; }
+        .clean-table td {
+          padding: 1.25rem 1rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+          vertical-align: middle;
+        }
+
+        .dashboard-grid {
+          display: grid;
+          gap: 2.5rem;
+        }
+
+        .section-header {
+          margin-bottom: 1.5rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-header h3 {
+          font-size: 1.15rem;
+          font-weight: 700;
+          color: #fff;
+          margin: 0;
+        }
+
+        .header-note {
+          font-size: 0.85rem;
+          color: #64748b;
+          margin-top: 0.25rem;
+          display: block;
+        }
+
+        .text-success { color: #4ade80; font-weight: 600; }
+        .text-warning { color: #facc15; font-weight: 600; }
+        .text-accent { color: #60a5fa; font-weight: 700; }
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
