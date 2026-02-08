@@ -75,6 +75,18 @@ except ImportError as e:
 import math
 from typing import Dict, List, Optional
 
+# --- Variables de estado Globales (En memoria por sesión) ---
+_memoria_empresas = []
+_empresa_counter = 1
+_busqueda_progreso = {
+    "total": 0,
+    "actual": 0,
+    "completado": False,
+    "error": None,
+    "ultima_actualizacion": None
+}
+_memoria_codigos_validacion = {}
+
 # Inicializar FastAPI inmediatamente después de imports
 app = FastAPI(
     title="B2B Client Acquisition API", 
