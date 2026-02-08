@@ -368,43 +368,33 @@ function AppB2B() {
       let buffer = '';
 
       let accumulatedLeads = [];
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        
-        // Procesar eventos SSE (formato data: {...}\n\n)
+      
+      const processBuffer = (chunk) => {
+        buffer += chunk;
         const parts = buffer.split('\n\n');
-        buffer = parts.pop(); // Mantener el último fragmento incompleto en el buffer
+        buffer = parts.pop();
 
         for (const part of parts) {
           const line = part.trim();
           if (line.startsWith('data: ')) {
             try {
               const eventPayload = JSON.parse(line.substring(6));
-              
               if (eventPayload.type === 'status') {
                 setSearchProgress(prev => ({ ...prev, message: eventPayload.message }));
-                // Si es un mensaje de inicio, dar un empujón visual
                 if (eventPayload.message.includes('Iniciando')) setDisplayProgress(5);
               } 
               else if (eventPayload.type === 'lead') {
                 const exists = accumulatedLeads.some(e => e.google_id === eventPayload.data.google_id);
-                if (!exists) {
-                  accumulatedLeads.push(eventPayload.data);
-                }
-                // Incrementar progreso visual levemente por cada lead
+                if (!exists) accumulatedLeads.push(eventPayload.data);
                 setDisplayProgress(prev => Math.min(prev + 0.3, 85));
               }
               else if (eventPayload.type === 'update') {
-                // Si llegamos a tener un update antes de terminar, lo aplicamos al buffer
                 accumulatedLeads = accumulatedLeads.map(e => 
                   e.google_id === eventPayload.data.google_id ? { ...e, ...eventPayload.data } : e
                 );
               }
               else if (eventPayload.type === 'complete') {
-                setEmpresas(accumulatedLeads);
+                setEmpresas([...accumulatedLeads]);
                 setSearchProgress({ percent: 100, message: '¡Búsqueda completada!' });
                 setDisplayProgress(100);
               }
@@ -413,7 +403,19 @@ function AppB2B() {
             }
           }
         }
+      };
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        processBuffer(decoder.decode(value, { stream: true }));
       }
+      
+      // Procesar cualquier resto en el buffer al cerrar
+      if (buffer.trim()) processBuffer('');
+
+      // Garantía final de visualización
+      setEmpresas([...accumulatedLeads]);
 
       // Finalización
       setSearchProgress({ percent: 100, message: '¡Listo!' });
