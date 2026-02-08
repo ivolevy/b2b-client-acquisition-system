@@ -189,6 +189,11 @@ class GooglePlacesClient:
         y Subdivisión Espacial (Quadtree) si se detecta saturación.
         """
         # 1. Búsqueda con Paginación (hasta 60 resultados de Google)
+        # Obtener keywords del rubro para mejorar la búsqueda
+        from backend.rubros_config import RUBROS_DISPONIBLES
+        rubro_info = RUBROS_DISPONIBLES.get(rubro_key, {})
+        keywords = rubro_info.get("keywords", [])
+
         # Combinamos rubro + keywords en un string plano para máxima compatibilidad con Google (v1)
         search_terms = [query] + keywords[:5] # Tomamos las primeras 5 keywords para no saturar
         optimized_query = ", ".join(search_terms)
