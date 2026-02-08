@@ -5,7 +5,7 @@ Enfocado en empresas, no en propiedades por zona
 
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -720,6 +720,137 @@ async def api_delete_search_history(user_id: str, search_id: str):
         raise HTTPException(status_code=500, detail="Error al eliminar del historial")
     
     return {"success": True, "message": "Entrada eliminada correctamente"}
+
+@app.post("/api/buscar-stream")
+async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
+    """
+    Versión Streaming de búsqueda: envía prospectos en tiempo real
+    usando Server-Sent Events (SSE).
+    """
+    # 1. Validación de Créditos
+    user_id = request.user_id
+    if user_id and user_id != 'anonymous':
+        check_reset_monthly_credits(user_id)
+        deduction = deduct_credits(user_id, 100)
+        if not deduction.get("success"):
+            raise HTTPException(
+                status_code=402, 
+                detail=f"Créditos insuficientes. Balance: {deduction.get('current', 0)}"
+            )
+
+    async def event_generator():
+        queue = asyncio.Queue()
+        seen_ids = set()
+        rubro_info = RUBROS_DISPONIBLES.get(request.rubro, {"nombre": request.rubro, "keywords": []})
+        
+        # Bbox mapping
+        google_bbox = None
+        if request.bbox:
+            partes = request.bbox.split(',')
+            if len(partes) == 4:
+                google_bbox = {
+                    "south": float(partes[0]), "west": float(partes[1]),
+                    "north": float(partes[2]), "east": float(partes[3])
+                }
+
+        # Búsquedas
+        search_queries = [rubro_info['nombre']] + rubro_info.get('keywords', [])
+        search_queries = list(dict.fromkeys(search_queries))
+
+        # Yield inicial
+        yield f"data: {json.dumps({'type': 'status', 'message': f'Iniciando búsqueda exhaustiva ({len(search_queries)} queries)...'})}\n\n"
+
+        # Worker para búsquedas de Google
+        async def run_google_search(query):
+            try:
+                # Usamos asyncio.to_thread para no bloquear el event loop
+                results = await asyncio.to_thread(
+                    google_client.search_all_places,
+                    query=query,
+                    rubro_nombre=rubro_info['nombre'],
+                    rubro_key=request.rubro,
+                    bbox=google_bbox,
+                    lat=request.busqueda_centro_lat,
+                    lng=request.busqueda_centro_lng,
+                    radius=(request.busqueda_radio_km * 1000) if request.busqueda_radio_km else None
+                )
+                if results:
+                    for r in results:
+                        if isinstance(r, dict) and 'google_id' in r:
+                            gid = r['google_id']
+                            if gid not in seen_ids:
+                                seen_ids.add(gid)
+                                await queue.put({'type': 'lead', 'data': r})
+            except Exception as e:
+                logger.error(f"Error en query stream '{query}': {e}")
+
+        # Worker para Scraping (enriquecimiento)
+        async def run_scraping(lead):
+            try:
+                # Enriquecer lead individualmente
+                enriched = await asyncio.to_thread(
+                    enriquecer_empresa_b2b,
+                    lead
+                )
+                # Ojo: Enriquecemos con redes sociales también
+                # enriched = await asyncio.to_thread(enriquecer_con_redes_sociales, enriched)
+                
+                # Guardar en DB
+                await asyncio.to_thread(insertar_empresa, enriched)
+                
+                await queue.put({'type': 'update', 'data': enriched})
+            except Exception as e:
+                logger.error(f"Error en scraping stream para {lead.get('nombre')}: {e}")
+
+        # Ejecutar búsquedas en paralelo
+        search_tasks = [asyncio.create_task(run_google_search(q)) for q in search_queries]
+        
+        # Contador de tareas de scraping activas
+        scraping_tasks = set()
+        
+        # Procesar cola mientras haya búsquedas activas o items en cola
+        while not all(t.done() for t in search_tasks) or not queue.empty() or scraping_tasks:
+            try:
+                # Esperar con timeout para revisar estado de search_tasks
+                item = await asyncio.wait_for(queue.get(), timeout=1.0)
+                
+                if item['type'] == 'lead':
+                    # Enviar lead básico al cliente inmediatamente
+                    yield f"data: {json.dumps(item)}\n\n"
+                    
+                    # Si tiene web, disparar scraping
+                    lead_data = item['data']
+                    if lead_data.get('website'):
+                        st = asyncio.create_task(run_scraping(lead_data))
+                        scraping_tasks.add(st)
+                        st.add_done_callback(scraping_tasks.discard)
+                
+                elif item['type'] == 'update':
+                    # Enviar actualización (email/teléfono)
+                    yield f"data: {json.dumps(item)}\n\n"
+                
+                queue.task_done()
+            except asyncio.TimeoutError:
+                continue
+            except Exception as e:
+                logger.error(f"Error en loop de eventos: {e}")
+                break
+
+        # Una vez terminadas las búsquedas, esperar a que terminen los scraping
+        if scraping_tasks:
+            yield f"data: {json.dumps({'type': 'status', 'message': f'Finalizando enriquecimiento de {len(scraping_tasks)} leads...'})}\n\n"
+            await asyncio.gather(*scraping_tasks, return_exceptions=True)
+            # Asegurarse de procesar cualquier update final en la cola
+            while not queue.empty():
+                item = await queue.get()
+                if item['type'] == 'update':
+                    yield f"data: {json.dumps(item)}\n\n"
+                queue.task_done()
+
+        yield f"data: {json.dumps({'type': 'status', 'message': 'Búsqueda completada exitosamente.'})}\n\n"
+        yield f"data: {json.dumps({'type': 'complete'})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @app.post("/api/buscar")
 async def buscar_por_rubro(request: BusquedaRubroRequest):

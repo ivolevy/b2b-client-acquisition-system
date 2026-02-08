@@ -333,144 +333,124 @@ function AppB2B() {
       setBlockingLoading(true);
       setSearchProgress({ percent: 0, message: 'Iniciando búsqueda...' });
       setDisplayProgress(0);
+      setEmpresas([]); // Limpiar resultados anteriores para el stream
 
-      // Seguridad: Timeout de 60 segundos por si el socket/poll fallan catastróficamente
+      // Seguridad: Timeout de 120 segundos para el stream completo
       if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
       loadingTimeoutRef.current = setTimeout(() => {
         if (blockingLoading || loading) {
-          console.warn('Safety timeout reached for search loading');
+          console.warn('Safety timeout reached for streaming search');
           setBlockingLoading(false);
           setLoading(false);
           toastError?.('Tiempo de espera agotado');
         }
-      }, 60000); 
+      }, 120000); 
 
+      const paramsWithUser = { ...params, user_id: user?.id };
       
-      // Generar Task ID único para tracking
-      const taskId = `search_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Iniciar polling de progreso
-      if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
-      
-      // Ref para trackear el taskId actual y evitar race conditions
-      currentTaskIdRef.current = taskId;
-      
-      loadingIntervalRef.current = setInterval(async () => {
-        try {
-          const progressRes = await axios.get(`${API_URL}/api/buscar/progreso/${taskId}`);
-          
-          // Verificar si seguimos en la misma tarea
-          if (currentTaskIdRef.current !== taskId) return;
-          if (!loadingIntervalRef.current) return;
+      // Usamos fetch directamente para manejar el ReadableStream (POST SSE)
+      const response = await fetch(`${API_URL}/api/buscar-stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paramsWithUser),
+      });
 
-          if (progressRes.data) {
-            setSearchProgress(prev => {
-              const newPercent = progressRes.data.progress || 0;
-              // Evitar retrocesos: solo actualizar si es mayor o igual, 
-              // a menos que sea 0 y el anterior sea muy alto (lo cual sería raro en misma task)
-              // Mejor estrategia: Nunca bajar del máximo alcanzado en esta sesión de polling
-              if (newPercent < prev.percent) {
-                return prev; 
-              }
-              return {
-                percent: newPercent,
-                message: progressRes.data.message || 'Procesando...'
-              };
-            });
-          }
-        } catch (e) {
-          console.warn('Error polling progress:', e);
-        }
-      }, 200);
-
-      const paramsWithTask = { ...params, task_id: taskId, user_id: user?.id };
-      const response = await axios.post(`${API_URL}/api/buscar`, paramsWithTask);
-      
-      // Detener polling
-      if (loadingIntervalRef.current) {
-        clearInterval(loadingIntervalRef.current);
-        loadingIntervalRef.current = null;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Error en la búsqueda');
       }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        
+        // Procesar eventos SSE (formato data: {...}\n\n)
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop(); // Mantener el último fragmento incompleto en el buffer
+
+        for (const part of parts) {
+          const line = part.trim();
+          if (line.startsWith('data: ')) {
+            try {
+              const eventPayload = JSON.parse(line.substring(6));
+              
+              if (eventPayload.type === 'status') {
+                setSearchProgress(prev => ({ ...prev, message: eventPayload.message }));
+                // Si es un mensaje de inicio, dar un empujón visual
+                if (eventPayload.message.includes('Iniciando')) setDisplayProgress(5);
+              } 
+              else if (eventPayload.type === 'lead') {
+                setEmpresas(prev => {
+                  const exists = prev.some(e => e.google_id === eventPayload.data.google_id);
+                  if (exists) return prev;
+                  return [...prev, eventPayload.data];
+                });
+                // Incrementar progreso visual levemente por cada lead
+                setDisplayProgress(prev => Math.min(prev + 0.3, 85));
+              }
+              else if (eventPayload.type === 'update') {
+                setEmpresas(prev => prev.map(e => 
+                  e.google_id === eventPayload.data.google_id ? { ...e, ...eventPayload.data } : e
+                ));
+              }
+              else if (eventPayload.type === 'complete') {
+                setSearchProgress({ percent: 100, message: '¡Búsqueda completada!' });
+                setDisplayProgress(100);
+              }
+            } catch (e) {
+              console.warn('Error parsing stream event:', e);
+            }
+          }
+        }
+      }
+
+      // Finalización
       setSearchProgress({ percent: 100, message: '¡Listo!' });
-      
-      // ESPERAR A QUE LA BARRA LLEGUE VISUALMENTE AL 100% + RETRASO
       await waitForVisualCompletion();
       
-      if (response.data.success) {
-        const validas = response.data.validas || 0;
-        const total = response.data.total_encontradas || 0;
-        const guardadas = response.data.guardadas || 0;
-        const empresasEncontradas = response.data.data || [];
-
-        // Guardar búsqueda en historial si es PRO (en background, sin bloquear)
-        // NO guardar si viene del historial para evitar duplicados
-        if (user?.id && total > 0 && !isFromHistory) {
-          // Ejecutar en background sin await para no bloquear la UI
-          searchHistoryService.saveSearch(user.id, {
-            rubro: params.rubro,
-            ubicacion_nombre: params.busqueda_ubicacion_nombre,
-            centro_lat: params.busqueda_centro_lat,
-            centro_lng: params.busqueda_centro_lng,
-            radio_km: params.busqueda_radio_km,
-            bbox: params.bbox,
-            empresas_encontradas: total,
-            empresas_validas: validas
-          }).then(({ data, error }) => {
-            if (error) console.warn('Historial no guardado:', error.message);
-            else console.log('Historial guardado:', data?.id);
-          }).catch(e => console.warn('Error historial:', e));
-        }
-        
-        // Resetear flag después de la búsqueda satisfactoria
-        if (isFromHistory) {
-          setIsFromHistory(false);
-          setHistorySearchData(null); // Limpiar para que FiltersB2B sepa que terminó
-        }
-        
-        if (total === 0) {
-          warning("No se encontraron resultados");
-        } else if (validas === 0 && params.solo_validadas) {
-          warning("Sin resultados validados");
-        } else {
-          const descartadas = total - guardadas;
-          
-           if (params.solo_validadas) {
-             success("Búsqueda completada con éxito");
-          } else {
-             success("Búsqueda completada con éxito");
+      if (user?.id && !isFromHistory) {
+        // Guardar en historial al finalizar (usamos el estado actual)
+        setEmpresas(currentEmpresas => {
+          if (currentEmpresas.length > 0) {
+            searchHistoryService.saveSearch(user.id, {
+              rubro: params.rubro,
+              ubicacion_nombre: params.busqueda_ubicacion_nombre,
+              centro_lat: params.busqueda_centro_lat,
+              centro_lng: params.busqueda_centro_lng,
+              radio_km: params.busqueda_radio_km,
+              bbox: params.bbox,
+              empresas_encontradas: currentEmpresas.length,
+              empresas_validas: currentEmpresas.filter(e => e.email || e.telefono).length
+            }).catch(e => console.warn('Error historial:', e));
           }
-        }
-        
-        // Actualizar la vista con los resultados encontrados inmediatamente
-        setEmpresas(empresasEncontradas);
-        
-        // Actualizamos las estadísticas en background
-        loadStats();
-        
-        console.log('Búsqueda completada exitosamente. Resultados en pantalla:', empresasEncontradas.length);
-        
-        // NO llamamos a loadEmpresas(false) inmediatamente para evitar race conditions
-        // que puedan sobreescribir los resultados recién obtenidos si el servidor
-        // aún está persistiendo en la base de datos física.
-        // setEmpresas(empresasEncontradas) ya es suficiente para la UI.
+          return currentEmpresas;
+        });
       }
+
+      // Limpiar estados de búsqueda del historial
+      if (isFromHistory) {
+        setIsFromHistory(false);
+        setHistorySearchData(null);
+      }
+
+      fetchCredits(); // Actualizar créditos al finalizar
+      success("Búsqueda completada con éxito");
 
     } catch (err) {
-      console.error('Error al buscar empresas:', err);
-      const errorMsg = err.response?.data?.detail || err.message;
-      
-      // Si fue cancelado manualmente, no mostrar error
-      if (err.message === 'Canceled') return;
-
-      toastError("Error en la búsqueda");
+      console.error('Error en búsqueda stream:', err);
+      toastError(err.message || "Error en la búsqueda");
     } finally {
-      // Limpiar estados y polling
       setBlockingLoading(false);
       setLoading(false);
-      if (loadingIntervalRef.current) {
-        clearInterval(loadingIntervalRef.current);
-        loadingIntervalRef.current = null;
-      }
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
     }
   };
 
