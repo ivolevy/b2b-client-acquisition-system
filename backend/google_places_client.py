@@ -188,16 +188,11 @@ class GooglePlacesClient:
         Versión avanzada de búsqueda que implementa Paginación (60)
         y Subdivisión Espacial (Quadtree) si se detecta saturación.
         """
-        # 0. Optimización de Query (Mapeo Inteligente)
-        from backend.rubros_config import RUBROS_DISPONIBLES
-        rubro_info = RUBROS_DISPONIBLES.get(rubro_key, {})
-        keywords = rubro_info.get("keywords", [])
+        # 1. Búsqueda con Paginación (hasta 60 resultados de Google)
+        # Combinamos rubro + keywords en un string plano para máxima compatibilidad con Google (v1)
+        search_terms = [query] + keywords[:5] # Tomamos las primeras 5 keywords para no saturar
+        optimized_query = ", ".join(search_terms)
         
-        # Si tenemos keywords, las añadimos para mejorar la precisión de Google
-        optimized_query = query
-        if keywords:
-            optimized_query = f"({query}) OR ({' OR '.join(keywords)})"
-            
         all_results = {} # Usamos dict con google_id para deduplicar
 
         # 1. Búsqueda con Paginación (hasta 60 resultados de Google)

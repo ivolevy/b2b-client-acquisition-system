@@ -30,10 +30,10 @@ RUBROS_DISPONIBLES = {
     "tecnologia_digital": {
         "nombre": "Tecnología y Servicios Digitales",
         "keywords": [
-            "Software Factory", "Agencia Digital B2B", "Digital Marketing Agency", 
-            "SEO Specialist", "SaaS Company", "Desarrollo Web Profesional", "IT Consulting", 
-            "Software Development", "App Development Agency", "Social Media Marketing", 
-            "Cloud Services", "Cybersecurity", "Data Analytics"
+            "Software Factory", "Agencia Digital", "Marketing Digital", 
+            "SEO Specialist", "SaaS", "Desarrollo Web", "Consultoría IT", 
+            "Software Development", "App Development", "Social Media Marketing", 
+            "Ciberseguridad", "Data Analytics", "Programación"
         ]
     },
     "salud_bienestar": {
