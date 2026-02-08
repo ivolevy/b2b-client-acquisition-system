@@ -601,31 +601,8 @@ function UserProfile() {
     navigate(`/checkout?type=credits&amount=${selectedRechargePack.amount}&price=${selectedRechargePack.price}&currency=${rechargeCurrency}`);
   };
 
-  const handleSelectPlan = async (planId, price, priceArs) => {
-      // Redirigir al checkout logic o reutilizar PricingSection logic
-      // Como esto es un componente separado, y LandingPage tiene la logica de checkout, 
-      // lo ideal sería mover el usuario a la landing o integrar aquí.
-      
-      try {
-        const mpResponse = await axios.post(`${API_URL}/api/payments/mercadopago/create_preference`, {
-          plan_id: planId,
-          user_id: user.id || 'anonymous',
-          email: user.email,
-          name: user.name || 'Usuario',
-          phone: user.phone || 'No phone',
-          amount: parseFloat(priceArs),
-          description: `Suscripción Smart Leads - Plan ${planId.charAt(0).toUpperCase() + planId.slice(1)}`
-        });
-        
-        if (mpResponse.data && mpResponse.data.init_point) {
-           window.location.href = mpResponse.data.init_point;
-        } else {
-           toastError?.('Error al iniciar el pago');
-        }
-      } catch (e) {
-         console.error(e);
-         toastError?.('Error de conexión con pagos');
-      }
+  const handleSelectPlan = (planId) => {
+      navigate(`/checkout?plan=${planId}`);
   };
 
   return (
@@ -902,14 +879,14 @@ function UserProfile() {
                    {/* STARTER */}
                    <div className="pricing-card-profile">
                       <h3>Starter</h3>
-                      <div className="price-profile">$35 USD <span>/mes</span></div>
-                      <p className="price-ars-profile">$40,000 ARS</p>
+                      <div className="price-profile">$100 USD <span>/mes</span></div>
+                      <p className="price-ars-profile">$100 ARS</p>
                       <ul className="profile-pkg-features">
                         <li>1,500 Créditos mensuales</li>
                         <li>Búsqueda por Mapa</li>
                         <li>Soporte básico</li>
                       </ul>
-                      <button className="btn-profile-subscribe" onClick={() => handleSelectPlan('starter', 35, 40000)}>
+                      <button className="btn-profile-subscribe" onClick={() => handleSelectPlan('starter')}>
                         Elegir Starter
                       </button>
                    </div>
@@ -918,13 +895,13 @@ function UserProfile() {
                    <div className="pricing-card-profile featured">
                       <h3>Growth</h3>
                       <div className="price-profile">$100 USD <span>/mes</span></div>
-                      <p className="price-ars-profile">$100,000 ARS</p>
+                      <p className="price-ars-profile">$100 ARS</p>
                       <ul className="profile-pkg-features">
                         <li>5,000 Créditos mensuales</li>
                         <li>Búsqueda Avanzada</li>
                         <li>Soporte prioritario</li>
                       </ul>
-                      <button className="btn-profile-subscribe primary" onClick={() => handleSelectPlan('growth', 100, 100000)}>
+                      <button className="btn-profile-subscribe primary" onClick={() => handleSelectPlan('growth')}>
                         Elegir Growth
                       </button>
                    </div>
@@ -932,14 +909,14 @@ function UserProfile() {
                    {/* SCALE */}
                    <div className="pricing-card-profile">
                       <h3>Scale</h3>
-                      <div className="price-profile">$200 USD <span>/mes</span></div>
-                      <p className="price-ars-profile">$220,000 ARS</p>
+                      <div className="price-profile">$100 USD <span>/mes</span></div>
+                      <p className="price-ars-profile">$100 ARS</p>
                       <ul className="profile-pkg-features">
                         <li>10,000 Créditos mensuales</li>
                         <li>API Access (Beta)</li>
                         <li>Soporte 24/7</li>
                       </ul>
-                      <button className="btn-profile-subscribe" onClick={() => handleSelectPlan('scale', 200, 220000)}>
+                      <button className="btn-profile-subscribe" onClick={() => handleSelectPlan('scale')}>
                         Elegir Scale
                       </button>
                    </div>
@@ -1652,7 +1629,7 @@ function UserProfile() {
 
                 {/* Scale Plan */}
                 <button 
-                  onClick={() => setSelectedUpgradePlan({ id: 'scale', name: 'Scale', price: 200, credits: 10000 })}
+                  onClick={() => setSelectedUpgradePlan({ id: 'scale', name: 'Scale', price: 100, credits: 10000 })}
                   className="recharge-pack-card"
                   style={{
                     background: selectedUpgradePlan?.id === 'scale' ? '#f0f9ff' : 'white',
@@ -1678,7 +1655,7 @@ function UserProfile() {
                     Máximo volumen con 10,000 créditos y acceso a API.
                   </div>
                   <div style={{ marginTop: 'auto', paddingTop: '12px' }}>
-                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>$200</span>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>$100</span>
                     <span style={{ fontSize: '0.85rem', color: '#64748b' }}> /mes</span>
                   </div>
                 </button>
