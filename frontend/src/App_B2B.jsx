@@ -330,16 +330,16 @@ function AppB2B() {
   const handleBuscar = async (params) => {
     try {
       setLoading(true);
+      // Solo bloqueamos al inicio (0.5s) para dar sensación de acción
       setBlockingLoading(true);
       setSearchProgress({ percent: 0, message: 'Iniciando búsqueda...' });
       setDisplayProgress(0);
-      setEmpresas([]); // Limpiar resultados anteriores para el stream
+      setEmpresas([]); 
 
-      // Seguridad: Timeout de 120 segundos para el stream completo
+      // Timeout de seguridad
       if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
       loadingTimeoutRef.current = setTimeout(() => {
-        if (blockingLoading || loading) {
-          console.warn('Safety timeout reached for streaming search');
+        if (loading) {
           setBlockingLoading(false);
           setLoading(false);
           toastError?.('Tiempo de espera agotado');
@@ -348,14 +348,14 @@ function AppB2B() {
 
       const paramsWithUser = { ...params, user_id: user?.id };
       
-      // Usamos fetch directamente para manejar el ReadableStream (POST SSE)
       const response = await fetch(`${API_URL}/api/buscar-stream`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(paramsWithUser),
       });
+
+      // Una vez que el stream abre, quitamos el bloqueo visual total
+      setBlockingLoading(false);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -673,6 +673,23 @@ function AppB2B() {
             historySearchData={historySearchData}
           />
           
+          {/* Indicador de progreso No Bloqueante (Streaming) */}
+          {loading && !blockingLoading && (
+            <div className="inline-progress-container">
+              <div className="inline-progress-info">
+                <span className="streaming-dot"></span>
+                <span className="loading-message">{searchProgress.message}</span>
+                <span className="progress-percentage">{Math.round(displayProgress)}%</span>
+              </div>
+              <div className="progress-bar-bg small">
+                <div 
+                  className="progress-bar-fill" 
+                  style={{ width: `${Math.min(displayProgress, 100)}%` }}
+                ></div>
+              </div>
+              <button onClick={handleCancelSearch} className="btn-cancel-mini">X</button>
+            </div>
+          )}
           {blockingLoading && (
             <div className="loading-overlay">
               <div className="loading-progress-container">

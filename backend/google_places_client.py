@@ -4,11 +4,15 @@ import logging
 from typing import List, Dict, Optional, Any
 import time
 from dotenv import load_dotenv
+import math
 from backend.db_supabase import increment_api_usage, get_current_month_usage, log_api_call
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Cache de coordenadas para evitar None en distancias
+_SEARCH_CENTER_CACHE = {}
 
 load_dotenv()
 
@@ -112,7 +116,7 @@ class GooglePlacesClient:
 
         start_time = time.time()
         try:
-            logger.info(f"Buscando en Google Places: '{query}'")
+            logger.info(f"Buscando en Google Places: '{query}' | Center: {lat}, {lng}")
             response = requests.post(self.BASE_URL, headers=headers, json=payload, timeout=30)
             duration_ms = int((time.time() - start_time) * 1000)
             
@@ -180,9 +184,9 @@ class GooglePlacesClient:
         lng: Optional[float] = None,
         radius: Optional[float] = None,
         bbox: Optional[Dict[str, float]] = None,
-        max_total_results: int = 200,
+        max_total_results: int = 100,
         depth: int = 0,
-        max_depth: int = 3 # Aumentado para escaneo exhaustivo en zonas ultra-densas
+        max_depth: int = 3
     ) -> List[Dict[str, Any]]:
         """
         Versión avanzada de búsqueda que implementa Paginación (60)
@@ -226,9 +230,15 @@ class GooglePlacesClient:
                 
             places = data.get("places", [])
             for p in places:
-                mapped = self.map_to_internal_format(p, rubro_nombre, rubro_key)
-                all_results[mapped['google_id']] = mapped
-                results_this_area.append(mapped)
+                # LA CLAVE: lat/lng aquí DEBEN ser las originales del centro de búsqueda
+                mapped = self.map_to_internal_format(p, rubro_nombre, rubro_key, lat, lng)
+                
+                if mapped['google_id'] not in all_results:
+                    all_results[mapped['google_id']] = mapped
+                    results_this_area.append(mapped)
+                    
+                    if len(all_results) >= max_total_results:
+                        break
                 
             current_page_token = data.get("nextPageToken")
             if not current_page_token or len(all_results) >= max_total_results:
@@ -251,30 +261,51 @@ class GooglePlacesClient:
                 {"south": s, "west": mid_lng, "north": mid_lat, "east": e}, # SE
                 {"south": mid_lat, "west": w, "north": n, "east": mid_lng}, # NW
                 {"south": mid_lat, "west": mid_lng, "north": n, "east": e}  # NE
-            ]
-            
             for sub_bbox in sub_bboxes:
+                if len(all_results) >= max_total_results:
+                    break
+
                 sub_results = self.search_all_places(
                     query=query,
                     rubro_nombre=rubro_nombre,
                     rubro_key=rubro_key,
+                    lat=lat, # PERSISTENCIA: Mantener centro original para distancia
+                    lng=lng,
                     bbox=sub_bbox,
                     max_total_results=max_total_results,
                     depth=depth + 1,
                     max_depth=max_depth
                 )
                 for res in sub_results:
+                    if len(all_results) >= max_total_results: break
                     all_results[res['google_id']] = res
 
-        return list(all_results.values())
+        return list(all_results.values())[:max_total_results]
 
-    def map_to_internal_format(self, google_place: Dict[str, Any], rubro_nombre: str, rubro_key: str) -> Dict[str, Any]:
+    def calcular_distancia(self, lat1, lon1, lat2, lon2):
+        """Calcula la distancia en km entre dos puntos usando Haversine."""
+        if None in (lat1, lon1, lat2, lon2): return None
+        R = 6371  # Radio de la Tierra en km
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = (math.sin(dlat / 2) * math.sin(dlat / 2) +
+             math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+             math.sin(dlon / 2) * math.sin(dlon / 2))
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return round(R * c, 2)
+
+    def map_to_internal_format(self, google_place: Dict[str, Any], rubro_nombre: str, rubro_key: str, 
+                               center_lat: Optional[float] = None, center_lng: Optional[float] = None) -> Dict[str, Any]:
         """
         Mapea un resultado de Google al formato interno 'Empresa' usado en el sistema.
         """
         display_name = google_place.get("displayName", {})
         location = google_place.get("location", {})
+        lat_res = location.get("latitude")
+        lng_res = location.get("longitude")
         
+        distancia = self.calcular_distancia(center_lat, center_lng, lat_res, lng_res)
+
         # Mapeo según el formato de overflow_client.py / main.py
         return {
             'nombre': display_name.get("text", "Sin nombre"),
@@ -287,8 +318,9 @@ class GooglePlacesClient:
             'ciudad': "", # Se puede extraer de address_components si es necesario
             'pais': "", 
             'codigo_postal': "",
-            'latitud': location.get("latitude"),
-            'longitud': location.get("longitude"),
+            'latitud': lat_res,
+            'longitud': lng_res,
+            'distancia_km': distancia, # Nueva columna solicitada
             'google_id': google_place.get("id"),
             'rubros_google': google_place.get("types", []),
             'rating': google_place.get("rating"),

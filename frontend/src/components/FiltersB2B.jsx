@@ -41,7 +41,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
   }, [historySearchData]);
   
   const [scrapearWebsites, setScrapearWebsites] = useState(false);
-  const [soloValidadas, setSoloValidadas] = useState(false);
   const [modoBusqueda, setModoBusqueda] = useState('nueva');
   
   // Efecto separado para ejecutar búsqueda cuando locationData esté listo después de cargar historial
@@ -60,7 +59,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
           rubro: historySearchData.rubro,
           bbox: historySearchData.bbox,
           scrapear_websites: scrapearWebsites,
-          solo_validadas: soloValidadas,
           limpiar_anterior: false,
           busqueda_ubicacion_nombre: historySearchData.ubicacion_nombre || null,
           busqueda_centro_lat: historySearchData.centro_lat || null,
@@ -71,7 +69,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
         onBuscar(params);
       }
     }
-  }, [locationData, historySearchData, scrapearWebsites, soloValidadas, onBuscar]);
+  }, [locationData, historySearchData, scrapearWebsites, onBuscar]);
 
   const handleBuscarSubmit = (e) => {
     e.preventDefault();
@@ -95,7 +93,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
       rubro: rubro,
       bbox: locationData.bbox.bbox_string,
       scrapear_websites: scrapearWebsites,
-      solo_validadas: soloValidadas,
       limpiar_anterior: modoBusqueda === 'nueva',
       busqueda_ubicacion_nombre: locationData.ubicacion_nombre || null,
       busqueda_centro_lat: locationData.center?.lat || null,
@@ -216,22 +213,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                   <span>Redes Sociales</span>
                 </button>
 
-                <button
-                  type="button"
-                  className={`filter-pill ${soloValidadas ? 'active' : ''}`}
-                  onClick={() => setSoloValidadas(!soloValidadas)}
-                  disabled={loading}
-                  title="Filtra los resultados a empresas con email o teléfono válido"
-                >
-                  <div className="pill-icon">
-                    {soloValidadas ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                    )}
-                  </div>
-                  <span>Solo Validados</span>
-                </button>
               </div>
 
               <div className="toolbar-divider"></div>
@@ -274,11 +255,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
             {scrapearWebsites && (
               <div className="helper-pill info">
                 <span><strong>Redes Sociales:</strong> Intentaremos extraer Instagram/LinkedIn de la web.</span>
-              </div>
-            )}
-            {soloValidadas && (
-              <div className="helper-pill success">
-                <span><strong>Calidad:</strong> Se filtrarán empresas sin email o teléfono válido.</span>
               </div>
             )}
             {modoBusqueda === 'agregar' && (
