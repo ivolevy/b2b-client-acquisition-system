@@ -1144,8 +1144,9 @@
 
 .selector-content-inner {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
+    grid-template-columns: 1fr;
+    /* Changed from 1fr 1fr to occupy 100% width */
+    gap: 40px;
     align-items: center;
     width: 100%;
     animation: fadeInSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1208,7 +1209,8 @@
     }
 
     .module-visual {
-        order: -1;
+        margin-top: 32px;
+        /* Add margin since it's now stacked */
     }
 }
 
@@ -1950,9 +1952,9 @@
     animation: scroll-left 40s linear infinite;
 }
 
-.testimonial-track:hover {
-    /* animation-play-state: paused; REMOVED per user request */
-}
+
+/* side fades for testimonials removed pausing on hover per user request */
+
 
 /* Side Fades for Slider */
 .slider-fade-left,
@@ -2491,7 +2493,8 @@
     }
 
     .accordion-body.open {
-        max-height: 500px;
+        max-height: 1000px;
+        /* Increased to avoid cutting tall content like Module 3 */
         border-top: 1px solid var(--border);
     }
 
@@ -3442,6 +3445,7 @@
 .desktop-only {
     display: block;
 }
+
 /* Agency Link Styles */
 .agency-link-container {
     margin-top: 40px;
