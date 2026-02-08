@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional, Any
 from urllib.parse import urlparse, urljoin
 import time
 from urllib.robotparser import RobotFileParser

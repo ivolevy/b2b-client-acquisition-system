@@ -135,6 +135,20 @@ def admin_update_user(user_id: str, updates: Dict) -> Dict:
         logger.error(f"Error actualizando usuario admin {user_id}: {e}")
         return {"error": str(e)}
 
+def obtener_perfil_usuario(user_id: str) -> Optional[Dict]:
+    """Obtiene el perfil público del usuario (nombre, email, etc) desde la tabla public.users"""
+    admin = get_supabase_admin()
+    
+    try:
+        result = admin.table('users').select('*').eq('id', user_id).execute()
+        
+        if result.data and len(result.data) > 0:
+            return result.data[0]
+        return None
+    except Exception as e:
+        logger.error(f"Error obteniendo perfil de usuario {user_id}: {e}")
+        return None
+
 def init_db_b2b() -> bool:
     """Verifica conexión a Supabase"""
     client = get_supabase()
@@ -477,6 +491,66 @@ def eliminar_usuario_totalmente(user_id: str) -> Dict:
     except Exception as e:
         logger.error(f"Error crítico eliminando usuario {user_id}: {e}")
         return {"success": False, "error": str(e)}
+
+# --- OAUTH TOKEN FUNCTIONS ---
+
+def save_user_oauth_token(user_id: str, provider: str, token_data: Dict):
+    """Guarda o actualiza tokens de OAuth para un usuario"""
+    admin = get_supabase_admin()
+    
+    # Preparar datos
+    data = {
+        'user_id': user_id,
+        'provider': provider,
+        'access_token': token_data.get('access_token'),
+        'refresh_token': token_data.get('refresh_token'),
+        'expires_at': token_data.get('expiry'),
+        'token_type': token_data.get('token_type', 'Bearer'),
+        'scopes': token_data.get('scopes', []),
+        'account_email': token_data.get('account_email'),
+        'updated_at': datetime.utcnow().isoformat()
+    }
+    
+    try:
+        # Usar upsert basado en user_id y provider
+        result = admin.table('user_oauth_tokens').upsert(data, on_conflict='user_id,provider').execute()
+        return True
+    except Exception as e:
+        logger.error(f"Error guardando token OAuth: {e}")
+        return False
+
+def get_user_oauth_token(user_id: str, provider: str) -> Optional[Dict]:
+    """Obtiene tokens de OAuth para un usuario y proveedor"""
+    admin = get_supabase_admin()
+    
+    try:
+        result = admin.table('user_oauth_tokens')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .eq('provider', provider)\
+            .execute()
+            
+        if result.data and len(result.data) > 0:
+            return result.data[0]
+        return None
+    except Exception as e:
+        logger.error(f"Error obteniendo token OAuth: {e}")
+        return None
+
+def delete_user_oauth_token(user_id: str, provider: str):
+    """Elimina tokens de OAuth para un usuario y proveedor"""
+    admin = get_supabase_admin()
+    
+    try:
+        admin.table('user_oauth_tokens')\
+            .delete()\
+            .eq('user_id', user_id)\
+            .eq('provider', provider)\
+            .execute()
+        return True
+    except Exception as e:
+        logger.error(f"Error eliminando token OAuth: {e}")
+        return False
 
 
 def save_search_history(user_id: str, search_data: dict) -> dict:
