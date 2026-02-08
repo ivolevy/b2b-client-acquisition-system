@@ -99,15 +99,24 @@ function ApiUsageDashboard() {
         </div>
       </header>
 
-      {/* metric-summary-hero: Simplified header metrics */}
-      <div className="simple-metric-hero glass-panel">
-        <div className="simple-metric-main">
-          <span className="simple-label">GASTO MENSUAL</span>
-          <h2 className="simple-value">${totalCost.toFixed(2)}</h2>
+      <div className="compact-hero-row glass-panel">
+        <div className="compact-stat">
+          <span className="compact-label">GASTO MENSUAL</span>
+          <span className="compact-value highlight">${totalCost.toFixed(2)}</span>
         </div>
-        <div className="simple-metric-sub">
-          <span className="simple-label">PRESUPUESTO</span>
-          <span className="simple-sub-value">${limit}</span>
+        <div className="compact-divider"></div>
+        <div className="compact-stat">
+          <span className="compact-label">CONSULTAS</span>
+          <span className="compact-value">{stats?.stats?.reduce((acc, s) => acc + s.calls_count, 0) || 0}</span>
+        </div>
+        <div className="compact-divider"></div>
+        <div className="compact-stat">
+          <span className="compact-label">PRESUPUESTO</span>
+          <span className="compact-value muted">${limit}</span>
+        </div>
+        <div className="compact-stat right-aligned">
+           <span className={`status-dot-large ${isFallback ? 'warning' : 'success'}`}></span>
+           <span className="compact-label">{isFallback ? 'Modo Ahorro' : 'Google Places'}</span>
         </div>
       </div>
 
@@ -152,64 +161,45 @@ function ApiUsageDashboard() {
           </div>
         </section>
 
-        {/* Logs Compact Table */}
-        <section className="dashboard-section glass-panel">
-          <div className="section-header">
-            <h3>Historial Reciente</h3>
-             <span className="header-note">Últimos 50 requests</span>
-          </div>
-          <div className="table-container">
-            <table className="clean-table compact">
-              <thead>
-                <tr>
-                  <th>Hora</th>
-                  <th>Endpoint / Query</th>
-                  <th>Status</th>
-                  <th className="text-right">Duración</th>
-                  <th className="text-right">Costo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log) => (
-                  <tr key={log.id} className="log-row">
-                    <td className="text-muted text-sm">
-                      {new Date(log.created_at).toLocaleTimeString()}
-                    </td>
-                    <td>
-                      <div className="log-endpoint">
-                        <span className="endpoint-name">{log.endpoint.split(':').pop()}</span>
-                        {log.metadata?.query && (
-                           <span className="log-query" title={log.metadata.query}>
-                             "{log.metadata.query.substring(0, 30)}{log.metadata.query.length > 30 ? '...' : ''}"
-                           </span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <span className={`status-dot ${log.status_code === 200 ? 'success' : 'error'}`}></span>
-                          <span className={`status-text ${log.status_code !== 200 ? 'text-error' : ''}`}>
-                            {log.status_code}
-                          </span>
-                      </div>
-                    </td>
-                    <td className="text-right text-sm text-muted">{log.duration_ms}ms</td>
-                    <td className="text-right text-sm">
-                        {log.cost_usd > 0 ? (
-                            <span className="text-accent">${parseFloat(log.cost_usd).toFixed(3)}</span>
-                        ) : (
-                            <span className="text-muted">-</span>
-                        )}
-                    </td>
+        {/* Logs - Only if errors exist */}
+        {logs.some(log => log.status_code !== 200) && (
+          <section className="dashboard-section glass-panel error-logs-section">
+            <div className="section-header small">
+              <h3>Errores / Alertas Recientes</h3>
+              <span className="header-note">Últimos eventos críticos detectados</span>
+            </div>
+            <div className="table-container">
+              <table className="clean-table compact">
+                <thead>
+                  <tr>
+                    <th>Hora</th>
+                    <th>Endpoint</th>
+                    <th>Status</th>
+                    <th className="text-right">Costo</th>
                   </tr>
-                ))}
-                {logs.length === 0 && (
-                    <tr><td colSpan="5" className="text-center p-4 text-muted">No hay logs recientes</td></tr>
-                 )}
-              </tbody>
-            </table>
-          </div>
-        </section>
+                </thead>
+                <tbody>
+                  {logs.filter(log => log.status_code !== 200).map((log) => (
+                    <tr key={log.id} className="log-row error">
+                      <td className="text-muted text-xs">
+                        {new Date(log.created_at).toLocaleTimeString()}
+                      </td>
+                      <td className="text-sm">
+                        <span className="endpoint-name-compact">{log.endpoint.split(':').pop()}</span>
+                      </td>
+                      <td>
+                        <span className="status-badge-mini error">{log.status_code}</span>
+                      </td>
+                      <td className="text-right text-xs">
+                         ${parseFloat(log.cost_usd).toFixed(3)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
       </div>
 
       <style jsx>{`
@@ -272,110 +262,154 @@ function ApiUsageDashboard() {
         .status-badge.warning { background: rgba(234, 179, 8, 0.1); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.2); }
         .date-badge { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* --- Simple Hero styles --- */
-        .simple-metric-hero {
+        /* --- Compact Hero styles --- */
+        .compact-hero-row {
           display: flex;
-          justify-content: space-around;
           align-items: center;
-          padding: 2.5rem;
-          margin-bottom: 2.5rem;
-          text-align: center;
+          padding: 1rem 2rem;
+          margin-bottom: 2rem;
+          gap: 3rem;
         }
 
-        .simple-metric-main .simple-value {
-          font-size: 3.5rem;
-          font-weight: 900;
-          color: #fff;
-          margin: 0.5rem 0 0 0;
-          letter-spacing: -0.05em;
-        }
-
-        .simple-label {
-          font-size: 0.9rem;
-          color: #94a3b8;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          font-weight: 700;
-        }
-
-        .simple-metric-sub .simple-sub-value {
-          font-size: 1.75rem;
-          font-weight: 700;
-          color: #64748b;
-          display: block;
-          margin-top: 0.5rem;
-        }
-
-        /* --- SKU Styles Simplified --- */
-        .sku-info-simple {
+        .compact-stat {
           display: flex;
           flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .compact-stat.right-aligned {
+          margin-left: auto;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .compact-label {
+          font-size: 0.7rem;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          font-weight: 700;
+        }
+
+        .compact-value {
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: #e2e8f0;
+          line-height: 1;
+        }
+
+        .compact-value.highlight {
+          color: #fff;
+          font-size: 1.75rem;
+        }
+
+        .compact-value.muted {
+          color: #475569;
+        }
+
+        .compact-divider {
+          width: 1px;
+          height: 30px;
+          background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-dot-large {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          box-shadow: 0 0 10px currentColor;
+        }
+        .status-dot-large.success { background: #4ade80; color: rgba(74, 222, 128, 0.4); }
+        .status-dot-large.warning { background: #fbbf24; color: rgba(251, 191, 36, 0.4); }
+
+        /* --- SKU Table Compact --- */
+        .sku-info-simple {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
         }
 
         .sku-primary {
-          font-weight: 600;
-          color: #fff;
-          font-size: 1rem;
+          font-weight: 500;
+          color: #cbd5e1;
+          font-size: 0.9rem;
         }
 
         .clean-table th {
           text-align: left;
-          padding: 1.25rem 1rem;
-          color: #64748b;
+          padding: 0.75rem 1rem;
+          color: #475569;
           font-weight: 700;
-          font-size: 0.8rem;
+          font-size: 0.65rem;
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          border-bottom: 1px solid rgba(148, 163, 184, 0.05);
         }
 
         .clean-table td {
-          padding: 1.5rem 1rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid rgba(148, 163, 184, 0.02);
           vertical-align: middle;
         }
 
         .val-main {
-          font-weight: 700;
-          color: #e2e8f0;
-          font-size: 1.1rem;
-        }
-
-        .dashboard-grid {
-          display: grid;
-          gap: 2.5rem;
-        }
-
-        .section-header {
-          margin-bottom: 1.5rem;
-          padding-bottom: 0.75rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          font-weight: 600;
+          color: #94a3b8;
+          font-size: 0.9rem;
         }
 
         .section-header h3 {
-          font-size: 1.15rem;
+          font-size: 0.85rem;
           font-weight: 700;
-          color: #fff;
+          color: #64748b;
           margin: 0;
           text-transform: uppercase;
           letter-spacing: 0.1em;
         }
 
-        .header-note {
-          font-size: 0.85rem;
-          color: #64748b;
-          margin-top: 0.25rem;
-          display: block;
+        .text-accent { color: #60a5fa; font-weight: 600; }
+
+        /* Error logs specific */
+        .status-badge-mini {
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          font-weight: 700;
+        }
+        .status-badge-mini.error {
+          background: rgba(239, 68, 68, 0.1);
+          color: #f87171;
+          border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
-        .text-accent { color: #60a5fa; font-weight: 800; }
+        .endpoint-name-compact {
+           font-family: 'Space Mono', monospace;
+           color: #64748b;
+        }
+
+        /* Overall scale reduction */
+        .premium-dashboard {
+           padding: 1.5rem;
+           max-width: 1200px;
+           margin: 0 auto;
+        }
+
+        .glass-panel {
+           padding: 1rem 1.5rem;
+           border-radius: 12px;
+        }
+
+        .dashboard-grid {
+           gap: 1.5rem;
+        }
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .premium-dashboard { padding: 1rem 0.5rem !important; }
-            .simple-metric-hero { flex-direction: column; gap: 2rem; padding: 1.5rem; }
-            .simple-metric-main .simple-value { font-size: 2.5rem; }
-            .dashboard-grid { gap: 1.5rem; }
+            .compact-hero-row { flex-direction: column; align-items: flex-start; gap: 1.5rem; padding: 1.5rem; }
+            .compact-divider { display: none; }
+            .compact-stat.right-aligned { margin-left: 0; }
             .table-container { width: 100%; overflow-x: auto; }
         }
 
