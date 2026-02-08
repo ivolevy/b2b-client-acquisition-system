@@ -189,7 +189,7 @@ class GooglePlacesClient:
         y Subdivisión Espacial (Quadtree) si se detecta saturación.
         """
         # 0. Optimización de Query (Mapeo Inteligente)
-        from backend.overpass_client import RUBROS_DISPONIBLES
+        from backend.rubros_config import RUBROS_DISPONIBLES
         rubro_info = RUBROS_DISPONIBLES.get(rubro_key, {})
         keywords = rubro_info.get("keywords", [])
         

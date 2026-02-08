@@ -90,7 +90,7 @@ b2b-client-acquisition-system/
 ├── backend/
 │   ├── main.py              # FastAPI application
 │   ├── db.py                # Database operations
-│   ├── overpass_client.py   # OpenStreetMap client
+│   ├── google_places_client.py   # Google Places client (New)
 │   ├── scraper.py           # Web scraping utilities
 │   ├── validators.py        # Email/phone validation
 │   └── requirements.txt     # Python dependencies
@@ -164,7 +164,7 @@ El sistema soporta múltiples rubros de negocio:
 - Tiendas
 - Y más...
 
-Ver `backend/overpass_client.py` para la lista completa.
+Ver `backend/rubros_config.py` para la lista completa.
 
 ### Base de Datos
 La base de datos SQLite almacena:
@@ -211,7 +211,7 @@ Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 ##  Agradecimientos
 
 - [OpenStreetMap](https://www.openstreetmap.org/) por los datos geográficos
-- [Overpass API](https://overpass-api.de/) por la consulta de datos
+- [Google Places API](https://developers.google.com/maps/documentation/places/web-service/overview) por la consulta de datos
 - [Leaflet](https://leafletjs.com/) por los mapas interactivos
 - [FastAPI](https://fastapi.tiangolo.com/) por el excelente framework
 - [React](https://react.dev/) por la UI library

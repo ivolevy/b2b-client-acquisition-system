@@ -22,11 +22,9 @@ import mercadopago
 from datetime import datetime, timedelta
 
 try:
-    from backend.overpass_client import (
-        buscar_empresas_por_rubro, 
-        listar_rubros_disponibles,
-        buscar_empresas_multiples_rubros,
-        query_by_bbox
+    from backend.rubros_config import (
+        RUBROS_DISPONIBLES,
+        listar_rubros_disponibles
     )
     from backend.scraper import enriquecer_empresa_b2b
     from backend.social_scraper import enriquecer_con_redes_sociales
@@ -64,7 +62,7 @@ try:
 except ImportError as e:
     logging.error(f"Error importando módulos del backend: {e}")
     # Solo para desarrollo local si el paquete no está instalado
-    from overpass_client import *
+    from rubros_config import *
     from scraper import *
     from social_scraper import *
     from scraper_parallel import *
@@ -955,17 +953,13 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             partes = request.bbox.split(',')
             bbox_valido = len(partes) == 4
             
-        # --- NUEVA LÓGICA: PRIORITY GOOGLE CON FALLBACK A OSM ---
+        # --- LÓGICA EXCLUSIVA GOOGLE PLACES ---
         empresas = []
-        source_used = "osm" # Default fallback
+        source_used = "google"
         search_method = "bbox" if request.bbox and bbox_valido else "city"
 
         try:
-            # Intentar primero con Google Places
-            # TEMP FIX: Deshabilitar Google Places por defecto ya que no devuelve emails y el scraping falla
-            # Comentar esta línea para reactivar Google Places
-            raise Exception("Trigger OSM Fallback")
-            logger.info(f" Intentando búsqueda con Google Places API (New)...")
+            logger.info(f" Iniciando búsqueda con Google Places API (New)...")
             
             # Mapear bbox si existe
             google_bbox = None
@@ -978,9 +972,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     "east": float(partes[3])
                 }
 
-            # Ejecutar búsqueda en Google (incluye Quadtree y Deduplicación interna)
-            # Pasamos el nombre del rubro para el mapeo
-            from backend.overpass_client import RUBROS_DISPONIBLES
+            # Ejecutar búsqueda en Google
             rubro_info = RUBROS_DISPONIBLES.get(request.rubro, {"nombre": request.rubro})
             
             google_results = await asyncio.to_thread(
@@ -994,34 +986,18 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 radius=(request.busqueda_radio_km * 1000) if request.busqueda_radio_km else None
             )
 
-            if google_results and not any(isinstance(r, dict) and r.get('error') == 'PRESUPUESTO_AGOTADO' for r in google_results):
-                empresas = google_results
-                source_used = "google"
+            if google_results:
+                # Filtrar posibles errores de presupuesto si vienen en la lista
+                empresas = [r for r in google_results if isinstance(r, dict) and 'error' not in r]
                 logger.info(f" EXITOSA: {len(empresas)} empresas obtenidas de Google Places")
             else:
-                logger.warning(" Fallback a OSM por presupuesto agotado o falta de resultados en Google.")
-                raise Exception("Trigger OSM Fallback")
+                logger.warning(" No se obtuvieron resultados de Google Places.")
 
         except Exception as e:
-            if str(e) != "Trigger OSM Fallback":
-                logger.error(f" Error en Google Places: {e}. Usando OpenStreetMap como fallback.")
-            
-            # FALLBACK: Buscar en OpenStreetMap (Lógica original)
-            if request.bbox and bbox_valido:
-                empresas = await asyncio.to_thread(
-                    query_by_bbox,
-                    bbox=request.bbox,
-                    rubro=request.rubro
-                )
-            else:
-                empresas = await asyncio.to_thread(
-                    buscar_empresas_por_rubro,
-                    rubro=request.rubro,
-                    pais=request.pais,
-                    ciudad=request.ciudad
-                )
-            source_used = "osm"
-            logger.info(f" Fallback OSM: {len(empresas if empresas else [])} empresas obtenidas")
+            logger.error(f" Error en Google Places: {e}")
+            empresas = []
+
+        # --- FIN DE LÓGICA GOOGLE ---
 
         # Asegurar que empresas es una lista
         if not isinstance(empresas, list):
@@ -1042,7 +1018,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             update_search_progress(request.task_id, 1, 1, phase="searching")
             SEARCH_PROGRESS[request.task_id]["message"] = f"Encontradas {len(empresas)} empresas. Iniciando enriquecimiento..."
 
-        logger.info(f" Encontradas {len(empresas)} empresas en OSM")
+        logger.info(f" Encontradas {len(empresas)} empresas en Google Places")
         
         # Guardar el número total encontrado ANTES de cualquier filtro
         total_encontradas_original = len(empresas)

@@ -44,14 +44,13 @@ CREATE TABLE IF NOT EXISTS empresas (
     -- Metadata
     descripcion TEXT,
     horario TEXT,
-    osm_id TEXT,
-    osm_type TEXT,
+    google_id TEXT,
     
     -- Control
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
-    UNIQUE(osm_id, osm_type)
+    UNIQUE(google_id)
 );
 
 -- =====================================================

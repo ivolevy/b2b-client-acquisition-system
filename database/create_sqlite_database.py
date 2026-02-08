@@ -139,14 +139,13 @@ def create_database(db_path: str, force: bool = False):
                 -- Metadata
                 descripcion TEXT,
                 horario TEXT,
-                osm_id TEXT,
-                osm_type TEXT,
+                google_id TEXT,
                 
                 -- Control
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 
-                UNIQUE(osm_id, osm_type)
+                UNIQUE(google_id)
             )
         ''')
         

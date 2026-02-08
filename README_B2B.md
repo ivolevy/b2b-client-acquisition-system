@@ -259,7 +259,7 @@ id,nombre,rubro,email,telefono,website,direccion,ciudad,pais,linkedin,descripcio
 
 ### Módulos Principales
 
-1. **b2b_client.py** - Cliente Overpass API para búsqueda por rubro
+1. **google_places_client.py** - Cliente Google Places API (New) para búsqueda por rubro
 2. **validators.py** - Validación de emails, teléfonos y websites
 3. **scraper_b2b.py** - Web scraper B2B con enfoque corporativo
 4. **db_b2b.py** - Base de datos SQLite para empresas

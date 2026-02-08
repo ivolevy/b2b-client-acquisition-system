@@ -198,7 +198,7 @@ def insertar_empresa(empresa: Dict) -> bool:
             'instagram': empresa.get('instagram', ''),
             # Metadata
             'descripcion': empresa.get('descripcion', ''),
-            'osm_id': empresa.get('osm_id'),
+            'google_id': empresa.get('google_id'),
             # Validación
             'validada': empresa.get('validada', False),
             'email_valido': empresa.get('email_valido', False),
@@ -210,15 +210,11 @@ def insertar_empresa(empresa: Dict) -> bool:
             'updated_at': datetime.now().isoformat()
         }
         
-        # Limpiar claves con valor None para evitar errores si la columna no permite NULL
-        # aunque Supabase suele manejarlo, es mejor limpiar
+        # Limpiar claves con valor None
         data_to_insert = {k: v for k, v in data_to_insert.items() if v is not None}
 
-        # Upsert basado en osm_id si existe, o email como fallback
-        # Nota: La tabla en Supabase debería tener una constraint UNIQUE o Primary Key
-        # Idealmente osm_id es único.
-        
-        response = client.table('empresas').upsert(data_to_insert, on_conflict='osm_id').execute()
+        # Upsert basado en google_id (nuevo estándar)
+        response = client.table('empresas').upsert(data_to_insert, on_conflict='google_id').execute()
         
         if response.data:
             logger.debug(f" Empresa guardada en Supabase: {empresa.get('nombre')}")

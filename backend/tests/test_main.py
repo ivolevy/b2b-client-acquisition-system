@@ -48,8 +48,41 @@ def test_auth_status():
 
 def test_buscar_requires_payload():
     response = client.post("/buscar", json={})
-    # Should fail validation if fields are missing
     assert response.status_code == 422
+
+def test_buscar_google_success():
+    payload = {
+        "rubro": "tecnologia_digital",
+        "user_id": "test-user-123",
+        "ciudad": "Buenos Aires",
+        "scrapear_websites": False
+    }
+    
+    # Mocking Google Places client response
+    mock_results = [{
+        "nombre": "UO SOLUTIONS",
+        "google_id": "google-123",
+        "website": "https://uosolutions.com",
+        "telefono": "12345678",
+        "direccion": "Buenos Aires, Argentina",
+        "fuente": "google"
+    }]
+    
+    with patch("backend.main.google_client.search_all_places") as mock_search, \
+         patch("backend.main.deduct_credits") as mock_deduct, \
+         patch("backend.main.check_reset_monthly_credits") as mock_reset:
+        
+        mock_search.return_value = mock_results
+        mock_deduct.return_value = {"success": True, "new_balance": 900}
+        
+        response = client.post("/buscar", json=payload)
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        assert len(data["data"]) == 1
+        assert data["data"][0]["nombre"] == "UO SOLUTIONS"
+        assert mock_search.called
 
 # --- MERCADOPAGO TESTS ---
 
