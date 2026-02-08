@@ -99,51 +99,15 @@ function ApiUsageDashboard() {
         </div>
       </header>
 
-      {/* metric-summary-cards: Quick glance at key metrics */}
-      <div className="metric-summary-grid">
-        <div className="metric-summary-card glass-panel">
-          <div className="metric-summary-icon-bg cost">
-            <FiDollarSign size={24} />
-          </div>
-          <div className="metric-summary-details">
-            <span className="metric-summary-label">Gasto Mensual</span>
-            <div className="metric-summary-value-row">
-              <span className="metric-summary-main-value">${totalCost.toFixed(2)}</span>
-              <span className="metric-summary-sub-value">/ ${limit}</span>
-            </div>
-            <div className="metric-summary-mini-progress">
-              <div className="mini-progress-track">
-                <div 
-                  className={`mini-progress-fill ${percentage > 90 ? 'critical' : percentage > 70 ? 'warning' : ''}`}
-                  style={{ width: `${percentage}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
+      {/* metric-summary-hero: Simplified header metrics */}
+      <div className="simple-metric-hero glass-panel">
+        <div className="simple-metric-main">
+          <span className="simple-label">GASTO MENSUAL</span>
+          <h2 className="simple-value">${totalCost.toFixed(2)}</h2>
         </div>
-
-        <div className="metric-summary-card glass-panel">
-          <div className="metric-summary-icon-bg calls">
-            <FiActivity size={24} />
-          </div>
-          <div className="metric-summary-details">
-            <span className="metric-summary-label">Total Consultas</span>
-            <div className="metric-summary-main-value">{stats?.stats?.reduce((acc, s) => acc + s.calls_count, 0) || 0}</div>
-            <span className="metric-summary-sub-text">Mes en curso</span>
-          </div>
-        </div>
-
-        <div className="metric-summary-card glass-panel">
-          <div className="metric-summary-icon-bg status">
-            {isFallback ? <FiAlertTriangle size={24} /> : <FiCheckCircle size={24} />}
-          </div>
-          <div className="metric-summary-details">
-            <span className="metric-summary-label">Estado del Proveedor</span>
-            <div className={`metric-summary-main-value ${isFallback ? 'text-warning' : 'text-success'}`}>
-              {isFallback ? 'Modo Ahorro' : 'Google Places'}
-            </div>
-            <span className="metric-summary-sub-text">Presupuesto: ${remainingBudget.toFixed(2)} rem.</span>
-          </div>
+        <div className="simple-metric-sub">
+          <span className="simple-label">PRESUPUESTO</span>
+          <span className="simple-sub-value">${limit}</span>
         </div>
       </div>
 
@@ -157,38 +121,26 @@ function ApiUsageDashboard() {
             <table className="clean-table">
               <thead>
                 <tr>
-                  <th>Proveedor / Tipo</th>
-                  <th className="text-right">Volumen</th>
-                  <th className="text-right">Costo Estimado</th>
+                  <th>TIPO</th>
+                  <th className="text-right">VOLUMEN</th>
+                  <th className="text-right">COSTO ESTIMADO</th>
                 </tr>
               </thead>
               <tbody>
                 {(stats?.stats || []).map((s, idx) => (
                   <tr key={idx} className="hover-row">
                     <td>
-                      <div className="sku-group">
-                        <div className="sku-icon">
-                          {s.sku === 'pro' ? <FiActivity /> : <FiDatabase />}
-                        </div>
-                        <div className="sku-info">
-                          <span className="sku-primary">
-                            {s.sku === 'pro' ? 'Google Places API' : 'Servicio Autonómo'}
+                      <div className="sku-info-simple">
+                         <span className="sku-primary">
+                            {s.sku === 'pro' ? 'Google Places API' : 'OSM / Autónomo'}
                           </span>
-                          <span className="sku-secondary">{s.sku === 'pro' ? 'Consultas B2B Premium' : 'Búsqueda por Mapa'}</span>
-                        </div>
                       </div>
                     </td>
                     <td className="text-right">
-                      <div className="val-stack">
-                        <span className="val-main">{s.calls_count}</span>
-                        <span className="val-sub">requests</span>
-                      </div>
+                       <span className="val-main">{s.calls_count}</span>
                     </td>
                     <td className="text-right">
-                      <div className="val-stack">
-                        <span className="val-main text-accent">${parseFloat(s.estimated_cost_usd).toFixed(2)}</span>
-                        <span className="val-sub">{s.sku === 'pro' ? '$0.032/u' : 'Gratuitos'}</span>
-                      </div>
+                       <span className="val-main text-accent">${parseFloat(s.estimated_cost_usd).toFixed(2)}</span>
                     </td>
                   </tr>
                 ))}
@@ -320,126 +272,42 @@ function ApiUsageDashboard() {
         .status-badge.warning { background: rgba(234, 179, 8, 0.1); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.2); }
         .date-badge { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* --- Metric Summary Cards --- */
-        .metric-summary-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 1.5rem;
-          margin-bottom: 2rem;
-        }
-
-        .metric-summary-card {
+        /* --- Simple Hero styles --- */
+        .simple-metric-hero {
           display: flex;
+          justify-content: space-around;
           align-items: center;
-          gap: 1.25rem;
-          padding: 1.5rem;
-          transition: transform 0.2s;
+          padding: 2.5rem;
+          margin-bottom: 2.5rem;
+          text-align: center;
         }
 
-        .metric-summary-card:hover {
-          transform: translateY(-2px);
-          border-color: rgba(255,255,255,0.1);
+        .simple-metric-main .simple-value {
+          font-size: 3.5rem;
+          font-weight: 900;
+          color: #fff;
+          margin: 0.5rem 0 0 0;
+          letter-spacing: -0.05em;
         }
 
-        .metric-summary-icon-bg {
-          width: 58px;
-          height: 58px;
-          border-radius: 14px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .metric-summary-icon-bg.cost { color: #60a5fa; background: rgba(59, 130, 246, 0.08); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1); }
-        .metric-summary-icon-bg.calls { color: #a78bfa; background: rgba(139, 92, 246, 0.08); box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1); }
-        .metric-summary-icon-bg.status { color: #4ade80; background: rgba(34, 197, 94, 0.08); box-shadow: 0 4px 20px rgba(34, 197, 94, 0.1); }
-        .metric-summary-icon-bg.status.warning { color: #facc15; background: rgba(234, 179, 8, 0.08); box-shadow: 0 4px 20px rgba(234, 179, 8, 0.1); }
-
-        .metric-summary-details {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .metric-summary-label {
-          font-size: 0.8rem;
+        .simple-label {
+          font-size: 0.9rem;
           color: #94a3b8;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
-          margin-bottom: 0.25rem;
+          letter-spacing: 0.15em;
+          font-weight: 700;
         }
 
-        .metric-summary-main-value {
-          font-size: 1.85rem;
-          font-weight: 800;
-          color: #fff;
-          letter-spacing: -0.02em;
-          line-height: 1.2;
+        .simple-metric-sub .simple-sub-value {
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: #64748b;
+          display: block;
+          margin-top: 0.5rem;
         }
 
-        .metric-summary-value-row {
-          display: flex;
-          align-items: baseline;
-          gap: 0.6rem;
-        }
-
-        .metric-summary-sub-value {
-          font-size: 1rem;
-          color: rgba(148, 163, 184, 0.7);
-          font-weight: 500;
-        }
-
-        .metric-summary-sub-text {
-          font-size: 0.85rem;
-          color: #94a3b8;
-          margin-top: 0.35rem;
-          font-weight: 500;
-        }
-
-        .metric-summary-mini-progress {
-          margin-top: 1rem;
-          width: 100%;
-        }
-
-        .mini-progress-track {
-          height: 8px;
-          background: rgba(0,0,0,0.3);
-          border-radius: 4px;
-          overflow: hidden;
-        }
-
-        .mini-progress-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #3b82f6, #60a5fa);
-          border-radius: 4px;
-          box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
-        }
-
-        .mini-progress-fill.warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .mini-progress-fill.critical { background: linear-gradient(90deg, #ef4444, #f87171); }
-
-        /* --- SKU Styles --- */
-        .sku-group {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .sku-icon {
-          width: 36px;
-          height: 36px;
-          background: rgba(255,255,255,0.03);
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #94a3b8;
-        }
-
-        .sku-info {
+        /* --- SKU Styles Simplified --- */
+        .sku-info-simple {
           display: flex;
           flex-direction: column;
         }
@@ -447,29 +315,30 @@ function ApiUsageDashboard() {
         .sku-primary {
           font-weight: 600;
           color: #fff;
-          font-size: 0.95rem;
-        }
-
-        .sku-secondary {
-          font-size: 0.75rem;
-          color: #64748b;
+          font-size: 1rem;
         }
 
         .clean-table th {
           text-align: left;
-           padding: 1.25rem 1rem;
-          color: #94a3b8;
+          padding: 1.25rem 1rem;
+          color: #64748b;
           font-weight: 700;
-          font-size: 0.85rem;
+          font-size: 0.8rem;
           text-transform: uppercase;
-          letter-spacing: 0.08em;
-          border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+          letter-spacing: 0.1em;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .clean-table td {
-          padding: 1.25rem 1rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+          padding: 1.5rem 1rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.02);
           vertical-align: middle;
+        }
+
+        .val-main {
+          font-weight: 700;
+          color: #e2e8f0;
+          font-size: 1.1rem;
         }
 
         .dashboard-grid {
@@ -488,6 +357,8 @@ function ApiUsageDashboard() {
           font-weight: 700;
           color: #fff;
           margin: 0;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
         }
 
         .header-note {
@@ -497,30 +368,14 @@ function ApiUsageDashboard() {
           display: block;
         }
 
-        .text-success { color: #4ade80; font-weight: 600; }
-        .text-warning { color: #facc15; font-weight: 600; }
-        .text-accent { color: #60a5fa; font-weight: 700; }
+        .text-accent { color: #60a5fa; font-weight: 800; }
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .premium-dashboard { padding: 1rem 0.5rem !important; }
-            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-            
-            .metric-summary-grid {
-              grid-template-columns: 1fr;
-              gap: 1rem;
-            }
-
-            .main-number { font-size: 2rem; }
-            .clean-table { font-size: 0.75rem; }
-            .clean-table th, .clean-table td { padding: 0.5rem !important; }
-            
-            .sku-primary { font-size: 0.85rem; }
-            .sku-secondary { font-size: 0.7rem; }
-            
-            .glass-panel { padding: 1rem; }
-            .dashboard-grid { gap: 1rem; }
-            
+            .simple-metric-hero { flex-direction: column; gap: 2rem; padding: 1.5rem; }
+            .simple-metric-main .simple-value { font-size: 2.5rem; }
+            .dashboard-grid { gap: 1.5rem; }
             .table-container { width: 100%; overflow-x: auto; }
         }
 
