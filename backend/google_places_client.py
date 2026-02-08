@@ -182,7 +182,7 @@ class GooglePlacesClient:
         bbox: Optional[Dict[str, float]] = None,
         max_total_results: int = 200,
         depth: int = 0,
-        max_depth: int = 2 # Evitar recursión infinita y costos descontrolados
+        max_depth: int = 3 # Aumentado para escaneo exhaustivo en zonas ultra-densas
     ) -> List[Dict[str, Any]]:
         """
         Versión avanzada de búsqueda que implementa Paginación (60)

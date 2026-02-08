@@ -6,55 +6,80 @@ Optimizado para Google Places API.
 RUBROS_DISPONIBLES = {
     "colegios": {
         "nombre": "Colegios e Instituciones Educativas",
-        "keywords": ["Colegio", "Escuela", "Universidad", "Instituto", "Jardin de infantes", "Formación"]
+        "keywords": [
+            "Colegio", "Escuela", "Secundario", "Primaria", "Jardín de infantes", 
+            "Jardin maternal", "Universidad", "Facultad", "Instituto", "Educación", 
+            "Centro educativo", "Preescolar", "Sala de 5"
+        ]
     },
     "metalurgicas": {
         "nombre": "Metalúrgicas e Industria del Metal",
-        "keywords": ["Metalúrgica", "Fundición", "Corte Laser", "Hierros", "Inox", "Estructuras Metálicas", "Soldadura"]
+        "keywords": [
+            "Metalurgica", "Metalúrgica", "Fundicion", "Soldadura", "Corte Laser", 
+            "Mecanizado", "Torno", "Hierros", "Inox", "Metales", "Carpintería metálica"
+        ]
     },
     "madereras": {
         "nombre": "Madereras y Carpinterías",
-        "keywords": ["Maderera", "Carpintería", "Aserradero", "Herrajes", "Muebles a medida"]
+        "keywords": [
+            "Maderera", "Carpinteria", "Carpintería", "Aserradero", "Muebles", 
+            "Placas", "Melamina", "Herrajes", "Fábrica de muebles"
+        ]
     },
     "fabricas": {
         "nombre": "Fábricas e Industrias Generales",
-        "keywords": ["Fábrica", "Planta Industrial", "Manufactura", "Industrial", "Insumos Industriales"]
+        "keywords": [
+            "Fabrica", "Fábrica", "Planta Industrial", "Industrial", "Manufactura", 
+            "Producción", "Industria", "Insumos Industriales"
+        ]
     },
     "construccion_arquitectura": {
         "nombre": "Construcción y Arquitectura",
         "keywords": [
-            "Constructora", "Arquitectura", "Desarrolladora Inmobiliaria", 
-            "Estudio de Arquitectura", "Diseño de Interiores", "Reformas"
+            "Constructora", "Arquitecto", "Arquitectura", "Inmobiliaria", 
+            "Desarrolladora", "Materiales construcción", "Corralón", "Reformas"
         ]
     },
     "tecnologia_digital": {
         "nombre": "Tecnología y Servicios Digitales",
         "keywords": [
-            "Software Factory", "Agencia Digital", "Marketing Digital", 
-            "SEO Specialist", "SaaS", "Desarrollo Web", "Consultoría IT", 
-            "Software Development", "App Development", "IT Outsourcing",
-            "Ciberseguridad", "Data Analytics", "Programación", "Desarrollo de Software"
+            "Software", "Sistemas", "Programacion", "Desarrollo web", 
+            "Agencia digital", "Marketing", "Consultoría IT", "IT Outsourcing", "SaaS"
         ]
     },
     "salud_bienestar": {
         "nombre": "Salud y Bienestar",
-        "keywords": ["Clínica", "Hospital", "Centro Médico", "Sanatorio", "Spa", "Centro de Estética"]
+        "keywords": [
+            "Clinica", "Clínica", "Hospital", "Sanatorio", "Centro médico", 
+            "Kinesiología", "Odontología", "Estética", "Spa", "Gimnasio"
+        ]
     },
     "gastronomia": {
         "nombre": "Gastronomía",
-        "keywords": ["Restaurante", "Cadena de comida", "Catering", "Eventos", "Gastronomía"]
+        "keywords": [
+            "Restaurante", "Catering", "Comida", "Gastronomia", "Bar", 
+            "Cafetería", "Rotisería", "Resto"
+        ]
     },
     "hoteles": {
         "nombre": "Hotelería y Alojamiento",
-        "keywords": ["Hotel", "Resort", "Apart Hotel", "Hostelería"]
+        "keywords": [
+            "Hotel", "Hostel", "Alojamiento", "Hospedaje", "Cabañas", "Apart"
+        ]
     },
     "mantenimiento_seguridad": {
         "nombre": "Mantenimiento y Seguridad",
-        "keywords": ["Empresa de Limpieza", "Seguridad Privada", "Mantenimiento Industrial", "Facility Management"]
+        "keywords": [
+            "Limpieza", "Seguridad", "Mantenimiento", "Fumigación", 
+            "Ascensores", "Refrigeración"
+        ]
     },
     "cotillones_y_reposteria": {
         "nombre": "Cotillón, Disfraces y Repostería",
-        "keywords": ["Cotillón", "Repostería", "Disfraz", "Artículos de Fiesta"]
+        "keywords": [
+            "Cotillon", "Cotillón", "Reposteria", "Repostería", "Disfraz", 
+            "Artículos de fiesta", "Insumos repostería"
+        ]
     }
 }
 

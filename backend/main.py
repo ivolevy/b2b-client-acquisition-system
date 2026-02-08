@@ -790,23 +790,47 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     "east": float(partes[3])
                 }
 
-            # Ejecutar búsqueda en Google
-            rubro_info = RUBROS_DISPONIBLES.get(request.rubro, {"nombre": request.rubro})
+            # Ejecutar búsqueda en Google (Pasada exhaustiva paralela para 100% cobertura)
+            rubro_info = RUBROS_DISPONIBLES.get(request.rubro, {"nombre": request.rubro, "keywords": []})
             
-            # Usar el nombre del rubro directamente sin sufijos geográficos literales
-            # que pueden confundir al motor de búsqueda de Google (v1) cuando ya hay bias/bbox
-            search_query = rubro_info['nombre']
+            # Construir set de búsquedas: Nombre del rubro + TODAS las keywords individuales
+            search_queries = [rubro_info['nombre']]
+            if rubro_info.get('keywords'):
+                # Usamos todas las keywords para asegurar cobertura total de sub-rubros y sinónimos
+                search_queries.extend(rubro_info['keywords'])
             
-            google_results = await asyncio.to_thread(
-                google_client.search_all_places,
-                query=search_query,
-                rubro_nombre=rubro_info['nombre'],
-                rubro_key=request.rubro,
-                bbox=google_bbox,
-                lat=request.busqueda_centro_lat,
-                lng=request.busqueda_centro_lng,
-                radius=(request.busqueda_radio_km * 1000) if request.busqueda_radio_km else None
-            )
+            # Eliminar duplicados en las queries por si acaso
+            search_queries = list(dict.fromkeys(search_queries))
+            
+            # Ejecutar búsquedas en paralelo para máxima potencia de descubrimiento
+            tasks = []
+            for q in search_queries:
+                tasks.append(asyncio.to_thread(
+                    google_client.search_all_places,
+                    query=q,
+                    rubro_nombre=rubro_info['nombre'],
+                    rubro_key=request.rubro,
+                    bbox=google_bbox,
+                    lat=request.busqueda_centro_lat,
+                    lng=request.busqueda_centro_lng,
+                    radius=(request.busqueda_radio_km * 1000) if request.busqueda_radio_km else None
+                ))
+            
+            # Reunir todos los resultados de las diferentes queries exhaustivamente
+            results_lists = await asyncio.gather(*tasks)
+            google_results = []
+            seen_ids = set()
+            
+            for r_list in results_lists:
+                if r_list and isinstance(r_list, list):
+                    for r in r_list:
+                        if isinstance(r, dict) and 'google_id' in r:
+                            gid = r['google_id']
+                            if gid not in seen_ids:
+                                google_results.append(r)
+                                seen_ids.add(gid)
+            
+            logger.info(f"Búsqueda EXHAUSTIVA completada. Total leads únicos encontrados: {len(google_results)}")
 
             if google_results:
                 # Filtrar posibles errores de presupuesto si vienen en la lista
