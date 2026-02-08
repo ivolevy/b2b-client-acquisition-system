@@ -593,14 +593,11 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
           aria-label="Seleccionar radio de búsqueda"
         >
           <option value="" disabled>-- Selecciona un radio --</option>
-          {[...Array(15)].map((_, i) => {
-            const km = i + 1;
-            return (
-              <option key={km} value={km * 1000}>
-                {km} km
-              </option>
-            );
-          })}
+          {[1, 2, 3, 4, 5].map((km) => (
+            <option key={km} value={km * 1000}>
+              {km} km
+            </option>
+          ))}
         </select>
       </div>
 
