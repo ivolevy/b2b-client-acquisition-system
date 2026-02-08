@@ -737,14 +737,14 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
 
     async def event_generator():
         seen_ids = set()
-        emitted_count = 0
-        MAX_LEADS = 100
+        all_candidates = []
+        MAX_LEADS = 50
         
         rubro_obj = RUBROS_DISPONIBLES.get(request.rubro.lower())
         keywords = rubro_obj["keywords"] if rubro_obj and isinstance(rubro_obj, dict) else [request.rubro]
         search_queries = [f"{kw} en {request.busqueda_ubicacion_nombre}" for kw in keywords]
 
-        logger.info(f"Iniciando búsqueda stream para: {request.rubro} | RubroObj: {rubro_obj} | Keywords: {keywords}")
+        logger.info(f"Iniciando búsqueda stream optimizada para: {request.rubro} | Límite: {MAX_LEADS}")
 
         # Centro de búsqueda para cálculo manual de distancia si falla el mapeo
         c_lat, c_lng = request.busqueda_centro_lat, request.busqueda_centro_lng
@@ -767,55 +767,68 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
         # Asegurar radio válido
         radius_m = (request.busqueda_radio_km * 1000) if request.busqueda_radio_km else None
 
-        yield f"data: {json.dumps({'type': 'status', 'message': f'Búsqueda optimizada (Límite estricto: {MAX_LEADS})...'})}\n\n"
+        yield f"data: {json.dumps({'type': 'status', 'message': f'Buscando los {MAX_LEADS} mejores prospectos...'})}\n\n"
 
+        # Ejecutar todas las queries en paralelo para obtener candidatos
+        tasks = []
         for query in search_queries:
-            if emitted_count >= MAX_LEADS: 
-                break
+            tasks.append(asyncio.to_thread(
+                google_client.search_all_places,
+                query=query,
+                rubro_nombre=request.rubro,
+                rubro_key=request.rubro.lower(),
+                lat=c_lat,
+                lng=c_lng,
+                radius=radius_m,
+                bbox=google_bbox,
+                max_total_results=20 # Buscamos 20 por query para tener candidatos de sobra sin gastar demasiado
+            ))
+        
+        try:
+            results_lists = await asyncio.gather(*tasks)
+            for r_list in results_lists:
+                for r in r_list:
+                    if r['google_id'] not in seen_ids:
+                        # Asegurar distancia
+                        if r.get('distancia_km') is None:
+                            r['distancia_km'] = google_client.calcular_distancia(c_lat, c_lng, r.get('latitud'), r.get('longitud'))
+                        
+                        seen_ids.add(r['google_id'])
+                        all_candidates.append(r)
             
-            try:
-                # Una llamada a la vez para control total
-                results = await asyncio.to_thread(
-                    google_client.search_all_places,
-                    query=query,
-                    rubro_nombre=request.rubro,
-                    rubro_key=request.rubro.lower(),
-                    lat=c_lat,
-                    lng=c_lng,
-                    radius=radius_m,
-                    bbox=google_bbox,
-                    max_total_results=MAX_LEADS 
-                )
-                
-                found_in_query = len(results)
-                skipped_contacts = 0
-                for r in results:
-                    if emitted_count >= MAX_LEADS: 
-                        break
-                    
-                    if r['google_id'] in seen_ids: 
-                        continue
-                    
-                    # FILTRO DE CONTACTO ESTRICTO
-                    has_contact = any([r.get('email'), r.get('telefono'), r.get('website')])
-                    if not has_contact: 
-                        skipped_contacts += 1
-                        continue
+            # --- PRIORIZACIÓN DE LEADS ---
+            def lead_score(lead):
+                score = 0
+                if lead.get('email'): score += 100
+                if lead.get('telefono'): score += 50
+                if lead.get('website'): score += 20
+                if lead.get('rating'): score += (lead.get('rating') * 2)
+                return score
 
-                    # ASEGURAR DISTANCIA (Fail-safe)
-                    if r.get('distancia_km') is None:
-                        r['distancia_km'] = google_client.calcular_distancia(c_lat, c_lng, r.get('latitud'), r.get('longitud'))
+            # Ordenar por puntaje (mejor primero)
+            all_candidates.sort(key=lead_score, reverse=True)
+            
+            # Emitir los mejores 50
+            emitted_count = 0
+            for r in all_candidates[:MAX_LEADS]:
+                # FILTRO DE CONTACTO BÁSICO (Para asegurar calidad)
+                has_contact = any([r.get('email'), r.get('telefono'), r.get('website')])
+                if not has_contact and emitted_count >= 10: 
+                    # Permitimos algunos sin contacto si son pocos, pero priorizamos los que sí tienen
+                    continue
 
-                    seen_ids.add(r['google_id'])
-                    yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
-                    emitted_count += 1
-                
-                logger.info(f"Query '{query}': Encontrados {found_in_query}, Filtrados por falta de contacto: {skipped_contacts}, Emitidos total: {emitted_count}")
-            except Exception as e:
-                logger.error(f"Error en query {query}: {e}")
+                yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
+                emitted_count += 1
+                # Pequeño delay para que el frontend respire
+                await asyncio.sleep(0.05)
+            
+            logger.info(f"Búsqueda finalizada. Candidatos totales: {len(all_candidates)}, Emitidos: {emitted_count}")
+            yield f"data: {json.dumps({'type': 'status', 'message': f'Búsqueda finalizada. {emitted_count} leads de alta calidad encontrados.'})}\n\n"
 
-        # Limpiar y cerrar
-        yield f"data: {json.dumps({'type': 'status', 'message': f'Búsqueda finalizada. {emitted_count} leads útiles encontrados.'})}\n\n"
+        except Exception as e:
+            logger.error(f"Error en event_generator: {e}")
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
         yield f"data: {json.dumps({'type': 'complete'})}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
