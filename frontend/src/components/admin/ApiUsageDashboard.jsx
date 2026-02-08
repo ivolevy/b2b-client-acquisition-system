@@ -77,10 +77,11 @@ function ApiUsageDashboard() {
   );
 
   const totalCost = stats?.total_estimated_cost_usd || 0;
-  const limit = 200; // Hard limit de seguridad
+  const limit = 200; // Google Cloud Free Credits
   const percentage = Math.min((totalCost / limit) * 100, 100);
   const isFallback = stats?.provider_status === 'osm';
-  const remainingBudget = limit - totalCost;
+  const remainingBudget = Math.max(0, limit - totalCost);
+  const extraSpending = Math.max(0, totalCost - limit);
 
   return (
     <div className="premium-dashboard">
@@ -99,24 +100,55 @@ function ApiUsageDashboard() {
         </div>
       </header>
 
-      <div className="compact-hero-row glass-panel">
-        <div className="compact-stat">
-          <span className="compact-label">GASTO MENSUAL</span>
-          <span className="compact-value highlight">${totalCost.toFixed(2)}</span>
+      <div className="credit-tracker-box glass-panel">
+        <div className="tracker-header">
+          <div className="tracker-title-group">
+            <FiShield className="tracker-icon" />
+            <span className="tracker-title">TRACKEO DE CRÉDITOS GRATIS</span>
+          </div>
+          <span className="tracker-provider-badge">Google Cloud Platform</span>
         </div>
-        <div className="compact-divider"></div>
-        <div className="compact-stat">
-          <span className="compact-label">CONSULTAS</span>
-          <span className="compact-value">{stats?.stats?.reduce((acc, s) => acc + s.calls_count, 0) || 0}</span>
-        </div>
-        <div className="compact-divider"></div>
-        <div className="compact-stat">
-          <span className="compact-label">PRESUPUESTO</span>
-          <span className="compact-value muted">${limit}</span>
-        </div>
-        <div className="compact-stat right-aligned">
-           <span className={`status-dot-large ${isFallback ? 'warning' : 'success'}`}></span>
-           <span className="compact-label">{isFallback ? 'Modo Ahorro' : 'Google Places'}</span>
+        
+        <div className="tracker-main-row">
+          <div className="tracker-cell">
+            <span className="tracker-label">GASTO ACUMULADO</span>
+            <span className="tracker-value highlight">${totalCost.toFixed(2)}</span>
+          </div>
+          
+          <div className="tracker-divider"></div>
+          
+          <div className="tracker-cell">
+            <span className="tracker-label">SALDO RESTANTE</span>
+            <span className="tracker-value accent">${remainingBudget.toFixed(2)}</span>
+          </div>
+
+          <div className="tracker-divider"></div>
+
+          <div className="tracker-cell">
+            <span className="tracker-label">TOPE MENSUAL</span>
+            <span className="tracker-value muted">${limit}</span>
+          </div>
+
+          <div className="tracker-divider"></div>
+
+          <div className="tracker-cell">
+            <span className="tracker-label">GASTO EXTRA</span>
+            <span className={`tracker-value ${extraSpending > 0 ? 'danger-text' : 'muted'}`}>
+              ${extraSpending.toFixed(2)}
+            </span>
+          </div>
+
+          <div className="tracker-cell right-aligned">
+             <div className="progress-mini-ring">
+               <div className="progress-bar-bg">
+                 <div 
+                   className={`progress-bar-fill ${percentage > 85 ? 'danger' : ''}`} 
+                   style={{ width: `${percentage}%` }}
+                 />
+               </div>
+               <span className="progress-percent">{percentage.toFixed(0)}% USADO</span>
+             </div>
+          </div>
         </div>
       </div>
 
@@ -131,6 +163,7 @@ function ApiUsageDashboard() {
               <thead>
                 <tr>
                   <th>TIPO</th>
+                  <th className="text-right">COSTO UNIT.</th>
                   <th className="text-right">VOLUMEN</th>
                   <th className="text-right">COSTO ESTIMADO</th>
                 </tr>
@@ -144,6 +177,9 @@ function ApiUsageDashboard() {
                             {s.sku === 'pro' ? 'Google Places API' : 'OSM / Autónomo'}
                           </span>
                       </div>
+                    </td>
+                    <td className="text-right">
+                       <span className="val-sub-compact">{s.sku === 'pro' ? '$0.032' : '$0.00'}</span>
                     </td>
                     <td className="text-right">
                        <span className="val-main">{s.calls_count}</span>
@@ -262,66 +298,138 @@ function ApiUsageDashboard() {
         .status-badge.warning { background: rgba(234, 179, 8, 0.1); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.2); }
         .date-badge { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* --- Compact Hero styles --- */
-        .compact-hero-row {
-          display: flex;
-          align-items: center;
-          padding: 1rem 2rem;
+        /* --- Credit Tracker Module --- */
+        .credit-tracker-box {
+          padding: 1.25rem 1.75rem;
           margin-bottom: 2rem;
-          gap: 3rem;
+          background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.4)) !important;
         }
 
-        .compact-stat {
+        .tracker-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.25rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tracker-title-group {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+        }
+
+        .tracker-icon { 
+          color: #60a5fa; 
+          font-size: 0.9rem;
+          filter: drop-shadow(0 0 5px rgba(96, 165, 250, 0.4));
+        }
+
+        .tracker-title {
+          font-size: 0.7rem;
+          font-weight: 800;
+          color: #94a3b8;
+          letter-spacing: 0.15em;
+        }
+
+        .tracker-provider-badge {
+          background: rgba(255, 255, 255, 0.03);
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 0.6rem;
+          color: #475569;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tracker-main-row {
+          display: flex;
+          align-items: center;
+          gap: 2.5rem;
+        }
+
+        .tracker-cell {
           display: flex;
           flex-direction: column;
-          gap: 0.25rem;
+          gap: 0.2rem;
         }
 
-        .compact-stat.right-aligned {
+        .tracker-cell.right-aligned {
           margin-left: auto;
-          flex-direction: row;
-          align-items: center;
-          gap: 0.75rem;
+          text-align: right;
         }
 
-        .compact-label {
-          font-size: 0.7rem;
-          color: #64748b;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
+        .tracker-label {
+          font-size: 0.65rem;
+          color: #475569;
           font-weight: 700;
+          letter-spacing: 0.1em;
         }
 
-        .compact-value {
+        .tracker-value {
           font-size: 1.5rem;
-          font-weight: 800;
-          color: #e2e8f0;
+          font-weight: 900;
+          color: #94a3b8;
           line-height: 1;
+          letter-spacing: -0.02em;
         }
 
-        .compact-value.highlight {
+        .tracker-value.highlight {
           color: #fff;
           font-size: 1.75rem;
         }
 
-        .compact-value.muted {
-          color: #475569;
+        .tracker-value.accent {
+          color: #60a5fa;
+          filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.2));
         }
 
-        .compact-divider {
+        .tracker-value.muted {
+          color: #334155;
+        }
+
+        .tracker-value.danger-text {
+          color: #ef4444;
+          filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.2));
+        }
+
+        .tracker-divider {
           width: 1px;
-          height: 30px;
+          height: 24px;
           background: rgba(255, 255, 255, 0.05);
         }
 
-        .status-dot-large {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          box-shadow: 0 0 10px currentColor;
+        .progress-mini-ring {
+           display: flex;
+           flex-direction: column;
+           gap: 0.4rem;
+           width: 120px;
         }
-        .status-dot-large.success { background: #4ade80; color: rgba(74, 222, 128, 0.4); }
-        .status-dot-large.warning { background: #fbbf24; color: rgba(251, 191, 36, 0.4); }
+
+        .progress-bar-bg {
+           height: 4px;
+           background: rgba(0,0,0,0.3);
+           border-radius: 2px;
+           overflow: hidden;
+        }
+
+        .progress-bar-fill {
+           height: 100%;
+           background: #3b82f6;
+           border-radius: 2px;
+           transition: width 0.5s ease;
+        }
+
+        .progress-bar-fill.danger { background: #ef4444; }
+
+        .progress-percent {
+           font-size: 0.6rem;
+           font-weight: 800;
+           color: #64748b;
+           letter-spacing: 0.05em;
+        }
 
         /* --- SKU Table Compact --- */
         .sku-info-simple {
@@ -329,87 +437,95 @@ function ApiUsageDashboard() {
           align-items: center;
           gap: 0.5rem;
         }
-
+        
         .sku-primary {
           font-weight: 500;
           color: #cbd5e1;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
         }
 
         .clean-table th {
           text-align: left;
-          padding: 0.75rem 1rem;
+          padding: 0.6rem 1rem;
           color: #475569;
           font-weight: 700;
-          font-size: 0.65rem;
+          font-size: 0.6rem;
           text-transform: uppercase;
           letter-spacing: 0.1em;
           border-bottom: 1px solid rgba(148, 163, 184, 0.05);
         }
 
         .clean-table td {
-          padding: 0.75rem 1rem;
+          padding: 0.6rem 1rem;
           border-bottom: 1px solid rgba(148, 163, 184, 0.02);
           vertical-align: middle;
         }
 
         .val-main {
           font-weight: 600;
-          color: #94a3b8;
-          font-size: 0.9rem;
+          color: #64748b;
+          font-size: 0.8rem;
+        }
+
+        .val-sub-compact {
+           font-size: 0.75rem;
+           color: #475569;
+           font-family: 'Space Mono', monospace;
         }
 
         .section-header h3 {
-          font-size: 0.85rem;
-          font-weight: 700;
-          color: #64748b;
+          font-size: 0.75rem;
+          font-weight: 800;
+          color: #475569;
           margin: 0;
           text-transform: uppercase;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.15em;
         }
 
-        .text-accent { color: #60a5fa; font-weight: 600; }
+        .text-accent { color: #60a5fa; font-weight: 700; opacity: 0.8; }
 
         /* Error logs specific */
         .status-badge-mini {
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-size: 0.7rem;
-          font-weight: 700;
+          padding: 1px 4px;
+          border-radius: 3px;
+          font-size: 0.6rem;
+          font-weight: 800;
         }
         .status-badge-mini.error {
-          background: rgba(239, 68, 68, 0.1);
-          color: #f87171;
-          border: 1px solid rgba(239, 68, 68, 0.2);
+          background: rgba(239, 68, 68, 0.05);
+          color: #fca5a5;
+          border: 1px solid rgba(239, 68, 68, 0.15);
         }
 
         .endpoint-name-compact {
            font-family: 'Space Mono', monospace;
-           color: #64748b;
+           color: #475569;
+           font-size: 0.75rem;
         }
 
         /* Overall scale reduction */
         .premium-dashboard {
-           padding: 1.5rem;
-           max-width: 1200px;
+           padding: 1.25rem;
+           max-width: 1100px;
            margin: 0 auto;
         }
 
         .glass-panel {
-           padding: 1rem 1.5rem;
-           border-radius: 12px;
+           padding: 0.75rem 1.25rem;
+           border-radius: 10px;
         }
 
         .dashboard-grid {
-           gap: 1.5rem;
+           gap: 1.25rem;
         }
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .premium-dashboard { padding: 1rem 0.5rem !important; }
-            .compact-hero-row { flex-direction: column; align-items: flex-start; gap: 1.5rem; padding: 1.5rem; }
-            .compact-divider { display: none; }
-            .compact-stat.right-aligned { margin-left: 0; }
+            .tracker-main-row { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+            .tracker-divider { display: none; }
+            .tracker-cell.right-aligned { margin-left: 0; width: 100%; }
+            .progress-mini-ring { width: 100%; }
             .table-container { width: 100%; overflow-x: auto; }
         }
 
