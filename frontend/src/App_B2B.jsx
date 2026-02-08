@@ -354,8 +354,9 @@ function AppB2B() {
         body: JSON.stringify(paramsWithUser),
       });
 
-      // Una vez que el stream abre, quitamos el bloqueo visual total
-      setBlockingLoading(false);
+      setSearchProgress({ percent: 0, message: 'Iniciando búsqueda...' });
+      setDisplayProgress(0);
+      setEmpresas([]); 
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -366,6 +367,7 @@ function AppB2B() {
       const decoder = new TextDecoder();
       let buffer = '';
 
+      let accumulatedLeads = [];
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
@@ -388,20 +390,21 @@ function AppB2B() {
                 if (eventPayload.message.includes('Iniciando')) setDisplayProgress(5);
               } 
               else if (eventPayload.type === 'lead') {
-                setEmpresas(prev => {
-                  const exists = prev.some(e => e.google_id === eventPayload.data.google_id);
-                  if (exists) return prev;
-                  return [...prev, eventPayload.data];
-                });
+                const exists = accumulatedLeads.some(e => e.google_id === eventPayload.data.google_id);
+                if (!exists) {
+                  accumulatedLeads.push(eventPayload.data);
+                }
                 // Incrementar progreso visual levemente por cada lead
                 setDisplayProgress(prev => Math.min(prev + 0.3, 85));
               }
               else if (eventPayload.type === 'update') {
-                setEmpresas(prev => prev.map(e => 
+                // Si llegamos a tener un update antes de terminar, lo aplicamos al buffer
+                accumulatedLeads = accumulatedLeads.map(e => 
                   e.google_id === eventPayload.data.google_id ? { ...e, ...eventPayload.data } : e
-                ));
+                );
               }
               else if (eventPayload.type === 'complete') {
+                setEmpresas(accumulatedLeads);
                 setSearchProgress({ percent: 100, message: '¡Búsqueda completada!' });
                 setDisplayProgress(100);
               }
@@ -673,23 +676,7 @@ function AppB2B() {
             historySearchData={historySearchData}
           />
           
-          {/* Indicador de progreso No Bloqueante (Streaming) */}
-          {loading && !blockingLoading && (
-            <div className="inline-progress-container">
-              <div className="inline-progress-info">
-                <span className="streaming-dot"></span>
-                <span className="loading-message">{searchProgress.message}</span>
-                <span className="progress-percentage">{Math.round(displayProgress)}%</span>
-              </div>
-              <div className="progress-bar-bg small">
-                <div 
-                  className="progress-bar-fill" 
-                  style={{ width: `${Math.min(displayProgress, 100)}%` }}
-                ></div>
-              </div>
-              <button onClick={handleCancelSearch} className="btn-cancel-mini">X</button>
-            </div>
-          )}
+          {/* El overlay bloqueante se muestra abajo si blockingLoading es true */}
           {blockingLoading && (
             <div className="loading-overlay">
               <div className="loading-progress-container">

@@ -1345,9 +1345,9 @@ async def list_users(admin: Dict = Depends(get_current_admin)):
 async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
     """Obtiene las estadísticas de uso de API para el dashboard"""
     # No es necesario el import local si ya está arriba
-    client = get_supabase()
+    client = get_supabase_admin()
     if not client:
-        raise HTTPException(status_code=500, detail="Error de base de datos")
+        raise HTTPException(status_code=500, detail="Error de configuración administrativa")
         
     try:
         from datetime import datetime
