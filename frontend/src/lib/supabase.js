@@ -527,7 +527,7 @@ export const adminService = {
       console.log('[Admin] Fetching users via backend...');
       const { data: { session } } = await supabase.auth.getSession();
 
-      const response = await axios.get(`${API_URL}/admin/users`, {
+      const response = await axios.get(`${API_URL}/api/admin/users`, {
         headers: {
           Authorization: `Bearer ${session?.access_token}`
         },
@@ -610,7 +610,7 @@ export const adminService = {
 
 
 
-      const response = await fetch(`${API_URL}/admin/create-user`, {
+      const response = await fetch(`${API_URL}/api/admin/create-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -637,7 +637,7 @@ export const adminService = {
 
 
 
-      const response = await fetch(`${API_URL}/admin/update-user`, {
+      const response = await fetch(`${API_URL}/api/admin/update-user`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -668,7 +668,7 @@ export const adminService = {
 
 
 
-      const response = await fetch(`${API_URL}/admin/delete-user`, {
+      const response = await fetch(`${API_URL}/api/admin/delete-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -33,7 +33,7 @@ function ApiUsageDashboard() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/admin/usage-stats`, {
+      const response = await axios.get(`${API_URL}/api/admin/usage-stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
@@ -50,7 +50,7 @@ function ApiUsageDashboard() {
   const fetchLogs = async () => {
     try {
       const token = localStorage.getItem('supabase.auth.token');
-      const response = await axios.get(`${API_URL}/admin/api-logs?limit=50`, {
+      const response = await axios.get(`${API_URL}/api/admin/api-logs?limit=50`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
