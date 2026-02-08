@@ -83,6 +83,17 @@ function ApiUsageDashboard() {
   const remainingBudget = Math.max(0, limit - totalCost);
   const extraSpending = Math.max(0, totalCost - limit);
 
+  // Formatting for UI Clarity
+  const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+  const fullMonths = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+  
+  const now = new Date();
+  const currentMonthStr = fullMonths[now.getMonth()];
+  const currentYear = now.getFullYear();
+  
+  const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const nextMonthLabel = `01 ${months[nextMonthDate.getMonth()]}`;
+
   return (
     <div className="premium-dashboard">
       <header className="dashboard-header">
@@ -94,12 +105,13 @@ function ApiUsageDashboard() {
            <span className={`status-badge ${isFallback ? 'warning' : 'success'}`}>
             {isFallback ? 'Modo Ahorro (OSM)' : 'Google Places Activo'}
           </span>
-          <span className="reset-badge">
-             <FiClock size={12} style={{ marginRight: '4px' }} />
-             Reset: Día 1
+          <span className="reset-badge" title="Fecha en que se reinician los créditos gratuitos de Google">
+             <FiClock size={12} style={{ marginRight: '6px' }} />
+             PRÓXIMO REINICIO: {nextMonthLabel}
           </span>
           <span className="date-badge">
-            {stats?.month || new Date().toISOString().slice(0, 7)}
+            <span className="period-label">PERIODO ACTUAL:</span>
+            <span className="period-value">{currentMonthStr} {currentYear}</span>
           </span>
         </div>
       </header>
@@ -292,14 +304,29 @@ function ApiUsageDashboard() {
         
         .status-badge.success { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
         .status-badge.warning { background: rgba(234, 179, 8, 0.1); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.2); }
-        .date-badge { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+        .date-badge { 
+          background: rgba(255, 255, 255, 0.05); 
+          color: #94a3b8; 
+          border: 1px solid rgba(255,255,255,0.1);
+          font-size: 0.65rem;
+          font-weight: 700;
+          padding: 4px 12px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          letter-spacing: 0.05em;
+        }
+        .period-label { color: #475569; }
+        .period-value { color: #cbd5e1; }
+
         .reset-badge {
           background: rgba(96, 165, 250, 0.05);
           color: #60a5fa;
           border: 1px solid rgba(96, 165, 250, 0.1);
           font-size: 0.65rem;
-          font-weight: 700;
-          padding: 4px 10px;
+          font-weight: 800;
+          padding: 4px 12px;
           border-radius: 6px;
           display: flex;
           align-items: center;
