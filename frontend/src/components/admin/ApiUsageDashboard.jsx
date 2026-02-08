@@ -181,7 +181,7 @@ function ApiUsageDashboard() {
                     <td>
                       <div className="sku-info-simple">
                          <span className="sku-primary">
-                            {s.sku === 'pro' ? 'Google Places API' : 'OSM / Autónomo'}
+                            {s.sku === 'pro' ? 'Búsqueda, Ubicación y Contacto' : 'Información Geográfica'}
                           </span>
                       </div>
                     </td>
