@@ -665,10 +665,17 @@ async def registrar_pago_exitoso(
         final_user_id = user_id
         is_new_user = False
         
-        logger.info(f"Procesando pago exitoso (INICIO): user_id={user_id}, email={email}, amount={amount}, method={payment_method_id}")
+        logger.info(f"Procesando pago exitoso (INICIO): user_id={user_id}, email={email}, amount={amount}, method={payment_method_id}, ext_id={external_id}")
 
-        # 1. Asegurar que el usuario existe en Auth y public.users
-        if user_id == 'anonymous' or not user_id or user_id == 'None':
+        # 0. Deduplicación: Verificar si el pago ya fue procesado
+        try:
+            existing_payment = admin_client.table("payments").select("id").eq("external_id", str(external_id)).execute()
+            if existing_payment.data:
+                logger.info(f"Pago ya procesado anteriormente (idempotencia): {external_id}. Ignorando.")
+                return True
+        except Exception as e:
+            logger.error(f"Error verificando duplicados: {e}")
+            # Continuamos por seguridad, el constraint de la DB fallará si es duplicado real
             # Buscar por email
             # El list_users de gotrue-python por defecto es paginado
             user_auth_res = admin_client.auth.admin.list_users()
@@ -729,8 +736,10 @@ async def registrar_pago_exitoso(
 
         # 2. Sincronizar con public.users (UPSERT)
         # Normalizar plan_id (frontend envía 'pro', backend usa 'growth'/'scale')
-        # Mapeo: starter->starter, pro->growth, agency->scale
+        # Mapeo: starter->starter, pro->growth, agency->scale, credits_XXX->credits
         normalized_plan = plan_id.lower()
+        is_credit_pack = normalized_plan.startswith("credits_")
+        
         if normalized_plan == 'pro': normalized_plan = 'growth'
         if normalized_plan == 'agency': normalized_plan = 'scale'
 
@@ -751,9 +760,30 @@ async def registrar_pago_exitoso(
         if user_res.data:
             current_credits = user_res.data[0].get("credits", 0) or 0
             
-        credits_map = {'starter': 1500, 'growth': 5000, 'scale': 10000}
-        credits_to_add = credits_map.get(normalized_plan, 1500)
+        credits_to_add = 0
+        if is_credit_pack:
+            try:
+                # Extraer monto de credits_1000 -> 1000
+                credits_to_add = int(normalized_plan.split('_')[1])
+                logger.info(f"Detectado Pack de Créditos: añadiendo {credits_to_add} créditos")
+            except:
+                logger.error(f"Error parseando pack de créditos: {normalized_plan}")
+                credits_to_add = 0
+        else:
+            credits_map = {'starter': 1500, 'growth': 5000, 'scale': 10000}
+            credits_to_add = credits_map.get(normalized_plan, 0)
+            
         upsert_data["credits"] = current_credits + credits_to_add
+        
+        # Si es pack de créditos, NO cambiar el plan actual del usuario si ya tiene uno
+        # Si no tiene plan (anonymous o nuevo), ponerle 'free' o similar
+        if is_credit_pack:
+            # Obtener plan actual para no sobreescribirlo
+            res_plan = admin_client.table("users").select("plan").eq("id", final_user_id).execute()
+            if res_plan.data and res_plan.data[0].get("plan"):
+                upsert_data["plan"] = res_plan.data[0]["plan"]
+            else:
+                upsert_data["plan"] = "free"
         
         try:
             logger.info(f"Sincronizando public.users para {final_user_id} (Plan: {normalized_plan}, Credits: {upsert_data['credits']})")
@@ -780,31 +810,31 @@ async def registrar_pago_exitoso(
         
         admin_client.table("payments").insert(payment_record).execute()
         
-        # 4. Si es nuevo, mandar mail para setear password
-        logger.info(f"PASO 4: Verificando si enviar email. is_new_user={is_new_user}")
-        if is_new_user:
-            logger.info(f"Intentando enviar email de bienvenida a {email}")
-            try:
-                # Generamos link de recuperación (set password)
-                # IMPORTANTE: Asegurarnos que el redirect_to apunte al frontend
-                frontend_url = os.getenv("FRONTEND_URL", "https://b2b-client-acquisition-system.vercel.app")
+        # 4. Enviar email de confirmación
+        logger.info(f"PASO 4: Preparando email de confirmación. is_new_user={is_new_user}")
+        try:
+            frontend_url = os.getenv("FRONTEND_URL", "https://b2b-client-acquisition-system.vercel.app")
+            recovery_link = None
+            
+            if is_new_user:
+                # Generamos link de recuperación sólo para nuevos usuarios
                 recovery_res = admin_client.auth.admin.generate_link({
                     "type": "recovery",
                     "email": email,
                     "options": {
-                        "redirect_to": f"{frontend_url}/profile"
+                        "redirect_to": f"{frontend_url}/set-password"
                     }
                 })
-                
                 recovery_link = recovery_res.properties.action_link
-                logger.info(f"Link generado: {recovery_link}")
-                
-                try:
-                    from backend.email_service import enviar_email, wrap_premium_template
-                except ImportError:
-                    from email_service import enviar_email, wrap_premium_template
-                
                 subject = "¡Bienvenido a Smart Leads! Activá tu cuenta"
+            else:
+                if is_credit_pack:
+                    subject = "¡Créditos Acreditados! - Smart Leads"
+                else:
+                    subject = f"Confirmación de Compra: Plan {plan_id.capitalize()}"
+
+            # Construir contenido del mail
+            if is_new_user:
                 content = f"""
                 Hola {name or 'cliente'},
                 
@@ -821,51 +851,81 @@ async def registrar_pago_exitoso(
                 Si el botón no funciona, podés copiar y pegar este link en tu navegador:
                 <br/>
                 {recovery_link}
-                
-                ¡Estamos emocionados de tenerte con nosotros!
                 """
-                
-                html_body = wrap_premium_template(content, "Ivan Levy", "solutionsdota@gmail.com")
-                
-                res_email = enviar_email(
-                    destinatario=email,
-                    asunto=subject,
-                    cuerpo_html=html_body,
-                    cuerpo_texto=content.replace('<br/>', '\n'),
-                    user_id=None # Enviar vía SMTP global
-                )
-                
-                # LOG TO SUPABASE (Vercel has read-only filesystem, can't use local files)
-                try:
-                    admin = get_supabase_admin()
-                    if admin:
-                        admin.table("debug_logs").insert({
-                            "event_name": "EMAIL_SENT_STATUS",
-                            "payload": {
-                                "email": email,
-                                "success": res_email.get('success'),
-                                "response": res_email
-                            }
-                        }).execute()
-                except Exception as log_err:
-                    logger.error(f"Error logging email status to Supabase: {log_err}")
-                
-                if res_email.get('success'):
-                    logger.info(f"✅ Email de bienvenida y password enviado a {email}")
+            else:
+                if is_credit_pack:
+                    content = f"""
+                    Hola {name or 'cliente'},
+                    
+                    ¡Tu compra ha sido exitosa! Hemos acreditado <strong>{credits_to_add} créditos</strong> extra en tu cuenta de Smart Leads.
+                    
+                    Tu balance de créditos se ha actualizado automáticamente. Ya podés seguir realizando búsquedas y extrayendo leads.
+                    
+                    <div style="margin: 30px 0; text-align: center;">
+                        <a href="{frontend_url}/profile" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                            Ver mi Perfil y Créditos
+                        </a>
+                    </div>
+                    """
                 else:
-                    logger.error(f"❌ Falló envío de email a {email}: {res_email}")
-            except Exception as e:
-                 logger.error(f"❌ Error enviando email de password: {e}")
-                 # LOG TO SUPABASE
-                 try:
-                     admin = get_supabase_admin()
-                     if admin:
-                         admin.table("debug_logs").insert({
-                             "event_name": "EMAIL_EXCEPTION",
-                             "payload": {"error": str(e), "email": email}
-                         }).execute()
-                 except:
-                     pass
+                    content = f"""
+                    Hola {name or 'cliente'},
+                    
+                    ¡Gracias por confiar en nosotros! Tu suscripción al <strong>Plan {plan_id.capitalize()}</strong> ha sido procesada exitosamente.
+                    
+                    Hemos acreditado {credits_to_add} créditos en tu cuenta y habilitado las funciones correspondientes a tu nuevo plan.
+                    
+                    <div style="margin: 30px 0; text-align: center;">
+                        <a href="{frontend_url}/profile" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                            Ir a mi Dashboard
+                        </a>
+                    </div>
+                    """
+
+            content += "\n¡Estamos emocionados de tenerte con nosotros!"
+            
+            try:
+                from backend.email_service import enviar_email, wrap_premium_template
+            except ImportError:
+                from email_service import enviar_email, wrap_premium_template
+                
+            html_body = wrap_premium_template(content, "Ivan Levy", "solutionsdota@gmail.com")
+            
+            res_email = enviar_email(
+                destinatario=email,
+                asunto=subject,
+                cuerpo_html=html_body,
+                cuerpo_texto=content.replace('<br/>', '\n'),
+                user_id=None
+            )
+            
+            # LOG STATUS...
+            try:
+                admin = get_supabase_admin()
+                if admin:
+                    admin.table("debug_logs").insert({
+                        "event_name": "EMAIL_SENT_STATUS",
+                        "payload": {"email": email, "success": res_email.get('success'), "is_new": is_new_user}
+                    }).execute()
+            except: pass
+
+            if res_email.get('success'):
+                logger.info(f"✅ Email de confirmación enviado a {email}")
+            else:
+                logger.error(f"❌ Falló envío de email a {email}")
+
+        except Exception as e:
+            logger.error(f"❌ Error en flujo de email: {e}")
+            # LOG TO SUPABASE
+            try:
+                admin = get_supabase_admin()
+                if admin:
+                    admin.table("debug_logs").insert({
+                        "event_name": "EMAIL_EXCEPTION",
+                        "payload": {"error": str(e), "email": email}
+                    }).execute()
+            except:
+                pass
 
         logger.info(f"✅ Proceso completado exitosamente para {email}")
         return True

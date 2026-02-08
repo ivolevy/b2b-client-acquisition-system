@@ -135,23 +135,8 @@ RUBROS_DISPONIBLES = {
             '["craft"="painter"]'
         ]
     },
-    "servicios_profesionales": {
-        "nombre": "Servicios Profesionales (Legal/Contable)",
-        "tags": [
-            '["office"="lawyer"]',
-            '["office"="legal"]',
-            '["amenity"="law_firm"]',
-            '["office"="accountant"]',
-            '["office"="tax_advisor"]',
-            '["office"="auditor"]',
-            '["office"="employment_agency"]',
-            '["office"="recruiter"]',
-            '["office"="consulting"]',
-            '["office"="consultant"]'
-        ]
-    },
-    "tecnologia_marketing": {
-        "nombre": "Tecnología, Marketing y Diseño",
+    "tecnologia_digital": {
+        "nombre": "Tecnología y Servicios Digitales",
         "tags": [
             '["office"="it"]',
             '["office"="technology"]',
@@ -164,7 +149,16 @@ RUBROS_DISPONIBLES = {
             '["office"="public_relations"]',
             '["office"="communication"]',
             '["office"="web_design"]',
-            '["office"="web_development"]'
+            '["office"="web_development"]',
+            '["office"="digital_marketing"]',
+            '["office"="seo"]',
+            '["office"="social_media"]',
+            '["office"="saas"]',
+            '["industrial"="software"]'
+        ],
+        "keywords": [
+            "Software", "Digital", "Marketing", "SEO", "Web Design", 
+            "App Development", "SaaS", "IT Services", "Agencia Digital"
         ]
     },
     "salud_bienestar": {
@@ -180,26 +174,6 @@ RUBROS_DISPONIBLES = {
             '["amenity"="beauty_salon"]',
             '["amenity"="spa"]',
             '["leisure"="fitness_center"]'
-        ]
-    },
-    "comercio_retail": {
-        "nombre": "Comercio y Retail",
-        "tags": [
-            '["shop"="supermarket"]',
-            '["shop"="department_store"]',
-            '["shop"="mall"]',
-            '["shop"="convenience"]',
-            '["shop"="clothes"]',
-            '["shop"="fashion"]',
-            '["shop"="shoes"]',
-            '["shop"="interior_decoration"]',
-            '["shop"="furniture"]',
-            '["shop"="houseware"]',
-            '["shop"="car"]',
-            '["shop"="car_repair"]',
-            '["amenity"="car_dealership"]',
-            '["shop"="electronics"]',
-            '["shop"="appliance"]'
         ]
     },
     "gastronomia": {
@@ -223,18 +197,6 @@ RUBROS_DISPONIBLES = {
             '["tourism"="apartment"]'
         ]
     },
-    "logistica_transporte": {
-        "nombre": "Logística y Transporte",
-        "tags": [
-            '["office"="logistics"]',
-            '["office"="transport"]',
-            '["amenity"="taxi"]',
-            '["office"="courier"]',
-            '["office"="delivery"]',
-            '["landuse"="warehouse"]',
-            '["industrial"="warehouse"]'
-        ]
-    },
     "mantenimiento_seguridad": {
         "nombre": "Mantenimiento y Seguridad",
         "tags": [
@@ -242,15 +204,6 @@ RUBROS_DISPONIBLES = {
             '["craft"="cleaner"]',
             '["office"="security"]',
             '["office"="security_services"]'
-        ]
-    },
-    "energia_medioambiente": {
-        "nombre": "Energía y Medio Ambiente",
-        "tags": [
-            '["office"="energy"]',
-            '["office"="utility"]',
-            '["office"="environmental"]',
-            '["office"="waste_management"]'
         ]
     },
     "cotillones_y_reposteria": {

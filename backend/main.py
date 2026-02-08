@@ -580,7 +580,7 @@ async def create_mp_preference(req: MPPreferenceRequest):
                 }
             ],
             "back_urls": {
-                "success": f"{os.getenv('FRONTEND_URL')}/payment-success",
+                "success": f"{os.getenv('FRONTEND_URL')}/payment-success?plan_id={req.plan_id}",
                 "failure": f"{os.getenv('FRONTEND_URL')}/landing",
                 "pending": f"{os.getenv('FRONTEND_URL')}/landing"
             },
@@ -1394,44 +1394,41 @@ async def list_users(admin: Dict = Depends(get_current_admin)):
             return {"success": False, "error": "Supabase Admin (Service Role) not configured. Check env vars."}
             
         # 1. Obtener perfiles públicos
-        res = client.table('users').select('*').order('created_at', desc=True).execute()
+        start_time = datetime.now()
+        res = client.table('users').select('*').order('created_at', desc=True).limit(500).execute()
         public_users = res.data
+        logger.info(f"[Admin] Public users fetch took: {datetime.now() - start_time}")
         
-        # 2. Obtener usuarios de Auth (para asegurar email)
-        # Nota: list_users() puede tener paginación, por ahora traemos la primera página (default 50)
-        # Si tienes muchos usuarios, deberías paginar esto.
+        # 2. Obtener usuarios de Auth (para asegurar email) solo si es necesario o para los primeros N
+        # Nota: list_users() es lento si hay miles. Limitamos a 500 para el dashboard rápido.
+        auth_users_map = {}
         try:
-            auth_users_res = client.auth.admin.list_users(page=1, per_page=1000)
-            # Handle different return types (UserList object or raw list)
+            start_auth = datetime.now()
+            auth_users_res = client.auth.admin.list_users(page=1, per_page=500)
+            
             if hasattr(auth_users_res, 'users'):
                 auth_users_list = auth_users_res.users
             elif isinstance(auth_users_res, list):
                 auth_users_list = auth_users_res
             else:
-                logger.warning(f"Unexpected type from auth.admin.list_users: {type(auth_users_res)}")
                 auth_users_list = []
 
             auth_users_map = {u.id: u.email for u in auth_users_list if hasattr(u, 'id') and hasattr(u, 'email')}
+            logger.info(f"[Admin] Auth users fetch took: {datetime.now() - start_auth}")
         except Exception as e_auth:
             logger.error(f"Error fetching auth users: {e_auth}")
-            auth_users_map = {}
         
         # 3. Combinar datos
         final_users = []
         for p_user in public_users:
             user_id = p_user.get('id')
-            # Si el perfil no tiene email, tomamos de Auth
-            if not p_user.get('email') and user_id in auth_users_map:
-                p_user['email'] = auth_users_map[user_id]
-            
-            # Si el email de Auth es diferente (más actual), priorizar Auth?
-            # Generalmente auth es la fuente de verdad para login.
+            # Priorizar email de Auth si existe, si no usar el de la tabla pública
             if user_id in auth_users_map:
-                 p_user['email'] = auth_users_map[user_id]
+                p_user['email'] = auth_users_map[user_id]
             
             final_users.append(p_user)
             
-        return {"success": True, "users": final_users}
+        return {"success": True, "users": final_users, "count": len(final_users)}
     except Exception as e:
         import traceback
         error_detail = str(e)
