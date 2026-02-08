@@ -78,74 +78,117 @@ def extraer_emails_b2b(soup: BeautifulSoup, text: str) -> List[str]:
         email = link['href'].replace('mailto:', '').split('?')[0].strip()
         emails.append(email)
     
-    # Buscar en texto con patrón mejorado
-    patron_email = r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b'
-    emails_texto = re.findall(patron_email, text)
-    emails.extend(emails_texto)
+    # Buscar en texto con patrón mejorado (soporta formatos comunes de ofuscación simple)
+    patrones_email = [
+        r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b',
+        r'\b[a-zA-Z0-9._%+-]+\s*\[at\]\s*[a-zA-Z0-9.-]+\s*\.\s*[a-zA-Z]{2,}\b', # [at] format
+    ]
+    
+    for patron in patrones_email:
+        found = re.findall(patron, text)
+        for e in found:
+            emails.append(e.replace(' [at] ', '@').replace(' ', '').lower())
     
     # Priorizar emails corporativos
     emails_validos = []
     for email in set(emails):
         email = email.lower().strip()
-        if any(x in email for x in ['noreply', 'no-reply', 'example', 'test', 'spam']):
+        if any(x in email for x in ['noreply', 'no-reply', 'example', 'test', 'spam', 'domain.com']):
             continue
         
         prioridad = 0
-        if any(x in email for x in ['contacto', 'contact', 'info', 'ventas', 'sales', 'comercial']):
+        if any(x in email for x in ['contacto', 'contact', 'info', 'ventas', 'sales', 'comercial', 'hola', 'hello']):
             prioridad = 10
-        elif any(x in email for x in ['admin', 'director', 'gerente']):
+        elif any(x in email for x in ['admin', 'director', 'gerente', 'ceo', 'presupuestos', 'cotizacion']):
             prioridad = 5
         
         emails_validos.append((prioridad, email))
     
-    emails_validos.sort(reverse=True)
-    return [email for _, email in emails_validos[:3]]
+    emails_validos.sort(key=lambda x: x[0], reverse=True)
+    return [email for _, email in emails_validos[:5]]
 
 def extraer_telefonos_b2b(soup: BeautifulSoup, text: str) -> List[str]:
-    """Extrae teléfonos corporativos"""
+    """Extrae teléfonos corporativos incluyendo WhatsApp"""
     telefonos = []
+    
+    # 1. Enlaces tel:
     for link in soup.find_all('a', href=re.compile(r'^tel:')):
         telefono = link['href'].replace('tel:', '').strip()
         telefonos.append(telefono)
     
+    # 2. Enlaces de WhatsApp (wa.me, api.whatsapp.com)
+    for link in soup.find_all('a', href=re.compile(r'wa\.me|whatsapp\.com/send')):
+        href = link['href']
+        # Extraer número del href
+        match = re.search(r'phone=(\d+)', href) or re.search(r'wa\.me/(\d+)', href)
+        if match:
+            telefonos.append(match.group(1))
+
+    # 3. Patrones de texto (Argentina y formatos globales)
     patrones = [
-        r'\+?\d{1,4}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}',
-        r'\(\d{2,4}\)\s*\d{6,10}',
-        r'\d{3,4}[-.\s]?\d{3,4}[-.\s]?\d{3,4}',
+        r'\+?\d{1,4}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}', # General
+        r'\d{2,4}\s*\d{4}[-.\s]?\d{4}', # Argentina Fijos
+        r'11\s*\d{4}[-.\s]?\d{4}', # Buenos Aires Celulares
+        r'0?8\d{2}[-.\s]?\d{3}[-.\s]?\d{4}', # 0800 / 0810
     ]
     
     for patron in patrones:
-        telefonos.extend(re.findall(patron, text))
+        found = re.findall(patron, text)
+        for f in found:
+            # Limpiar para validar largo
+            digitos = re.sub(r'\D', '', f)
+            if 7 <= len(digitos) <= 15:
+                telefonos.append(f.strip())
     
-    telefonos_validos = []
-    for tel in set(telefonos):
+    # Deduplicar y limpiar
+    telefonos_limpios = []
+    vistos = set()
+    for tel in telefonos:
         digitos = re.sub(r'\D', '', tel)
-        if 7 <= len(digitos) <= 15:
-            telefonos_validos.append(tel.strip())
-    
-    return telefonos_validos[:3]
+        if digitos and digitos not in vistos:
+            telefonos_limpios.append(tel.strip())
+            vistos.add(digitos)
+            
+    return telefonos_limpios[:5]
 
-def buscar_en_pagina_contacto(base_url: str, soup: BeautifulSoup, session: Optional[ScraperSession] = None) -> Dict:
-    """Busca página de contacto y extrae información"""
+def buscar_en_paginas_adicionales(base_url: str, soup: BeautifulSoup, session: Optional[ScraperSession] = None) -> Dict:
+    """Busca páginas de contacto, nosotros y sucursales"""
     if not session: session = ScraperSession()
-    contacto_urls = []
+    urls_a_escanear = []
+    
+    keywords_contacto = [
+        'contact', 'contacto', 'about', 'nosotros', 'donde', 'sucursal', 
+        'ubicacion', 'quienes', 'empresa', 'info', 'escribinos', 'ayuda'
+    ]
     
     for link in soup.find_all('a', href=True):
         href = link['href'].lower()
         texto = link.get_text().lower()
-        if any(palabra in href or palabra in texto for palabra in ['contact', 'contacto', 'about', 'nosotros']):
-            contacto_urls.append(urljoin(base_url, link['href']))
+        
+        if any(k in href or k in texto for k in keywords_contacto):
+            full_url = urljoin(base_url, link['href'])
+            # Evitar repetir la base_url y filtrar dominios externos
+            if full_url != base_url and urlparse(full_url).netloc == urlparse(base_url).netloc:
+                urls_a_escanear.append(full_url)
     
-    if contacto_urls:
-        soup_contacto = session.get_soup(contacto_urls[0], timeout=15)
-        if soup_contacto:
-            text_contacto = soup_contacto.get_text()
-            return {
-                'emails': extraer_emails_b2b(soup_contacto, text_contacto),
-                'telefonos': extraer_telefonos_b2b(soup_contacto, text_contacto)
-            }
+    # Tomar las 3 más prometedoras para no sobrecargar
+    urls_a_escanear = list(dict.fromkeys(urls_a_escanear))[:3]
     
-    return {'emails': [], 'telefonos': []}
+    emails_totales = []
+    telefonos_totales = []
+    
+    for url in urls_a_escanear:
+        logger.info(f"  Escanenando sub-página: {url}")
+        soup_sub = session.get_soup(url, timeout=10)
+        if soup_sub:
+            text_sub = soup_sub.get_text()
+            emails_totales.extend(extraer_emails_b2b(soup_sub, text_sub))
+            telefonos_totales.extend(extraer_telefonos_b2b(soup_sub, text_sub))
+            
+    return {
+        'emails': list(set(emails_totales)),
+        'telefonos': list(set(telefonos_totales))
+    }
 
 def scrapear_empresa_b2b(url: str, session: Optional[ScraperSession] = None) -> Dict:
     """Scrapea sitio web empresarial persistente o efímero"""
@@ -172,7 +215,7 @@ def scrapear_empresa_b2b(url: str, session: Optional[ScraperSession] = None) -> 
             resultado['telefonos'] = extraer_telefonos_b2b(soup, text)
             
             if not resultado['emails'] or not resultado['telefonos']:
-                datos_contacto = buscar_en_pagina_contacto(url, soup, session)
+                datos_contacto = buscar_en_paginas_adicionales(url, soup, session)
                 resultado['emails'] = list(set(resultado['emails'] + datos_contacto['emails']))
                 resultado['telefonos'] = list(set(resultado['telefonos'] + datos_contacto['telefonos']))
             

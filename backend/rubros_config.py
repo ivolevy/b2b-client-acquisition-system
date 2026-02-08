@@ -32,8 +32,8 @@ RUBROS_DISPONIBLES = {
         "keywords": [
             "Software Factory", "Agencia Digital", "Marketing Digital", 
             "SEO Specialist", "SaaS", "Desarrollo Web", "Consultoría IT", 
-            "Software Development", "App Development", "Social Media Marketing", 
-            "Ciberseguridad", "Data Analytics", "Programación"
+            "Software Development", "App Development", "IT Outsourcing",
+            "Ciberseguridad", "Data Analytics", "Programación", "Desarrollo de Software"
         ]
     },
     "salud_bienestar": {

@@ -793,9 +793,13 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             # Ejecutar búsqueda en Google
             rubro_info = RUBROS_DISPONIBLES.get(request.rubro, {"nombre": request.rubro})
             
+            # Usar el nombre del rubro directamente sin sufijos geográficos literales
+            # que pueden confundir al motor de búsqueda de Google (v1) cuando ya hay bias/bbox
+            search_query = rubro_info['nombre']
+            
             google_results = await asyncio.to_thread(
                 google_client.search_all_places,
-                query=f"{rubro_info['nombre']} en {request.ciudad or request.pais or 'el mapa'}",
+                query=search_query,
                 rubro_nombre=rubro_info['nombre'],
                 rubro_key=request.rubro,
                 bbox=google_bbox,

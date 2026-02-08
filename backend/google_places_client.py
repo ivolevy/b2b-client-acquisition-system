@@ -188,23 +188,25 @@ class GooglePlacesClient:
         Versión avanzada de búsqueda que implementa Paginación (60)
         y Subdivisión Espacial (Quadtree) si se detecta saturación.
         """
-        # 1. Búsqueda con Paginación (hasta 60 resultados de Google)
-        # Obtener keywords del rubro para mejorar la búsqueda
-        from backend.rubros_config import RUBROS_DISPONIBLES
-        rubro_info = RUBROS_DISPONIBLES.get(rubro_key, {})
-        keywords = rubro_info.get("keywords", [])
-
-        # Combinamos rubro + keywords en un string plano para máxima compatibilidad con Google (v1)
-        search_terms = [query] + keywords[:5] # Tomamos las primeras 5 keywords para no saturar
-        optimized_query = ", ".join(search_terms)
+        # 1. Búsqueda con Paginación (hasta 100 resultados de Google)
+        # Combinamos rubro + keywords de forma inteligente.
+        # Evitamos comas que restringen demasiado; usamos espacios o lógica OR si es corta.
+        if keywords:
+            # Si el query es corto, usamos OR, si no, simplemente añadimos keywords claves al final
+            if len(query.split()) <= 3:
+                optimized_query = f"({query}) OR ({' OR '.join(keywords[:4])})"
+            else:
+                optimized_query = f"{query} {' '.join(keywords[:3])}"
+        else:
+            optimized_query = query
         
         all_results = {} # Usamos dict con google_id para deduplicar
 
-        # 1. Búsqueda con Paginación (hasta 60 resultados de Google)
+        # 1. Búsqueda con Paginación (hasta 100 resultados de Google por área)
         current_page_token = None
         results_this_area = []
         
-        for _ in range(3): # Max 3 páginas de 20 = 60
+        for _ in range(5): # Max 5 páginas de 20 = 100
             data = self.search_places(
                 query=optimized_query,
                 lat=lat,
@@ -228,9 +230,10 @@ class GooglePlacesClient:
                 break
 
         # 2. Lógica de Quadtree (Subdivisión)
-        # Si llegamos a 60 en esta área y no hemos alcanzado el límite de profundidad, subdividimos
-        if len(results_this_area) >= 60 and depth < max_depth and bbox:
-            logger.info(f" Área saturada (60 leads). Subdividiendo cuadrante (Nivel {depth+1})...")
+        # Si llegamos a 20 en esta área (zona con densidad) y no hemos alcanzado el límite de profundidad, subdividimos
+        # Bajamos el umbral de 60 a 20 para ser más agresivos en la búsqueda de leads en zonas densas.
+        if len(results_this_area) >= 20 and depth < max_depth and bbox:
+            logger.info(f" Área con densidad detectada ({len(results_this_area)} leads). Subdividiendo cuadrante (Nivel {depth+1})...")
             
             # Calcular subdivisión de bbox
             s, w, n, e = bbox["south"], bbox["west"], bbox["north"], bbox["east"]
