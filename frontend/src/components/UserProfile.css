@@ -842,6 +842,46 @@ body.profile-page-active .main-content {
   transform: translateY(-1px);
 }
 
+/* Plan Footer */
+.profile-active-plan-footer {
+  margin-top: 40px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.plan-name-footer {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.plan-status-text {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.btn-cancel-subscription {
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 8px 0;
+  transition: opacity 0.2s;
+}
+
+.btn-cancel-subscription:hover {
+  opacity: 0.7;
+}
+
 @keyframes slideInLow {
   from {
     opacity: 0;
@@ -1245,13 +1285,30 @@ body.profile-page-active .main-content {
   .user-profile-container {
     width: 95%;
     max-width: 1200px;
-    /* Wider */
-    /* max-height removed mobile */
     margin: 1.5rem auto 2rem;
-    /* Top margin + bottom margin */
     border-radius: 12px;
     display: flex;
     flex-direction: column;
+  }
+
+  /* Plan Section Mobile Improvements */
+  .minimalist-balance-value {
+    font-size: 2rem;
+  }
+
+  .minimalist-actions-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .profile-active-plan-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .btn-cancel-subscription {
+    padding: 0;
   }
 }
 
@@ -1487,73 +1544,75 @@ body.profile-page-active .main-content {
   color: #0f172a;
   background: rgba(15, 23, 42, 0.05);
 }
+
 /* Recharge Pack Card Styles */
 .recharge-pack-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.25rem 1rem;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    position: relative;
-    overflow: hidden;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
 .recharge-pack-card:hover {
-    transform: translateY(-2px);
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .recharge-pack-card.selected {
-    background: #f0f9ff;
-    border: 2px solid #0f172a;
-    padding: calc(1.25rem - 1px) calc(1rem - 1px); /* Compensa el borde más grueso */
+  background: #f0f9ff;
+  border: 2px solid #0f172a;
+  padding: calc(1.25rem - 1px) calc(1rem - 1px);
+  /* Compensa el borde más grueso */
 }
 
 .pack-amount {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .pack-label {
-    font-size: 0.85rem;
-    color: #64748b;
-    font-weight: 500;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .pack-price-tag {
-    margin-top: 0.5rem;
-    background: #f1f5f9;
-    padding: 6px 16px;
-    border-radius: 100px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #0f172a;
-    white-space: nowrap;
-    display: inline-block;
-    transition: all 0.2s;
+  margin-top: 0.5rem;
+  background: #f1f5f9;
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  display: inline-block;
+  transition: all 0.2s;
 }
 
 .recharge-pack-card.selected .pack-price-tag {
-    background: #0f172a;
-    color: white;
+  background: #0f172a;
+  color: white;
 }
 
 .pack-popular-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: #0f172a;
-    color: white;
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-bottom-left-radius: 8px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #0f172a;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-bottom-left-radius: 8px;
 }

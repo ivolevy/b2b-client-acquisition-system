@@ -826,7 +826,7 @@ function UserProfile() {
                       ></div>
                     </div>
                     <div className="minimalist-progress-info">
-                      <span>{100 - Math.round(((creditsInfo.credits || 0) / (creditsInfo.total_credits || 1500)) * 100)}% consumido</span>
+                      <span>{Math.max(0, Math.round(((creditsInfo.total_credits - creditsInfo.credits) / creditsInfo.total_credits) * 100))}% consumido</span>
                       <span className="renewal-badge">
                         Renovación: {creditsInfo.next_reset ? new Date(creditsInfo.next_reset).toLocaleDateString() : 'Pendiente'}
                       </span>
@@ -857,20 +857,17 @@ function UserProfile() {
                     </div>
                   </div>
 
-                  <div className="minimalist-actions-grid" style={{ marginTop: '40px', borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                        <div>
-                            <h4 style={{ fontSize: '1rem', marginBottom: '4px' }}>Plan {creditsInfo.plan ? creditsInfo.plan.charAt(0).toUpperCase() + creditsInfo.plan.slice(1) : 'Actual'}</h4>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Tu suscripción está activa.</p>
-                        </div>
-                        <button 
-                            onClick={handleCancelPlan}
-                            className="btn-danger-text"
-                            style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-                        >
-                            Cancelar suscripción
-                        </button>
+                  <div className="profile-active-plan-footer">
+                    <div className="plan-status-info">
+                        <h4 className="plan-name-footer">Plan {creditsInfo.plan ? creditsInfo.plan.charAt(0).toUpperCase() + creditsInfo.plan.slice(1) : 'Actual'}</h4>
+                        <p className="plan-status-text">Tu suscripción está activa.</p>
                     </div>
+                    <button 
+                        onClick={handleCancelPlan}
+                        className="btn-cancel-subscription"
+                    >
+                        Cancelar suscripción
+                    </button>
                   </div>
                 </>
               ) : (

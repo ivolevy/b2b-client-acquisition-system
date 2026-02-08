@@ -26,6 +26,16 @@ function AdminUsers() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const searchTimeoutRef = useRef(null);
 
+  const filteredUsers = users.filter(user => {
+    const matchRole = !filters.role || user.role === filters.role;
+    const matchPlan = !filters.plan || user.plan === filters.plan;
+    const searchLower = filters.search.toLowerCase().trim();
+    const matchSearch = !searchLower || 
+      (user.email && user.email.toLowerCase().includes(searchLower)) ||
+      (user.name && user.name.toLowerCase().includes(searchLower));
+    return matchRole && matchPlan && matchSearch;
+  });
+
   const loadUsers = async (forceRefresh = false) => {
     setLoading(true);
     setError('');
@@ -99,16 +109,7 @@ function AdminUsers() {
   };
 
 
-  if (loading && users.length === 0) {
-    return (
-      <div className="admin-users">
-        <div className="admin-loading">
-          <div className="spinner"></div>
-          <p>Cargando usuarios...</p>
-        </div>
-      </div>
-    );
-  }
+  // No early return for loading to avoid layout shifts
 
   return (
     <div className="admin-users">
@@ -176,71 +177,66 @@ function AdminUsers() {
             </tr>
           </thead>
           <tbody>
-             {users.filter(user => {
-                // Client-side filtering because backend returns all users
-                const matchRole = !filters.role || user.role === filters.role;
-                const matchPlan = !filters.plan || user.plan === filters.plan;
-                const searchLower = filters.search.toLowerCase().trim();
-                const matchSearch = !searchLower || 
-                  (user.email && user.email.toLowerCase().includes(searchLower)) ||
-                  (user.name && user.name.toLowerCase().includes(searchLower));
-                return matchRole && matchPlan && matchSearch;
-             }).length === 0 ? (
-              <tr>
-                <td colSpan="5" className="no-data">
-                  {loading ? 'Cargando...' : 'No se encontraron usuarios coincidentes'}
-                </td>
-              </tr>
-            ) : (
-               users.filter(user => {
-                  const matchRole = !filters.role || user.role === filters.role;
-                  const matchPlan = !filters.plan || user.plan === filters.plan;
-                  const searchLower = filters.search.toLowerCase().trim();
-                  const matchSearch = !searchLower || 
-                    (user.email && user.email.toLowerCase().includes(searchLower)) ||
-                    (user.name && user.name.toLowerCase().includes(searchLower));
-                  return matchRole && matchPlan && matchSearch;
-               }).map((user) => (
-                <tr key={user.id}>
-                  <td>{user.email}</td>
-                  <td>{user.name || '-'}</td>
-                  <td>
-                    <span className={`role-badge ${user.role}`}>
-                      {user.role === 'admin' ? 'Admin' : 'Usuario'}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`plan-badge ${user.plan || 'starter'}`}>
-                      {user.plan || 'starter'}
-                    </span>
-                  </td>
-                  <td>{user.credits || 0}</td>
-                  <td>
-                    <div className="action-buttons">
-                      <button
-                        className="btn-action btn-view"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setShowDetailModal(true);
-                        }}
-                        title="Editar"
-                      >
-                        <FiEdit2 className="action-icon" size={16} />
-                      </button>
-                      {user.role !== 'admin' && (
-                        <button
-                          className="btn-action btn-delete"
-                          onClick={() => setShowDeleteConfirm(user)}
-                          title="Eliminar"
-                        >
-                           <FiTrash2 className="action-icon" size={16} />
-                        </button>
-                      )}
-                    </div>
+              {loading ? (
+                // Skeleton Rows
+                Array(5).fill(0).map((_, i) => (
+                  <tr key={`skeleton-${i}`} className="user-skeleton-row">
+                    <td><div className="skeleton-pulse skeleton-text" style={{ width: '180px' }}></div></td>
+                    <td><div className="skeleton-pulse skeleton-text" style={{ width: '120px' }}></div></td>
+                    <td><div className="skeleton-pulse skeleton-badge"></div></td>
+                    <td><div className="skeleton-pulse skeleton-badge"></div></td>
+                    <td><div className="skeleton-pulse skeleton-text" style={{ width: '40px' }}></div></td>
+                    <td><div className="skeleton-pulse skeleton-badge" style={{ width: '100px' }}></div></td>
+                  </tr>
+                ))
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="no-data">
+                    No se encontraron usuarios coincidentes
                   </td>
                 </tr>
-              ))
-            )}
+              ) : (
+                filteredUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td>{user.email}</td>
+                    <td>{user.name || '-'}</td>
+                    <td>
+                      <span className={`role-badge ${user.role}`}>
+                        {user.role === 'admin' ? 'Admin' : 'Usuario'}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`plan-badge ${user.plan || 'starter'}`}>
+                        {user.plan || 'starter'}
+                      </span>
+                    </td>
+                    <td>{user.credits || 0}</td>
+                    <td>
+                      <div className="action-buttons">
+                        <button
+                          className="btn-action btn-view"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowDetailModal(true);
+                          }}
+                          title="Editar"
+                        >
+                          <FiEdit2 className="action-icon" size={16} />
+                        </button>
+                        {user.role !== 'admin' && (
+                          <button
+                            className="btn-action btn-delete"
+                            onClick={() => setShowDeleteConfirm(user)}
+                            title="Eliminar"
+                          >
+                             <FiTrash2 className="action-icon" size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
           </tbody>
         </table>
       </div>

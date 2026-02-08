@@ -99,37 +99,50 @@ function ApiUsageDashboard() {
         </div>
       </header>
 
-      {/* Hero Section: Consolidated Status */}
-      <div className="hero-section">
-        <div className="hero-card glass-panel">
-          <div className="hero-main">
-            <div className="hero-info">
-              <h3>Gasto Mensual Estimado</h3>
-              <div className="hero-value">
-                <span className="main-number">${totalCost.toFixed(2)}</span>
-                <span className="separator">/</span>
-                <span className="limit-number">${limit.toFixed(2)}</span>
+      {/* metric-summary-cards: Quick glance at key metrics */}
+      <div className="metric-summary-grid">
+        <div className="metric-summary-card glass-panel">
+          <div className="metric-summary-icon-bg cost">
+            <FiDollarSign size={24} />
+          </div>
+          <div className="metric-summary-details">
+            <span className="metric-summary-label">Gasto Mensual</span>
+            <div className="metric-summary-value-row">
+              <span className="metric-summary-main-value">${totalCost.toFixed(2)}</span>
+              <span className="metric-summary-sub-value">/ ${limit}</span>
+            </div>
+            <div className="metric-summary-mini-progress">
+              <div className="mini-progress-track">
+                <div 
+                  className={`mini-progress-fill ${percentage > 90 ? 'critical' : percentage > 70 ? 'warning' : ''}`}
+                  style={{ width: `${percentage}%` }}
+                ></div>
               </div>
             </div>
           </div>
-          
-          <div className="hero-progress">
-             <div className="progress-labels">
-               <span>Uso del Presupuesto</span>
-               <strong>{percentage.toFixed(1)}%</strong>
-             </div>
-             <div className="progress-track-large">
-                <div 
-                  className={`progress-fill-large ${percentage > 90 ? 'critical' : percentage > 70 ? 'warning' : ''}`}
-                  style={{ width: `${percentage}%` }}
-                >
-                  <div className="glow-effect"></div>
-                </div>
-             </div>
-             <div className="hero-footer">
-               <span>Restante: <strong>${remainingBudget.toFixed(2)}</strong></span>
-               <span>{isFallback ? 'Límite excedido' : 'Dentro del presupuesto'}</span>
-             </div>
+        </div>
+
+        <div className="metric-summary-card glass-panel">
+          <div className="metric-summary-icon-bg calls">
+            <FiActivity size={24} />
+          </div>
+          <div className="metric-summary-details">
+            <span className="metric-summary-label">Total Consultas</span>
+            <div className="metric-summary-main-value">{stats?.stats?.reduce((acc, s) => acc + s.calls_count, 0) || 0}</div>
+            <span className="metric-summary-sub-text">Mes en curso</span>
+          </div>
+        </div>
+
+        <div className="metric-summary-card glass-panel">
+          <div className="metric-summary-icon-bg status">
+            {isFallback ? <FiAlertTriangle size={24} /> : <FiCheckCircle size={24} />}
+          </div>
+          <div className="metric-summary-details">
+            <span className="metric-summary-label">Estado del Proveedor</span>
+            <div className={`metric-summary-main-value ${isFallback ? 'text-warning' : 'text-success'}`}>
+              {isFallback ? 'Modo Ahorro' : 'Google Places'}
+            </div>
+            <span className="metric-summary-sub-text">Presupuesto: ${remainingBudget.toFixed(2)} rem.</span>
           </div>
         </div>
       </div>
@@ -144,40 +157,38 @@ function ApiUsageDashboard() {
             <table className="clean-table">
               <thead>
                 <tr>
-                  <th>Servicio</th>
-                  <th>Características</th>
+                  <th>Proveedor / Tipo</th>
                   <th className="text-right">Volumen</th>
-                  <th className="text-right">Costo Unitario</th>
-                  <th className="text-right">Total</th>
+                  <th className="text-right">Costo Estimado</th>
                 </tr>
               </thead>
               <tbody>
                 {(stats?.stats || []).map((s, idx) => (
                   <tr key={idx} className="hover-row">
                     <td>
-                      <div className="sku-name">
-                        {s.sku === 'pro' ? 'Google Places Requests' : s.sku.toUpperCase()}
+                      <div className="sku-group">
+                        <div className="sku-icon">
+                          {s.sku === 'pro' ? <FiActivity /> : <FiDatabase />}
+                        </div>
+                        <div className="sku-info">
+                          <span className="sku-primary">
+                            {s.sku === 'pro' ? 'Google Places API' : 'Servicio Autonómo'}
+                          </span>
+                          <span className="sku-secondary">{s.sku === 'pro' ? 'Consultas B2B Premium' : 'Búsqueda por Mapa'}</span>
+                        </div>
                       </div>
                     </td>
-                    <td>
-                      <div className="tags-row">
-                        {s.sku === 'pro' ? (
-                          <>
-                            <span className="mini-tag">Web</span>
-                            <span className="mini-tag">Teléfono</span>
-                            <span className="mini-tag">Estado</span>
-                          </>
-                        ) : (
-                          <span className="mini-tag basic">Básico</span>
-                        )}
+                    <td className="text-right">
+                      <div className="val-stack">
+                        <span className="val-main">{s.calls_count}</span>
+                        <span className="val-sub">requests</span>
                       </div>
                     </td>
-                    <td className="text-right font-mono">{s.calls_count}</td>
-                    <td className="text-right font-mono text-muted">
-                        {s.sku === 'pro' ? '$0.032' : '$0.00'}
-                    </td>
-                    <td className="text-right font-mono text-accent">
-                      ${parseFloat(s.estimated_cost_usd).toFixed(4)}
+                    <td className="text-right">
+                      <div className="val-stack">
+                        <span className="val-main text-accent">${parseFloat(s.estimated_cost_usd).toFixed(2)}</span>
+                        <span className="val-sub">{s.sku === 'pro' ? '$0.032/u' : 'Gratis'}</span>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -296,185 +307,175 @@ function ApiUsageDashboard() {
         .status-badge.warning { background: rgba(234, 179, 8, 0.1); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.2); }
         .date-badge { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* --- Hero Section --- */
-        .hero-section { margin-bottom: 2rem; }
-        
-        .glass-panel {
-          background: rgba(30, 41, 59, 0.4);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: 16px;
-          backdrop-filter: blur(10px);
-          padding: 1.5rem;
-        }
-
-        .hero-card {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 3rem;
-        }
-
-        .hero-main { display: flex; align-items: center; gap: 1.5rem; }
-        
-        .hero-icon-wrapper {
-          width: 64px; height: 64px;
-          background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(147,51,234,0.1));
-          border-radius: 16px;
-          display: flex; align-items: center; justify-content: center;
-          color: #60a5fa;
-          border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .hero-info h3 { margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
-        
-        .hero-value { display: flex; align-items: baseline; gap: 0.5rem; }
-        .main-number { font-size: 2.5rem; font-weight: 700; color: #fff; line-height: 1; }
-        .separator { font-size: 1.5rem; color: #475569; }
-        .limit-number { font-size: 1.5rem; color: #64748b; }
-
-        .hero-progress { flex: 1; max-width: 600px; }
-        
-        .progress-labels { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; color: #cbd5e1; }
-        
-        .progress-track-large {
-          height: 16px;
-          background: rgba(0,0,0,0.3);
-          border-radius: 8px;
-          overflow: hidden;
-          margin-bottom: 0.5rem;
-          border: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        .progress-fill-large {
-          height: 100%;
-          background: linear-gradient(90deg, var(--primary), #8b5cf6);
-          border-radius: 8px;
-          position: relative;
-          transition: width 0.8s ease-out;
-        }
-        
-        .progress-fill-large.warning { background: linear-gradient(90deg, #f59e0b, #facc15); }
-        .progress-fill-large.critical { background: linear-gradient(90deg, #ef4444, #f87171); }
-
-        .glow-effect {
-          position: absolute; top:0; right:0; bottom:0; width: 30px;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-          animation: shimmer 2s infinite;
-        }
-
-        .hero-footer { display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b; }
-
-        /* --- Dashboard Grid --- */
-        .dashboard-grid {
+        /* --- Metric Summary Cards --- */
+        .metric-summary-grid {
           display: grid;
-          gap: 2rem;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2rem;
         }
 
-        .section-header {
-            display: flex;
-            align-items: baseline;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+        .metric-summary-card {
+          display: flex;
+          align-items: center;
+          gap: 1.25rem;
+          padding: 1.5rem;
+          transition: transform 0.2s;
         }
-        
-        .section-header h3 { margin: 0; font-size: 1.1rem; color: #e2e8f0; display: flex; align-items: center; gap: 0.5rem; }
-        .section-icon { color: #60a5fa; }
-        .header-note { font-size: 0.8rem; color: #64748b; }
 
-        /* --- Clean Table --- */
-        .table-container { overflow-x: auto; }
-        
-        .clean-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-        .clean-table th { text-align: left; padding: 1rem; color: #94a3b8; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .clean-table td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.02); vertical-align: middle; color: #e2e8f0; }
-        .clean-table tr:last-child td { border-bottom: none; }
-        
-        .hover-row:hover { background: rgba(255,255,255,0.03); }
+        .metric-summary-card:hover {
+          transform: translateY(-2px);
+          border-color: rgba(255,255,255,0.1);
+        }
 
-        .sku-name { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: #fff; }
-        .premium-pill { background: linear-gradient(90deg, var(--primary), #8b5cf6); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .metric-summary-icon-bg {
+          width: 52px;
+          height: 52px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
 
-        .tags-row { display: flex; gap: 0.5rem; }
-        .mini-tag { font-size: 0.75rem; padding: 2px 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #cbd5e1; }
-        .mini-tag.basic { color: #64748b; border-color: transparent; background: transparent; padding-left: 0; }
+        .metric-summary-icon-bg.cost { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .metric-summary-icon-bg.calls { background: rgba(139, 92, 246, 0.1); color: #a78bfa; }
+        .metric-summary-icon-bg.status { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+        .metric-summary-icon-bg.status.warning { background: rgba(234, 179, 8, 0.1); color: #facc15; }
 
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .font-mono { font-family: 'Space Mono', monospace; }
-        .text-muted { color: #64748b; }
-        .text-accent { color: #4ade80; font-weight: 600; }
-        .text-error { color: #ef4444; }
-        .text-sm { font-size: 0.85rem; }
+        .metric-summary-details {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
 
-        /* --- Logs Compact --- */
-        .clean-table.compact th, .clean-table.compact td { padding: 0.6rem 1rem; }
-        .log-row .log-endpoint { display: flex; flex-direction: column; }
-        .endpoint-name { color: #e2e8f0; font-weight: 500; }
-        .log-query { font-size: 0.75rem; color: #64748b; font-style: italic; }
-        
-        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
-        .status-dot.success { background: #4ade80; box-shadow: 0 0 5px rgba(74, 222, 128, 0.4); }
-        .status-dot.error { background: #ef4444; box-shadow: 0 0 5px rgba(239, 68, 68, 0.4); }
+        .metric-summary-label {
+          font-size: 0.8rem;
+          color: #94a3b8;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-bottom: 0.25rem;
+        }
 
-        /* Mobile */
+        .metric-summary-main-value {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #fff;
+        }
+
+        .metric-summary-value-row {
+          display: flex;
+          align-items: baseline;
+          gap: 0.5rem;
+        }
+
+        .metric-summary-sub-value {
+          font-size: 0.9rem;
+          color: #64748b;
+        }
+
+        .metric-summary-sub-text {
+          font-size: 0.8rem;
+          color: #64748b;
+          margin-top: 0.25rem;
+        }
+
+        .metric-summary-mini-progress {
+          margin-top: 0.75rem;
+          width: 100%;
+        }
+
+        .mini-progress-track {
+          height: 6px;
+          background: rgba(0,0,0,0.2);
+          border-radius: 3px;
+          overflow: hidden;
+        }
+
+        .mini-progress-fill {
+          height: 100%;
+          background: #60a5fa;
+          border-radius: 3px;
+        }
+
+        .mini-progress-fill.warning { background: #f59e0b; }
+        .mini-progress-fill.critical { background: #ef4444; }
+
+        /* --- SKU Styles --- */
+        .sku-group {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .sku-icon {
+          width: 36px;
+          height: 36px;
+          background: rgba(255,255,255,0.03);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #94a3b8;
+        }
+
+        .sku-info {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .sku-primary {
+          font-weight: 600;
+          color: #fff;
+          font-size: 0.95rem;
+        }
+
+        .sku-secondary {
+          font-size: 0.75rem;
+          color: #64748b;
+        }
+
+        .val-stack {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .val-main {
+          font-weight: 600;
+          color: #e2e8f0;
+          font-family: 'Space Mono', monospace;
+        }
+
+        .val-sub {
+          font-size: 0.75rem;
+          color: #64748b;
+          text-transform: uppercase;
+        }
+
+        .text-success { color: #4ade80; }
+        .text-warning { color: #facc15; }
+
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .premium-dashboard { padding: 1rem; }
-            .hero-card { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-            .hero-progress { width: 100%; max-width: none; }
+            .premium-dashboard { padding: 1rem 0.5rem !important; }
             .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
             
-            /* Typography reduction */
-            .header-content h1 { font-size: 1.25rem; }
+            .metric-summary-grid {
+              grid-template-columns: 1fr;
+              gap: 1rem;
+            }
+
             .main-number { font-size: 2rem; }
-            .separator, .limit-number { font-size: 1.2rem; }
             .clean-table { font-size: 0.75rem; }
-            .clean-table th, .clean-table td { padding: 0.5rem; }
+            .clean-table th, .clean-table td { padding: 0.5rem !important; }
             
-            /* Hide unimportant columns in Service Breakdown (Table 1) */
-            /* Hide Characteristics (2) and Unit Cost (4) */
-            .clean-table:not(.compact) th:nth-child(2), 
-            .clean-table:not(.compact) td:nth-child(2),
-            .clean-table:not(.compact) th:nth-child(4), 
-            .clean-table:not(.compact) td:nth-child(4) {
-                display: none;
-            }
+            .sku-primary { font-size: 0.85rem; }
+            .sku-secondary { font-size: 0.7rem; }
             
-            /* Hide unimportant columns in Logs (Table 2 - .compact) */
-            /* Hide Duration (4) */
-            .clean-table.compact th:nth-child(4), 
-            .clean-table.compact td:nth-child(4) {
-                display: none;
-            }
+            .glass-panel { padding: 1rem; }
+            .dashboard-grid { gap: 1rem; }
             
-            .sku-name { font-size: 0.8rem; }
-            .mini-tag { font-size: 0.65rem; padding: 1px 4px; }
-            
-            /* FORCE FULL WIDTH on Mobile */
-            .premium-dashboard {
-                padding: 1rem 0.5rem !important; /* Minimal side padding */
-                width: 100% !important;
-                max-width: 100vw !important;
-                box-sizing: border-box;
-                overflow-x: hidden;
-            }
-            
-            .glass-panel {
-                border-radius: 12px;
-                padding: 1rem;
-                margin: 0;
-            }
-            
-            .dashboard-grid {
-                gap: 1rem;
-            }
-            
-            /* Ensure tables don't blowout width */
-            .table-container {
-                width: 100%;
-                overflow-x: auto;
-            }
+            .table-container { width: 100%; overflow-x: auto; }
         }
 
         @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
