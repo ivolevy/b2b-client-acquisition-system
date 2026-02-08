@@ -357,7 +357,7 @@ function AppB2B() {
       
       loadingIntervalRef.current = setInterval(async () => {
         try {
-          const progressRes = await axios.get(`${API_URL}/buscar/progreso/${taskId}`);
+          const progressRes = await axios.get(`${API_URL}/api/buscar/progreso/${taskId}`);
           
           // Verificar si seguimos en la misma tarea
           if (currentTaskIdRef.current !== taskId) return;
@@ -384,7 +384,7 @@ function AppB2B() {
       }, 200);
 
       const paramsWithTask = { ...params, task_id: taskId, user_id: user?.id };
-      const response = await axios.post(`${API_URL}/buscar`, paramsWithTask);
+      const response = await axios.post(`${API_URL}/api/buscar`, paramsWithTask);
       
       // Detener polling
       if (loadingIntervalRef.current) {
