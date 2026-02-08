@@ -102,8 +102,8 @@ function ApiUsageDashboard() {
           <p>Monitoreo de consumo Google Places vs OpenStreetMap</p>
         </div>
         <div className="header-actions">
-           <span className={`status-badge ${isFallback ? 'warning' : 'success'}`}>
-            {isFallback ? 'Modo Ahorro (OSM)' : 'Google Places Activo'}
+          <span className={`status-badge success`}>
+            Google Places Activo
           </span>
           <span className="reset-badge" title="Fecha en que se reinician los créditos gratuitos de Google">
              <FiClock size={12} style={{ marginRight: '6px' }} />
@@ -181,7 +181,9 @@ function ApiUsageDashboard() {
                     <td>
                       <div className="sku-info-simple">
                          <span className="sku-primary">
-                            {s.sku === 'pro' ? 'Nombre, Dirección, Teléfono, Web, Ratings y GPS' : 'Nombre, Coordenadas y Categoría básica'}
+                            {s.sku === 'pro' 
+                              ? 'Google Places Pro (B2B Full: Teléfono y Website)' 
+                              : 'Google Places Basic (Nombre y Ubicación)'}
                           </span>
                       </div>
                     </td>

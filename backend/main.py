@@ -643,7 +643,7 @@ async def root():
         }
     }
 
-@app.get("/buscar/progreso/{task_id}")
+@app.get("/api/buscar/progreso/{task_id}")
 async def obtener_progreso_busqueda(task_id: str):
     """
     Obtiene el progreso actual de una búsqueda específica
@@ -662,7 +662,7 @@ async def obtener_progreso_busqueda(task_id: str):
         
     return progreso
 
-@app.get("/rubros")
+@app.get("/api/rubros")
 def obtener_rubros():
     """Lista todos los rubros disponibles para búsqueda"""
     rubros = listar_rubros_disponibles()
@@ -681,7 +681,7 @@ def obtener_rubros():
         }
     }
 
-@app.get("/users/{user_id}/history")
+@app.get("/api/users/{user_id}/history")
 async def api_get_search_history(user_id: str, limit: int = 10):
     """Obtiene el historial de búsquedas de un usuario"""
     history = get_search_history(user_id, limit)
@@ -691,7 +691,7 @@ async def api_get_search_history(user_id: str, limit: int = 10):
         "history": history
     }
 
-@app.post("/users/history")
+@app.post("/api/users/history")
 async def api_save_search_history(request: SearchHistoryRequest):
     """Guarda una búsqueda en el historial"""
     result = save_search_history(request.user_id, request.dict())
@@ -700,7 +700,7 @@ async def api_save_search_history(request: SearchHistoryRequest):
     
     return result
 
-@app.delete("/users/{user_id}/history/{search_id}")
+@app.delete("/api/users/{user_id}/history/{search_id}")
 async def api_delete_search_history(user_id: str, search_id: str):
     """Elimina una entrada del historial"""
     success = delete_search_history(user_id, search_id)
@@ -709,7 +709,7 @@ async def api_delete_search_history(user_id: str, search_id: str):
     
     return {"success": True, "message": "Entrada eliminada correctamente"}
 
-@app.post("/buscar")
+@app.post("/api/buscar")
 async def buscar_por_rubro(request: BusquedaRubroRequest):
     """
     Busca empresas de un rubro específico con validación de contactos
@@ -1075,7 +1075,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         logger.error(f" Error en búsqueda: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/buscar-multiple")
+@app.post("/api/buscar-multiple")
 async def buscar_multiples_rubros(request: BusquedaMultipleRequest):
     """Busca empresas de múltiples rubros simultáneamente"""
     # Lógica de Créditos
@@ -1166,7 +1166,7 @@ async def filtrar(request: FiltroRequest):
         logger.error(f"Error filtrando: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/admin/users")
+@app.get("/api/admin/users")
 async def list_users(admin: Dict = Depends(get_current_admin)):
     """Lista todos los usuarios usando Service Role y combina con Auth data"""
     client = None
@@ -1224,7 +1224,7 @@ async def list_users(admin: Dict = Depends(get_current_admin)):
             }
         )
 
-@app.get("/admin/usage-stats")
+@app.get("/api/admin/usage-stats")
 async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
     """Obtiene las estadísticas de uso de API para el dashboard"""
     # No es necesario el import local si ya está arriba
@@ -1244,7 +1244,7 @@ async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
             "month": current_month,
             "total_estimated_cost_usd": total_cost,
             "stats": res.data,
-            "provider_status": "google" if total_cost < 195 else "osm"
+            "provider_status": "google"
         }
     except Exception as e:
         logger.error(f"Error en /admin/usage-stats: {e}")
@@ -1256,7 +1256,7 @@ async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
             "provider_status": "google"
         }
 
-@app.get("/admin/api-logs")
+@app.get("/api/admin/api-logs")
 async def get_api_logs_endpoint(
     limit: int = 100, 
     offset: int = 0, 
@@ -1276,7 +1276,7 @@ async def get_api_logs_endpoint(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/estadisticas")
+@app.get("/api/estadisticas")
 async def estadisticas():
     """Obtiene estadísticas del sistema"""
     try:
@@ -1302,7 +1302,7 @@ async def estadisticas():
         logger.error(f"Error obteniendo estadísticas: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
 
-@app.post("/exportar")
+@app.post("/api/exportar")
 async def exportar(request: ExportRequest):
     """Exporta empresas a CSV o JSON"""
     # Lógica de Créditos
@@ -1345,7 +1345,7 @@ async def exportar(request: ExportRequest):
         logger.error(f"Error exportando: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/clear")
+@app.delete("/api/clear")
 async def clear_database():
     """Elimina todas las empresas de la base de datos"""
     try:
@@ -1363,7 +1363,7 @@ async def clear_database():
         logger.error(f"Error limpiando base de datos: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/empresa/estado")
+@app.put("/api/empresa/estado")
 async def actualizar_estado(request: ActualizarEstadoRequest):
     """Actualiza el estado Kanban de una empresa"""
     try:
@@ -1404,7 +1404,7 @@ async def actualizar_estado(request: ActualizarEstadoRequest):
         logger.error(f"Error actualizando estado: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/empresa/notas")
+@app.put("/api/empresa/notas")
 async def actualizar_notas(request: ActualizarNotasRequest):
     """Actualiza las notas de una empresa"""
     try:
@@ -1436,7 +1436,7 @@ async def actualizar_notas(request: ActualizarNotasRequest):
 
 # ========== ENDPOINTS DE EMAIL TEMPLATES ==========
 
-@app.get("/templates")
+@app.get("/api/templates")
 async def listar_templates(type: Optional[str] = None):
     """Lista todos los templates, opcionalmente filtrados por tipo"""
     try:
@@ -1450,7 +1450,7 @@ async def listar_templates(type: Optional[str] = None):
         logger.error(f"Error listando templates: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/templates/{template_id}")
+@app.get("/api/templates/{template_id}")
 async def obtener_template_endpoint(template_id: int, user_id: str):
     """Obtiene un template por ID (validando pertenencia o default)"""
     try:
@@ -1544,7 +1544,7 @@ async def eliminar_template_endpoint(template_id: int):
 
 # ========== GMAIL OAUTH ENDPOINTS ==========
 
-@app.post("/auth/google/url")
+@app.post("/api/auth/google/url")
 async def google_auth_url(request: GoogleAuthURLRequest):
     """Obtiene la URL para iniciar el flujo de Google OAuth"""
     try:
@@ -1554,7 +1554,7 @@ async def google_auth_url(request: GoogleAuthURLRequest):
         logger.error(f"Error generando URL de Google Auth: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/auth/google/callback")
+@app.get("/api/auth/google/callback")
 async def google_callback(code: str, state: str):
     """Maneja el callback de Google OAuth e intercambia el código por tokens"""
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
@@ -1583,7 +1583,7 @@ async def google_callback(code: str, state: str):
 
 # ========== OUTLOOK OAUTH ENDPOINTS (CONSOLIDATED) ==========
 
-@app.post("/auth/outlook/url")
+@app.post("/api/auth/outlook/url")
 async def outlook_auth_url(request: GoogleAuthURLRequest):
     """Obtiene la URL de autorización para Outlook/Microsoft 365"""
     try:
@@ -1595,7 +1595,7 @@ async def outlook_auth_url(request: GoogleAuthURLRequest):
         logger.error(f"Error generando URL de Outlook Auth: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/auth/outlook/callback")
+@app.get("/api/auth/outlook/callback")
 async def outlook_callback(code: str, state: str):
     """Maneja el callback de Outlook OAuth"""
     frontend_url = os.getenv("FRONTEND_URL", "https://b2b-client-acquisition-system.vercel.app")
@@ -1664,7 +1664,7 @@ async def google_status(user_id: str):
         logger.error(f"Error obteniendo estado de Google Auth: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/auth/google/disconnect")
+@app.post("/api/auth/google/disconnect")
 async def google_disconnect(request: DisconnectRequest):
     """Elimina la conexión con Google Gmail"""
     try:
@@ -1674,7 +1674,7 @@ async def google_disconnect(request: DisconnectRequest):
         logger.error(f"Error desconectando Google Auth: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/auth/outlook/disconnect")
+@app.post("/api/auth/outlook/disconnect")
 async def outlook_disconnect(request: DisconnectRequest):
     """Desconectar Outlook"""
     try:

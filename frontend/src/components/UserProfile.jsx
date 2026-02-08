@@ -150,7 +150,7 @@ function UserProfile() {
     try {
       // Generar un state simple (user_id)
       const state = user.id;
-      const response = await axios.post(`${API_URL}/auth/google/url`, { state });
+      const response = await axios.post(`${API_URL}/api/auth/google/url`, { state });
       if (response.data.success) {
         window.location.href = response.data.url;
       }
@@ -163,7 +163,7 @@ function UserProfile() {
   const handleConnectOutlook = async () => {
     try {
       const state = user.id;
-      const response = await axios.post(`${API_URL}/auth/outlook/url`, { state });
+      const response = await axios.post(`${API_URL}/api/auth/outlook/url`, { state });
       if (response.data.success) {
         window.location.href = response.data.url;
       }
@@ -176,7 +176,7 @@ function UserProfile() {
   const handleDisconnectProvider = async (provider) => {
     if (!confirm(`¿Estás seguro de desconectar ${provider}?`)) return;
     try {
-      const response = await axios.post(`${API_URL}/auth/${provider}/disconnect`, { user_id: user.id });
+      const response = await axios.post(`${API_URL}/api/auth/${provider}/disconnect`, { user_id: user.id });
       if (response.data.success) {
         toastSuccess?.(`${provider === 'google' ? 'Gmail' : 'Outlook'} desconectado`);
         fetchAuthStatus();
@@ -194,7 +194,7 @@ function UserProfile() {
     setRubrosError('');
     try {
       console.log('Fetching rubros for user:', user.id);
-      const response = await axios.get(`${API_URL}/users/${user.id}/rubros?t=${Date.now()}`);
+      const response = await axios.get(`${API_URL}/api/users/${user.id}/rubros?t=${Date.now()}`);
       console.log('Rubros response:', response.data);
       
       if (response.data.success) {
@@ -204,7 +204,7 @@ function UserProfile() {
         // Fallback: si no viene all_rubros, intentar pedirlo del endpoint general
         if (!all || Object.keys(all).length === 0) {
           console.warn('all_rubros empty in user endpoint, falling back to /rubros');
-          const fallbackRes = await axios.get(`${API_URL}/rubros`);
+          const fallbackRes = await axios.get(`${API_URL}/api/rubros`);
           if (fallbackRes.data && fallbackRes.data.rubros) {
             all = fallbackRes.data.rubros;
           }
@@ -224,7 +224,7 @@ function UserProfile() {
       console.error('Error fetching user rubros:', err);
       // Último intento: cargar rubros generales si falla el endpoint de usuario
       try {
-        const fallbackRes = await axios.get(`${API_URL}/rubros`);
+        const fallbackRes = await axios.get(`${API_URL}/api/rubros`);
         if (fallbackRes.data && fallbackRes.data.rubros) {
           setAvailableRubros(fallbackRes.data.rubros);
           setSelectedRubros(Object.keys(fallbackRes.data.rubros));
@@ -254,7 +254,7 @@ function UserProfile() {
     }
 
     try {
-      const response = await axios.post(`${API_URL}/users/rubros`, {
+      const response = await axios.post(`${API_URL}/api/users/rubros`, {
         user_id: user.id,
         rubro_keys: selectedRubros
       });

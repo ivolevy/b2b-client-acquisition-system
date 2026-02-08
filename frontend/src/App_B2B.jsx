@@ -72,7 +72,7 @@ function AppB2B() {
 
   const loadRubros = async () => {
     try {
-      const response = await axios.get(`${API_URL}/rubros`);
+      const response = await axios.get(`${API_URL}/api/rubros`);
       if (response.data && response.data.rubros) {
         setRubros(response.data.rubros);
       } else {
@@ -87,7 +87,7 @@ function AppB2B() {
   const loadEmpresas = async (showError = true) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/empresas`);
+      const response = await axios.get(`${API_URL}/api/empresas`);
       setEmpresas(response.data.data || []);
     } catch (err) {
       console.error('Error al cargar empresas:', err);
