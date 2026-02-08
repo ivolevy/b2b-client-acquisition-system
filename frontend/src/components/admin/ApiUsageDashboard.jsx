@@ -173,7 +173,6 @@ function ApiUsageDashboard() {
                   <th>TIPO</th>
                   <th className="text-right">COSTO UNIT.</th>
                   <th className="text-right">VOLUMEN</th>
-                  <th className="text-right">COSTO ESTIMADO</th>
                 </tr>
               </thead>
               <tbody>
@@ -192,13 +191,10 @@ function ApiUsageDashboard() {
                     <td className="text-right">
                        <span className="val-main">{s.calls_count}</span>
                     </td>
-                    <td className="text-right">
-                       <span className="val-main text-accent">${parseFloat(s.estimated_cost_usd).toFixed(2)}</span>
-                    </td>
                   </tr>
                 ))}
                  {(!stats?.stats || stats.stats.length === 0) && (
-                    <tr><td colSpan="5" className="text-center p-4 text-muted">Sin actividad registrada</td></tr>
+                    <tr><td colSpan="3" className="text-center p-4 text-muted">Sin actividad registrada</td></tr>
                  )}
               </tbody>
             </table>
