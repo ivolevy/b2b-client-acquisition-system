@@ -199,6 +199,27 @@ function ApiUsageDashboard() {
               </tbody>
             </table>
           </div>
+
+          <div className="pricing-guide mt-4 pt-4 border-t border-white/5">
+            <div className="guide-header mb-3">
+              <span className="text-xs font-bold text-slate-500 tracking-widest uppercase">Guía de Referencia de Tiers (Google)</span>
+            </div>
+            <div className="guide-grid">
+              <div className="guide-item">
+                <span className="guide-price text-slate-400">$0.017</span>
+                <span className="guide-label text-slate-500">Tier Básico:</span>
+                <span className="guide-desc text-slate-300">Nombre, Dirección, Ratings y GPS.</span>
+              </div>
+              <div className="guide-item highlight">
+                <span className="guide-price text-blue-400">$0.032</span>
+                <span className="guide-label text-blue-500">Tier Avanzado:</span>
+                <span className="guide-desc text-slate-300">Teléfono y Website (B2B Full).</span>
+              </div>
+            </div>
+            <p className="guide-note mt-3 text-xs italic text-slate-600">
+              * El Tier Básico se incluye sin costo adicional cuando se solicitan campos del Tier Avanzado.
+            </p>
+          </div>
         </section>
 
         {/* Logs - Only if errors exist */}
@@ -522,15 +543,67 @@ function ApiUsageDashboard() {
             .table-container { width: 100%; overflow-x: auto; }
         }
 
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
+        .mt-4 { margin-top: 1rem; }
+        .pt-4 { padding-top: 1rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .border-t { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+        .font-bold { font-weight: 700; }
+        .tracking-widest { letter-spacing: 0.1rem; }
+        .uppercase { text-transform: uppercase; }
+
         .dashboard-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: #64748b; gap: 1rem; }
-        .spinner-ring { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        .spinner-ring { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         
         .dashboard-error { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: #ef4444; gap: 1rem; text-align: center; }
-        .retry-btn { padding: 0.5rem 1.5rem; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 6px; cursor: pointer; transition: all 0.2s; }
-        .retry-btn:hover { background: rgba(239, 68, 68, 0.2); }
+        
+        .pricing-guide {
+          background: rgba(255, 255, 255, 0.01);
+          border-radius: 0 0 12px 12px;
+        }
+        .guide-grid {
+          display: grid;
+          gap: 0.5rem;
+        }
+        .guide-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          font-size: 0.75rem;
+          padding: 6px 10px;
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: 6px;
+          border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .guide-item.highlight {
+          background: rgba(59, 130, 246, 0.05);
+          border-color: rgba(59, 130, 246, 0.1);
+        }
+        .guide-price {
+          font-family: 'Monaco', monospace;
+          font-weight: 700;
+          min-width: 50px;
+        }
+        .guide-label {
+          font-weight: 700;
+          text-transform: uppercase;
+          font-size: 0.65rem;
+        }
+        .guide-desc {
+          opacity: 0.8;
+        }
+        .guide-note {
+          line-height: 1.4;
+        }
+
+        .text-slate-300 { color: #cbd5e1; }
+        .text-slate-400 { color: #94a3b8; }
+        .text-slate-500 { color: #64748b; }
+        .text-slate-600 { color: #475569; }
+        .text-blue-400 { color: #60a5fa; }
+        .text-blue-500 { color: #3b82f6; }
+        .text-xs { font-size: 0.7rem; }
+        .italic { font-style: italic; }
       `}</style>
     </div>
   );
