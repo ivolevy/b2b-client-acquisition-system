@@ -363,12 +363,12 @@ class ExportRequest(BaseModel):
     user_id: Optional[str] = None
 
 class ActualizarEstadoRequest(BaseModel):
-    id: int
+    id: str
     estado: str
     notas: Optional[str] = None
 
 class ActualizarNotasRequest(BaseModel):
-    id: int
+    id: str
     notas: str
 
 class TemplateCreateRequest(BaseModel):
@@ -396,8 +396,8 @@ class EmailAttachment(BaseModel):
     content_type: str
 
 class EnviarEmailRequest(BaseModel):
-    empresa_id: int
-    template_id: int
+    empresa_id: str
+    template_id: str
     empresa_data: Optional[Dict[str, Any]] = None
     asunto_personalizado: Optional[str] = None
     user_id: Optional[str] = None
@@ -617,9 +617,9 @@ async def admin_get_usage(request: Request, admin=Depends(get_current_admin)):
         return {"current_month_cost_usd": 0.0}
 
 class EnviarEmailMasivoRequest(BaseModel):
-    empresa_ids: List[int]
+    empresa_ids: List[str]
     empresas_data: Optional[List[Dict[str, Any]]] = None
-    template_id: int
+    template_id: str
     asunto_personalizado: Optional[str] = None
     delay_segundos: float = 3.0
     user_id: Optional[str] = None
@@ -1665,6 +1665,56 @@ async def actualizar_notas(request: ActualizarNotasRequest):
         logger.error(f"Error actualizando notas: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# ========== FUNCIONES HELPER PARA PERSISTENCIA (Supabase) ==========
+
+def obtener_template(template_id: str) -> Optional[Dict]:
+    """Helper para obtener un template por ID (sin validar owner)"""
+    try:
+        from backend.db_supabase import get_supabase_admin
+        client = get_supabase_admin()
+        if not client: return None
+        
+        # Primero buscar en user templates
+        res = client.table('email_templates').select('*').eq('id', template_id).execute()
+        if res.data:
+            return res.data[0]
+            
+        return None
+    except Exception as e:
+        logger.error(f"Error en obtener_template helper: {e}")
+        return None
+
+def guardar_email_history(**kwargs):
+    """Helper para loguear historial de email"""
+    try:
+        from backend.db_supabase import db_log_email_history
+        # Intentar determinar el user_id (usualmente en kwargs o necesitamos pasarlo)
+        user_id = kwargs.get('user_id', 'system')
+        return db_log_email_history(user_id, kwargs)
+    except Exception as e:
+        logger.error(f"Error guardando email history: {e}")
+        return False
+
+def obtener_email_history(empresa_id=None, template_id=None, limit=100):
+    """Helper para leer historial de email"""
+    try:
+        from backend.db_supabase import get_supabase_admin
+        client = get_supabase_admin()
+        if not client: return []
+        
+        query = client.table('email_history').select('*').order('sent_at', desc=True).limit(limit)
+        if empresa_id:
+            query = query.eq('company_id', empresa_id)
+        if template_id:
+            query = query.eq('template_id', template_id)
+            
+        res = query.execute()
+        return res.data or []
+    except Exception as e:
+        logger.error(f"Error obteniendo email history: {e}")
+        return []
+
 # ========== ENDPOINTS DE EMAIL TEMPLATES ==========
 
 @app.get("/api/templates")
@@ -2131,7 +2181,7 @@ async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/email/historial")
-async def obtener_historial_email(empresa_id: Optional[int] = None, template_id: Optional[int] = None, limit: int = 100):
+async def obtener_historial_email(empresa_id: Optional[str] = None, template_id: Optional[str] = None, limit: int = 100):
     """Obtiene el historial de emails enviados"""
     try:
         historial = obtener_email_history(

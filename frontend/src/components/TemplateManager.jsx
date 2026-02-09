@@ -154,7 +154,7 @@ function TemplateManager({ userId, onClose, type: initialType = 'email', embedde
                     <span className={`type-badge type-${type}`}>
                       {type === 'email' ? 'Email' : 'WhatsApp'}
                     </span>
-                    {!template.is_default && (
+                    {!template.es_default && (
                       <div className="template-actions-btn-group">
                         <button className="btn-action-icon" onClick={() => handleEditTemplate(template.id)} title="Editar">
                           <FiEdit2 size={16} />
