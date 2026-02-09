@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
 import { financialService } from '../../lib/financialService';
+import './AdminFinancials.css';
+import './AdminLayout.css';
 
 const AdminFinancials = () => {
     const [activeTab, setActiveTab] = useState('transactions'); // revenue, costs, transactions (overview removed)
@@ -45,26 +47,15 @@ const AdminFinancials = () => {
     const formatUSD = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
     return (
-        <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', margin: 0 }}>Panel Financiero</h1>
-                <div style={{ background: '#f1f5f9', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
+        <div className="admin-financials-container">
+            <div className="financials-header">
+                <h1>Panel Financiero</h1>
+                <div className="tab-selector">
                     {['transactions', 'costs'].map(tab => (
                         <button
                             key={tab}
+                            className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
                             onClick={() => setActiveTab(tab)}
-                            style={{
-                                padding: '8px 16px',
-                                borderRadius: '6px',
-                                border: 'none',
-                                background: activeTab === tab ? 'white' : 'transparent',
-                                color: activeTab === tab ? '#0f172a' : '#64748b',
-                                fontWeight: activeTab === tab ? '600' : '500',
-                                boxShadow: activeTab === tab ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                                cursor: 'pointer',
-                                textTransform: 'capitalize',
-                                transition: 'all 0.2s'
-                            }}
                         >
                             {tab === 'costs' ? 'Costos' : 'Transacciones'}
                         </button>
@@ -73,9 +64,6 @@ const AdminFinancials = () => {
             </div>
 
             {/* VIEWS */}
-            {/* VIEWS */}
-
-
             {activeTab === 'costs' && (
                 <CostsView overview={overview} formatUSD={formatUSD} formatCurrency={formatCurrency} />
             )}
@@ -98,13 +86,13 @@ const AdminFinancials = () => {
 
 const OverviewView = ({ overview, mrrData, formatCurrency, formatUSD }) => (
     <>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+        <div className="kpi-grid">
             <KpiCard title="Ingreso Recurrente (MRR)" value={formatCurrency(overview.mrr)} trend="+15%" positive />
             <KpiCard title="Ganancia Neta" value={formatCurrency(overview.netProfit)} trend="+12%" positive />
             <KpiCard title="Usuarios Activos" value={overview.activeSubscribers} subtitle={`+${overview.newSubscribers} mes actual`} />
         </div>
-        <div style={{ background: 'white', padding: '25px', borderRadius: '16px', border: '1px solid #e2e8f0', height: '400px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#334155' }}>Profit vs Revenue</h3>
+        <div className="chart-container">
+            <h3>Profit vs Revenue</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={mrrData}>
                     <defs>

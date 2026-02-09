@@ -8,7 +8,8 @@ import { useToast } from '../hooks/useToast';
 import ToastContainer from './ToastContainer';
 import './UserProfile.css';
 import { validatePhone } from '../utils/validators';
-import { FiActivity, FiClock, FiCheck } from 'react-icons/fi';
+import { FiActivity, FiClock, FiCheck, FiLayers } from 'react-icons/fi';
+import TemplateManager from './TemplateManager';
 
 function UserProfile() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ function UserProfile() {
     return () => document.body.classList.remove('profile-page-active');
   }, []);
 
-  const [activeTab, setActiveTab] = useState('info'); // 'info', 'plan', 'rubros', 'danger'
+  const [activeTab, setActiveTab] = useState('info'); // 'info', 'plan', 'rubros', 'templates', 'danger'
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -653,6 +654,13 @@ function UserProfile() {
               <span>Mis Rubros</span>
             </button>
             <button 
+              className={`profile-nav-item ${activeTab === 'templates' ? 'active' : ''}`}
+              onClick={() => setActiveTab('templates')}
+            >
+              <FiLayers size={18} />
+              <span>Plantillas</span>
+            </button>
+            <button 
               className={`profile-nav-item danger ${activeTab === 'danger' ? 'active' : ''}`}
               onClick={() => setActiveTab('danger')}
             >
@@ -938,6 +946,13 @@ function UserProfile() {
                   Disponible muy pronto
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === 'templates' && (
+            <div className="profile-section-fade-in">
+              <h3 className="profile-section-title">Mis Plantillas</h3>
+              <TemplateManager userId={user?.id} embedded={true} />
             </div>
           )}
 
@@ -1534,7 +1549,6 @@ function UserProfile() {
                     border: selectedRechargePack?.amount === 10000 ? '2px solid #0f172a' : '1px solid #e2e8f0',
                     borderRadius: '12px',
                     padding: '1.25rem 1rem',
-                    cursor: 'pointer',
                     transition: 'all 0.2s',
                     textAlign: 'center',
                     display: 'flex',

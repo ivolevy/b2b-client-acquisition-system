@@ -9,7 +9,9 @@ import {
 } from 'react-icons/fi';
 import './TemplateManager.css';
 
-function TemplateManager({ onClose, type = 'email', embedded = false }) {
+function TemplateManager({ userId, onClose, type: initialType = 'email', embedded = false }) {
+  const [type, setType] = useState(initialType);
+
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
@@ -17,9 +19,10 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const loadTemplates = async () => {
+    if (!userId) return;
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/templates?type=${type}`);
+      const response = await axios.get(`${API_URL}/api/templates?user_id=${userId}&type=${type}`);
       if (response.data && response.data.data) {
         setTemplates(response.data.data);
       }
@@ -32,7 +35,7 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
 
   useEffect(() => {
     loadTemplates();
-  }, [type]);
+  }, [type, userId]);
 
   const handleNewTemplate = () => {
     setEditingTemplateId(null);
@@ -47,7 +50,7 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
   const handleDeleteTemplate = async (templateId) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta plantilla?')) {
       try {
-        await axios.delete(`${API_URL}/templates/${templateId}`);
+        await axios.delete(`${API_URL}/api/templates/${templateId}?user_id=${userId}`);
         loadTemplates();
       } catch (err) {
         console.error('Error al eliminar plantilla:', err);
@@ -55,15 +58,16 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
     }
   };
 
-  const filteredTemplates = templates.filter(t => 
-    t.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (t.subject && t.subject.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredTemplates = templates.filter(t => {
+    return t.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           (t.subject && t.subject.toLowerCase().includes(searchTerm.toLowerCase()));
+  });
 
   if (showEditor) {
     return (
       <TemplateEditor 
         templateId={editingTemplateId} 
+        userId={userId}
         onClose={() => setShowEditor(false)} 
         onSave={() => {
           setShowEditor(false);
@@ -79,30 +83,44 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
   const content = (
     <div className={containerClass}>
       <div className="template-manager-modal">
-        <div className="template-manager-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <FiLayers size={24} color="#3b82f6" />
-            <h2>Gestión de Plantillas</h2>
-          </div>
-          {!embedded && (
+        {!embedded && (
+          <div className="template-manager-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <FiLayers size={24} color="#2c5282" />
+              <h2>Gestión de Plantillas</h2>
+            </div>
             <button onClick={onClose} className="btn-action-icon">
               <FiX size={20} />
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="template-manager-content">
-          <div className="template-manager-actions" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div className="template-manager-actions">
+            <div className="template-type-selector-pro">
+              <button 
+                className={`type-pill ${type === 'email' ? 'active' : ''}`}
+                onClick={() => setType('email')}
+              >
+                <FiMail /> Emails
+              </button>
+              <button 
+                className={`type-pill ${type === 'whatsapp' ? 'active' : ''}`}
+                onClick={() => setType('whatsapp')}
+              >
+                <FiMessageSquare /> WhatsApp
+              </button>
+            </div>
+
             <button className="btn-new-template" onClick={handleNewTemplate}>
-              <FiPlus /> Nueva Plantilla
+              <FiPlus /> Nueva {type === 'email' ? 'Plantilla Email' : 'Mensaje WhatsApp'}
             </button>
-            <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
-              <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+            
+            <div className="search-box-minimal">
+              <FiSearch />
               <input 
                 type="text" 
                 placeholder="Buscar plantillas..." 
-                className="ws-input-modern" 
-                style={{ paddingLeft: '38px' }}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -110,15 +128,15 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '60px' }}>
+            <div className="loading-state">
               <div className="spinner"></div>
-              <p style={{ marginTop: '16px', color: '#64748b' }}>Cargando plantillas...</p>
+              <p>Cargando plantillas...</p>
             </div>
           ) : filteredTemplates.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px', background: 'white', borderRadius: '16px', border: '1px dashed #e2e8f0' }}>
-              <FiLayout size={48} style={{ opacity: 0.2, marginBottom: '16px' }} />
-              <h3 style={{ color: '#0f172a', margin: '0 0 8px 0' }}>No hay plantillas</h3>
-              <p style={{ color: '#64748b', margin: 0 }}>Comenzá creando tu primera plantilla personalizada.</p>
+            <div className="empty-state-minimal">
+              <FiLayout size={48} />
+              <h3>No hay plantillas</h3>
+              <p>Comenzá creando tu primera plantilla personalizada.</p>
             </div>
           ) : (
             <div className="templates-list-grid">
@@ -127,7 +145,7 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
                   <div className="template-info-pro">
                     <h3>{template.nombre}</h3>
                     <div className="template-subject-pill">
-                      {type === 'email' ? <FiMail size={12} style={{ marginRight: '6px' }} /> : <FiMessageSquare size={12} style={{ marginRight: '6px' }} />}
+                      {type === 'email' ? <FiMail size={12} /> : <FiMessageSquare size={12} />}
                       {template.subject || (type === 'whatsapp' ? 'Mensaje WhatsApp' : 'Sin asunto')}
                     </div>
                   </div>
@@ -136,14 +154,16 @@ function TemplateManager({ onClose, type = 'email', embedded = false }) {
                     <span className={`type-badge type-${type}`}>
                       {type === 'email' ? 'Email' : 'WhatsApp'}
                     </span>
-                    <div className="template-actions-btn-group">
-                      <button className="btn-action-icon" onClick={() => handleEditTemplate(template.id)} title="Editar">
-                        <FiEdit2 size={16} />
-                      </button>
-                      <button className="btn-action-icon delete" onClick={() => handleDeleteTemplate(template.id)} title="Eliminar">
-                        <FiTrash2 size={16} />
-                      </button>
-                    </div>
+                    {!template.is_default && (
+                      <div className="template-actions-btn-group">
+                        <button className="btn-action-icon" onClick={() => handleEditTemplate(template.id)} title="Editar">
+                          <FiEdit2 size={16} />
+                        </button>
+                        <button className="btn-action-icon delete" onClick={() => handleDeleteTemplate(template.id)} title="Eliminar">
+                          <FiTrash2 size={16} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

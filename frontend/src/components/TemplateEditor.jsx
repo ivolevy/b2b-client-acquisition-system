@@ -5,7 +5,7 @@ import { API_URL } from '../config';
 import { FiSave, FiX, FiInfo, FiTag, FiType } from 'react-icons/fi';
 import './TemplateEditor.css';
 
-function TemplateEditor({ templateId, onClose, onSave, type = 'email' }) {
+function TemplateEditor({ templateId, userId, onClose, onSave, type = 'email' }) {
   const [template, setTemplate] = useState({
     nombre: '',
     subject: '',
@@ -18,17 +18,17 @@ function TemplateEditor({ templateId, onClose, onSave, type = 'email' }) {
   const textareaRef = useRef(null);
 
   useEffect(() => {
-    if (templateId) {
+    if (templateId && userId) {
       loadTemplate();
     }
-  }, [templateId]);
+  }, [templateId, userId]);
 
   const loadTemplate = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/templates/${templateId}`);
-      if (response.data) {
-        setTemplate(response.data);
+      const response = await axios.get(`${API_URL}/api/templates/${templateId}?user_id=${userId}`);
+      if (response.data && response.data.data) {
+        setTemplate(response.data.data);
       }
     } catch (err) {
       console.error('Error al cargar la plantilla:', err);
@@ -44,13 +44,18 @@ function TemplateEditor({ templateId, onClose, onSave, type = 'email' }) {
       return;
     }
 
+    if (!userId) {
+      alert('Error de sesión: Usuario no identificado.');
+      return;
+    }
+
     setSaving(true);
     try {
-      const dataToSave = { ...template, type: type };
+      const dataToSave = { ...template, type: type, user_id: userId };
       if (templateId) {
-        await axios.put(`${API_URL}/templates/${templateId}`, dataToSave);
+        await axios.put(`${API_URL}/api/templates/${templateId}`, dataToSave);
       } else {
-        await axios.post(`${API_URL}/templates`, dataToSave);
+        await axios.post(`${API_URL}/api/templates`, dataToSave);
       }
       onSave();
     } catch (err) {
@@ -100,10 +105,10 @@ function TemplateEditor({ templateId, onClose, onSave, type = 'email' }) {
       <form 
         className="template-editor-modal" 
         onSubmit={handleSave}
-        style={{ '--editor-accent': type === 'whatsapp' ? '#25D366' : '#3b82f6' }}
+        style={{ '--editor-accent': type === 'whatsapp' ? '#25D366' : '#2c5282' }}
       >
         <div className="template-editor-header">
-          <FiType size={20} color="#3b82f6" />
+          <FiType size={20} color="#2c5282" />
           <h2>{templateId ? 'Editar Plantilla' : 'Nueva Plantilla'}</h2>
           <button type="button" onClick={onClose} className="btn-editor-cancel" style={{ padding: '8px' }}>
             <FiX size={20} />

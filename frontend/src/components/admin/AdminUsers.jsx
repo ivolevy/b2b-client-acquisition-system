@@ -115,7 +115,7 @@ function AdminUsers() {
     <div className="admin-users">
       {/* Filtros y búsqueda */}
       <div className="users-filters">
-        <div className="filter-group" style={{ flex: '0 1 400px', maxWidth: '400px' }}>
+        <div className="filter-group-search">
           <input
             type="text"
             placeholder="Buscar por email o nombre..."
@@ -124,7 +124,7 @@ function AdminUsers() {
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           />
         </div>
-        <div className="filter-group" style={{ flex: '0 0 160px' }}>
+        <div className="filter-group">
           <select
             className="filter-select"
             value={filters.plan}
@@ -136,7 +136,7 @@ function AdminUsers() {
             <option value="scale">Scale</option>
           </select>
         </div>
-        <div className="filter-group" style={{ flex: '0 0 160px' }}>
+        <div className="filter-group">
           <select
             className="filter-select"
             value={filters.role}
@@ -150,7 +150,6 @@ function AdminUsers() {
         <button 
           className="btn-primary btn-create"
           onClick={() => setShowCreateModal(true)}
-          style={{ marginLeft: 'auto' }}
         >
           + Crear Usuario
         </button>

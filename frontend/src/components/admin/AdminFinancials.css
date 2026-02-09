@@ -1,0 +1,90 @@
+/* AdminFinancials.css */
+
+.admin-financials-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.financials-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.financials-header h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0f172a;
+    margin: 0;
+}
+
+.tab-selector {
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 8px;
+    display: flex;
+    gap: 4px;
+}
+
+.tab-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-weight: 500;
+    cursor: pointer;
+    text-transform: capitalize;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: white;
+    color: #0f172a;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.chart-container {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    height: 400px;
+}
+
+@media (max-width: 768px) {
+    .financials-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .tab-selector {
+        width: 100%;
+    }
+
+    .tab-btn {
+        flex: 1;
+        text-align: center;
+        padding: 10px 0;
+    }
+
+    .admin-financials-container {
+        padding: 12px;
+    }
+
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}
