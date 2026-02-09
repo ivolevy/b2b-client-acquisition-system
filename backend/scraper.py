@@ -156,7 +156,7 @@ def extraer_telefonos_b2b(soup: BeautifulSoup, text: str) -> List[str]:
             
     return telefonos_limpios[:5]
 
-def buscar_en_paginas_adicionales(base_url: str, soup: BeautifulSoup, session: Optional[ScraperSession] = None) -> Dict:
+def buscar_en_paginas_adicionales(base_url: str, soup: BeautifulSoup, session: Optional[ScraperSession] = None, rubro: str = "") -> Dict:
     """Busca páginas de contacto, nosotros y sucursales"""
     if not session: session = ScraperSession()
     urls_a_escanear = []
@@ -166,7 +166,8 @@ def buscar_en_paginas_adicionales(base_url: str, soup: BeautifulSoup, session: O
         'ubicacion', 'quienes', 'empresa', 'info', 'escribinos', 'ayuda',
         'institucional', 'secretaria', 'secretaría', 'administracion', 'niveles',
         'admision', 'ingreso', 'comunidad', 'tel', 'admisiones', 'primaria', 
-        'secundaria', 'jardin', 'contacto-colegio', 'staff'
+        'secundaria', 'jardin', 'contacto-colegio', 'staff', 'docentes', 
+        'bachillerato', 'ciclo', 'clases', 'inscripcion'
     ]
     
     for link in soup.find_all('a', href=True):
@@ -186,8 +187,9 @@ def buscar_en_paginas_adicionales(base_url: str, soup: BeautifulSoup, session: O
     # 2. Priorizar URLs que tengan 'contacto' o 'contact'
     urls_a_escanear.sort(key=lambda u: 0 if any(k in u.lower() for k in ['contact', 'contacto']) else 1)
     
-    # 3. Tomar las 5 más prometedoras
-    urls_a_escanear = urls_a_escanear[:5]
+    # 3. Tomar las más prometedoras (Deep Scraper for Schools)
+    limit = 8 if rubro == "colegios" else 5
+    urls_a_escanear = urls_a_escanear[:limit]
     
     emails_totales = []
     telefonos_totales = []
@@ -206,7 +208,7 @@ def buscar_en_paginas_adicionales(base_url: str, soup: BeautifulSoup, session: O
         'telefonos': list(set(telefonos_totales))
     }
 
-def scrapear_empresa_b2b(url: str, session: Optional[ScraperSession] = None) -> Dict:
+def scrapear_empresa_b2b(url: str, session: Optional[ScraperSession] = None, rubro: str = "") -> Dict:
     """Scrapea sitio web empresarial persistente o efímero"""
     if not session: session = ScraperSession()
     resultado = {
@@ -222,7 +224,7 @@ def scrapear_empresa_b2b(url: str, session: Optional[ScraperSession] = None) -> 
             logger.warning(f"Bloqueado por robots: {url}")
             return resultado
         
-        logger.info(f"Scrapeando: {url}")
+        logger.info(f"Scrapeando: {url} | Rubro: {rubro}")
         soup = session.get_soup(url)
         
         if soup:
@@ -231,7 +233,7 @@ def scrapear_empresa_b2b(url: str, session: Optional[ScraperSession] = None) -> 
             resultado['telefonos'] = extraer_telefonos_b2b(soup, text)
             
             if not resultado['emails'] or not resultado['telefonos']:
-                datos_contacto = buscar_en_paginas_adicionales(url, soup, session)
+                datos_contacto = buscar_en_paginas_adicionales(url, soup, session, rubro=rubro)
                 resultado['emails'] = list(set(resultado['emails'] + datos_contacto['emails']))
                 resultado['telefonos'] = list(set(resultado['telefonos'] + datos_contacto['telefonos']))
             
@@ -253,10 +255,11 @@ def scrapear_empresa_b2b(url: str, session: Optional[ScraperSession] = None) -> 
 def enriquecer_empresa_b2b(empresa: Dict, session: Optional[ScraperSession] = None) -> Dict:
     """Enriquece datos con web scraping"""
     website = empresa.get('website')
+    rubro = empresa.get('rubro_key', '')
     if not website or (empresa.get('email') and empresa.get('telefono')):
         return empresa
     
-    datos_scraped = scrapear_empresa_b2b(website, session)
+    datos_scraped = scrapear_empresa_b2b(website, session, rubro=rubro)
     if not empresa.get('email') and datos_scraped['emails']:
         empresa['email'] = datos_scraped['emails'][0]
     if not empresa.get('telefono') and datos_scraped['telefonos']:

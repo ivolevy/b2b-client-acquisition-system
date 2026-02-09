@@ -26,7 +26,7 @@ try:
         RUBROS_DISPONIBLES,
         listar_rubros_disponibles
     )
-    from backend.scraper import enriquecer_empresa_b2b
+    from backend.scraper import enriquecer_empresa_b2b, ScraperSession
     from backend.social_scraper import enriquecer_con_redes_sociales
     from backend.scraper_parallel import enriquecer_empresas_paralelo
     from backend.validators import validar_empresa
@@ -743,6 +743,7 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
         rubro_obj = RUBROS_DISPONIBLES.get(request.rubro.lower())
         keywords = rubro_obj["keywords"] if rubro_obj and isinstance(rubro_obj, dict) else [request.rubro]
         search_queries = [f"{kw} en {request.busqueda_ubicacion_nombre}" for kw in keywords]
+        emitted_count = 0
 
         logger.info(f"Iniciando búsqueda stream optimizada para: {request.rubro} | Límite: {MAX_LEADS}")
 
@@ -808,19 +809,10 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
             # Filtro específico para "colegios" para evitar escuelas de fútbol/manejo/idiomas
             if request.rubro.lower() == "colegios":
                 logger.info("Aplicando filtro de exclusión educativo...")
-                unwanted_terms = ["futbol", "soccer", "tenis", "deportes", "manejo", "conducir", "danza", "baile", "musica"]
-                candidates_filtered = []
-                for lead in all_candidates:
-                    nombre_lower = lead.get('nombre', '').lower()
-                    if any(term in nombre_lower for term in unwanted_terms):
-                        logger.info(f"Excluyendo lead no educativo: {lead.get('nombre')}")
-                        continue
-                    candidates_filtered = all_candidates # Fallback if no filter needed, but here we rebuild
-                
-                # Reconstruir lista filtrada
+                unwanted_terms = ["futbol", "soccer", "tenis", "natacion", "deportes", "manejo", "conducir", "danza", "baile", "musica", "deportiva"]
                 all_candidates = [
                     l for l in all_candidates 
-                    if not any(term in l.get('nombre', '').lower() for term in ["futbol", "soccer", "tenis", "natacion", "deportiva", "conducir", "manejo"])
+                    if not any(term in l.get('nombre', '').lower() for term in unwanted_terms)
                 ]
 
             # --- ENRIQUECIMIENTO DE LEADS ---
