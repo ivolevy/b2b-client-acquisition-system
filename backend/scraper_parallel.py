@@ -168,7 +168,8 @@ def enriquecer_empresas_paralelo(
     empresas: List[Dict],
     max_workers: Optional[int] = None,
     timeout_por_empresa: int = 20,
-    progress_callback=None
+    progress_callback=None,
+    session: Optional[ScraperSession] = None
 ) -> List[Dict]:
     """
     Enriquece múltiples empresas con paralelismo optimizado y conexión persistente via ScraperSession.
@@ -187,8 +188,9 @@ def enriquecer_empresas_paralelo(
     
     max_workers = _resolver_max_workers(len(pendientes), max_workers)
     
-    # Una sola sesión para todas las peticiones paralelas para pooling
-    session = ScraperSession()
+    # Usar sesión provista o crear una nueva para pooling
+    if not session:
+        session = ScraperSession()
     
     empresas_enriquecidas = list(empresas)
     start_time = time.time()

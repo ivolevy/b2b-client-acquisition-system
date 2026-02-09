@@ -165,7 +165,8 @@ def buscar_en_paginas_adicionales(base_url: str, soup: BeautifulSoup, session: O
         'contact', 'contacto', 'about', 'nosotros', 'donde', 'sucursal', 
         'ubicacion', 'quienes', 'empresa', 'info', 'escribinos', 'ayuda',
         'institucional', 'secretaria', 'secretaría', 'administracion', 'niveles',
-        'admision', 'ingreso', 'comunidad', 'tel'
+        'admision', 'ingreso', 'comunidad', 'tel', 'admisiones', 'primaria', 
+        'secundaria', 'jardin', 'contacto-colegio', 'staff'
     ]
     
     for link in soup.find_all('a', href=True):

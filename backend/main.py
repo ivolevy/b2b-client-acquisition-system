@@ -825,47 +825,46 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
 
             # --- ENRIQUECIMIENTO DE LEADS ---
             if all_candidates:
+                # Limitamos a los mejores candidatos para no tardar demasiado
+                leads_to_process = all_candidates[:MAX_LEADS]
+                enriched_count = 0
+                batch_size = 10
+                
                 yield f"data: {json.dumps({'type': 'status', 'message': f'Encontrados {len(all_candidates)} prospectos. Buscando datos de contacto...'})}\n\n"
                 
-                # Enriquecer los candidatos (limitamos a 80 para no tardar demasiado en streaming)
-                leads_to_enrich = all_candidates[:80]
-                try:
-                    # Usar la sesión para pooling
-                    session = ScraperSession()
-                    enriched_results = await asyncio.to_thread(
-                        enriquecer_empresas_paralelo,
-                        empresas=leads_to_enrich,
-                        session=session
-                    )
+                # Crear sesión persistente para todo el proceso
+                session = ScraperSession()
+                
+                # Procesar en batches para fluidez en el stream
+                for i in range(0, len(leads_to_process), batch_size):
+                    batch = leads_to_process[i:i+batch_size]
                     
-                    if isinstance(enriched_results, list):
-                        # Mapear resultados enriquecidos de vuelta a la lista principal
-                        enrich_map = {e['google_id']: e for e in enriched_results}
-                        for r in all_candidates:
-                            if r['google_id'] in enrich_map:
-                                r.update(enrich_map[r['google_id']])
-                except Exception as e:
-                    logger.error(f"Error en enriquecimiento stream: {e}")
-
-            # Ordenar por puntaje (mejor primero)
-            all_candidates.sort(key=lead_score, reverse=True)
-            
-            # Emitir los mejores 50
-            emitted_count = 0
-            for r in all_candidates[:MAX_LEADS]:
-                # FILTRO DE CONTACTO BÁSICO (Para asegurar calidad)
-                has_contact = any([r.get('email'), r.get('telefono'), r.get('website')])
-                if not has_contact and emitted_count >= 10: 
-                    # Permitimos algunos sin contacto si son pocos, pero priorizamos los que sí tienen
-                    continue
-
-                yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
-                emitted_count += 1
-                # Pequeño delay para que el frontend respire
-                await asyncio.sleep(0.05)
-            
-            logger.info(f"Búsqueda finalizada. Candidatos totales: {len(all_candidates)}, Emitidos: {emitted_count}")
-            yield f"data: {json.dumps({'type': 'status', 'message': f'Búsqueda finalizada. {emitted_count} leads de alta calidad encontrados.'})}\n\n"
+                    try:
+                        # Enriquecer batch en paralelo
+                        enriched_batch = await asyncio.to_thread(
+                            enriquecer_empresas_paralelo,
+                            empresas=batch,
+                            session=session
+                        )
+                        
+                        if isinstance(enriched_batch, list):
+                            for r in enriched_batch:
+                                yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
+                                emitted_count += 1
+                                enriched_count += 1
+                                await asyncio.sleep(0.02) # Micro-delay para suavidad
+                                
+                    except Exception as e:
+                        logger.error(f"Error en enriquecimiento batch: {e}")
+                        # Si falla el batch, emitimos los originales para no perder datos
+                        for r in batch:
+                            yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
+                            emitted_count += 1
+                
+                logger.info(f"Búsqueda finalizada. Enriquecidos: {enriched_count}/{len(leads_to_process)}")
+                yield f"data: {json.dumps({'type': 'status', 'message': f'Búsqueda finalizada. {emitted_count} prospectos procesados con éxito.'})}\n\n"
+            else:
+                yield f"data: {json.dumps({'type': 'status', 'message': 'No se encontraron resultados para los criterios seleccionados.'})}\n\n"
 
         except Exception as e:
             logger.error(f"Error en event_generator: {e}")
