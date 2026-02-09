@@ -54,8 +54,9 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     }, [validEmpresas]);
 
     const loadTemplates = async () => {
+        if (!user?.id) return;
         try {
-            const response = await axios.get(`${API_URL}/templates?type=email`);
+            const response = await axios.get(`${API_URL}/api/templates?user_id=${user.id}&type=email`);
             if (response.data && response.data.data) {
                 setTemplates(response.data.data);
                 if (response.data.data.length > 0 && !selectedTemplateId) {
@@ -87,7 +88,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
         if (e) e.stopPropagation();
         if (window.confirm("¿Eliminar plantilla?")) {
             try {
-                await axios.delete(`${API_URL}/templates/${id}`);
+                await axios.delete(`${API_URL}/api/templates/${id}?user_id=${user.id}`);
                 loadTemplates();
                 success("Plantilla eliminada.");
             } catch (err) {
@@ -480,6 +481,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
             {showTemplateEditor && (
                 <TemplateEditor
                     templateId={currentTemplateIdToEdit}
+                    userId={user?.id}
                     onClose={() => setShowTemplateEditor(false)}
                     onSave={handleTemplateSaved}
                     type="email"

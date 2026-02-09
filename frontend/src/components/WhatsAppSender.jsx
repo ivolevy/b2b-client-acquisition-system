@@ -37,9 +37,10 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
     const [currentPage, setCurrentPage] = useState(1);
 
     const loadTemplates = async () => {
+        if (!user?.id) return;
         setTemplatesLoading(true);
         try {
-            const response = await axios.get(`${API_URL}/templates?type=whatsapp`);
+            const response = await axios.get(`${API_URL}/api/templates?user_id=${user.id}&type=whatsapp`);
             if (response.data && response.data.data) {
                 setTemplates(response.data.data);
                 // Auto-select first template if available and none selected
@@ -443,6 +444,7 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
             {showTemplateEditor && (
                 <TemplateEditor
                     templateId={currentTemplateIdToEdit}
+                    userId={user?.id}
                     onClose={() => setShowTemplateEditor(false)}
                     onSave={handleTemplateSaved}
                     type="whatsapp"
