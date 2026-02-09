@@ -1942,7 +1942,7 @@ class UserRubrosRequest(BaseModel):
 async def google_status(user_id: str):
     """Verifica si el usuario tiene una cuenta de Gmail conectada"""
     try:
-        token_data = get_user_oauth_token(user_id)
+        token_data = get_user_oauth_token(user_id, 'google')
         if token_data:
             return {
                 "success": True,

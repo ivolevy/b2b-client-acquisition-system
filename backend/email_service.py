@@ -111,7 +111,7 @@ def enviar_email(
     # 1. Intentar enviar vía Gmail API si tenemos user_id (y provider es None o 'google')
     if user_id and (provider is None or provider == 'google'):
         try:
-            token_data = get_user_oauth_token(user_id)
+            token_data = get_user_oauth_token(user_id, 'google')
             if token_data:
                 logger.info(f" Intentando enviar vía Gmail API para usuario {user_id}")
                 success_gmail, new_creds = send_gmail_api(
