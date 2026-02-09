@@ -2186,7 +2186,7 @@ async def solicitar_codigo_cambio_password(request: SolicitarCodigoRequest):
         }
         
         # Enviar email con el código
-        asunto = "Código de validación para cambio de contraseña - Smart Leads"
+        asunto = "Código de validación para cambio de contraseña"
         cuerpo_html = f"""
         <!DOCTYPE html>
         <html>
@@ -2205,12 +2205,12 @@ async def solicitar_codigo_cambio_password(request: SolicitarCodigoRequest):
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>Smart Leads</h1>
+                    <h1>Notificación de Seguridad</h1>
                 </div>
                 <div class="content">
                     <h2>Código de validación</h2>
                     <p>Hola,</p>
-                    <p>Recibiste este email porque solicitaste cambiar tu contraseña en Smart Leads.</p>
+                    <p>Recibiste este email porque solicitaste cambiar tu contraseña.</p>
                     <p>Ingresá el siguiente código para continuar:</p>
                     <div class="codigo">{codigo}</div>
                     <div class="warning">
@@ -2220,7 +2220,7 @@ async def solicitar_codigo_cambio_password(request: SolicitarCodigoRequest):
                 </div>
                 <div class="footer">
                     <p>Este es un email automático, por favor no respondas.</p>
-                    <p>© 2024 Smart Leads</p>
+                    <p>© 2024</p>
                 </div>
             </div>
         </body>
@@ -2324,7 +2324,7 @@ async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
         }
         
         # Enviar email con el código
-        asunto = "Código de recuperación de contraseña - Smart Leads"
+        asunto = "Código de recuperación de contraseña"
         cuerpo_html = f"""
         <!DOCTYPE html>
         <html>
@@ -2343,12 +2343,12 @@ async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>Smart Leads</h1>
+                    <h1>Recuperación de Acceso</h1>
                 </div>
                 <div class="content">
                     <h2>Recuperación de contraseña</h2>
                     <p>Hola,</p>
-                    <p>Recibiste este email porque solicitaste recuperar tu contraseña en Smart Leads.</p>
+                    <p>Recibiste este email porque solicitaste recuperar tu contraseña.</p>
                     <p>Ingresá el siguiente código para continuar:</p>
                     <div class="codigo">{codigo}</div>
                     <div class="warning">
@@ -2358,7 +2358,7 @@ async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
                 </div>
                 <div class="footer">
                     <p>Este es un email automático, por favor no respondas.</p>
-                    <p>© 2024 Smart Leads</p>
+                    <p>© 2024</p>
                 </div>
             </div>
         </body>

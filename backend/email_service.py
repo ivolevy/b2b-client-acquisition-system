@@ -41,7 +41,7 @@ SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
 SMTP_USER = os.getenv('SMTP_USER', 'solutionsdota@gmail.com')
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')  # Debe configurarse en .env o usar App Password
 SMTP_FROM_EMAIL = os.getenv('SMTP_FROM_EMAIL', 'solutionsdota@gmail.com')
-SMTP_FROM_NAME = os.getenv('SMTP_FROM_NAME', 'Ivan Levy - Smart Leads')
+SMTP_FROM_NAME = os.getenv('SMTP_FROM_NAME', 'Ivan Levy')
 SMTP_TIMEOUT = int(os.getenv('SMTP_TIMEOUT_SECONDS', '20'))
 PLACEHOLDER_PATTERN = re.compile(r'\{([a-zA-Z0-9_]+)\}')
 
@@ -271,7 +271,7 @@ def wrap_premium_template(content: str, sender_name: str, sender_email: str) -> 
         </div>
 
         <div style="padding-top: 20px; text-align: left;">
-          <p style="margin: 0; color: #999999; font-size: 11px;">Enviado a través de Smart Leads</p>
+          <p style="margin: 0; color: #999999; font-size: 11px;">Enviado por solicitud del remitente</p>
         </div>
       </div>
     """

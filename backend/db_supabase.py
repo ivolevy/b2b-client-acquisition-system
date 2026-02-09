@@ -877,10 +877,10 @@ async def registrar_pago_exitoso(
                     }
                 })
                 recovery_link = recovery_res.properties.action_link
-                subject = "¡Bienvenido a Smart Leads! Activá tu cuenta"
+                subject = "¡Bienvenido! Activá tu cuenta"
             else:
                 if is_credit_pack:
-                    subject = "¡Créditos Acreditados! - Smart Leads"
+                    subject = "¡Créditos Acreditados!"
                 else:
                     subject = f"Confirmación de Compra: Plan {plan_id.capitalize()}"
 
@@ -908,7 +908,7 @@ async def registrar_pago_exitoso(
                     content = f"""
                     Hola {name or 'cliente'},
                     
-                    ¡Tu compra ha sido exitosa! Hemos acreditado <strong>{credits_to_add} créditos</strong> extra en tu cuenta de Smart Leads.
+                    ¡Tu compra ha sido exitosa! Hemos acreditado <strong>{credits_to_add} créditos</strong> extra en tu cuenta.
                     
                     Tu balance de créditos se ha actualizado automáticamente. Ya podés seguir realizando búsquedas y extrayendo leads.
                     
