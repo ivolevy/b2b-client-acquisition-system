@@ -2113,7 +2113,7 @@ async def enviar_email_individual(request: EnviarEmailRequest):
         logger.error(f"Error enviando email: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/email/enviar-masivo")
+@app.post("/api/email/enviar-masivo")
 async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
     """Envía emails a múltiples empresas"""
     try:
@@ -2180,7 +2180,7 @@ async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
         logger.error(f"Error enviando emails masivos: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/email/historial")
+@app.get("/api/email/historial")
 async def obtener_historial_email(empresa_id: Optional[str] = None, template_id: Optional[str] = None, limit: int = 100):
     """Obtiene el historial de emails enviados"""
     try:

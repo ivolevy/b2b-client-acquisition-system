@@ -344,7 +344,7 @@ def enviar_email_empresa(
     asunto = asunto_personalizado or renderizar_template(template.get('subject', ''), variables)
     
     # Cuerpo texto (versión simple)
-    cuerpo_texto = rendered_content
+    cuerpo_texto = renderizar_template(raw_content, variables)
     
     # Enviar
     resultado = enviar_email(

@@ -180,7 +180,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
         setSending(true);
         try {
             info(`Enviando ${targets.length} correos...`);
-            const response = await axios.post(`${API_URL}/email/enviar-masivo`, {
+            const response = await axios.post(`${API_URL}/api/email/enviar-masivo`, {
                 empresa_ids: targets.map(e => e.id || e.google_id),
                 empresas_data: targets, // Enviamos data completa (Stateless)
                 template_id: selectedTemplateId,

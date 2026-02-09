@@ -305,7 +305,7 @@ export const searchHistoryService = {
   // Guardar búsqueda
   async saveSearch(userId, searchData) {
     try {
-      const response = await fetch(`${API_URL}/users/history`, {
+      const response = await fetch(`${API_URL}/api/users/history`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -339,7 +339,7 @@ export const searchHistoryService = {
   // Obtener historial
   async getHistory(userId, limit = 20) {
     try {
-      const response = await fetch(`${API_URL}/users/${userId}/history?limit=${limit}`);
+      const response = await fetch(`${API_URL}/api/users/${userId}/history?limit=${limit}`);
       const data = await response.json();
 
       if (!response.ok) {
@@ -356,7 +356,7 @@ export const searchHistoryService = {
   // Eliminar búsqueda del historial
   async deleteSearch(userId, searchId) {
     try {
-      const response = await fetch(`${API_URL}/users/${userId}/history/${searchId}`, {
+      const response = await fetch(`${API_URL}/api/users/${userId}/history/${searchId}`, {
         method: 'DELETE'
       });
 
