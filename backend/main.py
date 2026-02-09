@@ -2358,7 +2358,7 @@ async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
                 </div>
                 <div class="footer">
                     <p>Este es un email automático, por favor no respondas.</p>
-                    <p>© 2024 Smart Leads - Dota Solutions</p>
+                    <p>© 2024 Smart Leads</p>
                 </div>
             </div>
         </body>

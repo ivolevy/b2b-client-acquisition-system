@@ -41,7 +41,7 @@ SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
 SMTP_USER = os.getenv('SMTP_USER', 'solutionsdota@gmail.com')
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')  # Debe configurarse en .env o usar App Password
 SMTP_FROM_EMAIL = os.getenv('SMTP_FROM_EMAIL', 'solutionsdota@gmail.com')
-SMTP_FROM_NAME = os.getenv('SMTP_FROM_NAME', 'Ivan Levy - Dota Solutions')
+SMTP_FROM_NAME = os.getenv('SMTP_FROM_NAME', 'Ivan Levy - Smart Leads')
 SMTP_TIMEOUT = int(os.getenv('SMTP_TIMEOUT_SECONDS', '20'))
 PLACEHOLDER_PATTERN = re.compile(r'\{([a-zA-Z0-9_]+)\}')
 
