@@ -371,14 +371,16 @@ class ActualizarNotasRequest(BaseModel):
     id: int
     notas: str
 
-class TemplateRequest(BaseModel):
+class TemplateCreateRequest(BaseModel):
+    user_id: str
     nombre: str
     subject: str
     body_html: str
     body_text: Optional[str] = None
     type: str = 'email'  # email | whatsapp
 
-class TemplateUpdateRequest(BaseModel):
+class TemplateModifyRequest(BaseModel):
+    user_id: str
     nombre: Optional[str] = None
     subject: Optional[str] = None
     body_html: Optional[str] = None
@@ -1700,17 +1702,25 @@ async def obtener_template_endpoint(template_id: int, user_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/templates")
-async def crear_template_endpoint(request: TemplateRequest):
+async def crear_template_endpoint(data: TemplateCreateRequest):
     """Crea un nuevo template persistente"""
     try:
+        # Debug logger
+        logger.info(f"POST /api/templates - Received data type: {type(data)}")
+        logger.info(f"POST /api/templates - Data dict keys: {data.dict().keys() if hasattr(data, 'dict') else 'no dict'}")
+        
+        uid = getattr(data, 'user_id', None)
+        if not uid:
+             raise HTTPException(status_code=400, detail=f"Falta user_id en el objeto {type(data)}")
+
         template_id = db_create_template(
-            user_id=request.user_id,
+            user_id=uid,
             data={
-                "nombre": request.nombre,
-                "subject": request.subject,
-                "body_html": request.body_html,
-                "body_text": request.body_text,
-                "type": request.type
+                "nombre": data.nombre,
+                "subject": data.subject,
+                "body_html": data.body_html,
+                "body_text": data.body_text,
+                "type": data.type
             }
         )
         if not template_id:
@@ -1727,18 +1737,19 @@ async def crear_template_endpoint(request: TemplateRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/api/templates/{template_id}")
-async def actualizar_template_endpoint(template_id: int, request: TemplateUpdateRequest):
+async def actualizar_template_endpoint(template_id: int, data: TemplateModifyRequest):
     """Actualiza un template persistente"""
     try:
+        uid = getattr(data, 'user_id', None)
         success = db_update_template(
             template_id=template_id,
-            user_id=request.user_id,
+            user_id=uid,
             updates={
-                "name": request.nombre,
-                "subject": request.subject,
-                "body_html": request.body_html,
-                "body_text": request.body_text,
-                "type": request.type
+                "name": data.nombre,
+                "subject": data.subject,
+                "body_html": data.body_html,
+                "body_text": data.body_text,
+                "type": data.type
             }
         )
 
