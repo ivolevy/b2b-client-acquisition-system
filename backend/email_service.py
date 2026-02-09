@@ -257,21 +257,14 @@ def wrap_premium_template(content: str, sender_name: str, sender_email: str) -> 
     formatted_content = content.replace('\n', '<br/>')
     
     return f"""
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto;">
-        
-        <div style="padding: 20px 0;">
-          <div style="font-size: 16px; color: #333333;">
-            {formatted_content}
-          </div>
-          
-          <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #eaeaea;">
-            <p style="margin: 0; font-weight: 600; color: #111111; font-size: 15px;">{sender_name}</p>
-            <p style="margin: 2px 0 0 0; color: #666666; font-size: 14px;">{sender_email}</p>
-          </div>
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="font-size: 16px; color: #333333;">
+          {formatted_content}
         </div>
-
-        <div style="padding-top: 20px; text-align: left;">
-          <p style="margin: 0; color: #999999; font-size: 11px;">Enviado por solicitud del remitente</p>
+        
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
+          <p style="margin: 0; font-weight: 600; color: #111111; font-size: 15px;">{sender_name}</p>
+          <p style="margin: 2px 0 0 0; color: #666666; font-size: 14px;">{sender_email}</p>
         </div>
       </div>
     """
@@ -314,12 +307,15 @@ def enviar_email_empresa(
     # Preparar variables para el template
     variables = {
         'nombre_empresa': empresa.get('nombre'),
+        'empresa': empresa.get('nombre'), # Alias común
         'rubro': empresa.get('rubro'),
         'ciudad': empresa.get('ciudad'),
         'direccion': empresa.get('direccion'),
         'website': empresa.get('website'),
+        'sitio_web': empresa.get('website'), # Alias común
         'telefono': empresa.get('telefono'),
         'email_empresa': empresa.get('email'),
+        'email': empresa.get('email'), # Alias común
         'pais': empresa.get('pais'),
         'distancia_km': empresa.get('distancia_km'),
         'busqueda_ubicacion_nombre': empresa.get('busqueda_ubicacion_nombre'),
@@ -331,14 +327,18 @@ def enviar_email_empresa(
     # debemos usar renderizar_template sobre body_text (o body_html como fallback)
     # y luego aplicar el wrapper premium.
     
-    raw_content = template.get('body_text') or template.get('body_html', '')
-    # Quitar tags HTML si existen (legacy support)
-    raw_content = re.sub(r'<[^>]*>', '', raw_content)
+    raw_content = template.get('body_html') or template.get('body_text', '')
+    # No quitar tags HTML si es body_html, para permitir diseño
+    # Solo normalizar saltos de línea si es texto plano
+    is_html = bool(template.get('body_html'))
     
-    rendered_content = renderizar_template(raw_content, variables)
+    if not is_html:
+        formatted_content = raw_content.replace('\n', '<br/>')
+    else:
+        formatted_content = raw_content
     
     # Aplicar Premium Wrapper
-    cuerpo_html = wrap_premium_template(rendered_content, sender_name, sender_email)
+    cuerpo_html = wrap_premium_template(renderizar_template(formatted_content, variables), sender_name, sender_email)
     
     # Asunto
     asunto = asunto_personalizado or renderizar_template(template.get('subject', ''), variables)
