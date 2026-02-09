@@ -85,7 +85,7 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         // Strategy: Start with none selected, or all? EmailSender selects all valid by default in some versions, 
         // but let's stick to user explicit selection or just filtering valid.
         // For now, let's just ensure selectedEmpresas are valid.
-        setSelectedEmpresas(prev => prev.filter(p => validEmpresas.find(v => v.id === p.id)));
+        setSelectedEmpresas(prev => prev.filter(p => validEmpresas.find(v => (v.id || v.google_id) === (p.id || p.google_id))));
     }, [validEmpresas]);
 
     // Keyboard Shortcuts
@@ -183,10 +183,11 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
     };
 
     const toggleEmpresa = (id) => {
-        if (selectedEmpresas.find(e => e.id === id)) {
-            setSelectedEmpresas(selectedEmpresas.filter(e => e.id !== id));
+        const empresaId = id;
+        if (selectedEmpresas.find(e => (e.id || e.google_id) === empresaId)) {
+            setSelectedEmpresas(selectedEmpresas.filter(e => (e.id || e.google_id) !== empresaId));
         } else {
-            const empresa = empresas.find(e => e.id === id);
+            const empresa = empresas.find(e => (e.id || e.google_id) === empresaId);
             if (empresa) setSelectedEmpresas([...selectedEmpresas, empresa]);
         }
     };
@@ -295,12 +296,12 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
 
                                         {paginatedEmpresas.map(empresa => (
                                             <div 
-                                                key={empresa.id} 
-                                                className={`ws-row ${selectedEmpresas.find(e => e.id === empresa.id) ? 'selected' : ''}`}
-                                                onClick={() => toggleEmpresa(empresa.id)}
+                                                key={empresa.id || empresa.google_id} 
+                                                className={`ws-row ${selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? 'selected' : ''}`}
+                                                onClick={() => toggleEmpresa(empresa.id || empresa.google_id)}
                                             >
                                                 <div className="row-check-area">
-                                                    {selectedEmpresas.find(e => e.id === empresa.id) ? 
+                                                    {selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? 
                                                         <FiCheckSquare size={18} color="#25D366" /> : 
                                                         <FiSquare size={18} color="#cbd5e1" />
                                                     }

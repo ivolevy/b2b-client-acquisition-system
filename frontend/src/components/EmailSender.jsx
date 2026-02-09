@@ -26,7 +26,6 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     const [senderProvider, setSenderProvider] = useState('google'); // google or outlook
     const [sending, setSending] = useState(false);
     const [authStatus, setAuthStatus] = useState({ google: false, outlook: false, loading: true });
-    const [mode, setMode] = useState('individual'); // individual, masivo
     const [currentPage, setCurrentPage] = useState(1);
 
     // Template Editing State
@@ -159,7 +158,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     };
 
     const handleSendCampaign = async () => {
-        const targets = mode === 'masivo' ? selectedEmpresas : (selectedEmpresas.length > 0 ? [selectedEmpresas[0]] : []);
+        const targets = selectedEmpresas;
         
         if (targets.length === 0) {
             warning("Seleccioná al menos un destinatario.");
@@ -182,7 +181,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
         try {
             info(`Enviando ${targets.length} correos...`);
             const response = await axios.post(`${API_URL}/email/enviar-masivo`, {
-                empresa_ids: targets.map(e => e.id),
+                empresa_ids: targets.map(e => e.id || e.google_id),
                 empresas_data: targets, // Enviamos data completa (Stateless)
                 template_id: selectedTemplateId,
                 user_id: user.id,
@@ -217,10 +216,11 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     };
 
     const toggleEmpresa = (id) => {
-        if (selectedEmpresas.find(e => e.id === id)) {
-            setSelectedEmpresas(selectedEmpresas.filter(e => e.id !== id));
+        const empresaId = id;
+        if (selectedEmpresas.find(e => (e.id || e.google_id) === empresaId)) {
+            setSelectedEmpresas(selectedEmpresas.filter(e => (e.id || e.google_id) !== empresaId));
         } else {
-            const empresa = empresas.find(e => e.id === id);
+            const empresa = empresas.find(e => (e.id || e.google_id) === empresaId);
             if (empresa) setSelectedEmpresas([...selectedEmpresas, empresa]);
         }
     };
@@ -281,10 +281,6 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                         <div className="sidebar-section">
                             <label className="section-label">Configuración de Envío</label>
                             
-                            <div className="mode-pill-toggle">
-                                <button className={mode === 'individual' ? 'active' : ''} onClick={() => setMode('individual')}>Individual</button>
-                                <button className={mode === 'masivo' ? 'active' : ''} onClick={() => setMode('masivo')}>Masivo</button>
-                            </div>
 
                             <div className="sidebar-field">
                                 <label className="field-label-small">Plantilla Activa</label>
@@ -330,9 +326,9 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                             <button 
                                 className="btn-send-main" 
                                 onClick={handleSendCampaign}
-                                disabled={sending || (mode === 'masivo' && selectedEmpresas.length === 0)}
+                                disabled={sending || selectedEmpresas.length === 0}
                             >
-                                {sending ? 'Procesando...' : (mode === 'masivo' ? 'Lanzar Campaña' : 'Enviar individual')}
+                                {sending ? 'Procesando...' : 'Lanzar Campaña'}
                             </button>
                         </div>
                     </aside>
@@ -364,12 +360,12 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                                     <div className="es-list-container">
                                         {paginatedEmpresas.map(empresa => (
                                             <div 
-                                                key={empresa.id} 
-                                                className={`es-row ${selectedEmpresas.find(e => e.id === empresa.id) ? 'selected' : ''}`}
-                                                onClick={() => toggleEmpresa(empresa.id)}
+                                                key={empresa.id || empresa.google_id} 
+                                                className={`es-row ${selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? 'selected' : ''}`}
+                                                onClick={() => toggleEmpresa(empresa.id || empresa.google_id)}
                                             >
                                                 <div className="row-check-area">
-                                                   {selectedEmpresas.find(e => e.id === empresa.id) ? <FiCheckSquare color="#3b82f6" /> : <FiSquare color="#cbd5e1" />}
+                                                   {selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? <FiCheckSquare color="#3b82f6" /> : <FiSquare color="#cbd5e1" />}
                                                 </div>
                                                 <div className="row-main-info">
                                                     <span className="row-name">{empresa.nombre}</span>

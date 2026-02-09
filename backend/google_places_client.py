@@ -296,6 +296,7 @@ class GooglePlacesClient:
 
         # Mapeo según el formato de overflow_client.py / main.py
         return {
+            'id': google_place.get("id"), # Frontend expects 'id'
             'nombre': display_name.get("text", "Sin nombre"),
             'rubro': rubro_nombre,
             'rubro_key': rubro_key,
