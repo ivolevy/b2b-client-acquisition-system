@@ -370,7 +370,7 @@ def db_get_templates(user_id: str, tipo: Optional[str] = None) -> List[Dict]:
     client = get_supabase_admin() # Usar admin para ver templates de sistema + usuario si es necesario
     if not client: return []
     try:
-        query = client.table('email_templates').select('*').or_(f"user_id.eq.{user_id},is_default.eq.true")
+        query = client.table('email_templates').select('*').or_(f"user_id.eq.{user_id},es_default.eq.true")
         if tipo:
             query = query.eq('type', tipo)
         res = query.execute()
@@ -379,19 +379,19 @@ def db_get_templates(user_id: str, tipo: Optional[str] = None) -> List[Dict]:
         logger.error(f"Error db_get_templates: {e}")
         return []
 
-def db_create_template(user_id: str, data: Dict) -> Optional[int]:
+def db_create_template(user_id: str, data: Dict) -> Optional[str]:
     """Crea un nuevo template en la base de datos"""
     client = get_supabase_admin()
     if not client: return None
     try:
         insert_data = {
             "user_id": user_id,
-            "name": data.get('nombre'),
+            "nombre": data.get('nombre'),
             "subject": data.get('subject'),
             "body_html": data.get('body_html'),
             "body_text": data.get('body_text'),
             "type": data.get('type', 'email'),
-            "is_default": False,
+            "es_default": False,
             "updated_at": datetime.now().isoformat()
         }
         res = client.table('email_templates').insert(insert_data).execute()
@@ -400,19 +400,28 @@ def db_create_template(user_id: str, data: Dict) -> Optional[int]:
         logger.error(f"Error db_create_template: {e}")
         return None
 
-def db_update_template(template_id: int, user_id: str, updates: Dict) -> bool:
+def db_update_template(template_id: str, user_id: str, updates: Dict) -> bool:
     """Actualiza un template existente si pertenece al usuario"""
     client = get_supabase_admin()
     if not client: return False
     try:
-        updates['updated_at'] = datetime.now().isoformat()
-        res = client.table('email_templates').update(updates).eq('id', template_id).eq('user_id', user_id).execute()
+        # Convertir nombres de campos de frontend/api a DB si es necesario
+        db_updates = {**updates}
+        if 'nombre' in updates:
+            db_updates['nombre'] = updates.pop('nombre')
+        # En la DB ya es 'nombre', 'subject', 'body_html', 'body_text', 'type', 'es_default'
+        # Si el frontend envía 'name', lo cambiamos
+        if 'name' in updates:
+            db_updates['nombre'] = updates.pop('name')
+
+        db_updates['updated_at'] = datetime.now().isoformat()
+        res = client.table('email_templates').update(db_updates).eq('id', template_id).eq('user_id', user_id).execute()
         return bool(res.data)
     except Exception as e:
         logger.error(f"Error db_update_template: {e}")
         return False
 
-def db_delete_template(template_id: int, user_id: str) -> bool:
+def db_delete_template(template_id: str, user_id: str) -> bool:
     """Elimina un template si pertenece al usuario"""
     client = get_supabase_admin()
     if not client: return False

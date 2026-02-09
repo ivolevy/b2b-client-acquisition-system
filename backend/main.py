@@ -1682,7 +1682,7 @@ async def listar_templates(user_id: str, type: Optional[str] = None):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/templates/{template_id}")
-async def obtener_template_endpoint(template_id: int, user_id: str):
+async def obtener_template_endpoint(template_id: str, user_id: str):
     """Obtiene un template por ID (validando pertenencia o default)"""
     try:
         # Reutilizamos db_get_templates y filtramos localmente para simplicidad o agregamos db_get_template_by_id
@@ -1737,7 +1737,7 @@ async def crear_template_endpoint(data: TemplateCreateRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/api/templates/{template_id}")
-async def actualizar_template_endpoint(template_id: int, data: TemplateModifyRequest):
+async def actualizar_template_endpoint(template_id: str, data: TemplateModifyRequest):
     """Actualiza un template persistente"""
     try:
         uid = getattr(data, 'user_id', None)
@@ -1766,7 +1766,7 @@ async def actualizar_template_endpoint(template_id: int, data: TemplateModifyReq
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/templates/{template_id}")
-async def eliminar_template_endpoint(template_id: int, user_id: str):
+async def eliminar_template_endpoint(template_id: str, user_id: str):
     """Elimina un template"""
     try:
         success = db_delete_template(template_id, user_id)
