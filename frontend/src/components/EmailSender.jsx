@@ -17,9 +17,15 @@ import {
 
 const ITEMS_PER_PAGE = 10;
 
-const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
+const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, toastError, toastWarning, toastInfo }) => {
     const { user } = useAuth();
-    const { success, error, warning, info } = useToast();
+    const localToasts = useToast();
+    
+    // Usar toasts de props si están disponibles, si no los locales
+    const success = toastSuccess || localToasts.success;
+    const error = toastError || localToasts.error;
+    const warning = toastWarning || localToasts.warning;
+    const info = toastInfo || localToasts.info;
     const [activeTab, setActiveTab] = useState('list'); // list, templates, history
     const [selectedEmpresas, setSelectedEmpresas] = useState([]);
     const [templates, setTemplates] = useState([]);
@@ -33,6 +39,10 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
     const [showTemplateEditor, setShowTemplateEditor] = useState(false);
     const [currentTemplateIdToEdit, setCurrentTemplateIdToEdit] = useState(null);
     
+    // Success View State
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [lastCampaignStats, setLastCampaignStats] = useState(null);
+
     // Attachments State
     const [files, setFiles] = useState([]);
     const fileInputRef = useRef(null);
@@ -194,13 +204,14 @@ const EmailSender = ({ empresas = [], onClose, embedded = false }) => {
                 }))
             });
 
-            if (response.data) {
-                success(`Campaña finalizada: ${response.data.exitosos} enviados.`);
-                if (onClose && !embedded) {
-                    setTimeout(() => onClose(), 2500);
-                }
+            if (response.data && response.data.data) {
+                const results = response.data.data;
+                success(`¡Campaña finalizada! ${results.exitosos} enviados con éxito.`);
+                // Minimalismo: No bloqueamos con pantalla de éxito gigante. 
+                // Los resultados ya están en el historial.
             }
         } catch (err) {
+            console.error('Error enviando campaña:', err);
             error(err.response?.data?.detail || "Error en el envío.");
         } finally {
             setSending(false);

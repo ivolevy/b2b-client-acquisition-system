@@ -43,7 +43,7 @@ SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')  # Debe configurarse en .env o us
 SMTP_FROM_EMAIL = os.getenv('SMTP_FROM_EMAIL', 'solutionsdota@gmail.com')
 SMTP_FROM_NAME = os.getenv('SMTP_FROM_NAME', 'Ivan Levy')
 SMTP_TIMEOUT = int(os.getenv('SMTP_TIMEOUT_SECONDS', '20'))
-PLACEHOLDER_PATTERN = re.compile(r'\{([a-zA-Z0-9_]+)\}')
+PLACEHOLDER_PATTERN = re.compile(r'\{\s*([a-zA-Z0-9_]*)\s*\}')
 
 def renderizar_template(template: str, variables: Dict) -> str:
     """
@@ -65,20 +65,23 @@ def renderizar_template(template: str, variables: Dict) -> str:
     # Escapar variables para prevenir inyección HTML (excepto en body_html que ya es HTML)
     # Nota: body_html debe ser HTML válido, así que no escapamos ahí
     # Pero subject y body_text sí deben escaparse
-    variables = {}
+    escaped_vars = {}
     for k, v in (variables or {}).items():
         if v is None:
-            variables[k] = ''
+            escaped_vars[k] = ''
         else:
             # Escapar HTML en variables para prevenir XSS
             # Solo escapar si no es body_html (que ya contiene HTML)
-            variables[k] = html.escape(str(v))
+            escaped_vars[k] = html.escape(str(v))
     
-    variables.setdefault('fecha', datetime.now().strftime('%d/%m/%Y'))
+    escaped_vars.setdefault('fecha', datetime.now().strftime('%d/%m/%Y'))
 
     def _reemplazar(match: re.Match) -> str:
-        key = match.group(1)
-        return variables.get(key, '')
+        key = match.group(1).strip()
+        if not key:
+            # Soporte para {} como alias de nombre_empresa
+            return escaped_vars.get('nombre_empresa', '')
+        return escaped_vars.get(key, '')
 
     return PLACEHOLDER_PATTERN.sub(_reemplazar, texto)
 

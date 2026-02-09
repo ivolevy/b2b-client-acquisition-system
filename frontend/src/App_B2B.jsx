@@ -784,6 +784,10 @@ function AppB2B() {
                 setView('table');
               }}
               embedded={true}
+              toastSuccess={success}
+              toastError={toastError}
+              toastWarning={warning}
+              toastInfo={info}
             />
           )}
 
@@ -795,6 +799,10 @@ function AppB2B() {
                 setView('table');
               }}
               embedded={true}
+              toastSuccess={success}
+              toastError={toastError}
+              toastWarning={warning}
+              toastInfo={info}
             />
           )}
       </main>
@@ -803,6 +811,10 @@ function AppB2B() {
         <EmailSender
           empresas={empresas}
           onClose={() => setShowEmailSender(false)}
+          toastSuccess={success}
+          toastError={toastError}
+          toastWarning={warning}
+          toastInfo={info}
         />
       )}
 

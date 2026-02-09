@@ -16,9 +16,15 @@ import { FaWhatsapp } from 'react-icons/fa6';
 
 const ITEMS_PER_PAGE = 10;
 
-const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
+const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess, toastError, toastWarning, toastInfo }) => {
     const { user } = useAuth();
-    const { success, error, warning, info } = useToast();
+    const localToasts = useToast();
+    
+    // Usar toasts de props si están disponibles, si no los locales
+    const success = toastSuccess || localToasts.success;
+    const error = toastError || localToasts.error;
+    const warning = toastWarning || localToasts.warning;
+    const info = toastInfo || localToasts.info;
     const [activeTab, setActiveTab] = useState('list'); // list, templates
     const [selectedEmpresas, setSelectedEmpresas] = useState([]);
     const [templates, setTemplates] = useState([]);
@@ -141,7 +147,8 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
         message = message.replace(/{ciudad}/g, empresa.ciudad || '');
 
         const phone = empresa.telefono.replace(/\D/g, '');
-        const url = `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
+        // Usar api.whatsapp.com para evitar el problema de "pantalla gris" en navegadores
+        const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
         
         window.open(url, '_blank');
     };
@@ -392,52 +399,27 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false }) => {
                     </main>
                 </div>
 
-                {/* Progress Overlay - Kept logic but matches container style */}
+                {/* Floating Minimalist Progress Widget */}
                 {sendingState.active && (
-                    <div className="whats-progress-backdrop">
-                        <div className="whats-progress-card">
-                            <div className="progress-card-header">
-                                <h3>Enviando Campaña</h3>
-                                <button onClick={handleCancel} className="btn-icon-close"><FiX /></button>
-                            </div>
-                            
-                            <div className="progress-status-row">
-                                <div className="progress-stat">
-                                    <span className="stat-label">Enviados</span>
-                                    <span className="stat-value">{sendingState.completed}</span>
-                                </div>
-                                <div className="progress-stat-divider">/</div>
-                                <div className="progress-stat">
-                                    <span className="stat-label">Total</span>
-                                    <span className="stat-value">{sendingState.total}</span>
-                                </div>
-                            </div>
-
-                            <div className="progress-bar-modern-container">
-                                <div className="progress-bar-modern-fill" style={{ width: `${progressPercent}%` }}></div>
-                            </div>
-
-                            <div className="current-action-area">
-                                {sendingState.currentIndex < sendingState.total ? (
-                                    <>
-                                        <p className="stat-label" style={{marginBottom: '12px'}}>Próximo destinatario:</p>
-                                        <div className="next-target">
-                                            <strong>{selectedEmpresas[sendingState.currentIndex].nombre}</strong>
-                                            <span>{selectedEmpresas[sendingState.currentIndex].telefono}</span>
-                                        </div>
-                                        
-                                        <button className="btn-whatsapp-action" onClick={handleNext}>
-                                            <FaWhatsapp /> Abrir Chat y Enviar
-                                        </button>
-                                    </>
-                                ) : (
-                                    <div className="completion-state">
-                                        <div className="check-circle"><FiCheck size={32} /></div>
-                                        <p>¡Campaña finalizada!</p>
-                                    </div>
-                                )}
-                            </div>
+                    <div className="ws-minimal-progress-floating">
+                        <div className="ws-mini-header">
+                            <FaWhatsapp color="#25D366" />
+                            <span>Progreso: {sendingState.completed}/{sendingState.total}</span>
+                            <button onClick={handleCancel} className="mini-close-btn"><FiX /></button>
                         </div>
+                        
+                        <div className="ws-mini-bar">
+                            <div className="ws-mini-fill" style={{ width: `${progressPercent}%` }}></div>
+                        </div>
+
+                        {sendingState.currentIndex < sendingState.total && (
+                            <div className="ws-mini-action">
+                                <p>Enviar a: <strong>{selectedEmpresas[sendingState.currentIndex].nombre}</strong></p>
+                                <button className="btn-ws-mini-next" onClick={handleNext}>
+                                    Siguiente <FiChevronRight />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
