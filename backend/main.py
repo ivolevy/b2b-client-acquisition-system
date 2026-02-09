@@ -772,7 +772,7 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
     async def event_generator():
         seen_ids = set()
         all_candidates = []
-        MAX_LEADS = 50
+        MAX_LEADS = 60
         
         rubro_obj = RUBROS_DISPONIBLES.get(request.rubro.lower())
         keywords = rubro_obj["keywords"] if rubro_obj and isinstance(rubro_obj, dict) else [request.rubro]

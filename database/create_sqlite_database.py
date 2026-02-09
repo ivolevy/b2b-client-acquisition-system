@@ -20,8 +20,8 @@ from pathlib import Path
 DEFAULT_TEMPLATE = {
     'nombre': 'Plantilla de prueba',
     'subject': 'Asunto de contacto',
-    'body_html': 'Hola {nombre_empresa}, estamos interesados en su rubro {rubro} en la ciudad de {ciudad}. Atentamente, Ivan Levy.',
-    'body_text': 'Hola {nombre_empresa}, estamos interesados en su rubro {rubro} en la ciudad de {ciudad}. Atentamente, Ivan Levy.'
+    'body_html': 'Hola {nombre_empresa}, estamos interesados en su rubro {rubro} en la ciudad de {ciudad}.',
+    'body_text': 'Hola {nombre_empresa}, estamos interesados en su rubro {rubro} en la ciudad de {ciudad}.'
 }
 
 def create_database(db_path: str, force: bool = False):
