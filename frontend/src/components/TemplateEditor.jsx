@@ -60,7 +60,8 @@ function TemplateEditor({ templateId, userId, onClose, onSave, type = 'email' })
       onSave();
     } catch (err) {
       console.error('Error al guardar la plantilla:', err);
-      alert('Error al guardar la plantilla.');
+      const errorMsg = err.response?.data?.detail || 'Error al guardar la plantilla.';
+      alert(errorMsg);
     } finally {
       setSaving(false);
     }
