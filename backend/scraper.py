@@ -163,7 +163,9 @@ def buscar_en_paginas_adicionales(base_url: str, soup: BeautifulSoup, session: O
     
     keywords_contacto = [
         'contact', 'contacto', 'about', 'nosotros', 'donde', 'sucursal', 
-        'ubicacion', 'quienes', 'empresa', 'info', 'escribinos', 'ayuda'
+        'ubicacion', 'quienes', 'empresa', 'info', 'escribinos', 'ayuda',
+        'institucional', 'secretaria', 'secretaría', 'administracion', 'niveles',
+        'admision', 'ingreso', 'comunidad', 'tel'
     ]
     
     for link in soup.find_all('a', href=True):

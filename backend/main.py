@@ -823,6 +823,30 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                     if not any(term in l.get('nombre', '').lower() for term in ["futbol", "soccer", "tenis", "natacion", "deportiva", "conducir", "manejo"])
                 ]
 
+            # --- ENRIQUECIMIENTO DE LEADS ---
+            if all_candidates:
+                yield f"data: {json.dumps({'type': 'status', 'message': f'Encontrados {len(all_candidates)} prospectos. Buscando datos de contacto...'})}\n\n"
+                
+                # Enriquecer los candidatos (limitamos a 80 para no tardar demasiado en streaming)
+                leads_to_enrich = all_candidates[:80]
+                try:
+                    # Usar la sesión para pooling
+                    session = ScraperSession()
+                    enriched_results = await asyncio.to_thread(
+                        enriquecer_empresas_paralelo,
+                        empresas=leads_to_enrich,
+                        session=session
+                    )
+                    
+                    if isinstance(enriched_results, list):
+                        # Mapear resultados enriquecidos de vuelta a la lista principal
+                        enrich_map = {e['google_id']: e for e in enriched_results}
+                        for r in all_candidates:
+                            if r['google_id'] in enrich_map:
+                                r.update(enrich_map[r['google_id']])
+                except Exception as e:
+                    logger.error(f"Error en enriquecimiento stream: {e}")
+
             # Ordenar por puntaje (mejor primero)
             all_candidates.sort(key=lead_score, reverse=True)
             
