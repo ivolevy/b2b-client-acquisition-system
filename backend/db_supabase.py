@@ -405,14 +405,14 @@ def db_update_template(template_id: str, user_id: str, updates: Dict) -> bool:
     client = get_supabase_admin()
     if not client: return False
     try:
-        # Convertir nombres de campos de frontend/api a DB si es necesario
-        db_updates = {**updates}
-        if 'nombre' in updates:
-            db_updates['nombre'] = updates.pop('nombre')
-        # En la DB ya es 'nombre', 'subject', 'body_html', 'body_text', 'type', 'es_default'
-        # Si el frontend envía 'name', lo cambiamos
-        if 'name' in updates:
-            db_updates['nombre'] = updates.pop('name')
+        # Map fields from API/Frontend to DB schema
+        db_updates = {}
+        for key, value in updates.items():
+            if value is not None: # Only update provided non-null fields
+                if key == 'name' or key == 'nombre':
+                    db_updates['nombre'] = value
+                else:
+                    db_updates[key] = value
 
         db_updates['updated_at'] = datetime.now().isoformat()
         res = client.table('email_templates').update(db_updates).eq('id', template_id).eq('user_id', user_id).execute()

@@ -1795,7 +1795,7 @@ async def actualizar_template_endpoint(template_id: str, data: TemplateModifyReq
             template_id=template_id,
             user_id=uid,
             updates={
-                "name": data.nombre,
+                "nombre": data.nombre,
                 "subject": data.subject,
                 "body_html": data.body_html,
                 "body_text": data.body_text,
