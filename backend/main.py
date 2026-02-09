@@ -53,7 +53,11 @@ try:
         get_user_credits,
         check_reset_monthly_credits,
         deduct_credits,
-        cancel_user_plan
+        cancel_user_plan,
+        db_get_templates,
+        db_create_template,
+        db_update_template,
+        db_delete_template
     )
     from backend.auth_google import get_google_auth_url, exchange_code_for_token
     from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
@@ -67,7 +71,35 @@ except ImportError as e:
     from social_scraper import *
     from scraper_parallel import *
     from validators import *
-    from db_supabase import *
+    from db_supabase import (
+        insertar_empresa, 
+        buscar_empresas, 
+        obtener_estadisticas, 
+        exportar_a_csv, 
+        exportar_a_json, 
+        init_db_b2b, 
+        crear_usuario_admin,
+        obtener_todas_empresas,
+        get_user_oauth_token,
+        save_user_oauth_token,
+        delete_user_oauth_token,
+        admin_update_user,
+        eliminar_usuario_totalmente,
+        save_search_history,
+        get_search_history,
+        delete_search_history,
+        get_supabase,
+        get_supabase_admin,
+        get_api_logs,
+        get_user_credits,
+        check_reset_monthly_credits,
+        deduct_credits,
+        cancel_user_plan,
+        db_get_templates,
+        db_create_template,
+        db_update_template,
+        db_delete_template
+    )
     from auth_google import get_google_auth_url, exchange_code_for_token
     from auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
 # Todas las funciones trabajan con datos en memoria durante la sesión
@@ -800,10 +832,13 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
             # --- PRIORIZACIÓN Y FILTRADO DE LEADS ---
             def lead_score(lead):
                 score = 0
-                if lead.get('email'): score += 100
+                if lead.get('email'): score += 500  # Prioridad máxima para emails
                 if lead.get('telefono'): score += 50
                 if lead.get('website'): score += 20
                 if lead.get('rating'): score += (lead.get('rating') * 2)
+                # Penalizar un poco los que solo tienen redes pero no email
+                if not lead.get('email') and (lead.get('instagram') or lead.get('facebook')):
+                    score += 5
                 return score
 
             # Filtro específico para "colegios" para evitar escuelas de fútbol/manejo/idiomas
@@ -814,6 +849,9 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                     l for l in all_candidates 
                     if not any(term in l.get('nombre', '').lower() for term in unwanted_terms)
                 ]
+
+            # Ordenar por score para priorizar emails
+            all_candidates.sort(key=lead_score, reverse=True)
 
             # --- ENRIQUECIMIENTO DE LEADS ---
             if all_candidates:
@@ -1038,7 +1076,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         # Agregar información de búsqueda
         # Validar y limitar radio (Máximo 3km según solicitud del usuario)
         radio_solicitado = request.busqueda_radio_km or 1.0
-        radius = min(float(radio_solicitado), 3.0)
+        radius = min(float(radio_solicitado), 5.0)
         
         logger.info(f"Iniciando búsqueda: {request.rubro} en {request.ubicacion_nombre} (Radio: {radius}km, Bbox: {bool(request.bbox)})")
 
@@ -1628,10 +1666,10 @@ async def actualizar_notas(request: ActualizarNotasRequest):
 # ========== ENDPOINTS DE EMAIL TEMPLATES ==========
 
 @app.get("/api/templates")
-async def listar_templates(type: Optional[str] = None):
-    """Lista todos los templates, opcionalmente filtrados por tipo"""
+async def listar_templates(user_id: str, type: Optional[str] = None):
+    """Lista todos los templates del usuario + defaults"""
     try:
-        templates = obtener_templates(tipo=type)
+        templates = db_get_templates(user_id, tipo=type)
         return {
             "success": True,
             "total": len(templates),
@@ -1661,7 +1699,7 @@ async def obtener_template_endpoint(template_id: int, user_id: str):
         logger.error(f"Error obteniendo template: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/templates")
+@app.post("/api/templates")
 async def crear_template_endpoint(request: TemplateRequest):
     """Crea un nuevo template persistente"""
     try:
@@ -1688,7 +1726,7 @@ async def crear_template_endpoint(request: TemplateRequest):
         logger.error(f"Error creando template: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/templates/{template_id}")
+@app.put("/api/templates/{template_id}")
 async def actualizar_template_endpoint(template_id: int, request: TemplateUpdateRequest):
     """Actualiza un template persistente"""
     try:
@@ -1716,13 +1754,13 @@ async def actualizar_template_endpoint(template_id: int, request: TemplateUpdate
         logger.error(f"Error actualizando template: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/templates/{template_id}")
-async def eliminar_template_endpoint(template_id: int):
+@app.delete("/api/templates/{template_id}")
+async def eliminar_template_endpoint(template_id: int, user_id: str):
     """Elimina un template"""
     try:
-        success = eliminar_template(template_id)
+        success = db_delete_template(template_id, user_id)
         if not success:
-            raise HTTPException(status_code=404, detail="Template no encontrado")
+            raise HTTPException(status_code=404, detail="Template no encontrado o sin permisos")
         return {
             "success": True,
             "message": "Template eliminado exitosamente"
