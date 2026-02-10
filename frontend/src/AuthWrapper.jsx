@@ -404,29 +404,44 @@ const AuthWrapper = () => {
 
             {/* AUTHENTICATED ROUTES */}
             {user ? (
-              <>
-                <Route path="/profile" element={
-                  <div className="app pro-theme">
-                    <ProBackground />
-                    <Navbar />
-                    <main className="main-content">
-                      <UserProfile />
-                    </main>
-                  </div>
-                } />
-                <Route path="/backoffice" element={<AdminLayout />}>
-                  <Route index element={<Navigate to="/backoffice/users" replace />} />
-                  <Route path="users" element={<AdminUsers />} />
-                  <Route path="users/:id" element={<AdminUserDetail />} />
-                  <Route path="email" element={<AdminEmailCenter />} />
-                  <Route path="whatsapp" element={<AdminWhatsAppCenter />} />
+              user.subscription_status === 'cancelled' ? (
+                <>
+                  <Route path="/profile" element={
+                    <div className="app pro-theme">
+                      <ProBackground />
+                      <Navbar />
+                      <main className="main-content">
+                        <UserProfile />
+                      </main>
+                    </div>
+                  } />
+                  <Route path="*" element={<Navigate to="/profile" replace />} />
+                </>
+              ) : (
+                <>
+                  <Route path="/profile" element={
+                    <div className="app pro-theme">
+                      <ProBackground />
+                      <Navbar />
+                      <main className="main-content">
+                        <UserProfile />
+                      </main>
+                    </div>
+                  } />
+                  <Route path="/backoffice" element={<AdminLayout />}>
+                    <Route index element={<Navigate to="/backoffice/users" replace />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="users/:id" element={<AdminUserDetail />} />
+                    <Route path="email" element={<AdminEmailCenter />} />
+                    <Route path="whatsapp" element={<AdminWhatsAppCenter />} />
 
-                  <Route path="api-usage" element={<ApiUsageDashboard />} />
-                  <Route path="financials" element={<AdminFinancials />} />
-                </Route>
-                {/* Main App Route - Only matches root */}
-                <Route path="/" element={<AppB2B />} />
-              </>
+                    <Route path="api-usage" element={<ApiUsageDashboard />} />
+                    <Route path="financials" element={<AdminFinancials />} />
+                  </Route>
+                  {/* Main App Route - Only matches root */}
+                  <Route path="/" element={<AppB2B />} />
+                </>
+              )
             ) : (
               /* GUEST ROUTES */
               <>

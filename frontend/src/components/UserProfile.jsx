@@ -22,7 +22,7 @@ function UserProfile() {
     return () => document.body.classList.remove('profile-page-active');
   }, []);
 
-  const [activeTab, setActiveTab] = useState('info'); // 'info', 'plan', 'rubros', 'templates', 'danger'
+  const [activeTab, setActiveTab] = useState(user?.subscription_status === 'cancelled' ? 'plan' : 'info'); // 'info', 'plan', 'rubros', 'templates', 'danger'
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -610,15 +610,17 @@ function UserProfile() {
     <div className="user-profile-container">
       <div className="user-profile-header">
         <div className="profile-header-content">
-          <button 
-            className="profile-back-btn"
-            onClick={() => navigate('/')}
-            title="Volver al inicio"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-          </button>
+          {user?.subscription_status !== 'cancelled' && (
+            <button 
+              className="profile-back-btn"
+              onClick={() => navigate('/')}
+              title="Volver al inicio"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+            </button>
+          )}
           <h2>Configuración de Perfil</h2>
         </div>
       </div>
