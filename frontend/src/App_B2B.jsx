@@ -10,7 +10,6 @@ import TemplateEditor from './components/TemplateEditor';
 import TemplateManager from './components/TemplateManager';
 import UserProfile from './components/UserProfile';
 import ToastContainer from './components/ToastContainer';
-import ToastContainer from './components/ToastContainer';
 import ProBackground from './components/ProBackground';
 import OfflineView from './components/OfflineView';
 const AdminPayments = React.lazy(() => import('./components/admin/AdminPayments'));
