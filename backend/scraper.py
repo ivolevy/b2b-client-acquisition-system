@@ -80,12 +80,14 @@ def extraer_emails_b2b(soup: BeautifulSoup, text: str) -> List[str]:
         email = link['href'].replace('mailto:', '').split('?')[0].strip()
         emails.append(email)
     
-    # Buscar en texto con patrón mejorado (soporta formatos comunes de ofuscación simple)
+    # Buscar en texto con patrón mejorado (limitamos el TLD para evitar junk)
+    # Soporta TLDs comunes y extensiones de país (ar, cl, etc) ordenados para match más largo primero
+    tld_pattern = r'(?:com\.ar|com\.mx|com\.cl|com\.uy|com\.br|com|net|org|edu|gov|biz|info|ar|cl|br|mx|co|es|uy|py|pe|bo|ve|ec|us|uk|it|fr|de)'
     patrones_email = [
-        r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b',
-        r'\b[a-zA-Z0-9._%+-]+\s*\[at\]\s*[a-zA-Z0-9.-]+\s*\.\s*[a-zA-Z]{2,}\b', 
-        r'\b[a-zA-Z0-9._%+-]+\s*\(at\)\s*[a-zA-Z0-9.-]+\s*\.\s*[a-zA-Z]{2,}\b',
-        r'\b[a-zA-Z0-9._%+-]+\s*@\s*[a-zA-Z0-9.-]+\s*\.\s*[a-zA-Z]{2,}\b',
+        fr'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.{tld_pattern}',
+        fr'\b[a-zA-Z0-9._%+-]+\s*\[at\]\s*[a-zA-Z0-9.-]+\s*\.\s*{tld_pattern}', 
+        fr'\b[a-zA-Z0-9._%+-]+\s*\(at\)\s*[a-zA-Z0-9.-]+\s*\.\s*{tld_pattern}',
+        fr'\b[a-zA-Z0-9._%+-]+\s*@\s*[a-zA-Z0-9.-]+\s*\.\s*{tld_pattern}',
     ]
     
     for patron in patrones_email:

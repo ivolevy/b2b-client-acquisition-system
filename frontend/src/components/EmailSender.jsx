@@ -39,6 +39,10 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
     const [showTemplateEditor, setShowTemplateEditor] = useState(false);
     const [currentTemplateIdToEdit, setCurrentTemplateIdToEdit] = useState(null);
     
+    // Delete Confirmation State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [templateToDelete, setTemplateToDelete] = useState(null);
+    
     // Success View State
     const [showSuccess, setShowSuccess] = useState(false);
     const [lastCampaignStats, setLastCampaignStats] = useState(null);
@@ -93,16 +97,26 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
         loadTemplates(); // reload to get updates
     };
 
-    const deleteTemplate = async (id, e) => {
+    const deleteTemplate = (id, e) => {
         if (e) e.stopPropagation();
-        if (window.confirm("¿Eliminar plantilla?")) {
-            try {
-                await axios.delete(`${API_URL}/api/templates/${id}?user_id=${user.id}`);
-                loadTemplates();
-                success("Plantilla eliminada.");
-            } catch (err) {
-                error("Error al eliminar.");
-            }
+        const template = templates.find(t => t.id === id);
+        if (template) {
+            setTemplateToDelete(template);
+            setShowDeleteModal(true);
+        }
+    };
+
+    const confirmDelete = async () => {
+        if (!templateToDelete) return;
+        try {
+            await axios.delete(`${API_URL}/api/templates/${templateToDelete.id}?user_id=${user.id}`);
+            loadTemplates();
+            success("Plantilla eliminada.");
+        } catch (err) {
+            error("Error al eliminar.");
+        } finally {
+            setShowDeleteModal(false);
+            setTemplateToDelete(null);
         }
     };
 
@@ -493,6 +507,52 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                     onSave={handleTemplateSaved}
                     type="email"
                 />
+            )}
+
+            {/* Custom Delete Confirmation Modal */}
+            {showDeleteModal && (
+                <div 
+                    className="es-delete-modal-overlay"
+                    onClick={() => setShowDeleteModal(false)}
+                >
+                    <div 
+                        className="es-delete-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="es-delete-modal-header">
+                            <div className="es-delete-modal-icon">
+                                <FiTrash2 size={24} />
+                            </div>
+                            <h3>Eliminar plantilla</h3>
+                            <button 
+                                className="es-delete-modal-close"
+                                onClick={() => setShowDeleteModal(false)}
+                            >
+                                <FiX />
+                            </button>
+                        </div>
+                        
+                        <div className="es-delete-modal-body">
+                            <p>¿Estás seguro de que deseas eliminar la plantilla <strong>"{templateToDelete?.nombre}"</strong>?</p>
+                            <p className="delete-hint">Esta acción no se puede deshacer.</p>
+                        </div>
+                        
+                        <div className="es-delete-modal-footer">
+                            <button 
+                                className="cancel-btn"
+                                onClick={() => setShowDeleteModal(false)}
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                className="delete-confirm-btn"
+                                onClick={confirmDelete}
+                            >
+                                Sí, eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

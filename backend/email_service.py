@@ -43,7 +43,7 @@ SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')  # Debe configurarse en .env o us
 SMTP_FROM_EMAIL = os.getenv('SMTP_FROM_EMAIL', 'solutionsdota@gmail.com')
 SMTP_FROM_NAME = os.getenv('SMTP_FROM_NAME', 'Ivan Levy')
 SMTP_TIMEOUT = int(os.getenv('SMTP_TIMEOUT_SECONDS', '20'))
-PLACEHOLDER_PATTERN = re.compile(r'\{\s*([a-zA-Z0-9_]*)\s*\}')
+PLACEHOLDER_PATTERN = re.compile(r'\{\{?\s*([a-zA-Z0-9_]*)\s*\}?\}')
 
 def renderizar_template(template: str, variables: Dict) -> str:
     """
@@ -310,6 +310,7 @@ def enviar_email_empresa(
     # Preparar variables para el template
     variables = {
         'nombre_empresa': empresa.get('nombre'),
+        'nombre': empresa.get('nombre'), # Alias solicitado por el usuario
         'empresa': empresa.get('nombre'), # Alias común
         'rubro': empresa.get('rubro'),
         'ciudad': empresa.get('ciudad'),
