@@ -1485,7 +1485,7 @@ function UserProfile() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '1.5rem' }}>
                 {/* Pack 1 */}
                 <button 
-                  onClick={() => setSelectedRechargePack({ amount: 1000, price: rechargeCurrency === 'ARS' ? 1499 : 4 })}
+                  onClick={() => setSelectedRechargePack({ amount: 1000, price: rechargeCurrency === 'ARS' ? 100 : 4 })}
                   className="recharge-pack-card"
                   style={{
                     background: selectedRechargePack?.amount === 1000 ? '#f0f9ff' : 'white',
@@ -1507,13 +1507,13 @@ function UserProfile() {
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>1,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 1000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 1000 ? 'white' : '#0f172a' }}>
-                    {rechargeCurrency === 'ARS' ? '$1499' : '$4 (Soon)'}
+                    {rechargeCurrency === 'ARS' ? '$100' : '$4 (Soon)'}
                   </div>
                 </button>
 
                 {/* Pack 2 */}
                 <button 
-                  onClick={() => setSelectedRechargePack({ amount: 5000, price: rechargeCurrency === 'ARS' ? 4999 : 6 })}
+                  onClick={() => setSelectedRechargePack({ amount: 5000, price: rechargeCurrency === 'ARS' ? 100 : 6 })}
                   className="recharge-pack-card"
                   style={{
                     background: selectedRechargePack?.amount === 5000 ? '#f0f9ff' : 'white',
@@ -1538,13 +1538,13 @@ function UserProfile() {
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>5,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 5000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 5000 ? 'white' : '#0f172a' }}>
-                    {rechargeCurrency === 'ARS' ? '$4999' : '$6 (Soon)'}
+                    {rechargeCurrency === 'ARS' ? '$100' : '$6 (Soon)'}
                   </div>
                 </button>
 
                 {/* Pack 3 */}
                 <button 
-                  onClick={() => setSelectedRechargePack({ amount: 10000, price: rechargeCurrency === 'ARS' ? 8999 : 7 })}
+                  onClick={() => setSelectedRechargePack({ amount: 10000, price: rechargeCurrency === 'ARS' ? 100 : 7 })}
                   className="recharge-pack-card"
                   style={{
                     background: selectedRechargePack?.amount === 10000 ? '#f0f9ff' : 'white',
@@ -1565,7 +1565,7 @@ function UserProfile() {
                   <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>10,000</div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>créditos</div>
                   <div style={{ marginTop: '0.5rem', background: selectedRechargePack?.amount === 10000 ? '#0f172a' : '#f1f5f9', padding: '4px 12px', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 700, color: selectedRechargePack?.amount === 10000 ? 'white' : '#0f172a' }}>
-                    {rechargeCurrency === 'ARS' ? '$8999' : '$7 (Soon)'}
+                    {rechargeCurrency === 'ARS' ? '$100' : '$7 (Soon)'}
                   </div>
                 </button>
               </div>
