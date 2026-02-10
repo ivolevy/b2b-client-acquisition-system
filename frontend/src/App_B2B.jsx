@@ -10,7 +10,9 @@ import TemplateEditor from './components/TemplateEditor';
 import TemplateManager from './components/TemplateManager';
 import UserProfile from './components/UserProfile';
 import ToastContainer from './components/ToastContainer';
+import ToastContainer from './components/ToastContainer';
 import ProBackground from './components/ProBackground';
+import OfflineView from './components/OfflineView';
 const AdminPayments = React.lazy(() => import('./components/admin/AdminPayments'));
 import { ToastContainer as ReactToastifyContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -662,8 +664,25 @@ function AppB2B() {
     success("Resultados limpiados: Vista reiniciada.");
   };
 
+  // Connectivity State
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   return (
     <div className="app pro-theme">
+      {!isOnline && <OfflineView />}
       <ProBackground />
       
       <Navbar creditsInfo={creditsInfo} />

@@ -407,9 +407,6 @@ const LandingPage = () => {
                 <div className="module-lead">
                   {modules[activeModule].lead}
                 </div>
-                <button className="btn-primary" style={{ marginTop: '32px' }}>
-                  Empezar Ahora <FiArrowRight />
-                </button>
               </div>
               <div className="module-visual">
                 {modules[activeModule].visual}
@@ -438,9 +435,6 @@ const LandingPage = () => {
                    <div className="module-lead-mobile">
                      {mod.lead}
                    </div>
-                    <button className="btn-primary btn-sm btn-mobile-accordion">
-                      Empezar Ahora
-                    </button>
                    <div className="module-visual-mobile">
                       {mod.visual}
                    </div>

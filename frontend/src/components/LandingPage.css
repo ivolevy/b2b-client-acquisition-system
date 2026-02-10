@@ -1138,7 +1138,7 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 32px;
-    padding: 60px;
+    padding: 40px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.03);
     /* min-height: 550px; REMOVED for dynamic content adjustment */
     display: flex;
@@ -1338,7 +1338,8 @@
 /* OPEN VISUALS (No Boxes) */
 .visual-display-open {
     position: relative;
-    height: 400px;
+    height: auto;
+    min-height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2496,8 +2497,8 @@
     }
 
     .accordion-body.open {
-        max-height: 1000px;
-        /* Increased to avoid cutting tall content like Module 3 */
+        max-height: 2000px;
+        /* Increased to ensure all content fits */
         border-top: 1px solid var(--border);
     }
 

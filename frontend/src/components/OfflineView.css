@@ -1,0 +1,89 @@
+/* OfflineView.css */
+.offline-view-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.95);
+    /* Dark background with slight transparency */
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    /* Highest priority */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.offline-content {
+    background: rgba(30, 41, 59, 0.8);
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.offline-icon {
+    font-size: 64px;
+    color: #ef4444;
+    /* Red color for alert */
+    margin-bottom: 10px;
+    animation: pulse 2s infinite;
+}
+
+.offline-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #f8fafc;
+}
+
+.offline-message {
+    font-size: 1rem;
+    color: #94a3b8;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.offline-submessage {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 10px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

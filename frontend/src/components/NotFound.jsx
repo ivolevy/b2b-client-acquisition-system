@@ -9,51 +9,68 @@ const NotFound = () => {
   const [showModal, setShowModal] = useState(false);
 
   // Helper for contact items
-  const ContactItem = ({ icon: Icon, label, value, href, color }) => (
-    <a 
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem',
-        background: 'rgba(255, 255, 255, 0.03)',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        padding: '1rem',
-        borderRadius: '12px',
-        textDecoration: 'none',
-        transition: 'all 0.2s',
-        cursor: 'pointer'
-      }}
-      onMouseOver={(e) => {
-        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-        e.currentTarget.style.transform = 'translateY(-2px)';
-      }}
-      onMouseOut={(e) => {
-        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-        e.currentTarget.style.transform = 'translateY(0)';
-      }}
-    >
-      <div style={{
-        background: `rgba(${color}, 0.1)`,
-        color: `rgb(${color})`,
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1.2rem'
-      }}>
-        <Icon />
-      </div>
-      <div style={{ textAlign: 'left' }}>
-        <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '2px' }}>{label}</div>
-        <div style={{ color: '#fff', fontWeight: '500', fontSize: '0.95rem' }}>{value}</div>
-      </div>
-    </a>
-  );
+  const ContactItem = ({ icon: Icon, label, value, href, color, isCopy = false }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleClick = (e) => {
+      if (isCopy) {
+        e.preventDefault();
+        navigator.clipboard.writeText(value);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    };
+
+    return (
+      <a 
+        href={href}
+        target={isCopy ? undefined : "_blank"}
+        rel={isCopy ? undefined : "noopener noreferrer"}
+        onClick={handleClick}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          background: '#0f172a', // Darker inner background for contrast
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          padding: '1rem',
+          borderRadius: '16px', // Slightly rounder
+          textDecoration: 'none',
+          transition: 'all 0.2s',
+          cursor: 'pointer',
+          position: 'relative'
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+          // Removed hover lift effect as requested
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.background = '#0f172a';
+        }}
+      >
+        <div style={{
+          background: `rgba(${color}, 0.1)`,
+          color: `rgb(${color})`,
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1.2rem'
+        }}>
+          <Icon />
+        </div>
+        <div style={{ textAlign: 'left', flex: 1 }}>
+          <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '2px' }}>{label}</div>
+          <div style={{ color: '#fff', fontWeight: '500', fontSize: '0.95rem' }}>
+            {value}
+            {copied && <span style={{ marginLeft: '8px', fontSize: '0.75rem', color: '#4ade80' }}>(Copiado)</span>}
+          </div>
+        </div>
+      </a>
+    );
+  };
 
   return (
     <div style={{
@@ -199,66 +216,90 @@ const NotFound = () => {
       {showModal && (
         <div style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.7)',
-          backdropFilter: 'blur(4px)',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000,
-          animation: 'fadeIn 0.2s ease'
+          animation: 'fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
         onClick={(e) => {
            if(e.target === e.currentTarget) setShowModal(false);
         }}
         >
           <div style={{
-            background: '#1e293b',
+            background: '#1e293b', // Solid Slate-800
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '20px',
-            padding: '2rem',
-            width: '90%',
-            maxWidth: '400px',
+            borderRadius: '24px',
+            padding: '2.5rem',
+            width: '100%',
+            maxWidth: '420px',
             position: 'relative',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-            animation: 'scaleIn 0.2s ease'
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05)', // Deep shadow
+            animation: 'scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.5rem'
           }}>
-            <button 
-              onClick={() => setShowModal(false)}
-              style={{
-                position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                background: 'transparent',
-                border: 'none',
-                color: '#94a3b8',
-                cursor: 'pointer',
-                padding: '0.5rem',
+            <div style={{
                 display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <FiX size={24} />
-            </button>
-
-            <h3 style={{
-              margin: '0 0 1.5rem 0',
-              fontSize: '1.25rem',
-              color: '#fff',
-              textAlign: 'center'
-            }}>Contacto del Administrador</h3>
+                marginBottom: '0.5rem'
+            }}>
+                <h3 style={{
+                  margin: 0,
+                  fontSize: '1.25rem',
+                  fontWeight: '700',
+                  color: '#fff',
+                  letterSpacing: '-0.01em'
+                }}>Contacto de Soporte</h3>
+                
+                <button 
+                  onClick={() => setShowModal(false)}
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: 'none',
+                    color: '#94a3b8',
+                    cursor: 'pointer',
+                    padding: '8px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                      e.currentTarget.style.color = '#fff';
+                  }}
+                  onMouseOut={(e) => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.color = '#94a3b8';
+                  }}
+                >
+                  <FiX size={20} />
+                </button>
+            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <ContactItem 
+               <ContactItem 
                 icon={FiMail} 
-                label="Correo Electrónico" 
-                value="ivo.levy03@gmail.com" 
-                href="mailto:ivo.levy03@gmail.com"
+                label="Soporte Técnico" 
+                value="solutionsdota@gmail.com" 
+                href="#"
                 color="244, 63, 94" // pink
+                isCopy={true}
+              />
+               <ContactItem 
+                icon={FiMail} 
+                label="CTO" 
+                value="ivo.levy03@gmail.com" 
+                href="#"
+                color="168, 85, 247" // purple
+                isCopy={true}
               />
               <ContactItem 
                 icon={FiPhone} 
@@ -274,6 +315,16 @@ const NotFound = () => {
                 href="https://www.linkedin.com/in/ivan-levy/"
                 color="59, 130, 246" // blue
               />
+            </div>
+            
+            <div style={{
+                textAlign: 'center',
+                fontSize: '0.75rem',
+                color: '#64748b',
+                marginTop: '0.5rem'
+            }}>
+                <span style={{ display: 'inline-block', width: '8px', height: '8px', background: '#22c55e', borderRadius: '50%', marginRight: '8px' }}></span>
+                Disponible 24/7
             </div>
           </div>
           <style>{`
