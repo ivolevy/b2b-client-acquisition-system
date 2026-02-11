@@ -44,6 +44,16 @@ const LandingPage = () => {
           <p style={{ margin: 0 }}>Solo eliges a quién quieres venderle. El sistema hace el resto.</p>
         </>
       ),
+      visual: (
+        <div className="visual-display-open">
+          <FiMapPin className="hero-icon-faded" />
+          <div className="data-stream-vertical">
+            <div className="stream-item"><span>Consultora Tech</span> <small>Buenos Aires</small></div>
+            <div className="stream-item"><span>Estudio Jurídico</span> <small>CABA</small></div>
+            <div className="stream-item"><span>Agencia Marketing</span> <small>Córdoba</small></div>
+          </div>
+        </div>
+      )
     },
     {
       id: 'enrich',
