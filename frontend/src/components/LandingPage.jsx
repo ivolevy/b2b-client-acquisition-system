@@ -36,12 +36,12 @@ const LandingPage = () => {
   const modules = [
     {
       id: 'search',
-      title: 'Motor de Búsqueda con IA',
+      title: 'Búsqueda inteligente',
       icon: <FiMapPin />,
       lead: (
         <>
-          <p style={{ marginBottom: '16px' }}>Creamos una IA que busca leads nuevos en tiempo real en toda la web.</p>
-          <p style={{ margin: 0 }}>Solo ingresás rubro, dirección y radio, y el sistema encuentra empresas que coincidan.</p>
+          <p style={{ marginBottom: '16px' }}>La plataforma encuentra negocios que coinciden con tu rubro, ubicación y radio en segundos.</p>
+          <p style={{ margin: 0 }}>Solo eliges a quién quieres venderle. El sistema hace el resto.</p>
         </>
       ),
       visual: (
@@ -57,12 +57,12 @@ const LandingPage = () => {
     },
     {
       id: 'enrich',
-      title: 'Enriquecimiento de Datos',
+      title: 'Datos verificados',
       icon: <FiDatabase />,
       lead: (
         <>
-          <p style={{ marginBottom: '16px' }}>El sistema analiza la presencia digital de cada prospecto para validar la calidad de sus datos antes de procesarlo.</p>
-          <p style={{ margin: 0 }}>Emails verificados para reducir rebotes, teléfonos existentes y demás.</p>
+          <p style={{ marginBottom: '16px' }}>Analizamos cada empresa para obtener información real y actualizada.</p>
+          <p style={{ margin: 0 }}>Emails válidos, teléfonos activos y perfiles digitales confiables para reducir rebotes.</p>
         </>
       ),
       visual: (
@@ -72,9 +72,14 @@ const LandingPage = () => {
     },
     {
       id: 'reach',
-      title: 'Contacto Masivo',
+      title: 'Mensajes automáticos',
       icon: <FiZap />,
-      lead: null,
+      lead: (
+        <>
+          <p style={{ marginBottom: '16px' }}>Contacta a cientos de prospectos con emails y WhatsApps personalizados.</p>
+          <p style={{ margin: 0 }}>Conecta tus cuentas de Gmail u Outlook y envía con alta entregabilidad, sin complicaciones.</p>
+        </>
+      ),
       visual: (
         <div className="visual-display-open dual-split">
           <div className="split-side email-side">
@@ -111,11 +116,12 @@ const LandingPage = () => {
     },
     {
       id: 'export',
-      title: 'Exportación y Reportes',
+      title: 'Listas y métricas',
       icon: <FiZap />,
       lead: (
         <>
-          <p style={{ margin: 0 }}>Tus datos son tuyos. Descargá listas de los leads obtenidos limpias y listas para usar en cualquier plataforma.</p>
+          <p style={{ marginBottom: '16px' }}>Descarga tus contactos o analiza resultados en tiempo real.</p>
+          <p style={{ margin: 0 }}>Más respuestas, más oportunidades, mejores decisiones.</p>
         </>
       ),
       visual: (
@@ -321,11 +327,11 @@ const LandingPage = () => {
         <div className="container hero-content">
           <div className="hero-text">
             <h1>
-              Gana mas dinero <br />
-              <span className="text-gradient">con menos esfuerzo</span>
+              tu próxima venta <br />
+              <span className="text-gradient">empieza acá</span>
             </h1>
             <p className="hero-subtext">
-              Extrae leads de Google Maps enriquecelos con IA y contáctalos masivamente. 100% Automático.
+              Encuentra clientes validados en Google Maps con IA y contáctalos masivamente. 100% Automático.
             </p>
             <div className="hero-buttons">
               <button className="btn-primary btn-lg">
@@ -374,7 +380,7 @@ const LandingPage = () => {
   <section id="features" className="features-selector-section">
     <div className="container">
       <div className="section-header center">
-        <h2>Simples 4 pasos que te hacen ganar mas plata con menos esfuerzo</h2>
+        <h2>Todo lo que necesitas para convertir Google Maps en clientes</h2>
       </div>
       {/* Desktop View */}
       <div className="selector-grid">
@@ -469,197 +475,198 @@ const LandingPage = () => {
             {/* ORIGINAL SET */}
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar blue">CM</div>
+                <div className="author-avatar blue">DS</div>
                 <div className="author-info">
-                  <h4>Carlos M.</h4>
-                  <span>CEO @ TechStart</span>
+                  <h4>Diego Suárez</h4>
+                  <span>Founder @ Nexo Comercial · Consultoría B2B</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "Incrementamos nuestros leads cualificados un 400% en el primer mes. La calidad de los datos es impresionante."
+                “Antes hacíamos la búsqueda de prospectos a mano. Hoy contactamos 10 veces más empresas por semana y duplicamos las reuniones mensuales.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar violet">AR</div>
+                <div className="author-avatar violet">MF</div>
                 <div className="author-info">
-                  <h4>Ana R.</h4>
-                  <span>Head of Sales @ GrowthAgency</span>
+                  <h4>Mariana Ferreyra</h4>
+                  <span>Gerente Comercial @ Textil Aurora · Industria Textil</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "La automatización de emails nos ahorró contratar a 2 SDRs. Se paga solo en la primera semana."
+                “Nos ayudó a llegar a nuevos distribuidores en todo el país. En dos meses generamos más contactos que en todo el semestre anterior.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar green">DS</div>
+                <div className="author-avatar green">CB</div>
                 <div className="author-info">
-                  <h4>Diego S.</h4>
-                  <span>Founder @ B2B Solutions</span>
+                  <h4>Carlos Benítez</h4>
+                  <span>Director @ Metalúrgica Delta · Fábrica industrial</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "La mejor herramienta para prospección B2B en LATAM. El soporte es increíble y la plataforma vuela."
+                “La segmentación por zona fue clave. En pocas semanas abrimos conversaciones con clientes que antes eran imposibles de alcanzar.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar blue">JP</div>
+                <div className="author-avatar blue">SL</div>
                 <div className="author-info">
-                  <h4>Juan P.</h4>
-                  <span>Director @ ScaleUp</span>
+                  <h4>Sofía López</h4>
+                  <span>CMO @ MarketBridge · Servicios Financieros</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "Pudimos escalar nuestra agencia sin perder calidad en el trato. La verificación de emails es clave."
+                “Pasamos de 6 a 22 demos por semana. La personalización automática hace la diferencia.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar violet">SL</div>
+                <div className="author-avatar violet">LM</div>
                 <div className="author-info">
-                  <h4>Sofia L.</h4>
-                  <span>CMO @ MarketFit</span>
+                  <h4>Lucía Martínez</h4>
+                  <span>Founder @ Estudio Prisma · Diseño y Branding</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "Una máquina de generar reuniones. Pasamos de 5 a 25 demos semanales en un solo mes."
+                “Más del 70% de nuestros clientes actuales llegaron gracias a las campañas que lanzamos desde la plataforma.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar green">DK</div>
+                <div className="author-avatar green">GT</div>
                 <div className="author-info">
-                  <h4>David K.</h4>
-                  <span>CTO @ DevSolutions</span>
+                  <h4>Gabriel Torres</h4>
+                  <span>Responsable de Ventas @ EduPro · Proveedor de colegios</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "La integración API nos ahorró semanas de desarrollo. Excelente documentación."
+                “Encontramos instituciones que no estaban en nuestras bases. Hoy todas las semanas agendamos reuniones nuevas.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar blue">LM</div>
+                <div className="author-avatar blue">MR</div>
                 <div className="author-info">
-                  <h4>Lucia M.</h4>
-                  <span>Founder @ DesignStudio</span>
+                  <h4>Martín Ríos</h4>
+                  <span>Head of Sales @ Crece Digital · Agencia de Performance</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "Encontramos el 80% de nuestros clientes actuales gracias a esta plataforma."
+                “Automatizamos el primer contacto y el equipo ahora se enfoca solo en cerrar. Aumentamos un 40% las oportunidades en el primer mes.”
               </p>
             </div>
 
             {/* DUPLICATE SET FOR LOOP */}
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar blue">CM</div>
+                <div className="author-avatar blue">DS</div>
                 <div className="author-info">
-                  <h4>Carlos M.</h4>
-                  <span>CEO @ TechStart</span>
+                  <h4>Diego Suárez</h4>
+                  <span>Founder @ Nexo Comercial · Consultoría B2B</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "Incrementamos nuestros leads cualificados un 400% en el primer mes. La calidad de los datos es impresionante."
+                “Antes hacíamos la búsqueda de prospectos a mano. Hoy contactamos 10 veces más empresas por semana y duplicamos las reuniones mensuales.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar violet">AR</div>
+                <div className="author-avatar violet">MF</div>
                 <div className="author-info">
-                  <h4>Ana R.</h4>
-                  <span>Head of Sales @ GrowthAgency</span>
+                  <h4>Mariana Ferreyra</h4>
+                  <span>Gerente Comercial @ Textil Aurora · Industria Textil</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "La automatización de emails nos ahorró contratar a 2 SDRs. Se paga solo en la primera semana."
+                “Nos ayudó a llegar a nuevos distribuidores en todo el país. En dos meses generamos más contactos que en todo el semestre anterior.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar green">DS</div>
+                <div className="author-avatar green">CB</div>
                 <div className="author-info">
-                  <h4>Diego S.</h4>
-                  <span>Founder @ B2B Solutions</span>
+                  <h4>Carlos Benítez</h4>
+                  <span>Director @ Metalúrgica Delta · Fábrica industrial</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "La mejor herramienta para prospección B2B en LATAM. El soporte es increíble y la plataforma vuela."
+                “La segmentación por zona fue clave. En pocas semanas abrimos conversaciones con clientes que antes eran imposibles de alcanzar.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar blue">JP</div>
+                <div className="author-avatar blue">SL</div>
                 <div className="author-info">
-                  <h4>Juan P.</h4>
-                  <span>Director @ ScaleUp</span>
+                  <h4>Sofía López</h4>
+                  <span>CMO @ MarketBridge · Servicios Financieros</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "Pudimos escalar nuestra agencia sin perder calidad en el trato. La verificación de emails es clave."
+                “Pasamos de 6 a 22 demos por semana. La personalización automática hace la diferencia.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar violet">SL</div>
+                <div className="author-avatar violet">LM</div>
                 <div className="author-info">
-                  <h4>Sofia L.</h4>
-                  <span>CMO @ MarketFit</span>
+                  <h4>Lucía Martínez</h4>
+                  <span>Founder @ Estudio Prisma · Diseño y Branding</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
+                “Más del 70% de nuestros clientes actuales llegaron gracias a las campañas que lanzamos desde la plataforma.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar green">DK</div>
+                <div className="author-avatar green">GT</div>
                 <div className="author-info">
-                  <h4>David K.</h4>
-                  <span>CTO @ DevSolutions</span>
+                  <h4>Gabriel Torres</h4>
+                  <span>Responsable de Ventas @ EduPro · Proveedor de colegios</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "La integración API nos ahorró semanas de desarrollo. Excelente documentación."
+                “Encontramos instituciones que no estaban en nuestras bases. Hoy todas las semanas agendamos reuniones nuevas.”
               </p>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
-                <div className="author-avatar blue">LM</div>
+                <div className="author-avatar blue">MR</div>
                 <div className="author-info">
-                  <h4>Lucia M.</h4>
-                  <span>Founder @ DesignStudio</span>
+                  <h4>Martín Ríos</h4>
+                  <span>Head of Sales @ Crece Digital · Agencia de Performance</span>
                 </div>
               </div>
               <div className="testimonial-stars">★★★★★</div>
               <p className="testimonial-text">
-                "Encontramos el 80% de nuestros clientes actuales gracias a esta plataforma."
+                “Automatizamos el primer contacto y el equipo ahora se enfoca solo en cerrar. Aumentamos un 40% las oportunidades en el primer mes.”
               </p>
             </div>
           </div>
@@ -674,7 +681,7 @@ const LandingPage = () => {
       <section id="pricing" className="pricing-section-new">
         <div className="container">
           <div className="section-header center" style={{ marginBottom: '40px' }}>
-            <h2>Elige el plan para tu crecimiento</h2>
+            <h2>Elige el plan que te ayudará a conseguir más clientes</h2>
             <p>
 
             </p>
