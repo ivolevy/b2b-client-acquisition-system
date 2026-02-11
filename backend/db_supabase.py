@@ -1222,6 +1222,7 @@ def cancel_user_plan(user_id: str) -> bool:
         # Actualizar estado a cancelled
         execute_with_retry(lambda c: c.table('users').update({
             "subscription_status": "cancelled",
+            "credits": 0  # Zero out credits upon cancellation
             # Opcional: Podríamos borrar next_credit_reset si queremos que no se renueve más ni siquiera al final del ciclo
             # "next_credit_reset": None 
         }).eq('id', user_id))
