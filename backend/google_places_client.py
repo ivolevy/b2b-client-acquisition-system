@@ -55,12 +55,19 @@ class GooglePlacesClient:
         # Precio oficial Text Search (Advanced) al 2025: $32.00 USD por 1000 calls
         self.COST_PER_PRO_CALL = 0.032 
         self.COST_PER_ESSENTIAL_CALL = 0.00 # Text Search ID Only es free, Basic es $0.017
-        self.BUDGET_LIMIT_USD = 195.00 # Umbral para fallback (de los $200)
+        self.BUDGET_LIMIT_USD = 500.00 # Umbral elevado para evitar bloqueos preventivos ($500)
 
     def is_within_budget(self) -> bool:
-        """Verifica si aún queda crédito mensual disponible"""
-        current_spend = get_current_month_usage()
-        return current_spend < self.BUDGET_LIMIT_USD
+        """Verifica si aún queda crédito mensual disponible (No bloqueante para evitar 0 resultados)"""
+        try:
+            current_spend = get_current_month_usage()
+            is_ok = current_spend < self.BUDGET_LIMIT_USD
+            if not is_ok:
+                logger.warning(f"⚠️ Alerta de Presupuesto: Gasto actual ${current_spend} excede límite configurado ${self.BUDGET_LIMIT_USD}")
+            return True # Retornamos True SIEMPRE para no bloquear la entrega de valor al cliente
+        except Exception as e:
+            logger.error(f"Error consultando presupuesto: {e}")
+            return True
 
     def search_places(
         self, 

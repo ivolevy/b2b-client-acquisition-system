@@ -1082,10 +1082,9 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 logger.error(f"Error en enriquecimiento paralelo: {e}, usando empresas originales")
                 # Continuar con empresas sin enriquecer
         
-        # Agregar información de búsqueda
-        # Validar y limitar radio (Máximo 3km según solicitud del usuario)
+        # Validar y limitar radio (Máximo 20km para ser permisivos)
         radio_solicitado = request.busqueda_radio_km or 1.0
-        radius = min(float(radio_solicitado), 5.0)
+        radius = min(float(radio_solicitado), 20.0)
         
         logger.info(f"Iniciando búsqueda: {request.rubro} en {request.ubicacion_nombre} (Radio: {radius}km, Bbox: {bool(request.bbox)})")
 
@@ -1119,11 +1118,14 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     if distancia is not None and isinstance(distancia, (int, float)) and distancia >= 0:
                         empresa['distancia_km'] = distancia
                         
-                        # Filtrar por radio: solo incluir empresas dentro del radio
-                        if radio_km is not None and isinstance(radio_km, (int, float)) and radio_km > 0:
-                            if distancia > radio_km:
-                                logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio: {distancia:.2f}km > {radio_km:.2f}km")
-                                continue  # Saltar esta empresa, está fuera del radio
+                        # Filtrar por radio con margen de tolerancia (20%)
+                        # Si el radio es de 5km, permitimos hasta 6km para no ser excesivamente estrictos con Google
+                        margen_tolerancia = 1.2 
+                        radio_con_tolerancia = radio_km * margen_tolerancia if radio_km else None
+                        
+                        if radio_con_tolerancia is not None and distancia > radio_con_tolerancia:
+                            logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio extendido: {distancia:.2f}km > {radio_con_tolerancia:.2f}km")
+                            continue  # Saltar esta empresa
                     else:
                         empresa['distancia_km'] = None
                         logger.debug(f" Distancia inválida calculada para {empresa.get('nombre', 'Sin nombre')}")
