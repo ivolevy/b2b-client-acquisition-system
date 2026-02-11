@@ -739,15 +739,35 @@
     }
 
     .hero-text h1 {
-        font-size: 3.5rem;
-        /* Increased from 3rem */
-        line-height: 1.1;
+        font-size: 4rem;
+        /* Increased from 3.5rem */
+        line-height: 1;
+        letter-spacing: -0.04em;
     }
 
     .hero-subtext {
-        font-size: 1.1rem;
-        /* Decreased from 1.25rem */
-        margin-bottom: 40px;
+        font-size: 1rem;
+        /* Decreased from 1.1rem */
+        margin-bottom: 32px;
+        padding: 0 10px;
+    }
+
+    .hero-buttons {
+        gap: 12px;
+    }
+
+    .hero-buttons .btn-primary,
+    .hero-buttons .btn-secondary {
+        padding: 10px 18px;
+        /* Smaller padding */
+        font-size: 0.85rem;
+        /* Smaller font */
+    }
+
+    .trust-logos {
+        font-size: 0.7rem;
+        /* Much smaller fixed size for mobile */
+        gap: 16px;
     }
 
     .card-1 {
