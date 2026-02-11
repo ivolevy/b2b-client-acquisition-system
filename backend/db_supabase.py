@@ -1083,7 +1083,7 @@ def log_api_call(
         if user_id:
             data['user_id'] = user_id
             
-        execute_with_retry(lambda c: c.table('api_call_logs').insert(data), is_admin=False)
+        execute_with_retry(lambda c: c.table('api_call_logs').insert(data), is_admin=True)
         return True
     except Exception as e:
         logger.error(f"Error registrando log de API: {e}")
