@@ -140,7 +140,8 @@ function UserProfile() {
     if (!user?.id) return;
     setCreditsLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/api/users/${user.id}/credits`);
+      // Cache busting
+      const response = await axios.get(`${API_URL}/api/users/${user.id}/credits?_t=${Date.now()}`);
       setCreditsInfo(response.data);
     } catch (error) {
       console.error('Error fetching credits:', error);
