@@ -777,8 +777,11 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
         MAX_LEADS = 60
         
         rubro_obj = RUBROS_DISPONIBLES.get(request.rubro.lower())
-        keywords = rubro_obj["keywords"] if rubro_obj and isinstance(rubro_obj, dict) else [request.rubro]
-        search_queries = [f"{kw} en {request.busqueda_ubicacion_nombre}" for kw in keywords]
+        if c_lat and c_lng:
+            # Si tenemos coordenadas, no ensuciar la query con texto geográfico
+            search_queries = [kw for kw in keywords]
+        else:
+            search_queries = [f"{kw} en {request.busqueda_ubicacion_nombre}" for kw in keywords]
         emitted_count = 0
 
         logger.info(f"Iniciando búsqueda stream optimizada para: {request.rubro} | Límite: {MAX_LEADS}")
@@ -985,11 +988,15 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             # Ejecutar búsqueda en Google (Pasada exhaustiva paralela para 100% cobertura)
             rubro_info = RUBROS_DISPONIBLES.get(request.rubro, {"nombre": request.rubro, "keywords": []})
             
-            # Construir set de búsquedas: Nombre del rubro + TODAS las keywords individuales
-            search_queries = [rubro_info['nombre']]
-            if rubro_info.get('keywords'):
-                # Usamos todas las keywords para asegurar cobertura total de sub-rubros y sinónimos
-                search_queries.extend(rubro_info['keywords'])
+            # Construir set de búsquedas
+            if request.busqueda_centro_lat and request.busqueda_centro_lng:
+                search_queries = [rubro_info['nombre']]
+                if rubro_info.get('keywords'):
+                    search_queries.extend(rubro_info['keywords'])
+            else:
+                search_queries = [f"{rubro_info['nombre']} en {request.ubicacion_nombre}"]
+                if rubro_info.get('keywords'):
+                    search_queries.extend([f"{kw} en {request.ubicacion_nombre}" for kw in rubro_info['keywords']])
             
             # Eliminar duplicados en las queries por si acaso
             search_queries = list(dict.fromkeys(search_queries))
@@ -1082,9 +1089,10 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 logger.error(f"Error en enriquecimiento paralelo: {e}, usando empresas originales")
                 # Continuar con empresas sin enriquecer
         
-        # Validar y limitar radio (Máximo 20km para ser permisivos)
+        # Agregar información de búsqueda
+        # Validar y limitar radio (Máximo 3km según solicitud del usuario)
         radio_solicitado = request.busqueda_radio_km or 1.0
-        radius = min(float(radio_solicitado), 20.0)
+        radius = min(float(radio_solicitado), 5.0)
         
         logger.info(f"Iniciando búsqueda: {request.rubro} en {request.ubicacion_nombre} (Radio: {radius}km, Bbox: {bool(request.bbox)})")
 
@@ -1118,14 +1126,11 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     if distancia is not None and isinstance(distancia, (int, float)) and distancia >= 0:
                         empresa['distancia_km'] = distancia
                         
-                        # Filtrar por radio con margen de tolerancia (20%)
-                        # Si el radio es de 5km, permitimos hasta 6km para no ser excesivamente estrictos con Google
-                        margen_tolerancia = 1.2 
-                        radio_con_tolerancia = radio_km * margen_tolerancia if radio_km else None
-                        
-                        if radio_con_tolerancia is not None and distancia > radio_con_tolerancia:
-                            logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio extendido: {distancia:.2f}km > {radio_con_tolerancia:.2f}km")
-                            continue  # Saltar esta empresa
+                        # Filtrar por radio: solo incluir empresas dentro del radio
+                        if radio_km is not None and isinstance(radio_km, (int, float)) and radio_km > 0:
+                            if distancia > radio_km:
+                                logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio: {distancia:.2f}km > {radio_km:.2f}km")
+                                continue  # Saltar esta empresa, está fuera del radio
                     else:
                         empresa['distancia_km'] = None
                         logger.debug(f" Distancia inválida calculada para {empresa.get('nombre', 'Sin nombre')}")
