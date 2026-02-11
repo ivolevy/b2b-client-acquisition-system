@@ -463,9 +463,18 @@ def db_update_template(template_id: str, user_id: str, updates: Dict) -> bool:
     """Actualiza un template existente si pertenece al usuario"""
     client = get_supabase_admin()
     if not client: return False
-        db_updates['updated_at'] = datetime.now().isoformat()
-        res = client.table('email_templates').update(db_updates).eq('id', template_id).eq('user_id', user_id).execute()
-        return bool(res.data)
+    # Map fields from API/Frontend to DB schema
+    db_updates = {}
+    for key, value in updates.items():
+        if value is not None: # Only update provided non-null fields
+            if key == 'name' or key == 'nombre':
+                db_updates['nombre'] = value
+            else:
+                db_updates[key] = value
+
+    db_updates['updated_at'] = datetime.now().isoformat()
+    res = client.table('email_templates').update(db_updates).eq('id', template_id).eq('user_id', user_id).execute()
+    return bool(res.data)
 
 def db_delete_template(template_id: str, user_id: str) -> bool:
     """Elimina un template si pertenece al usuario"""
