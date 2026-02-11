@@ -849,9 +849,9 @@ function UserProfile() {
                     <div className="minimalist-balance-row">
                       {creditsInfo.extra_credits > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                          <span className="minimalist-balance-value">{creditsInfo.credits || 0}</span>
+                          <span className="minimalist-balance-value">{creditsInfo.monthly_credits} <span style={{ fontSize: '1rem', color: '#94a3b8' }}>/ {creditsInfo.total_credits}</span></span>
                           <span className="minimalist-balance-label" style={{ fontSize: '0.85rem' }}>
-                            {creditsInfo.monthly_credits} Plan + <span style={{ color: '#10b981', fontWeight: 600 }}>{creditsInfo.extra_credits} Extra</span>
+                            Plan Mensual + <span style={{ color: '#10b981', fontWeight: 600 }}>{creditsInfo.extra_credits} Extra</span>
                           </span>
                         </div>
                       ) : (
@@ -870,12 +870,12 @@ function UserProfile() {
                   <div className="minimalist-progress-wrapper">
                     <div className="minimalist-progress-track">
                       <div 
-                        className={`minimalist-progress-fill ${(creditsInfo.credits || 0) < ((creditsInfo.total_credits || 1500) * 0.2) ? 'low' : ''}`}
-                        style={{ width: `${Math.min(100, Math.round(((creditsInfo.credits || 0) / (creditsInfo.total_credits || 1500)) * 100))}%` }}
+                        className={`minimalist-progress-fill ${(creditsInfo.monthly_credits || 0) < ((creditsInfo.total_credits || 1500) * 0.2) ? 'low' : ''}`}
+                        style={{ width: `${Math.min(100, Math.round(((creditsInfo.monthly_credits || 0) / (creditsInfo.total_credits || 1500)) * 100))}%` }}
                       ></div>
                     </div>
                     <div className="minimalist-progress-info">
-                      <span>{Math.max(0, Math.round(((creditsInfo.total_credits - creditsInfo.credits) / creditsInfo.total_credits) * 100))}% consumido</span>
+                      <span>{Math.max(0, Math.round(((creditsInfo.total_credits - (creditsInfo.monthly_credits || 0)) / creditsInfo.total_credits) * 100))}% consumido</span>
                       <span className="renewal-badge">
                         Renovación: {creditsInfo.next_reset ? new Date(creditsInfo.next_reset).toLocaleDateString() : 'Pendiente'}
                       </span>
