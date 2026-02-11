@@ -2904,8 +2904,16 @@ async def admin_update_user_endpoint(request: AdminUpdateUserRequest):
         logger.error(f"Error en /admin/update-user: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# Debug Router
+from backend.debug_user_endpoints import router as debug_router
+app.include_router(debug_router)
+
 if __name__ == "__main__":
     import uvicorn
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
     print("""
     ╔══════════════════════════════════════════════════╗
     ║   B2B CLIENT ACQUISITION API - INICIANDO...      ║
@@ -2913,6 +2921,5 @@ if __name__ == "__main__":
     ║   Sistema de captación de clientes por rubro    ║
     ║   Enfoque: Empresas B2B con datos validados     ║
     ╚══════════════════════════════════════════════════╝
-    """)
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
 
