@@ -22,7 +22,7 @@ function UserProfile() {
     return () => document.body.classList.remove('profile-page-active');
   }, []);
 
-  const [creditsInfo, setCreditsInfo] = useState({});
+  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, next_reset: null, subscription_status: 'active' });
   const isCancelled = creditsInfo?.subscription_status === 'cancelled';
   const [activeTab, setActiveTab] = useState('info'); // Will be updated by useEffect
   
@@ -63,7 +63,6 @@ function UserProfile() {
   const [authLoading, setAuthLoading] = useState(false);
   const [rechargeCurrency, setRechargeCurrency] = useState('ARS'); // 'ARS' or 'USD'
 
-  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, next_reset: null, subscription_status: 'active' });
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
