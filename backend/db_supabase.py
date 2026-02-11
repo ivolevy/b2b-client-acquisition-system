@@ -1118,7 +1118,7 @@ def get_user_credits(user_id: str) -> Dict:
         return {"credits": 0, "next_reset": None}
         
     try:
-        res = execute_with_retry(lambda c: c.table('users').select('credits, next_credit_reset, plan, subscription_status').eq('id', user_id), is_admin=False)
+        res = execute_with_retry(lambda c: c.table('users').select('credits, next_credit_reset, plan, subscription_status').eq('id', user_id), is_admin=True)
         if res.data:
             user_data = res.data[0]
             plan_id = user_data.get('plan', 'starter')

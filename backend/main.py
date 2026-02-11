@@ -2905,13 +2905,8 @@ async def admin_update_user_endpoint(request: AdminUpdateUserRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Debug Router
-from backend.debug_user_endpoints import router as debug_router
-app.include_router(debug_router)
-
 if __name__ == "__main__":
     import uvicorn
-    import os
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
     print("""
