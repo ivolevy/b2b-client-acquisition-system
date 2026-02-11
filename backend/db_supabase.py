@@ -439,26 +439,25 @@ def db_get_templates(user_id: str, tipo: Optional[str] = None) -> List[Dict]:
         logger.error(f"Error db_get_templates: {e}")
         return []
 
-def db_create_template(user_id: str, data: Dict) -> Optional[str]:
-    """Crea un nuevo template en la base de datos"""
+def db_create_template(user_id: str, data: Dict) -> str:
+    """Crea un nuevo template en la base de datos (Raise exception on error)"""
     client = get_supabase_admin()
-    if not client: return None
-    try:
-        insert_data = {
-            "user_id": user_id,
-            "nombre": data.get('nombre'),
-            "subject": data.get('subject'),
-            "body_html": data.get('body_html'),
-            "body_text": data.get('body_text'),
-            "type": data.get('type', 'email'),
-            "es_default": False,
-            "updated_at": datetime.now().isoformat()
-        }
-        res = client.table('email_templates').insert(insert_data).execute()
-        return res.data[0]['id'] if res.data else None
-    except Exception as e:
-        logger.error(f"Error db_create_template: {e}")
-        return None
+    if not client: raise Exception("Error de conexión con base de datos")
+    
+    insert_data = {
+        "user_id": user_id,
+        "nombre": data.get('nombre'),
+        "subject": data.get('subject'),
+        "body_html": data.get('body_html'),
+        "body_text": data.get('body_text'),
+        "type": data.get('type', 'email'),
+        "es_default": False,
+        "updated_at": datetime.now().isoformat()
+    }
+    res = client.table('email_templates').insert(insert_data).execute()
+    if res.data:
+        return res.data[0]['id']
+    raise Exception("No se recibieron datos de la inserción")
 
 def db_update_template(template_id: str, user_id: str, updates: Dict) -> bool:
     """Actualiza un template existente si pertenece al usuario"""

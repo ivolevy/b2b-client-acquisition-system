@@ -1807,13 +1807,20 @@ async def crear_template_endpoint(data: TemplateCreateRequest):
                 "type": data.type
             }
         )
-        if not template_id:
-            raise HTTPException(status_code=400, detail="Error creando template.")
         return {
             "success": True,
             "message": "Template creado exitosamente",
             "template_id": template_id
         }
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_str = str(e).lower()
+        if "23505" in error_str or "already exists" in error_str:
+            raise HTTPException(status_code=400, detail="Ya existe una plantilla con ese nombre. Por favor elegí otro.")
+            
+        logger.error(f"Error creando template: {e}")
+        raise HTTPException(status_code=500, detail=f"Error creando template: {str(e)}")
     except HTTPException:
         raise
     except Exception as e:
