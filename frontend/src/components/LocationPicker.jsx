@@ -43,7 +43,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
   });
 
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [radius, setRadius] = useState(5000); // 5km por defecto para evitar error setRadius: not a number
+  const [radius, setRadius] = useState(''); // "Selecciona un radio" por defecto
   const [mapCenter, setMapCenter] = useState({ lat: -34.6037, lng: -58.3816 }); // Buenos Aires por defecto
   const [mapZoom, setMapZoom] = useState(12);
   const [map, setMap] = useState(null);
@@ -252,11 +252,11 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
   const handleLocationSelect = (latlng, ubicacionNombre = null) => {
     setSelectedLocation(latlng);
 
-    const bbox = calculateBoundingBox(latlng.lat, latlng.lng, radius);
+    const bbox = radius ? calculateBoundingBox(latlng.lat, latlng.lng, radius) : null;
 
     onLocationChange({
       center: latlng,
-      radius: radius,
+      radius: radius || 0,
       bbox: bbox,
       ubicacion_nombre: ubicacionNombre || searchQuery || `Ubicación (${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)})`
     });
@@ -265,7 +265,7 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
   const handleRadiusChange = (newRadius) => {
     setRadius(newRadius);
 
-    if (selectedLocation) {
+    if (selectedLocation && newRadius) {
       const bbox = calculateBoundingBox(selectedLocation.lat, selectedLocation.lng, newRadius);
       onLocationChange({
         center: selectedLocation,
@@ -693,17 +693,19 @@ function LocationPicker({ onLocationChange, initialLocation, rubroSelect = null 
             {selectedLocation && (
               <>
                 <Marker position={{ lat: selectedLocation.lat, lng: selectedLocation.lng }} />
-                <Circle
-                  center={{ lat: selectedLocation.lat, lng: selectedLocation.lng }}
-                  radius={radius}
-                  options={{
-                    strokeColor: '#667eea',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: '#667eea',
-                    fillOpacity: 0.2,
-                  }}
-                />
+                {radius && (
+                  <Circle
+                    center={{ lat: selectedLocation.lat, lng: selectedLocation.lng }}
+                    radius={radius}
+                    options={{
+                      strokeColor: '#667eea',
+                      strokeOpacity: 0.8,
+                      strokeWeight: 2,
+                      fillColor: '#667eea',
+                      fillOpacity: 0.2,
+                    }}
+                  />
+                )}
               </>
             )}
           </GoogleMap>

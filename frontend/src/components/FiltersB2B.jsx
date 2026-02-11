@@ -84,8 +84,8 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
       return;
     }
 
-    if (!locationData.radius) {
-      toastWarning?.("Selecciona un radio");
+    if (!locationData?.radius) {
+      toastWarning?.("Selecciona un radio de búsqueda en el mapa");
       return;
     }
 

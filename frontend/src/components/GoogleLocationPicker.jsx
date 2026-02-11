@@ -25,7 +25,7 @@ const calculateBoundingBox = (lat, lng, radiusMeters) => {
 
 function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect = null }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [radius, setRadius] = useState(5000); // 5km por defecto
+  const [radius, setRadius] = useState(''); // "Selecciona un radio" por defecto
   const [mapCenter, setMapCenter] = useState({ lat: -34.6037, lng: -58.3816 }); // Buenos Aires, Argentina por defecto
   const [searchQuery, setSearchQuery] = useState('');
   const [map, setMap] = useState(null);
@@ -69,11 +69,11 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
     const location = { lat, lng };
     setSelectedLocation(location);
     
-    const bbox = calculateBoundingBox(lat, lng, radius);
+    const bbox = radius ? calculateBoundingBox(lat, lng, radius) : null;
     
     onLocationChange({
       center: location,
-      radius: radius,
+      radius: radius || 0,
       bbox: bbox,
       ubicacion_nombre: ubicacionNombre || searchQuery || `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`
     });
@@ -189,7 +189,7 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
 
   const handleRadiusChange = (newRadius) => {
     setRadius(newRadius);
-    if (selectedLocation) {
+    if (selectedLocation && newRadius) {
       const bbox = calculateBoundingBox(selectedLocation.lat, selectedLocation.lng, newRadius);
       onLocationChange({
         center: selectedLocation,
@@ -452,8 +452,9 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         <label className="radius-label">Radio de búsqueda</label>
         <select
           value={radius}
-          onChange={(e) => handleRadiusChange(Number(e.target.value))}
+          onChange={(e) => handleRadiusChange(e.target.value ? Number(e.target.value) : '')}
         >
+          <option value="" disabled>-- Selecciona un radio --</option>
           {[...Array(15)].map((_, i) => {
             const km = i + 1;
             return (
@@ -584,11 +585,13 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
             {selectedLocation && (
               <>
                 <Marker position={selectedLocation} />
-                <Circle
-                  center={selectedLocation}
-                  radius={radius}
-                  options={circleOptions}
-                />
+                {radius && (
+                  <Circle
+                    center={selectedLocation}
+                    radius={radius}
+                    options={circleOptions}
+                  />
+                )}
               </>
             )}
           </GoogleMap>

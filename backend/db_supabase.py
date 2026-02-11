@@ -1129,8 +1129,8 @@ def deduct_credits(user_id: str, amount: int) -> Dict:
         return {"success": False, "error": "No hay cliente o user_id"}
         
     try:
-        # 1. Obtener créditos actuales
-        res = execute_with_retry(lambda c: c.table('users').select('credits').eq('id', user_id), is_admin=False)
+        # 1. Obtener créditos actuales (Usar admin para asegurar acceso)
+        res = execute_with_retry(lambda c: c.table('users').select('credits').eq('id', user_id), is_admin=True)
         if not res.data:
             return {"success": False, "error": "Usuario no encontrado"}
             
@@ -1138,9 +1138,9 @@ def deduct_credits(user_id: str, amount: int) -> Dict:
         if current < amount:
             return {"success": False, "error": "Créditos insuficientes", "current": current}
             
-        # 2. Descontar
+        # 2. Descontar (Usar admin para asegurar acceso)
         new_balance = current - amount
-        execute_with_retry(lambda c: c.table('users').update({"credits": new_balance}).eq('id', user_id), is_admin=False)
+        execute_with_retry(lambda c: c.table('users').update({"credits": new_balance}).eq('id', user_id), is_admin=True)
         
         logger.info(f"🪙 Créditos deducidos para {user_id}: -{amount} (Nuevo balance: {new_balance})")
         return {"success": True, "new_balance": new_balance}
@@ -1155,7 +1155,8 @@ def check_reset_monthly_credits(user_id: str) -> bool:
         return False
         
     try:
-        res = client.table('users').select('next_credit_reset').eq('id', user_id).execute()
+        # Usar execute_with_retry con admin para asegurar acceso
+        res = execute_with_retry(lambda c: c.table('users').select('next_credit_reset').eq('id', user_id), is_admin=True)
         if not res.data:
             return False
             
@@ -1169,8 +1170,8 @@ def check_reset_monthly_credits(user_id: str) -> bool:
         if today >= next_reset:
             logger.info(f"🔄 Reseteando créditos para {user_id} (Billing cycle reach: {next_reset})")
             
-            # Obtener plan para saber cuánto resetear
-            user_res = execute_with_retry(lambda c: c.table('users').select('plan').eq('id', user_id), is_admin=False)
+            # Obtener plan para saber cuánto resetear (Admin para asegurar acceso)
+            user_res = execute_with_retry(lambda c: c.table('users').select('plan').eq('id', user_id), is_admin=True)
             plan_id = user_res.data[0].get('plan', 'starter') if user_res.data else 'starter'
             credits_map = {'starter': 1500, 'growth': 3000, 'scale': 10000}
             reset_amount = credits_map.get((plan_id or 'starter').lower(), 1500)
@@ -1181,7 +1182,7 @@ def check_reset_monthly_credits(user_id: str) -> bool:
                 "credits": reset_amount,
                 "next_credit_reset": new_reset,
                 "subscription_status": "active"
-            }).eq('id', user_id), is_admin=False)
+            }).eq('id', user_id), is_admin=True)
             
             return True
         return False
