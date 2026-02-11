@@ -342,7 +342,7 @@ const LandingPage = () => {
               </button>
             </div>
             <div className="hero-trust">
-              <p>Confiado por +500 empresas modernas</p>
+              <p>Confiado por +100 empresas</p>
               <div className="trust-logos">
                 <span>ACME Corp</span>
                 <span>Stark Ind</span>
@@ -838,7 +838,7 @@ const LandingPage = () => {
                 </div>
                 <span>Smart Leads</span>
               </div>
-              <p>Tu motor de crecimiento B2B.</p>
+              <p>tu proxima venta empieza aca</p>
             </div>
 
             <div className="footer-col">
@@ -850,7 +850,7 @@ const LandingPage = () => {
 
             <div className="footer-col">
               <h4>Compañía</h4>
-              <a href="#">Sobre Nosotros</a>
+              <a href="https://dotasolutions.agency" target="_blank" rel="noopener noreferrer">Sobre Nosotros</a>
             </div>
 
             <div className="footer-col">

@@ -733,8 +733,21 @@
 }
 
 @media (max-width: 768px) {
+    .hero-section {
+        padding-top: 250px;
+        /* Increased from 200px */
+    }
+
     .hero-text h1 {
-        font-size: 3rem;
+        font-size: 3.5rem;
+        /* Increased from 3rem */
+        line-height: 1.1;
+    }
+
+    .hero-subtext {
+        font-size: 1.1rem;
+        /* Decreased from 1.25rem */
+        margin-bottom: 40px;
     }
 
     .card-1 {
@@ -1411,6 +1424,17 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     /* Enhanced shadow */
     animation: stream-flow 4s infinite ease-in-out;
+}
+
+@media (max-width: 768px) {
+    .stream-item {
+        width: 240px;
+        padding: 8px 16px;
+    }
+
+    .stream-item span {
+        font-size: 0.85rem;
+    }
 }
 
 .stream-item:nth-child(2) {
