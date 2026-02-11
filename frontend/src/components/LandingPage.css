@@ -789,6 +789,11 @@
     margin: 0 auto 60px;
 }
 
+/* Specific override for pricing title to fit in one line on desktop */
+.pricing-section-new .section-header.center {
+    max-width: 1000px;
+}
+
 .section-header h2 {
     font-size: 3rem;
     margin-bottom: 16px;
