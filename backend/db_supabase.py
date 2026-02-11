@@ -8,7 +8,7 @@ import logging
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta
 import json
-from supabase import create_client, Client
+from supabase import create_client, Client, ClientOptions
 from dotenv import load_dotenv
 
 # Cargar variables de entorno (asegurando ruta correcta si se inicia desde la raíz)
@@ -39,7 +39,12 @@ def get_supabase(force_refresh: bool = False) -> Optional[Client]:
         return None
         
     try:
-        _supabase_public_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+        # Usar ClientOptions para mejorar estabilidad y timeouts
+        opts = ClientOptions(
+            postgrest_client_timeout=20,
+            storage_client_timeout=20
+        )
+        _supabase_public_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY, options=opts)
         logger.info(f"{'🔄 Re-' if force_refresh else '✅ '}Cliente Supabase PÚBLICO inicializado")
         return _supabase_public_client
     except Exception as e:
@@ -58,7 +63,12 @@ def get_supabase_admin(force_refresh: bool = False) -> Optional[Client]:
         return None
         
     try:
-        _supabase_admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+        # Usar ClientOptions para mejorar estabilidad y timeouts en admin
+        opts = ClientOptions(
+            postgrest_client_timeout=30,
+            storage_client_timeout=30
+        )
+        _supabase_admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, options=opts)
         logger.info(f"{'🔄 Re-' if force_refresh else '🔑 '}Cliente Supabase ADMIN inicializado")
         return _supabase_admin_client
     except Exception as e:
@@ -89,7 +99,8 @@ def execute_with_retry(query_factory, is_admin: bool = True, max_retries: int = 
             # Lista ampliada de errores de conexión/red detectados
             is_connection_error = any(msg in error_str for msg in [
                 "connection", "closed", "disconnected", "broken pipe", "eof", 
-                "timeout", "handshake", "remotely closed", "network", "server disconnected"
+                "timeout", "handshake", "remotely closed", "network", "server disconnected",
+                "pseudo-header", "trailer"
             ])
             
             if is_connection_error and attempt < max_retries - 1:
