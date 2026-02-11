@@ -866,25 +866,36 @@ async def registrar_pago_exitoso(
         }
         
         # Obtener créditos actuales si existe
-        user_res = admin_client.table("users").select("credits").eq("id", final_user_id).execute()
+        user_res = admin_client.table("users").select("credits, extra_credits").eq("id", final_user_id).execute()
         current_credits = 0
+        current_extra = 0
         if user_res.data:
             current_credits = user_res.data[0].get("credits", 0) or 0
+            current_extra = user_res.data[0].get("extra_credits", 0) or 0
             
         if is_credit_pack:
             try:
                 # Extraer monto de credits_1000 -> 1000
                 credits_to_add = int(normalized_plan.split('_')[1])
-                logger.info(f"Detectado Pack de Créditos: añadiendo {credits_to_add} créditos")
-                upsert_data["credits"] = current_credits + credits_to_add
+                logger.info(f"Detectado Pack de Créditos: añadiendo {credits_to_add} créditos a extra_credits")
+                
+                # Para packs, sumamos a extra_credits, NO tocamos credits (mensuales)
+                upsert_data["extra_credits"] = current_extra + credits_to_add
+                # Mantenemos los créditos mensuales actuales
+                upsert_data["credits"] = current_credits
+                
+                # Asegurar que el plan se mantenga (ver abajo)
             except:
                 logger.error(f"Error parseando pack de créditos: {normalized_plan}")
                 upsert_data["credits"] = current_credits
+                upsert_data["extra_credits"] = current_extra
         else:
-            # Si es un PLAN (subscription), reseteamos los créditos al valor del plan
+            # Si es un PLAN (subscription), reseteamos los créditos MENSUALES al valor del plan
+            # Y mantenemos los extra_credits
             credits_map = {'starter': 1500, 'growth': 3000, 'scale': 10000}
             credits_to_add = credits_map.get(normalized_plan, 0)
             upsert_data["credits"] = credits_to_add
+            upsert_data["extra_credits"] = current_extra
         
         # Si es pack de créditos, NO cambiar el plan actual del usuario si ya tiene uno
         # Si no tiene plan (anonymous o nuevo), ponerle 'free' o similar
@@ -897,7 +908,7 @@ async def registrar_pago_exitoso(
                 upsert_data["plan"] = "free"
         
         try:
-            logger.info(f"Sincronizando public.users para {final_user_id} (Plan: {normalized_plan}, Credits: {upsert_data['credits']})")
+            logger.info(f"Sincronizando public.users para {final_user_id} (Plan: {normalized_plan})")
             admin_client.table("users").upsert(upsert_data).execute()
         except Exception as upsert_err:
             logger.error(f"Error sincronizando perfil en public.users: {upsert_err}")
@@ -1118,17 +1129,25 @@ def get_user_credits(user_id: str) -> Dict:
         return {"credits": 0, "next_reset": None}
         
     try:
-        res = execute_with_retry(lambda c: c.table('users').select('credits, next_credit_reset, plan, subscription_status').eq('id', user_id), is_admin=True)
+        res = execute_with_retry(lambda c: c.table('users').select('credits, extra_credits, next_credit_reset, plan, subscription_status').eq('id', user_id), is_admin=True)
         if res.data:
             user_data = res.data[0]
             plan_id = user_data.get('plan', 'starter')
             credits_map = {'starter': 1500, 'growth': 3000, 'scale': 10000}
-            total_credits = credits_map.get((plan_id or 'starter').lower(), 1500)
+            total_plan_credits = credits_map.get((plan_id or 'starter').lower(), 1500)
             
+            monthly_credits = user_data.get('credits', 0)
+            extra_credits = user_data.get('extra_credits', 0) or 0
+            
+            # Frontend expects "credits" to be the available balance
+            # We return total available as "credits" for backward compatibility,
+            # but also send broken down values for UI enhancements
             return {
-                "credits": user_data.get('credits', 0),
+                "credits": monthly_credits + extra_credits, # Total available
+                "monthly_credits": monthly_credits,
+                "extra_credits": extra_credits,
                 "next_reset": user_data.get('next_credit_reset'),
-                "total_credits": total_credits,
+                "total_credits": total_plan_credits, # This is the plan limit
                 "plan": plan_id,
                 "subscription_status": user_data.get('subscription_status', 'active')
             }
@@ -1138,27 +1157,44 @@ def get_user_credits(user_id: str) -> Dict:
         return {"credits": 0, "next_reset": None}
 
 def deduct_credits(user_id: str, amount: int) -> Dict:
-    """Deduce créditos del usuario si tiene suficientes"""
+    """Deduce créditos del usuario (usando mensuales primero, luego extra)"""
     client = get_supabase_admin()
     if not client or not user_id:
         return {"success": False, "error": "No hay cliente o user_id"}
         
     try:
         # 1. Obtener créditos actuales (Usar admin para asegurar acceso)
-        res = execute_with_retry(lambda c: c.table('users').select('credits').eq('id', user_id), is_admin=True)
+        res = execute_with_retry(lambda c: c.table('users').select('credits, extra_credits').eq('id', user_id), is_admin=True)
         if not res.data:
             return {"success": False, "error": "Usuario no encontrado"}
             
-        current = res.data[0].get('credits', 0) or 0
-        if current < amount:
-            return {"success": False, "error": "Créditos insuficientes", "current": current}
-            
-        # 2. Descontar (Usar admin para asegurar acceso)
-        new_balance = current - amount
-        execute_with_retry(lambda c: c.table('users').update({"credits": new_balance}).eq('id', user_id), is_admin=True)
+        user_data = res.data[0]
+        monthly = user_data.get('credits', 0) or 0
+        extra = user_data.get('extra_credits', 0) or 0
         
-        logger.info(f"🪙 Créditos deducidos para {user_id}: -{amount} (Nuevo balance: {new_balance})")
-        return {"success": True, "new_balance": new_balance}
+        if (monthly + extra) < amount:
+            return {"success": False, "error": "Créditos insuficientes", "current": monthly + extra}
+            
+        # 2. Descontar con lógica de prioridad (mensuales primero)
+        new_monthly = monthly
+        new_extra = extra
+        
+        if monthly >= amount:
+            new_monthly = monthly - amount
+        else:
+            # Consumir todos los mensuales y el resto de extra
+            remainder = amount - monthly
+            new_monthly = 0
+            new_extra = extra - remainder
+            
+        # 3. Actualizar DB
+        execute_with_retry(lambda c: c.table('users').update({
+            "credits": new_monthly,
+            "extra_credits": new_extra
+        }).eq('id', user_id), is_admin=True)
+        
+        logger.info(f"🪙 Créditos deducidos para {user_id}: -{amount} (M:{monthly}->{new_monthly}, E:{extra}->{new_extra})")
+        return {"success": True, "new_balance": new_monthly + new_extra}
     except Exception as e:
         error_str = str(e).lower()
         if "42501" in error_str or "policy" in error_str:

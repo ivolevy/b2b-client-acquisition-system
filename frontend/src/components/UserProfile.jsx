@@ -54,6 +54,7 @@ function UserProfile() {
   const [passwordChangeEmail, setPasswordChangeEmail] = useState('');
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [showCancelPlanModal, setShowCancelPlanModal] = useState(false);
+  const [showCancelSuccessModal, setShowCancelSuccessModal] = useState(false);
   const [cancelPlanLoading, setCancelPlanLoading] = useState(false);
   const [showRechargeModal, setShowRechargeModal] = useState(false);
   const [selectedRechargePack, setSelectedRechargePack] = useState(null);
@@ -603,9 +604,10 @@ function UserProfile() {
     try {
       const response = await axios.post(`${API_URL}/api/users/${user.id}/cancel-plan`);
       if (response.data.success) {
-        toastSuccess?.('Plan cancelado correctamente');
+        // toastSuccess?.('Plan cancelado correctamente');
         fetchCredits(); // Recargar datos para actualizar la UI
         setShowCancelPlanModal(false);
+        setShowCancelSuccessModal(true); // Mostrar modal personalizado
       }
     } catch (error) {
       console.error('Error cancelling plan:', error);
@@ -845,8 +847,19 @@ function UserProfile() {
                 </h3>
                   {creditsInfo.subscription_status === 'active' && (
                     <div className="minimalist-balance-row">
-                      <span className="minimalist-balance-value">{creditsInfo.credits || 0}</span>
-                      <span className="minimalist-balance-label">/ {creditsInfo.total_credits || 1500} créditos</span>
+                      {creditsInfo.extra_credits > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                          <span className="minimalist-balance-value">{creditsInfo.credits || 0}</span>
+                          <span className="minimalist-balance-label" style={{ fontSize: '0.85rem' }}>
+                            {creditsInfo.monthly_credits} Plan + <span style={{ color: '#10b981', fontWeight: 600 }}>{creditsInfo.extra_credits} Extra</span>
+                          </span>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="minimalist-balance-value">{creditsInfo.credits || 0}</span>
+                          <span className="minimalist-balance-label">/ {creditsInfo.total_credits || 1500} créditos</span>
+                        </>
+                      )}
                     </div>
                   )}
               </div>

@@ -17,6 +17,10 @@ function TemplateManager({ userId, onClose, type: initialType = 'email', embedde
   const [showEditor, setShowEditor] = useState(false);
   const [editingTemplateId, setEditingTemplateId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // States for custom delete modal
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState(null);
 
   const loadTemplates = async () => {
     if (!userId) return;
@@ -47,14 +51,25 @@ function TemplateManager({ userId, onClose, type: initialType = 'email', embedde
     setShowEditor(true);
   };
 
-  const handleDeleteTemplate = async (templateId) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar esta plantilla?')) {
-      try {
-        await axios.delete(`${API_URL}/api/templates/${templateId}?user_id=${userId}`);
-        loadTemplates();
-      } catch (err) {
-        console.error('Error al eliminar plantilla:', err);
-      }
+  const handleDeleteTemplate = (template) => {
+    // Reemplaza window.confirm con modal personalizado
+    setTemplateToDelete(template);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const confirmDeleteTemplate = async () => {
+    if (!templateToDelete) return;
+    
+    try {
+      await axios.delete(`${API_URL}/api/templates/${templateToDelete.id}?user_id=${userId}`);
+      
+      // Limpiar estado y recargar
+      setShowDeleteConfirmModal(false);
+      setTemplateToDelete(null);
+      loadTemplates();
+    } catch (err) {
+      console.error('Error al eliminar plantilla:', err);
+      alert('Error al eliminar la plantilla'); // Fallback simple para error
     }
   };
 
@@ -159,7 +174,7 @@ function TemplateManager({ userId, onClose, type: initialType = 'email', embedde
                         <button className="btn-action-icon" onClick={() => handleEditTemplate(template.id)} title="Editar">
                           <FiEdit2 size={16} />
                         </button>
-                        <button className="btn-action-icon delete" onClick={() => handleDeleteTemplate(template.id)} title="Eliminar">
+                        <button className="btn-action-icon delete" onClick={() => handleDeleteTemplate(template)} title="Eliminar">
                           <FiTrash2 size={16} />
                         </button>
                       </div>
@@ -171,6 +186,65 @@ function TemplateManager({ userId, onClose, type: initialType = 'email', embedde
           )}
         </div>
       </div>
+
+      {/* Modal de Confirmación para Eliminar */}
+      {showDeleteConfirmModal && (
+        <div className="template-manager-overlay" style={{ zIndex: 10000 }}>
+           <div className="template-manager-modal" style={{ maxWidth: '400px', padding: '24px', height: 'auto' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ 
+                  width: '50px', 
+                  height: '50px', 
+                  background: '#fee2e2', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  margin: '0 auto 16px auto' 
+                }}>
+                  <FiTrash2 size={24} color="#dc2626" />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  ¿Eliminar plantilla?
+                </h3>
+                <p style={{ color: '#64748b', marginBottom: '24px', fontSize: '0.95rem' }}>
+                  Estás a punto de eliminar <strong>"{templateToDelete?.nombre}"</strong>. Esta acción no se puede deshacer.
+                </p>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <button 
+                    onClick={() => setShowDeleteConfirmModal(false)}
+                    style={{
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      background: 'white',
+                      color: '#475569',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    onClick={confirmDeleteTemplate}
+                    style={{
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: '#dc2626',
+                      color: 'white',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 
