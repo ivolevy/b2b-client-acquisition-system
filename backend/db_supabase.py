@@ -9,7 +9,6 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta
 import json
 from supabase import create_client, Client
-from supabase.lib.client_options import ClientOptions
 from dotenv import load_dotenv
 
 # Cargar variables de entorno (asegurando ruta correcta si se inicia desde la raíz)
@@ -40,9 +39,7 @@ def get_supabase(force_refresh: bool = False) -> Optional[Client]:
         return None
         
     try:
-        # Aumentar timeouts para evitar "server disconnected" por latencia
-        options = ClientOptions(postgrest_client_timeout=60)
-        _supabase_public_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY, options=options)
+        _supabase_public_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
         logger.info(f"{'🔄 Re-' if force_refresh else '✅ '}Cliente Supabase PÚBLICO inicializado")
         return _supabase_public_client
     except Exception as e:
@@ -61,9 +58,7 @@ def get_supabase_admin(force_refresh: bool = False) -> Optional[Client]:
         return None
         
     try:
-        # Aumentar timeouts para mayor estabilidad en operaciones admin pesadas
-        options = ClientOptions(postgrest_client_timeout=60)
-        _supabase_admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, options=options)
+        _supabase_admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
         logger.info(f"{'🔄 Re-' if force_refresh else '🔑 '}Cliente Supabase ADMIN inicializado")
         return _supabase_admin_client
     except Exception as e:
@@ -98,7 +93,7 @@ def execute_with_retry(query_factory, is_admin: bool = True, max_retries: int = 
             ])
             
             if is_connection_error and attempt < max_retries - 1:
-                wait_time = (attempt + 1) * 2
+                wait_time = (attempt + 1) # 1s, luego 2s... Total wait = 3s. Más seguro para serverless.
                 logger.warning(f"⚠️ Error de red/conexión (Intento {attempt + 1}/{max_retries}): {e}. Refrescando cliente y reintentando en {wait_time}s...")
                 
                 # Forzar refresco del cliente correspondiente

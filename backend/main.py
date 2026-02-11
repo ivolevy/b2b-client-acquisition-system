@@ -764,10 +764,12 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
         check_reset_monthly_credits(user_id)
         deduction = deduct_credits(user_id, 100)
         if not deduction.get("success"):
-            raise HTTPException(
-                status_code=402, 
-                detail=f"Créditos insuficientes. Balance: {deduction.get('current', 0)}"
-            )
+            error_msg = deduction.get("error", "Error desconocido")
+            if "insuficientes" in error_msg.lower():
+                raise HTTPException(status_code=402, detail=f"Créditos insuficientes. Balance: {deduction.get('current', 0)}")
+            else:
+                logger.error(f"Error sistémico en deducción de créditos: {error_msg}")
+                raise HTTPException(status_code=500, detail=f"Error en el sistema de créditos: {error_msg}")
 
     async def event_generator():
         seen_ids = set()
@@ -921,10 +923,15 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         # 2. Deducir créditos (100 por búsqueda)
         deduction = deduct_credits(user_id, 100)
         if not deduction.get("success"):
-            raise HTTPException(
-                status_code=402, 
-                detail=f"Créditos insuficientes. Necesitás 100 créditos para buscar. Balance actual: {deduction.get('current', 0)}"
-            )
+            error_msg = deduction.get("error", "Error desconocido")
+            if "insuficientes" in error_msg.lower():
+                raise HTTPException(
+                    status_code=402, 
+                    detail=f"Créditos insuficientes. Necesitás 100 créditos para buscar. Balance actual: {deduction.get('current', 0)}"
+                )
+            else:
+                logger.error(f"Error crítico deduciendo créditos para {user_id}: {error_msg}")
+                raise HTTPException(status_code=500, detail=f"Error al procesar créditos: {error_msg}")
             
     try:
         # Verificar que el parámetro se recibe correctamente
@@ -1318,10 +1325,14 @@ async def buscar_multiples_rubros(request: BusquedaMultipleRequest):
         # 2. Deducir créditos (100 por búsqueda multiple también)
         deduction = deduct_credits(user_id, 100)
         if not deduction.get("success"):
-            raise HTTPException(
-                status_code=402, 
-                detail=f"Créditos insuficientes. Necesitás 100 créditos para buscar. Balance actual: {deduction.get('current', 0)}"
-            )
+            error_msg = deduction.get("error", "Error desconocido")
+            if "insuficientes" in error_msg.lower():
+                raise HTTPException(
+                    status_code=402, 
+                    detail=f"Créditos insuficientes. Necesitás 100 créditos para buscar. Balance actual: {deduction.get('current', 0)}"
+                )
+            else:
+                raise HTTPException(status_code=500, detail=f"Error de base de datos en créditos: {error_msg}")
             
     try:
         resultados = buscar_empresas_multiples_rubros(
@@ -1545,10 +1556,14 @@ async def exportar(request: ExportRequest):
         check_reset_monthly_credits(user_id)
         deduction = deduct_credits(user_id, 100)
         if not deduction.get("success"):
-            raise HTTPException(
-                status_code=402, 
-                detail=f"Créditos insuficientes para exportar. Necesitás 100 créditos. Balance: {deduction.get('current', 0)}"
-            )
+            error_msg = deduction.get("error", "Error desconocido")
+            if "insuficientes" in error_msg.lower():
+                raise HTTPException(
+                    status_code=402, 
+                    detail=f"Créditos insuficientes para exportar. Necesitás 100 créditos. Balance: {deduction.get('current', 0)}"
+                )
+            else:
+                raise HTTPException(status_code=500, detail=f"Falla técnica al validar créditos: {error_msg}")
 
     try:
         if request.formato.lower() == "csv":
