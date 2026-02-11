@@ -65,10 +65,7 @@ const LandingPage = () => {
           <p style={{ margin: 0 }}>Emails válidos, teléfonos activos y perfiles digitales confiables para reducir rebotes.</p>
         </>
       ),
-      visual: (
-        <div className="visual-display-open">
-        </div>
-      )
+      visual: null
     },
     {
       id: 'reach',
@@ -118,10 +115,7 @@ const LandingPage = () => {
           <p style={{ margin: 0 }}>Más respuestas, más oportunidades, mejores decisiones.</p>
         </>
       ),
-      visual: (
-        <div className="visual-display-open">
-        </div>
-      )
+      visual: null
     }
   ];
 
@@ -408,9 +402,11 @@ const LandingPage = () => {
                   {modules[activeModule].lead}
                 </div>
               </div>
-              <div className="module-visual">
-                {modules[activeModule].visual}
-              </div>
+              {modules[activeModule].visual && (
+                <div className="module-visual">
+                  {modules[activeModule].visual}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -435,9 +431,11 @@ const LandingPage = () => {
                    <div className="module-lead-mobile">
                      {mod.lead}
                    </div>
-                   <div className="module-visual-mobile">
-                      {mod.visual}
-                   </div>
+                   {mod.visual && (
+                     <div className="module-visual-mobile">
+                        {mod.visual}
+                     </div>
+                   )}
                 </div>
              </div>
           </div>
