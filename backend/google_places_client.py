@@ -136,23 +136,28 @@ class GooglePlacesClient:
                 
                 return {"error": f"API Error {response.status_code}", "places": []}
 
-            # 2. Registrar el gasto si la llamada fue exitosa
-            # Si usamos Pro fields, cobramos el Tier Pro
-            increment_api_usage(provider='google', sku='pro', cost_usd=self.COST_PER_PRO_CALL)
+            # 2. Registrar el gasto si la llamada fue exitosa (No bloqueante)
+            try:
+                increment_api_usage(provider='google', sku='pro', cost_usd=self.COST_PER_PRO_CALL)
+            except Exception as e_usage:
+                logger.error(f"Error no-bloqueante incrementando uso: {e_usage}")
             
             data = response.json()
             places_count = len(data.get('places', []))
             
-            # Log success detail
-            log_api_call(
-                provider='google',
-                endpoint='places:searchText',
-                sku='pro',
-                cost_usd=self.COST_PER_PRO_CALL,
-                status_code=200,
-                duration_ms=duration_ms,
-                metadata={"query": query, "results_count": places_count}
-            )
+            # Log success detail (No bloqueante)
+            try:
+                log_api_call(
+                    provider='google',
+                    endpoint='places:searchText',
+                    sku='pro',
+                    cost_usd=self.COST_PER_PRO_CALL,
+                    status_code=200,
+                    duration_ms=duration_ms,
+                    metadata={"query": query, "results_count": places_count}
+                )
+            except Exception as e_log:
+                logger.error(f"Error no-bloqueante registrando log: {e_log}")
 
             return data
 
