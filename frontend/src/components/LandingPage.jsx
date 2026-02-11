@@ -74,12 +74,6 @@ const LandingPage = () => {
       id: 'reach',
       title: 'Mensajes automáticos',
       icon: <FiZap />,
-      lead: (
-        <>
-          <p style={{ marginBottom: '16px' }}>Contacta a cientos de prospectos con emails y WhatsApps personalizados.</p>
-          <p style={{ margin: 0 }}>Conecta tus cuentas de Gmail u Outlook y envía con alta entregabilidad, sin complicaciones.</p>
-        </>
-      ),
       visual: (
         <div className="visual-display-open dual-split">
           <div className="split-side email-side">
