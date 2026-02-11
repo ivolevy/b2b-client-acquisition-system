@@ -22,7 +22,16 @@ function UserProfile() {
     return () => document.body.classList.remove('profile-page-active');
   }, []);
 
-  const [activeTab, setActiveTab] = useState(user?.subscription_status === 'cancelled' ? 'plan' : 'info'); // 'info', 'plan', 'rubros', 'templates', 'danger'
+  const [creditsInfo, setCreditsInfo] = useState({});
+  const isCancelled = creditsInfo?.subscription_status === 'cancelled';
+  const [activeTab, setActiveTab] = useState('info'); // Will be updated by useEffect
+  
+  // Set initial tab based on subscription status once credits are loaded
+  useEffect(() => {
+    if (creditsInfo?.subscription_status) {
+      setActiveTab(creditsInfo.subscription_status === 'cancelled' ? 'plan' : 'info');
+    }
+  }, [creditsInfo?.subscription_status]);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -109,6 +118,15 @@ function UserProfile() {
       setCanResendCode(true);
     }
   }, [resendCountdown, codeSent]);
+
+  // Forzar refresco de créditos cuando la ventana recupera el foco (ej. después de un pago)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user?.id) fetchCredits();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user?.id]);
 
   // Fetch rubros del usuario
   useEffect(() => {
@@ -630,8 +648,10 @@ function UserProfile() {
         <aside className="profile-sidebar">
           <nav className="profile-nav">
             <button 
-              className={`profile-nav-item ${activeTab === 'info' ? 'active' : ''}`}
-              onClick={() => setActiveTab('info')}
+              className={`profile-nav-item ${activeTab === 'info' ? 'active' : ''} ${isCancelled ? 'disabled' : ''}`}
+              onClick={() => !isCancelled && setActiveTab('info')}
+              disabled={isCancelled}
+              title={isCancelled ? "Debes tener un plan activo" : ""}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -647,8 +667,10 @@ function UserProfile() {
               <span>Mi Plan</span>
             </button>
             <button 
-              className={`profile-nav-item ${activeTab === 'rubros' ? 'active' : ''}`}
-              onClick={() => setActiveTab('rubros')}
+              className={`profile-nav-item ${activeTab === 'rubros' ? 'active' : ''} ${isCancelled ? 'disabled' : ''}`}
+              onClick={() => !isCancelled && setActiveTab('rubros')}
+              disabled={isCancelled}
+              title={isCancelled ? "Debes tener un plan activo" : ""}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -656,15 +678,19 @@ function UserProfile() {
               <span>Mis Rubros</span>
             </button>
             <button 
-              className={`profile-nav-item ${activeTab === 'templates' ? 'active' : ''}`}
-              onClick={() => setActiveTab('templates')}
+              className={`profile-nav-item ${activeTab === 'templates' ? 'active' : ''} ${isCancelled ? 'disabled' : ''}`}
+              onClick={() => !isCancelled && setActiveTab('templates')}
+              disabled={isCancelled}
+              title={isCancelled ? "Debes tener un plan activo" : ""}
             >
               <FiLayers size={18} />
               <span>Plantillas</span>
             </button>
             <button 
-              className={`profile-nav-item danger ${activeTab === 'danger' ? 'active' : ''}`}
-              onClick={() => setActiveTab('danger')}
+              className={`profile-nav-item danger ${activeTab === 'danger' ? 'active' : ''} ${isCancelled ? 'disabled' : ''}`}
+              onClick={() => !isCancelled && setActiveTab('danger')}
+              disabled={isCancelled}
+              title={isCancelled ? "Debes tener un plan activo" : ""}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>

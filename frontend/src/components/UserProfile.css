@@ -141,6 +141,19 @@ body.profile-page-active .main-content {
   font-weight: 600;
 }
 
+.profile-nav-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.profile-nav-item.disabled:hover {
+  background: transparent;
+  color: #64748b;
+  box-shadow: none;
+  transform: none;
+}
+
 .profile-nav-item.danger {
   margin-top: auto;
   color: #ef4444;
