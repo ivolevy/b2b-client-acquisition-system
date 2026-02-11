@@ -832,8 +832,16 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                 for r in r_list:
                     if r['google_id'] not in seen_ids:
                         # Asegurar distancia
-                        if r.get('distancia_km') is None:
-                            r['distancia_km'] = google_client.calcular_distancia(c_lat, c_lng, r.get('latitud'), r.get('longitud'))
+                        dist = r.get('distancia_km')
+                        if dist is None:
+                            dist = google_client.calcular_distancia(c_lat, c_lng, r.get('latitud'), r.get('longitud'))
+                            r['distancia_km'] = dist
+                        
+                        # FILTRO ESTRICTO DE RADIO
+                        # Si el usuario especificó un radio, no queremos leads que lo superen (con un margen del 5% por precisión)
+                        if request.busqueda_radio_km and dist:
+                            if dist > (request.busqueda_radio_km * 1.05):
+                                continue
                         
                         seen_ids.add(r['google_id'])
                         all_candidates.append(r)
@@ -1128,9 +1136,9 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                     if distancia is not None and isinstance(distancia, (int, float)) and distancia >= 0:
                         empresa['distancia_km'] = distancia
                         
-                        # Filtrar por radio: solo incluir empresas dentro del radio
+                        # Filtrar por radio: solo incluir empresas dentro del radio (con margen del 5%)
                         if radio_km is not None and isinstance(radio_km, (int, float)) and radio_km > 0:
-                            if distancia > radio_km:
+                            if distancia > (radio_km * 1.05):
                                 logger.debug(f" Empresa {empresa.get('nombre', 'Sin nombre')} fuera del radio: {distancia:.2f}km > {radio_km:.2f}km")
                                 continue  # Saltar esta empresa, está fuera del radio
                     else:
