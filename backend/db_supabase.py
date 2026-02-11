@@ -871,20 +871,20 @@ async def registrar_pago_exitoso(
         if user_res.data:
             current_credits = user_res.data[0].get("credits", 0) or 0
             
-        credits_to_add = 0
         if is_credit_pack:
             try:
                 # Extraer monto de credits_1000 -> 1000
                 credits_to_add = int(normalized_plan.split('_')[1])
                 logger.info(f"Detectado Pack de Créditos: añadiendo {credits_to_add} créditos")
+                upsert_data["credits"] = current_credits + credits_to_add
             except:
                 logger.error(f"Error parseando pack de créditos: {normalized_plan}")
-                credits_to_add = 0
+                upsert_data["credits"] = current_credits
         else:
-            credits_map = {'starter': 1500, 'growth': 5000, 'scale': 10000}
+            # Si es un PLAN (subscription), reseteamos los créditos al valor del plan
+            credits_map = {'starter': 1500, 'growth': 3000, 'scale': 10000}
             credits_to_add = credits_map.get(normalized_plan, 0)
-            
-        upsert_data["credits"] = current_credits + credits_to_add
+            upsert_data["credits"] = credits_to_add
         
         # Si es pack de créditos, NO cambiar el plan actual del usuario si ya tiene uno
         # Si no tiene plan (anonymous o nuevo), ponerle 'free' o similar
