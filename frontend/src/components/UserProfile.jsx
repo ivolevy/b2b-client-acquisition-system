@@ -837,6 +837,13 @@ function UserProfile() {
 
           {activeTab === 'plan' && (
             <div className="profile-section-fade-in minimalist-credits">
+              {/* DEBUG INFO - REMOVE AFTER FIX */}
+              <div style={{ padding: '10px', background: '#f8fafc', fontSize: '10px', color: '#94a3b8', border: '1px dashed #cbd5e1', marginBottom: '20px' }}>
+                <p>Debug ID: {user?.id} ({user?.email})</p>
+                <p>Status: {creditsInfo.subscription_status}</p>
+                <p>Plan: {creditsInfo.plan}</p>
+                <button onClick={fetchCredits} style={{ marginTop: '5px', padding: '2px 8px', border: '1px solid #ccc' }}>Force Refresh</button>
+              </div>
               
               {/* HEADER PLAN */}
               <div className="minimalist-credits-header">
