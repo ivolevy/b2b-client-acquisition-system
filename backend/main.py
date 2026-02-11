@@ -1817,15 +1817,10 @@ async def crear_template_endpoint(data: TemplateCreateRequest):
     except Exception as e:
         error_str = str(e).lower()
         if "23505" in error_str or "already exists" in error_str:
-            raise HTTPException(status_code=400, detail="Ya existe una plantilla con ese nombre. Por favor elegí otro.")
+            raise HTTPException(status_code=409, detail="Ya existe una plantilla con ese nombre. Por favor elegí otro.")
             
         logger.error(f"Error creando template: {e}")
         raise HTTPException(status_code=500, detail=f"Error creando template: {str(e)}")
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error creando template: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/api/templates/{template_id}")
 async def actualizar_template_endpoint(template_id: str, data: TemplateModifyRequest):
@@ -1853,6 +1848,9 @@ async def actualizar_template_endpoint(template_id: str, data: TemplateModifyReq
     except HTTPException:
         raise
     except Exception as e:
+        error_str = str(e).lower()
+        if "23505" in error_str or "already exists" in error_str:
+            raise HTTPException(status_code=409, detail="Ya existe una plantilla con ese nombre. Por favor elegí otro.")
         logger.error(f"Error actualizando template: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { API_URL } from '../config';
 import { FiSave, FiX, FiInfo, FiTag, FiType } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 import './TemplateEditor.css';
 
 function TemplateEditor({ templateId, userId, onClose, onSave, type = 'email' }) {
@@ -37,31 +38,38 @@ function TemplateEditor({ templateId, userId, onClose, onSave, type = 'email' })
     }
   };
 
+
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!template.nombre || !template.body_text) {
-      alert('Por favor complete el nombre y el cuerpo del mensaje.');
-      return;
-    }
-
     if (!userId) {
-      alert('Error de sesión: Usuario no identificado.');
+      toast.error('Error de sesión: Usuario no identificado.');
       return;
     }
 
     setSaving(true);
+    const loadingToast = toast.loading('Guardando plantilla...');
+    
     try {
       const dataToSave = { ...template, type: type, user_id: userId };
+      
       if (templateId) {
         await axios.put(`${API_URL}/api/templates/${templateId}`, dataToSave);
+        toast.update(loadingToast, { render: 'Plantilla actualizada correctamente', type: 'success', isLoading: false, autoClose: 3000 });
       } else {
         await axios.post(`${API_URL}/api/templates`, dataToSave);
+        toast.update(loadingToast, { render: 'Plantilla creada correctamente', type: 'success', isLoading: false, autoClose: 3000 });
       }
       onSave();
     } catch (err) {
       console.error('Error al guardar la plantilla:', err);
       const errorMsg = err.response?.data?.detail || 'Error al guardar la plantilla.';
-      alert(errorMsg);
+      
+      // Manejo específico para duplicados (aunque el backend ya manda mensaje, aseguramos UX)
+      if (err.response?.status === 409 || errorMsg.includes('ya existe')) {
+        toast.update(loadingToast, { render: 'Ya tienes una plantilla con este nombre.', type: 'warning', isLoading: false, autoClose: 4000 });
+      } else {
+        toast.update(loadingToast, { render: errorMsg, type: 'error', isLoading: false, autoClose: 4000 });
+      }
     } finally {
       setSaving(false);
     }
