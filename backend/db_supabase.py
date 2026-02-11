@@ -9,6 +9,7 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta
 import json
 from supabase import create_client, Client
+from supabase.lib.client_options import ClientOptions
 from dotenv import load_dotenv
 
 # Cargar variables de entorno (asegurando ruta correcta si se inicia desde la raíz)
@@ -28,10 +29,10 @@ logger.info(f"Supabase Init - URL present: {bool(SUPABASE_URL)}, Anon Key: {bool
 _supabase_public_client: Optional[Client] = None
 _supabase_admin_client: Optional[Client] = None
 
-def get_supabase() -> Optional[Client]:
-    """Obtiene el cliente público de Supabase (respeta RLS)"""
+def get_supabase(force_refresh: bool = False) -> Optional[Client]:
+    """Obtiene el cliente público de Supabase (respeta RLS) - Singleton con opción de refresh"""
     global _supabase_public_client
-    if _supabase_public_client:
+    if _supabase_public_client and not force_refresh:
         return _supabase_public_client
         
     if not SUPABASE_URL or not SUPABASE_ANON_KEY:
@@ -39,18 +40,20 @@ def get_supabase() -> Optional[Client]:
         return None
         
     try:
-        _supabase_public_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-        logger.info("✅ Cliente Supabase PÚBLICO inicializado")
+        # Aumentar timeouts para evitar "server disconnected" por latencia
+        options = ClientOptions(postgrest_client_timeout=60)
+        _supabase_public_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY, options=options)
+        logger.info(f"{'🔄 Re-' if force_refresh else '✅ '}Cliente Supabase PÚBLICO inicializado")
         return _supabase_public_client
     except Exception as e:
         logger.error(f"Error inicializando Supabase público: {e}")
         return None
 
-def get_supabase_admin() -> Optional[Client]:
-    """Obtiene cliente con privilegios de admin (Service Role) - Singleton"""
+def get_supabase_admin(force_refresh: bool = False) -> Optional[Client]:
+    """Obtiene cliente con privilegios de admin (Service Role) - Singleton con opción de refresh"""
     global _supabase_admin_client
     
-    if _supabase_admin_client:
+    if _supabase_admin_client and not force_refresh:
         return _supabase_admin_client
 
     if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
@@ -58,12 +61,61 @@ def get_supabase_admin() -> Optional[Client]:
         return None
         
     try:
-        _supabase_admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-        logger.info("🔑 Cliente Supabase ADMIN inicializado")
+        # Aumentar timeouts para mayor estabilidad en operaciones admin pesadas
+        options = ClientOptions(postgrest_client_timeout=60)
+        _supabase_admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, options=options)
+        logger.info(f"{'🔄 Re-' if force_refresh else '🔑 '}Cliente Supabase ADMIN inicializado")
         return _supabase_admin_client
     except Exception as e:
         logger.error(f"Error creando cliente admin: {e}")
         return None
+
+def execute_with_retry(query_factory, is_admin: bool = True, max_retries: int = 3):
+    """
+    Ejecuta una consulta de Supabase con lógica de reintento para errores de conexión.
+    Utiliza un factory para poder regenerar la consulta con un nuevo cliente si es necesario.
+    """
+    last_exception = None
+    for attempt in range(max_retries):
+        try:
+            # Obtener el cliente actual (admin o público según corresponda)
+            client = get_supabase_admin() if is_admin else get_supabase()
+            if not client:
+                raise Exception("Cliente de Supabase no disponible")
+            
+            # Construir la query usando el factory y ejecutar
+            query = query_factory(client)
+            return query.execute()
+            
+        except Exception as e:
+            last_exception = e
+            error_str = str(e).lower()
+            
+            # Lista ampliada de errores de conexión/red detectados
+            is_connection_error = any(msg in error_str for msg in [
+                "connection", "closed", "disconnected", "broken pipe", "eof", 
+                "timeout", "handshake", "remotely closed", "network", "server disconnected"
+            ])
+            
+            if is_connection_error and attempt < max_retries - 1:
+                wait_time = (attempt + 1) * 2
+                logger.warning(f"⚠️ Error de red/conexión (Intento {attempt + 1}/{max_retries}): {e}. Refrescando cliente y reintentando en {wait_time}s...")
+                
+                # Forzar refresco del cliente correspondiente
+                if is_admin:
+                    get_supabase_admin(force_refresh=True)
+                else:
+                    get_supabase(force_refresh=True)
+                    
+                import time
+                time.sleep(wait_time)
+                continue
+            
+            # Si no es un error de conexión conocido o agotamos reintentos, lanzamos el error
+            break
+            
+    logger.error(f"❌ Error definitivo tras {max_retries} intentos: {last_exception}")
+    raise last_exception
 
 def crear_usuario_admin(email: str, password: str, user_metadata: Dict) -> Dict:
     """Crea un usuario usando la API de administración de Supabase"""
@@ -204,7 +256,7 @@ def insertar_empresa(empresa: Dict) -> bool:
         data_to_insert = {k: v for k, v in data_to_insert.items() if v is not None}
 
         # Upsert basado en google_id (nuevo estándar)
-        response = client.table('empresas').upsert(data_to_insert, on_conflict='google_id').execute()
+        response = execute_with_retry(lambda c: c.table('empresas').upsert(data_to_insert, on_conflict='google_id'), is_admin=False)
         
         if response.data:
             logger.debug(f" Empresa guardada en Supabase: {empresa.get('nombre')}")
@@ -250,7 +302,7 @@ def buscar_empresas(
         # Ordenar por fecha de creación descendente
         query = query.order('created_at', desc=True)
         
-        response = query.execute()
+        response = execute_with_retry(lambda _: query, is_admin=False)
         return response.data
         
     except Exception as e:
@@ -266,7 +318,7 @@ def obtener_todas_empresas() -> List[Dict]:
     try:
         # Por defecto Supabase limita a 1000 rows.
         # Ordenamos por created_at para ver las más recientes.
-        response = client.table('empresas').select('*').order('created_at', desc=True).limit(1000).execute()
+        response = execute_with_retry(lambda c: c.table('empresas').select('*').order('created_at', desc=True).limit(1000), is_admin=False)
         return response.data
     except Exception as e:
         logger.error(f"Error obteniendo todas las empresas: {e}")
@@ -282,13 +334,11 @@ def obtener_estadisticas() -> Dict:
         # Nota: Supabase API no tiene un endpoint de agregación directo simple sin usar RPC
         # Para mantenerlo simple, haremos queries con count='exact' y head=True
         
-        total = client.table('empresas').select('*', count='exact', head=True).execute().count
+        total = execute_with_retry(lambda c: c.table('empresas').select('*', count='exact', head=True), is_admin=False).count
         
-        con_email = client.table('empresas').select('*', count='exact', head=True)\
-            .eq('email_valido', True).execute().count
+        con_email = execute_with_retry(lambda c: c.table('empresas').select('*', count='exact', head=True).eq('email_valido', True), is_admin=False).count
             
-        validas = client.table('empresas').select('*', count='exact', head=True)\
-            .eq('validada', True).execute().count
+        validas = execute_with_retry(lambda c: c.table('empresas').select('*', count='exact', head=True).eq('validada', True), is_admin=False).count
 
         return {
             'total': total,
@@ -647,27 +697,27 @@ def increment_api_usage(provider: str, sku: str, cost_usd: float) -> bool:
         # Para simplificar, usaremos una función RPC en el futuro o un upsert aquí
         
         # Obtener valor actual
-        res = client.table('api_usage_stats').select('calls_count, estimated_cost_usd').eq('month', current_month).eq('provider', provider).eq('sku', sku).execute()
+        res = execute_with_retry(lambda c: c.table('api_usage_stats').select('calls_count, estimated_cost_usd').eq('month', current_month).eq('provider', provider).eq('sku', sku))
         
         if res.data:
             curr = res.data[0]
             new_calls = curr['calls_count'] + 1
             new_cost = float(curr['estimated_cost_usd']) + cost_usd
             
-            client.table('api_usage_stats').update({
+            execute_with_retry(lambda c: c.table('api_usage_stats').update({
                 'calls_count': new_calls,
                 'estimated_cost_usd': new_cost,
                 'last_update': datetime.now().isoformat()
-            }).eq('month', current_month).eq('provider', provider).eq('sku', sku).execute()
+            }).eq('month', current_month).eq('provider', provider).eq('sku', sku))
         else:
-            client.table('api_usage_stats').insert({
+            execute_with_retry(lambda c: c.table('api_usage_stats').insert({
                 'month': current_month,
                 'provider': provider,
                 'sku': sku,
                 'calls_count': 1,
                 'estimated_cost_usd': cost_usd,
                 'last_update': datetime.now().isoformat()
-            }).execute()
+            }))
             
         return True
     except Exception as e:
@@ -683,7 +733,7 @@ def get_current_month_usage() -> float:
     try:
         current_month = datetime.now().replace(day=1).date().isoformat()
         # Nota: En Postgres el tipo DATE se compara bien con string ISO 'YYYY-MM-DD'
-        res = client.table('api_usage_stats').select('estimated_cost_usd').eq('month', current_month).execute()
+        res = execute_with_retry(lambda c: c.table('api_usage_stats').select('estimated_cost_usd').eq('month', current_month), is_admin=False)
         
         total = sum([float(item.get('estimated_cost_usd', 0)) for item in res.data])
         return total
@@ -1027,7 +1077,7 @@ def log_api_call(
         if user_id:
             data['user_id'] = user_id
             
-        client.table('api_call_logs').insert(data).execute()
+        execute_with_retry(lambda c: c.table('api_call_logs').insert(data), is_admin=False)
         return True
     except Exception as e:
         logger.error(f"Error registrando log de API: {e}")
@@ -1040,11 +1090,10 @@ def get_api_logs(limit: int = 100, offset: int = 0) -> List[Dict]:
         return []
         
     try:
-        response = client.table('api_call_logs')\
+        response = execute_with_retry(lambda c: c.table('api_call_logs')\
             .select('*')\
             .order('created_at', desc=True)\
-            .range(offset, offset + limit - 1)\
-            .execute()
+            .range(offset, offset + limit - 1), is_admin=False)
         return response.data
     except Exception as e:
         logger.error(f"Error obteniendo logs de API: {e}")
@@ -1059,7 +1108,7 @@ def get_user_credits(user_id: str) -> Dict:
         return {"credits": 0, "next_reset": None}
         
     try:
-        res = client.table('users').select('credits, next_credit_reset, plan, subscription_status').eq('id', user_id).execute()
+        res = execute_with_retry(lambda c: c.table('users').select('credits, next_credit_reset, plan, subscription_status').eq('id', user_id), is_admin=False)
         if res.data:
             user_data = res.data[0]
             plan_id = user_data.get('plan', 'starter')
@@ -1086,7 +1135,7 @@ def deduct_credits(user_id: str, amount: int) -> Dict:
         
     try:
         # 1. Obtener créditos actuales
-        res = client.table('users').select('credits').eq('id', user_id).execute()
+        res = execute_with_retry(lambda c: c.table('users').select('credits').eq('id', user_id), is_admin=False)
         if not res.data:
             return {"success": False, "error": "Usuario no encontrado"}
             
@@ -1096,7 +1145,7 @@ def deduct_credits(user_id: str, amount: int) -> Dict:
             
         # 2. Descontar
         new_balance = current - amount
-        client.table('users').update({"credits": new_balance}).eq('id', user_id).execute()
+        execute_with_retry(lambda c: c.table('users').update({"credits": new_balance}).eq('id', user_id), is_admin=False)
         
         logger.info(f"🪙 Créditos deducidos para {user_id}: -{amount} (Nuevo balance: {new_balance})")
         return {"success": True, "new_balance": new_balance}
@@ -1126,18 +1175,18 @@ def check_reset_monthly_credits(user_id: str) -> bool:
             logger.info(f"🔄 Reseteando créditos para {user_id} (Billing cycle reach: {next_reset})")
             
             # Obtener plan para saber cuánto resetear
-            user_res = client.table('users').select('plan').eq('id', user_id).execute()
+            user_res = execute_with_retry(lambda c: c.table('users').select('plan').eq('id', user_id), is_admin=False)
             plan_id = user_res.data[0].get('plan', 'starter') if user_res.data else 'starter'
             credits_map = {'starter': 1500, 'growth': 3000, 'scale': 10000}
             reset_amount = credits_map.get((plan_id or 'starter').lower(), 1500)
             
             # Reset y nueva fecha (hoy + 30 días)
             new_reset = (today + timedelta(days=30)).isoformat()
-            client.table('users').update({
+            execute_with_retry(lambda c: c.table('users').update({
                 "credits": reset_amount,
                 "next_credit_reset": new_reset,
                 "subscription_status": "active"
-            }).eq('id', user_id).execute()
+            }).eq('id', user_id), is_admin=False)
             
             return True
         return False
@@ -1155,11 +1204,11 @@ def cancel_user_plan(user_id: str) -> bool:
         logger.info(f"🚫 Cancelando plan para usuario {user_id}")
         
         # Actualizar estado a cancelled
-        client.table('users').update({
+        execute_with_retry(lambda c: c.table('users').update({
             "subscription_status": "cancelled",
             # Opcional: Podríamos borrar next_credit_reset si queremos que no se renueve más ni siquiera al final del ciclo
             # "next_credit_reset": None 
-        }).eq('id', user_id).execute()
+        }).eq('id', user_id))
         
         return True
     except Exception as e:

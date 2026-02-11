@@ -1407,8 +1407,9 @@ async def list_users(admin: Dict = Depends(get_current_admin)):
             return {"success": False, "error": "Supabase Admin (Service Role) not configured. Check env vars."}
             
         # 1. Obtener perfiles públicos
+        from backend.db_supabase import execute_with_retry
         start_time = datetime.now()
-        res = client.table('users').select('*').order('created_at', desc=True).limit(500).execute()
+        res = execute_with_retry(lambda c: c.table('users').select('*').order('created_at', desc=True).limit(500))
         public_users = res.data
         logger.info(f"[Admin] Public users fetch took: {datetime.now() - start_time}")
         
@@ -1465,8 +1466,9 @@ async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
         
     try:
         from datetime import datetime
+        from backend.db_supabase import execute_with_retry
         current_month = datetime.now().replace(day=1).date().isoformat()
-        res = client.table('api_usage_stats').select('*').eq('month', current_month).execute()
+        res = execute_with_retry(lambda c: c.table('api_usage_stats').select('*').eq('month', current_month))
         
         total_cost = sum([float(item.get('estimated_cost_usd', 0)) for item in res.data])
         
