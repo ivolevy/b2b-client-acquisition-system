@@ -776,18 +776,20 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
         all_candidates = []
         MAX_LEADS = 60
         
+        # Centro de búsqueda para cálculo manual de distancia si falla el mapeo
+        c_lat, c_lng = request.busqueda_centro_lat, request.busqueda_centro_lng
+        
         rubro_obj = RUBROS_DISPONIBLES.get(request.rubro.lower())
+        keywords = rubro_obj["keywords"] if rubro_obj and isinstance(rubro_obj, dict) else [request.rubro]
+        
         if c_lat and c_lng:
             # Si tenemos coordenadas, no ensuciar la query con texto geográfico
             search_queries = [kw for kw in keywords]
         else:
             search_queries = [f"{kw} en {request.busqueda_ubicacion_nombre}" for kw in keywords]
+        
         emitted_count = 0
-
         logger.info(f"Iniciando búsqueda stream optimizada para: {request.rubro} | Límite: {MAX_LEADS}")
-
-        # Centro de búsqueda para cálculo manual de distancia si falla el mapeo
-        c_lat, c_lng = request.busqueda_centro_lat, request.busqueda_centro_lng
 
         # Parsear bbox si viene como string
         google_bbox = None
