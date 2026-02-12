@@ -17,6 +17,8 @@ import { FaLinkedin, FaTwitter, FaGithub, FaGoogle, FaMicrosoft, FaEnvelope, FaW
 import AnimatedBackground from './AnimatedBackground';
 
 import './LandingPage.css';
+import './LandingPageComparison.css';
+import './LandingPagePricing.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -167,17 +169,23 @@ const LandingPage = () => {
 
   const plans = [
     {
-      id: 'starter',
-      name: 'Starter',
+      id: 'essential',
+      name: 'Essential',
       description: 'Para freelancers que recién empiezan.',
-      price: { USD: 100, localUSD: 100 },
-      credits: 1000,
+      price: { USD: 49 },
+      credits: 1500,
       features: [
-        { text: '1,000 Créditos mensuales', included: true },
-        { text: 'Expectativa de cerrar ~200 clientes', included: true },
-        { text: 'Acceso a Búsqueda Local', included: true },
+        { text: '1,500 Créditos /mes', included: true },
+        { text: 'Búsqueda Avanzada Maps', included: true },
+        { text: 'Enriquecimiento Básico', included: true },
+        { text: 'Validación Emails (Básica)', included: true, highlight: 'warning' },
+        { text: 'Exportación Excel/CSV', included: true },
+        { text: 'Soporte vía Email', included: true },
+        { text: 'Adjuntar Archivos (PDF)', included: false },
+        { text: 'Contacto WhatsApp', included: false },
+        { text: 'Sync CRM', included: false },
       ],
-      buttonText: 'Comenzar Starter',
+      buttonText: 'Comenzar Essential',
       buttonClass: 'btn-secondary',
       popular: false
     },
@@ -185,29 +193,39 @@ const LandingPage = () => {
       id: 'growth',
       name: 'Growth',
       description: 'El plan ideal para PYMES.',
-      price: { USD: 100, localUSD: 100 },
+      price: { USD: 89 },
       credits: 3000,
       features: [
-        { text: '3,000 Créditos mensuales', included: true },
-        { text: 'Expectativa de cerrar ~600 clientes', included: true },
-        { text: 'Prioridad en búsquedas', included: true },
-        { text: 'Próximamente: Nuevas funciones', included: true },
+        { text: '3,000 Créditos /mes', included: true },
+        { text: 'Búsqueda Avanzada Maps', included: true },
+        { text: 'Enriquecimiento Full (Web+Redes)', included: true },
+        { text: 'Validación SMTP Real-time', included: true },
+        { text: 'Exportación Google Sheets', included: true },
+        { text: 'Soporte Chat Prioritario', included: true },
+        { text: 'Adjuntar Archivos (PDF)', included: true },
+        { text: 'Contacto WhatsApp (1 Clic)', included: true },
+        { text: 'Sync CRM', included: false },
       ],
       buttonText: 'Elegir Growth',
       buttonClass: 'btn-primary',
       popular: true
     },
     {
-      id: 'scale',
-      name: 'Scale',
+      id: 'agency',
+      name: 'Agency',
       description: 'Volumen alto para Agencias.',
-      price: { USD: 100, localUSD: 100 },
-      credits: 10000,
+      price: { USD: 199 },
+      credits: 15000,
       features: [
-        { text: '10,000 Créditos mensuales', included: true },
-        { text: 'Expectativa de cerrar ~2,000 clientes', included: true },
-        { text: 'API Access (Beta)', included: true },
-        { text: 'Próximamente: Nuevas funciones', included: true },
+        { text: '15,000 Créditos /mes', included: true },
+        { text: 'Búsqueda Avanzada Maps', included: true },
+        { text: 'Enriquecimiento Full + Custom', included: true },
+        { text: 'Validación Garantizada', included: true },
+        { text: 'Sync CRM Directo', included: true },
+        { text: 'Soporte WhatsApp Directo', included: true },
+        { text: 'Adjuntar Archivos (PDF)', included: true },
+        { text: 'Contacto WhatsApp Masivo', included: true },
+        { text: 'Acceso API (Beta)', included: true },
       ],
       buttonText: 'Contactar Ventas',
       buttonClass: 'btn-secondary',
@@ -216,11 +234,22 @@ const LandingPage = () => {
   ];
 
   const getPrice = (plan) => {
-    // Override requested by user: All plans 100 USD / 100 ARS
     if (currency === 'ARS') {
-      return 100;
+      // Dynamic conversion: USD Price * Blue Rate
+      const rawPrice = plan.price.USD * exchangeRate;
+      
+      // Smart Rounding Logic (Psychological Pricing)
+      // 1. Round to nearest 1000 (e.g., 70.315 -> 70.000)
+      // 2. Subtract 100 to get the "900" effect (e.g., 69.900)
+      // This is perceived as significantly cheaper by users (Left-Digit Effect)
+      let rounded = Math.round(rawPrice / 1000) * 1000;
+      
+      // If result is 0 (edge case), return 0 or small fee
+      if (rounded === 0) return 900;
+      
+      return rounded - 100;
     }
-    return 100;
+    return plan.price.USD;
   };
 
   const handlePlanSelect = (planId) => {
@@ -448,6 +477,60 @@ const LandingPage = () => {
 
 
 
+      {/* --- SOFTWARE VS EMPLOYEE COMPARISON --- */}
+      <section className="comparison-section">
+        <div className="container comparison-layout">
+          {/* LEFT SIDE: Header & Text */}
+          <div className="comparison-header-side">
+            <h2>Un software que trabaja como un empleado <span className="text-gradient">(pero sin sueldo)</span>.</h2>
+            <p>Automatiza horas de búsqueda manual y obtén cientos de leads en minutos, por una fracción del costo.</p>
+            
+            <div className="comparison-footer-side">
+              <p>"Contratar personas escala los costos. Automatizar escala los resultados."</p>
+              <button className="btn-primary btn-lg" onClick={() => scrollToSection('pricing')}>
+                Comenzar ahora <FiArrowRight />
+              </button>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE: Cards Grid */}
+          <div className="comparison-content-side">
+            <div className="comparison-grid">
+              {/* Employee Card */}
+              <div className="comparison-card employee">
+                <div className="card-header">
+                  <h3>Empleado administrativo</h3>
+                  <div className="price-tag-comp">$1.000+ <small>/mes</small></div>
+                </div>
+                <ul className="comparison-list">
+                  <li className="negative"><FiX /> Horario limitado</li>
+                  <li className="negative"><FiX /> Búsqueda lenta</li>
+                  <li className="negative"><FiX /> Errores humanos</li>
+                  <li className="negative"><FiX /> Se cansa</li>
+                  <li className="negative"><FiX /> Un rubro a la vez</li>
+                </ul>
+              </div>
+
+              {/* Platform Card */}
+              <div className="comparison-card platform">
+                <div className="most-popular-badge">RECOMENDADO</div>
+                <div className="card-header">
+                  <h3>La plataforma</h3>
+                  <div className="price-tag-comp">Desde $49 <small>/mes</small></div>
+                </div>
+                <ul className="comparison-list">
+                  <li className="positive"><FiCheck /> Funciona 24/7</li>
+                  <li className="positive"><FiCheck /> Resultados en segundos</li>
+                  <li className="positive"><FiCheck /> Datos listos para vender</li>
+                  <li className="positive"><FiCheck /> Escala ilimitadamente</li>
+                  <li className="positive"><FiCheck /> Múltiples rubros al instante</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* --- ROI / EFFICIENCY IMPACT SECTION --- */}
 
 
@@ -673,9 +756,9 @@ const LandingPage = () => {
       <section id="pricing" className="pricing-section-new">
         <div className="container">
           <div className="section-header center" style={{ marginBottom: '40px' }}>
-            <h2>Elige el plan que te ayudará a conseguir más clientes</h2>
+            <h2>Invierte en automatización, no en tareas repetitivas.</h2>
             <p>
-
+              Menos que el costo de un empleado part-time. Más resultados que un equipo completo.
             </p>
           </div>
 
@@ -772,6 +855,22 @@ const LandingPage = () => {
               fontSize: '0.9rem'
             }}>
               <p>¿Necesitas más capacidad? Packs de créditos extra disponibles desde <strong style={{ color: '#2563eb' }}>$1 USD</strong>.</p>
+            </div>
+
+            {/* Aspirational Text below Agency Plan */}
+            <div className="aspirational-text" style={{
+              textAlign: 'center',
+              marginTop: '40px',
+              maxWidth: '800px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              color: 'var(--text-secondary)',
+              fontSize: '0.95rem',
+              lineHeight: '1.6'
+            }}>
+              <p>
+                <strong>Empresas que dependen de la generación constante de oportunidades eligen el plan Agency</strong> porque necesitan un volumen masivo, velocidad extrema y control total sobre su flujo de ventas.
+              </p>
             </div>
 
           </div>

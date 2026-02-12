@@ -1,0 +1,308 @@
+/* --- PRICING SECTION (New Design) --- */
+.pricing-section-new {
+    padding: 100px 0;
+    /* position: relative; Removed to avoid stacking context issues */
+    background: #ffffff;
+}
+
+.pricing-controls {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 60px;
+    align-items: center;
+}
+
+/* Currency Toggle (No Background/Border) */
+.currency-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Smaller gap */
+    background: transparent;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+}
+
+.currency-selector button {
+    background: none;
+    border: none;
+    font-size: 0.85rem;
+    /* Smaller font */
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 2px 0;
+    transition: all 0.2s;
+    opacity: 0.6;
+    position: relative;
+    border-bottom: 2px solid transparent;
+    /* Prepare for underline */
+}
+
+.currency-selector button.active {
+    color: var(--primary);
+    font-weight: 700;
+    opacity: 1;
+    background: transparent;
+    box-shadow: none;
+    border-bottom-color: var(--primary);
+    /* Blue underline */
+}
+
+.currency-selector button.active::after {
+    display: none;
+    /* No pseudo underline, use border-bottom */
+}
+
+.currency-selector .divider {
+    color: var(--border);
+    font-size: 0.9rem;
+    /* Smaller divider */
+    opacity: 0.5;
+}
+
+/* Billing Cycle Toggle */
+.billing-toggle-pill {
+    background: var(--bg-alt);
+    padding: 4px;
+    border-radius: 99px;
+    display: flex;
+    gap: 4px;
+    border: 1px solid var(--border);
+}
+
+.billing-toggle-pill button {
+    background: none;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 99px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.billing-toggle-pill button.active {
+    background: #ffffff;
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.save-badge {
+    background: #dcfce7;
+    color: #166534;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 700;
+}
+
+/* Grid Layout */
+.pricing-grid-new {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    align-items: stretch;
+    /* Cards same height */
+}
+
+/* --- PLAN CARD STYLES --- */
+.plan-card-new {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.plan-card-new:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+    /* Soft shadow lift */
+    border-color: rgba(37, 99, 235, 0.3);
+    /* Slight blue border on hover */
+}
+
+/* POPULAR CARD (Growth) */
+.plan-card-new.popular {
+    background: #ffffff;
+    border: 2px solid var(--primary);
+    /* Blue border highlight */
+    box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.15);
+    /* Blue glow shadow */
+    z-index: 10;
+    transform: scale(1.05);
+    /* Make it bigger */
+}
+
+.plan-card-new.popular:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 30px 60px -15px rgba(37, 99, 235, 0.25);
+}
+
+.popular-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: 99px;
+    letter-spacing: 0.05em;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Card Header */
+.plan-header-new {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.plan-header-new h3 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.plan-header-new p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    min-height: 44px;
+    /* Align heights */
+}
+
+/* Price */
+.plan-price-new {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    margin-bottom: 32px;
+    color: var(--text-primary);
+}
+
+.plan-price-new .currency {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-right: 4px;
+    color: var(--text-secondary);
+}
+
+.plan-price-new .amount {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.plan-price-new .period {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-left: 4px;
+}
+
+/* Features List */
+.plan-features-new {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 40px;
+    flex-grow: 1;
+    /* Push button to bottom */
+}
+
+.plan-features-new li {
+    display: flex;
+    align-items: flex-start;
+    /* Align top for multi-line */
+    gap: 12px;
+    margin-bottom: 14px;
+    /* More breathing room */
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.plan-features-new li.disabled {
+    opacity: 0.5;
+    /* Fade out excluded items */
+    text-decoration: line-through;
+    /* Optional: Strike-through for excluded */
+}
+
+.plan-features-new li svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    /* Eye-ball alignment */
+}
+
+/* Feature Icons Colors */
+.plan-features-new li svg.fi-check {
+    /* Assuming you add a class or target specific SVG */
+    color: var(--primary);
+}
+
+/* Specific targeting if we can't add classes to icons easily from here without JSX change */
+.plan-features-new li:not(.disabled) svg {
+    color: var(--primary);
+    /* Blue Check */
+}
+
+.plan-features-new li.disabled svg {
+    color: #cbd5e1;
+    /* Grey X */
+}
+
+
+/* Buttons */
+.plan-btn-new {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.plan-btn-new.primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.plan-btn-new.primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+}
+
+.plan-btn-new.secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.plan-btn-new.secondary:hover {
+    background: var(--bg-alt);
+    border-color: var(--text-primary);
+    transform: translateY(-2px);
+}

@@ -1,0 +1,209 @@
+/* --- SOFTWARE VS EMPLOYEE COMPARISON (Clean & Modern) --- */
+.comparison-section {
+    padding: 100px 0;
+    position: relative;
+    overflow: hidden;
+    /* background: #ffffff; Removed to match site bg */
+}
+
+/* Main Container: Flex for Side-by-Side */
+.comparison-layout {
+    display: flex;
+    align-items: flex-start;
+    /* Align top */
+    gap: 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Left Side: Text/Header */
+.comparison-header-side {
+    flex: 1;
+    max-width: 400px;
+    position: sticky;
+    /* Sticky scroll effect */
+    top: 120px;
+}
+
+.comparison-header-side h2 {
+    font-size: 3rem;
+    /* Big title */
+    margin-bottom: 24px;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+.comparison-header-side p {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+/* Right Side: Grid of Cards */
+.comparison-content-side {
+    flex: 1.5;
+    /* Takes more space */
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: stretch;
+}
+
+.comparison-card {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* Light border */
+    border-radius: 24px;
+    padding: 32px;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+/* EMPLOYEE CARD (Simpler) */
+.comparison-card.employee {
+    background: rgba(241, 245, 249, 0.5);
+    /* Slate 100 with opacity */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* PLATFORM CARD (Premium) */
+.comparison-card.platform {
+    background: #ffffff;
+    border: 2px solid var(--primary);
+    /* Blue border highlight */
+    box-shadow:
+        0 20px 40px -10px rgba(37, 99, 235, 0.15),
+        0 0 0 1px rgba(37, 99, 235, 0.1);
+    transform: scale(1.02);
+    /* Slight lift */
+    z-index: 10;
+}
+
+.most-popular-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 6px 16px;
+    /* Pill shape */
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+.card-header h3 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+}
+
+.price-tag-comp {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+}
+
+.price-tag-comp small {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.comparison-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.comparison-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.comparison-list li.positive {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.comparison-list li.negative svg {
+    color: #ef4444;
+    /* Red X */
+    font-size: 1.1rem;
+}
+
+.comparison-list li.positive svg {
+    color: var(--primary);
+    /* Blue Check */
+    font-size: 1.1rem;
+}
+
+/* Footer CTA moved to header side */
+.comparison-footer-side {
+    margin-top: 32px;
+}
+
+.comparison-footer-side p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .comparison-layout {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 40px;
+    }
+
+    .comparison-header-side {
+        max-width: 800px;
+        position: static;
+        text-align: center;
+    }
+
+    .comparison-content-side {
+        width: 100%;
+        max-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    .comparison-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .comparison-card.platform {
+        transform: scale(1);
+        /* Reset scale on mobile */
+        order: -1;
+        /* Show platform first on mobile? Optional */
+    }
+
+    .comparison-header-side h2 {
+        font-size: 2.5rem;
+    }
+}
