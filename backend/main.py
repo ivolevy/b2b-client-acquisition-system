@@ -1884,6 +1884,7 @@ async def google_auth_url(request: GoogleAuthURLRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/auth/google/callback")
+@app.get("/auth/google/callback") # Compatibilidad con consola Google
 async def google_callback(code: str, state: str):
     """Maneja el callback de Google OAuth e intercambia el código por tokens"""
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
@@ -1925,6 +1926,7 @@ async def outlook_auth_url(request: GoogleAuthURLRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/auth/outlook/callback")
+@app.get("/auth/outlook/callback") # Compatibilidad con consola Microsoft
 async def outlook_callback(code: str, state: str):
     """Maneja el callback de Outlook OAuth"""
     frontend_url = os.getenv("FRONTEND_URL", "https://b2b-client-acquisition-system.vercel.app")
