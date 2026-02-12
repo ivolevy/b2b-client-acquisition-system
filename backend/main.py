@@ -2915,3 +2915,92 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
 
+
+# --- MODULE: COMMUNICATIONS (INBOX) ---
+
+def get_user_id_from_header(request: Request) -> Optional[str]:
+    # Helper simple para extraer user_id del header (usado en endpoints protegidos)
+    return request.headers.get("X-User-ID")
+
+@app.get("/api/communications/inbox")
+async def get_inbox_conversations(request: Request):
+    """Obtiene la lista de conversaciones (Inbox)"""
+    user_id = get_user_id_from_header(request)
+    if not user_id:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+        
+    try:
+        admin = get_supabase_admin()
+        # Traer conversaciones ordenadas por último mensaje
+        res = admin.table("email_conversations")\
+            .select("*")\
+            .eq("user_id", user_id)\
+            .order("last_message_at", desc=True)\
+            .execute()
+            
+        return {"conversations": res.data}
+    except Exception as e:
+        logger.error(f"Error fetching inbox: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.get("/api/communications/thread/{conversation_id}")
+async def get_conversation_thread(conversation_id: str, request: Request):
+    """Obtiene el hilo de mensajes de una conversación"""
+    user_id = get_user_id_from_header(request)
+    if not user_id:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+        
+    try:
+        admin = get_supabase_admin()
+        
+        # Verificar pertenencia
+        conv = admin.table("email_conversations").select("user_id").eq("id", conversation_id).execute()
+        if not conv.data or str(conv.data[0]['user_id']) != user_id:
+             return JSONResponse(status_code=403, content={"detail": "Forbidden"})
+
+        # Traer mensajes
+        res = admin.table("email_messages")\
+            .select("*")\
+            .eq("conversation_id", conversation_id)\
+            .order("sent_at", desc=False)\
+            .execute()
+            
+        return {"messages": res.data}
+    except Exception as e:
+        logger.error(f"Error fetching thread: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.post("/api/communications/sync")
+async def trigger_email_sync(request: Request):
+    """Dispara la sincronización manual de emails"""
+    user_id = get_user_id_from_header(request)
+    if not user_id:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+        
+    try:
+        # Importar dinámicamente para evitar ciclos
+        from backend.email_sync_service import sync_gmail_account, sync_outlook_account
+        from backend.db_supabase import get_user_oauth_token
+
+        tokens = get_user_oauth_token(user_id)
+        if not tokens:
+             return {"status": "ok", "synced": {}, "message": "No connected accounts"}
+
+        results = {"gmail": False, "outlook": False}
+        
+        # Sync Google
+        google_token = next((t for t in tokens if t.get('provider') == 'google'), None)
+        if google_token:
+            sync_gmail_account(user_id, google_token)
+            results["gmail"] = True
+            
+        # Sync Outlook
+        outlook_token = next((t for t in tokens if t.get('provider') == 'outlook'), None)
+        if outlook_token:
+            sync_outlook_account(user_id, outlook_token)
+            results["outlook"] = True
+            
+        return {"status": "ok", "synced": results}
+    except Exception as e:
+        logger.error(f"Error triggering sync: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})

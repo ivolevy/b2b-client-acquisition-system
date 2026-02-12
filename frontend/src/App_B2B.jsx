@@ -12,6 +12,7 @@ import UserProfile from './components/UserProfile';
 import ToastContainer from './components/ToastContainer';
 import ProBackground from './components/ProBackground';
 import OfflineView from './components/OfflineView';
+import Communications from './components/Communications';
 const AdminPayments = React.lazy(() => import('./components/admin/AdminPayments'));
 import { ToastContainer as ReactToastifyContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -737,7 +738,7 @@ function AppB2B() {
           )}
 
           {/* Toggle de navegación Tabla/Emails */}
-          <div className="view-toggle-container">
+          <div className={`view-toggle-container ${view === 'communications' ? 'connected-header' : ''}`}>
             <div className="view-toggle-inline">
               <button 
                 type="button"
@@ -776,6 +777,16 @@ function AppB2B() {
                 </svg>
                 WhatsApp
               </button>
+              <button 
+                type="button"
+                className={view === 'communications' ? 'active' : ''}
+                onClick={() => setView('communications')}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                Mensajes
+              </button>
             </div>
           </div>
 
@@ -808,7 +819,7 @@ function AppB2B() {
               toastInfo={info}
             />
           )}
-
+          
           {view === 'whatsapp' && (
             <WhatsAppSender
               empresas={empresas}
@@ -823,7 +834,16 @@ function AppB2B() {
               toastInfo={info}
             />
           )}
-      </main>
+
+          {view === 'communications' && (
+            <Communications 
+              onClose={() => {
+                navigate('/');
+                setView('table');
+              }}
+            />
+          )}
+        </main>
 
       {showEmailSender && (
         <EmailSender

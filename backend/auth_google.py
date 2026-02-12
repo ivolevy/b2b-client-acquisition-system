@@ -19,9 +19,10 @@ REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/goog
 # Permitir que los scopes cambien sin lanzar error (necesario si el usuario modifica permisos o google devuelve diferente orden)
 os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 
-# Scopes necesarios para enviar correos y ver el perfil
+# Scopes necesarios para enviar correos y ver el perfil, y leer para tracking
 SCOPES = [
     'https://www.googleapis.com/auth/gmail.send',
+    'https://www.googleapis.com/auth/gmail.readonly', # Scope para leer emails (Tracking)
     'https://www.googleapis.com/auth/userinfo.email',
     'openid'
 ]

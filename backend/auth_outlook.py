@@ -17,8 +17,8 @@ AUTHORIZE_ENDPOINT = f"{AUTHORITY}/oauth2/v2.0/authorize"
 TOKEN_ENDPOINT = f"{AUTHORITY}/oauth2/v2.0/token"
 GRAPH_API_ENDPOINT = "https://graph.microsoft.com/v1.0"
 
-# Scopes needed for sending email and reading profile
-SCOPES = ["User.Read", "Mail.Send", "offline_access"]
+# Scopes needed for sending email, reading profile, and reading mail (Tracking)
+SCOPES = ["User.Read", "Mail.Send", "Mail.Read", "offline_access"]
 
 def get_outlook_auth_url(state: str = "") -> str:
     """Genera la URL de autorización para Outlook"""
