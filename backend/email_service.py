@@ -128,7 +128,7 @@ def enviar_email(
                 # Si se refrescó el token, guardarlo
                 if new_creds:
                     logger.info(f" Actualizando token refrescado para usuario {user_id}")
-                    save_user_oauth_token(user_id, {
+                    save_user_oauth_token(user_id, 'google', {
                         'access_token': new_creds.token,
                         'refresh_token': new_creds.refresh_token,
                         'expiry': new_creds.expiry.isoformat() if new_creds.expiry else None,

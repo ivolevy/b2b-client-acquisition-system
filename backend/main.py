@@ -1897,7 +1897,7 @@ async def google_callback(code: str, state: str):
         token_data = exchange_code_for_token(code)
         
         # Guardar tokens en la base de datos
-        success = save_user_oauth_token(user_id, token_data)
+        success = save_user_oauth_token(user_id, 'google', token_data)
         
         if not success:
             logger.error(f"Error guardando token OAuth para usuario {user_id}")
@@ -1960,7 +1960,7 @@ async def outlook_callback(code: str, state: str):
             'account_email': email
         }
         
-        success = save_user_oauth_token(user_id, token_to_save, provider='outlook')
+        success = save_user_oauth_token(user_id, 'outlook', token_to_save)
         
         if not success:
             logger.error(f"Error guardando token Outlook en BD para usuario {user_id}")
@@ -2982,9 +2982,9 @@ async def trigger_email_sync(request: Request):
     try:
         # Importar dinámicamente para evitar ciclos
         from backend.email_sync_service import sync_gmail_account, sync_outlook_account
-        from backend.db_supabase import get_user_oauth_token
+        from backend.db_supabase import get_all_user_oauth_tokens
 
-        tokens = get_user_oauth_token(user_id)
+        tokens = get_all_user_oauth_tokens(user_id)
         if not tokens:
              return {"status": "ok", "synced": {}, "message": "No connected accounts"}
 

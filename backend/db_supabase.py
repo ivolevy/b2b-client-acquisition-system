@@ -601,6 +601,21 @@ def get_user_oauth_token(user_id: str, provider: str) -> Optional[Dict]:
         logger.error(f"Error obteniendo token OAuth: {e}")
         return None
 
+def get_all_user_oauth_tokens(user_id: str) -> List[Dict]:
+    """Obtiene todos los tokens de OAuth para un usuario"""
+    admin = get_supabase_admin()
+    
+    try:
+        result = admin.table('user_oauth_tokens')\
+            .select('*')\
+            .eq('user_id', user_id)\
+            .execute()
+            
+        return result.data or []
+    except Exception as e:
+        logger.error(f"Error obteniendo todos los tokens OAuth: {e}")
+        return []
+
 def delete_user_oauth_token(user_id: str, provider: str):
     """Elimina tokens de OAuth para un usuario y proveedor"""
     admin = get_supabase_admin()
