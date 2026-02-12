@@ -361,6 +361,35 @@ def enviar_email_empresa(
         attachments=attachments
     )
     
+    # Tracking: Registrar el mensaje enviado en la base de datos de conversaciones
+    if resultado.get('success') and user_id:
+        try:
+            from .email_sync_service import get_or_create_conversation, store_message
+            
+            # Obtener email del usuario (remitente)
+            from .db_supabase import obtener_perfil_usuario
+            profile = obtener_perfil_usuario(user_id)
+            user_email = profile.get('email', '') if profile else sender_email
+            
+            # 1. Obtener o crear conversación
+            conv_id = get_or_create_conversation(user_id, empresa['email'], asunto, empresa.get('nombre'))
+            
+            if conv_id:
+                # 2. Guardar mensaje
+                msg_data = {
+                    "external_id": f"sent_{datetime.now().timestamp()}",
+                    "sender": user_email,
+                    "recipient": empresa['email'],
+                    "direction": 'outbound',
+                    "snippet": cuerpo_texto[:200] if cuerpo_texto else '',
+                    "date": datetime.now().isoformat(),
+                    "body_html": cuerpo_html
+                }
+                store_message(user_id, conv_id, msg_data)
+                logger.info(f"Tracking: Mensaje enviado guardado en conversación {conv_id}")
+        except Exception as e:
+            logger.error(f"Error en tracking de email enviado: {e}")
+
     # Agregar info de la empresa al resultado
     resultado['empresa_id'] = empresa.get('id')
     resultado['empresa_nombre'] = empresa.get('nombre')

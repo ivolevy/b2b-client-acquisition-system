@@ -91,29 +91,38 @@ const Communications = () => {
         height: 'calc(100vh - 250px)', 
         minHeight: '600px',
         gap: 0, 
-        bgcolor: 'transparent',
-        borderRadius: '0 0 32px 32px',
+        bgcolor: 'rgba(10, 15, 25, 0.4)',
+        borderRadius: '24px',
         overflow: 'hidden',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderTop: 'none',
-        backdropFilter: 'blur(20px)',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        backdropFilter: 'blur(16px)',
+        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)'
     }}>
       {/* Sidebar: Conversations */}
       <Box sx={{ 
           width: { xs: selectedConversation ? '0%' : '100%', md: '350px' },
           display: { xs: selectedConversation ? 'none' : 'flex', md: 'flex' },
           flexDirection: 'column',
-          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-          bgcolor: 'rgba(255, 255, 255, 0.02)',
+          borderRight: '1px solid rgba(255, 255, 255, 0.05)',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
       }}>
         <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h5" sx={{ fontWeight: 800, background: 'linear-gradient(90deg, #fff 0%, #aaa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <Typography variant="h5" sx={{ 
+            fontWeight: 800, 
+            letterSpacing: '-1px',
+            background: 'linear-gradient(90deg, #fff 0%, rgba(255,255,255,0.6) 100%)', 
+            WebkitBackgroundClip: 'text', 
+            WebkitTextFillColor: 'transparent' 
+          }}>
             Inbox
           </Typography>
-          <Tooltip title="Sincronizar correos">
-            <IconButton onClick={handleSync} disabled={syncing} sx={{ bgcolor: 'rgba(255,255,255,0.05)', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
-              <RefreshIcon sx={{ color: '#fff', fontSize: '1.2rem', animation: syncing ? 'spin 2s linear infinite' : 'none' }} />
+          <Tooltip title="Actualizar">
+            <IconButton onClick={handleSync} disabled={syncing} sx={{ 
+              bgcolor: 'rgba(255,255,255,0.03)', 
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.08)', transform: 'rotate(45deg)' },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}>
+              <RefreshIcon sx={{ color: '#fff', fontSize: '1.2rem', animation: syncing ? 'spin 1.5s linear infinite' : 'none' }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -124,62 +133,84 @@ const Communications = () => {
               alignItems: 'center', 
               px: 2, 
               py: 1, 
-              borderRadius: '14px', 
-              bgcolor: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.05)'
+              borderRadius: '16px', 
+              bgcolor: 'rgba(0,0,0,0.2)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              transition: 'all 0.2s',
+              '&:focus-within': {
+                bgcolor: 'rgba(0,0,0,0.3)',
+                borderColor: 'rgba(59, 130, 246, 0.4)'
+              }
           }}>
-            <SearchIcon sx={{ color: 'rgba(255,255,255,0.3)', mr: 1, fontSize: '1.2rem' }} />
+            <SearchIcon sx={{ color: 'rgba(255,255,255,0.2)', mr: 1, fontSize: '1.1rem' }} />
             <InputBase 
-              placeholder="Buscar conversaciones..." 
+              placeholder="Buscar..." 
               fullWidth 
-              sx={{ color: '#fff', fontSize: '0.9rem' }}
+              sx={{ color: '#fff', fontSize: '0.85rem' }}
             />
           </Box>
         </Box>
 
-        <List sx={{ flexGrow: 1, overflowY: 'auto', px: 1, py: 0 }}>
+        <List sx={{ flexGrow: 1, overflowY: 'auto', px: 1.5, py: 0 }}>
           {loading ? (
             [1,2,3].map(i => (
-              <Box key={i} sx={{ p: 2, mb: 1, borderRadius: '16px', bgcolor: 'rgba(255,255,255,0.02)', height: '70px', opacity: 0.5 }} />
+              <Box key={i} sx={{ p: 2.5, mb: 1, borderRadius: '20px', bgcolor: 'rgba(255,255,255,0.01)', height: '76px' }} />
             ))
+          ) : conversations.length === 0 ? (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>No hay chats</Typography>
+            </Box>
           ) : conversations.map((conv) => (
             <ListItem 
               key={conv.id}
               button 
               onClick={() => setSelectedConversation(conv)}
               sx={{ 
-                  borderRadius: '16px', 
+                  borderRadius: '20px', 
                   mb: 1, 
                   py: 2,
-                  transition: 'all 0.2s',
-                  bgcolor: selectedConversation?.id === conv.id ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-                  border: selectedConversation?.id === conv.id ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid transparent',
-                  '&:hover': { bgcolor: selectedConversation?.id === conv.id ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.05)' }
+                  px: 2,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  bgcolor: selectedConversation?.id === conv.id ? 'rgba(59, 130, 246, 0.12)' : 'transparent',
+                  border: '1px solid',
+                  borderColor: selectedConversation?.id === conv.id ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                  '&:hover': { 
+                    bgcolor: selectedConversation?.id === conv.id ? 'rgba(59, 130, 246, 0.18)' : 'rgba(255,255,255,0.03)',
+                    transform: 'translateX(4px)'
+                  }
               }}
             >
               <Avatar 
                 sx={{ 
-                    width: 45, 
-                    height: 45, 
+                    width: 48, 
+                    height: 48, 
                     mr: 2, 
-                    bgcolor: 'rgba(59, 130, 246, 0.2)', 
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', 
                     color: '#fff', 
-                    fontWeight: 700,
-                    border: '1px solid rgba(59, 130, 246, 0.5)'
+                    fontWeight: 800,
+                    fontSize: '1rem',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
                 }}>
                 {conv.lead_name?.charAt(0).toUpperCase()}
               </Avatar>
               <ListItemText 
                 primary={
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                        <Typography sx={{ fontWeight: 700, color: '#fff', fontSize: '0.95rem' }}>{conv.lead_name}</Typography>
-                        <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem' }}>
+                        <Typography sx={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem', letterSpacing: '-0.2px' }}>{conv.lead_name}</Typography>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', fontWeight: 500 }}>
                             {new Date(conv.last_message_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                         </Typography>
                     </Box>
                 }
                 secondary={
-                    <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <Typography sx={{ 
+                      color: selectedConversation?.id === conv.id ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)', 
+                      fontSize: '0.8rem', 
+                      whiteSpace: 'nowrap', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis',
+                      fontWeight: 400
+                    }}>
                         {conv.subject}
                     </Typography>
                 } 
@@ -194,11 +225,11 @@ const Communications = () => {
           flexGrow: 1, 
           display: 'flex', 
           flexDirection: 'column', 
-          bgcolor: 'rgba(0,0,0,0.1)',
+          bgcolor: 'rgba(0,0,0,0.15)',
           position: 'relative'
       }}>
         {selectedConversation ? (
-          <Fade in={true}>
+          <Fade in={true} timeout={400}>
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 {/* Thread Header */}
                 <Box sx={{ 
@@ -206,26 +237,40 @@ const Communications = () => {
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'space-between',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                    bgcolor: 'rgba(255, 255, 255, 0.01)'
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                    bgcolor: 'rgba(255, 255, 255, 0.01)',
+                    backdropFilter: 'blur(8px)'
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <IconButton 
                         onClick={() => setSelectedConversation(null)} 
-                        sx={{ mr: 1, display: { xs: 'flex', md: 'none' }, color: 'rgba(255,255,255,0.5)' }}
+                        sx={{ mr: 1, display: { xs: 'flex', md: 'none' }, color: 'rgba(255,255,255,0.3)' }}
                     >
                         <BackIcon />
                     </IconButton>
                     <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#fff', lineHeight: 1.1, mb: 0.5, letterSpacing: '-0.3px' }}>
                             {selectedConversation.lead_name}
                         </Typography>
-                        <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
-                            {selectedConversation.lead_email} • {selectedConversation.subject}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography sx={{ 
+                            px: 1, 
+                            py: 0.2, 
+                            bgcolor: 'rgba(59, 130, 246, 0.1)', 
+                            color: '#3b82f6', 
+                            fontSize: '0.7rem', 
+                            borderRadius: '4px',
+                            fontWeight: 600
+                          }}>
+                              {selectedConversation.lead_email}
+                          </Typography>
+                          <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem' }}>
+                            • {selectedConversation.subject}
+                          </Typography>
+                        </Box>
                     </Box>
                   </Box>
-                  <IconButton sx={{ color: 'rgba(255,255,255,0.3)' }}>
+                  <IconButton sx={{ color: 'rgba(255,255,255,0.2)', '&:hover': { color: '#fff' } }}>
                     <MoreVertIcon />
                   </IconButton>
                 </Box>
@@ -238,7 +283,8 @@ const Communications = () => {
                     display: 'flex', 
                     flexDirection: 'column', 
                     gap: 3,
-                    height: '100px' // Hack for flex overflow
+                    height: '100px',
+                    background: 'radial-gradient(circle at top right, rgba(59, 130, 246, 0.03) 0%, transparent 70%)'
                 }}>
                   {messages.map((msg) => {
                     const isOutbound = msg.direction === 'outbound';
@@ -247,7 +293,7 @@ const Communications = () => {
                             key={msg.id} 
                             sx={{ 
                                 alignSelf: isOutbound ? 'flex-end' : 'flex-start',
-                                maxWidth: '80%',
+                                maxWidth: '75%',
                                 display: 'flex', 
                                 flexDirection: 'column',
                                 alignItems: isOutbound ? 'flex-end' : 'flex-start'
@@ -255,29 +301,38 @@ const Communications = () => {
                         >
                             <Box sx={{ 
                                 px: 2.5, 
-                                py: 1.5, 
-                                borderRadius: isOutbound ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-                                bgcolor: isOutbound ? '#3b82f6' : 'rgba(255,255,255,0.06)',
-                                border: isOutbound ? 'none' : '1px solid rgba(255,255,255,0.08)',
-                                boxShadow: isOutbound ? '0 4px 15px rgba(59, 130, 246, 0.2)' : 'none',
-                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                py: 1.8, 
+                                borderRadius: isOutbound ? '24px 24px 4px 24px' : '24px 24px 24px 4px',
+                                bgcolor: isOutbound ? '#3b82f6' : 'rgba(255,255,255,0.05)',
+                                border: isOutbound ? 'none' : '1px solid rgba(255,255,255,0.05)',
+                                boxShadow: isOutbound ? '0 10px 30px rgba(59, 130, 246, 0.25)' : 'none',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                 '&:hover': { 
-                                    transform: 'translateY(-1px)',
-                                    boxShadow: isOutbound ? '0 6px 20px rgba(59, 130, 246, 0.3)' : '0 4px 12px rgba(0,0,0,0.2)'
+                                    transform: isOutbound ? 'translateX(-4px)' : 'translateX(4px)',
+                                    bgcolor: isOutbound ? '#2563eb' : 'rgba(255,255,255,0.08)'
                                 }
                             }}>
                                 <Typography sx={{ 
-                                    color: isOutbound ? '#fff' : 'rgba(255,255,255,0.9)', 
-                                    fontSize: '0.95rem',
+                                    color: isOutbound ? '#fff' : 'rgba(255,255,255,0.95)', 
+                                    fontSize: '0.92rem',
                                     whiteSpace: 'pre-wrap',
-                                    fontWeight: 500
+                                    fontWeight: 500,
+                                    lineHeight: 1.5,
+                                    letterSpacing: '0.1px'
                                 }}>
                                     {msg.body_text}
                                 </Typography>
                             </Box>
-                            <Typography sx={{ mt: 1, color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem' }}>
+                            <Typography sx={{ 
+                              mt: 0.8, 
+                              color: 'rgba(255,255,255,0.2)', 
+                              fontSize: '0.65rem', 
+                              fontWeight: 600,
+                              letterSpacing: '0.5px',
+                              textTransform: 'uppercase'
+                            }}>
                                 {new Date(msg.sent_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                {isOutbound && ' • Enviado'}
+                                {isOutbound && ' • Entregado'}
                             </Typography>
                         </Box>
                     );
@@ -286,45 +341,62 @@ const Communications = () => {
                 </Box>
 
                 {/* Reply Section */}
-                <Box sx={{ p: 3, bgcolor: 'rgba(255,255,255,0.01)' }}>
+                <Box sx={{ p: 3, bgcolor: 'rgba(0,0,0,0.1)' }}>
                   <Box sx={{ 
                       display: 'flex', 
                       alignItems: 'flex-end', 
                       gap: 2, 
                       p: 1.5,
-                      borderRadius: '20px',
+                      borderRadius: '24px',
                       bgcolor: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
+                      border: '1px solid rgba(255,255,255,0.05)',
+                      transition: 'all 0.3s',
+                      '&:focus-within': {
+                        bgcolor: 'rgba(255,255,255,0.05)',
+                        borderColor: 'rgba(59, 130, 246, 0.3)',
+                        boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.05)'
+                      }
                   }}>
-                    <IconButton sx={{ color: 'rgba(255,255,255,0.4)', p: 1.5 }}>
-                        <AttachFileIcon />
+                    <IconButton sx={{ color: 'rgba(255,255,255,0.3)', p: 1.5, '&:hover': { color: '#fff', bgcolor: 'rgba(255,255,255,0.05)' } }}>
+                        <AttachFileIcon sx={{ fontSize: '1.2rem' }} />
                     </IconButton>
                     <InputBase 
                         multiline
                         maxRows={5}
                         fullWidth
-                        placeholder="Mensaje..."
+                        placeholder="Escribe tu respuesta..."
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         sx={{ 
                             color: '#fff', 
-                            fontSize: '0.95rem', 
+                            fontSize: '0.92rem', 
                             py: 1.5,
-                            '& .MuiInputBase-input': { p: 0 }
+                            '& .MuiInputBase-input': { 
+                                p: 0,
+                                '&::placeholder': {
+                                  color: 'rgba(255,255,255,0.2)',
+                                  opacity: 1
+                                }
+                            }
                         }}
                     />
                     <IconButton 
                         disabled={!replyText.trim()}
                         sx={{ 
-                            bgcolor: replyText.trim() ? '#3b82f6' : 'rgba(255,255,255,0.05)', 
-                            color: '#fff',
+                            bgcolor: replyText.trim() ? '#3b82f6' : 'rgba(255,255,255,0.02)', 
+                            color: replyText.trim() ? '#fff' : 'rgba(255,255,255,0.1)',
                             p: 1.5,
-                            transition: 'all 0.3s',
-                            '&:hover': { bgcolor: '#2563eb' }
+                            borderRadius: '16px',
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: replyText.trim() ? '0 8px 20px rgba(59, 130, 246, 0.3)' : 'none',
+                            '&:hover': { 
+                              bgcolor: replyText.trim() ? '#2563eb' : 'rgba(255,255,255,0.05)',
+                              transform: replyText.trim() ? 'scale(1.05)' : 'none'
+                            },
+                            '&:active': { transform: 'scale(0.95)' }
                         }}
                     >
-                        <SendIcon sx={{ fontSize: '1.2rem' }} />
+                        <SendIcon sx={{ fontSize: '1.25rem' }} />
                     </IconButton>
                   </Box>
                 </Box>
@@ -337,23 +409,27 @@ const Communications = () => {
               alignItems: 'center', 
               justifyContent: 'center', 
               flexDirection: 'column',
-              opacity: 0.3
+              background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.05) 0%, transparent 70%)'
           }}>
             <Box sx={{ 
-                width: 120, 
-                height: 120, 
-                borderRadius: '40px', 
-                bgcolor: 'rgba(255,255,255,0.03)', 
+                width: 140, 
+                height: 140, 
+                borderRadius: '48px', 
+                bgcolor: 'rgba(59, 130, 246, 0.05)', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center',
-                mb: 3,
-                border: '1px solid rgba(255,255,255,0.05)'
+                mb: 4,
+                border: '1px solid rgba(59, 130, 246, 0.1)',
+                boxShadow: '0 30px 60px rgba(0,0,0,0.3)',
+                animation: 'pulse 3s infinite ease-in-out'
             }}>
-                <SendIcon sx={{ fontSize: 60, color: '#fff', transform: 'rotate(-45deg)', opacity: 0.2 }} />
+                <SendIcon sx={{ fontSize: 70, color: '#3b82f6', transform: 'rotate(-45deg)', opacity: 0.4 }} />
             </Box>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: '#fff', mb: 1 }}>Tus Mensajes</Typography>
-            <Typography sx={{ color: '#fff', fontSize: '0.9rem' }}>Selecciona una conversación para empezar a chatear</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', mb: 1, letterSpacing: '-1px' }}>Inbox Pro</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.95rem', maxWidth: '300px', textAlign: 'center', lineHeight: 1.6 }}>
+                Tus conversaciones de Gmail y Outlook unificadas en un solo lugar.
+            </Typography>
           </Box>
         )}
       </Box>
@@ -364,8 +440,13 @@ const Communications = () => {
                 from { transform: rotate(0deg); }
                 to { transform: rotate(360deg); }
             }
+            @keyframes pulse {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.05); opacity: 0.8; }
+                100% { transform: scale(1); opacity: 1; }
+            }
             .communications-container ::-webkit-scrollbar {
-                width: 6px;
+                width: 5px;
             }
             .communications-container ::-webkit-scrollbar-track {
                 background: transparent;
@@ -375,7 +456,7 @@ const Communications = () => {
                 border-radius: 10px;
             }
             .communications-container ::-webkit-scrollbar-thumb:hover {
-                background: rgba(255,255,255,0.1);
+                background: rgba(255,255,255,0.12);
             }
           `}
       </style>
