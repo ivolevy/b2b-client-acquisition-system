@@ -31,7 +31,7 @@ def get_gmail_service_for_sync(token_data: Dict):
             creds.refresh(Request())
             # TODO: Actualizar token en DB
     
-    return build('gmail', 'v1', credentials=creds)
+    return build('gmail', 'v1', credentials=creds, static_discovery=False)
 
 def sync_gmail_account(user_id: str, token_data: Dict):
     """Sincroniza correos recientes de Gmail"""

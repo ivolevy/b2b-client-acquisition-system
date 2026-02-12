@@ -568,9 +568,9 @@ def save_user_oauth_token(user_id: str, provider: str, token_data: Dict):
         'provider': provider,
         'access_token': token_data.get('access_token'),
         'refresh_token': token_data.get('refresh_token'),
-        'expires_at': token_data.get('expiry'),
+        'token_expiry': token_data.get('expiry'),
         'token_type': token_data.get('token_type', 'Bearer'),
-        'scopes': token_data.get('scopes', []),
+        'scope': token_data.get('scopes', []),
         'account_email': token_data.get('account_email'),
         'updated_at': datetime.utcnow().isoformat()
     }

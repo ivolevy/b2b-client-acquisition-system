@@ -79,7 +79,7 @@ def exchange_code_for_token(code: str) -> Dict:
     credentials = flow.credentials
     
     # Obtener el email del usuario para guardarlo
-    service = build('oauth2', 'v2', credentials=credentials)
+    service = build('oauth2', 'v2', credentials=credentials, static_discovery=False)
     user_info = service.userinfo().get().execute()
     
     return {
@@ -109,9 +109,9 @@ def get_gmail_service(token_data: Dict):
             creds.refresh(Request())
             # Aquí se debería guardar el nuevo token en la DB
             # Lo manejaremos en el llamador para actualizar si cambió
-            return build('gmail', 'v1', credentials=creds), creds
+            return build('gmail', 'v1', credentials=creds, static_discovery=False), creds
     
-    return build('gmail', 'v1', credentials=creds), None
+    return build('gmail', 'v1', credentials=creds, static_discovery=False), None
 
 def send_gmail_api(token_data: Dict, to: str, subject: str, body_html: str, attachments: Optional[List[Any]] = None):
     """Envía un email usando la Gmail API"""
