@@ -63,6 +63,9 @@ function UserProfile() {
   const [authStatus, setAuthStatus] = useState({ google: { connected: false }, outlook: { connected: false } });
   const [authLoading, setAuthLoading] = useState(false);
   const [rechargeCurrency, setRechargeCurrency] = useState('ARS'); // 'ARS' or 'USD'
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
+  const [providerToDisconnect, setProviderToDisconnect] = useState(null);
+  const [disconnectLoading, setDisconnectLoading] = useState(false);
 
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
@@ -82,7 +85,7 @@ function UserProfile() {
 
   // Bloquear scroll del body cuando cualquier modal está abierto
   useEffect(() => {
-    const hasModalOpen = showDeleteModal || showPasswordModal || showDeleteSuccessModal;
+    const hasModalOpen = showDeleteModal || showPasswordModal || showDeleteSuccessModal || showDisconnectModal;
     
     if (hasModalOpen) {
       // Guardar el scroll actual
@@ -193,18 +196,29 @@ function UserProfile() {
     }
   };
 
-  const handleDisconnectProvider = async (provider) => {
-    if (!confirm(`¿Estás seguro de desconectar ${provider}?`)) return;
+  const handleDisconnectProvider = async () => {
+    if (!providerToDisconnect) return;
+    const provider = providerToDisconnect;
+    setDisconnectLoading(true);
     try {
       const response = await axios.post(`${API_URL}/api/auth/${provider}/disconnect`, { user_id: user.id });
       if (response.data.success) {
         toastSuccess?.(`${provider === 'google' ? 'Gmail' : 'Outlook'} desconectado`);
         fetchAuthStatus();
+        setShowDisconnectModal(false);
+        setProviderToDisconnect(null);
       }
     } catch (error) {
       console.error(`Error disconnecting ${provider}:`, error);
       toastError?.(`Error al desconectar ${provider}`);
+    } finally {
+      setDisconnectLoading(false);
     }
+  };
+
+  const openDisconnectModal = (provider) => {
+    setProviderToDisconnect(provider);
+    setShowDisconnectModal(true);
   };
 
   const fetchUserRubros = async () => {
@@ -799,7 +813,7 @@ function UserProfile() {
                           {authStatus?.google?.connected && <span className="integration-status">Conectado</span>}
                         </div>
                         {authStatus?.google?.connected ? (
-                          <button onClick={() => handleDisconnectProvider('google')} className="btn-disconnect-minimal">
+                          <button onClick={() => openDisconnectModal('google')} className="btn-disconnect-minimal">
                             Desconectar
                           </button>
                         ) : (
@@ -821,7 +835,7 @@ function UserProfile() {
                           {authStatus?.outlook?.connected && <span className="integration-status">Conectado</span>}
                         </div>
                         {authStatus?.outlook?.connected ? (
-                          <button onClick={() => handleDisconnectProvider('outlook')} className="btn-disconnect-minimal">
+                          <button onClick={() => openDisconnectModal('outlook')} className="btn-disconnect-minimal">
                             Desconectar
                           </button>
                         ) : (
@@ -1746,6 +1760,60 @@ function UserProfile() {
                 }}
               >
                 Mejorar Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para confirmar desconexión de cuenta */}
+      {showDisconnectModal && (
+        <div className="password-modal-overlay">
+          <div className="password-modal">
+            <div className="password-modal-header">
+              <div style={{ 
+                width: '48px', 
+                height: '48px', 
+                background: '#fff5f5', 
+                borderRadius: '12px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                marginBottom: '1rem'
+              }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                  <line x1="12" y1="2" x2="12" y2="12"></line>
+                </svg>
+              </div>
+              <h3 style={{ margin: 0 }}>Desconectar {providerToDisconnect === 'google' ? 'Gmail' : 'Outlook'}</h3>
+            </div>
+            
+            <div className="password-modal-body">
+              <p style={{ color: '#64748b', fontSize: '0.95rem', margin: 0, lineHeight: '1.5' }}>
+                ¿Estás seguro de que deseas desconectar tu cuenta de {providerToDisconnect === 'google' ? 'Gmail' : 'Outlook'}? 
+                Ya no podrás trackear respuestas automáticas de tus campañas desde esta cuenta.
+              </p>
+            </div>
+            
+            <div className="password-modal-footer">
+              <button 
+                className="cancel-btn"
+                onClick={() => {
+                  setShowDisconnectModal(false);
+                  setProviderToDisconnect(null);
+                }}
+                disabled={disconnectLoading}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="password-save-btn"
+                onClick={handleDisconnectProvider}
+                disabled={disconnectLoading}
+                style={{ background: '#dc2626' }}
+              >
+                {disconnectLoading ? 'Desconectando...' : 'Sí, desconectar'}
               </button>
             </div>
           </div>

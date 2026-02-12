@@ -1997,7 +1997,7 @@ async def google_status(user_id: str):
 async def google_disconnect(request: DisconnectRequest):
     """Elimina la conexión con Google Gmail"""
     try:
-        success = delete_user_oauth_token(request.user_id)
+        success = delete_user_oauth_token(request.user_id, provider='google')
         return {"success": success, "message": "Cuenta desconectada exitosamente"}
     except Exception as e:
         logger.error(f"Error desconectando Google Auth: {e}")
@@ -2012,7 +2012,7 @@ async def outlook_disconnect(request: DisconnectRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/users/{user_id}/rubros")
+@app.get("/api/users/{user_id}/rubros")
 async def get_user_rubros(user_id: str):
     """Obtiene los rubros seleccionados por el usuario y todos los disponibles"""
     try:
