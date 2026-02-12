@@ -158,7 +158,7 @@ function UserProfile() {
     if (!user?.id) return;
     setAuthLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/auth/status/${user.id}`);
+      const response = await axios.get(`${API_URL}/api/auth/status/${user.id}`);
       if (response.data) {
         setAuthStatus(response.data);
       }
@@ -349,7 +349,7 @@ function UserProfile() {
     setPasswordError('');
 
     try {
-      const response = await axios.post(`${API_URL}/auth/solicitar-codigo-cambio-password`, {
+      const response = await axios.post(`${API_URL}/api/auth/solicitar-codigo-cambio-password`, {
         email: emailToUse,
         user_id: user.id
       });
@@ -387,7 +387,7 @@ function UserProfile() {
     setPasswordError('');
 
     try {
-      const response = await axios.post(`${API_URL}/auth/validar-codigo-cambio-password`, {
+      const response = await axios.post(`${API_URL}/api/auth/validar-codigo-cambio-password`, {
         email: emailToUse,
         codigo: verificationCode
       });
@@ -462,7 +462,7 @@ function UserProfile() {
 
     try {
       // Validar el código y actualizar la contraseña en un solo paso usando el endpoint del backend
-      const resetResponse = await axios.post(`${API_URL}/auth/actualizar-password-reset`, {
+      const resetResponse = await axios.post(`${API_URL}/api/auth/actualizar-password-reset`, {
         email: emailToUse,
         codigo: verificationCode,
         new_password: passwordForm.newPassword

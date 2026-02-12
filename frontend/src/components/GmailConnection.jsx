@@ -14,7 +14,7 @@ const GmailConnection = ({ user, onSuccess, onError, variant = 'default', minima
 
   const checkStatus = async () => {
     try {
-      const response = await axios.get(`${API_URL}/auth/google/status/${user.id}`);
+      const response = await axios.get(`${API_URL}/api/auth/google/status/${user.id}`);
       if (response.data.success) {
         setStatus({
           connected: response.data.connected,
@@ -30,7 +30,7 @@ const GmailConnection = ({ user, onSuccess, onError, variant = 'default', minima
     setLoading(true);
     try {
       // Pasamos el user.id como state para recuperarlo en el callback
-      const response = await axios.post(`${API_URL}/auth/google/url`, { state: user.id });
+      const response = await axios.post(`${API_URL}/api/auth/google/url`, { state: user.id });
       if (response.data.success && response.data.url) {
         window.location.href = response.data.url;
       }
@@ -52,7 +52,7 @@ const GmailConnection = ({ user, onSuccess, onError, variant = 'default', minima
     setShowDisconnectModal(false);
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/auth/google/disconnect/${user.id}`);
+      const response = await axios.post(`${API_URL}/api/auth/google/disconnect`, { user_id: user.id });
       if (response.data.success) {
         setStatus({ connected: false, account_email: null });
         onSuccess("Cuenta de Gmail desconectada");

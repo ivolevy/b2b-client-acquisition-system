@@ -39,8 +39,8 @@ const OAuthCallback = () => {
                 // Gmail: /auth/google/callback
                 
                 const endpoint = provider === 'outlook' 
-                    ? `${API_URL}/auth/outlook/callback` 
-                    : `${API_URL}/auth/google/callback`;
+                    ? `${API_URL}/api/auth/outlook/callback` 
+                    : `${API_URL}/api/auth/google/callback`;
 
                 // For Gmail, sometimes generic google is used
                 

@@ -1977,7 +1977,7 @@ class UserRubrosRequest(BaseModel):
     user_id: str
     rubro_keys: List[str]
 
-@app.get("/auth/google/status/{user_id}")
+@app.get("/api/auth/google/status/{user_id}")
 async def google_status(user_id: str):
     """Verifica si el usuario tiene una cuenta de Gmail conectada"""
     try:
@@ -2045,7 +2045,7 @@ async def get_user_rubros(user_id: str):
             "error": str(e)
         }
 
-@app.post("/users/rubros")
+@app.post("/api/users/rubros")
 async def save_user_rubros(request: UserRubrosRequest):
     """Guarda los rubros seleccionados por el usuario"""
     try:
@@ -2069,7 +2069,7 @@ async def save_user_rubros(request: UserRubrosRequest):
         logger.error(f"Error guardando rubros para {request.user_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/auth/status/{user_id}")
+@app.get("/api/auth/status/{user_id}")
 async def auth_status_global(user_id: str):
     """Estado de todas las conexiones"""
     google = get_user_oauth_token(user_id, 'google')
@@ -2247,7 +2247,7 @@ class ValidarCodigoRequest(BaseModel):
     email: str
     codigo: str
 
-@app.post("/auth/solicitar-codigo-cambio-password")
+@app.post("/api/auth/solicitar-codigo-cambio-password")
 async def solicitar_codigo_cambio_password(request: SolicitarCodigoRequest):
     """Genera y envía un código de validación por email para cambio de contraseña"""
     try:
@@ -2339,7 +2339,7 @@ async def solicitar_codigo_cambio_password(request: SolicitarCodigoRequest):
         logger.error(f"Error solicitando código: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/auth/validar-codigo-cambio-password")
+@app.post("/api/auth/validar-codigo-cambio-password")
 async def validar_codigo_cambio_password(request: ValidarCodigoRequest):
     """Valida el código de verificación para cambio de contraseña"""
     try:
@@ -2384,7 +2384,7 @@ async def validar_codigo_cambio_password(request: ValidarCodigoRequest):
         logger.error(f"Error validando código: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/auth/solicitar-codigo-reset-password")
+@app.post("/api/auth/solicitar-codigo-reset-password")
 async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
     """Genera y envía un código de validación por email para reset de contraseña (sin autenticación)"""
     try:
@@ -2477,7 +2477,7 @@ async def solicitar_codigo_reset_password(request: SolicitarCodigoRequest):
         logger.error(f"Error solicitando código de recuperación: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/auth/reset-password")
+@app.post("/api/auth/reset-password")
 async def reset_password(request: ValidarCodigoRequest):
     """Valida el código y permite resetear la contraseña (sin autenticación)"""
     try:
@@ -2531,7 +2531,7 @@ class ActualizarPasswordResetRequest(BaseModel):
     codigo: str
     new_password: str
 
-@app.post("/auth/actualizar-password-reset")
+@app.post("/api/auth/actualizar-password-reset")
 async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
     """Valida el código y actualiza la contraseña usando Supabase Admin API"""
     try:
@@ -2735,7 +2735,7 @@ async def actualizar_password_reset(request: ActualizarPasswordResetRequest):
 
 
 
-@app.delete("/auth/delete-account")
+@app.delete("/api/auth/delete-account")
 async def delete_account(request: Request):
     """
     Endpoint para eliminar cuenta del usuario actual.

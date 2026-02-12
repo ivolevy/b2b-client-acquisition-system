@@ -123,7 +123,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
     const checkAuthStatus = async () => {
         if (!user?.id) return;
         try {
-            const response = await axios.get(`${API_URL}/auth/status/${user.id}`);
+            const response = await axios.get(`${API_URL}/api/auth/status/${user.id}`);
             setAuthStatus({
                 google: response.data.google?.connected || false,
                 outlook: response.data.outlook?.connected || false,

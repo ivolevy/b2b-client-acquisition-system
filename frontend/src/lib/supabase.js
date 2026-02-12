@@ -212,7 +212,7 @@ export const authService = {
       const token = session.access_token;
 
       // Llamar al endpoint del backend
-      const response = await fetch(`${API_URL}/auth/delete-account`, {
+      const response = await fetch(`${API_URL}/api/auth/delete-account`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

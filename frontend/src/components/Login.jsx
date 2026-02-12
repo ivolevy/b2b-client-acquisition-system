@@ -1369,7 +1369,7 @@ function Login({ onLogin }) {
                             setCanResendCode(false);
 
                             try {
-                              const response = await axios.post(`${API_URL}/auth/solicitar-codigo-reset-password`, {
+                              const response = await axios.post(`${API_URL}/api/auth/solicitar-codigo-reset-password`, {
                                 email: forgotPasswordEmail
                               });
 
@@ -1516,7 +1516,7 @@ function Login({ onLogin }) {
                     setForgotPasswordError('');
 
                     try {
-                      const response = await axios.post(`${API_URL}/auth/solicitar-codigo-reset-password`, {
+                      const response = await axios.post(`${API_URL}/api/auth/solicitar-codigo-reset-password`, {
                         email: forgotPasswordEmail
                       });
 
@@ -1554,7 +1554,7 @@ function Login({ onLogin }) {
                     setForgotPasswordError('');
 
                     try {
-                      const response = await axios.post(`${API_URL}/auth/reset-password`, {
+                      const response = await axios.post(`${API_URL}/api/auth/reset-password`, {
                         email: forgotPasswordEmail,
                         codigo: forgotPasswordCode
                       });
@@ -1618,7 +1618,7 @@ function Login({ onLogin }) {
                       });
 
                       // Llamar al endpoint que actualiza la contraseña
-                      const response = await axios.post(`${API_URL}/auth/actualizar-password-reset`, {
+                      const response = await axios.post(`${API_URL}/api/auth/actualizar-password-reset`, {
                         email: forgotPasswordEmail,
                         codigo: forgotPasswordCode,
                         new_password: forgotPasswordNewPassword

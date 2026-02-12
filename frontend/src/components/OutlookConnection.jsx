@@ -15,7 +15,7 @@ const OutlookConnection = ({ user, onSuccess, onError, variant = 'default', mini
   const checkStatus = async () => {
     try {
       // Usamos el nuevo endpoint global y filtramos por outlook
-      const response = await axios.get(`${API_URL}/auth/status/${user.id}`);
+      const response = await axios.get(`${API_URL}/api/auth/status/${user.id}`);
       if (response.data.outlook) {
         setStatus({
           connected: response.data.outlook.connected,
@@ -30,7 +30,7 @@ const OutlookConnection = ({ user, onSuccess, onError, variant = 'default', mini
   const handleConnect = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/auth/outlook/url`, { state: user.id });
+      const response = await axios.post(`${API_URL}/api/auth/outlook/url`, { state: user.id });
       if (response.data.success && response.data.url) {
         window.location.href = response.data.url;
       }
@@ -52,7 +52,7 @@ const OutlookConnection = ({ user, onSuccess, onError, variant = 'default', mini
     setShowDisconnectModal(false);
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/auth/outlook/disconnect/${user.id}`);
+      const response = await axios.post(`${API_URL}/api/auth/outlook/disconnect`, { user_id: user.id });
       if (response.data.success) {
         setStatus({ connected: false, account_email: null });
         onSuccess("Cuenta de Outlook desconectada");
