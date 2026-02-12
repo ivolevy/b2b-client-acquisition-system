@@ -3,7 +3,7 @@ import {
   Box, Typography, Paper, List, ListItem, ListItemText, 
   Divider, Avatar, TextField, Button, IconButton, Chip,
   InputBase, Tooltip, Zoom, Fade, ToggleButton, ToggleButtonGroup,
-  Dialog, DialogTitle, DialogContent, DialogActions
+  Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress
 } from '@mui/material';
 import { 
   Refresh as RefreshIcon, 
@@ -14,7 +14,8 @@ import {
   MoreVert as MoreVertIcon,
   KeyboardArrowLeft as BackIcon,
   ViewList as ListIcon,
-  ViewKanban as KanbanIcon
+  ViewKanban as KanbanIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
