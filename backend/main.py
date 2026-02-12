@@ -625,6 +625,15 @@ async def admin_get_usage(request: Request, admin=Depends(get_current_admin)):
         logger.error(f"Error admin usage: {e}")
         return {"current_month_cost_usd": 0.0}
 
+class EnviarEmailRequest(BaseModel):
+    empresa_id: str
+    empresa_data: Optional[Dict[str, Any]] = None
+    template_id: str
+    asunto_personalizado: Optional[str] = None
+    user_id: Optional[str] = None
+    provider: Optional[str] = None
+    attachments: Optional[List[EmailAttachment]] = None
+
 class EnviarEmailMasivoRequest(BaseModel):
     empresa_ids: List[str]
     empresas_data: Optional[List[Dict[str, Any]]] = None
