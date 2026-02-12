@@ -494,9 +494,8 @@ def db_log_email_history(user_id: str, history_data: Dict) -> bool:
     try:
         insert_data = {
             "user_id": user_id,
-            "company_id": history_data.get('empresa_id'),
-            "company_name": history_data.get('empresa_nombre'),
-            "company_email": history_data.get('empresa_email'),
+            "empresa_nombre": history_data.get('empresa_nombre'),
+            "empresa_email": history_data.get('empresa_email'),
             "template_id": history_data.get('template_id'),
             "subject": history_data.get('subject'),
             "status": history_data.get('status'),
@@ -504,6 +503,34 @@ def db_log_email_history(user_id: str, history_data: Dict) -> bool:
             "sent_at": datetime.now().isoformat()
         }
         res = client.table('email_history').insert(insert_data).execute()
+        
+        # Sincronizar con el nuevo sistema de comunicaciones (Inbox/Kanban)
+        if res.data and history_data.get('status') == 'success':
+            try:
+                from backend.email_sync_service import get_or_create_conversation, store_message
+                
+                lead_email = history_data.get('empresa_email')
+                subject = history_data.get('subject', '(Sin Asunto)')
+                lead_name = history_data.get('empresa_nombre')
+                
+                # Buscar o crear conversación
+                conv_id = get_or_create_conversation(user_id, lead_email, subject, lead_name)
+                
+                if conv_id:
+                    msg_data = {
+                        "external_id": f"hist_{res.data[0]['id']}", # ID sintético para historial
+                        "sender": "me", # Enviar desde el usuario
+                        "recipient": lead_email,
+                        "direction": 'outbound',
+                        "snippet": subject,
+                        "date": datetime.now().isoformat(),
+                        "body_html": f"<p>Email enviado vía campaña: {subject}</p>",
+                        "channel": "email"
+                    }
+                    store_message(user_id, conv_id, msg_data)
+            except Exception as sync_err:
+                logger.error(f"Error sincronizando historial con comunicaciones: {sync_err}")
+                
         return bool(res.data)
     except Exception as e:
         logger.error(f"Error db_log_email_history: {e}")

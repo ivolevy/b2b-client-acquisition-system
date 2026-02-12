@@ -59,17 +59,16 @@ def sync_gmail_account(user_id: str, token_data: Dict):
         logger.error(f"Error general sync Gmail para usuario {user_id}: {e}")
 
 
-def get_or_create_conversation(user_id: str, lead_email: str, subject: str, lead_name: str = None) -> str:
+def get_or_create_conversation(user_id: str, lead_email: str, subject: str, lead_name: str = None, channel: str = 'email', lead_phone: str = None) -> str:
     """Busca una conversación existente o crea una nueva"""
     admin = get_supabase_admin()
     
-    # 1. Buscar conversación abierta con ese lead
-    # Intentar match exacto por lead_email
+    # 1. Buscar conversación con ese lead y canal
     res = admin.table("email_conversations")\
         .select("id")\
         .eq("user_id", user_id)\
         .eq("lead_email", lead_email)\
-        .eq("status", "open")\
+        .eq("channel", channel)\
         .execute()
         
     if res.data:
@@ -82,6 +81,8 @@ def get_or_create_conversation(user_id: str, lead_email: str, subject: str, lead
         "lead_name": lead_name or lead_email.split('@')[0],
         "subject": subject,
         "status": "open",
+        "channel": channel,
+        "lead_phone": lead_phone,
         "last_message_at": datetime.now().isoformat()
     }
     res_create = admin.table("email_conversations").insert(new_conv).execute()
@@ -106,21 +107,24 @@ def store_message(user_id: str, conversation_id: str, msg_data: Dict):
         "sender_email": msg_data.get('sender'),
         "recipient_email": msg_data.get('recipient'),
         "direction": msg_data.get('direction'),
-        "body_text": msg_data.get('snippet'), # Por ahora snippet para simplificar
+        "body_text": msg_data.get('snippet'),
         "body_html": msg_data.get('body_html'),
         "sent_at": msg_data.get('date'),
+        "channel": msg_data.get('channel', 'email'),
         "is_read": False if msg_data.get('direction') == 'inbound' else True
     }
     
     admin.table("email_messages").insert(msg_record).execute()
     
     # Determinar nuevo estado de la conversación
+    # Prioridad: outbound -> waiting_reply, inbound -> replied
     new_status = 'waiting_reply' if msg_data.get('direction') == 'outbound' else 'replied'
     
     # Actualizar timestamp y estado de conversación
     admin.table("email_conversations").update({
         "last_message_at": msg_data.get('date') or datetime.now().isoformat(),
-        "status": new_status
+        "status": new_status,
+        "unread_count": 0 if msg_data.get('direction') == 'outbound' else 1 # Simple increment logic could be better
     }).eq("id", conversation_id).execute()
 
 def process_gmail_message(user_id: str, msg_detail: Dict, user_email: str):

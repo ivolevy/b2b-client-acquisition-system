@@ -406,11 +406,6 @@ class SendEmailReplyRequest(BaseModel):
     recipient_email: str
     subject: str
     message: str
-    thread_id: Optional[str] = None
-    empresa_data: Optional[Dict[str, Any]] = None
-    asunto_personalizado: Optional[str] = None
-    user_id: Optional[str] = None
-    provider: Optional[str] = None
     attachments: Optional[List[EmailAttachment]] = None
 
 class MPPreferenceRequest(BaseModel):
@@ -2971,51 +2966,33 @@ async def log_whatsapp_message(req: LogWhatsAppRequest, request: Request):
         return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
         
     try:
-        admin = get_supabase_admin()
+        from backend.email_sync_service import get_or_create_conversation, store_message
         
         # 1. Buscar o crear conversación de WhatsApp
         # Buscamos por lead_phone y channel='whatsapp'
-        res_conv = admin.table("email_conversations")\
-            .select("id")\
-            .eq("user_id", user_id)\
-            .eq("lead_phone", req.phone)\
-            .eq("channel", "whatsapp")\
-            .execute()
+        conv_id = get_or_create_conversation(
+            user_id=user_id,
+            lead_email=f"{req.phone}@whatsapp", # Email sintético para match
+            subject="WhatsApp Chat",
+            channel="whatsapp",
+            lead_phone=req.phone
+        )
             
-        if res_conv.data:
-            conv_id = res_conv.data[0]['id']
-        else:
-            # Traer nombre de la empresa si existe
-            empresa = admin.table("empresas").select("nombre").eq("id", req.empresa_id).execute()
-            lead_name = empresa.data[0]['nombre'] if empresa.data else req.phone
+        if not conv_id:
+            return JSONResponse(status_code=500, content={"detail": "Could not create/find conversation"})
             
-            new_conv = {
-                "user_id": user_id,
-                "lead_phone": req.phone,
-                "lead_name": lead_name,
-                "channel": "whatsapp",
-                "status": "waiting_reply",
-                "last_message_at": datetime.now().isoformat()
-            }
-            res_create = admin.table("email_conversations").insert(new_conv).execute()
-            conv_id = res_create.data[0]['id']
-            
-        # 2. Registrar el mensaje
-        msg_record = {
-            "conversation_id": conv_id,
+        # 2. Registrar el mensaje y actualizar conversación vía store_message
+        msg_data = {
+            "external_id": f"wa_{datetime.now().timestamp()}",
+            "sender": "me" if req.direction == 'outbound' else req.phone,
+            "recipient": req.phone if req.direction == 'outbound' else "me",
             "direction": req.direction,
-            "body_text": req.message,
-            "sent_at": datetime.now().isoformat(),
+            "snippet": req.message,
+            "date": datetime.now().isoformat(),
             "channel": "whatsapp",
-            "is_read": True
+            "body_html": f"<p>{req.message}</p>"
         }
-        admin.table("email_messages").insert(msg_record).execute()
-        
-        # 3. Actualizar conversación
-        admin.table("email_conversations").update({
-            "last_message_at": datetime.now().isoformat(),
-            "status": "waiting_reply" if req.direction == 'outbound' else 'replied'
-        }).eq("id", conv_id).execute()
+        store_message(user_id, conv_id, msg_data)
         
         return {"status": "success", "conversation_id": conv_id}
     except Exception as e:
@@ -3141,7 +3118,8 @@ async def send_email_reply(req: SendEmailReplyRequest, request: Request):
             "direction": 'outbound',
             "snippet": req.message[:100],
             "date": datetime.now().isoformat(),
-            "body_html": req.message.replace('\n', '<br>')
+            "body_html": req.message.replace('\n', '<br>'),
+            "channel": 'email'
         }
         store_message(user_id, req.conversation_id, msg_data)
         

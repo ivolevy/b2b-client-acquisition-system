@@ -31,6 +31,7 @@ const Communications = () => {
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'kanban'
   const [channelFilter, setChannelFilter] = useState('all'); // 'all', 'email', 'whatsapp'
   const [showReplyModal, setShowReplyModal] = useState(false);
+  const [attachments, setAttachments] = useState([]);
   const [isSendingReply, setIsSendingReply] = useState(false);
   const messagesEndRef = useRef(null);
   
@@ -95,10 +96,17 @@ const Communications = () => {
           conversation_id: selectedConversation.id,
           recipient_email: selectedConversation.lead_email,
           subject: selectedConversation.subject ? `Re: ${selectedConversation.subject}` : 'Respuesta',
-          message: replyText
+          message: replyText,
+          attachments: attachments.map(a => ({
+            filename: a.name,
+            content_base64: a.base64,
+            content_type: a.type
+          }))
         }, {
           headers: { 'X-User-ID': user.id }
         });
+        setReplyText('');
+        setAttachments([]);
         setShowReplyModal(false);
       } else {
         const phone = selectedConversation.lead_phone?.replace(/\D/g, '');
@@ -124,14 +132,13 @@ const Communications = () => {
   };
 
   const handleSimulateInbound = async () => {
-    if (!selectedConversation) return;
     try {
       await axios.post(`${API_URL}/api/debug/mock-inbound`, {
-        conversation_id: selectedConversation.id,
-        lead_email: selectedConversation.lead_email,
-        message: "¡Hola! Me interesa mucho la propuesta que me enviaste. ¿Podemos coordinar una llamada informativa para el lunes?"
+          conversation_id: selectedConversation.id,
+          lead_email: selectedConversation.lead_email,
+          message: "¡Hola! Gracias por el contacto. Me gustaría saber más sobre la propuesta."
       }, {
-        headers: { 'X-User-ID': user.id }
+          headers: { 'X-User-ID': user.id }
       });
       fetchMessages(selectedConversation.id);
       fetchConversations();
@@ -604,21 +611,27 @@ const Communications = () => {
             backgroundImage: 'none',
             border: '1px solid rgba(255,255,255,0.05)',
             borderRadius: '20px',
-            color: '#fff'
+            color: '#fff',
+            maxHeight: '90vh'
           }
         }}
       >
-        <DialogTitle sx={{ borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 800 }}>Responder Email</Typography>
-            <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
-                Para: {selectedConversation?.lead_email}
-            </Typography>
+        <DialogTitle sx={{ borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800 }}>Responder Email</Typography>
+                <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
+                    Para: {selectedConversation?.lead_email} • <b>Re: {selectedConversation?.subject}</b>
+                </Typography>
+            </Box>
+            <IconButton onClick={() => setShowReplyModal(false)} size="small" sx={{ color: 'rgba(255,255,255,0.2)' }}>
+                <CloseIcon />
+            </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ pt: 3 }}>
+        <DialogContent sx={{ pt: 3, display: 'flex', flexDirection: 'column' }}>
           <TextField
             autoFocus
             multiline
-            rows={10}
+            rows={12}
             fullWidth
             placeholder="Escribe tu correo de respuesta aquí..."
             variant="standard"
@@ -626,28 +639,74 @@ const Communications = () => {
             onChange={(e) => setReplyText(e.target.value)}
             InputProps={{
               disableUnderline: true,
-              sx: { color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem' }
+              sx: { color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', fontFamily: 'inherit' }
             }}
           />
+          
+          {attachments.length > 0 && (
+            <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {attachments.map((file, idx) => (
+                <Chip 
+                  key={idx}
+                  label={file.name}
+                  onDelete={() => removeAttachment(idx)}
+                  size="small"
+                  sx={{ 
+                    bgcolor: 'rgba(255,255,255,0.05)', 
+                    color: 'rgba(255,255,255,0.6)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    '& .MuiChip-deleteIcon': { color: 'rgba(255,255,255,0.3)' }
+                  }}
+                />
+              ))}
+            </Box>
+          )}
         </DialogContent>
-        <DialogActions sx={{ p: 3, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <Button onClick={() => setShowReplyModal(false)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>
-            Cancelar
-          </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSendReply}
-            disabled={!replyText.trim() || isSendingReply}
-            startIcon={<SendIcon />}
-            sx={{ 
-                borderRadius: '10px', 
-                px: 4, 
-                bgcolor: '#3b82f6',
-                '&:hover': { bgcolor: '#2563eb' }
-            }}
-          >
-            {isSendingReply ? 'Enviando...' : 'Enviar Respuesta'}
-          </Button>
+        <DialogActions sx={{ p: 3, borderTop: '1px solid rgba(255,255,255,0.05)', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <input
+              type="file"
+              id="email-attach-file"
+              multiple
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+            <Tooltip title="Adjuntar archivo">
+              <IconButton 
+                component="label" 
+                htmlFor="email-attach-file"
+                sx={{ 
+                  color: '#3b82f6', 
+                  bgcolor: 'rgba(59, 130, 246, 0.1)',
+                  '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.2)' }
+                }}
+              >
+                <AttachFileIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button onClick={() => setShowReplyModal(false)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>
+              Cancelar
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={handleSendReply}
+              disabled={!replyText.trim() || isSendingReply}
+              startIcon={isSendingReply ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
+              sx={{ 
+                  borderRadius: '10px', 
+                  px: 4, 
+                  bgcolor: '#3b82f6',
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
+                  '&:hover': { bgcolor: '#2563eb' }
+              }}
+            >
+              {isSendingReply ? 'Enviando...' : 'Enviar Respuesta'}
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
     </Box>
