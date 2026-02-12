@@ -132,6 +132,20 @@ const Communications = () => {
     }
   };
 
+  const handleOpenReplyModal = () => {
+    if (messages.length > 0) {
+      const lastMsg = [...messages].reverse().find(m => m.direction === 'inbound') || messages[messages.length - 1];
+      const dateStr = new Date(lastMsg.sent_at).toLocaleString();
+      const senderName = lastMsg.direction === 'inbound' ? selectedConversation.lead_name : 'Mí';
+      const quote = `\n\n\n--- El ${dateStr}, ${senderName} escribió:\n> ${lastMsg.body_text?.replace(/\n/g, '\n> ')}`;
+      setReplyText(quote);
+    } else {
+      setReplyText('');
+    }
+    setAttachments([]);
+    setShowReplyModal(true);
+  };
+
   const handleSimulateInbound = async () => {
     try {
       await axios.post(`${API_URL}/api/debug/mock-inbound`, {
@@ -536,7 +550,7 @@ const Communications = () => {
                                         bgcolor: '#3b82f6',
                                         '&:hover': { bgcolor: '#2563eb' }
                                     }}
-                                    onClick={() => setShowReplyModal(true)}
+                                    onClick={handleOpenReplyModal}
                                 >
                                     Responder Email
                                 </Button>

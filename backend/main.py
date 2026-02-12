@@ -3105,9 +3105,10 @@ async def send_email_reply(req: SendEmailReplyRequest, request: Request):
             cuerpo_html=req.message.replace('\n', '<br>'),
             cuerpo_texto=req.message,
             user_id=user_id,
+            attachments=req.attachments # Pasar adjuntos
         )
         
-        if res_send.get('status') == 'error':
+        if not res_send.get('success'):
             return JSONResponse(status_code=500, content={"detail": res_send.get('message')})
             
         # 2. Guardar en DB y actualizar estado

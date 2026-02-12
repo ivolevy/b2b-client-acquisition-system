@@ -59,7 +59,7 @@ def sync_gmail_account(user_id: str, token_data: Dict):
         logger.error(f"Error general sync Gmail para usuario {user_id}: {e}")
 
 
-def get_or_create_conversation(user_id: str, lead_email: str, subject: str, lead_name: str = None, channel: str = 'email', lead_phone: str = None) -> str:
+def get_or_create_conversation(user_id: str, lead_email: str, subject: str, lead_name: str = None, channel: str = 'email', lead_phone: str = None, initial_status: str = 'open') -> str:
     """Busca una conversación existente o crea una nueva"""
     admin = get_supabase_admin()
     
@@ -80,7 +80,7 @@ def get_or_create_conversation(user_id: str, lead_email: str, subject: str, lead
         "lead_email": lead_email,
         "lead_name": lead_name or lead_email.split('@')[0],
         "subject": subject,
-        "status": "open",
+        "status": initial_status,
         "channel": channel,
         "lead_phone": lead_phone,
         "last_message_at": datetime.now().isoformat()
@@ -119,13 +119,18 @@ def store_message(user_id: str, conversation_id: str, msg_data: Dict):
     # Determinar nuevo estado de la conversación
     # Prioridad: outbound -> waiting_reply, inbound -> replied
     new_status = 'waiting_reply' if msg_data.get('direction') == 'outbound' else 'replied'
-    
+
     # Actualizar timestamp y estado de conversación
-    admin.table("email_conversations").update({
+    update_data = {
         "last_message_at": msg_data.get('date') or datetime.now().isoformat(),
         "status": new_status,
-        "unread_count": 0 if msg_data.get('direction') == 'outbound' else 1 # Simple increment logic could be better
-    }).eq("id", conversation_id).execute()
+        "unread_count": 0 if msg_data.get('direction') == 'outbound' else 1
+    }
+    
+    # Si detectamos que es un "interested" o algo manual, no lo sobreescribimos con "replied"?
+    # Por ahora lógica simple, pero podríamos chequear estado actual
+    
+    admin.table("email_conversations").update(update_data).eq("id", conversation_id).execute()
 
 def process_gmail_message(user_id: str, msg_detail: Dict, user_email: str):
     """Procesa un mensaje individual de Gmail y lo guarda en DB"""
@@ -174,7 +179,8 @@ def process_outlook_message(user_id: str, msg: Dict, user_email: str):
     direction = 'outbound' if user_email.lower() == sender.lower() else 'inbound'
     lead_email = recipient if direction == 'outbound' else sender
     
-    conversation_id = get_or_create_conversation(user_id, lead_email, subject)
+    # Buscar o crear conversación con estado inicial waiting_reply
+    conversation_id = get_or_create_conversation(user_id, lead_email, subject, initial_status='waiting_reply')
     
     if conversation_id:
         msg_data = {
