@@ -114,9 +114,13 @@ def store_message(user_id: str, conversation_id: str, msg_data: Dict):
     
     admin.table("email_messages").insert(msg_record).execute()
     
-    # Actualizar timestamp de conversación
+    # Determinar nuevo estado de la conversación
+    new_status = 'waiting_reply' if msg_data.get('direction') == 'outbound' else 'replied'
+    
+    # Actualizar timestamp y estado de conversación
     admin.table("email_conversations").update({
-        "last_message_at": msg_data.get('date') or datetime.now().isoformat()
+        "last_message_at": msg_data.get('date') or datetime.now().isoformat(),
+        "status": new_status
     }).eq("id", conversation_id).execute()
 
 def process_gmail_message(user_id: str, msg_detail: Dict, user_email: str):

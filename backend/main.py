@@ -395,9 +395,18 @@ class EmailAttachment(BaseModel):
     content_base64: str
     content_type: str
 
-class EnviarEmailRequest(BaseModel):
+class LogWhatsAppRequest(BaseModel):
     empresa_id: str
-    template_id: str
+    phone: str
+    message: str
+    direction: str = 'outbound'
+
+class SendEmailReplyRequest(BaseModel):
+    conversation_id: str
+    recipient_email: str
+    subject: str
+    message: str
+    thread_id: Optional[str] = None
     empresa_data: Optional[Dict[str, Any]] = None
     asunto_personalizado: Optional[str] = None
     user_id: Optional[str] = None
@@ -2925,24 +2934,83 @@ def get_user_id_from_header(request: Request) -> Optional[str]:
     return request.headers.get("X-User-ID")
 
 @app.get("/api/communications/inbox")
-async def get_inbox_conversations(request: Request):
-    """Obtiene la lista de conversaciones (Inbox)"""
+async def get_inbox_conversations(request: Request, channel: Optional[str] = None):
+    """Obtiene la lista de conversaciones (Inbox) filtrada opcionalmente por canal"""
     user_id = get_user_id_from_header(request)
     if not user_id:
         return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
         
     try:
         admin = get_supabase_admin()
-        # Traer conversaciones ordenadas por último mensaje
-        res = admin.table("email_conversations")\
-            .select("*")\
-            .eq("user_id", user_id)\
-            .order("last_message_at", desc=True)\
-            .execute()
+        query = admin.table("email_conversations").select("*").eq("user_id", user_id)
+        
+        if channel and channel != 'all':
+            query = query.eq("channel", channel)
+            
+        res = query.order("last_message_at", desc=True).execute()
             
         return {"conversations": res.data}
     except Exception as e:
         logger.error(f"Error fetching inbox: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.post("/api/communications/whatsapp/log")
+async def log_whatsapp_message(req: LogWhatsAppRequest, request: Request):
+    """Registra un mensaje de WhatsApp enviado manualmente"""
+    user_id = get_user_id_from_header(request)
+    if not user_id:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+        
+    try:
+        admin = get_supabase_admin()
+        
+        # 1. Buscar o crear conversación de WhatsApp
+        # Buscamos por lead_phone y channel='whatsapp'
+        res_conv = admin.table("email_conversations")\
+            .select("id")\
+            .eq("user_id", user_id)\
+            .eq("lead_phone", req.phone)\
+            .eq("channel", "whatsapp")\
+            .execute()
+            
+        if res_conv.data:
+            conv_id = res_conv.data[0]['id']
+        else:
+            # Traer nombre de la empresa si existe
+            empresa = admin.table("empresas").select("nombre").eq("id", req.empresa_id).execute()
+            lead_name = empresa.data[0]['nombre'] if empresa.data else req.phone
+            
+            new_conv = {
+                "user_id": user_id,
+                "lead_phone": req.phone,
+                "lead_name": lead_name,
+                "channel": "whatsapp",
+                "status": "waiting_reply",
+                "last_message_at": datetime.now().isoformat()
+            }
+            res_create = admin.table("email_conversations").insert(new_conv).execute()
+            conv_id = res_create.data[0]['id']
+            
+        # 2. Registrar el mensaje
+        msg_record = {
+            "conversation_id": conv_id,
+            "direction": req.direction,
+            "body_text": req.message,
+            "sent_at": datetime.now().isoformat(),
+            "channel": "whatsapp",
+            "is_read": True
+        }
+        admin.table("email_messages").insert(msg_record).execute()
+        
+        # 3. Actualizar conversación
+        admin.table("email_conversations").update({
+            "last_message_at": datetime.now().isoformat(),
+            "status": "waiting_reply" if req.direction == 'outbound' else 'replied'
+        }).eq("id", conv_id).execute()
+        
+        return {"status": "success", "conversation_id": conv_id}
+    except Exception as e:
+        logger.error(f"Error logging whatsapp: {e}")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 @app.get("/api/communications/thread/{conversation_id}")
@@ -3005,4 +3073,70 @@ async def trigger_email_sync(request: Request):
         return {"status": "ok", "synced": results}
     except Exception as e:
         logger.error(f"Error triggering sync: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.post("/api/debug/mock-inbound")
+async def mock_inbound_email(req: Dict, request: Request):
+    """Simula la llegada de un correo entrante para pruebas de UI"""
+    user_id = get_user_id_from_header(request)
+    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    
+    try:
+        from backend.email_sync_service import store_message
+        
+        # Datos del mensaje mock
+        msg_data = {
+            "external_id": f"mock_{datetime.now().timestamp()}",
+            "sender": req.get('lead_email', 'cliente@ejemplo.com'),
+            "recipient": "me@example.com",
+            "direction": 'inbound',
+            "snippet": req.get('message', '¡Hola! Me interesa mucho la propuesta. ¿Podemos coordinar una reunión?'),
+            "date": datetime.now().isoformat(),
+            "body_html": f"<p>{req.get('message', '¡Hola! Me interesa mucho la propuesta. ¿Podemos coordinar una reunión?')}</p>"
+        }
+        
+        store_message(user_id, req.get('conversation_id'), msg_data)
+        return {"status": "success", "message": "Injected mock inbound email"}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.post("/api/communications/email/reply")
+async def send_email_reply(req: SendEmailReplyRequest, request: Request):
+    """Envía una respuesta formal a un correo y actualiza el hilo"""
+    user_id = get_user_id_from_header(request)
+    if not user_id:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+        
+    try:
+        from backend.email_service import enviar_email
+        from backend.email_sync_service import store_message
+        
+        # 1. Enviar el correo físicamente
+        # Nota: Por ahora usamos enviar_email genérico que busca provider
+        res_send = enviar_email(
+            destinatario=req.recipient_email,
+            asunto=req.subject,
+            cuerpo_html=req.message.replace('\n', '<br>'),
+            cuerpo_texto=req.message,
+            user_id=user_id,
+        )
+        
+        if res_send.get('status') == 'error':
+            return JSONResponse(status_code=500, content={"detail": res_send.get('message')})
+            
+        # 2. Guardar en DB y actualizar estado
+        msg_data = {
+            "external_id": res_send.get('message_id'),
+            "sender": "me", 
+            "recipient": req.recipient_email,
+            "direction": 'outbound',
+            "snippet": req.message[:100],
+            "date": datetime.now().isoformat(),
+            "body_html": req.message.replace('\n', '<br>')
+        }
+        store_message(user_id, req.conversation_id, msg_data)
+        
+        return {"status": "success", "message_id": res_send.get('message_id')}
+    except Exception as e:
+        logger.error(f"Error sending email reply: {e}")
         return JSONResponse(status_code=500, content={"detail": str(e)})

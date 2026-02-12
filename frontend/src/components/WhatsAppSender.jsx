@@ -130,7 +130,7 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
         processResult(0);
     };
 
-    const processResult = (index) => {
+    const processResult = async (index) => {
         if (index >= selectedEmpresas.length) {
             finishCampaign();
             return;
@@ -139,7 +139,6 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
         const empresa = selectedEmpresas[index];
         const template = templates.find(t => t.id === selectedTemplateId);
         
-        // Use logic from TemplateEditor variables (body_text)
         let message = template ? (template.body_text || template.body) : '';
         message = message.replace(/{nombre}/g, empresa.nombre || 'cliente');
         message = message.replace(/{empresa}/g, empresa.nombre || ''); 
@@ -147,9 +146,22 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
         message = message.replace(/{ciudad}/g, empresa.ciudad || '');
 
         const phone = empresa.telefono.replace(/\D/g, '');
-        // Usar api.whatsapp.com para evitar el problema de "pantalla gris" en navegadores
         const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
         
+        // Log to backend
+        try {
+            await axios.post(`${API_URL}/api/communications/whatsapp/log`, {
+                empresa_id: empresa.id || empresa.google_id,
+                phone: phone,
+                message: message,
+                direction: 'outbound'
+            }, {
+                headers: { 'X-User-ID': user.id }
+            });
+        } catch (err) {
+            console.error('Error logging WhatsApp message:', err);
+        }
+
         window.open(url, '_blank');
     };
 
