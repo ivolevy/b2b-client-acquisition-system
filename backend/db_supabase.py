@@ -905,6 +905,26 @@ async def registrar_pago_exitoso(
         try:
             logger.info(f"Sincronizando public.users para {final_user_id} (Plan: {normalized_plan})")
             admin_client.table("users").upsert(upsert_data).execute()
+            
+            # --- VERIFICACIÓN DE SEGURIDAD (Verify-After-Write) ---
+            # Consultar inmediatamente si el cambio se aplicó
+            verification = admin_client.table("users").select("plan, credits").eq("id", final_user_id).execute()
+            if verification.data:
+                saved_plan = verification.data[0].get("plan")
+                if saved_plan != normalized_plan and not is_credit_pack: # Si es credit pack, el plan no cambia necesariamente
+                    logger.critical(f"⚠️ ALERTA CRÍTICA: El plan no se actualizó correctamente. Esperado: {normalized_plan}, Actual: {saved_plan}. Reintentando...")
+                    
+                    # Reintento forzado
+                    admin_client.table("users").update({"plan": normalized_plan, "updated_at": datetime.now().isoformat()}).eq("id", final_user_id).execute()
+                    
+                    # Segunda verificación
+                    verif_2 = admin_client.table("users").select("plan").eq("id", final_user_id).execute()
+                    if verif_2.data and verif_2.data[0].get("plan") == normalized_plan:
+                         logger.info("✅ Recuperación exitosa: Plan actualizado en el segundo intento.")
+                    else:
+                         logger.critical(f"❌ ERROR FATAL: No se pudo actualizar el plan tras dos intentos para usuario {final_user_id}")
+            # -----------------------------------------------------
+
         except Exception as upsert_err:
             logger.error(f"Error sincronizando perfil en public.users: {upsert_err}")
             # Continuamos para al menos guardar el pago
