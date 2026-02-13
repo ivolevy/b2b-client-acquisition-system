@@ -8,7 +8,7 @@ import { useToast } from '../hooks/useToast';
 import ToastContainer from './ToastContainer';
 import './UserProfile.css';
 import { validatePhone } from '../utils/validators';
-import { FiActivity, FiClock, FiCheck, FiLayers } from 'react-icons/fi';
+import { FiActivity, FiClock, FiCheck, FiLayers, FiRefreshCw } from 'react-icons/fi';
 import TemplateManager from './TemplateManager';
 
 function UserProfile() {
@@ -17,10 +17,17 @@ function UserProfile() {
   const { user, logout, useSupabase } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  const [creditsFetchError, setCreditsFetchError] = useState(false);
+
   useEffect(() => {
+    console.log('--- USER PROFILE DEBUG ---');
+    console.log('API_URL:', API_URL);
+    console.log('User ID:', user?.id);
+    console.log('---------------------------');
+    
     document.body.classList.add('profile-page-active');
     return () => document.body.classList.remove('profile-page-active');
-  }, []);
+  }, [user?.id]);
 
   const [creditsInfo, setCreditsInfo] = useState({ credits: 0, next_reset: null, subscription_status: 'active' });
   const isCancelled = creditsInfo?.subscription_status === 'cancelled';
@@ -140,15 +147,21 @@ function UserProfile() {
     }
   }, [user?.id]);
 
-  const fetchCredits = async () => {
+  const fetchCredits = async (manual = false) => {
     if (!user?.id) return;
     setCreditsLoading(true);
+    setCreditsFetchError(false);
     try {
       // Cache busting
       const response = await axios.get(`${API_URL}/api/users/${user.id}/credits?_t=${Date.now()}`);
       setCreditsInfo(response.data);
+      if (manual) toastSuccess?.('Sincronización exitosa');
     } catch (error) {
       console.error('Error fetching credits:', error);
+      setCreditsFetchError(true);
+      if (manual) {
+        toastError?.('No se pudieron sincronizar los créditos. Verificá tu conexión.');
+      }
     } finally {
       setCreditsLoading(false);
     }
@@ -855,10 +868,46 @@ function UserProfile() {
             <div className="profile-section-fade-in minimalist-credits">
               
               {/* HEADER PLAN */}
+              {creditsFetchError && (
+                <div className="minimalist-alert-simple error" style={{ 
+                  marginBottom: '1.5rem', 
+                  background: '#fef2f2', 
+                  color: '#991b1b', 
+                  border: '1px solid #fee2e2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div className="alert-dot" style={{ background: '#ef4444', boxShadow: '0 0 0 4px rgba(239, 68, 68, 0.2)' }}></div>
+                  <div style={{ flex: 1 }}>
+                    <strong>Error de conexión:</strong> No pudimos actualizar tus créditos. 
+                  </div>
+                  <button 
+                    onClick={() => fetchCredits(true)} 
+                    style={{ background: '#991b1b', border: 'none', color: 'white', padding: '4px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              )}
+
               <div className="minimalist-credits-header">
-                <h3 className="profile-subsection-title">
-                  {creditsInfo.subscription_status === 'active' ? 'Tu Plan Activo' : 'Elegí tu Plan'}
-                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                  <h3 className="profile-subsection-title" style={{ margin: 0 }}>
+                    {creditsInfo.subscription_status === 'active' ? 'Tu Plan Activo' : 'Elegí tu Plan'}
+                  </h3>
+                  {creditsInfo.subscription_status === 'active' && (
+                    <button 
+                      onClick={() => fetchCredits(true)} 
+                      className={`btn-sync-minimalist ${creditsLoading ? 'rotating' : ''}`}
+                      disabled={creditsLoading}
+                      title="Sincronizar cuenta"
+                    >
+                      <FiRefreshCw />
+                      <span>{creditsLoading ? 'Sincronizando...' : 'Sincronizar'}</span>
+                    </button>
+                  )}
+                </div>
                   {creditsInfo.subscription_status === 'active' && (
                     <div className="minimalist-balance-row">
                       {creditsInfo.extra_credits > 0 ? (

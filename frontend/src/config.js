@@ -1,5 +1,5 @@
 // Configuración centralizada del endpoint API
-const FALLBACK_API = 'http://localhost:8000';
+const FALLBACK_API = 'https://b2b-client-acquisition-system-hlll.vercel.app';
 
 const normalizeUrl = (value) => {
   if (!value || typeof value !== 'string') {
