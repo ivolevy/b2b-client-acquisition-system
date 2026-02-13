@@ -43,7 +43,9 @@ res = admin.table("email_conversations")\
 if res.data:
     conv = res.data[0]
     print(f"Conversation Found: {conv['id']}")
-    print(f"Status (Expected: waiting_reply): {conv['status']}")
+    print(f"Status (Expected: open): {conv['status']}")
+    if conv['status'] != 'open':
+        print(f"FAILED: Status mismatch")
     print(f"Channel: {conv['channel']}")
     
     # 3. Verificar mensaje creado

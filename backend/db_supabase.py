@@ -513,8 +513,8 @@ def db_log_email_history(user_id: str, history_data: Dict) -> bool:
                 subject = history_data.get('subject', '(Sin Asunto)')
                 lead_name = history_data.get('empresa_nombre')
                 
-                # Buscar o crear conversación con estado inicial waiting_reply
-                conv_id = get_or_create_conversation(user_id, lead_email, subject, lead_name, initial_status='waiting_reply')
+                # Buscar o crear conversación con estado inicial open (Nuevos Leads)
+                conv_id = get_or_create_conversation(user_id, lead_email, subject, lead_name, initial_status='open')
                 
                 if conv_id:
                     msg_data = {

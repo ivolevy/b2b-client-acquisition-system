@@ -118,7 +118,15 @@ def store_message(user_id: str, conversation_id: str, msg_data: Dict):
     
     # Determinar nuevo estado de la conversación
     # Prioridad: outbound -> waiting_reply, inbound -> replied
-    new_status = 'waiting_reply' if msg_data.get('direction') == 'outbound' else 'replied'
+    # EXCEPCIÓN: Si es un mensaje de historial (campaña inicial), mantenemos 'open' o el estado actual
+    new_status = 'replied'
+    if msg_data.get('direction') == 'outbound':
+        if str(external_id).startswith('hist_'):
+            # Es campaña, mantenemos 'open'
+            new_status = 'open'
+        else:
+            # Es respuesta manual, vamos a 'waiting_reply'
+            new_status = 'waiting_reply'
 
     # Actualizar timestamp y estado de conversación
     update_data = {
@@ -127,9 +135,27 @@ def store_message(user_id: str, conversation_id: str, msg_data: Dict):
         "unread_count": 0 if msg_data.get('direction') == 'outbound' else 1
     }
     
-    # Si detectamos que es un "interested" o algo manual, no lo sobreescribimos con "replied"?
-    # Por ahora lógica simple, pero podríamos chequear estado actual
-    
+    # --- IA ANALYSIS (Solo para Inbound) ---
+    if msg_data.get('direction') == 'inbound':
+        try:
+            from backend.ai_service import analyze_conversation_intent
+            
+            # Traer contexto reciente
+            thread_res = admin.table("email_messages")\
+                .select("body_text, direction")\
+                .eq("conversation_id", conversation_id)\
+                .order("sent_at", desc=True)\
+                .limit(5)\
+                .execute()
+            
+            if thread_res.data:
+                ai_result = analyze_conversation_intent(thread_res.data[::-1]) # Invertir para orden cronológico
+                if ai_result and ai_result.get('status'):
+                    update_data["status"] = ai_result['status']
+                    logger.info(f"AI classified lead as: {ai_result['status']}")
+        except Exception as ai_err:
+            logger.error(f"Error in AI analysis trigger: {ai_err}")
+
     admin.table("email_conversations").update(update_data).eq("id", conversation_id).execute()
 
 def process_gmail_message(user_id: str, msg_detail: Dict, user_email: str):
@@ -179,8 +205,8 @@ def process_outlook_message(user_id: str, msg: Dict, user_email: str):
     direction = 'outbound' if user_email.lower() == sender.lower() else 'inbound'
     lead_email = recipient if direction == 'outbound' else sender
     
-    # Buscar o crear conversación con estado inicial waiting_reply
-    conversation_id = get_or_create_conversation(user_id, lead_email, subject, initial_status='waiting_reply')
+    # Buscar o crear conversación con estado inicial open
+    conversation_id = get_or_create_conversation(user_id, lead_email, subject, initial_status='open')
     
     if conversation_id:
         msg_data = {

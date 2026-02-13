@@ -110,6 +110,33 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [sendingState]);
 
+    const wrapLinksInMessage = async (text, empresa) => {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const matches = text.match(urlRegex);
+        if (!matches) return text;
+
+        let newText = text;
+        // Eliminar duplicados para no procesar el mismo link varias veces
+        const uniqueUrls = [...new Set(matches)];
+        
+        for (const url of uniqueUrls) {
+            try {
+                const response = await axios.post(`${API_URL}/api/communications/link-tracking`, {
+                    original_url: url,
+                    lead_id: empresa.id || empresa.google_id
+                }, {
+                    headers: { 'X-User-ID': user.id }
+                });
+                if (response.data.tracked_url) {
+                    newText = newText.replaceAll(url, response.data.tracked_url);
+                }
+            } catch (err) {
+                console.error('Error wrapping link:', err);
+            }
+        }
+        return newText;
+    };
+
     const startCampaign = () => {
         if (selectedEmpresas.length === 0) {
             warning("No hay destinatarios con teléfono seleccionados.");
@@ -146,14 +173,18 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
         message = message.replace(/{ciudad}/g, empresa.ciudad || '');
 
         const phone = empresa.telefono.replace(/\D/g, '');
-        const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
+        
+        // Wrap links with tracker
+        const trackedMessage = await wrapLinksInMessage(message, empresa);
+        
+        const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(trackedMessage)}`;
         
         // Log to backend
         try {
             await axios.post(`${API_URL}/api/communications/whatsapp/log`, {
                 empresa_id: empresa.id || empresa.google_id,
                 phone: phone,
-                message: message,
+                message: trackedMessage,
                 direction: 'outbound'
             }, {
                 headers: { 'X-User-ID': user.id }

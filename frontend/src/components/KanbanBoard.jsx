@@ -16,6 +16,7 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
     { id: 'waiting_reply', title: 'Esperando Respuesta', color: '#f59e0b' },
     { id: 'replied', title: 'Respondido', color: '#10b981' },
     { id: 'interested', title: 'Interesado', color: '#3b82f6' },
+    { id: 'not_interested', title: 'No Interesado', color: '#ef4444' },
   ];
 
   const getStatusLabel = (status) => {
@@ -29,16 +30,17 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
       onClick={() => onSelectConversation(conv)}
       sx={{ 
         mb: 2, 
-        bgcolor: 'rgba(255, 255, 255, 0.03)', 
-        border: '1px solid rgba(255, 255, 255, 0.05)',
+        bgcolor: '#ffffff', 
+        border: '1px solid rgba(0, 0, 0, 0.05)',
         borderRadius: '16px',
         cursor: 'pointer',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
         '&:hover': {
           transform: 'translateY(-4px)',
-          bgcolor: 'rgba(255, 255, 255, 0.06)',
-          borderColor: 'rgba(59, 130, 246, 0.3)',
-          boxShadow: '0 12px 24px rgba(0,0,0,0.3)'
+          bgcolor: '#ffffff',
+          borderColor: '#3b82f6',
+          boxShadow: '0 12px 24px rgba(0,0,0,0.1)'
         }
       }}
     >
@@ -54,17 +56,17 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
           }}>
             {conv.lead_name?.charAt(0).toUpperCase()}
           </Avatar>
-          <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.2)' }}>
+          <IconButton size="small" sx={{ color: 'rgba(0,0,0,0.2)' }}>
             <MoreVertIcon fontSize="small" />
           </IconButton>
         </Box>
         
-        <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem', mb: 0.5 }}>
+        <Typography sx={{ color: '#0f172a', fontWeight: 700, fontSize: '0.9rem', mb: 0.5 }}>
           {conv.lead_name}
         </Typography>
         
         <Typography sx={{ 
-          color: 'rgba(255,255,255,0.4)', 
+          color: '#64748b', 
           fontSize: '0.75rem', 
           mb: 2,
           display: 'flex',
@@ -77,8 +79,8 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Stack direction="row" spacing={0.5} alignItems="center">
-            <ScheduleIcon sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)' }} />
-            <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.7rem' }}>
+            <ScheduleIcon sx={{ fontSize: '0.7rem', color: '#94a3b8' }} />
+            <Typography sx={{ color: '#94a3b8', fontSize: '0.7rem' }}>
               {new Date(conv.last_message_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
             </Typography>
           </Stack>
@@ -103,9 +105,9 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
 
   return (
     <Box sx={{ p: 3, height: '100%', overflowX: 'auto' }}>
-      <Grid container spacing={3} sx={{ minWidth: '1000px', height: '100%' }}>
+      <Grid container spacing={3} sx={{ minWidth: '1250px', height: '100%' }}>
         {columns.map(column => (
-          <Grid item xs={3} key={column.id} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <Grid item sx={{ width: '250px', height: '100%', display: 'flex', flexDirection: 'column' }} key={column.id}>
             <Box sx={{ 
               mb: 2, 
               display: 'flex', 
@@ -114,7 +116,7 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
               px: 1
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                <Typography sx={{ color: '#0f172a', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                   {column.title}
                 </Typography>
                 <Chip 
@@ -122,8 +124,8 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
                   size="small"
                   sx={{ 
                     height: 20, 
-                    bgcolor: 'rgba(255,255,255,0.05)', 
-                    color: 'rgba(255,255,255,0.4)',
+                    bgcolor: '#f1f5f9', 
+                    color: '#64748b',
                     fontSize: '0.7rem',
                     fontWeight: 700
                   }}
@@ -134,11 +136,11 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
             
             <Box sx={{ 
               flexGrow: 1, 
-              bgcolor: 'rgba(0,0,0,0.1)', 
+              bgcolor: '#f8fafc', 
               borderRadius: '20px', 
               p: 1.5,
               overflowY: 'auto',
-              border: '1px solid rgba(255,255,255,0.02)'
+              border: '1px solid rgba(0, 0, 0, 0.05)'
             }}>
               {conversations
                 .filter(c => c.status === column.id || (column.id === 'open' && !c.status))

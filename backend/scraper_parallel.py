@@ -18,7 +18,7 @@ try:
     from .scraper import enriquecer_empresa_b2b, ScraperSession
     from .social_scraper import enriquecer_con_redes_sociales
 except ImportError:
-    from scraper import enriquecer_empresa_b2b
+    from scraper import enriquecer_empresa_b2b, ScraperSession
     from social_scraper import enriquecer_con_redes_sociales
 # from db import guardar_cache_scraping, obtener_cache_scraping, insertar_empresa
 

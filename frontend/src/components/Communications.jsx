@@ -3,7 +3,8 @@ import {
   Box, Typography, Paper, List, ListItem, ListItemText, 
   Divider, Avatar, TextField, Button, IconButton, Chip,
   InputBase, Tooltip, Zoom, Fade, ToggleButton, ToggleButtonGroup,
-  Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress
+  Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress,
+  Menu, MenuItem, ListItemIcon, Drawer
 } from '@mui/material';
 import { 
   Refresh as RefreshIcon, 
@@ -13,15 +14,25 @@ import {
   Circle as CircleIcon,
   MoreVert as MoreVertIcon,
   KeyboardArrowLeft as BackIcon,
-  ViewList as ListIcon,
-  ViewKanban as KanbanIcon,
-  Close as CloseIcon
+  CheckCircle as CheckCircleIcon,
+  Error as ErrorIcon,
+  MoreHoriz as MoreHorizIcon,
+  Close as CloseIcon,
+  Flag as FlagIcon,
+  Cancel as CancelIcon,
+  Stars as StarsIcon,
+  HourglassEmpty as WaitIcon,
+  PersonAdd as NewLeadIcon,
+  SmartToy as AiIcon,
+  AutoAwesome as SparklesIcon
 } from '@mui/icons-material';
+import ListIcon from '@mui/icons-material/ListAlt';
+import KanbanIcon from '@mui/icons-material/Dashboard';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import KanbanBoard from './KanbanBoard';
 
-const Communications = () => {
+const Communications = ({ onOpenAi }) => {
   const { user } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -34,8 +45,11 @@ const Communications = () => {
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [attachments, setAttachments] = useState([]);
   const [isSendingReply, setIsSendingReply] = useState(false);
+  const [statusMenuAnchor, setStatusMenuAnchor] = useState(null);
+  const [threadSummary, setThreadSummary] = useState('');
+  const [isSummarizing, setIsSummarizing] = useState(false);
   const messagesEndRef = useRef(null);
-  
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   useEffect(() => {
@@ -92,12 +106,15 @@ const Communications = () => {
       setIsSendingReply(true);
       const isEmail = selectedConversation.channel !== 'whatsapp';
       
+      // Wrap links with tracker
+      const trackedMessage = await wrapLinksInMessage(replyText, selectedConversation);
+
       if (isEmail) {
         await axios.post(`${API_URL}/api/communications/email/reply`, {
           conversation_id: selectedConversation.id,
           recipient_email: selectedConversation.lead_email,
           subject: selectedConversation.subject ? `Re: ${selectedConversation.subject}` : 'Respuesta',
-          message: replyText,
+          message: trackedMessage,
           attachments: attachments.map(a => ({
             filename: a.name,
             content_base64: a.base64,
@@ -111,12 +128,12 @@ const Communications = () => {
         setShowReplyModal(false);
       } else {
         const phone = selectedConversation.lead_phone?.replace(/\D/g, '');
-        window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(replyText)}`, '_blank');
+        window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(trackedMessage)}`, '_blank');
         
         await axios.post(`${API_URL}/api/communications/whatsapp/log`, {
             empresa_id: selectedConversation.id,
             phone: phone,
-            message: replyText,
+            message: trackedMessage,
             direction: 'outbound'
         }, {
             headers: { 'X-User-ID': user.id }
@@ -130,6 +147,24 @@ const Communications = () => {
     } finally {
       setIsSendingReply(false);
     }
+  };
+
+  const handleUpdateStatus = async (newStatus) => {
+    try {
+      const response = await axios.patch(`${API_URL}/api/communications/conversations/${selectedConversation.id}/status`, {
+        status: newStatus
+      }, {
+        headers: { 'X-User-ID': user.id }
+      });
+      
+      if (response.data.status === 'success') {
+        setSelectedConversation({ ...selectedConversation, status: newStatus });
+        fetchConversations();
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
+    }
+    setStatusMenuAnchor(null);
   };
 
   const handleOpenReplyModal = () => {
@@ -181,6 +216,50 @@ const Communications = () => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleSummarizeThread = async () => {
+    if (messages.length === 0) return;
+    try {
+        setIsSummarizing(true);
+        const res = await axios.post(`${API_URL}/api/ai/assistant`, { 
+            query: "Por favor, generame un resumen de 2 líneas de esta conversación para saber en qué quedamos." 
+        }, {
+            headers: { 'X-User-ID': user.id }
+        });
+        setThreadSummary(res.data.response);
+    } catch (err) {
+        console.error("Summary error:", err);
+    } finally {
+        setIsSummarizing(false);
+    }
+  };
+
+  const wrapLinksInMessage = async (text, conv) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const matches = text.match(urlRegex);
+    if (!matches) return text;
+
+    let newText = text;
+    const uniqueUrls = [...new Set(matches)];
+    
+    for (const url of uniqueUrls) {
+      try {
+        const response = await axios.post(`${API_URL}/api/communications/link-tracking`, {
+          original_url: url,
+          conversation_id: conv.id,
+          lead_id: conv.lead_email
+        }, {
+          headers: { 'X-User-ID': user.id }
+        });
+        if (response.data.tracked_url) {
+          newText = newText.replaceAll(url, response.data.tracked_url);
+        }
+      } catch (err) {
+        console.error('Error wrapping link:', err);
+      }
+    }
+    return newText;
+  };
+
   const handleSync = async () => {
     try {
       setSyncing(true);
@@ -201,12 +280,11 @@ const Communications = () => {
         flexDirection: 'column',
         height: 'calc(100vh - 250px)', 
         minHeight: '600px',
-        bgcolor: 'rgba(10, 15, 25, 0.4)',
-        borderRadius: '24px',
+        bgcolor: '#ffffff',
+        borderRadius: '0 0 24px 24px',
         overflow: 'hidden',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        backdropFilter: 'blur(16px)',
-        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)'
+        border: '1px solid rgba(0, 0, 0, 0.08)',
+        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.1)'
     }}>
       {/* Persistent Header */}
       <Box sx={{ 
@@ -214,19 +292,10 @@ const Communications = () => {
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          bgcolor: 'rgba(255, 255, 255, 0.02)'
+          borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+          bgcolor: '#fafafa'
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <Typography variant="h5" sx={{ 
-            fontWeight: 800, 
-            letterSpacing: '-1px',
-            background: 'linear-gradient(90deg, #fff 0%, rgba(255,255,255,0.6) 100%)', 
-            WebkitBackgroundClip: 'text', 
-            WebkitTextFillColor: 'transparent' 
-          }}>
-            Communications
-          </Typography>
 
           <ToggleButtonGroup
             value={viewMode}
@@ -234,21 +303,22 @@ const Communications = () => {
             onChange={(e, next) => next && setViewMode(next)}
             size="small"
             sx={{ 
-              bgcolor: 'rgba(0,0,0,0.2)', 
+              bgcolor: '#f1f5f9', 
               borderRadius: '12px',
               p: 0.5,
-              border: '1px solid rgba(255,255,255,0.05)',
+              border: '1px solid rgba(0,0,0,0.05)',
               '& .MuiToggleButton-root': {
-                color: 'rgba(255,255,255,0.3)',
+                color: '#64748b',
                 border: 'none',
                 borderRadius: '8px',
                 px: 1.5,
                 py: 0.5,
                 textTransform: 'none',
                 '&.Mui-selected': {
-                  bgcolor: 'rgba(59, 130, 246, 0.2)',
+                  bgcolor: '#ffffff',
                   color: '#3b82f6',
-                  '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.3)' }
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                  '&:hover': { bgcolor: '#ffffff' }
                 }
               }
             }}
@@ -265,27 +335,40 @@ const Communications = () => {
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Tooltip title="Vancha (Asistente IA)">
+            <IconButton 
+              onClick={onOpenAi}
+              sx={{ 
+                bgcolor: '#f1f5f9', 
+                color: '#3b82f6',
+                '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.1)' }
+              }}>
+              <SparklesIcon sx={{ fontSize: '1.2rem' }} />
+            </IconButton>
+          </Tooltip>
+
           <ToggleButtonGroup
             value={channelFilter}
             exclusive
             onChange={(e, next) => next && setChannelFilter(next)}
             size="small"
             sx={{ 
-                bgcolor: 'rgba(255,255,255,0.03)', 
+                bgcolor: '#f1f5f9', 
                 borderRadius: '8px',
                 p: 0.3,
                 '& .MuiToggleButton-root': {
                     border: 'none',
                     borderRadius: '6px',
-                    color: 'rgba(255,255,255,0.4)',
+                    color: '#64748b',
                     px: 1.5,
                     py: 0.3,
                     fontSize: '0.7rem',
                     fontWeight: 700,
                     textTransform: 'none',
                     '&.Mui-selected': {
-                        bgcolor: 'rgba(255,255,255,0.08)',
-                        color: '#fff',
+                        bgcolor: '#ffffff',
+                        color: '#3b82f6',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
                     }
                 }
             }}
@@ -297,11 +380,11 @@ const Communications = () => {
 
           <Tooltip title="Actualizar">
             <IconButton onClick={handleSync} disabled={syncing} sx={{ 
-              bgcolor: 'rgba(255,255,255,0.03)', 
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.08)', transform: 'rotate(45deg)' },
+              bgcolor: '#f1f5f9', 
+              '&:hover': { bgcolor: '#e2e8f0', transform: 'rotate(45deg)' },
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}>
-              <RefreshIcon sx={{ color: '#fff', fontSize: '1.2rem', animation: syncing ? 'spin 1.5s linear infinite' : 'none' }} />
+              <RefreshIcon sx={{ color: '#0f172a', fontSize: '1.2rem', animation: syncing ? 'spin 1.5s linear infinite' : 'none' }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -316,8 +399,8 @@ const Communications = () => {
                 width: { xs: selectedConversation ? '0%' : '100%', md: '350px' },
                 display: { xs: selectedConversation ? 'none' : 'flex', md: 'flex' },
                 flexDirection: 'column',
-                borderRight: '1px solid rgba(255, 255, 255, 0.05)',
-                bgcolor: 'rgba(255, 255, 255, 0.01)',
+                borderRight: '1px solid rgba(0, 0, 0, 0.05)',
+                bgcolor: '#ffffff',
             }}>
               <Box sx={{ p: 2 }}>
                 <Box sx={{ 
@@ -326,14 +409,21 @@ const Communications = () => {
                     px: 2, 
                     py: 1, 
                     borderRadius: '12px', 
-                    bgcolor: 'rgba(0,0,0,0.2)',
-                    border: '1px solid rgba(255,255,255,0.05)'
+                    bgcolor: '#f1f5f9',
+                    border: '1px solid rgba(0,0,0,0.05)'
                 }}>
-                  <SearchIcon sx={{ color: 'rgba(255,255,255,0.2)', mr: 1, fontSize: '1rem' }} />
+                  <SearchIcon sx={{ color: '#64748b', mr: 1, fontSize: '1rem' }} />
                   <InputBase 
                     placeholder="Buscar chats..." 
                     fullWidth 
-                    sx={{ color: '#fff', fontSize: '0.8rem' }}
+                    sx={{ 
+                        color: '#0f172a', 
+                        fontSize: '0.8rem',
+                        '& input': {
+                            padding: 0,
+                            background: 'transparent',
+                        }
+                    }}
                   />
                 </Box>
               </Box>
@@ -345,7 +435,7 @@ const Communications = () => {
                   ))
                 ) : conversations.length === 0 ? (
                   <Box sx={{ p: 4, textAlign: 'center' }}>
-                    <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>No hay chats</Typography>
+                    <Typography sx={{ color: '#94a3b8', fontSize: '0.85rem' }}>No hay chats</Typography>
                   </Box>
                 ) : conversations.map((conv) => (
                   <ListItem 
@@ -357,8 +447,8 @@ const Communications = () => {
                         mb: 0.5, 
                         py: 1.5,
                         px: 2,
-                        bgcolor: selectedConversation?.id === conv.id ? 'rgba(59, 130, 246, 0.12)' : 'transparent',
-                        '&:hover': { bgcolor: 'rgba(255,255,255,0.03)' }
+                        bgcolor: selectedConversation?.id === conv.id ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                        '&:hover': { bgcolor: '#f8fafc' }
                     }}
                   >
                     <Box sx={{ position: 'relative', mr: 1.5 }}>
@@ -392,15 +482,15 @@ const Communications = () => {
                     <ListItemText 
                       primary={
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.2 }}>
-                              <Typography sx={{ fontWeight: 700, color: '#fff', fontSize: '0.85rem' }}>{conv.lead_name}</Typography>
-                              <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem' }}>
+                               <Typography sx={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>{conv.lead_name}</Typography>
+                              <Typography sx={{ color: '#94a3b8', fontSize: '0.65rem' }}>
                                   {new Date(conv.last_message_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                               </Typography>
                           </Box>
                       }
                       secondary={
                           <Typography sx={{ 
-                            color: 'rgba(255,255,255,0.4)', 
+                            color: '#64748b', 
                             fontSize: '0.75rem', 
                             whiteSpace: 'nowrap', 
                             overflow: 'hidden', 
@@ -420,7 +510,7 @@ const Communications = () => {
                 flexGrow: 1, 
                 display: 'flex', 
                 flexDirection: 'column', 
-                bgcolor: 'rgba(0,0,0,0.1)',
+                bgcolor: '#fafafa',
                 position: 'relative'
             }}>
               {selectedConversation ? (
@@ -431,24 +521,106 @@ const Communications = () => {
                           display: 'flex', 
                           alignItems: 'center', 
                           justifyContent: 'space-between',
-                          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                          bgcolor: 'rgba(255, 255, 255, 0.01)'
+                          borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+                          bgcolor: '#ffffff'
                       }}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <IconButton 
                               onClick={() => setSelectedConversation(null)} 
-                              sx={{ mr: 1, display: { xs: 'flex', md: 'none' }, color: 'rgba(255,255,255,0.3)' }}
+                              sx={{ mr: 1, display: { xs: 'flex', md: 'none' }, color: '#64748b' }}
                           >
                               <BackIcon />
                           </IconButton>
                           <Box>
-                              <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>
+                              <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
                                   {selectedConversation.lead_name}
                               </Typography>
-                              <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem' }}>
+                              <Typography sx={{ color: '#64748b', fontSize: '0.7rem' }}>
                                 {selectedConversation.lead_email} • {selectedConversation.subject}
                               </Typography>
+                                  {threadSummary && (
+                                      <Box sx={{ mt: 1, p: 1, borderRadius: '8px', bgcolor: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                                          <Typography sx={{ color: '#2563eb', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                                              <b>Resumen IA:</b> {threadSummary}
+                                          </Typography>
+                                      </Box>
+                                  )}
                           </Box>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Tooltip title="Resumen IA">
+                                <IconButton 
+                                    size="small" 
+                                    onClick={handleSummarizeThread} 
+                                    disabled={isSummarizing}
+                                    sx={{ color: 'rgba(255,255,255,0.3)' }}
+                                >
+                                    {isSummarizing ? <CircularProgress size={16} color="inherit" /> : <StarsIcon fontSize="small" />}
+                                </IconButton>
+                            </Tooltip>
+                             <Chip 
+                                icon={<FlagIcon sx={{ fontSize: '0.8rem !important', color: 'inherit !important' }} />}
+                                label={
+                                    selectedConversation.status === 'open' ? 'Nuevos Leads' :
+                                    selectedConversation.status === 'waiting_reply' ? 'Espera' :
+                                    selectedConversation.status === 'replied' ? 'Respondido' :
+                                    selectedConversation.status === 'interested' ? 'Interesado' :
+                                    selectedConversation.status === 'not_interested' ? 'No Interesado' : 'Otro'
+                                }
+                                size="small"
+                                onClick={(e) => setStatusMenuAnchor(e.currentTarget)}
+                                sx={{ 
+                                    bgcolor: '#f1f5f9', 
+                                    color: '#64748b',
+                                    fontWeight: 700,
+                                    fontSize: '0.7rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(0,0,0,0.05)',
+                                    '&:hover': { bgcolor: '#e2e8f0' }
+                                }}
+                            />
+                            
+                            <Menu
+                                anchorEl={statusMenuAnchor}
+                                open={Boolean(statusMenuAnchor)}
+                                onClose={() => setStatusMenuAnchor(null)}
+                                PaperProps={{
+                                    sx: {
+                                        bgcolor: '#ffffff',
+                                        border: '1px solid rgba(0,0,0,0.05)',
+                                        boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                                        mt: 1,
+                                        '& .MuiMenuItem-root': {
+                                            fontSize: '0.8rem',
+                                            color: '#0f172a',
+                                            py: 1,
+                                            '&:hover': { bgcolor: '#f1f5f9' }
+                                        }
+                                    }
+                                }}
+                            >
+                                <MenuItem onClick={() => handleUpdateStatus('open')}>
+                                    <ListItemIcon><NewLeadIcon sx={{ fontSize: '1rem', color: '#94a3b8' }} /></ListItemIcon>
+                                    Nuevos Leads
+                                </MenuItem>
+                                <MenuItem onClick={() => handleUpdateStatus('waiting_reply')}>
+                                    <ListItemIcon><WaitIcon sx={{ fontSize: '1rem', color: '#f59e0b' }} /></ListItemIcon>
+                                    Esperando Respuesta
+                                </MenuItem>
+                                <MenuItem onClick={() => handleUpdateStatus('replied')}>
+                                    <ListItemIcon><CheckCircleIcon sx={{ fontSize: '1rem', color: '#10b981' }} /></ListItemIcon>
+                                    Respondido
+                                </MenuItem>
+                                <MenuItem onClick={() => handleUpdateStatus('interested')}>
+                                    <ListItemIcon><StarsIcon sx={{ fontSize: '1rem', color: '#3b82f6' }} /></ListItemIcon>
+                                    Interesado
+                                </MenuItem>
+                                <MenuItem onClick={() => handleUpdateStatus('not_interested')}>
+                                    <ListItemIcon><CancelIcon sx={{ fontSize: '1rem', color: '#ef4444' }} /></ListItemIcon>
+                                    No Interesado
+                                </MenuItem>
+                            </Menu>
                         </Box>
                       </Box>
 
@@ -470,24 +642,25 @@ const Communications = () => {
                                 <Box key={msg.id} sx={{ mb: 2 }}>
                                     <Paper sx={{ 
                                         p: 2, 
-                                        bgcolor: 'rgba(255,255,255,0.03)', 
-                                        border: '1px solid rgba(255,255,255,0.05)',
-                                        borderRadius: '12px'
+                                        bgcolor: '#ffffff', 
+                                        border: '1px solid rgba(0,0,0,0.05)',
+                                        borderRadius: '12px',
+                                        boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
                                     }}>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 1 }}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, borderBottom: '1px solid rgba(0,0,0,0.05)', pb: 1 }}>
                                             <Box>
-                                                <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.8rem' }}>
+                                                <Typography sx={{ color: '#0f172a', fontWeight: 700, fontSize: '0.8rem' }}>
                                                     {isOutbound ? 'De: Mí' : `De: ${selectedConversation.lead_name}`}
                                                 </Typography>
-                                                <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem' }}>
+                                                <Typography sx={{ color: '#64748b', fontSize: '0.7rem' }}>
                                                     {isOutbound ? `Para: ${selectedConversation.lead_email}` : 'Para: Mí'}
                                                 </Typography>
                                             </Box>
-                                            <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem' }}>
+                                            <Typography sx={{ color: '#94a3b8', fontSize: '0.7rem' }}>
                                                 {new Date(msg.sent_at).toLocaleString()}
                                             </Typography>
                                         </Box>
-                                        <Typography sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem', whiteSpace: 'pre-wrap', pt: 1 }}>
+                                        <Typography sx={{ color: '#334155', fontSize: '0.9rem', whiteSpace: 'pre-wrap', pt: 1 }}>
                                             {msg.body_text}
                                         </Typography>
                                     </Paper>
@@ -511,15 +684,15 @@ const Communications = () => {
                                       px: 2, 
                                       py: 1.5, 
                                       borderRadius: isOutbound ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-                                      bgcolor: isOutbound ? '#056162' : 'rgba(255,255,255,0.05)',
-                                      boxShadow: isOutbound ? '0 8px 24px rgba(5, 97, 98, 0.2)' : 'none',
-                                      border: isOutbound ? 'none' : '1px solid rgba(255,255,255,0.05)'
+                                      bgcolor: isOutbound ? '#075e54' : '#ffffff',
+                                      boxShadow: isOutbound ? '0 4px 15px rgba(7, 94, 84, 0.2)' : '0 2px 10px rgba(0,0,0,0.05)',
+                                      border: isOutbound ? 'none' : '1px solid rgba(0,0,0,0.05)'
                                   }}>
-                                      <Typography sx={{ color: '#fff', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
+                                      <Typography sx={{ color: isOutbound ? '#fff' : '#0f172a', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
                                           {msg.body_text}
                                       </Typography>
                                   </Box>
-                                  <Typography sx={{ mt: 0.5, color: 'rgba(255,255,255,0.2)', fontSize: '0.6rem' }}>
+                                  <Typography sx={{ mt: 0.5, color: '#94a3b8', fontSize: '0.6rem' }}>
                                       {new Date(msg.sent_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                   </Typography>
                               </Box>
@@ -528,15 +701,15 @@ const Communications = () => {
                         <div ref={messagesEndRef} />
                       </Box>
 
-                      <Box sx={{ p: 2, borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                      <Box sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.05)', bgcolor: '#ffffff' }}>
                         <Box sx={{ 
                             display: 'flex', 
                             alignItems: 'center', 
                             gap: 1, 
                             p: 1.5,
                             borderRadius: '16px',
-                            bgcolor: 'rgba(255,255,255,0.03)',
-                            border: '1px solid rgba(255,255,255,0.05)'
+                            bgcolor: '#f8fafc',
+                            border: '1px solid rgba(0, 0, 0, 0.05)'
                         }}>
                           {selectedConversation.channel !== 'whatsapp' ? (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -558,7 +731,7 @@ const Communications = () => {
                                   size="small"
                                   onClick={handleSimulateInbound}
                                   sx={{ 
-                                    color: 'rgba(255,255,255,0.15)', 
+                                    color: 'rgba(0, 0, 0, 0.15)', 
                                     fontSize: '0.65rem', 
                                     textTransform: 'none',
                                     ml: 1,
@@ -570,7 +743,7 @@ const Communications = () => {
                             </Box>
                           ) : (
                             <>
-                                <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.2)' }}>
+                                <IconButton size="small" sx={{ color: '#64748b' }}>
                                     <AttachFileIcon fontSize="small" />
                                 </IconButton>
                                 <InputBase 
@@ -580,7 +753,7 @@ const Communications = () => {
                                     placeholder="Escribe por WhatsApp..."
                                     value={replyText}
                                     onChange={(e) => setReplyText(e.target.value)}
-                                    sx={{ color: '#fff', fontSize: '0.85rem' }}
+                                    sx={{ color: '#0f172a', fontSize: '0.85rem' }}
                                 />
                                 <IconButton 
                                     onClick={handleSendReply}
@@ -588,7 +761,7 @@ const Communications = () => {
                                     size="small"
                                     sx={{ 
                                         bgcolor: replyText.trim() ? '#25D366' : 'transparent', 
-                                        color: replyText.trim() ? '#fff' : 'rgba(255,255,255,0.1)'
+                                        color: replyText.trim() ? '#fff' : 'rgba(0, 0, 0, 0.1)'
                                     }}
                                 >
                                     <SendIcon fontSize="small" />
@@ -601,8 +774,8 @@ const Communications = () => {
                 </Fade>
               ) : (
                 <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                  <SendIcon sx={{ fontSize: 60, color: 'rgba(59, 130, 246, 0.1)', mb: 2 }} />
-                  <Typography sx={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.9rem' }}>Selecciona una conversación</Typography>
+                  <SendIcon sx={{ fontSize: 60, color: 'rgba(59, 130, 246, 0.05)', mb: 2 }} />
+                  <Typography sx={{ color: '#94a3b8', fontSize: '0.9rem' }}>Selecciona una conversación</Typography>
                 </Box>
               )}
             </Box>
@@ -628,7 +801,7 @@ const Communications = () => {
                 width: 4px;
             }
             .communications-container ::-webkit-scrollbar-thumb {
-                background: rgba(255,255,255,0.05);
+                background: rgba(0,0,0,0.05);
                 border-radius: 10px;
             }
           `}
@@ -641,23 +814,24 @@ const Communications = () => {
         fullWidth
         PaperProps={{
           sx: {
-            bgcolor: '#0a0f19',
+            bgcolor: '#ffffff',
             backgroundImage: 'none',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '20px',
-            color: '#fff',
-            maxHeight: '90vh'
+            border: '1px solid rgba(0, 0, 0, 0.08)',
+            borderRadius: '24px',
+            color: '#0f172a',
+            maxHeight: '90vh',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
           }
         }}
       >
-        <DialogTitle sx={{ borderBottom: '1px solid rgba(255,255,255,0.05)', pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <DialogTitle sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.05)', pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>Responder Email</Typography>
-                <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
+                <Typography sx={{ color: '#64748b', fontSize: '0.8rem' }}>
                     Para: {selectedConversation?.lead_email} • <b>Re: {selectedConversation?.subject}</b>
                 </Typography>
             </Box>
-            <IconButton onClick={() => setShowReplyModal(false)} size="small" sx={{ color: 'rgba(255,255,255,0.2)' }}>
+            <IconButton onClick={() => setShowReplyModal(false)} size="small" sx={{ color: 'rgba(0, 0, 0, 0.3)' }}>
                 <CloseIcon />
             </IconButton>
         </DialogTitle>
@@ -673,7 +847,7 @@ const Communications = () => {
             onChange={(e) => setReplyText(e.target.value)}
             InputProps={{
               disableUnderline: true,
-              sx: { color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', fontFamily: 'inherit' }
+              sx: { color: '#0f172a', fontSize: '0.95rem', fontFamily: 'inherit' }
             }}
           />
           
@@ -743,6 +917,7 @@ const Communications = () => {
           </Box>
         </DialogActions>
       </Dialog>
+
     </Box>
   );
 };

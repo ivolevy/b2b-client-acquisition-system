@@ -5,7 +5,7 @@ Enfocado en empresas, no en propiedades por zona
 
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response, StreamingResponse
+from fastapi.responses import JSONResponse, Response, StreamingResponse, RedirectResponse, HTMLResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -408,8 +408,20 @@ class SendEmailReplyRequest(BaseModel):
     message: str
     attachments: Optional[List[EmailAttachment]] = None
 
+class UpdateConversationStatusRequest(BaseModel):
+    status: str
+
+class CreateLinkTrackingRequest(BaseModel):
+    original_url: str
+    lead_id: Optional[str] = None
+    conversation_id: Optional[str] = None
+
 class MPPreferenceRequest(BaseModel):
     plan_id: str
+
+class CreateShortLinkRequest(BaseModel):
+    destination_url: str
+    conversation_id: Optional[str] = None
     user_id: str
     email: str
     name: str
@@ -2999,6 +3011,32 @@ async def log_whatsapp_message(req: LogWhatsAppRequest, request: Request):
         logger.error(f"Error logging whatsapp: {e}")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
+@app.patch("/api/communications/conversations/{conversation_id}/status")
+async def update_conversation_status(conversation_id: str, req: UpdateConversationStatusRequest, request: Request):
+    """Actualiza el estado de una conversación"""
+    user_id = get_user_id_from_header(request)
+    if not user_id:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+        
+    try:
+        admin = get_supabase_admin()
+        
+        # Verificar pertenencia
+        conv = admin.table("email_conversations").select("user_id").eq("id", conversation_id).execute()
+        if not conv.data or str(conv.data[0]['user_id']) != user_id:
+             return JSONResponse(status_code=403, content={"detail": "Forbidden"})
+
+        # Actualizar estado
+        res = admin.table("email_conversations").update({
+            "status": req.status,
+            "updated_at": datetime.now().isoformat()
+        }).eq("id", conversation_id).execute()
+        
+        return {"status": "success", "data": res.data}
+    except Exception as e:
+        logger.error(f"Error updating status: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
 @app.get("/api/communications/thread/{conversation_id}")
 async def get_conversation_thread(conversation_id: str, request: Request):
     """Obtiene el hilo de mensajes de una conversación"""
@@ -3127,4 +3165,102 @@ async def send_email_reply(req: SendEmailReplyRequest, request: Request):
         return {"status": "success", "message_id": res_send.get('message_id')}
     except Exception as e:
         logger.error(f"Error sending email reply: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.get("/api/l/{slug}")
+async def redirect_tracked_link(slug: str):
+    """Redirige un link trackeado y registra el click"""
+    try:
+        admin = get_supabase_admin()
+        
+        # 1. Buscar el link original
+        res = admin.table("link_tracking").select("*").eq("slug", slug).execute()
+        
+        if not res.data:
+             return HTMLResponse(status_code=404, content="<h1>404 - Link Not Found</h1>")
+            
+        link_data = res.data[0]
+        original_url = link_data['original_url']
+        
+        # 2. Incrementar contador de clicks
+        admin.table("link_tracking").update({
+            "clicks": link_data.get('clicks', 0) + 1,
+            "last_click_at": datetime.now().isoformat()
+        }).eq("slug", slug).execute()
+        
+        # 3. Redirigir
+        return RedirectResponse(url=original_url)
+    except Exception as e:
+        logger.error(f"Error in redirector: {e}")
+        return HTMLResponse(status_code=500, content="<h1>500 - Internal Server Error</h1>")
+
+@app.post("/api/communications/link-tracking")
+async def create_tracking_link(req: CreateLinkTrackingRequest, request: Request):
+    """Crea un link trackeado manual"""
+    user_id = get_user_id_from_header(request)
+    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    
+    import secrets
+    import string
+    
+    try:
+        admin = get_supabase_admin()
+        
+        # Generar slug único
+        slug = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
+        
+        insert_data = {
+            "user_id": user_id,
+            "slug": slug,
+            "original_url": req.original_url,
+            "lead_id": req.lead_id,
+            "conversation_id": req.conversation_id
+        }
+        
+        admin.table("link_tracking").insert(insert_data).execute()
+        
+        # Construir URL pública
+        api_url = os.getenv("API_URL", "http://localhost:8000")
+        tracked_url = f"{api_url}/api/l/{slug}"
+        
+        return {"slug": slug, "tracked_url": tracked_url}
+    except Exception as e:
+        logger.error(f"Error creating link tracking: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+class AIAssistantRequest(BaseModel):
+    query: str
+
+@app.post("/api/ai/assistant")
+async def chat_with_ai_assistant(req: AIAssistantRequest, request: Request):
+    """Interactúa con el asistente de IA usando contexto de leads"""
+    user_id = get_user_id_from_header(request)
+    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    
+    try:
+        from backend.ai_service import get_ai_assistant_response
+        admin = get_supabase_admin()
+        
+        # 1. Traer contexto (Usuario / Leads recientes)
+        user_res = admin.table("users").select("email, plan, credits").eq("id", user_id).single().execute()
+        u = user_res.data or {}
+        
+        leads_res = admin.table("email_conversations")\
+            .select("lead_name, lead_email, status, last_message_at, subject")\
+            .eq("user_id", user_id)\
+            .order("last_message_at", desc=True)\
+            .limit(20)\
+            .execute()
+        
+        context_data = f"DATOS DEL USUARIO ACTUAL (Tú): Email: {u.get('email')}, Plan: {u.get('plan')}, Créditos Disponibles: {u.get('credits')}/{u.get('monthly_credits')}\n\n"
+        context_data += "Lista de 20 Conversaciones Recientes:\n"
+        for l in (leads_res.data or []):
+            context_data += f"- {l['lead_name']} ({l['lead_email']}): {l['status']}. Asunto: {l['subject']}. Última vez: {l['last_message_at']}\n"
+            
+        # 2. Obtener respuesta de Gemini
+        response = get_ai_assistant_response(req.query, context_data)
+        
+        return {"response": response}
+    except Exception as e:
+        logger.error(f"Error in AI Assistant endpoint: {e}")
         return JSONResponse(status_code=500, content={"detail": str(e)})

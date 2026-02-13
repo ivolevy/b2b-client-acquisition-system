@@ -13,6 +13,9 @@ import ToastContainer from './components/ToastContainer';
 import ProBackground from './components/ProBackground';
 import OfflineView from './components/OfflineView';
 import Communications from './components/Communications';
+import AIAssistant from './components/AIAssistant';
+import { Fab, Tooltip, Zoom } from '@mui/material';
+import { Face as FaceIcon } from '@mui/icons-material';
 const AdminPayments = React.lazy(() => import('./components/admin/AdminPayments'));
 import { ToastContainer as ReactToastifyContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -47,6 +50,7 @@ function AppB2B() {
   const [historySearchData, setHistorySearchData] = useState(null);
   const [showAllResults, setShowAllResults] = useState(false);
   const [isFromHistory, setIsFromHistory] = useState(false);
+  const [showGlobalAi, setShowGlobalAi] = useState(false);
 
   // Determinar la vista basada en la ruta
   const isProfilePage = location.pathname === '/profile';
@@ -785,7 +789,7 @@ function AppB2B() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
-                Mensajes
+                Leads
               </button>
             </div>
           </div>
@@ -837,6 +841,7 @@ function AppB2B() {
 
           {view === 'communications' && (
             <Communications 
+              onOpenAi={() => setShowGlobalAi(true)}
               onClose={() => {
                 navigate('/');
                 setView('table');
@@ -861,6 +866,40 @@ function AppB2B() {
           onClose={() => setShowTemplateManager(false)}
         />
       )}
+
+      {/* Floating AI Assistant Button */}
+      {!isProfilePage && (
+        <Zoom in={true} style={{ transitionDelay: '500ms' }}>
+          <Tooltip title="Preguntar a la IA" placement="left">
+            <Fab 
+              onClick={() => setShowGlobalAi(true)}
+              sx={{ 
+                position: 'fixed', 
+                bottom: 30, 
+                right: 30, 
+                bgcolor: '#ffffff',
+                color: '#3b82f6',
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.2)',
+                zIndex: 1100, // Debajo del drawer de comunicaciones si fuera necesario, pero este es global
+                '&:hover': {
+                  bgcolor: '#2563eb',
+                  transform: 'scale(1.1) rotate(5deg)',
+                  boxShadow: '0 10px 30px rgba(59, 130, 246, 0.5)',
+                },
+                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+              }}
+            >
+              <FaceIcon />
+            </Fab>
+          </Tooltip>
+        </Zoom>
+      )}
+
+      {/* Global AI Assistant Drawer */}
+      <AIAssistant 
+        open={showGlobalAi} 
+        onClose={() => setShowGlobalAi(false)} 
+      />
 
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       <ReactToastifyContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" />
