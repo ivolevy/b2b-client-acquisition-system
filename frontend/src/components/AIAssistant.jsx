@@ -117,18 +117,25 @@ const AIAssistant = ({ open, onClose }) => {
                   flexDirection: 'column',
                   alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start'
               }}>
-                  <Paper sx={{ 
-                      p: 1.5, 
-                      borderRadius: msg.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-                      bgcolor: msg.role === 'user' ? '#3b82f6' : '#f1f5f9',
-                      color: msg.role === 'user' ? '#fff' : '#0f172a',
-                      border: msg.role === 'user' ? 'none' : '1px solid rgba(0,0,0,0.05)',
-                      boxShadow: msg.role === 'user' ? '0 4px 15px rgba(59, 130, 246, 0.2)' : 'none'
-                  }}>
-                      <Typography variant="body2" sx={{ lineHeight: 1.5, whiteSpace: 'pre-wrap', fontWeight: msg.role === 'user' ? 400 : 500 }}>
-                          {msg.text}
-                      </Typography>
-                  </Paper>
+                    <Paper sx={{ 
+                        p: 1.8, 
+                        borderRadius: msg.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                        bgcolor: msg.role === 'user' ? '#3b82f6' : '#ffffff',
+                        color: msg.role === 'user' ? '#fff' : '#1e293b',
+                        border: msg.role === 'user' ? 'none' : '1px solid rgba(0,0,0,0.08)',
+                        boxShadow: msg.role === 'user' ? '0 8px 20px rgba(59, 130, 246, 0.15)' : '0 2px 8px rgba(0,0,0,0.02)',
+                        transition: 'all 0.2s ease'
+                    }}>
+                        <Typography variant="body2" sx={{ 
+                            lineHeight: 1.6, 
+                            whiteSpace: 'pre-wrap', 
+                            fontWeight: msg.role === 'user' ? 450 : 500,
+                            fontSize: '0.92rem',
+                            letterSpacing: '0.01em'
+                        }}>
+                            {msg.text}
+                        </Typography>
+                    </Paper>
                   <Typography variant="caption" sx={{ mt: 0.5, color: '#94a3b8', mx: 1 }}>
                       {msg.role === 'user' ? 'Tú' : 'Vancha'}
                   </Typography>
