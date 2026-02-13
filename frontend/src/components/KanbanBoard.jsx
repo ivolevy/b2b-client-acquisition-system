@@ -31,16 +31,16 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
       sx={{ 
         mb: 2, 
         bgcolor: '#ffffff', 
-        border: '1px solid rgba(0, 0, 0, 0.05)',
+        border: '1px solid rgba(0, 0, 0, 0.12)',
         borderRadius: '16px',
         cursor: 'pointer',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
         '&:hover': {
           transform: 'translateY(-4px)',
           bgcolor: '#ffffff',
           borderColor: '#3b82f6',
-          boxShadow: '0 12px 24px rgba(0,0,0,0.1)'
+          boxShadow: '0 16px 32px rgba(0,0,0,0.12)'
         }
       }}
     >
@@ -116,7 +116,7 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
               px: 1
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography sx={{ color: '#0f172a', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                <Typography sx={{ color: '#0f172a', fontWeight: 800, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
                   {column.title}
                 </Typography>
                 <Chip 
@@ -136,11 +136,11 @@ const KanbanBoard = ({ conversations, onSelectConversation }) => {
             
             <Box sx={{ 
               flexGrow: 1, 
-              bgcolor: '#f8fafc', 
+              bgcolor: '#f1f5f9', 
               borderRadius: '20px', 
               p: 1.5,
               overflowY: 'auto',
-              border: '1px solid rgba(0, 0, 0, 0.05)'
+              border: '1px solid rgba(0, 0, 0, 0.08)'
             }}>
               {conversations
                 .filter(c => c.status === column.id || (column.id === 'open' && !c.status))

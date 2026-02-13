@@ -324,11 +324,9 @@ const Communications = ({ onOpenAi }) => {
             }}
           >
             <ToggleButton value="list">
-              <ListIcon sx={{ fontSize: '1.2rem', mr: 0.8 }} />
               <Typography sx={{ fontSize: '0.8rem', fontWeight: 700 }}>Inbox</Typography>
             </ToggleButton>
             <ToggleButton value="kanban">
-              <KanbanIcon sx={{ fontSize: '1.2rem', mr: 0.8 }} />
               <Typography sx={{ fontSize: '0.8rem', fontWeight: 700 }}>Sales Pipeline</Typography>
             </ToggleButton>
           </ToggleButtonGroup>
@@ -463,21 +461,6 @@ const Communications = ({ onOpenAi }) => {
                           }}>
                           {conv.lead_name?.charAt(0).toUpperCase()}
                         </Avatar>
-                        <Box sx={{ 
-                            position: 'absolute', 
-                            bottom: -2, 
-                            right: -2, 
-                            bgcolor: '#0a0f19', 
-                            borderRadius: '50%', 
-                            p: 0.2,
-                            display: 'flex',
-                            border: '1px solid rgba(255,255,255,0.1)'
-                        }}>
-                            {conv.channel === 'whatsapp' ? 
-                                <KanbanIcon sx={{ fontSize: '0.7rem', color: '#25D366' }} /> : 
-                                <ListIcon sx={{ fontSize: '0.7rem', color: '#3b82f6' }} />
-                            }
-                        </Box>
                     </Box>
                     <ListItemText 
                       primary={
