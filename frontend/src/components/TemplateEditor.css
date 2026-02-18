@@ -96,7 +96,68 @@
 }
 
 /* Variable Insertion Bar */
+
+/* AI Draft Section */
+.ai-draft-section {
+    margin: 20px 0;
+    padding: 16px;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px dashed rgba(99, 102, 241, 0.3);
+    border-radius: 12px;
+}
+
+.ai-draft-section label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #4f46e5;
+    margin-bottom: 12px;
+}
+
+.ai-draft-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.ai-draft-input-group input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.btn-ai-generate {
+    padding: 0 20px;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-ai-generate:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-ai-generate:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.ai-draft-hint {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
 .variables-section {
+    margin: 20px 0;
     background: #f8fafc;
     padding: 16px;
     border-radius: 12px;

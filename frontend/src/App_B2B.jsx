@@ -336,7 +336,6 @@ function AppB2B() {
   const handleBuscar = async (params) => {
     try {
       setLoading(true);
-      // Solo bloqueamos al inicio (0.5s) para dar sensación de acción
       setBlockingLoading(true);
       setSearchProgress({ percent: 0, message: 'Iniciando búsqueda...' });
       setDisplayProgress(0);
@@ -354,6 +353,33 @@ function AppB2B() {
 
       const paramsWithUser = { ...params, user_id: user?.id };
       
+      // Manejo de Audio para Smart Filter
+      if (params.smart_filter_audio_blob) {
+        try {
+            setSearchProgress({ percent: 0, message: '🎙️ Transcribiendo audio...' });
+            
+            const formData = new FormData();
+            formData.append('file', params.smart_filter_audio_blob);
+            
+            const transcribeResponse = await axios.post(`${API_URL}/api/ai/transcribe`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            if (transcribeResponse.data && transcribeResponse.data.text) {
+                // Actualizar el texto del filtro con la transcripción
+                paramsWithUser.smart_filter_text = transcribeResponse.data.text;
+                success(`Audio transcribido: "${transcribeResponse.data.text.substring(0, 30)}..."`);
+            }
+        } catch (audioErr) {
+            console.error("Error transcribiendo audio:", audioErr);
+            warning("No se pudo transcribir el audio. Se usará solo el texto.");
+        }
+        // Limpiar el blob para no enviarlo al endpoint de búsqueda
+        delete paramsWithUser.smart_filter_audio_blob;
+      }
+
       const response = await fetch(`${API_URL}/api/buscar-stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

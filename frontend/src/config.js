@@ -18,4 +18,6 @@ const normalizeUrl = (value) => {
   return normalized;
 };
 
-export const API_URL = normalizeUrl(import.meta.env.VITE_API_URL || FALLBACK_API);
+// For local development, use 127.0.0.1 to avoid localhost DNS/IPv6 issues
+export const API_URL = normalizeUrl(import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000');
+// export const API_URL = normalizeUrl(FALLBACK_API);

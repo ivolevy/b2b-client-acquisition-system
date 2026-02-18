@@ -16,6 +16,8 @@ function TemplateEditor({ templateId, userId, onClose, onSave, type = 'email' })
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [aiInstruction, setAiInstruction] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -72,6 +74,36 @@ function TemplateEditor({ templateId, userId, onClose, onSave, type = 'email' })
       }
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAiDraft = async () => {
+    if (!aiInstruction.trim()) {
+      toast.warning('Por favor, escribe qué quieres que la IA redacte.');
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/ai/draft-template`, {
+        instruction: aiInstruction,
+        type: type
+      });
+
+      if (response.data) {
+        const { subject, body } = response.data;
+        setTemplate(prev => ({
+          ...prev,
+          subject: subject || prev.subject,
+          body_text: body || prev.body_text
+        }));
+        toast.success('¡Borrador generado con éxito!');
+      }
+    } catch (err) {
+      console.error('Error generando borrador:', err);
+      toast.error('No se pudo generar el borrador. Intenta de nuevo.');
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -148,6 +180,27 @@ function TemplateEditor({ templateId, userId, onClose, onSave, type = 'email' })
             </div>
           )}
 
+          <div className="ai-draft-section">
+            <label>Auto-Redactar con IA ✨</label>
+            <div className="ai-draft-input-group">
+              <input 
+                type="text"
+                placeholder="Ej: Escribe un mail de seguimiento para agendar una demo..."
+                value={aiInstruction}
+                onChange={e => setAiInstruction(e.target.value)}
+              />
+              <button 
+                type="button" 
+                className="btn-ai-generate" 
+                onClick={handleAiDraft}
+                disabled={aiLoading}
+              >
+                {aiLoading ? 'Redactando...' : 'Generar'}
+              </button>
+            </div>
+            <p className="ai-draft-hint">Gemini redactará el mensaje completo usando variables inteligentes.</p>
+          </div>
+
           <div className="variables-section">
             <label>Inserción de Variables</label>
             <div className="variable-chips-container">
@@ -155,6 +208,7 @@ function TemplateEditor({ templateId, userId, onClose, onSave, type = 'email' })
               <button type="button" className="variable-chip" onClick={() => insertVariable('empresa')}>Empresa</button>
               <button type="button" className="variable-chip" onClick={() => insertVariable('rubro')}>Rubro</button>
               <button type="button" className="variable-chip" onClick={() => insertVariable('ciudad')}>Ciudad</button>
+              <button type="button" className="variable-chip" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', color: 'white', border: 'none' }} onClick={() => insertVariable('ai_icebreaker')}>✨ Apertura IA</button>
             </div>
           </div>
 

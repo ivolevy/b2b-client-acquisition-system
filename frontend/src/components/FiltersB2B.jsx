@@ -3,7 +3,12 @@ import GoogleLocationPicker from './GoogleLocationPicker';
 import LocationPicker from './LocationPicker';
 import { useAuth } from '../context/AuthContext';
 import SearchHistory from './SearchHistory';
+import axios from 'axios';
 import './Filters.css';
+
+import SmartFilterInput from './SmartFilterInput';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHistory, historySearchData }) {
   const { user } = useAuth();
@@ -12,6 +17,8 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
   // Estados para búsqueda
   const [rubro, setRubro] = useState('');
   const [locationData, setLocationData] = useState(null);
+  const [smartFilterText, setSmartFilterText] = useState('');
+  const [smartFilterAudio, setSmartFilterAudio] = useState(null);
   
   // Estado para inicializar el mapa desde historial
   const [initialMapLocation, setInitialMapLocation] = useState(null);
@@ -40,7 +47,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
     }
   }, [historySearchData]);
   
-  const [scrapearWebsites, setScrapearWebsites] = useState(false);
+  const [scrapearWebsites, setScrapearWebsites] = useState(true);
   const [modoBusqueda, setModoBusqueda] = useState('nueva');
   
   // Efecto separado para ejecutar búsqueda cuando locationData esté listo después de cargar historial
@@ -97,7 +104,10 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
       busqueda_ubicacion_nombre: locationData.ubicacion_nombre || null,
       busqueda_centro_lat: locationData.center?.lat || null,
       busqueda_centro_lng: locationData.center?.lng || null,
-      busqueda_radio_km: locationData.radius ? (locationData.radius / 1000) : null
+      busqueda_radio_km: locationData.radius ? (locationData.radius / 1000) : null,
+      smart_filter_text: smartFilterText,
+      // Solo enviar audio si NO hay texto, para evitar re-transcripción en backend
+      smart_filter_audio_blob: smartFilterText ? null : smartFilterAudio 
     };
 
     onBuscar(params);
@@ -107,6 +117,44 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
     setRubro(searchData.rubro);
     if (onSelectFromHistory) {
       onSelectFromHistory(searchData);
+    }
+  };
+
+  const handleTranscribe = async (audioBlob) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', audioBlob);
+      
+      const response = await axios.post(`${API_URL}/api/ai/transcribe`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      if (response.data && response.data.text) {
+        setSmartFilterText(prev => {
+            // Append if there's already text, or replace? Usually replace or append.
+            // Let's replace for now based on "describe tu cliente" flow
+            return response.data.text;
+        });
+        return response.data.text;
+      }
+    } catch (error) {
+      console.error("Error transcribing:", error);
+      throw error;
+    }
+  };
+
+  const handleInterpret = async (text) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/ai/interpret`, {
+        instruction: text
+      });
+      return response.data;
+    } catch (error) {
+       console.error("Error interpreting search:", error);
+       toastWarning?.("Error al interpretar con IA");
+       return null;
     }
   };
 
@@ -132,6 +180,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
           </button>
         </div>
         <form onSubmit={handleBuscarSubmit}>
+            
           {/* Controles en una sola línea: Rubro + Radio + Dirección + Botón */}
           {GOOGLE_API_KEY ? (
             <GoogleLocationPicker 
@@ -159,6 +208,16 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                     )}
                   </select>
                 </div>
+              }
+              smartFilterComponent={
+                <SmartFilterInput 
+                  value={smartFilterText}
+                  onChange={setSmartFilterText}
+                  onAudioRecord={setSmartFilterAudio}
+                  onTranscribe={handleTranscribe}
+                  onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
+                  onInterpret={handleInterpret}
+                />
               }
             />
           ) : (
@@ -188,6 +247,16 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                   </select>
                 </div>
               }
+              smartFilterComponent={
+                <SmartFilterInput 
+                  value={smartFilterText}
+                  onChange={setSmartFilterText}
+                  onAudioRecord={setSmartFilterAudio}
+                  onTranscribe={handleTranscribe}
+                  onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
+                  onInterpret={handleInterpret}
+                />
+              }
             />
           )}
 
@@ -195,27 +264,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
           <div className="filters-bottom-row">
             <div className="filters-toolbar">
               
-              <div className="toolbar-group">
-                <button
-                  type="button"
-                  className={`filter-pill ${scrapearWebsites ? 'active' : ''}`}
-                  onClick={() => setScrapearWebsites(!scrapearWebsites)}
-                  disabled={loading}
-                  title="Si la empresa tiene sitio web, intentaremos obtener Instagram, LinkedIn, etc."
-                >
-                  <div className="pill-icon">
-                    {scrapearWebsites ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle><line x1="2" y1="2" x2="22" y2="22"></line></svg>
-                    )}
-                  </div>
-                  <span>Redes Sociales</span>
-                </button>
-
-              </div>
-
-              <div className="toolbar-divider"></div>
 
               <div className="toolbar-group">
                 <div className="search-mode-segment">
@@ -252,11 +300,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
 
           {/* Texto de ayuda dinámico */}
           <div className="filters-helper-text">
-            {scrapearWebsites && (
-              <div className="helper-pill info">
-                <span><strong>Redes Sociales:</strong> Intentaremos extraer Instagram/LinkedIn de la web.</span>
-              </div>
-            )}
             {modoBusqueda === 'agregar' && (
               <div className="helper-pill neutral">
                 <span>

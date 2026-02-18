@@ -23,7 +23,8 @@ const calculateBoundingBox = (lat, lng, radiusMeters) => {
   };
 };
 
-function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect = null }) {
+function GoogleLocationPicker(props) {
+  const { onLocationChange, initialLocation, rubroSelect = null, smartFilterComponent = null } = props;
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radius, setRadius] = useState(''); // "Selecciona un radio" por defecto
   const [mapCenter, setMapCenter] = useState({ lat: -34.6037, lng: -58.3816 }); // Buenos Aires, Argentina por defecto
@@ -564,6 +565,9 @@ function GoogleLocationPicker({ onLocationChange, initialLocation, rubroSelect =
         {controlsRow}
       </div>
       
+      {/* Smart Filter Component Injected Here */}
+      {smartFilterComponent}
+
       <div className="location-picker">
 
         <div className="map-instruction">

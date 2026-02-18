@@ -12,7 +12,8 @@ import {
     FiPlus, FiEdit2, FiTrash2, FiX, 
     FiCheckSquare, FiSquare, FiSend, 
     FiUsers, FiTag, FiClock,
-    FiChevronLeft, FiChevronRight, FiPaperclip
+    FiChevronLeft, FiChevronRight, FiPaperclip,
+    FiEye, FiCheckCircle, FiAlertCircle, FiLoader
 } from 'react-icons/fi';
 
 const ITEMS_PER_PAGE = 10;
@@ -50,6 +51,11 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
     // Attachments State
     const [files, setFiles] = useState([]);
     const fileInputRef = useRef(null);
+    const [generatingIcebreakers, setGeneratingIcebreakers] = useState(false);
+    const [loadingIcebreakers, setLoadingIcebreakers] = useState({}); // { [id]: boolean }
+    const [previewEmpresa, setPreviewEmpresa] = useState(null);
+    const [generatedIcebreakers, setGeneratedIcebreakers] = useState({});
+    const [autoPersonalize, setAutoPersonalize] = useState(false);
 
     const isAnyConnected = authStatus.google || authStatus.outlook;
 
@@ -58,6 +64,10 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
         return empresas.filter(e => e.email && e.email.trim() !== '' && e.email.includes('@'));
     }, [empresas]);
 
+    const selectedTemplate = React.useMemo(() => {
+        return templates.find(t => t.id.toString() === selectedTemplateId);
+    }, [selectedTemplateId, templates]);
+
     useEffect(() => {
         /* if (validEmpresas) {
             setSelectedEmpresas(validEmpresas);
@@ -65,6 +75,17 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
         loadTemplates();
         checkAuthStatus();
     }, [validEmpresas]);
+
+    // Auto-generación de Icebreakers al SELECCIONAR empresas (Ahorro de créditos)
+    // Auto-generación ELIMINADA a pedido del usuario (ahora es manual con botón)
+    /*
+    useEffect(() => {
+        const generateIcebreakersAutomatically = async () => {
+             // ... (código comentado para respetar flujo manual)
+        };
+        // generateIcebreakersAutomatically();
+    }, [selectedEmpresas]); 
+    */
 
     const loadTemplates = async () => {
         if (!user?.id) return;
@@ -211,6 +232,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                 user_id: user.id,
                 provider: senderProvider,
                 delay_segundos: 2.0,
+                auto_personalize: autoPersonalize,
                 attachments: files.map(f => ({
                     filename: f.name,
                     content_base64: f.base64,
@@ -245,9 +267,96 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
         if (selectedEmpresas.find(e => (e.id || e.google_id) === empresaId)) {
             setSelectedEmpresas(selectedEmpresas.filter(e => (e.id || e.google_id) !== empresaId));
         } else {
-            const empresa = empresas.find(e => (e.id || e.google_id) === empresaId);
+            const empresa = validEmpresas.find(e => (e.id || e.google_id) === empresaId);
             if (empresa) setSelectedEmpresas([...selectedEmpresas, empresa]);
         }
+    };
+
+    const handleGenerateIcebreakersSelected = async () => {
+        if (selectedEmpresas.length === 0) {
+            warning("Seleccioná al menos una empresa.");
+            return;
+        }
+
+        setGeneratingIcebreakers(true);
+        info(`Generando aperturas personalizadas para ${selectedEmpresas.length} leads...`);
+        
+        try {
+            const response = await axios.post(`${API_URL}/api/leads/generate-icebreakers`, {
+                empresas: selectedEmpresas,
+                user_id: user.id
+            });
+
+            if (response.data && response.data.results) {
+                const results = response.data.results;
+                const successCount = results.filter(r => r.status === 'success').length;
+                
+                // Actualizar localmente las empresas con los nuevos icebreakers
+                const newIcebreakers = { ...generatedIcebreakers };
+                
+                const updatedSelected = selectedEmpresas.map(emp => {
+                    const empId = String(emp.id || emp.google_id);
+                    const result = results.find(r => String(r.id) === empId);
+                    if (result && result.status === 'success') {
+                        newIcebreakers[empId] = result.icebreaker;
+                        return { ...emp, icebreaker: result.icebreaker };
+                    }
+                    return emp;
+                });
+                
+                setGeneratedIcebreakers(newIcebreakers);
+                setSelectedEmpresas(updatedSelected);
+                success(`¡Listo! Se generaron ${successCount} aperturas.`);
+            }
+        } catch (err) {
+            console.error('Error generating icebreakers in sender:', err);
+            error("Error al generar aperturas con IA.");
+        } finally {
+            setGeneratingIcebreakers(false);
+        }
+    };
+
+    const renderPreviewContent = (empresa) => {
+        if (!selectedTemplate || !empresa) return { subject: '', body: '' };
+        
+        // Buscamos la versión más reciente de la empresa en selectedEmpresas
+        // para asegurarnos de tener el icebreaker recién generado.
+        const empId = String(empresa.id || empresa.google_id);
+        const currentIcebreaker = generatedIcebreakers[empId] || empresa.icebreaker || '';
+        
+        let bodyHtml = selectedTemplate.body_html || selectedTemplate.body_text || '';
+        
+        // Auto-Personalizar: Inyectar al principio si el toggle está activo 
+        // y no hay ya un tag manual en el template
+        if (autoPersonalize && currentIcebreaker && !bodyHtml.includes('{{ai_icebreaker}}') && !bodyHtml.includes('{ai_icebreaker}')) {
+            bodyHtml = `<p>${currentIcebreaker}</p>\n${bodyHtml}`;
+        }
+
+        const variables = {
+            nombre_empresa: empresa.nombre,
+            nombre: empresa.nombre,
+            empresa: empresa.nombre,
+            rubro: empresa.rubro,
+            ciudad: empresa.ciudad,
+            website: empresa.website,
+            ai_icebreaker: currentIcebreaker,
+            icebreaker: currentIcebreaker
+        };
+
+        const replaceVars = (text) => {
+            if (!text) return '';
+            let rendered = text;
+            Object.entries(variables).forEach(([key, val]) => {
+                const regex = new RegExp(`{{${key}}}|{${key}}`, 'g');
+                rendered = rendered.replace(regex, val || '');
+            });
+            return rendered;
+        };
+
+        return {
+            subject: replaceVars(selectedTemplate.subject),
+            body: replaceVars(bodyHtml)
+        };
     };
 
     // --- PAGINATION LOGIC ---
@@ -319,6 +428,18 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                                 </select>
                             </div>
 
+                            <div className="sidebar-field-toggle">
+                                <div className="toggle-container" onClick={() => setAutoPersonalize(!autoPersonalize)}>
+                                    <div className={`toggle-switch ${autoPersonalize ? 'active' : ''}`}>
+                                        <div className="toggle-handle"></div>
+                                    </div>
+                                    <div className="toggle-label-group">
+                                        <span className="toggle-main-label">✨ Auto-Personalizar</span>
+                                        <span className="toggle-sub-label">Inyectar apertura IA al inicio</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="sidebar-field">
                                 <label className="field-label-small">Adjuntos</label>
                                 <input 
@@ -375,13 +496,37 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                         <div className="es-tab-panel">
                             {activeTab === 'list' && (
                                 <div className="recipients-view">
-                                    <div className="view-toolbar">
-                                        <button className="btn-check-all" onClick={toggleAllEmpresas}>
-                                            {selectedEmpresas.length === validEmpresas.length ? <FiCheckSquare size={14} /> : <FiSquare size={14} />}
-                                            {selectedEmpresas.length === validEmpresas.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
-                                        </button>
-                                        <div className="stats-selected-badge">{selectedEmpresas.length} seleccionados</div>
-                                    </div>
+                                        <div className="view-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                <button className="btn-check-all" onClick={toggleAllEmpresas}>
+                                                    {selectedEmpresas.length === validEmpresas.length ? <FiCheckSquare size={14} /> : <FiSquare size={14} />}
+                                                    {selectedEmpresas.length === validEmpresas.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
+                                                </button>
+                                                <div className="stats-selected-badge">{selectedEmpresas.length} seleccionados</div>
+                                            </div>
+
+                                            <button 
+                                                className="btn-ai-generate-selected"
+                                                onClick={handleGenerateIcebreakersSelected}
+                                                disabled={generatingIcebreakers || selectedEmpresas.length === 0}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    padding: '6px 12px',
+                                                    borderRadius: '8px',
+                                                    border: 'none',
+                                                    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                                                    color: 'white',
+                                                    fontSize: '0.8rem',
+                                                    fontWeight: 600,
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s ease'
+                                                }}
+                                            >
+                                                {generatingIcebreakers ? 'Generando...' : 'Generar Aperturas IA'}
+                                            </button>
+                                        </div>
                                     <div className="es-list-container">
                                         {paginatedEmpresas.map(empresa => (
                                             <div 
@@ -389,13 +534,45 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                                                 className={`es-row ${selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? 'selected' : ''}`}
                                                 onClick={() => toggleEmpresa(empresa.id || empresa.google_id)}
                                             >
-                                                <div className="row-check-area">
-                                                   {selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? <FiCheckSquare color="#3b82f6" /> : <FiSquare color="#cbd5e1" />}
-                                                </div>
-                                                <div className="row-main-info">
-                                                    <span className="row-name">{empresa.nombre}</span>
-                                                    <span className="row-email">{empresa.email || 'Sin email'}</span>
-                                                </div>
+                                                <div className="es-lead-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                        <button 
+                                                            className="btn-preview-lead"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setPreviewEmpresa(empresa);
+                                                            }}
+                                                            title="Previsualizar mensaje"
+                                                            style={{
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                color: '#6366f1',
+                                                                cursor: 'pointer',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                padding: '6px',
+                                                                borderRadius: '50%',
+                                                                transition: 'background 0.2s'
+                                                            }}
+                                                        >
+                                                            <FiEye size={16} />
+                                                        </button>
+                                                        <div className={`es-checkbox ${selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? 'checked' : ''}`}>
+                                                            {selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? <FiCheckSquare /> : <FiSquare />}
+                                                        </div>
+                                                    </div>
+                                                 <div className="row-main-info">
+                                                     <span className="row-name">
+                                                         {empresa.nombre}
+                                                         {loadingIcebreakers[String(empresa.id || empresa.google_id)] && (
+                                                             <FiLoader className="spin" style={{ marginLeft: '8px', color: '#6366f1' }} size={14}/>
+                                                         )}
+                                                         {!loadingIcebreakers[String(empresa.id || empresa.google_id)] && generatedIcebreakers[String(empresa.id || empresa.google_id)] && (
+                                                             <span className="icebreaker-indicator" title="Apertura IA lista"> ✨</span>
+                                                         )}
+                                                     </span>
+                                                     <span className="row-email">{empresa.email || 'Sin email'}</span>
+                                                 </div>
                                                 <div className="row-meta">
                                                     <span className="meta-badge">{empresa.rubro}</span>
                                                 </div>
@@ -554,11 +731,76 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                     </div>
                 </div>
             )}
+            {/* Preview Modal */}
+            {previewEmpresa && (
+                <div className="es-modal-overlay" style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', zIndex: 2000,
+                    backdropFilter: 'blur(4px)'
+                }}>
+                    <div className="es-preview-card" style={{
+                        backgroundColor: 'white', borderRadius: '16px',
+                        width: '90%', maxWidth: '600px', maxHeight: '80vh',
+                        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
+                    }}>
+                        <div style={{
+                            padding: '20px', borderBottom: '1px solid #eee',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            background: '#f8fafc'
+                        }}>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>
+                                Previsualización: {previewEmpresa.nombre}
+                            </h3>
+                            <button onClick={() => setPreviewEmpresa(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                                <FiX size={20} />
+                            </button>
+                        </div>
+                        <div style={{ padding: '24px', overflowY: 'auto' }}>
+                            {!selectedTemplate ? (
+                                <div style={{ textAlign: 'center', color: '#64748b', padding: '40px' }}>
+                                    Seleccioná una plantilla para ver la previsualización.
+                                </div>
+                            ) : (
+                                <>
+                                    <div style={{ marginBottom: '20px' }}>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>Asunto</label>
+                                        <div style={{ fontSize: '1rem', color: '#1e293b', marginTop: '4px', fontWeight: 500 }}>
+                                            {renderPreviewContent(previewEmpresa).subject}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>Mensaje</label>
+                                        <div 
+                                            style={{ 
+                                                fontSize: '0.95rem', color: '#334155', marginTop: '8px', 
+                                                whiteSpace: 'pre-wrap', lineHeight: 1.6,
+                                                padding: '16px', backgroundColor: '#fdfdfd', 
+                                                border: '1px solid #f1f5f9', borderRadius: '8px'
+                                            }}
+                                            dangerouslySetInnerHTML={{ __html: renderPreviewContent(previewEmpresa).body }}
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <div style={{ padding: '16px', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                            <button className="btn-secondary" onClick={() => setPreviewEmpresa(null)} style={{ padding: '8px 20px' }}>Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                .btn-preview-lead:hover { background: #f0f0ff !important; }
+            `}</style>
         </div>
     );
 
     if (embedded) return content;
     return createPortal(content, document.body);
 };
+
 
 export default EmailSender;

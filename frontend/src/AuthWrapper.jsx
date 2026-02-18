@@ -144,7 +144,7 @@ const AuthWrapper = () => {
 
             // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
             if (profileError || !profile) {
-              handleError(new Error('Usuario sin perfil detectado'), 'AuthWrapper - initAuth');
+              console.warn('[AuthWrapper] Usuario sin perfil o error de auth (initAuth), cerrando sesión...', profileError);
               await supabase.auth.signOut();
               authStorage.clearAll();
               sessionStorage.clear();
@@ -158,7 +158,7 @@ const AuthWrapper = () => {
             setToken(session.access_token);
           }
         } catch (error) {
-          handleError(error, 'AuthWrapper - initAuth');
+          console.warn('[AuthWrapper] Error en initAuth, limpiando sesión...', error);
           // En caso de error, cerrar sesión por seguridad
           try {
             await supabase.auth.signOut();
@@ -179,7 +179,7 @@ const AuthWrapper = () => {
 
               // CRÍTICO: Si no hay perfil, el usuario fue eliminado - cerrar sesión inmediatamente
               if (profileError || !profile) {
-                handleError(new Error('Usuario sin perfil detectado'), 'AuthWrapper - SIGNED_IN');
+                console.warn('[AuthWrapper] Usuario sin perfil o error de auth (SIGNED_IN), cerrando sesión...', profileError);
                 await supabase.auth.signOut();
                 authStorage.clearAll();
                 sessionStorage.clear();

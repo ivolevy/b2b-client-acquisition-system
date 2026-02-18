@@ -327,6 +327,92 @@
     gap: 6px;
 }
 
+
+/* Toggle Switch */
+.sidebar-field-toggle {
+    margin: 15px 0;
+    padding: 12px;
+    background: rgba(var(--primary-rgb), 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(var(--primary-rgb), 0.1);
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle-switch {
+    width: 36px;
+    height: 20px;
+    background: #cbd5e1;
+    border-radius: 20px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.toggle-switch.active {
+    background: var(--primary);
+}
+
+.toggle-handle {
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-switch.active .toggle-handle {
+    left: 19px;
+}
+
+.toggle-label-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.toggle-main-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.toggle-sub-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.icebreaker-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    font-size: 14px;
+    animation: spark-pulse 2s infinite ease-in-out;
+}
+
+@keyframes spark-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 2px #25D366);
+    }
+
+    50% {
+        transform: scale(1.3);
+        filter: drop-shadow(0 0 5px #4ade80);
+    }
+}
+
 .btn-page-nav {
     background: white;
     border: 1px solid #e2e8f0;
@@ -467,11 +553,11 @@
     }
 }
 
-/* 
+/*
    PROGRESS OVERLAY (Keep original functionality but styled to match)
-   Reusing classes from previous step that worked well, but ensuring colors match 
+   Reusing classes from previous step that worked well, but ensuring colors match
 */
-.whats-progress-backdrop {
+*/ .whats-progress-backdrop {
     position: absolute;
     inset: 0;
     background: rgba(255, 255, 255, 0.95);

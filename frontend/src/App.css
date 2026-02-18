@@ -37,14 +37,16 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.85);
+  background: #0f172a;
+  /* Fully opaque per user request */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 1050;
+  z-index: 9999;
+  /* Ensure it covers everything */
 }
 
 /* Progress Bar Styles */

@@ -7,10 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../hooks/useToast';
 import TemplateEditor from './TemplateEditor';
 import { 
-    FiPlus, FiEdit2, FiTrash2, FiX, 
-    FiCheckSquare, FiSquare, 
-    FiUsers, FiTag, FiClock,
-    FiChevronLeft, FiChevronRight, FiCheck
+    FiSend, FiX, FiCheckCircle, FiAlertCircle, FiLoader, FiCheckSquare, FiSquare, FiPlus, FiChevronLeft, FiChevronRight, FiEye, FiEdit2, FiUsers, FiTag
 } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa6';
 
@@ -41,6 +38,11 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
     const [showTemplateEditor, setShowTemplateEditor] = useState(false);
     const [currentTemplateIdToEdit, setCurrentTemplateIdToEdit] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [generatingIcebreakers, setGeneratingIcebreakers] = useState(false);
+    const [loadingIcebreakers, setLoadingIcebreakers] = useState({}); // { [id]: boolean }
+    const [previewEmpresa, setPreviewEmpresa] = useState(null);
+    const [generatedIcebreakers, setGeneratedIcebreakers] = useState({});
+    const [autoPersonalize, setAutoPersonalize] = useState(false);
 
     const loadTemplates = async () => {
         if (!user?.id) return;
@@ -64,6 +66,17 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
     useEffect(() => {
         loadTemplates();
     }, []);
+
+    // Auto-generación de Icebreakers al SELECCIONAR empresas (Ahorro de créditos)
+    // Auto-generación ELIMINADA a pedido del usuario (ahora es manual con botón)
+    /*
+    useEffect(() => {
+        const generateIcebreakersAutomatically = async () => {
+             // ... (código comentado)
+        };
+        // generateIcebreakersAutomatically();
+    }, [selectedEmpresas]); 
+    */
 
     const handleNewTemplate = () => {
         setCurrentTemplateIdToEdit(null);
@@ -167,10 +180,19 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
         const template = templates.find(t => t.id === selectedTemplateId);
         
         let message = template ? (template.body_text || template.body) : '';
+        const currentIcebreaker = empresa.icebreaker || generatedIcebreakers[String(empresa.id || empresa.google_id)] || '';
+
+        // Auto-Personalizar
+        if (autoPersonalize && currentIcebreaker && !message.includes('{{ai_icebreaker}}') && !message.includes('{ai_icebreaker}')) {
+            message = `${currentIcebreaker}\n\n${message}`;
+        }
+
         message = message.replace(/{nombre}/g, empresa.nombre || 'cliente');
         message = message.replace(/{empresa}/g, empresa.nombre || ''); 
         message = message.replace(/{rubro}/g, empresa.rubro || '');
         message = message.replace(/{ciudad}/g, empresa.ciudad || '');
+        message = message.replace(/{ai_icebreaker}/g, currentIcebreaker);
+        message = message.replace(/{{ai_icebreaker}}/g, currentIcebreaker);
 
         const phone = empresa.telefono.replace(/\D/g, '');
         
@@ -237,9 +259,82 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
         if (selectedEmpresas.find(e => (e.id || e.google_id) === empresaId)) {
             setSelectedEmpresas(selectedEmpresas.filter(e => (e.id || e.google_id) !== empresaId));
         } else {
-            const empresa = empresas.find(e => (e.id || e.google_id) === empresaId);
+            const empresa = validEmpresas.find(e => (e.id || e.google_id) === empresaId);
             if (empresa) setSelectedEmpresas([...selectedEmpresas, empresa]);
         }
+    };
+
+    const handleGenerateIcebreakersSelected = async () => {
+        if (selectedEmpresas.length === 0) {
+            warning("Seleccioná al menos una empresa.");
+            return;
+        }
+
+        setGeneratingIcebreakers(true);
+        info(`Generando aperturas personalizadas con Gemini para ${selectedEmpresas.length} leads...`);
+        
+        try {
+            const response = await axios.post(`${API_URL}/api/leads/generate-icebreakers`, {
+                empresas: selectedEmpresas,
+                user_id: user.id
+            });
+
+            if (response.data && response.data.results) {
+                const results = response.data.results;
+                const successCount = results.filter(r => r.status === 'success').length;
+                
+                const newIcebreakers = { ...generatedIcebreakers };
+                
+                // Actualizar localmente las empresas seleccionadas con los nuevos icebreakers
+                const updatedSelected = selectedEmpresas.map(emp => {
+                    const empId = String(emp.id || emp.google_id);
+                    const result = results.find(r => String(r.id) === empId);
+                    if (result && result.status === 'success') {
+                        newIcebreakers[empId] = result.icebreaker;
+                        return { ...emp, icebreaker: result.icebreaker };
+                    }
+                    return emp;
+                });
+                
+                setGeneratedIcebreakers(newIcebreakers);
+                setSelectedEmpresas(updatedSelected);
+                success(`¡Listo! Se generaron ${successCount} aperturas.`);
+            }
+        } catch (err) {
+            console.error('Error generating icebreakers in WhatsApp sender:', err);
+            error("Error al generar aperturas con IA.");
+        } finally {
+            setGeneratingIcebreakers(false);
+        }
+    };
+
+    const renderPreviewMessage = (empresa) => {
+        const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
+        // Sincronizar con la versión más reciente (que tiene el icebreaker)
+        const empId = String(empresa.id || empresa.google_id);
+        const currentIcebreaker = generatedIcebreakers[empId] || empresa.icebreaker || '';
+        
+        let message = selectedTemplate ? (selectedTemplate.body_text || selectedTemplate.body) : '';
+
+        // Auto-Personalizar para la previsualización
+        if (autoPersonalize && currentIcebreaker && !message.includes('{{ai_icebreaker}}') && !message.includes('{ai_icebreaker}')) {
+            message = `${currentIcebreaker}\n\n${message}`;
+        }
+
+        const variables = {
+            nombre: empresa.nombre || 'Prospecto',
+            empresa: empresa.nombre || '',
+            rubro: empresa.rubro || '',
+            ciudad: empresa.ciudad || '',
+            ai_icebreaker: currentIcebreaker
+        };
+
+        Object.entries(variables).forEach(([key, val]) => {
+            const regex = new RegExp(`{{${key}}}|{${key}}`, 'g');
+            message = message.replace(regex, val || '');
+        });
+
+        return message;
     };
 
     const progressPercent = sendingState.total > 0 
@@ -294,6 +389,18 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
                                 )}
                             </div>
 
+                            <div className="sidebar-field-toggle">
+                                <div className="toggle-container" onClick={() => setAutoPersonalize(!autoPersonalize)}>
+                                    <div className={`toggle-switch ${autoPersonalize ? 'active' : ''}`}>
+                                        <div className="toggle-handle"></div>
+                                    </div>
+                                    <div className="toggle-label-group">
+                                        <span className="toggle-main-label">✨ Auto-Personalizar</span>
+                                        <span className="toggle-sub-label">Inyectar apertura IA al inicio</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="sending-summary-minimal">
                                 <span>{selectedEmpresas.length} prospectos</span>
                                 <small>Listos para enviar</small>
@@ -327,12 +434,15 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
                         <div className="ws-tab-panel">
                             {activeTab === 'list' && (
                                 <div className="recipients-view" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                    <div className="view-toolbar">
-                                        <button className="btn-check-all" onClick={toggleAllEmpresas}>
-                                            {selectedEmpresas.length === validEmpresas.length && validEmpresas.length > 0 ? <FiCheckSquare size={14} /> : <FiSquare size={14} />}
-                                            {selectedEmpresas.length === validEmpresas.length && validEmpresas.length > 0 ? 'Deseleccionar todos' : 'Seleccionar todos'}
-                                        </button>
-                                        <div className="stats-selected-badge">{selectedEmpresas.length} seleccionados</div>
+                                    <div className="view-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                            <button className="btn-check-all" onClick={toggleAllEmpresas}>
+                                                {selectedEmpresas.length === validEmpresas.length && validEmpresas.length > 0 ? <FiCheckSquare size={14} /> : <FiSquare size={14} />}
+                                                {selectedEmpresas.length === validEmpresas.length && validEmpresas.length > 0 ? 'Deseleccionar todos' : 'Seleccionar todos'}
+                                            </button>
+                                            <div className="stats-selected-badge">{selectedEmpresas.length} seleccionados</div>
+                                        </div>
+
                                     </div>
 
                                     <div className="ws-list-container">
@@ -350,16 +460,45 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
                                                 className={`ws-row ${selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? 'selected' : ''}`}
                                                 onClick={() => toggleEmpresa(empresa.id || empresa.google_id)}
                                             >
-                                                <div className="row-check-area">
-                                                    {selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? 
-                                                        <FiCheckSquare size={18} color="#25D366" /> : 
-                                                        <FiSquare size={18} color="#cbd5e1" />
-                                                    }
+                                                <div className="ws-lead-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                    <button 
+                                                        className="btn-preview-lead-wa"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setPreviewEmpresa(empresa);
+                                                        }}
+                                                        title="Previsualizar mensaje"
+                                                        style={{
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            color: '#25D366',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            padding: '6px',
+                                                            borderRadius: '50%',
+                                                            transition: 'background 0.2s'
+                                                        }}
+                                                    >
+                                                        <FiEye size={16} />
+                                                    </button>
+                                                    <div className={`ws-checkbox ${selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? 'checked' : ''}`}>
+                                                        {selectedEmpresas.find(e => (e.id || e.google_id) === (empresa.id || empresa.google_id)) ? <FiCheckSquare /> : <FiSquare />}
+                                                    </div>
                                                 </div>
-                                                <div className="row-main-info">
-                                                    <span className="row-name">{empresa.nombre}</span>
-                                                    <span className="row-phone">{empresa.telefono || 'Sin teléfono'}</span>
-                                                </div>
+                                                 <div className="row-main-info">
+                                                     <span className="row-name">
+                                                         {empresa.nombre}
+                                                         {loadingIcebreakers[String(empresa.id || empresa.google_id)] && (
+                                                             <FiLoader className="spin" style={{ marginLeft: '8px', color: '#6366f1' }} size={14}/>
+                                                         )}
+                                                         {!loadingIcebreakers[String(empresa.id || empresa.google_id)] && generatedIcebreakers[String(empresa.id || empresa.google_id)] && (
+                                                             <span className="icebreaker-indicator" title="Apertura IA lista"> ✨</span>
+                                                         )}
+                                                     </span>
+                                                     <span className="row-phone">{empresa.telefono || 'Sin teléfono'}</span>
+                                                 </div>
                                                 <div className="row-meta">
                                                     <span className="meta-badge">{empresa.rubro}</span>
                                                 </div>
@@ -476,11 +615,79 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
                     type="whatsapp"
                 />
             )}
+            {/* WhatsApp Preview Modal */}
+            {previewEmpresa && (
+                <div className="es-modal-overlay" style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', zIndex: 2000,
+                    backdropFilter: 'blur(4px)'
+                }}>
+                    <div className="es-preview-card" style={{
+                        backgroundColor: 'white', borderRadius: '16px',
+                        width: '90%', maxWidth: '500px', maxHeight: '80vh',
+                        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+                        boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
+                    }}>
+                        <div style={{
+                            padding: '20px', borderBottom: '1px solid #eee',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            background: '#f8fafc'
+                        }}>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>
+                                Previsualización WhatsApp: {previewEmpresa.nombre}
+                            </h3>
+                            <button onClick={() => setPreviewEmpresa(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                                <FiX size={20} />
+                            </button>
+                        </div>
+                        <div style={{ padding: '24px', overflowY: 'auto', background: '#e5ddd5' }}>
+                            {!selectedTemplateId ? ( // Changed from selectedTemplate to selectedTemplateId
+                                <div style={{ textAlign: 'center', color: '#64748b', padding: '40px', background: 'white', borderRadius: '8px' }}>
+                                    Seleccioná una plantilla para ver la previsualización.
+                                </div>
+                            ) : (
+                                <div style={{
+                                    alignSelf: 'flex-start',
+                                    maxWidth: '85%',
+                                    backgroundColor: 'white',
+                                    padding: '12px 16px',
+                                    borderRadius: '8px 8px 8px 0',
+                                    boxShadow: '0 1px 0.5px rgba(0,0,0,0.13)',
+                                    position: 'relative',
+                                    fontSize: '0.95rem',
+                                    lineHeight: 1.5,
+                                    color: '#303030',
+                                    whiteSpace: 'pre-wrap'
+                                }}>
+                                    {renderPreviewMessage(previewEmpresa)}
+                                    <div style={{ 
+                                        textAlign: 'right', 
+                                        fontSize: '0.7rem', 
+                                        color: '#667781', 
+                                        marginTop: '4px' 
+                                    }}>
+                                        15:47
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div style={{ padding: '16px', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'flex-end', gap: '12px', background: 'white' }}>
+                            <button className="btn-secondary" onClick={() => setPreviewEmpresa(null)} style={{ padding: '8px 20px' }}>Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                .btn-preview-lead-wa:hover { background: #eaffea !important; }
+            `}</style>
         </div>
     );
 
     if (embedded) return content;
     return createPortal(content, document.body);
 };
+
 
 export default WhatsAppSender;
