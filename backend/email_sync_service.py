@@ -58,6 +58,47 @@ def sync_gmail_account(user_id: str, token_data: Dict):
     except Exception as e:
         logger.error(f"Error general sync Gmail para usuario {user_id}: {e}")
 
+def sync_outlook_account(user_id: str, token_data: Dict):
+    """Sincroniza correos recientes de Outlook (Microsoft Graph)"""
+    try:
+        access_token = token_data.get('access_token')
+        account_email = token_data.get('account_email', '')
+        
+        if not account_email:
+            # Si no viene en el token, intentar obtenerlo del perfil guardado
+            from backend.db_supabase import obtener_perfil_usuario
+            profile = obtener_perfil_usuario(user_id)
+            account_email = profile.get('email', '') if profile else ''
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Traer los últimos 20 mensajes
+        response = requests.get(
+            f"{GRAPH_API_ENDPOINT}/me/messages?$top=20&$select=subject,sender,toRecipients,internetMessageId,bodyPreview,receivedDateTime,body",
+            headers=headers
+        )
+        
+        if response.status_code == 401:
+            logger.warning(f"Token Outlook potencialmente expirado para usuario {user_id}")
+            return
+
+        if response.status_code != 200:
+            logger.error(f"Error fetching Outlook messages: {response.text}")
+            return
+
+        messages = response.json().get('value', [])
+        for msg in messages:
+            try:
+                process_outlook_message(user_id, msg, account_email)
+            except Exception as e:
+                logger.error(f"Error procesando mensaje Outlook individual: {e}")
+
+    except Exception as e:
+        logger.error(f"Error general sync Outlook para usuario {user_id}: {e}")
+
 
 def get_or_create_conversation(user_id: str, lead_email: str, subject: str, lead_name: str = None, channel: str = 'email', lead_phone: str = None, initial_status: str = 'open') -> str:
     """Busca una conversación existente o crea una nueva"""
@@ -196,11 +237,19 @@ def process_gmail_message(user_id: str, msg_detail: Dict, user_email: str):
 
 def process_outlook_message(user_id: str, msg: Dict, user_email: str):
     """Procesa un mensaje individual de Outlook"""
-    subject = msg.get('subject')
+    subject = msg.get('subject') or "(Sin Asunto)"
     sender = msg.get('sender', {}).get('emailAddress', {}).get('address')
-    recipient = msg.get('toRecipients', [{}])[0].get('emailAddress', {}).get('address')
+    
+    # Manejar caso de destinatarios múltiples o vacíos
+    recipients = msg.get('toRecipients', [])
+    recipient = recipients[0].get('emailAddress', {}).get('address') if recipients else ''
+    
+    if not sender or not recipient:
+        logger.warning(f"Mensaje Outlook con remitente o destinatario incompleto")
+        return
+
     id_externo = msg.get('internetMessageId')
-    body_preview = msg.get('bodyPreview')
+    body_preview = msg.get('bodyPreview') or ""
     
     direction = 'outbound' if user_email.lower() == sender.lower() else 'inbound'
     lead_email = recipient if direction == 'outbound' else sender

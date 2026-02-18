@@ -554,12 +554,25 @@ async def create_mp_preference(req: MPPreferenceRequest):
     Crea una preferencia de pago en MercadoPago y devuelve el ID y el punto de inicio.
     """
     try:
+        # Precios hardcoded en backend para seguridad (Source of Truth)
+        PLAN_PRICES = {
+            "essential": 70900,
+            "growth": 127900,
+            "agency": 286900
+        }
+        
+        # Determinar precio real basado en el plan_id
+        real_price = float(req.amount) # Fallback al valor del frontend si no machea
+        if req.plan_id and req.plan_id.lower() in PLAN_PRICES:
+            real_price = float(PLAN_PRICES[req.plan_id.lower()])
+            logger.info(f"💰 Precio corregido por Backend para plan {req.plan_id}: ${real_price}")
+            
         preference_data = {
             "items": [
                 {
                     "title": req.description,
                     "quantity": 1,
-                    "unit_price": float(req.amount),
+                    "unit_price": real_price,
                     "currency_id": "ARS"
                 }
             ],

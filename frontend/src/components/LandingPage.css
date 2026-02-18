@@ -3556,3 +3556,92 @@
 .footer-link-btn:hover {
     color: var(--primary);
 }
+/* --- SALES TEAM AI SECTION --- */
+.sales-team-section {
+    padding: 120px 0;
+    background: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.sales-team-header {
+    max-width: 800px;
+    margin-bottom: 80px;
+}
+
+.sales-team-header h2 {
+    font-size: 4rem;
+    line-height: 1.1;
+    margin-bottom: 24px;
+}
+
+.sales-team-header .subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+.sales-team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.sales-pillar {
+    background: #f8fafc;
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.sales-pillar:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    background: #ffffff;
+    border-color: var(--primary);
+}
+
+.pillar-icon {
+    width: 64px;
+    height: 64px;
+    background: white;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--primary);
+    margin-bottom: 24px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.sales-pillar h4 {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.sales-pillar p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+    .sales-team-header h2 {
+        font-size: 3rem;
+    }
+    
+    .sales-team-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .sales-pillar {
+        padding: 32px;
+    }
+}

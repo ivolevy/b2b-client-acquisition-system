@@ -185,7 +185,7 @@ const LandingPage = () => {
         { text: 'Contacto WhatsApp', included: false },
         { text: 'Sync CRM', included: false },
       ],
-      buttonText: 'Comenzar Essential',
+      buttonText: 'Comenzar Ahora',
       buttonClass: 'btn-secondary',
       popular: false
     },
@@ -206,7 +206,7 @@ const LandingPage = () => {
         { text: 'Contacto WhatsApp (1 Clic)', included: true },
         { text: 'Sync CRM', included: false },
       ],
-      buttonText: 'Elegir Growth',
+      buttonText: 'Obtener Growth',
       buttonClass: 'btn-primary',
       popular: true
     },
@@ -227,7 +227,7 @@ const LandingPage = () => {
         { text: 'Contacto WhatsApp Masivo', included: true },
         { text: 'Acceso API (Beta)', included: true },
       ],
-      buttonText: 'Contactar Ventas',
+      buttonText: 'Contratar Agency',
       buttonClass: 'btn-secondary',
       popular: false
     }
@@ -797,9 +797,11 @@ const LandingPage = () => {
               </button>
               <button
                 className={isYearly ? 'active' : ''}
-                onClick={() => setBillingCycle('yearly')}
+                onClick={() => false && setBillingCycle('yearly')}
+                disabled={true}
+                style={{ opacity: 0.6, cursor: 'not-allowed' }}
               >
-                Anual <span className="save-badge">-20%</span>
+                Anual <span className="save-badge">Próximamente</span>
               </button>
             </div>
           </div>
