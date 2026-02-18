@@ -76,7 +76,32 @@ const Communications = ({ onOpenAi }) => {
       const res = await axios.get(`${API_URL}/api/communications/inbox?channel=${channelFilter}`, {
         headers: { 'X-User-ID': user.id }
       });
-      setConversations(res.data.conversations || []);
+      
+      const apiConversations = res.data.conversations || [];
+      
+      // Inject Demo Leads for Investor Demo
+      const demoLeads = [
+        {
+            id: 'demo-123',
+            lead_name: 'Martín García (Demo)',
+            lead_email: 'm.garcia@inversora.com',
+            subject: 'Consulta sobre Smart Leads',
+            last_message_at: new Date().toISOString(),
+            status: 'interested',
+            channel: 'email'
+        },
+      ];
+
+      // Merge ensuring demo leads are at the top and avoiding duplicates
+      const merged = [...demoLeads];
+      apiConversations.forEach(c => {
+          if (!demoLeads.find(d => d.id === c.id)) {
+              merged.push(c);
+          }
+      });
+      
+      setConversations(merged);
+      
     } catch (error) {
       console.error("Error fetching inbox:", error);
     } finally {
@@ -85,10 +110,17 @@ const Communications = ({ onOpenAi }) => {
   };
 
   useEffect(() => {
-    if (viewMode === 'list') fetchConversations();
-  }, [channelFilter]);
+    fetchConversations();
+  }, [channelFilter, viewMode]);
+
+  // No longer needed here as it's handled in fetchConversations
 
   const fetchMessages = async (convId) => {
+    if (!convId || convId.toString().startsWith('demo-')) {
+      // For demo leads, we don't fetch from backend.
+      // Message state is handled by demoLeads logic or remains empty if not found.
+      return;
+    }
     try {
       const res = await axios.get(`${API_URL}/api/communications/thread/${convId}`, {
         headers: { 'X-User-ID': user.id }
@@ -197,6 +229,25 @@ const Communications = ({ onOpenAi }) => {
     }
   };
 
+  const handleDeleteConversation = async (convId) => {
+    if (convId.startsWith('demo-')) {
+        // Just filter it out for the demo leads
+        setConversations(prev => prev.filter(c => c.id !== convId));
+        if (selectedConversation?.id === convId) setSelectedConversation(null);
+        return;
+    }
+
+    try {
+        await axios.delete(`${API_URL}/api/communications/conversations/${convId}`, {
+            headers: { 'X-User-ID': user.id }
+        });
+        fetchConversations();
+        if (selectedConversation?.id === convId) setSelectedConversation(null);
+    } catch (err) {
+        console.error('Error deleting conversation:', err);
+    }
+  };
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     files.forEach(file => {
@@ -260,19 +311,104 @@ const Communications = ({ onOpenAi }) => {
     return newText;
   };
 
+  const [isSuggesting, setIsSuggesting] = useState(false);
+
   const handleSync = async () => {
     try {
       setSyncing(true);
-      await axios.post(`${API_URL}/api/communications/sync`, {}, {
+      const res = await axios.post(`${API_URL}/api/communications/sync`, {}, {
         headers: { 'X-User-ID': user.id }
       });
-      setTimeout(fetchConversations, 2000);
+      
+      // Inject Demo Lead for Investor Demo
+      const demoLead = {
+          id: 'demo-123',
+          lead_name: 'Martín García (Demo)',
+          lead_email: 'm Garcia@inversora.com',
+          subject: 'Consulta sobre Smart Leads',
+          last_message_at: new Date().toISOString(),
+          status: 'waiting_reply',
+          channel: 'email'
+      };
+      
+      setTimeout(() => {
+          setConversations(prev => {
+              if (prev.find(c => c.id === 'demo-123')) return prev;
+              return [demoLead, ...prev];
+          });
+          setSyncing(false);
+      }, 2000);
+
     } catch (error) {
       console.error("Sync error:", error);
-    } finally {
       setSyncing(false);
     }
   };
+
+  const handleSuggestReply = async () => {
+    if (!selectedConversation) return;
+    try {
+        setIsSuggesting(true);
+        const res = await axios.post(`${API_URL}/api/ai/suggest-reply`, {
+            messages: messages,
+            lead_data: {
+                nombre: selectedConversation.lead_name,
+                rubro: selectedConversation.rubro || 'Posible Cliente'
+            }
+        }, {
+            headers: { 'X-User-ID': user.id }
+        });
+        
+        const aiReply = res.data.reply;
+        
+        // Add quote if it's email
+        if (selectedConversation.channel !== 'whatsapp' && messages.length > 0) {
+            const lastMsg = [...messages].reverse().find(m => m.direction === 'inbound') || messages[messages.length - 1];
+          const dateStr = new Date(lastMsg.sent_at).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const quote = `\n\n\n________________________________\nDe: ${selectedConversation.lead_name} <${selectedConversation.lead_email}>\nEnviado el: ${dateStr}\nAsunto: ${selectedConversation.subject || 'Sin asunto'}\n\n${lastMsg.body_text}`;
+          setReplyText(aiReply + quote);
+        } else {
+            setReplyText(aiReply);
+        }
+        
+        if (selectedConversation.channel !== 'whatsapp') {
+            setShowReplyModal(true);
+        }
+    } catch (err) {
+        console.error("Error suggesting reply:", err);
+    } finally {
+        setIsSuggesting(false);
+    }
+  };
+
+  // Mock messages for Demo Leads
+  useEffect(() => {
+    if (selectedConversation?.id === 'demo-123') {
+        setMessages([
+            {
+                id: 'm1',
+                direction: 'outbound',
+                sent_at: new Date(Date.now() - 3600000).toISOString(),
+                body_text: "Hola Martín, vi tu perfil en LinkedIn y me impresionó tu trayectoria en el sector. Te escribo porque creo que nuestro sistema Smart Leads podría ayudarte a automatizar la prospección de tu equipo."
+            },
+            {
+                id: 'm2',
+                direction: 'inbound',
+                sent_at: new Date(Date.now() - 1800000).toISOString(),
+                body_text: "Hola! Gracias por el mail. Justo andamos buscando algo para mejorar el outreach. ¿Tenés idea de precios y cómo se integra con Outlook?"
+            }
+        ]);
+    } else if (selectedConversation?.id === 'demo-456') {
+        setMessages([
+            {
+                id: 'm3',
+                direction: 'outbound',
+                sent_at: new Date(Date.now() - 86400000).toISOString(),
+                body_text: "Hola, te escribo para presentarte nuestra solución de Smart Leads. ¿Te interesaría coordinar una breve charla?"
+            }
+        ]);
+    }
+  }, [selectedConversation]);
 
   return (
     <Box className="communications-container" sx={{ 
@@ -446,7 +582,13 @@ const Communications = ({ onOpenAi }) => {
                         py: 1.5,
                         px: 2,
                         bgcolor: selectedConversation?.id === conv.id ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
-                        '&:hover': { bgcolor: '#f8fafc' }
+                        border: '1px solid',
+                        borderColor: selectedConversation?.id === conv.id ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&:hover': { 
+                            bgcolor: selectedConversation?.id === conv.id ? 'rgba(59, 130, 246, 0.12)' : '#f8fafc',
+                            transform: 'translateX(4px)'
+                        }
                     }}
                   >
                     <Box sx={{ position: 'relative', mr: 1.5 }}>
@@ -483,6 +625,14 @@ const Communications = ({ onOpenAi }) => {
                           </Typography>
                       } 
                     />
+                    <IconButton size="small" onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm('¿Estás seguro de que quieres eliminar este lead?')) {
+                            handleDeleteConversation(conv.id);
+                        }
+                    }}>
+                        <CloseIcon sx={{ fontSize: '0.9rem', color: '#94a3b8', opacity: 0.5, '&:hover': { color: '#ef4444' } }} />
+                    </IconButton>
                   </ListItem>
                 ))}
               </List>
@@ -542,25 +692,39 @@ const Communications = ({ onOpenAi }) => {
                                     {isSummarizing ? <CircularProgress size={16} color="inherit" /> : <StarsIcon fontSize="small" />}
                                 </IconButton>
                             </Tooltip>
+                            <Tooltip title="Sugerir Respuesta (IA)">
+                                <IconButton 
+                                    size="small" 
+                                    onClick={handleSuggestReply} 
+                                    disabled={isSuggesting}
+                                    sx={{ 
+                                        color: '#3b82f6', 
+                                        bgcolor: 'rgba(59, 130, 246, 0.05)',
+                                        '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.1)' },
+                                        mr: 1
+                                    }}
+                                >
+                                    {isSuggesting ? <CircularProgress size={16} color="inherit" /> : <SparklesIcon fontSize="small" />}
+                                </IconButton>
+                            </Tooltip>
                              <Chip 
                                 icon={<FlagIcon sx={{ fontSize: '0.8rem !important', color: 'inherit !important' }} />}
                                 label={
                                     selectedConversation.status === 'open' ? 'Nuevos Leads' :
-                                    selectedConversation.status === 'waiting_reply' ? 'Espera' :
-                                    selectedConversation.status === 'replied' ? 'Respondido' :
+                                    selectedConversation.status === 'waiting_reply' ? 'Seguimiento' :
                                     selectedConversation.status === 'interested' ? 'Interesado' :
-                                    selectedConversation.status === 'not_interested' ? 'No Interesado' : 'Otro'
+                                    selectedConversation.status === 'not_interested' ? 'Poco Interés' : 'Abierto'
                                 }
                                 size="small"
                                 onClick={(e) => setStatusMenuAnchor(e.currentTarget)}
                                 sx={{ 
-                                    bgcolor: '#f1f5f9', 
-                                    color: '#64748b',
+                                    bgcolor: selectedConversation.status === 'interested' ? '#e0f2fe' : selectedConversation.status === 'not_interested' ? '#fee2e2' : '#f1f5f9',
+                                    color: selectedConversation.status === 'interested' ? '#3b82f6' : selectedConversation.status === 'not_interested' ? '#ef4444' : '#64748b',
                                     fontWeight: 700,
                                     fontSize: '0.7rem',
                                     borderRadius: '8px',
                                     border: '1px solid rgba(0,0,0,0.05)',
-                                    '&:hover': { bgcolor: '#e2e8f0' }
+                                    '&:hover': { opacity: 0.8 }
                                 }}
                             />
                             
@@ -589,11 +753,7 @@ const Communications = ({ onOpenAi }) => {
                                 </MenuItem>
                                 <MenuItem onClick={() => handleUpdateStatus('waiting_reply')}>
                                     <ListItemIcon><WaitIcon sx={{ fontSize: '1rem', color: '#f59e0b' }} /></ListItemIcon>
-                                    Esperando Respuesta
-                                </MenuItem>
-                                <MenuItem onClick={() => handleUpdateStatus('replied')}>
-                                    <ListItemIcon><CheckCircleIcon sx={{ fontSize: '1rem', color: '#10b981' }} /></ListItemIcon>
-                                    Respondido
+                                    Seguimiento
                                 </MenuItem>
                                 <MenuItem onClick={() => handleUpdateStatus('interested')}>
                                     <ListItemIcon><StarsIcon sx={{ fontSize: '1rem', color: '#3b82f6' }} /></ListItemIcon>
@@ -601,7 +761,7 @@ const Communications = ({ onOpenAi }) => {
                                 </MenuItem>
                                 <MenuItem onClick={() => handleUpdateStatus('not_interested')}>
                                     <ListItemIcon><CancelIcon sx={{ fontSize: '1rem', color: '#ef4444' }} /></ListItemIcon>
-                                    No Interesado
+                                    Poco Interés
                                 </MenuItem>
                             </Menu>
                         </Box>
@@ -625,10 +785,10 @@ const Communications = ({ onOpenAi }) => {
                                 <Box key={msg.id} sx={{ mb: 2 }}>
                                     <Paper sx={{ 
                                         p: 2, 
-                                        bgcolor: '#ffffff', 
+                                        bgcolor: isOutbound ? '#ffffff' : '#fef2f2', 
                                         border: '1px solid rgba(0,0,0,0.05)',
                                         borderRadius: '12px',
-                                        boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
+                                        boxShadow: isOutbound ? '0 2px 10px rgba(0,0,0,0.02)' : 'none'
                                     }}>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, borderBottom: '1px solid rgba(0,0,0,0.05)', pb: 1 }}>
                                             <Box>
@@ -770,6 +930,7 @@ const Communications = ({ onOpenAi }) => {
               setSelectedConversation(conv);
               setViewMode('list');
             }} 
+            onDeleteConversation={handleDeleteConversation}
           />
         )}
       </Box>
@@ -799,38 +960,57 @@ const Communications = ({ onOpenAi }) => {
           sx: {
             bgcolor: '#ffffff',
             backgroundImage: 'none',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
-            borderRadius: '24px',
+            border: 'none',
+            borderRadius: '20px',
             color: '#0f172a',
-            maxHeight: '90vh',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
+            maxHeight: '85vh',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
           }
         }}
       >
-        <DialogTitle sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.05)', pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <DialogTitle sx={{ p: 3, pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800 }}>Responder Email</Typography>
-                <Typography sx={{ color: '#64748b', fontSize: '0.8rem' }}>
-                    Para: {selectedConversation?.lead_email} • <b>Re: {selectedConversation?.subject}</b>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>Responder Email</Typography>
+                <Typography sx={{ color: '#64748b', fontSize: '0.75rem', mt: 0.5 }}>
+                    Para: <span style={{ color: '#3b82f6', fontWeight: 600 }}>{selectedConversation?.lead_email}</span>
                 </Typography>
             </Box>
-            <IconButton onClick={() => setShowReplyModal(false)} size="small" sx={{ color: 'rgba(0, 0, 0, 0.3)' }}>
-                <CloseIcon />
+            <IconButton onClick={() => setShowReplyModal(false)} size="small" sx={{ bgcolor: '#f1f5f9', '&:hover': { bgcolor: '#e2e8f0' } }}>
+                <CloseIcon sx={{ fontSize: '1.2rem' }} />
             </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ pt: 3, display: 'flex', flexDirection: 'column' }}>
+        <DialogContent sx={{ px: 3, py: 0, display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ 
+              mb: 2, 
+              pb: 1, 
+              borderBottom: '1px solid #f1f5f9',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+          }}>
+             <Typography sx={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600 }}>Asunto:</Typography>
+             <Typography sx={{ color: '#475569', fontSize: '0.75rem', fontWeight: 500 }}>Re: {selectedConversation?.subject}</Typography>
+          </Box>
           <TextField
             autoFocus
             multiline
-            rows={12}
+            rows={14}
             fullWidth
-            placeholder="Escribe tu correo de respuesta aquí..."
+            placeholder="Escribe tu respuesta..."
             variant="standard"
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             InputProps={{
               disableUnderline: true,
-              sx: { color: '#0f172a', fontSize: '0.95rem', fontFamily: 'inherit' }
+              sx: { 
+                  color: '#1e293b', 
+                  fontSize: '0.9rem', 
+                  lineHeight: 1.6,
+                  fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+                  '& textarea': {
+                      paddingTop: '8px'
+                  }
+              }
             }}
           />
           
@@ -843,17 +1023,17 @@ const Communications = ({ onOpenAi }) => {
                   onDelete={() => removeAttachment(idx)}
                   size="small"
                   sx={{ 
-                    bgcolor: 'rgba(255,255,255,0.05)', 
-                    color: 'rgba(255,255,255,0.6)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    '& .MuiChip-deleteIcon': { color: 'rgba(255,255,255,0.3)' }
+                  bgcolor: '#f1f5f9', 
+                  color: '#475569',
+                  border: '1px solid #e2e8f0',
+                  '& .MuiChip-deleteIcon': { color: '#94a3b8' }
                   }}
                 />
               ))}
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 3, borderTop: '1px solid rgba(255,255,255,0.05)', justifyContent: 'space-between' }}>
+        <DialogActions sx={{ p: 3, pt: 1, borderTop: '1px solid #f1f5f9', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <input
               type="file"
@@ -868,16 +1048,16 @@ const Communications = ({ onOpenAi }) => {
                 htmlFor="email-attach-file"
                 sx={{ 
                   color: '#3b82f6', 
-                  bgcolor: 'rgba(59, 130, 246, 0.1)',
-                  '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.2)' }
+                  bgcolor: 'rgba(59, 130, 246, 0.08)',
+                  '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.12)' }
                 }}
               >
                 <AttachFileIcon />
               </IconButton>
             </Tooltip>
           </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button onClick={() => setShowReplyModal(false)} sx={{ color: 'rgba(255,255,255,0.4)', textTransform: 'none' }}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Button onClick={() => setShowReplyModal(false)} sx={{ color: '#64748b', textTransform: 'none', fontWeight: 600 }}>
               Cancelar
             </Button>
             <Button 

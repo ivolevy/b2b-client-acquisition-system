@@ -13,6 +13,7 @@ import ToastContainer from './components/ToastContainer';
 import ProBackground from './components/ProBackground';
 import OfflineView from './components/OfflineView';
 import Communications from './components/Communications';
+import InsightsDashboard from './components/Insights';
 import AIAssistant from './components/AIAssistant';
 import { Fab, Tooltip, Zoom } from '@mui/material';
 import { Face as FaceIcon } from '@mui/icons-material';
@@ -817,8 +818,36 @@ function AppB2B() {
                 </svg>
                 Leads
               </button>
+              <button 
+                type="button"
+                className={view === 'insights' ? 'active' : ''}
+                onClick={() => {
+                  // Bloqueado temporalmente
+                  info("El módulo de Insights estará disponible próximamente.");
+                }}
+                style={{ cursor: 'not-allowed', position: 'relative' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                   <path d="M3 3v18h18"/>
+                   <path d="M18 9l-6 6-2-2-4 4"/>
+                </svg>
+                Insights
+                <span style={{ 
+                  fontSize: '10px', 
+                  background: '#e2e8f0', 
+                  color: '#64748b', 
+                  padding: '2px 6px', 
+                  borderRadius: '10px',
+                  fontWeight: '800',
+                  marginLeft: '4px'
+                }}>PRÓXIMAMENTE</span>
+              </button>
             </div>
           </div>
+
+          {view === 'insights' && (
+             <InsightsDashboard />
+          )}
 
           {view === 'table' && (
             <TableViewB2B 

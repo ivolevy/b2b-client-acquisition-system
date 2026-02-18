@@ -2,9 +2,10 @@
 .smart-filter-container {
     background: transparent;
     padding: 0;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: 0;
     position: relative;
-    width: 100%;
+    display: flex;
+    align-items: center;
 }
 
 .smart-filter-header {
@@ -159,6 +160,53 @@
     transform: translateY(0);
 }
 
+.smart-filter-card-overlay {
+    display: block;
+    width: 650px;
+    max-width: 90vw;
+    background: white;
+    padding: 20px;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    position: absolute;
+    bottom: calc(100% + 16px);
+    left: 0;
+    z-index: 100;
+    border: 1px solid var(--gray-200);
+    animation: slideUpFade 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn-close-compact {
+    background: transparent;
+    border: none;
+    color: var(--gray-400);
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.btn-close-compact:hover {
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
 .recording-dot {
     width: 8px;
     height: 8px;
@@ -298,12 +346,23 @@
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    font-size: 0.9rem;
-    color: var(--gray-600);
+    font-size: 0.85rem;
+    color: var(--primary);
     width: fit-content;
-    margin-bottom: var(--spacing-lg);
-    transition: all 0.2s;
-    padding: 4px 0;
+    margin-bottom: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 6px 16px;
+    background: var(--primary-light, #eef2ff);
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    border: 1px solid var(--primary-light, #e0e7ff);
+}
+
+.smart-filter-container.active .smart-filter-trigger-text {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .smart-filter-trigger-text:hover {

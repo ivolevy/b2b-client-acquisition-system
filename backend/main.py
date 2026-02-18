@@ -75,7 +75,7 @@ try:
     from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
     from backend.google_places_client import google_client
     from backend.email_service import enviar_email, enviar_emails_masivo
-    from backend.ai_service import generate_icebreaker, draft_message_from_instruction, filter_leads_by_description, transcribe_audio_file, interpret_search_intent
+    from backend.ai_service import generate_icebreaker, draft_message_from_instruction, filter_leads_by_description, transcribe_audio_file, interpret_search_intent, generate_suggested_reply
     from fastapi import UploadFile, File
 except ImportError as e:
     logging.error(f"Error importando módulos del backend: {e}")
@@ -122,7 +122,12 @@ except ImportError as e:
 
 
 
+class SuggestReplyRequest(BaseModel):
+    messages: List[Dict[str, Any]]
+    lead_data: Optional[Dict[str, Any]] = None
+
 class DraftTemplateRequest(BaseModel):
+
     instruction: str
     type: str = 'email'
 # --- Variables de estado Globales (En memoria por sesión) ---
@@ -534,7 +539,20 @@ async def api_transcribe_audio(file: UploadFile = File(...)):
         logger.error(f"Error transcribing audio endpoint: {e}")
         raise HTTPException(status_code=500, detail="Error transcribing audio")
 
+@app.post("/api/ai/suggest-reply")
+async def api_suggest_reply(req: SuggestReplyRequest):
+    """
+    Generates a suggested AI reply based on conversation history.
+    """
+    try:
+        reply = generate_suggested_reply(req.messages, req.lead_data)
+        return {"reply": reply}
+    except Exception as e:
+        logger.error(f"Error suggesting reply: {e}")
+        raise HTTPException(status_code=500, detail="Error suggesting reply")
+
 @app.post("/api/ai/interpret")
+
 async def api_interpret_intent(req: DraftTemplateRequest):
     """
     Interprets the user's search intent before executing a search.
@@ -2993,7 +3011,7 @@ async def delete_account(request: Request):
 class AdminDeleteUserRequest(BaseModel):
     user_id: str
 
-@app.post("/admin/delete-user")
+@app.post("/api/admin/delete-user")
 async def admin_delete_user(request: AdminDeleteUserRequest):
     """
     Endpoint administrativo para eliminar usuarios TOTALMENTE (Auth + DB)
@@ -3031,7 +3049,7 @@ class AdminCreateUserRequest(BaseModel):
     plan: Optional[str] = 'starter'
     credits: Optional[int] = 1500
 
-@app.post("/admin/create-user")
+@app.post("/api/admin/create-user")
 async def admin_create_user(user_data: AdminCreateUserRequest):
     """
     Endpoint administrativo para crear usuarios directamente en Supabase Auth
@@ -3072,7 +3090,7 @@ class AdminUpdateUserRequest(BaseModel):
     user_id: str
     updates: Dict[str, Any]
 
-@app.put("/admin/update-user")
+@app.put("/api/admin/update-user")
 async def admin_update_user_endpoint(request: AdminUpdateUserRequest):
     """Endpoint para actualizar usuario vía admin (bypassing RLS)"""
     try:
@@ -3121,6 +3139,130 @@ async def get_inbox_conversations(request: Request, channel: Optional[str] = Non
         return {"conversations": res.data}
     except Exception as e:
         logger.error(f"Error fetching inbox: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.get("/api/communications/stats")
+async def get_communications_stats(request: Request):
+    """Obtiene estadísticas detalladas para el módulo Insights"""
+    user_id = get_user_id_from_header(request)
+    if not user_id:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+        
+    try:
+        admin = get_supabase_admin()
+        
+        # 1. Agregación de estados (Funnel)
+        raw_convs = admin.table("email_conversations").select("status").eq("user_id", user_id).execute()
+        
+        status_counts = {
+            "open": 0,
+            "waiting_reply": 0,
+            "interested": 0,
+            "not_interested": 0,
+            "converted": 0
+        }
+        
+        for c in (raw_convs.data or []):
+            st = c.get('status', 'open') or 'open'
+            if st in status_counts:
+                status_counts[st] += 1
+            else:
+                status_counts["open"] += 1
+                
+        # 2. Activity Feed (Últimos 20 mensajes)
+        # Necesitamos unir con email_conversations para tener el lead_name
+        recent_messages = admin.table("email_messages")\
+            .select("*, email_conversations(lead_name, channel)")\
+            .order("sent_at", desc=True)\
+            .limit(20)\
+            .execute()
+            
+        # 3. Radar: Leads Olvidados (Interesados sin actividad por > 3 días)
+        three_days_ago = (datetime.now() - timedelta(days=3)).isoformat()
+        forgotten_leads = admin.table("email_conversations")\
+            .select("id, lead_name, last_message_at, subject")\
+            .eq("user_id", user_id)\
+            .eq("status", "interested")\
+            .lt("last_message_at", three_days_ago)\
+            .order("last_message_at", desc=True)\
+            .limit(10)\
+            .execute()
+
+        # 4. Cálculo de Conversión
+        total_leads = sum(status_counts.values())
+        conversion_rate = round((status_counts["converted"] / total_leads * 100), 1) if total_leads > 0 else 0
+        
+        return {
+            "funnel": status_counts,
+            "activity": recent_messages.data or [],
+            "radar": forgotten_leads.data or [],
+            "kpis": {
+                "total_leads": total_leads,
+                "conversion_rate": conversion_rate,
+                "hot_leads": status_counts["interested"]
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error in stats endpoint: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.post("/api/communications/cleanup")
+async def cleanup_inactive_leads(request: Request):
+    """Elimina automáticamente leads en 'Poco Interés' inactivos por > 14 días"""
+    user_id = get_user_id_from_header(request)
+    if not user_id:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+        
+    try:
+        admin = get_supabase_admin()
+        # Calculamos la fecha límite (hace 14 días)
+        cutoff_date = (datetime.now() - timedelta(days=14)).isoformat()
+        
+        # 1. Buscar conversaciones que cumplen el criterio
+        to_delete = admin.table("email_conversations")\
+            .select("id")\
+            .eq("user_id", user_id)\
+            .eq("status", "not_interested")\
+            .lt("last_message_at", cutoff_date)\
+            .execute()
+            
+        deleted_count = 0
+        if to_delete.data:
+            for conv in to_delete.data:
+                conv_id = conv['id']
+                # Eliminar mensajes primero
+                admin.table("email_messages").delete().eq("conversation_id", conv_id).execute()
+                # Eliminar conversación
+                admin.table("email_conversations").delete().eq("id", conv_id).execute()
+                deleted_count += 1
+                
+        return {"status": "success", "deleted_count": deleted_count}
+    except Exception as e:
+        logger.error(f"Error in cleanup: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.delete("/api/communications/conversations/{conversation_id}")
+async def delete_conversation(conversation_id: str, request: Request):
+    """Elimina una conversación y sus mensajes asociados"""
+    user_id = get_user_id_from_header(request)
+    if not user_id:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+        
+    try:
+        admin = get_supabase_admin()
+        # Primero eliminar mensajes (si no hay cascade delete en DB)
+        admin.table("email_messages").delete().eq("conversation_id", conversation_id).execute()
+        
+        # Eliminar conversación (verificando user_id por seguridad)
+        res = admin.table("email_conversations")\
+            .delete()\
+            .eq("id", conversation_id)\
+            .eq("user_id", user_id)\
+            .execute()
+            
+        return {"status": "success", "data": res.data}
+    except Exception as e:
+        logger.error(f"Error deleting conversation {conversation_id}: {e}")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 @app.post("/api/communications/whatsapp/log")

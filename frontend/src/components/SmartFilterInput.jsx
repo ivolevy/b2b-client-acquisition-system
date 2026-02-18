@@ -146,172 +146,181 @@ const SmartFilterInput = ({ value, onChange, onAudioRecord, onTranscribe, onSear
     }
   };
 
-  if (!isExpanded && !value && !audioBlob) {
-    return (
-            <div 
-                className="smart-filter-trigger-text"
-                onClick={() => setIsExpanded(true)}
-            >
-                <span className="trigger-label">Filtro Inteligente (IA)</span>
-            </div>
-    );
-  }
+  const containerRef = useRef(null);
+
+  // Click outside to close
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+        if (containerRef.current && !containerRef.current.contains(e.target)) {
+            // Only collapse if no content or clicking way outside
+            if (!value && !audioBlob) setIsExpanded(false);
+        }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [value, audioBlob]);
 
   return (
-    <div className="smart-filter-container expanded">
-      <div className="smart-filter-header">
-        <div 
-          className="smart-filter-title clickable" 
-          onClick={() => !value && !audioBlob && setIsExpanded(false)}
-          title="Minimizar filtro"
-        >
-          <span className="smart-label-text">Filtro Inteligente</span>
-        </div>
-        <div className="header-actions">
-            <div className="smart-filter-badges">
-                <span className="smart-badge">IA</span>
-            </div>
-        </div>
+    <div className={`smart-filter-container ${isExpanded ? 'active' : ''}`} ref={containerRef}>
+      <div 
+          className="smart-filter-trigger-text"
+          onClick={() => setIsExpanded(!isExpanded)}
+      >
+          <span className="trigger-label">Filtro Inteligente (IA)</span>
       </div>
-      
-      <div className="smart-filter-input-wrapper">
-        {!audioBlob ? (
-            <div className="textarea-container">
-              <textarea
-                  className="smart-filter-textarea"
-                  placeholder="Describe tu cliente ideal (Ej: 'Empresas de logística con flota propia...')"
-                  value={value}
-                  onChange={(e) => onChange(e.target.value)}
-                  onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        if (value.trim()) {
-                           if (onInterpret) handleInterpretationTrigger(value.trim());
-                           else if (onSearch) onSearch();
-                        }
-                      }
-                  }}
-                  disabled={isRecording || isTranscribing || isInterpreting}
-                  autoFocus
-              />
-              <div className="input-actions">
-                  {!isRecording && value && value.trim().length > 0 && !interpretation && (
-                      <button 
-                          type="button" 
-                          className="btn-icon-action submit"
-                          onClick={() => {
-                              if (onInterpret) handleInterpretationTrigger(value.trim());
-                              else if (onSearch) onSearch();
-                          }}
-                          title="Analizar filtro (Enter)"
-                      >
-                          <FiArrowRight />
-                      </button>
-                  )}
-                  {!isRecording ? (
-                      <button 
-                          type="button" 
-                          className="btn-icon-action"
-                          onClick={startRecording}
-                          title="Grabar audio"
-                          disabled={isTranscribing || isInterpreting}
-                      >
-                          <FiMic />
-                      </button>
-                  ) : (
-                       <button 
-                          type="button" 
-                          className="btn-icon-action recording"
-                          onClick={stopRecording}
-                          title="Detener grabación"
-                      >
-                          <span className="recording-dot"></span>
-                          <span className="timer">{formatTime(recordingTime)}</span>
-                          <FiStopCircle />
-                      </button>
-                  )}
-              </div>
-            </div>
-        ) : (
-            <div className="audio-preview-compact">
-                <audio 
-                    ref={audioRef}
-                    src={URL.createObjectURL(audioBlob)} 
-                    onEnded={() => setIsPlaying(false)}
-                    style={{ display: 'none' }}
-                />
-                
-                <div className="audio-controls">
-                    <button type="button" onClick={togglePlayback} className="btn-icon-round">
-                        {isPlaying ? <FiPause /> : <FiPlay />}
-                    </button>
-                    <div className="audio-meta">
-                        <span className="audio-label">Audio grabado</span>
-                        <span className="audio-duration">{formatTime(recordingTime)}</span>
-                    </div>
-                </div>
 
-                <div className="audio-actions-group">
-                    <button 
-                        type="button" 
-                        onClick={handleTranscribeClick} 
-                        className="btn-text-action" 
-                        disabled={isTranscribing}
-                    >
-                        <FiFileText />
-                        {isTranscribing ? 'Transcribiendo...' : 'Transcribir'}
-                    </button>
-                    <button type="button" onClick={clearAudio} className="btn-icon-action delete" title="Eliminar">
-                        <FiTrash2 />
-                    </button>
-                </div>
+      {isExpanded && (
+        <div className="smart-filter-card-overlay">
+          <div className="smart-filter-header">
+            <div className="smart-filter-title">
+              <span className="smart-label-text">Filtro Inteligente</span>
             </div>
-        )}
-
-        {/* AI Interpretation UI */}
-        {(isInterpreting || interpretation) && (
-            <div className="interpretation-card">
-                {isInterpreting ? (
-                    <div className="ai-thinking">
-                        <div className="ai-spinner"></div>
-                        <span>Analizando tu solicitud...</span>
-                    </div>
-                ) : (
-                    <div className="interpretation-content">
-                        <div className="interpretation-text">
-                            <strong>Entendido:</strong> {interpretation.interpretation_summary}
-                        </div>
-                        <div className="interpretation-actions">
-                            <button 
-                                className="btn-confirm"
-                                onClick={() => {
-                                    // Removed onSearch() call as requested - just accept the interpretation
-                                    setInterpretation(null); 
-                                }}
-                                title="Confirmar"
-                                style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            </button>
-                            <button 
-                                className="btn-cancel"
-                                onClick={() => setInterpretation(null)}
-                                title="Volver a intentar"
-                                style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', minWidth: '24px', minHeight: '24px' }}>
-                                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/>
-                                </svg>
-                            </button>
+            <div className="header-actions">
+                <div className="smart-filter-badges">
+                    <span className="smart-badge">IA</span>
+                </div>
+                <button className="btn-close-compact" onClick={() => setIsExpanded(false)}>
+                  <FiX />
+                </button>
+            </div>
+          </div>
+          
+          <div className="smart-filter-input-wrapper">
+            {!audioBlob ? (
+                <div className="textarea-container">
+                  <textarea
+                      className="smart-filter-textarea"
+                      placeholder="Describe tu cliente ideal (Ej: 'Empresas de logística con flota propia...')"
+                      value={value}
+                      onChange={(e) => onChange(e.target.value)}
+                      onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            if (value.trim()) {
+                               if (onInterpret) handleInterpretationTrigger(value.trim());
+                               else if (onSearch) onSearch();
+                            }
+                          }
+                      }}
+                      disabled={isRecording || isTranscribing || isInterpreting}
+                      autoFocus
+                  />
+                  <div className="input-actions">
+                      {!isRecording && value && value.trim().length > 0 && !interpretation && (
+                          <button 
+                              type="button" 
+                              className="btn-icon-action submit"
+                              onClick={() => {
+                                  if (onInterpret) handleInterpretationTrigger(value.trim());
+                                  else if (onSearch) onSearch();
+                              }}
+                              title="Analizar filtro (Enter)"
+                          >
+                              <FiArrowRight />
+                          </button>
+                      )}
+                      {!isRecording ? (
+                          <button 
+                              type="button" 
+                              className="btn-icon-action"
+                              onClick={startRecording}
+                              title="Grabar audio"
+                              disabled={isTranscribing || isInterpreting}
+                          >
+                              <FiMic />
+                          </button>
+                      ) : (
+                           <button 
+                              type="button" 
+                              className="btn-icon-action recording"
+                              onClick={stopRecording}
+                              title="Detener grabación"
+                          >
+                              <span className="recording-dot"></span>
+                              <span className="timer">{formatTime(recordingTime)}</span>
+                              <FiStopCircle />
+                          </button>
+                      )}
+                  </div>
+                </div>
+            ) : (
+                <div className="audio-preview-compact">
+                    <audio 
+                        ref={audioRef}
+                        src={URL.createObjectURL(audioBlob)} 
+                        onEnded={() => setIsPlaying(false)}
+                        style={{ display: 'none' }}
+                    />
+                    
+                    <div className="audio-controls">
+                        <button type="button" onClick={togglePlayback} className="btn-icon-round">
+                            {isPlaying ? <FiPause /> : <FiPlay />}
+                        </button>
+                        <div className="audio-meta">
+                            <span className="audio-label">Audio grabado</span>
+                            <span className="audio-duration">{formatTime(recordingTime)}</span>
                         </div>
                     </div>
-                )}
-            </div>
-        )}
 
-      </div>
+                    <div className="audio-actions-group">
+                        <button 
+                            type="button" 
+                            onClick={handleTranscribeClick} 
+                            className="btn-text-action" 
+                            disabled={isTranscribing}
+                        >
+                            <FiFileText />
+                            {isTranscribing ? 'Transcribiendo...' : 'Transcribir'}
+                        </button>
+                        <button type="button" onClick={clearAudio} className="btn-icon-action delete" title="Eliminar">
+                            <FiTrash2 />
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* AI Interpretation UI */}
+            {(isInterpreting || interpretation) && (
+                <div className="interpretation-card">
+                    {isInterpreting ? (
+                        <div className="ai-thinking">
+                            <div className="ai-spinner"></div>
+                            <span>Analizando tu solicitud...</span>
+                        </div>
+                    ) : (
+                        <div className="interpretation-content">
+                            <div className="interpretation-text">
+                                <strong>Entendido:</strong> {interpretation.interpretation_summary}
+                            </div>
+                            <div className="interpretation-actions">
+                                <button 
+                                    className="btn-confirm"
+                                    onClick={() => {
+                                        setInterpretation(null); 
+                                    }}
+                                    title="Confirmar"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </button>
+                                <button 
+                                    className="btn-cancel"
+                                    onClick={() => setInterpretation(null)}
+                                    title="Volver a intentar"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

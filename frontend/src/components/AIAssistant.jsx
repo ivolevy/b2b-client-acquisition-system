@@ -200,9 +200,6 @@ const AIAssistant = ({ open, onClose }) => {
                   <SendIcon sx={{ fontSize: '1.2rem' }} />
               </IconButton>
           </Box>
-          <Typography variant="caption" sx={{ display: 'block', mt: 1, textAlign: 'center', color: '#94a3b8', fontSize: '0.65rem' }}>
-              Vancha puede cometer errores.
-          </Typography>
       </Box>
     </Drawer>
   );

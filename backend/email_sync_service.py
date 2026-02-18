@@ -157,19 +157,29 @@ def store_message(user_id: str, conversation_id: str, msg_data: Dict):
     
     admin.table("email_messages").insert(msg_record).execute()
     
-    # Determinar nuevo estado de la conversación
-    # Prioridad: outbound -> waiting_reply, inbound -> replied
-    # EXCEPCIÓN: Si es un mensaje de historial (campaña inicial), mantenemos 'open' o el estado actual
-    new_status = 'replied'
+    # Determinar nuevo estado base de la conversación
+    # Obtenemos el estado actual para evitar "downgrades" (ej: de interested a waiting_reply)
+    current_status = 'open'
+    try:
+        conv_res = admin.table("email_conversations").select("status").eq("id", conversation_id).execute()
+        if conv_res.data:
+            current_status = conv_res.data[0]['status']
+    except:
+        pass
+
+    # Lógica de transición
+    new_status = current_status
     if msg_data.get('direction') == 'outbound':
-        if str(external_id).startswith('hist_'):
-            # Es campaña, mantenemos 'open'
-            new_status = 'open'
-        else:
-            # Es respuesta manual, vamos a 'waiting_reply'
+        if not str(external_id).startswith('hist_'):
+            # Si respondo manualmente, pasa a 'waiting_reply'
+            new_status = 'waiting_reply'
+    else:
+        # Si entra mensaje (inbound), por defecto lo marcamos para revisión
+        # pero si ya estaba en 'interested', lo dejamos ahí para que no "vuelva atrás"
+        if current_status != 'interested':
             new_status = 'waiting_reply'
 
-    # Actualizar timestamp y estado de conversación
+    # Actualizar timestamp y estado
     update_data = {
         "last_message_at": msg_data.get('date') or datetime.now().isoformat(),
         "status": new_status,
@@ -181,7 +191,6 @@ def store_message(user_id: str, conversation_id: str, msg_data: Dict):
         try:
             from backend.ai_service import analyze_conversation_intent
             
-            # Traer contexto reciente
             thread_res = admin.table("email_messages")\
                 .select("body_text, direction")\
                 .eq("conversation_id", conversation_id)\
@@ -190,10 +199,19 @@ def store_message(user_id: str, conversation_id: str, msg_data: Dict):
                 .execute()
             
             if thread_res.data:
-                ai_result = analyze_conversation_intent(thread_res.data[::-1]) # Invertir para orden cronológico
+                ai_result = analyze_conversation_intent(thread_res.data[::-1])
                 if ai_result and ai_result.get('status'):
-                    update_data["status"] = ai_result['status']
-                    logger.info(f"AI classified lead as: {ai_result['status']}")
+                    ai_status = ai_result['status']
+                    # Lógica de persistencia de interés:
+                    # Si ya era 'interested', solo permitimos cambiar a 'not_interested' (si perdió interés)
+                    if current_status == 'interested':
+                        if ai_status == 'not_interested':
+                            update_data["status"] = 'not_interested'
+                        # De lo contrario, se queda en 'interested'
+                    else:
+                        update_data["status"] = ai_status
+                        
+                    logger.info(f"AI classified lead as: {update_data['status']}")
         except Exception as ai_err:
             logger.error(f"Error in AI analysis trigger: {ai_err}")
 

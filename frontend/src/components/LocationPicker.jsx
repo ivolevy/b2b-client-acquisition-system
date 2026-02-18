@@ -36,7 +36,7 @@ const formatNominatimResult = (item) => {
 };
 
 function LocationPicker(props) {
-  const { onLocationChange, initialLocation, rubroSelect = null, smartFilterComponent = null } = props;
+  const { onLocationChange, initialLocation, rubroSelect = null } = props;
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: GOOGLE_API_KEY,
@@ -673,10 +673,6 @@ function LocationPicker(props) {
         {rubroSelect}
         {controlsRow}
       </div>
-
-      {/* Smart Filter Component Injected Here */}
-      {smartFilterComponent}
-
       <div className="location-picker">
 
         <div className="map-instruction">

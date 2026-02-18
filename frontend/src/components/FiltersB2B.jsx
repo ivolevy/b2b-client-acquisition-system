@@ -209,16 +209,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                   </select>
                 </div>
               }
-              smartFilterComponent={
-                <SmartFilterInput 
-                  value={smartFilterText}
-                  onChange={setSmartFilterText}
-                  onAudioRecord={setSmartFilterAudio}
-                  onTranscribe={handleTranscribe}
-                  onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
-                  onInterpret={handleInterpret}
-                />
-              }
             />
           ) : (
             <LocationPicker 
@@ -266,6 +256,15 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
               
 
               <div className="toolbar-group">
+                <SmartFilterInput 
+                  value={smartFilterText}
+                  onChange={setSmartFilterText}
+                  onAudioRecord={setSmartFilterAudio}
+                  onTranscribe={handleTranscribe}
+                  onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
+                  onInterpret={handleInterpret}
+                />
+                <div className="toolbar-divider" />
                 <div className="search-mode-segment">
                   <button 
                     type="button"

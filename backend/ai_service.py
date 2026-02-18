@@ -75,10 +75,9 @@ def analyze_conversation_intent(messages: List[Dict[str, Any]]) -> Dict[str, Any
         entre un Agente de Ventas y un Lead (prospecto).
         
         Debes clasificar el estado del Lead en una de estas categorías:
-        - interested: El lead muestra interés real, pide precios, quiere una reunión o hace preguntas específicas.
-        - not_interested: El lead dice explícitamente que no le interesa, pide ser removido o es hostil.
-        - waiting_reply: El agente hizo una pregunta y el lead aún no respondió.
-        - replied: El lead respondió algo neutral o genérico.
+        - interested: El lead muestra interés real, pide una reunión, presupuesto o precios.
+        - not_interested: El lead dice explícitamente que no le interesa o pide que no lo contacten más. (Poco Interés)
+        - waiting_reply: El lead respondió algo pero aún requiere seguimiento o el hilo está abierto sin una decisión clara. 
         - open: Conversación inicial.
 
         Historial de conversación:
@@ -88,7 +87,7 @@ def analyze_conversation_intent(messages: List[Dict[str, Any]]) -> Dict[str, Any
         {{
             "status": "categoría_elegida",
             "reason": "breve explicación en español",
-            "sentiment": "positivo/negativo/neutral"
+            "interest_level": "high/medium/low/none"
         }}
         """
 
@@ -428,3 +427,52 @@ async def transcribe_audio_file(file_content: bytes) -> str:
     except Exception as e:
         logger.error(f"Error transcribing with Gemini: {e}")
         return ""
+def generate_suggested_reply(messages: List[Dict[str, Any]], lead_data: Optional[Dict[str, Any]] = None) -> str:
+    """
+    Generates a professional and persuasive reply based on conversation history.
+    """
+    try:
+        # Prepare history
+        history_text = ""
+        for msg in messages[-10:]:
+            sender = "Lead" if msg.get('direction') == 'inbound' else "Agente (Yo)"
+            history_text += f"{sender}: {msg.get('body_text', '')}\n"
+
+        lead_info = ""
+        if lead_data:
+            nombre = lead_data.get('nombre') or lead_data.get('name') or 'Prospecto'
+            rubro = lead_data.get('rubro') or lead_data.get('category') or 'su sector'
+            lead_info = f"Empresa: {nombre}, Rubro: {rubro}"
+
+        prompt = f"""
+        Sos un experto en ventas B2B (Top 1% Account Executive). Tu tarea es redactar la MEJOR respuesta posible para un Lead basándote en el historial de chat.
+        
+        CONTEXTO DEL LEAD:
+        {lead_info}
+
+        CONOCIMIENTO DE PRODUCTO (Smart Leads):
+        - Somos un motor de captación de clientes B2B hiper-segmentado.
+        - Usamos IA para encontrar leads en Google Maps y contactarlos por Email/WhatsApp.
+        - Planes: Essential ($49/ms - 1500 cred), Growth ($89/ms - 3000 cred), Agency ($199/ms - 15000 cred).
+        - Conversión: El objetivo es llevar al lead a una reunión o demostrar el valor del sistema.
+
+        HISTORIAL:
+        {history_text}
+
+        REGLAS DE ORO:
+        1. TONO: Elegante, servicial, extremadamente profesional pero cercano.
+        2. CONCISIÓN: No te extiendas. Sé directo al grano.
+        3. LLAMADO A LA ACCIÓN (CTA): Termina con una pregunta que invite a seguir la charla o agendar.
+        4. FORMATO: Solo devolvé el texto de la respuesta. Sin explicaciones, sin asuntitos.
+
+        TU RESPUESTA SUGERIDA:
+        """
+
+        result = call_gemini_with_retry(prompt)
+        if result:
+            return result.strip().strip('"')
+        return "Gracias por tu respuesta. ¿Te gustaría que coordinemos una breve llamada para mostrarte cómo podemos ayudarte?"
+        
+    except Exception as e:
+        logger.error(f"Error generating suggested reply: {e}")
+        return "Hola! Muchas gracias por el interés. ¿Te parece si agendamos una demo rápida mañana?"
