@@ -278,7 +278,8 @@ def enviar_email_empresa(
     asunto_personalizado: Optional[str] = None,
     user_id: Optional[str] = None,
     provider: Optional[str] = None,
-    attachments: Optional[List[Any]] = None
+    attachments: Optional[List[Any]] = None,
+    auto_personalize: bool = False
 ) -> Dict:
     """
     Envía email a una empresa usando un template
@@ -323,7 +324,9 @@ def enviar_email_empresa(
         'pais': empresa.get('pais'),
         'distancia_km': empresa.get('distancia_km'),
         'busqueda_ubicacion_nombre': empresa.get('busqueda_ubicacion_nombre'),
-        'descripcion': empresa.get('descripcion')
+        'descripcion': empresa.get('descripcion'),
+        'ai_icebreaker': empresa.get('icebreaker', ''),
+        'icebreaker': empresa.get('icebreaker', '')
     }
     
     # Renderizar template
@@ -332,6 +335,17 @@ def enviar_email_empresa(
     # y luego aplicar el wrapper premium.
     
     raw_content = template.get('body_html') or template.get('body_text', '')
+    
+    # Auto-Personalize: Inyectar si no hay tags manuales
+    icebreaker = empresa.get('icebreaker', '')
+    if auto_personalize and icebreaker and 'ai_icebreaker' not in raw_content and 'icebreaker' not in raw_content:
+        # Si es HTML, rodeamos con párrafo, si no con saltos de línea
+        is_html = bool(template.get('body_html'))
+        if is_html:
+            raw_content = f"<p>{icebreaker}</p>\n{raw_content}"
+        else:
+            raw_content = f"{icebreaker}\n\n{raw_content}"
+
     # No quitar tags HTML si es body_html, para permitir diseño
     # Solo normalizar saltos de línea si es texto plano
     is_html = bool(template.get('body_html'))
@@ -404,7 +418,8 @@ def enviar_emails_masivo(
     delay_segundos: float = 3.0,
     user_id: Optional[str] = None,
     provider: Optional[str] = None,
-    attachments: Optional[List[Any]] = None
+    attachments: Optional[List[Any]] = None,
+    auto_personalize: bool = False
 ) -> Dict:
     """
     Envía emails a múltiples empresas
@@ -463,7 +478,15 @@ def enviar_emails_masivo(
             continue
         
         try:
-            resultado = enviar_email_empresa(empresa, template, asunto_personalizado, user_id=user_id, provider=provider, attachments=attachments)
+            resultado = enviar_email_empresa(
+                empresa, 
+                template, 
+                asunto_personalizado, 
+                user_id=user_id, 
+                provider=provider, 
+                attachments=attachments,
+                auto_personalize=auto_personalize
+            )
             
             if resultado['success']:
                 resultados['exitosos'] += 1

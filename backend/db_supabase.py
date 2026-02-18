@@ -250,6 +250,9 @@ def insertar_empresa(empresa: Dict) -> bool:
             'instagram': empresa.get('instagram', ''),
             # Metadata
             'descripcion': empresa.get('descripcion', ''),
+            'website_title': empresa.get('website_title', ''),
+            'website_description': empresa.get('website_description', ''),
+            'website_content': empresa.get('website_content', ''),
             'google_id': empresa.get('google_id'),
             # Validación
             'validada': empresa.get('validada', False),
@@ -334,8 +337,45 @@ def obtener_todas_empresas() -> List[Dict]:
         logger.error(f"Error obteniendo todas las empresas: {e}")
         return []
 
+
+def get_empresa_by_id(empresa_id: str) -> Optional[Dict]:
+    """Obtiene una empresa por su ID uuid o google_id"""
+    client = get_supabase()
+    if not client: return None
+    try:
+        # Intentar por UUID primero
+        response = execute_with_retry(lambda c: c.table('empresas').select('*').eq('id', empresa_id).limit(1), is_admin=False)
+        if response.data:
+            return response.data[0]
+        
+        # Si no se encuentra, intentar por google_id
+        response = execute_with_retry(lambda c: c.table('empresas').select('*').eq('google_id', empresa_id).limit(1), is_admin=False)
+        if response.data:
+            return response.data[0]
+            
+        return None
+    except Exception as e:
+        logger.error(f"Error get_empresa_by_id ({empresa_id}): {e}")
+        return None
+
+def update_empresa_icebreaker(empresa_id: str, icebreaker: str) -> bool:
+    """Actualiza solo el campo icebreaker de la empresa (soporta id o google_id)"""
+    client = get_supabase()
+    if not client: return False
+    try:
+        # Intentar update por ID
+        res = execute_with_retry(lambda c: c.table('empresas').update({'icebreaker': icebreaker}).eq('id', empresa_id), is_admin=False)
+        
+        # Si no afectó ninguna fila, intentar por google_id
+        if not res.data:
+            res = execute_with_retry(lambda c: c.table('empresas').update({'icebreaker': icebreaker}).eq('google_id', empresa_id), is_admin=False)
+            
+        return True
+    except Exception as e:
+        logger.error(f"Error update_empresa_icebreaker ({empresa_id}): {e}")
+        return False
+
 def obtener_estadisticas() -> Dict:
-    """Obtiene estadísticas básicas desde Supabase"""
     client = get_supabase()
     if not client:
         return {}

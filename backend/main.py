@@ -10,8 +10,17 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import logging
-import os
 import sys
+import os
+
+# Asegurar que el directorio raíz esté en el path para soportar imports con "backend."
+# tanto en local como en despliegues.
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
 import time
 import asyncio
 import math
@@ -30,6 +39,7 @@ try:
     from backend.social_scraper import enriquecer_con_redes_sociales
     from backend.scraper_parallel import enriquecer_empresas_paralelo
     from backend.validators import validar_empresa
+    from backend.smart_filter_service import apply_smart_filter
     from backend.db_supabase import (
         insertar_empresa, 
         buscar_empresas, 
@@ -57,12 +67,16 @@ try:
         db_get_templates,
         db_create_template,
         db_update_template,
-        db_delete_template
+        db_delete_template,
+        get_empresa_by_id,
+        update_empresa_icebreaker
     )
     from backend.auth_google import get_google_auth_url, exchange_code_for_token
     from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
     from backend.google_places_client import google_client
     from backend.email_service import enviar_email, enviar_emails_masivo
+    from backend.ai_service import generate_icebreaker, draft_message_from_instruction, filter_leads_by_description, transcribe_audio_file, interpret_search_intent
+    from fastapi import UploadFile, File
 except ImportError as e:
     logging.error(f"Error importando módulos del backend: {e}")
     # Solo para desarrollo local si el paquete no está instalado
@@ -98,15 +112,19 @@ except ImportError as e:
         db_get_templates,
         db_create_template,
         db_update_template,
-        db_delete_template
+        db_delete_template,
+        get_empresa_by_id,
+        update_empresa_icebreaker
     )
     from auth_google import get_google_auth_url, exchange_code_for_token
     from auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
-# Todas las funciones trabajan con datos en memoria durante la sesión
+    from ai_service import generate_icebreaker, draft_message_from_instruction, interpret_search_intent
 
-import math
-from typing import Dict, List, Optional
 
+
+class DraftTemplateRequest(BaseModel):
+    instruction: str
+    type: str = 'email'
 # --- Variables de estado Globales (En memoria por sesión) ---
 _memoria_empresas = []
 _empresa_counter = 1
@@ -343,6 +361,8 @@ class BusquedaRubroRequest(BaseModel):
     busqueda_radio_km: Optional[float] = None
     task_id: Optional[str] = None  # ID único de la tarea para tracking de progreso
     user_id: Optional[str] = None # ID del usuario para créditos
+    smart_filter_text: Optional[str] = None
+    smart_filter_audio_blob: Optional[str] = None # Aunque en realidad enviamos text desde frontend si ya transcribimos
 
 class BusquedaMultipleRequest(BaseModel):
     pais: Optional[str] = None
@@ -416,18 +436,116 @@ class CreateLinkTrackingRequest(BaseModel):
     lead_id: Optional[str] = None
     conversation_id: Optional[str] = None
 
-class MPPreferenceRequest(BaseModel):
-    plan_id: str
-
 class CreateShortLinkRequest(BaseModel):
     destination_url: str
     conversation_id: Optional[str] = None
+
+class MPPreferenceRequest(BaseModel):
     user_id: str
     email: str
     name: str
     phone: str
+    plan_id: str
     amount: float
     description: str
+
+class GenerateIcebreakerRequest(BaseModel):
+    empresas: List[Dict[str, Any]]
+    user_id: str
+
+@app.post("/api/leads/generate-icebreakers")
+async def api_generate_icebreakers(req: GenerateIcebreakerRequest):
+    """
+    Genera icebreakers para una lista de empresas.
+    """
+    logger.info(f"RECIBIDA PETICIÓN ICEBREAKERS: user_id={req.user_id}, count={len(req.empresas)}")
+    
+    # Log the first empresa to see the structure
+    if req.empresas:
+        logger.info(f"Primera empresa recibida: {json.dumps(req.empresas[0])[:200]}...")
+    results = []
+    for item in req.empresas:
+        try:
+            # Si recibimos el objeto completo, lo usamos. 
+            # Si solo recibimos un ID, lo buscamos.
+            empresa = item
+            empresa_id = item.get('id') or item.get('google_id')
+            
+            # Si el objeto está vacío, solo tiene ID, o le faltan datos clave, buscamos en DB
+            # Esto corrige el error donde objetos con {id, selected: true} no traían datos
+            needs_fetch = len(item.keys()) <= 3 or not item.get('nombre') or not item.get('rubro')
+            
+            logger.info(f"Procesando item {empresa_id}. Keys: {list(item.keys())}. Needs fetch: {needs_fetch}")
+
+            if needs_fetch and empresa_id:
+                empresa_db = get_empresa_by_id(empresa_id)
+                if empresa_db:
+                    empresa = empresa_db
+                    logger.info(f"Recuperado de DB: {empresa.get('nombre')}")
+                else:
+                    logger.warning(f"No se encontró en DB: {empresa_id}")
+            
+            if not empresa:
+                results.append({"id": empresa_id, "status": "error", "message": "No data for lead"})
+                continue
+                
+            # Generar icebreaker
+            icebreaker = generate_icebreaker(empresa)
+            
+            # Intentar guardar en DB si tenemos un ID
+            success_db = False
+            if empresa_id:
+                success_db = update_empresa_icebreaker(empresa_id, icebreaker)
+            
+            results.append({
+                "id": empresa_id,
+                "icebreaker": icebreaker,
+                "status": "success"
+            })
+            
+        except Exception as e:
+            logger.error(f"Error generando icebreaker: {e}")
+            results.append({"id": item.get('id'), "status": "error", "message": str(e)})
+            
+    return {"results": results}
+
+@app.post("/api/ai/draft-template")
+async def api_draft_template(req: DraftTemplateRequest):
+    """
+    Drafts a template message based on user instruction.
+    """
+    try:
+        draft = draft_message_from_instruction(req.instruction, req.type)
+        return draft
+    except Exception as e:
+        logger.error(f"Error in draft endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/ai/transcribe")
+async def api_transcribe_audio(file: UploadFile = File(...)):
+    """
+    Recibe un archivo de audio y devuelve la transcripción.
+    """
+    try:
+        content = await file.read()
+        text = await transcribe_audio_file(content)
+        return {"text": text}
+    except Exception as e:
+        logger.error(f"Error transcribing audio endpoint: {e}")
+        raise HTTPException(status_code=500, detail="Error transcribing audio")
+
+@app.post("/api/ai/interpret")
+async def api_interpret_intent(req: DraftTemplateRequest):
+    """
+    Interprets the user's search intent before executing a search.
+    Reuses DraftTemplateRequest (instruction field) for simplicity.
+    """
+    try:
+        result = interpret_search_intent(req.instruction)
+        return result
+    except Exception as e:
+        logger.error(f"Error interpreting intent endpoint: {e}")
+        raise HTTPException(status_code=500, detail="Error interpreting intent")
 
 # Endpoints de Pagos
 @app.post("/api/payments/mercadopago/create_preference")
@@ -648,6 +766,7 @@ class EnviarEmailMasivoRequest(BaseModel):
     asunto_personalizado: Optional[str] = None
     delay_segundos: float = 3.0
     user_id: Optional[str] = None
+    auto_personalize: bool = False
     provider: Optional[str] = None
     attachments: Optional[List[EmailAttachment]] = None
 
@@ -908,6 +1027,8 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                 session = ScraperSession()
                 
                 # Procesar en batches para fluidez en el stream
+                accumulated_enriched = []
+                
                 for i in range(0, len(leads_to_process), batch_size):
                     batch = leads_to_process[i:i+batch_size]
                     
@@ -920,19 +1041,38 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                         )
                         
                         if isinstance(enriched_batch, list):
-                            for r in enriched_batch:
-                                yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
-                                emitted_count += 1
-                                enriched_count += 1
-                                await asyncio.sleep(0.02) # Micro-delay para suavidad
+                            # Si hay Smart Filter, lo aplicamos INMEDIATAMENTE al batch para no hacer esperar al usuario
+                            if request.smart_filter_text:
+                                yield f"data: {json.dumps({'type': 'status', 'message': f'Analizando calidad con IA ({enriched_count + len(enriched_batch)}/{len(leads_to_process)})...'})}\n\n"
+                                
+                                # Aplicar filtro AI al batch actual
+                                filtered_batch_leads = await apply_smart_filter(enriched_batch, request.smart_filter_text)
+                                
+                                for r in filtered_batch_leads:
+                                    yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
+                                    emitted_count += 1
+                                    enriched_count += 1
+                                    await asyncio.sleep(0.02)
+                                    
+                            else:
+                                # Comportamiento standard: emitir inmediatamente
+                                for r in enriched_batch:
+                                    yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
+                                    emitted_count += 1
+                                    enriched_count += 1
+                                    await asyncio.sleep(0.02) 
                                 
                     except Exception as e:
                         logger.error(f"Error en enriquecimiento batch: {e}")
-                        # Si falla el batch, emitimos los originales para no perder datos
+                        # Si falla, emitimos originales
+                        # Fallback seguro para ambos casos
                         for r in batch:
                             yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
                             emitted_count += 1
-                
+                            enriched_count += 1
+
+                # (Bloque acumulado eliminado - ya se procesó en tiempo real)
+                # Finalización normal
                 logger.info(f"Búsqueda finalizada. Enriquecidos: {enriched_count}/{len(leads_to_process)}")
                 yield f"data: {json.dumps({'type': 'status', 'message': f'Búsqueda finalizada. {emitted_count} prospectos procesados con éxito.'})}\n\n"
             else:
@@ -2209,7 +2349,6 @@ async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
         if not template:
             raise HTTPException(status_code=404, detail="Template no encontrado")
         
-        # Enviar emails
         resultados = enviar_emails_masivo(
             empresas=empresas,
             template=template,
@@ -2217,7 +2356,8 @@ async def enviar_email_masivo_endpoint(request: EnviarEmailMasivoRequest):
             delay_segundos=request.delay_segundos,
             user_id=request.user_id,
             provider=request.provider,
-            attachments=request.attachments
+            attachments=request.attachments,
+            auto_personalize=request.auto_personalize
         )
         
         # Guardar en historial

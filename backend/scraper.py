@@ -230,6 +230,31 @@ def scrapear_empresa_b2b(url: str, session: Optional[ScraperSession] = None, rub
         soup = session.get_soup(url)
         
         if soup:
+            # Extraer metadatos básicos para Deep Enrichment
+            try:
+                # Title
+                if soup.title:
+                    resultado['website_title'] = soup.title.string.strip() if soup.title.string else ''
+                
+                # Meta Description
+                meta_desc = soup.find('meta', attrs={'name': 'description'}) or soup.find('meta', attrs={'property': 'og:description'})
+                if meta_desc:
+                    resultado['website_description'] = meta_desc.get('content', '').strip()
+                
+                # Body Content (Truncated)
+                # Eliminamos scripts, estilos y navegarion para obtener texto limpio
+                for script in soup(["script", "style", "nav", "footer", "header"]):
+                    script.decompose()
+                
+                text_content = soup.get_text(separator=' ', strip=True)
+                # Limpiamos espacios múltiples
+                text_content = ' '.join(text_content.split())
+                # Guardamos primeros 3000 caracteres para no explotar la DB
+                resultado['website_content'] = text_content[:3000]
+                
+            except Exception as e:
+                logger.warning(f"Error extrayendo contenido extra de {url}: {e}")
+
             text = soup.get_text()
             resultado['emails'] = extraer_emails_b2b(soup, text)
             resultado['telefonos'] = extraer_telefonos_b2b(soup, text)
@@ -270,7 +295,10 @@ def enriquecer_empresa_b2b(empresa: Dict, session: Optional[ScraperSession] = No
     empresa.update({
         'linkedin': datos_scraped.get('linkedin', ''),
         'facebook': datos_scraped.get('facebook', ''),
-        'twitter': datos_scraped.get('twitter', '')
+        'twitter': datos_scraped.get('twitter', ''),
+        'website_title': datos_scraped.get('website_title', ''),
+        'website_description': datos_scraped.get('website_description', ''),
+        'website_content': datos_scraped.get('website_content', '')
     })
     return empresa
 
