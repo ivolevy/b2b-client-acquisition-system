@@ -1091,6 +1091,14 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                                     yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
                                     emitted_count += 1
                                     enriched_count += 1
+                                    
+                                    # Trigger: Lead Extracted
+                                    try:
+                                        from backend.trigger_service import process_triggers_async
+                                        process_triggers_async(request.user_id, "lead_extracted", lead_data=r)
+                                    except:
+                                        pass
+                                        
                                     await asyncio.sleep(0.02) 
                                 
                     except Exception as e:
@@ -1423,6 +1431,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 if tiene_contacto_valido:
                     # Empresa con contacto válido - siempre se guarda
                     empresa_validada['validada'] = True
+                    empresa_validada['user_id'] = request.user_id # Para el trigger de lead_saved
                     empresas_validadas.append(empresa_validada)
                     _memoria_empresas.append(empresa_validada)
                     

@@ -219,8 +219,8 @@ def store_message(user_id: str, conversation_id: str, msg_data: Dict):
 
     if msg_data.get('direction') == 'inbound':
         try:
-            from backend.trigger_service import process_email_triggers_async
-            process_email_triggers_async(user_id, conversation_id, msg_data)
+            from backend.trigger_service import process_triggers_async
+            process_triggers_async(user_id, "email_received", conversation_id=conversation_id, lead_data=msg_data)
         except Exception as trigger_err:
             logger.error(f"Error launching trigger service: {trigger_err}")
 

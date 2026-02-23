@@ -22,6 +22,8 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
         is_active: true
     });
 
+    const [templates, setTemplates] = useState([]);
+
     const definedIntents = [
         "PIDE_PRECIO", "AGENDAR_REUNION", "MAS_INFO", "NO_INTERESADO", "FUERA_DE_OFICINA", "OTRO"
     ];
@@ -32,10 +34,17 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
         { value: 'not_interested', label: 'No Interesado' },
     ];
 
+    const definedTriggers = [
+        { value: 'email_received', label: 'Email Recibido (Reply)', desc: 'Cuando un lead responde a tus campañas.' },
+        { value: 'lead_extracted', label: 'Nuevo Lead Encontrado', desc: 'Cuando el buscador encuentra un prospecto nuevo.' },
+        { value: 'lead_saved', label: 'Lead Guardado (CRM)', desc: 'Cuando guardas manualmente un lead en tu pipeline.' },
+    ];
+
     useEffect(() => {
         if (user?.id) {
             fetchRules();
             fetchLogs();
+            fetchTemplates();
         }
     }, [user?.id]);
 
@@ -65,9 +74,30 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
         }
     };
 
+    const fetchTemplates = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/api/templates`, {
+                headers: { 'X-User-ID': user.id }
+            });
+            if (res.data) setTemplates(res.data);
+        } catch (error) {
+            console.error("Error fetching templates", error);
+        }
+    };
+
     const handleSaveRule = async () => {
-        if (!formData.name || !formData.condition_value.intent) {
-            if (toastWarning) toastWarning("Complete todos los campos requeridos");
+        if (!formData.name) {
+            if (toastWarning) toastWarning("Asigna un nombre a la regla");
+            return;
+        }
+
+        // Validate condition
+        if (formData.condition_type === 'ai_intent' && !formData.condition_value.intent) {
+            if (toastWarning) toastWarning("Selecciona una intención");
+            return;
+        }
+        if (formData.condition_type === 'keyword' && !formData.condition_value.keyword) {
+            if (toastWarning) toastWarning("Escribe una palabra clave");
             return;
         }
 
@@ -123,6 +153,10 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
         }
     };
 
+    const getTriggerInfo = (event) => {
+        return definedTriggers.find(t => t.value === event) || { label: event, desc: '' };
+    };
+
     return (
         <div id="automations-root" className="automations-container unified-results-module fade-in">
             <div className="automations-header">
@@ -133,7 +167,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                         </svg>
                         Triggers y Automatizaciones IA
                     </h2>
-                    <p>Configura respuestas automáticas y reglas de negocio. Deja que nuestra IA clasifique los correos y organice el pipeline por ti sin intervención manual.</p>
+                    <p>Configura respuestas automáticas y reglas de negocio. Deja que nuestra IA trabaje por ti 24/7 conectando el buscador, el CRM y tu Outbox.</p>
                 </div>
                 {!isFormOpen && (
                     <button className="btn-primary" onClick={() => setIsFormOpen(true)}>
@@ -158,7 +192,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                         <input 
                             className="app-input"
                             type="text" 
-                            placeholder="Ej: Clasificar Leads Interesados automáticamente"
+                            placeholder="Ej: Auto-reply a pedidos de presupuesto"
                             value={formData.name}
                             onChange={(e) => setFormData({...formData, name: e.target.value})}
                         />
@@ -169,16 +203,28 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                         <div className="workflow-step">
                             <div className="step-icon step-trigger">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
                                 </svg>
                             </div>
                             <div className="step-content">
                                 <div className="step-header">
                                     <span className="step-badge">1. CUANDO</span>
-                                    <h4>Se recibe un nuevo email</h4>
+                                    <h4>Seleccionar disparador</h4>
                                 </div>
-                                <p className="step-desc">El flujo se iniciará de manera automática en segundo plano apenas un lead envíe un correo a tu casilla conectada.</p>
+                                <div className="step-inputs">
+                                    <select 
+                                        className="styled-select"
+                                        value={formData.trigger_event}
+                                        onChange={(e) => setFormData({...formData, trigger_event: e.target.value})}
+                                    >
+                                        {definedTriggers.map(t => (
+                                            <option key={t.value} value={t.value}>{t.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <p className="step-desc" style={{marginTop: '8px', fontSize: '0.85rem'}}>
+                                    {getTriggerInfo(formData.trigger_event).desc}
+                                </p>
                             </div>
                         </div>
 
@@ -194,24 +240,52 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                             </div>
                             <div className="step-content">
                                 <div className="step-header">
-                                    <span className="step-badge">2. CONDICIÓN (INTELIGENCIA ARTIFICIAL)</span>
-                                    <h4>Clasificación de Intención</h4>
+                                    <span className="step-badge">2. SI (CONDICIÓN)</span>
+                                    <h4>Regla de filtrado</h4>
                                 </div>
-                                <p className="step-desc">Selecciona qué intención debe ser detectada leyendo el contexto del mensaje para continuar.</p>
-                                <div className="step-inputs">
+                                <div className="step-inputs" style={{flexDirection: 'column', gap: '10px'}}>
                                     <select 
                                         className="styled-select"
-                                        value={formData.condition_value.intent}
+                                        value={formData.condition_type}
                                         onChange={(e) => setFormData({
                                             ...formData, 
-                                            condition_value: { intent: e.target.value }
+                                            condition_type: e.target.value,
+                                            condition_value: e.target.value === 'ai_intent' ? { intent: '' } : { keyword: '' }
                                         })}
                                     >
-                                        <option value="">-- Seleccionar intención requerida --</option>
-                                        {definedIntents.map(intent => (
-                                            <option key={intent} value={intent}>{intent.replace(/_/g, ' ')}</option>
-                                        ))}
+                                        <option value="no_condition">Sin condición (Siempre)</option>
+                                        <option value="ai_intent">Intención detectada por IA</option>
+                                        <option value="keyword">Contiene palabra clave</option>
                                     </select>
+
+                                    {formData.condition_type === 'ai_intent' && (
+                                        <select 
+                                            className="styled-select"
+                                            value={formData.condition_value.intent}
+                                            onChange={(e) => setFormData({
+                                                ...formData, 
+                                                condition_value: { intent: e.target.value }
+                                            })}
+                                        >
+                                            <option value="">-- Seleccionar intención --</option>
+                                            {definedIntents.map(intent => (
+                                                <option key={intent} value={intent}>{intent.replace(/_/g, ' ')}</option>
+                                            ))}
+                                        </select>
+                                    )}
+
+                                    {formData.condition_type === 'keyword' && (
+                                        <input 
+                                            className="app-input"
+                                            type="text"
+                                            placeholder="Escribe la palabra (ej: presupuesto)"
+                                            value={formData.condition_value.keyword}
+                                            onChange={(e) => setFormData({
+                                                ...formData,
+                                                condition_value: { keyword: e.target.value }
+                                            })}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -227,22 +301,27 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                             </div>
                             <div className="step-content">
                                 <div className="step-header">
-                                    <span className="step-badge">3. ACCIÓN</span>
+                                    <span className="step-badge">3. ENTONCES (ACCIÓN)</span>
                                     <h4>Ejecutar comportamiento</h4>
                                 </div>
-                                <p className="step-desc">Indica qué sistema debe interactuar y los datos de destino.</p>
-                                <div className="step-inputs">
+                                <div className="step-inputs" style={{flexDirection: 'column', gap: '10px'}}>
                                     <select 
                                         className="styled-select"
                                         value={formData.action_type}
-                                        onChange={(e) => setFormData({...formData, action_type: e.target.value})}
+                                        onChange={(e) => setFormData({
+                                            ...formData, 
+                                            action_type: e.target.value,
+                                            action_payload: e.target.value === 'change_status' ? { status: 'interested' } : { template_id: '' }
+                                        })}
                                     >
-                                        <option value="change_status">Actualizar Etapa del CRM (Mover Columna)</option>
+                                        <option value="change_status">Actualizar Etapa del CRM</option>
+                                        <option value="send_template">Enviar Email Automático</option>
+                                        <option value="send_whatsapp">Crear Tarea de WhatsApp</option>
                                     </select>
 
                                     {formData.action_type === 'change_status' && (
-                                        <React.Fragment>
-                                            <span style={{color: '#94a3b8'}}>→</span>
+                                        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                            <span style={{color: '#94a3b8'}}>Mover lead a:</span>
                                             <select 
                                                 className="styled-select"
                                                 value={formData.action_payload.status}
@@ -255,7 +334,23 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                                     <option key={status.value} value={status.value}>{status.label}</option>
                                                 ))}
                                             </select>
-                                        </React.Fragment>
+                                        </div>
+                                    )}
+
+                                    {formData.action_type === 'send_template' && (
+                                        <select 
+                                            className="styled-select"
+                                            value={formData.action_payload.template_id}
+                                            onChange={(e) => setFormData({
+                                                ...formData, 
+                                                action_payload: { template_id: e.target.value }
+                                            })}
+                                        >
+                                            <option value="">-- Seleccionar Plantilla --</option>
+                                            {templates.map(t => (
+                                                <option key={t.id} value={t.id}>{t.nombre || t.name}</option>
+                                            ))}
+                                        </select>
                                     )}
                                 </div>
                             </div>
@@ -321,18 +416,18 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                     </div>
                                     <div className="rule-flow-preview">
                                         <div className="flow-node">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                            <span>Email entra</span>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                                            <span>{getTriggerInfo(rule.trigger_event).label}</span>
                                         </div>
                                         <div className="flow-arrow">→</div>
                                         <div className="flow-node highlight">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z"></path></svg>
-                                            <span>{rule.condition_value?.intent || 'Cualquiera'}</span>
+                                            <span>{rule.condition_type === 'ai_intent' ? rule.condition_value?.intent : (rule.condition_type === 'keyword' ? `"${rule.condition_value?.keyword}"` : 'Siempre')}</span>
                                         </div>
                                         <div className="flow-arrow">→</div>
                                         <div className="flow-node action">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                                            <span>Mover a {rule.action_payload?.status || '?'}</span>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                            <span>{rule.action_type === 'change_status' ? `Mover a ${rule.action_payload?.status}` : (rule.action_type === 'send_template' ? 'Enviar Email' : 'WhatsApp')}</span>
                                         </div>
                                     </div>
                                 </div>

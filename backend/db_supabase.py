@@ -273,6 +273,18 @@ def insertar_empresa(empresa: Dict) -> bool:
         
         if response.data:
             logger.debug(f" Empresa guardada en Supabase: {empresa.get('nombre')}")
+            
+            # Trigger: Lead Saved
+            try:
+                from backend.trigger_service import process_triggers_async
+                # Pasamos el user_id del objeto empresa si lo tiene, o intentamos obtenerlo de algún lado
+                # Nota: El objeto empresa aquí suele venir de un scrape masivo que tiene user_id en el request context
+                user_id = empresa.get('user_id')
+                if user_id:
+                    process_triggers_async(user_id, "lead_saved", lead_data=response.data[0])
+            except Exception as e_trig:
+                logger.error(f"Error lanzando trigger lead_saved: {e_trig}")
+                
             return True
         return False
         
