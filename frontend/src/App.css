@@ -37,8 +37,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #0f172a;
-  /* Fully opaque per user request */
+  background: rgba(15, 23, 42, 0.8);
+  /* Slightly transparent blue overlay */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display: flex;

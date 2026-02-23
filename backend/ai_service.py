@@ -315,7 +315,12 @@ async def filter_leads_by_description(leads_list: List[Dict[str, Any]], descript
         4. If the requirement specifies quality (e.g., "4 stars", "high rated", "5 estrellas"), CHECK THE 'rating' field.
         5. If there is not enough info but it looks promising/relevant, APPROVE it (benefit of doubt).
         6. Be intelligent about "Rubros" vs Description. Example: If user wants "Industrial Factories" and lead is "Small Retails", REJECT.
-        7. IGNORE location criteria (address/city). The search engine handles that. Focus on BUSINESS TYPE, SIZE, and QUALITY/RATING.
+        7. IGNORE location criteria (address/city).
+        
+        OUTPUT FORMAT (Strict JSON Array of Objects):
+        [
+          {"id": "lead_id", "status": "approved" | "rejected", "reason": "Short explanation in Spanish"}
+        ]
         
         LEADS TO ANALYZE:
         {json.dumps(batch_leads, ensure_ascii=False, indent=1)}

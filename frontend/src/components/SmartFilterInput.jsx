@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { FiMic, FiStopCircle, FiTrash2, FiPlay, FiPause, FiFileText, FiArrowRight, FiCheck, FiX, FiRefreshCw, FiRotateCw } from 'react-icons/fi';
 import './SmartFilterInput.css';
 
-const SmartFilterInput = ({ value, onChange, onAudioRecord, onTranscribe, onSearch, onInterpret }) => {
+const SmartFilterInput = ({ value, onChange, onAudioRecord, onTranscribe, onSearch, onInterpret, onConfirm }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
@@ -11,6 +11,7 @@ const SmartFilterInput = ({ value, onChange, onAudioRecord, onTranscribe, onSear
   // Interpretation State
   const [isInterpreting, setIsInterpreting] = useState(false);
   const [interpretation, setInterpretation] = useState(null);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const timerRef = useRef(null);
@@ -22,6 +23,7 @@ const SmartFilterInput = ({ value, onChange, onAudioRecord, onTranscribe, onSear
       
       setIsInterpreting(true);
       setInterpretation(null);
+      setIsConfirmed(false);
       try {
           const result = await onInterpret(text);
           if (result && result.is_clear) {
@@ -280,12 +282,28 @@ const SmartFilterInput = ({ value, onChange, onAudioRecord, onTranscribe, onSear
             )}
 
             {/* AI Interpretation UI */}
-            {(isInterpreting || interpretation) && (
+            {(isInterpreting || interpretation || isConfirmed) && (
                 <div className="interpretation-card">
                     {isInterpreting ? (
                         <div className="ai-thinking">
                             <div className="ai-spinner"></div>
                             <span>Analizando tu solicitud...</span>
+                        </div>
+                    ) : isConfirmed ? (
+                        <div className="interpretation-content confirmed">
+                             <div className="interpretation-text">
+                                <FiCheck style={{ color: '#10b981', marginRight: '8px' }} />
+                                <strong>Filtro inyectado:</strong> El buscador priorizará prospectos que cumplan con estos criterios.
+                            </div>
+                            <div className="interpretation-actions">
+                                <button 
+                                    className="btn-cancel"
+                                    onClick={() => setIsConfirmed(false)}
+                                    title="Editar filtro"
+                                >
+                                    <FiRotateCw />
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <div className="interpretation-content">
@@ -296,22 +314,20 @@ const SmartFilterInput = ({ value, onChange, onAudioRecord, onTranscribe, onSear
                                 <button 
                                     className="btn-confirm"
                                     onClick={() => {
+                                        setIsConfirmed(true);
+                                        if (onConfirm) onConfirm(interpretation);
                                         setInterpretation(null); 
                                     }}
                                     title="Confirmar"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
+                                    <FiCheck />
                                 </button>
                                 <button 
                                     className="btn-cancel"
                                     onClick={() => setInterpretation(null)}
                                     title="Volver a intentar"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/>
-                                    </svg>
+                                    <FiRotateCw />
                                 </button>
                             </div>
                         </div>

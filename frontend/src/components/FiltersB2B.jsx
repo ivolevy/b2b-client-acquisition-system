@@ -151,6 +151,12 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
     }
   };
 
+  const handleConfirmInterpretation = (interpretation) => {
+    if (interpretation && interpretation.interpretation_summary) {
+        success?.(`Filtro IA confirmado: ${interpretation.interpretation_summary}`);
+    }
+  };
+
   const handleInterpret = async (text) => {
     try {
       const response = await axios.post(`${API_URL}/api/ai/interpret`, {
@@ -252,6 +258,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                     onTranscribe={handleTranscribe}
                     onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
                     onInterpret={handleInterpret}
+                    onConfirm={handleConfirmInterpretation}
                   />
                 ) : (
                   <div className="smart-filter-container locked" onClick={() => toastWarning("El Filtro Inteligente está disponible desde el plan Growth. ¡Mejorá tu plan!")}>
@@ -278,6 +285,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                     onTranscribe={handleTranscribe}
                     onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
                     onInterpret={handleInterpret}
+                    onConfirm={handleConfirmInterpretation}
                   />
                 ) : (
                   <div className="smart-filter-container locked" onClick={() => toastWarning("El Filtro Inteligente está disponible desde el plan Growth. ¡Mejorá tu plan!")}>
