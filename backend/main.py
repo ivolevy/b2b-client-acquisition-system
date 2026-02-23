@@ -3106,12 +3106,7 @@ async def admin_update_user_endpoint(request: AdminUpdateUserRequest):
     except Exception as e:
         logger.error(f"Error en /admin/update-user: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+# (Movido el bloque de uvicorn.run al final del archivo)
 
 
 # --- MODULE: COMMUNICATIONS (INBOX) ---
@@ -3559,3 +3554,94 @@ async def chat_with_ai_assistant(req: AIAssistantRequest, request: Request):
     except Exception as e:
         logger.error(f"Error in AI Assistant endpoint: {e}")
         return JSONResponse(status_code=500, content={"detail": str(e)})
+
+# --- AI TRIGGERS ENGINE ---
+class AutomationRuleRequest(BaseModel):
+    name: str
+    trigger_event: str = "email_received"
+    condition_type: str
+    condition_value: Dict[str, Any]
+    action_type: str
+    action_payload: Dict[str, Any]
+    is_active: bool = True
+
+@app.get("/api/automations/rules")
+async def get_automation_rules(request: Request):
+    """Obtiene las reglas de automatización del usuario"""
+    user_id = get_user_id_from_header(request)
+    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    try:
+        from backend.db_supabase import get_supabase_admin
+        admin = get_supabase_admin()
+        res = admin.table("automation_rules").select("*").eq("user_id", user_id).order("created_at", desc=True).execute()
+        return res.data
+    except Exception as e:
+        logger.error(f"Error fetching rules: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.post("/api/automations/rules")
+async def create_automation_rule(req: AutomationRuleRequest, request: Request):
+    """Crea una nueva regla de automatización"""
+    user_id = get_user_id_from_header(request)
+    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    try:
+        from backend.db_supabase import get_supabase_admin
+        admin = get_supabase_admin()
+        data = req.dict()
+        data["user_id"] = user_id
+        res = admin.table("automation_rules").insert(data).execute()
+        return res.data[0]
+    except Exception as e:
+        logger.error(f"Error creating rule: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.put("/api/automations/rules/{rule_id}")
+async def update_automation_rule(rule_id: str, req: AutomationRuleRequest, request: Request):
+    """Actualiza una regla de automatización"""
+    user_id = get_user_id_from_header(request)
+    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    try:
+        from backend.db_supabase import get_supabase_admin
+        admin = get_supabase_admin()
+        data = req.dict()
+        res = admin.table("automation_rules").update(data).eq("id", rule_id).eq("user_id", user_id).execute()
+        # if res.data is empty it could throw IndexError but Supabase update returns updated row
+        return res.data[0] if res.data else {"success": True}
+    except Exception as e:
+        logger.error(f"Error updating rule: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.delete("/api/automations/rules/{rule_id}")
+async def delete_automation_rule(rule_id: str, request: Request):
+    """Elimina una regla de automatización"""
+    user_id = get_user_id_from_header(request)
+    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    try:
+        from backend.db_supabase import get_supabase_admin
+        admin = get_supabase_admin()
+        admin.table("automation_rules").delete().eq("id", rule_id).eq("user_id", user_id).execute()
+        return {"success": True}
+    except Exception as e:
+        logger.error(f"Error deleting rule: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+@app.get("/api/automations/logs")
+async def get_automation_logs(request: Request):
+    """Obtiene el historial de ejecuciones de reglas del usuario"""
+    user_id = get_user_id_from_header(request)
+    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    try:
+        from backend.db_supabase import get_supabase_admin
+        admin = get_supabase_admin()
+        # Try a join, but Supabase SDK joins require the foreign key to be explicitly set or valid
+        # We'll just fetch flat logs to avoid GraphQL issues
+        res = admin.table("automation_logs").select("*").eq("user_id", user_id).order("created_at", desc=True).limit(50).execute()
+        return res.data
+    except Exception as e:
+        logger.error(f"Error fetching logs: {e}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

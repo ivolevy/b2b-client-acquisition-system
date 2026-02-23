@@ -474,5 +474,35 @@ def generate_suggested_reply(messages: List[Dict[str, Any]], lead_data: Optional
         return "Gracias por tu respuesta. ¿Te gustaría que coordinemos una breve llamada para mostrarte cómo podemos ayudarte?"
         
     except Exception as e:
-        logger.error(f"Error generating suggested reply: {e}")
         return "Hola! Muchas gracias por el interés. ¿Te parece si agendamos una demo rápida mañana?"
+
+def classify_email_intent(body: str, allowed_intents: list) -> str:
+    """Clasifica la intención de un correo electrónico entrante usando Gemini"""
+    try:
+        if not allowed_intents:
+            return "UNKNOWN"
+            
+        allowed_str = ", ".join(allowed_intents)
+        prompt = f"""
+        Eres un asistente entrenado para analizar correos entrantes.
+        Lee el siguiente correo y clasifícalo en UNA Y SOLO UNA de las siguientes categorías exactas:
+        [{allowed_str}]
+
+        CORREO:
+        "{body}"
+
+        Responde ÚNICAMENTE con el nombre de la categoría exacta. Si no encaja en ninguna, responde UNKNOWN. No agregues comillas, formato markdown ni texto adicional.
+        """
+        response = call_gemini_with_retry(prompt)
+        if not response: return "UNKNOWN"
+        
+        intent = response.strip().upper()
+        
+        for allowed in allowed_intents:
+            if allowed.upper() in intent:
+                return allowed.upper()
+                
+        return "UNKNOWN"
+    except Exception as e:
+        logger.error(f"Error en classify_email_intent: {e}")
+        return "UNKNOWN"

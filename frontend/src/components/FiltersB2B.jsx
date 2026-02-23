@@ -12,6 +12,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHistory, historySearchData }) {
   const { user } = useAuth();
+  
+  // Plan Logic
+  const plan = user?.plan || 'essential';
+  const isAgency = plan === 'agency' || user?.role === 'admin';
+  const isGrowthOrHigher = ['growth', 'agency'].includes(plan) || user?.role === 'admin';
+
   const [showHistory, setShowHistory] = useState(false);
   
   // Estados para búsqueda
@@ -237,16 +243,24 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
                   </select>
                 </div>
               }
-              smartFilterComponent={
-                <SmartFilterInput 
-                  value={smartFilterText}
-                  onChange={setSmartFilterText}
-                  onAudioRecord={setSmartFilterAudio}
-                  onTranscribe={handleTranscribe}
-                  onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
-                  onInterpret={handleInterpret}
-                />
-              }
+                smartFilterComponent={
+                isGrowthOrHigher ? (
+                  <SmartFilterInput 
+                    value={smartFilterText}
+                    onChange={setSmartFilterText}
+                    onAudioRecord={setSmartFilterAudio}
+                    onTranscribe={handleTranscribe}
+                    onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
+                    onInterpret={handleInterpret}
+                  />
+                ) : (
+                  <div className="smart-filter-container locked" onClick={() => toastWarning("El Filtro Inteligente está disponible desde el plan Growth. ¡Mejorá tu plan!")}>
+                    <div className="smart-filter-trigger-text" style={{ opacity: 0.6, cursor: 'not-allowed', background: '#f1f5f9' }}>
+                        <span className="trigger-label">Filtro Inteligente (IA) 🔒 (Plan Growth)</span>
+                    </div>
+                  </div>
+                )
+                  }
             />
           )}
 
@@ -256,14 +270,22 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
               
 
               <div className="toolbar-group">
-                <SmartFilterInput 
-                  value={smartFilterText}
-                  onChange={setSmartFilterText}
-                  onAudioRecord={setSmartFilterAudio}
-                  onTranscribe={handleTranscribe}
-                  onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
-                  onInterpret={handleInterpret}
-                />
+                {isGrowthOrHigher ? (
+                  <SmartFilterInput 
+                    value={smartFilterText}
+                    onChange={setSmartFilterText}
+                    onAudioRecord={setSmartFilterAudio}
+                    onTranscribe={handleTranscribe}
+                    onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
+                    onInterpret={handleInterpret}
+                  />
+                ) : (
+                  <div className="smart-filter-container locked" onClick={() => toastWarning("El Filtro Inteligente está disponible desde el plan Growth. ¡Mejorá tu plan!")}>
+                    <div className="smart-filter-trigger-text" style={{ opacity: 0.6, cursor: 'not-allowed', background: '#f1f5f9' }}>
+                        <span className="trigger-label">Filtro Inteligente (IA) 🔒 (Plan Growth)</span>
+                    </div>
+                  </div>
+                )}
                 <div className="toolbar-divider" />
                 <div className="search-mode-segment">
                   <button 

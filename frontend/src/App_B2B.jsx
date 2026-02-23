@@ -14,6 +14,7 @@ import ProBackground from './components/ProBackground';
 import OfflineView from './components/OfflineView';
 import Communications from './components/Communications';
 import InsightsDashboard from './components/Insights';
+import Automations from './components/Automations';
 import AIAssistant from './components/AIAssistant';
 import { Fab, Tooltip, Zoom } from '@mui/material';
 import { Face as FaceIcon } from '@mui/icons-material';
@@ -59,6 +60,12 @@ function AppB2B() {
 
   const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
   const { user } = useAuth();
+  
+  // Plan Logic
+  const plan = user?.plan || 'essential';
+  const isAgency = plan === 'agency' || user?.role === 'admin';
+  const isGrowthOrHigher = ['growth', 'agency'].includes(plan) || user?.role === 'admin';
+  
   const loadingIntervalRef = useRef(null);
   const loadingTimeoutRef = useRef(null); 
 
@@ -801,52 +808,105 @@ function AppB2B() {
               <button 
                 type="button"
                 className={view === 'whatsapp' ? 'active' : ''}
-                onClick={() => setView('whatsapp')}
+                onClick={() => {
+                   if (isGrowthOrHigher) {
+                     setView('whatsapp');
+                   } else {
+                     info("El envío por WhatsApp está disponible en el plan Growth.");
+                   }
+                }}
+                style={{ opacity: isGrowthOrHigher ? 1 : 0.6, cursor: isGrowthOrHigher ? 'pointer' : 'not-allowed' }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
                 </svg>
                 WhatsApp
+                {!isGrowthOrHigher && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
               </button>
               <button 
                 type="button"
                 className={view === 'communications' ? 'active' : ''}
-                onClick={() => setView('communications')}
+                onClick={() => {
+                   if (isGrowthOrHigher) {
+                     setView('communications');
+                   } else {
+                     info("El módulo de Leads y CRM está disponible en el plan Growth.");
+                   }
+                }}
+                style={{ opacity: isGrowthOrHigher ? 1 : 0.6, cursor: isGrowthOrHigher ? 'pointer' : 'not-allowed' }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
                 Leads
+                {!isGrowthOrHigher && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
               </button>
               <button 
                 type="button"
                 className={view === 'insights' ? 'active' : ''}
                 onClick={() => {
-                  // Bloqueado temporalmente
-                  info("El módulo de Insights estará disponible próximamente.");
+                  if (false) { // Siempre bloqueado por "Próximamente" por ahora, pero la lógica de plan iría acá
+                     setView('insights');
+                  } else {
+                     if (!isAgency) {
+                        info("Insights disponible exclusivamente en plan Agency.");
+                     } else {
+                        info("El módulo de Insights estará disponible próximamente.");
+                     }
+                  }
                 }}
-                style={{ cursor: 'not-allowed', position: 'relative' }}
+                style={{ cursor: 'not-allowed', position: 'relative', opacity: isAgency ? 1 : 0.6 }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                    <path d="M3 3v18h18"/>
                    <path d="M18 9l-6 6-2-2-4 4"/>
                 </svg>
                 Insights
-                <span style={{ 
-                  fontSize: '10px', 
-                  background: '#e2e8f0', 
-                  color: '#64748b', 
-                  padding: '2px 6px', 
-                  borderRadius: '10px',
-                  fontWeight: '800',
-                  marginLeft: '4px'
-                }}>PRÓXIMAMENTE</span>
+                {!isAgency ? (
+                   <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>
+                ) : (
+                  <span style={{ 
+                    fontSize: '10px', 
+                    background: '#e2e8f0', 
+                    color: '#64748b', 
+                    padding: '2px 6px', 
+                    borderRadius: '10px',
+                    fontWeight: '800',
+                    marginLeft: '4px'
+                  }}>PRÓXIMAMENTE</span>
+                )}
+              </button>
+              <button 
+                type="button"
+                className={view === 'automations' ? 'active' : ''}
+                onClick={() => {
+                  if (isAgency) {
+                     setView('automations');
+                  } else {
+                     info("Las Automatizaciones con IA están disponibles exclusivamente en el plan Agency.");
+                  }
+                }}
+                style={{ opacity: isAgency ? 1 : 0.6, cursor: isAgency ? 'pointer' : 'not-allowed' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                Triggers IA
+                {!isAgency && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
               </button>
             </div>
           </div>
 
           {view === 'insights' && (
              <InsightsDashboard />
+          )}
+
+          {view === 'automations' && (
+             <Automations 
+                toastSuccess={success}
+                toastError={toastError}
+                toastWarning={warning}
+             />
           )}
 
           {view === 'table' && (
@@ -922,8 +982,8 @@ function AppB2B() {
         />
       )}
 
-      {/* Floating AI Assistant Button */}
-      {!isProfilePage && (
+      {/* Floating AI Assistant Button - Solo Growth+ */}
+      {!isProfilePage && isGrowthOrHigher && (
         <Zoom in={true} style={{ transitionDelay: '500ms' }}>
           <Tooltip title="Preguntar a la IA" placement="left">
             <Fab 

@@ -171,40 +171,40 @@ const LandingPage = () => {
     {
       id: 'essential',
       name: 'Essential',
-      description: 'Para freelancers que recién empiezan.',
+      description: 'Empeza a generar oportunidades reales.',
       price: { USD: 49 },
       credits: 1500,
+      leadCount: 'Hasta 900 leads por mes',
       features: [
-        { text: '1,500 Créditos /mes', included: true },
-        { text: 'Búsqueda Avanzada Maps', included: true },
-        { text: 'Enriquecimiento Básico', included: true },
-        { text: 'Validación Emails (Básica)', included: true, highlight: 'warning' },
-        { text: 'Exportación Excel/CSV', included: true },
-        { text: 'Soporte vía Email', included: true },
-        { text: 'Adjuntar Archivos (PDF)', included: false },
-        { text: 'Contacto WhatsApp', included: false },
-        { text: 'Sync CRM', included: false },
+        { text: 'Encuentra leads en tiempo real', included: true },
+        { text: 'Obtén emails y teléfonos', included: true },
+        { text: 'Validación básica de emails', included: true },
+        { text: 'Organiza tus leads en CRM', included: true },
+        { text: 'Exporta a Excel / CSV', included: true },
+        { text: 'Soporte por email', included: true },
+        { text: 'Prueba limitada de IA incluida', included: true },
       ],
-      buttonText: 'Comenzar Ahora',
+      buttonText: 'Comenzar ahora',
       buttonClass: 'btn-secondary',
       popular: false
     },
     {
       id: 'growth',
       name: 'Growth',
-      description: 'El plan ideal para PYMES.',
-      price: { USD: 89 },
+      description: 'El sistema inteligente para convertir conversaciones en ventas.',
+      price: { USD: 129, ARS: 127900 },
       credits: 3000,
+      leadCount: 'Hasta 1.800 leads por mes',
       features: [
-        { text: '3,000 Créditos /mes', included: true },
-        { text: 'Búsqueda Avanzada Maps', included: true },
-        { text: 'Enriquecimiento Full (Web+Redes)', included: true },
-        { text: 'Validación SMTP Real-time', included: true },
-        { text: 'Exportación Google Sheets', included: true },
-        { text: 'Soporte Chat Prioritario', included: true },
-        { text: 'Adjuntar Archivos (PDF)', included: true },
-        { text: 'Contacto WhatsApp (1 Clic)', included: true },
-        { text: 'Sync CRM', included: false },
+        { text: 'Todo lo de Essential, más:', included: true, isHeader: true },
+        { text: 'Enriquecimiento completo (web + redes)', included: true },
+        { text: 'Email Marketing', included: true },
+        { text: 'WhatsApp', included: true },
+        { text: 'Adjunta propuestas en PDF', included: true },
+        { text: 'IA para personalizar cada mensaje', included: true },
+        { text: 'Respuestas automáticas con IA', included: true },
+        { text: 'Clasificación automática de interesados', included: true },
+        { text: 'Soporte prioritario', included: true },
       ],
       buttonText: 'Obtener Growth',
       buttonClass: 'btn-primary',
@@ -213,19 +213,19 @@ const LandingPage = () => {
     {
       id: 'agency',
       name: 'Agency',
-      description: 'Volumen alto para Agencias.',
-      price: { USD: 199 },
+      description: 'Escala campañas y gestiona múltiples clientes.',
+      price: { USD: 299, ARS: 285900 },
       credits: 15000,
+      leadCount: 'Hasta 9.000 leads por mes',
       features: [
-        { text: '15,000 Créditos /mes', included: true },
-        { text: 'Búsqueda Avanzada Maps', included: true },
+        { text: 'Todo lo de Growth, más:', included: true, isHeader: true },
         { text: 'Enriquecimiento Full + Custom', included: true },
-        { text: 'Validación Garantizada', included: true },
-        { text: 'Sync CRM Directo', included: true },
-        { text: 'Soporte WhatsApp Directo', included: true },
-        { text: 'Adjuntar Archivos (PDF)', included: true },
-        { text: 'Contacto WhatsApp Masivo', included: true },
-        { text: 'Acceso API (Beta)', included: true },
+        { text: 'Email Validado con IA', included: true },
+        { text: 'WhatsApp Integrado', included: true },
+        { text: 'Sincronización directa con CRM', included: true },
+        { text: 'Acceso API (beta)', included: true },
+        { text: 'Dashboard de Insights', included: true },
+        { text: 'Soporte directo por WhatsApp', included: true },
       ],
       buttonText: 'Contratar Agency',
       buttonClass: 'btn-secondary',
@@ -235,16 +235,19 @@ const LandingPage = () => {
 
   const getPrice = (plan) => {
     if (currency === 'ARS') {
-      // Dynamic conversion: USD Price * Blue Rate
+      // Use explicit ARS price if available
+      if (plan.price.ARS) {
+         return plan.price.ARS;
+      }
+      
+      // Dynamic conversion for plans without explicit ARS price
       const rawPrice = plan.price.USD * exchangeRate;
       
       // Smart Rounding Logic (Psychological Pricing)
       // 1. Round to nearest 1000 (e.g., 70.315 -> 70.000)
       // 2. Subtract 100 to get the "900" effect (e.g., 69.900)
-      // This is perceived as significantly cheaper by users (Left-Digit Effect)
       let rounded = Math.round(rawPrice / 1000) * 1000;
       
-      // If result is 0 (edge case), return 0 or small fee
       if (rounded === 0) return 900;
       
       return rounded - 100;
@@ -825,14 +828,39 @@ const LandingPage = () => {
                     <span className="period">/{isYearly ? 'mes' : 'mes'}</span>
                   </div>
 
+                  {/* Microcopy for Growth Plan */}
+                  {plan.microcopy && (
+                    <div className="plan-microcopy">
+                      {plan.microcopy}
+                    </div>
+                  )}
+
+                  <div className="plan-limits">
+                    <p className="lead-count">{plan.leadCount}</p>
+                    <p className="credit-count">({plan.credits.toLocaleString()} créditos incluidos)</p>
+                  </div>
+
                   <ul className="plan-features-new">
                     {plan.features.map((feature, idx) => (
-                      <li key={idx} className={!feature.included ? 'disabled' : ''}>
-                        {feature.included ? <FiCheck /> : <FiX style={{ opacity: 0.5 }} />}
-                        {feature.text}
-                      </li>
+                      feature.isHeader ? (
+                        <li key={idx} className="feature-header" style={{ fontWeight: '700', color: 'var(--text-primary)', marginTop: '12px', marginBottom: '8px' }}>
+                          {feature.text}
+                        </li>
+                      ) : (
+                        <li key={idx} className={!feature.included ? 'disabled' : ''}>
+                          {feature.included ? <FiCheck /> : <FiX style={{ opacity: 0.5 }} />}
+                          {feature.text}
+                        </li>
+                      )
                     ))}
                   </ul>
+
+                  {/* Note for Agency Plan */}
+                  {plan.note && (
+                     <div className="plan-note" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '16px', fontStyle: 'italic', lineHeight: '1.4' }}>
+                        {plan.note}
+                     </div>
+                  )}
 
                   <button
                     className={`plan-btn-new ${plan.buttonClass === 'btn-primary' ? 'primary' : 'secondary'}`}

@@ -41,17 +41,25 @@ const DEMO_USERS = [
     id: 'd6da6078-b335-43d3-8e06-4db0fb35fdb9',
     email: 'admin@admin.com',
     password: 'admin123',
-    name: 'Administrador',
+    name: 'Admin Agency',
     role: 'admin',
-    plan: 'starter'
+    plan: 'agency'
   },
   {
-    id: 'user_demo_id',
-    email: 'user@dotasolutions.com',
-    password: 'User2024!',
-    name: 'Usuario',
+    id: 'user_growth_id',
+    email: 'growth@demo.com',
+    password: 'growth123',
+    name: 'Usuario Growth',
     role: 'user',
-    plan: 'pro'
+    plan: 'growth'
+  },
+  {
+    id: 'user_essential_id',
+    email: 'essential@demo.com',
+    password: 'essential123',
+    name: 'Usuario Essential',
+    role: 'user',
+    plan: 'essential'
   }
 ];
 

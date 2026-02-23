@@ -217,6 +217,13 @@ def store_message(user_id: str, conversation_id: str, msg_data: Dict):
 
     admin.table("email_conversations").update(update_data).eq("id", conversation_id).execute()
 
+    if msg_data.get('direction') == 'inbound':
+        try:
+            from backend.trigger_service import process_email_triggers_async
+            process_email_triggers_async(user_id, conversation_id, msg_data)
+        except Exception as trigger_err:
+            logger.error(f"Error launching trigger service: {trigger_err}")
+
 def process_gmail_message(user_id: str, msg_detail: Dict, user_email: str):
     """Procesa un mensaje individual de Gmail y lo guarda en DB"""
     headers = {h['name'].lower(): h['value'] for h in msg_detail['payload']['headers']}

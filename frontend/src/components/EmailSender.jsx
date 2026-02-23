@@ -20,6 +20,11 @@ const ITEMS_PER_PAGE = 10;
 
 const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, toastError, toastWarning, toastInfo }) => {
     const { user } = useAuth();
+    
+    // Plan Logic
+    const plan = user?.plan || 'essential';
+    const isGrowthOrHigher = ['growth', 'agency'].includes(plan) || user?.role === 'admin';
+
     const localToasts = useToast();
     
     // Usar toasts de props si están disponibles, si no los locales
@@ -441,28 +446,44 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                             </div>
 
                             <div className="sidebar-field">
-                                <label className="field-label-small">Adjuntos</label>
-                                <input 
-                                    type="file" 
-                                    multiple 
-                                    onChange={handleFileChange} 
-                                    style={{display: 'none'}} 
-                                    ref={fileInputRef} 
-                                />
-                                <button className="file-upload-trigger" onClick={() => fileInputRef.current.click()}>
-                                    <FiPaperclip /> Adjuntar archivos
-                                </button>
+                                <label className="field-label-small">
+                                    Adjuntos
+                                    {!isGrowthOrHigher && <span style={{fontSize:'0.7em', color:'#64748b', marginLeft:'6px', fontWeight: 400}}>🔒 (Plan Growth)</span>}
+                                </label>
                                 
-                                {files.length > 0 && (
-                                    <div className="files-list">
-                                        {files.map((f, i) => (
-                                            <div key={i} className="file-chip">
-                                                <span>{f.name}</span>
-                                                <button className="file-chip-remove" onClick={() => removeFile(i)}>
-                                                    <FiX />
-                                                </button>
+                                {isGrowthOrHigher ? (
+                                    <>
+                                        <input 
+                                            type="file" 
+                                            multiple 
+                                            onChange={handleFileChange} 
+                                            style={{display: 'none'}} 
+                                            ref={fileInputRef} 
+                                        />
+                                        <button className="file-upload-trigger" onClick={() => fileInputRef.current.click()}>
+                                            <FiPaperclip /> Adjuntar archivos
+                                        </button>
+                                        
+                                        {files.length > 0 && (
+                                            <div className="files-list">
+                                                {files.map((f, i) => (
+                                                    <div key={i} className="file-chip">
+                                                        <span>{f.name}</span>
+                                                        <button className="file-chip-remove" onClick={() => removeFile(i)}>
+                                                            <FiX />
+                                                        </button>
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
+                                        )}
+                                    </>
+                                ) : (
+                                    <div 
+                                        className="file-upload-trigger locked" 
+                                        onClick={() => warning("La subida de archivos está disponible desde el plan Growth.")}
+                                        style={{ opacity: 0.6, cursor: 'not-allowed', background: '#f1f5f9', color: '#94a3b8' }}
+                                    >
+                                        <FiPaperclip /> Adjuntar archivos 🔒
                                     </div>
                                 )}
                             </div>

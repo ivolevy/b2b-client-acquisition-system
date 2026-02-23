@@ -2677,7 +2677,7 @@
 /* Grid */
 .landing-page .pricing-grid-new {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(360px, 1fr));
     gap: 32px;
     align-items: flex-start;
 }
@@ -2907,6 +2907,7 @@
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 8px;
+    font-family: var(--font-body);
 }
 
 .landing-page .plan-header-new p {
@@ -2970,7 +2971,8 @@
     gap: 12px;
     margin-bottom: 14px;
     color: var(--text-secondary);
-    font-size: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
 .landing-page .plan-features-new li svg {
@@ -3556,6 +3558,7 @@
 .footer-link-btn:hover {
     color: var(--primary);
 }
+
 /* --- SALES TEAM AI SECTION --- */
 .sales-team-section {
     padding: 120px 0;
@@ -3635,12 +3638,12 @@
     .sales-team-header h2 {
         font-size: 3rem;
     }
-    
+
     .sales-team-grid {
         grid-template-columns: 1fr;
         gap: 24px;
     }
-    
+
     .sales-pillar {
         padding: 32px;
     }
