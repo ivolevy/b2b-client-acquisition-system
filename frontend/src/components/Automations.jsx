@@ -124,7 +124,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
     };
 
     return (
-        <div className="automations-container unified-results-module fade-in">
+        <div id="automations-root" className="automations-container unified-results-module fade-in">
             <div className="automations-header">
                 <div>
                     <h2>

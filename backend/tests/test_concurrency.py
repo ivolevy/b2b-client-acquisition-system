@@ -28,7 +28,7 @@ def test_credit_deduction_concurrency():
                 "user_id": user_id,
                 "ciudad": "Tester City"
             }
-            client.post("/buscar", json=payload)
+            client.post("/api/buscar", json=payload)
 
         threads = []
         for i in range(5):

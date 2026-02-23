@@ -1,606 +1,264 @@
-.automations-container {
-    padding: var(--spacing-xl) var(--spacing-2xl);
-    color: var(--gray-900);
+/* --- AUTOMATIONS MODULE REBORN (ROBUST EDITION) --- */
+#automations-root {
+    padding: var(--spacing-xl) var(--spacing-2xl) !important;
+    color: var(--gray-900) !important;
 }
 
 /* --- ENCABEZADO MAIN --- */
-.automations-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-2xl);
-    padding-bottom: var(--spacing-xl);
-    border-bottom: 1px solid var(--gray-200);
+#automations-root .automations-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: var(--spacing-2xl) !important;
+    padding-bottom: var(--spacing-xl) !important;
+    border-bottom: 2px solid var(--gray-100) !important;
 }
 
-.automations-header h2 {
-    font-size: 1.75rem;
-    font-weight: 800;
-    margin: 0 0 8px 0;
-    color: var(--gray-900);
-    letter-spacing: -0.02em;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+#automations-root .automations-header h2 {
+    font-size: 1.75rem !important;
+    font-weight: 800 !important;
+    margin: 0 0 8px 0 !important;
+    color: var(--gray-900) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
 }
 
-.automations-header h2 svg {
-    color: var(--primary);
+/* UI BUTTONS */
+#automations-root .btn-primary {
+    background: var(--primary) !important;
+    color: white !important;
+    padding: 12px 24px !important;
+    border-radius: var(--radius-md) !important;
+    font-weight: 700 !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: all 0.2s ease !important;
 }
 
-.automations-header p {
-    color: var(--gray-500);
-    margin: 0;
-    font-size: 0.95rem;
-    max-width: 600px;
-    line-height: 1.5;
+#automations-root .btn-secondary {
+    background: white !important;
+    color: var(--gray-600) !important;
+    padding: 12px 24px !important;
+    border-radius: var(--radius-md) !important;
+    font-weight: 600 !important;
+    border: 1px solid var(--gray-200) !important;
+    cursor: pointer !important;
 }
 
-/* Base button styles */
-.btn-primary {
-    background: var(--gray-900);
-    color: white;
-    padding: 10px 20px;
-    border-radius: var(--radius-lg);
-    font-weight: 600;
-    font-size: 0.95rem;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+/* --- WORKFLOW BUILDER CARD --- */
+#automations-root .rule-form-card {
+    background: #ffffff !important;
+    border-radius: var(--radius-xl) !important;
+    padding: var(--spacing-2xl) !important;
+    box-shadow: var(--shadow-xl) !important;
+    margin-bottom: var(--spacing-2xl) !important;
+    border: 1px solid var(--gray-200) !important;
 }
 
-.btn-primary:hover {
-    background: #000;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+#automations-root .form-header {
+    border-bottom: 1px solid var(--gray-100) !important;
+    padding-bottom: var(--spacing-lg) !important;
+    margin-bottom: var(--spacing-xl) !important;
 }
 
-.btn-primary:active {
-    transform: translateY(0);
+#automations-root .form-header h3 {
+    margin: 0 0 8px 0 !important;
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    color: var(--gray-900) !important;
 }
 
-.btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
+/* --- EL CONSTRUCTOR VISUAL --- */
+#automations-root .workflow-builder {
+    background: #f1f5f9 !important;
+    /* Slate-100 background to pop from white card */
+    border-radius: var(--radius-lg) !important;
+    padding: 40px !important;
+    border: 2px solid var(--gray-200) !important;
+    position: relative !important;
+    margin: 32px 0 !important;
 }
 
-.btn-secondary {
-    background: white;
-    color: var(--gray-700);
-    padding: 10px 20px;
-    border-radius: var(--radius-lg);
-    font-weight: 600;
-    font-size: 0.95rem;
-    border: 1px solid var(--gray-300);
-    cursor: pointer;
-    transition: all 0.2s ease;
+#automations-root .workflow-step {
+    display: flex !important;
+    gap: 24px !important;
+    position: relative !important;
+    z-index: 2 !important;
+    align-items: flex-start !important;
 }
 
-.btn-secondary:hover {
-    background: var(--gray-50);
-    color: var(--gray-900);
-    border-color: var(--gray-400);
+#automations-root .workflow-connector {
+    width: 4px !important;
+    height: 40px !important;
+    background: #cbd5e1 !important;
+    margin-left: 24px !important;
 }
 
-/* --- GRID LAYOUT --- */
-.automations-content {
-    display: grid;
-    grid-template-columns: 1.8fr 1fr;
-    gap: var(--spacing-2xl);
-    align-items: start;
+#automations-root .step-icon {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    color: white !important;
+    box-shadow: var(--shadow-md) !important;
 }
 
-.section-title {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin: 0 0 var(--spacing-lg) 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+#automations-root .step-trigger {
+    background: #3b82f6 !important;
 }
 
-.rules-section,
-.logs-section {
-    display: flex;
-    flex-direction: column;
+#automations-root .step-condition {
+    background: #a855f7 !important;
 }
 
-/* --- RULE FORM CARD (WORKFLOW BUILDER) --- */
-.rule-form-card {
-    background: #ffffff;
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-2xl);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-    margin-bottom: var(--spacing-2xl);
-    border: 1px solid var(--gray-200);
-    animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+#automations-root .step-action {
+    background: #10b981 !important;
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+#automations-root .step-badge {
+    font-size: 0.75rem !important;
+    font-weight: 800 !important;
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    background: #cbd5e1 !important;
+    color: #334155 !important;
+    display: inline-block !important;
+    margin-bottom: 8px !important;
 }
 
-.form-header {
-    border-bottom: 1px solid var(--gray-100);
-    padding-bottom: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
+#automations-root .step-inputs {
+    background: white !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--gray-200) !important;
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
+    margin-top: 12px !important;
 }
 
-.form-header h3 {
-    margin: 0 0 8px 0;
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: var(--gray-900);
+#automations-root select,
+#automations-root input {
+    border: 1px solid var(--gray-300) !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+    background: white !important;
+    color: var(--gray-900) !important;
 }
 
-.form-header p {
-    margin: 0;
-    color: var(--gray-500);
-    font-size: 0.9rem;
+/* --- LIST VIEW --- */
+#automations-root .automations-content {
+    display: grid !important;
+    grid-template-columns: 1.8fr 1fr !important;
+    gap: 40px !important;
+    align-items: start !important;
 }
 
-.form-group {
-    margin-bottom: var(--spacing-xl);
+#automations-root .rule-card {
+    background: white !important;
+    padding: 24px !important;
+    border-radius: var(--radius-xl) !important;
+    border: 1px solid var(--gray-200) !important;
+    box-shadow: var(--shadow-sm) !important;
+    margin-bottom: 20px !important;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: var(--gray-700);
-    font-size: 0.9rem;
+#automations-root .rule-flow-preview {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    background: #f8fafc !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
 }
 
-.app-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid var(--gray-200);
-    border-radius: var(--radius-lg);
-    font-size: 1rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    background: var(--bg-white);
-    color: var(--gray-900);
-    outline: none;
-}
-
-.app-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(44, 82, 130, 0.1);
-}
-
-/* --- WORKFLOW VISUAL BUILDER UI --- */
-.workflow-builder {
-    background: #f8fafc;
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-xl) var(--spacing-2xl);
-    border: 1px solid var(--gray-200);
-    position: relative;
-    margin-bottom: var(--spacing-xl);
-}
-
-.workflow-step {
-    display: flex;
-    gap: 20px;
-    position: relative;
-    z-index: 2;
-}
-
-.workflow-connector {
-    width: 2px;
-    height: 30px;
-    background: var(--gray-300);
-    margin-left: 23px;
-    position: relative;
-    z-index: 1;
-}
-
-.step-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: white;
-    box-shadow: var(--shadow-sm);
-}
-
-.step-trigger {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-
-.step-condition {
-    background: linear-gradient(135deg, #a855f7, #7e22ce);
-}
-
-.step-action {
-    background: linear-gradient(135deg, #10b981, #059669);
-}
-
-.step-content {
-    flex: 1;
-    padding-top: 4px;
-}
-
-.step-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 6px;
-}
-
-.step-badge {
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    padding: 2px 8px;
-    border-radius: 6px;
-    background: var(--gray-200);
-    color: var(--gray-700);
-}
-
-.step-header h4 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--gray-900);
-}
-
-.step-desc {
-    margin: 0 0 12px 0;
-    font-size: 0.85rem;
-    color: var(--gray-500);
-    line-height: 1.4;
-}
-
-.step-inputs {
-    background: white;
-    padding: 12px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--gray-200);
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-}
-
-.styled-select {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--gray-300);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--gray-800);
-    background-color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-    outline: none;
-}
-
-.styled-select:hover {
-    border-color: var(--gray-400);
-}
-
-.styled-select:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: var(--spacing-xl);
-    padding-top: var(--spacing-lg);
-    border-top: 1px solid var(--gray-100);
-}
-
-/* --- RULES LIST CARDS --- */
-.rules-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.rule-card {
-    background: white;
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius-xl);
-    padding: 20px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.rule-card:hover {
-    border-color: var(--gray-300);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
-}
-
-.rule-card.inactive {
-    opacity: 0.6;
-    background: var(--gray-50);
-}
-
-.rule-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.rule-title-wrap {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.rule-title-wrap h4 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--gray-900);
-}
-
-.rule-flow-preview {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--gray-50);
-    padding: 12px 16px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--gray-100);
-    overflow-x: auto;
-}
-
-.flow-node {
+#automations-root .flow-node {
+    background: white !important;
+    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--gray-600);
-    background: white;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--gray-200);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-    white-space: nowrap;
 }
 
-.flow-node svg {
-    color: var(--gray-500);
+#automations-root .flow-node.highlight {
+    background: #fdf4ff !important;
+    border-color: #f0abfc !important;
+    color: #86198f !important;
 }
 
-.flow-node.highlight {
-    background: #fdf4ff;
-    /* light purple */
-    border-color: #f0abfc;
-    color: #86198f;
+#automations-root .flow-node.action {
+    background: #ecfdf5 !important;
+    border-color: #6ee7b7 !important;
+    color: #065f46 !important;
 }
 
-.flow-node.highlight svg {
-    color: #c026d3;
+/* --- LOGS --- */
+#automations-root .log-item {
+    background: white !important;
+    border: 1px solid var(--gray-100) !important;
+    border-left: 5px solid #cbd5e1 !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
 
-.flow-node.action {
-    background: #ecfdf5;
-    /* light green */
-    border-color: #6ee7b7;
-    color: #065f46;
+#automations-root .log-item.status-success {
+    border-left-color: #10b981 !important;
 }
 
-.flow-node.action svg {
-    color: #10b981;
-}
-
-.flow-arrow {
-    color: var(--gray-400);
-    font-weight: bold;
-}
-
-.delete-btn {
-    background: var(--gray-100);
-    color: var(--gray-500);
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.delete-btn:hover {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-/* --- LOGS LIST --- */
-.logs-card {
-    background: white;
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-xl);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-}
-
-.logs-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-height: 500px;
-    overflow-y: auto;
-    padding-right: 8px;
-}
-
-.log-item {
-    background: var(--gray-50);
-    border: 1px solid var(--gray-100);
-    border-left: 4px solid var(--gray-300);
-    border-radius: var(--radius-md);
-    padding: 12px 16px;
-    transition: all 0.2s;
-}
-
-.log-item.status-success {
-    border-left-color: #10b981;
-}
-
-.log-item.status-error {
-    border-left-color: #ef4444;
-}
-
-.log-item:hover {
-    background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.log-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.log-rule-name {
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--gray-800);
-}
-
-.log-time {
-    font-size: 0.75rem;
-    color: var(--gray-500);
-    font-weight: 500;
-}
-
-.log-detail {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
-}
-
-.log-lead {
-    color: var(--gray-600);
-    background: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    border: 1px solid var(--gray-200);
-    font-weight: 500;
-    font-size: 0.8rem;
-}
-
-.log-error-msg {
-    margin-top: 10px;
-    font-size: 0.8rem;
-    color: #b91c1c;
-    background: #fef2f2;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    border: 1px solid #fecaca;
-    font-family: monospace;
-}
-
-.status-badge {
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    font-weight: 700;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.status-success {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.status-error {
-    background: #fee2e2;
-    color: #991b1b;
+#automations-root .log-item.status-error {
+    border-left-color: #ef4444 !important;
 }
 
 /* --- EMPTY STATES --- */
-.automations-empty-state {
-    background: white;
-    border: 2px dashed var(--gray-200);
-    border-radius: var(--radius-xl);
-    padding: 48px 20px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-}
-
-.empty-icon-wrap {
-    width: 64px;
-    height: 64px;
-    background: var(--gray-50);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--gray-400);
-}
-
-.automations-empty-state p {
-    color: var(--gray-500);
-    font-size: 1rem;
-    font-weight: 500;
-    margin: 0;
-    max-width: 250px;
+#automations-root .automations-empty-state {
+    background: white !important;
+    border: 2px dashed #cbd5e1 !important;
+    border-radius: var(--radius-xl) !important;
+    padding: 60px 40px !important;
+    text-align: center !important;
 }
 
 /* --- TOGGLES --- */
-.toggle-switch {
-    position: relative;
-    display: inline-block;
+#automations-root .toggle-switch {
     width: 44px;
     height: 24px;
+    position: relative;
+    display: inline-block;
 }
 
-.toggle-switch input {
+#automations-root .toggle-switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-.slider {
+#automations-root .slider {
     position: absolute;
     cursor: pointer;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--gray-300);
-    transition: .3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    background-color: #e2e8f0;
+    transition: .4s;
     border-radius: 24px;
 }
 
-.slider:before {
+#automations-root .slider:before {
     position: absolute;
     content: "";
     height: 18px;
@@ -608,38 +266,14 @@
     left: 3px;
     bottom: 3px;
     background-color: white;
-    transition: .3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transition: .4s;
     border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-input:checked+.slider {
+#automations-root input:checked+.slider {
     background-color: #10b981;
 }
 
-input:focus+.slider {
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-}
-
-input:checked+.slider:before {
+#automations-root input:checked+.slider:before {
     transform: translateX(20px);
-}
-
-/* Custom Scrollbar for logs list */
-.logs-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.logs-list::-webkit-scrollbar-track {
-    background: var(--gray-50);
-    border-radius: 10px;
-}
-
-.logs-list::-webkit-scrollbar-thumb {
-    background: var(--gray-300);
-    border-radius: 10px;
-}
-
-.logs-list::-webkit-scrollbar-thumb:hover {
-    background: var(--gray-400);
 }

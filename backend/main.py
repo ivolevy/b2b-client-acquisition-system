@@ -1200,9 +1200,9 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                 if rubro_info.get('keywords'):
                     search_queries.extend(rubro_info['keywords'])
             else:
-                search_queries = [f"{rubro_info['nombre']} en {request.ubicacion_nombre}"]
+                search_queries = [f"{rubro_info['nombre']} en {request.busqueda_ubicacion_nombre or request.ciudad or 'su ubicación'}"]
                 if rubro_info.get('keywords'):
-                    search_queries.extend([f"{kw} en {request.ubicacion_nombre}" for kw in rubro_info['keywords']])
+                    search_queries.extend([f"{kw} en {request.busqueda_ubicacion_nombre or request.ciudad or 'su ubicación'}" for kw in rubro_info['keywords']])
             
             # Eliminar duplicados en las queries por si acaso
             search_queries = list(dict.fromkeys(search_queries))
@@ -1300,7 +1300,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         radio_solicitado = request.busqueda_radio_km or 1.0
         radius = min(float(radio_solicitado), 5.0)
         
-        logger.info(f"Iniciando búsqueda: {request.rubro} en {request.ubicacion_nombre} (Radio: {radius}km, Bbox: {bool(request.bbox)})")
+        logger.info(f"Iniciando búsqueda: {request.rubro} en {request.busqueda_ubicacion_nombre or request.ciudad} (Radio: {radius}km, Bbox: {bool(request.bbox)})")
 
         if request.busqueda_centro_lat and request.busqueda_centro_lng:
             logger.info(f" Calculando distancias desde ubicación: {request.busqueda_ubicacion_nombre or 'Sin nombre'}")

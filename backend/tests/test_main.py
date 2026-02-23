@@ -13,7 +13,7 @@ def test_read_root():
 def test_get_rubros():
     with patch("backend.main.listar_rubros_disponibles") as mock_rubros:
         mock_rubros.return_value = ["Restaurantes", "Hoteles"]
-        response = client.get("/rubros")
+        response = client.get("/api/rubros")
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
@@ -47,7 +47,7 @@ def test_auth_status():
         assert response.status_code in [200, 404] # Depending on if user exists in mock
 
 def test_buscar_requires_payload():
-    response = client.post("/buscar", json={})
+    response = client.post("/api/buscar", json={})
     assert response.status_code == 422
 
 def test_buscar_google_success():
@@ -75,7 +75,7 @@ def test_buscar_google_success():
         mock_search.return_value = mock_results
         mock_deduct.return_value = {"success": True, "new_balance": 900}
         
-        response = client.post("/buscar", json=payload)
+        response = client.post("/api/buscar", json=payload)
         
         assert response.status_code == 200
         data = response.json()
