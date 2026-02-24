@@ -158,60 +158,59 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
     };
 
     return (
-        <div id="automations-root" className="automations-container unified-results-module fade-in">
+        <div id="automations-root" className="automations-container fade-in">
             <div className="automations-header">
-                <div>
-                    <h2>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                        </svg>
-                        Triggers y Automatizaciones IA
-                    </h2>
-                    <p>Configura respuestas automáticas y reglas de negocio. Deja que nuestra IA trabaje por ti 24/7 conectando el buscador, el CRM y tu Outbox.</p>
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    Triggers IA
+                </h2>
+                <p>Automatiza tu flujo de ventas con inteligencia artificial. Conecta eventos del buscador, el CRM y tu Outbox sin escribir código.</p>
+                
+                <div className="header-actions">
+                    {!isFormOpen && (
+                        <button className="btn-premium" onClick={() => setIsFormOpen(true)}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Crear Automatización
+                        </button>
+                    )}
                 </div>
-                {!isFormOpen && (
-                    <button className="btn-primary" onClick={() => setIsFormOpen(true)}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Nueva Regla
-                    </button>
-                )}
             </div>
 
             {isFormOpen && (
-                <div className="rule-form-card">
-                    <div className="form-header">
-                        <h3>Crear flujo automatizado</h3>
-                        <p>Define las condiciones necesarias para disparar la acción en tu pipeline.</p>
+                <div className="builder-container">
+                    <div className="builder-title-section">
+                        <h3>Constructor de Flujos</h3>
+                        <p>Diseña paso a paso cómo debe reaccionar el sistema ante nuevos eventos.</p>
                     </div>
-                    
-                    <div className="form-group">
-                        <label>Nombre identificador de la Regla</label>
+
+                    <div className="form-group" style={{maxWidth: '400px', margin: '0 auto 3rem auto'}}>
+                        <label className="node-label">Nombre de la Automatización</label>
                         <input 
                             className="app-input"
                             type="text" 
-                            placeholder="Ej: Auto-reply a pedidos de presupuesto"
+                            placeholder="Ej: Auto-reply a pedidos..."
                             value={formData.name}
                             onChange={(e) => setFormData({...formData, name: e.target.value})}
                         />
                     </div>
 
-                    <div className="workflow-builder">
+                    <div className="builder-steps">
                         {/* STEP 1: TRIGGER */}
-                        <div className="workflow-step">
-                            <div className="step-icon step-trigger">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <div className="step-node">
+                            <div className="node-icon icon-trigger">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
                                 </svg>
                             </div>
-                            <div className="step-content">
-                                <div className="step-header">
-                                    <span className="step-badge">1. CUANDO</span>
-                                    <h4>Seleccionar disparador</h4>
-                                </div>
-                                <div className="step-inputs">
+                            <div className="node-content">
+                                <span className="node-label">1. DISPARADOR (TRIGGER)</span>
+                                <h4>¿Cuándo debe iniciar?</h4>
+                                <div className="node-inputs">
                                     <select 
                                         className="styled-select"
                                         value={formData.trigger_event}
@@ -222,28 +221,26 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                         ))}
                                     </select>
                                 </div>
-                                <p className="step-desc" style={{marginTop: '8px', fontSize: '0.85rem'}}>
+                                <p style={{marginTop: '1rem', color: '#64748b', fontSize: '0.9rem'}}>
                                     {getTriggerInfo(formData.trigger_event).desc}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="workflow-connector"></div>
+                        <div className="step-connector"></div>
 
                         {/* STEP 2: CONDITION */}
-                        <div className="workflow-step">
-                            <div className="step-icon step-condition">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <div className="step-node">
+                            <div className="node-icon icon-condition">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M12 3l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z"></path>
                                     <path d="M19 14l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7z"></path>
                                 </svg>
                             </div>
-                            <div className="step-content">
-                                <div className="step-header">
-                                    <span className="step-badge">2. SI (CONDICIÓN)</span>
-                                    <h4>Regla de filtrado</h4>
-                                </div>
-                                <div className="step-inputs" style={{flexDirection: 'column', gap: '10px'}}>
+                            <div className="node-content">
+                                <span className="node-label">2. FILTRO (CONDITION)</span>
+                                <h4>¿Bajo qué condiciones?</h4>
+                                <div className="node-inputs">
                                     <select 
                                         className="styled-select"
                                         value={formData.condition_type}
@@ -278,7 +275,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                         <input 
                                             className="app-input"
                                             type="text"
-                                            placeholder="Escribe la palabra (ej: presupuesto)"
+                                            placeholder="Palabra... (ej: presupuesto)"
                                             value={formData.condition_value.keyword}
                                             onChange={(e) => setFormData({
                                                 ...formData,
@@ -290,21 +287,19 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                             </div>
                         </div>
 
-                        <div className="workflow-connector"></div>
+                        <div className="step-connector"></div>
 
                         {/* STEP 3: ACTION */}
-                        <div className="workflow-step">
-                            <div className="step-icon step-action">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <div className="step-node">
+                            <div className="node-icon icon-action">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline points="9 18 15 12 9 6"></polyline>
                                 </svg>
                             </div>
-                            <div className="step-content">
-                                <div className="step-header">
-                                    <span className="step-badge">3. ENTONCES (ACCIÓN)</span>
-                                    <h4>Ejecutar comportamiento</h4>
-                                </div>
-                                <div className="step-inputs" style={{flexDirection: 'column', gap: '10px'}}>
+                            <div className="node-content">
+                                <span className="node-label">3. RESPUESTA (ACTION)</span>
+                                <h4>¿Qué acción realizar?</h4>
+                                <div className="node-inputs">
                                     <select 
                                         className="styled-select"
                                         value={formData.action_type}
@@ -314,27 +309,24 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                             action_payload: e.target.value === 'change_status' ? { status: 'interested' } : { template_id: '' }
                                         })}
                                     >
-                                        <option value="change_status">Actualizar Etapa del CRM</option>
-                                        <option value="send_template">Enviar Email Automático</option>
-                                        <option value="send_whatsapp">Crear Tarea de WhatsApp</option>
+                                        <option value="change_status">Mover Etapa del CRM</option>
+                                        <option value="send_template">Enviar Email Plantilla</option>
+                                        <option value="send_whatsapp">WhatsApp (Task)</option>
                                     </select>
 
                                     {formData.action_type === 'change_status' && (
-                                        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                            <span style={{color: '#94a3b8'}}>Mover lead a:</span>
-                                            <select 
-                                                className="styled-select"
-                                                value={formData.action_payload.status}
-                                                onChange={(e) => setFormData({
-                                                    ...formData, 
-                                                    action_payload: { status: e.target.value }
-                                                })}
-                                            >
-                                                {definedStatuses.map(status => (
-                                                    <option key={status.value} value={status.value}>{status.label}</option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                        <select 
+                                            className="styled-select"
+                                            value={formData.action_payload.status}
+                                            onChange={(e) => setFormData({
+                                                ...formData, 
+                                                action_payload: { status: e.target.value }
+                                            })}
+                                        >
+                                            {definedStatuses.map(status => (
+                                                <option key={status.value} value={status.value}>{status.label}</option>
+                                            ))}
+                                        </select>
                                     )}
 
                                     {formData.action_type === 'send_template' && (
@@ -357,10 +349,12 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                         </div>
                     </div>
 
-                    <div className="form-actions">
-                        <button className="btn-secondary" onClick={() => setIsFormOpen(false)}>Cancelar</button>
-                        <button className="btn-primary" onClick={handleSaveRule} disabled={loading}>
-                            {loading ? 'Guardando...' : 'Activar Regla'}
+                    <div style={{marginTop: '4rem', display: 'flex', justifyContent: 'center', gap: '1.5rem'}}>
+                        <button className="btn-secondary" onClick={() => setIsFormOpen(false)} style={{padding: '1rem 2.5rem', borderRadius: '999px', border: 'none', background: '#f1f5f9', fontWeight: '600', cursor: 'pointer'}}>
+                            Descartar
+                        </button>
+                        <button className="btn-premium" onClick={handleSaveRule} disabled={loading}>
+                            {loading ? 'Activando...' : 'Publicar Automatización'}
                         </button>
                     </div>
                 </div>
@@ -368,67 +362,60 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
 
             <div className="automations-content">
                 <div className="rules-section">
-                    <h3 className="section-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="3" y1="9" x2="21" y2="9"></line>
-                            <line x1="9" y1="21" x2="9" y2="9"></line>
-                        </svg>
-                        Reglas Activas
-                    </h3>
+                    <h3 style={{fontFamily: 'var(--font-heading)', fontSize: '2rem', marginBottom: '2rem'}}>Tus Automatizaciones</h3>
                     
-                    {loading && !rules.length ? <p style={{color: '#64748b'}}>Cargando automatizaciones...</p> : null}
+                    {loading && !rules.length ? <p style={{color: '#64748b'}}>Consultando motor de triggers...</p> : null}
                     
                     {!loading && rules.length === 0 ? (
                         <div className="automations-empty-state">
-                            <div className="empty-icon-wrap">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 8 12 12 14 14"></polyline>
-                                </svg>
-                            </div>
-                            <div>
-                                <p>No has configurado ninguna regla de automatización todavía.</p>
-                            </div>
+                            <p style={{fontSize: '1.25rem', color: '#94a3b8', fontStyle: 'italic'}}>No hay procesos activos. Comienza creando uno nuevo arriba.</p>
                         </div>
                     ) : (
-                        <div className="rules-list">
+                        <div className="automations-grid">
                             {rules.map(rule => (
-                                <div key={rule.id} className={`rule-card ${!rule.is_active ? 'inactive' : ''}`}>
-                                    <div className="rule-card-header">
-                                        <div className="rule-title-wrap">
-                                            <h4>{rule.name}</h4>
-                                            <label className="toggle-switch" title={rule.is_active ? "Desactivar" : "Activar"}>
+                                <div key={rule.id} className="premium-rule-card">
+                                    <div className="card-header">
+                                        <div>
+                                            <h3>{rule.name}</h3>
+                                            <span style={{fontSize: '0.8rem', color: '#94a3b8'}}>{rule.is_active ? 'Activa y monitoreando' : 'En pausa'}</span>
+                                        </div>
+                                        <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
+                                            <label className="ios-toggle">
                                                 <input 
                                                     type="checkbox" 
                                                     checked={rule.is_active}
                                                     onChange={() => toggleRuleActive(rule)}
                                                 />
-                                                <span className="slider round"></span>
+                                                <span className="ios-slider"></span>
                                             </label>
+                                            <button 
+                                                onClick={() => handleDeleteRule(rule.id)} 
+                                                style={{background: 'none', border: 'none', color: '#e2e8f0', cursor: 'pointer', padding: '0.5rem'}}
+                                                onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                                                onMouseOut={(e) => e.currentTarget.style.color = '#e2e8f0'}
+                                            >
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                </svg>
+                                            </button>
                                         </div>
-                                        <button className="delete-btn" onClick={() => handleDeleteRule(rule.id)} title="Eliminar regla">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            </svg>
-                                        </button>
                                     </div>
-                                    <div className="rule-flow-preview">
-                                        <div className="flow-node">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-                                            <span>{getTriggerInfo(rule.trigger_event).label}</span>
+
+                                    <div className="visual-flow-summary">
+                                        <div className="flow-pill trigger">{getTriggerInfo(rule.trigger_event).label}</div>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="3"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                        <div className="flow-pill condition">
+                                            {rule.condition_type === 'ai_intent' ? rule.condition_value?.intent : (rule.condition_type === 'keyword' ? `"${rule.condition_value?.keyword}"` : 'Siempre')}
                                         </div>
-                                        <div className="flow-arrow">→</div>
-                                        <div className="flow-node highlight">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z"></path></svg>
-                                            <span>{rule.condition_type === 'ai_intent' ? rule.condition_value?.intent : (rule.condition_type === 'keyword' ? `"${rule.condition_value?.keyword}"` : 'Siempre')}</span>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="3"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                        <div className="flow-pill action">
+                                            {rule.action_type === 'change_status' ? `CRM Stage` : (rule.action_type === 'send_template' ? 'Auto Email' : 'WhatsApp')}
                                         </div>
-                                        <div className="flow-arrow">→</div>
-                                        <div className="flow-node action">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                                            <span>{rule.action_type === 'change_status' ? `Mover a ${rule.action_payload?.status}` : (rule.action_type === 'send_template' ? 'Enviar Email' : 'WhatsApp')}</span>
-                                        </div>
+                                    </div>
+                                    
+                                    <div style={{fontSize: '0.85rem', color: '#64748b'}}>
+                                        {rule.trigger_event === 'email_received' ? 'Detecta intención y responde automáticamente vía email.' : 'Procesa nuevos datos del buscador/CRM en tiempo real.'}
                                     </div>
                                 </div>
                             ))}
@@ -436,38 +423,20 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                     )}
                 </div>
 
-                <div className="logs-section">
-                    <h3 className="section-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                        </svg>
-                        Registro de Ejecuciones
-                    </h3>
+                <div className="logs-sidebar">
+                    <h3 className="logs-title">Monitor en Vivo</h3>
                     
                     {logs.length === 0 ? (
-                        <div className="automations-empty-state">
-                            <div className="empty-icon-wrap">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                                </svg>
-                            </div>
-                            <p>Esperando a que ocurra un evento de automatización.</p>
-                        </div>
+                        <p style={{color: '#64748b', fontStyle: 'italic'}}>Esperando disparadores...</p>
                     ) : (
-                        <div className="logs-list">
-                            {logs.map(log => (
-                                <div key={log.id} className={`log-item status-${log.execution_status}`}>
-                                    <div className="log-header">
-                                        <span className="log-rule-name">{log.automation_rules?.name || 'Regla Desconocida'}</span>
-                                        <span className={`status-badge status-${log.execution_status}`}>
-                                            {log.execution_status === 'success' ? 'Éxito' : 'Error'}
-                                        </span>
-                                    </div>
-                                    <div className="log-time">{new Date(log.created_at).toLocaleString()}</div>
-                                    <div className="log-detail">
-                                        <span className="log-lead">{log.event_payload?.sender || 'Sender desconocido'}</span>
-                                    </div>
-                                    {log.error_message && <div className="log-error-msg">{log.error_message}</div>}
+                        <div className="timeline-container">
+                            {logs.slice(0, 10).map(log => (
+                                <div key={log.id} className={`timeline-item ${log.execution_status === 'success' ? 'success' : 'error'}`}>
+                                    <span className="log-time">{new Date(log.created_at).toLocaleTimeString()}</span>
+                                    <p className="log-msg">
+                                        <strong>{log.automation_rules?.name || 'Regla'}:</strong> {log.execution_status === 'success' ? 'Ejecutada' : 'Fallida'}
+                                    </p>
+                                    <span style={{fontSize: '0.75rem', color: '#4b5563'}}>{log.event_payload?.sender || log.event_payload?.nombre || 'Evento procesado'}</span>
                                 </div>
                             ))}
                         </div>

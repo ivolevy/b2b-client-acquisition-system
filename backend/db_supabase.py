@@ -934,112 +934,54 @@ async def registrar_pago_exitoso(
         
         logger.info(f"PASO 2: Sincronizando usuario {final_user_id} en public.users (is_new_user={is_new_user})")
 
-        # 2. Sincronizar con public.users (UPSERT)
-        # Normalizar plan_id (frontend envía 'pro', backend usa 'growth'/'scale')
-        # Mapeo: starter->starter, pro->growth, agency->scale, credits_XXX->credits
+        # 2 & 3. Sincronizar usuario y registrar pago (ATÓMICO vía RPC)
         normalized_plan = plan_id.lower()
         is_credit_pack = normalized_plan.startswith("credits_")
-        
         if normalized_plan == 'pro': normalized_plan = 'growth'
         if normalized_plan == 'agency': normalized_plan = 'scale'
 
-        upsert_data = {
-            "id": final_user_id,
-            "email": email,
-            "name": name or email.split('@')[0],
-            "phone": phone,
-            "plan": normalized_plan,
-            "subscription_status": "active",
-            "next_credit_reset": (datetime.now() + timedelta(days=30)).date().isoformat(),
-            "updated_at": datetime.now().isoformat()
-        }
-        
-        # Obtener créditos actuales si existe
-        user_res = admin_client.table("users").select("credits, extra_credits").eq("id", final_user_id).execute()
-        current_credits = 0
-        current_extra = 0
-        if user_res.data:
-            current_credits = user_res.data[0].get("credits", 0) or 0
-            current_extra = user_res.data[0].get("extra_credits", 0) or 0
-            
+        credits_to_add = 0
         if is_credit_pack:
             try:
-                # Extraer monto de credits_1000 -> 1000
                 credits_to_add = int(normalized_plan.split('_')[1])
-                logger.info(f"Detectado Pack de Créditos: añadiendo {credits_to_add} créditos a extra_credits")
-                
-                # Para packs, sumamos a extra_credits, NO tocamos credits (mensuales)
-                upsert_data["extra_credits"] = current_extra + credits_to_add
-                # Mantenemos los créditos mensuales actuales
-                upsert_data["credits"] = current_credits
-                
-                # Asegurar que el plan se mantenga (ver abajo)
             except:
-                logger.error(f"Error parseando pack de créditos: {normalized_plan}")
-                upsert_data["credits"] = current_credits
-                upsert_data["extra_credits"] = current_extra
+                logger.error(f'Error parseando pack de créditos: {normalized_plan}')
         else:
-            # Si es un PLAN (subscription), reseteamos los créditos MENSUALES al valor del plan
-            # Y mantenemos los extra_credits
             credits_map = {'starter': 1500, 'growth': 3000, 'scale': 10000}
             credits_to_add = credits_map.get(normalized_plan, 0)
-            upsert_data["credits"] = credits_to_add
-            upsert_data["extra_credits"] = current_extra
-        
-        # Si es pack de créditos, NO cambiar el plan actual del usuario si ya tiene uno
-        # Si no tiene plan (anonymous o nuevo), ponerle 'free' o similar
-        if is_credit_pack:
-            # Obtener plan actual para no sobreescribirlo
-            res_plan = admin_client.table("users").select("plan").eq("id", final_user_id).execute()
-            if res_plan.data and res_plan.data[0].get("plan"):
-                upsert_data["plan"] = res_plan.data[0]["plan"]
-            else:
-                upsert_data["plan"] = "free"
-        
-        try:
-            logger.info(f"Sincronizando public.users para {final_user_id} (Plan: {normalized_plan})")
-            admin_client.table("users").upsert(upsert_data).execute()
-            
-            # --- VERIFICACIÓN DE SEGURIDAD (Verify-After-Write) ---
-            # Consultar inmediatamente si el cambio se aplicó
-            verification = admin_client.table("users").select("plan, credits").eq("id", final_user_id).execute()
-            if verification.data:
-                saved_plan = verification.data[0].get("plan")
-                if saved_plan != normalized_plan and not is_credit_pack: # Si es credit pack, el plan no cambia necesariamente
-                    logger.critical(f"⚠️ ALERTA CRÍTICA: El plan no se actualizó correctamente. Esperado: {normalized_plan}, Actual: {saved_plan}. Reintentando...")
-                    
-                    # Reintento forzado
-                    admin_client.table("users").update({"plan": normalized_plan, "updated_at": datetime.now().isoformat()}).eq("id", final_user_id).execute()
-                    
-                    # Segunda verificación
-                    verif_2 = admin_client.table("users").select("plan").eq("id", final_user_id).execute()
-                    if verif_2.data and verif_2.data[0].get("plan") == normalized_plan:
-                         logger.info("✅ Recuperación exitosa: Plan actualizado en el segundo intento.")
-                    else:
-                         logger.critical(f"❌ ERROR FATAL: No se pudo actualizar el plan tras dos intentos para usuario {final_user_id}")
-            # -----------------------------------------------------
 
-        except Exception as upsert_err:
-            logger.error(f"Error sincronizando perfil en public.users: {upsert_err}")
-            # Continuamos para al menos guardar el pago
-
-        # 3. Registrar Pago
-        payment_record = {
-            "user_id": final_user_id,
-            "user_email": email, # Nuevo campo para persistencia post-borrado
+        payment_data = {
             "amount": float(amount),
+            "currency": "ARS",
             "platform": "mercadopago",
             "external_id": str(external_id),
-            "status": "approved",
-            "plan_id": normalized_plan,
-            "currency": "ARS",
             "payment_method_id": payment_method_id,
             "payment_type_id": payment_type_id,
             "net_amount": float(net_amount) if net_amount is not None else None,
             "fee_details": fee_details
         }
-        
-        admin_client.table("payments").insert(payment_record).execute()
+
+        rpc_res = admin_client.rpc('process_successful_payment', {
+            "p_user_id": final_user_id,
+            "p_email": email,
+            'p_name': name or email.split('@')[0],
+            "p_phone": phone,
+            "p_plan": normalized_plan,
+            "p_credits_to_set": credits_to_add if not is_credit_pack else 0,
+            "p_extra_credits_to_add": credits_to_add if is_credit_pack else 0,
+            "p_is_credit_pack": is_credit_pack,
+            "p_payment_data": payment_data
+        }).execute()
+
+        if not rpc_res.data or not rpc_res.data.get('success'):
+             error_msg = rpc_res.data.get('error') if rpc_res.data else 'Error desconocido en RPC'
+             logger.error(f'❌ ERROR ATÓMICO: Falló process_successful_payment: {error_msg}')
+             if rpc_res.data and rpc_res.data.get('status') == 'already_processed':
+                 logger.info(f'Pago ya procesado anteriormente (idempotencia rpc): {external_id}')
+             else:
+                 return False
+
+        logger.info(f'✅ Pago y usuario procesados atómicamente para {email}')
         
         # 4. Enviar email de confirmación
         logger.info(f"PASO 4: Preparando email de confirmación. is_new_user={is_new_user}")
@@ -1266,44 +1208,28 @@ def get_user_credits(user_id: str) -> Dict:
         return {"credits": 0, "next_reset": None}
 
 def deduct_credits(user_id: str, amount: int) -> Dict:
-    """Deduce créditos del usuario (usando mensuales primero, luego extra)"""
+    """Deduce créditos del usuario de forma atómica usando un procedimiento almacenado"""
     client = get_supabase_admin()
     if not client or not user_id:
         return {"success": False, "error": "No hay cliente o user_id"}
         
     try:
-        # 1. Obtener créditos actuales (Usar admin para asegurar acceso)
-        res = execute_with_retry(lambda c: c.table('users').select('credits, extra_credits').eq('id', user_id), is_admin=True)
-        if not res.data:
-            return {"success": False, "error": "Usuario no encontrado"}
-            
-        user_data = res.data[0]
-        monthly = user_data.get('credits', 0) or 0
-        extra = user_data.get('extra_credits', 0) or 0
+        # Llamar a la función RPC atómica
+        res = client.rpc('atomic_deduct_credits', {
+            "p_user_id": user_id,
+            "p_amount": amount
+        }).execute()
         
-        if (monthly + extra) < amount:
-            return {"success": False, "error": "Créditos insuficientes", "current": monthly + extra}
-            
-        # 2. Descontar con lógica de prioridad (mensuales primero)
-        new_monthly = monthly
-        new_extra = extra
-        
-        if monthly >= amount:
-            new_monthly = monthly - amount
+        if res.data and res.data.get('success'):
+            new_balance = res.data.get('new_balance')
+            logger.info(f"🪙 Créditos deducidos atómicamente para {user_id}: -{amount} (Nuevo: {new_balance})")
+            return {"success": True, "new_balance": new_balance}
         else:
-            # Consumir todos los mensuales y el resto de extra
-            remainder = amount - monthly
-            new_monthly = 0
-            new_extra = extra - remainder
+            error = res.data.get('error') if res.data else "Error desconocido en RPC"
+            balance = res.data.get('balance') if res.data else None
+            logger.warning(f"⚠️ Falló deducción de créditos: {error} (Balance actual: {balance})")
+            return {"success": False, "error": error, "current": balance}
             
-        # 3. Actualizar DB
-        execute_with_retry(lambda c: c.table('users').update({
-            "credits": new_monthly,
-            "extra_credits": new_extra
-        }).eq('id', user_id), is_admin=True)
-        
-        logger.info(f"🪙 Créditos deducidos para {user_id}: -{amount} (M:{monthly}->{new_monthly}, E:{extra}->{new_extra})")
-        return {"success": True, "new_balance": new_monthly + new_extra}
     except Exception as e:
         error_str = str(e).lower()
         if "42501" in error_str or "policy" in error_str:

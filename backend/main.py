@@ -163,10 +163,16 @@ app.add_middleware(
 # Exception handler para HTTPException limpio
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
-    """Maneja HTTPException con headers CORS"""
+    """Maneja HTTPException con formato estandarizado y headers CORS"""
+    logger.warning(f"HTTP Error {exc.status_code} en {request.url.path}: {exc.detail}")
     return JSONResponse(
         status_code=exc.status_code,
-        content={"detail": exc.detail},
+        content={
+            "success": False,
+            "error": exc.detail,
+            "code": f"ERR_HTTP_{exc.status_code}",
+            "path": request.url.path
+        },
         headers={
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "*",
@@ -192,16 +198,25 @@ async def api_cancel_user_plan(user_id: str):
 # Exception handler global para asegurar que CORS siempre se incluya
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Maneja cualquier error no controlado con headers CORS"""
+    """Maneja cualquier error no controlado con formato estandarizado y headers CORS"""
     import traceback
-    logger.error(f"Error fatal: {exc}", exc_info=True)
+    logger.error(f"Error fatal no controlado en {request.url.path}: {exc}", exc_info=True)
     
+    # Determinar si es un error de base de datos para dar un código más específico
+    error_msg = str(exc)
+    code = "ERR_INTERNAL_SERVER"
+    if "supabase" in error_msg.lower() or "db" in error_msg.lower() or "postgrest" in error_msg.lower():
+        code = "ERR_DATABASE_ERROR"
+
     return JSONResponse(
         status_code=500,
         content={
-            "detail": "Error interno del servidor",
-            "error": str(exc),
-            "trace": traceback.format_exc().split('\n')
+            "success": False,
+            "error": "Error interno del servidor",
+            "detail": error_msg,
+            "code": code,
+            "path": request.url.path,
+            "trace": traceback.format_exc().split('\n') if os.getenv("DEBUG") == "true" else None
         },
         headers={
             "Access-Control-Allow-Origin": "*",
@@ -341,15 +356,44 @@ logger = logging.getLogger(__name__)
 async def get_current_admin(request: Request):
     """
     Dependencia para validar que el usuario es admin.
-    Valida la presencia del Bearer token.
+    Valida la presencia del Bearer token y el rol del usuario.
     """
     auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        # Para no bloquear en esta fase de migración si el frontend aún no envía el token
-        # pero registrar la advertencia
-        logger.warning("Falta header de Authorization en endpoint admin")
-        return {"role": "admin"}
-    return {"role": "admin"}
+    if not auth_header or not auth_header.startswith("Bearer "):
+        logger.error("Falta header de Authorization o formato inválido en endpoint admin")
+        raise HTTPException(status_code=401, detail="Header de Authorization faltante o inválido")
+    
+    token = auth_header.split(" ")[1]
+    
+    try:
+        from backend.db_supabase import get_supabase
+        supabase = get_supabase()
+        if not supabase:
+             raise HTTPException(status_code=500, detail="Error de conexión con la base de datos")
+             
+        # Verificar el token con Supabase
+        user_res = supabase.auth.get_user(token)
+        if not user_res or not user_res.user:
+            raise HTTPException(status_code=401, detail="Token inválido o expirado")
+            
+        user_id = user_res.user.id
+        
+        # Consultar el rol del usuario en public.users
+        from backend.db_supabase import get_supabase_admin
+        admin_client = get_supabase_admin()
+        profile_res = admin_client.table('users').select('role').eq('id', user_id).single().execute()
+        
+        if not profile_res.data or profile_res.data.get('role') != 'admin':
+            logger.warning(f"Intento de acceso denegado a admin: {user_res.user.email} (Rol: {profile_res.data.get('role') if profile_res.data else 'N/A'})")
+            raise HTTPException(status_code=403, detail="Acceso denegado: Se requieren privilegios de administrador")
+            
+        return {"role": "admin", "user_id": user_id, "email": user_res.user.email}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error verificando privilegios de admin: {e}")
+        raise HTTPException(status_code=500, detail="Error interno al validar permisos")
 
 class BusquedaRubroRequest(BaseModel):
     rubro: str
@@ -989,8 +1033,7 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
         # Ejecutar todas las queries en paralelo para obtener candidatos
         tasks = []
         for query in search_queries:
-            tasks.append(asyncio.to_thread(
-                google_client.search_all_places,
+            tasks.append(google_client.search_all_places(
                 query=query,
                 rubro_nombre=request.rubro,
                 rubro_key=request.rubro.lower(),
@@ -1218,8 +1261,7 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
             # Ejecutar búsquedas en paralelo para máxima potencia de descubrimiento
             tasks = []
             for q in search_queries:
-                tasks.append(asyncio.to_thread(
-                    google_client.search_all_places,
+                tasks.append(google_client.search_all_places(
                     query=q,
                     rubro_nombre=rubro_info['nombre'],
                     rubro_key=request.rubro,

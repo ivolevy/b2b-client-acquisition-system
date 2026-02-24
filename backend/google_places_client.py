@@ -1,6 +1,7 @@
 import os
-import requests
+import httpx
 import logging
+import asyncio
 from typing import List, Dict, Optional, Any
 import time
 from dotenv import load_dotenv
@@ -57,12 +58,17 @@ class GooglePlacesClient:
         self.COST_PER_ESSENTIAL_CALL = 0.00 # Text Search ID Only es free, Basic es $0.017
         self.BUDGET_LIMIT_USD = 195.00 # Umbral para fallback (de los $200)
 
-    def is_within_budget(self) -> bool:
+    async def is_within_budget(self) -> bool:
         """Verifica si aún queda crédito mensual disponible"""
-        current_spend = get_current_month_usage()
-        return current_spend < self.BUDGET_LIMIT_USD
+        try:
+            # Aunque get_current_month_usage es síncrona, la envolvemos para no bloquear
+            current_spend = await asyncio.to_thread(get_current_month_usage)
+            return current_spend < self.BUDGET_LIMIT_USD
+        except Exception as e:
+            logger.error(f"Error verificando presupuesto: {e}")
+            return True # Por seguridad, permitimos si falla la verificación
 
-    def search_places(
+    async def search_places(
         self, 
         query: str, 
         lat: Optional[float] = None, 
@@ -118,31 +124,34 @@ class GooglePlacesClient:
 
         start_time = time.time()
         try:
-            logger.info(f"Buscando en Google Places: '{query}' | Center: {lat}, {lng}")
-            response = requests.post(self.BASE_URL, headers=headers, json=payload, timeout=30)
+            logger.info(f"Buscando en Google Places (Async): '{query}' | Center: {lat}, {lng}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(self.BASE_URL, headers=headers, json=payload)
+            
             duration_ms = int((time.time() - start_time) * 1000)
             
             if response.status_code != 200:
                 logger.error(f"Error en Google Places API: {response.status_code} - {response.text}")
                 
-                # Log failure
-                log_api_call(
+                # Log failure (No bloqueante)
+                asyncio.create_task(asyncio.to_thread(
+                    log_api_call,
                     provider='google',
                     endpoint='places:searchText',
                     sku='pro',
-                    cost_usd=0, # No cost on error usually
+                    cost_usd=0,
                     status_code=response.status_code,
                     duration_ms=duration_ms,
                     metadata={"query": query, "error": response.text}
-                )
+                ))
                 
                 return {"error": f"API Error {response.status_code}", "places": []}
 
             # 2. Registrar el gasto si la llamada fue exitosa (No bloqueante)
-            try:
-                increment_api_usage(provider='google', sku='pro', cost_usd=self.COST_PER_PRO_CALL)
-            except Exception as e_usage:
-                logger.error(f"Error no-bloqueante incrementando uso: {e_usage}")
+            asyncio.create_task(asyncio.to_thread(
+                increment_api_usage, provider='google', sku='pro', cost_usd=self.COST_PER_PRO_CALL
+            ))
             
             data = response.json()
             places = data.get('places', [])
@@ -150,18 +159,16 @@ class GooglePlacesClient:
             logger.info(f"Google Places éxito: {places_count} resultados encontrados para '{query}'")
             
             # Log success detail (No bloqueante)
-            try:
-                log_api_call(
-                    provider='google',
-                    endpoint='places:searchText',
-                    sku='pro',
-                    cost_usd=self.COST_PER_PRO_CALL,
-                    status_code=200,
-                    duration_ms=duration_ms,
-                    metadata={"query": query, "results_count": places_count}
-                )
-            except Exception as e_log:
-                logger.error(f"Error no-bloqueante registrando log: {e_log}")
+            asyncio.create_task(asyncio.to_thread(
+                log_api_call,
+                provider='google',
+                endpoint='places:searchText',
+                sku='pro',
+                cost_usd=self.COST_PER_PRO_CALL,
+                status_code=200,
+                duration_ms=duration_ms,
+                metadata={"query": query, "results_count": places_count}
+            ))
 
             return data
 
@@ -184,7 +191,7 @@ class GooglePlacesClient:
                 
             return {"error": str(e), "places": []}
 
-    def search_all_places(
+    async def search_all_places(
         self,
         query: str,
         rubro_nombre: str,
@@ -212,7 +219,7 @@ class GooglePlacesClient:
         results_this_area = []
         
         for _ in range(5): # Max 5 páginas de 20 = 100
-            data = self.search_places(
+            data = await self.search_places(
                 query=optimized_query,
                 lat=lat,
                 lng=lng,
@@ -262,7 +269,7 @@ class GooglePlacesClient:
                 if len(all_results) >= max_total_results:
                     break
 
-                sub_results = self.search_all_places(
+                sub_results = await self.search_all_places(
                     query=query,
                     rubro_nombre=rubro_nombre,
                     rubro_key=rubro_key,

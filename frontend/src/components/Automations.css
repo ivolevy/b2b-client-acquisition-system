@@ -1,279 +1,398 @@
-/* --- AUTOMATIONS MODULE REBORN (ROBUST EDITION) --- */
+/* --- AUTOMATIONS MODULE: THE PREMIUM REBIRTH --- */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
 #automations-root {
-    padding: var(--spacing-xl) var(--spacing-2xl) !important;
-    color: var(--gray-900) !important;
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --blur: blur(16px) saturate(180%);
+    --font-heading: 'Instrument Serif', serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
+
+    padding: 2rem 3rem !important;
+    font-family: var(--font-body) !important;
+    min-height: calc(100vh - 80px);
 }
 
-/* --- ENCABEZADO MAIN --- */
+/* --- HEADER --- */
 #automations-root .automations-header {
+    margin-bottom: 3rem !important;
     display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    margin-bottom: var(--spacing-2xl) !important;
-    padding-bottom: var(--spacing-xl) !important;
-    border-bottom: 2px solid var(--gray-100) !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    position: relative !important;
+    padding-bottom: 2rem !important;
+}
+
+#automations-root .automations-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 2px;
 }
 
 #automations-root .automations-header h2 {
-    font-size: 1.75rem !important;
-    font-weight: 800 !important;
-    margin: 0 0 8px 0 !important;
-    color: var(--gray-900) !important;
+    font-family: var(--font-heading) !important;
+    font-size: 3.5rem !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.02em !important;
+    color: #0f172a !important;
+    margin: 0 !important;
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: 1.5rem !important;
 }
 
-/* UI BUTTONS */
-#automations-root .btn-primary {
-    background: var(--primary) !important;
+#automations-root .automations-header h2 svg {
+    width: 40px !important;
+    height: 40px !important;
+    color: var(--primary);
+}
+
+#automations-root .automations-header p {
+    font-size: 1.1rem !important;
+    color: #64748b !important;
+    max-width: 600px !important;
+    margin: 0.5rem 0 0 0 !important;
+}
+
+#automations-root .header-actions {
+    position: absolute !important;
+    right: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+}
+
+/* --- BUTTONS --- */
+#automations-root .btn-premium {
+    background: #0f172a !important;
     color: white !important;
-    padding: 12px 24px !important;
-    border-radius: var(--radius-md) !important;
-    font-weight: 700 !important;
+    padding: 1rem 2rem !important;
+    border-radius: 9999px !important;
+    font-weight: 600 !important;
     border: none !important;
     cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    box-shadow: var(--shadow-md) !important;
-    transition: all 0.2s ease !important;
+    gap: 0.75rem !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1) !important;
 }
 
-#automations-root .btn-secondary {
-    background: white !important;
-    color: var(--gray-600) !important;
-    padding: 12px 24px !important;
-    border-radius: var(--radius-md) !important;
-    font-weight: 600 !important;
-    border: 1px solid var(--gray-200) !important;
-    cursor: pointer !important;
+#automations-root .btn-premium:hover {
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 0 15px 30px rgba(15, 23, 42, 0.2) !important;
+    background: #1e293b !important;
 }
 
-/* --- WORKFLOW BUILDER CARD --- */
-#automations-root .rule-form-card {
-    background: #ffffff !important;
-    border-radius: var(--radius-xl) !important;
-    padding: var(--spacing-2xl) !important;
-    box-shadow: var(--shadow-xl) !important;
-    margin-bottom: var(--spacing-2xl) !important;
-    border: 1px solid var(--gray-200) !important;
+/* --- WORKFLOW BUILDER (THE ZAPIER FEEL) --- */
+#automations-root .builder-container {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--blur) !important;
+    -webkit-backdrop-filter: var(--blur) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 2.5rem !important;
+    padding: 4rem !important;
+    margin-bottom: 4rem !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05) !important;
+    animation: slideUp 0.6s ease-out !important;
 }
 
-#automations-root .form-header {
-    border-bottom: 1px solid var(--gray-100) !important;
-    padding-bottom: var(--spacing-lg) !important;
-    margin-bottom: var(--spacing-xl) !important;
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-#automations-root .form-header h3 {
-    margin: 0 0 8px 0 !important;
-    font-size: 1.5rem !important;
-    font-weight: 800 !important;
-    color: var(--gray-900) !important;
-}
-
-/* --- EL CONSTRUCTOR VISUAL --- */
-#automations-root .workflow-builder {
-    background: #f1f5f9 !important;
-    /* Slate-100 background to pop from white card */
-    border-radius: var(--radius-lg) !important;
-    padding: 40px !important;
-    border: 2px solid var(--gray-200) !important;
-    position: relative !important;
-    margin: 32px 0 !important;
-}
-
-#automations-root .workflow-step {
-    display: flex !important;
-    gap: 24px !important;
-    position: relative !important;
-    z-index: 2 !important;
-    align-items: flex-start !important;
-}
-
-#automations-root .workflow-connector {
-    width: 4px !important;
-    height: 40px !important;
-    background: #cbd5e1 !important;
-    margin-left: 24px !important;
-}
-
-#automations-root .step-icon {
-    width: 52px !important;
-    height: 52px !important;
-    border-radius: 14px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0 !important;
-    color: white !important;
-    box-shadow: var(--shadow-md) !important;
-}
-
-#automations-root .step-trigger {
-    background: #3b82f6 !important;
-}
-
-#automations-root .step-condition {
-    background: #a855f7 !important;
-}
-
-#automations-root .step-action {
-    background: #10b981 !important;
-}
-
-#automations-root .step-badge {
-    font-size: 0.75rem !important;
-    font-weight: 800 !important;
-    padding: 4px 10px !important;
-    border-radius: 6px !important;
-    background: #cbd5e1 !important;
-    color: #334155 !important;
-    display: inline-block !important;
-    margin-bottom: 8px !important;
-}
-
-#automations-root .step-inputs {
-    background: white !important;
-    padding: 16px !important;
-    border-radius: 12px !important;
-    border: 1px solid var(--gray-200) !important;
-    display: flex !important;
-    gap: 12px !important;
-    align-items: center !important;
-    margin-top: 12px !important;
-}
-
-#automations-root select,
-#automations-root input {
-    border: 1px solid var(--gray-300) !important;
-    padding: 12px !important;
-    border-radius: 8px !important;
-    background: white !important;
-    color: var(--gray-900) !important;
-}
-
-/* --- LIST VIEW --- */
-#automations-root .automations-content {
-    display: grid !important;
-    grid-template-columns: 1.8fr 1fr !important;
-    gap: 40px !important;
-    align-items: start !important;
-}
-
-#automations-root .rule-card {
-    background: white !important;
-    padding: 24px !important;
-    border-radius: var(--radius-xl) !important;
-    border: 1px solid var(--gray-200) !important;
-    box-shadow: var(--shadow-sm) !important;
-    margin-bottom: 20px !important;
-}
-
-#automations-root .rule-flow-preview {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-    background: #f8fafc !important;
-    padding: 16px !important;
-    border-radius: 12px !important;
-}
-
-#automations-root .flow-node {
-    background: white !important;
-    padding: 8px 14px !important;
-    border-radius: 8px !important;
-    border: 1px solid #e2e8f0 !important;
-    font-size: 0.85rem !important;
-    font-weight: 700 !important;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-#automations-root .flow-node.highlight {
-    background: #fdf4ff !important;
-    border-color: #f0abfc !important;
-    color: #86198f !important;
-}
-
-#automations-root .flow-node.action {
-    background: #ecfdf5 !important;
-    border-color: #6ee7b7 !important;
-    color: #065f46 !important;
-}
-
-/* --- LOGS --- */
-#automations-root .log-item {
-    background: white !important;
-    border: 1px solid var(--gray-100) !important;
-    border-left: 5px solid #cbd5e1 !important;
-    padding: 16px !important;
-    border-radius: 12px !important;
-    margin-bottom: 12px !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-}
-
-#automations-root .log-item.status-success {
-    border-left-color: #10b981 !important;
-}
-
-#automations-root .log-item.status-error {
-    border-left-color: #ef4444 !important;
-}
-
-/* --- EMPTY STATES --- */
-#automations-root .automations-empty-state {
-    background: white !important;
-    border: 2px dashed #cbd5e1 !important;
-    border-radius: var(--radius-xl) !important;
-    padding: 60px 40px !important;
+#automations-root .builder-title-section {
+    margin-bottom: 3rem !important;
     text-align: center !important;
 }
 
-/* --- TOGGLES --- */
-#automations-root .toggle-switch {
-    width: 44px;
-    height: 24px;
-    position: relative;
-    display: inline-block;
+#automations-root .builder-title-section h3 {
+    font-family: var(--font-heading) !important;
+    font-size: 2.5rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
-#automations-root .toggle-switch input {
+#automations-root .builder-steps {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0 !important;
+    position: relative !important;
+}
+
+#automations-root .step-node {
+    width: 100% !important;
+    max-width: 800px !important;
+    background: white !important;
+    border-radius: 1.5rem !important;
+    padding: 2.5rem !important;
+    border: 1px solid #e2e8f0 !important;
+    display: grid !important;
+    grid-template-columns: 80px 1fr !important;
+    gap: 2rem !important;
+    position: relative !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+}
+
+#automations-root .step-node:hover {
+    border-color: var(--primary) !important;
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.08) !important;
+    transform: scale(1.01) !important;
+}
+
+#automations-root .node-icon {
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 1.25rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+}
+
+#automations-root .icon-trigger {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+}
+
+#automations-root .icon-condition {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+}
+
+#automations-root .icon-action {
+    background: linear-gradient(135deg, #059669, #10b981) !important;
+}
+
+#automations-root .node-content h4 {
+    font-family: var(--font-heading) !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 0.25rem !important;
+    color: #1e293b !important;
+}
+
+#automations-root .node-label {
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    font-size: 0.75rem !important;
+    font-weight: 800 !important;
+    color: #94a3b8 !important;
+    margin-bottom: 0.5rem !important;
+    display: block !important;
+}
+
+#automations-root .node-inputs {
+    margin-top: 1.5rem !important;
+    display: flex !important;
+    gap: 1rem !important;
+    flex-wrap: wrap !important;
+}
+
+#automations-root .app-input,
+#automations-root .styled-select {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 0.875rem 1.25rem !important;
+    border-radius: 0.75rem !important;
+    font-size: 1rem !important;
+    transition: all 0.2s !important;
+    min-width: 200px !important;
+}
+
+#automations-root .app-input:focus,
+#automations-root .styled-select:focus {
+    background: white !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important;
+}
+
+#automations-root .step-connector {
+    width: 3px !important;
+    height: 60px !important;
+    background: linear-gradient(to bottom, var(--primary), #e2e8f0) !important;
+    margin: 0 !important;
+}
+
+/* --- RULE CARDS GRID --- */
+#automations-root .automations-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
+    gap: 2rem !important;
+}
+
+#automations-root .premium-rule-card {
+    background: white !important;
+    border-radius: 2rem !important;
+    padding: 2.5rem !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+#automations-root .premium-rule-card:hover {
+    transform: translateY(-8px) !important;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08) !important;
+}
+
+#automations-root .card-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 2rem !important;
+}
+
+#automations-root .card-header h3 {
+    font-family: var(--font-heading) !important;
+    font-size: 1.5rem !important;
+    color: #1e293b !important;
+}
+
+#automations-root .visual-flow-summary {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    padding: 1.5rem !important;
+    background: #f8fafc !important;
+    border-radius: 1.25rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+#automations-root .flow-pill {
+    padding: 0.5rem 1rem !important;
+    border-radius: 999px !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+#automations-root .flow-pill.trigger {
+    color: #3b82f6;
+}
+
+#automations-root .flow-pill.condition {
+    background: #fdf4ff;
+    border-color: #f0abfc;
+    color: #86198f;
+}
+
+#automations-root .flow-pill.action {
+    background: #ecfdf5;
+    border-color: #6ee7b7;
+    color: #065f46;
+}
+
+/* --- LOGS TIMELINE --- */
+#automations-root .logs-sidebar {
+    background: #0f172a !important;
+    color: #cbd5e1 !important;
+    border-radius: 2rem !important;
+    padding: 2.5rem !important;
+    position: sticky !important;
+    top: 100px !important;
+}
+
+#automations-root .logs-title {
+    font-family: var(--font-heading) !important;
+    font-size: 2rem !important;
+    color: white !important;
+    margin-bottom: 2rem !important;
+}
+
+#automations-root .timeline-item {
+    position: relative !important;
+    padding-left: 2rem !important;
+    padding-bottom: 2rem !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+#automations-root .timeline-item::before {
+    content: '' !important;
+    position: absolute !important;
+    left: -5px !important;
+    top: 5px !important;
+    width: 9px !important;
+    height: 9px !important;
+    border-radius: 50% !important;
+    background: #64748b !important;
+}
+
+#automations-root .timeline-item.success::before {
+    background: #10b981 !important;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5) !important;
+}
+
+#automations-root .timeline-item.error::before {
+    background: #ef4444 !important;
+}
+
+#automations-root .log-time {
+    font-size: 0.75rem !important;
+    color: #64748b !important;
+    display: block !important;
+    margin-bottom: 0.25rem !important;
+}
+
+#automations-root .log-msg {
+    font-size: 0.9rem !important;
+    color: white !important;
+}
+
+/* --- TOGGLE PREMIUM --- */
+#automations-root .ios-toggle {
+    position: relative !important;
+    display: inline-block !important;
+    width: 48px !important;
+    height: 28px !important;
+}
+
+#automations-root .ios-toggle input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-#automations-root .slider {
-    position: absolute;
-    cursor: pointer;
+#automations-root .ios-slider {
+    position: absolute !important;
+    cursor: pointer !important;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background-color: #e2e8f0;
-    transition: .4s;
-    border-radius: 24px;
+    bottom: 0 !important;
+    background-color: #e2e8f0 !important;
+    transition: .4s !important;
+    border-radius: 34px !important;
 }
 
-#automations-root .slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
+#automations-root .ios-slider:before {
+    position: absolute !important;
+    content: "" !important;
+    height: 22px !important;
+    width: 22px !important;
+    left: 3px !important;
+    bottom: 3px !important;
+    background-color: white !important;
+    transition: .4s !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
-#automations-root input:checked+.slider {
-    background-color: #10b981;
+#automations-root input:checked+.ios-slider {
+    background-color: #10b981 !important;
 }
 
-#automations-root input:checked+.slider:before {
-    transform: translateX(20px);
+#automations-root input:checked+.ios-slider:before {
+    transform: translateX(20px) !important;
 }
