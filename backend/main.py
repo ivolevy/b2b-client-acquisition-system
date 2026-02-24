@@ -1999,8 +1999,11 @@ def obtener_email_history(empresa_id=None, template_id=None, limit=100):
 # ========== ENDPOINTS DE EMAIL TEMPLATES ==========
 
 @app.get("/api/templates")
-async def listar_templates(user_id: str, type: Optional[str] = None):
+async def listar_templates(request: Request, type: Optional[str] = None):
     """Lista todos los templates del usuario + defaults"""
+    user_id = get_user_id_from_header(request)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="X-User-ID header missing")
     try:
         templates = db_get_templates(user_id, tipo=type)
         return {

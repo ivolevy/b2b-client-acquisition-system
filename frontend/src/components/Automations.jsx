@@ -79,7 +79,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
             const res = await axios.get(`${API_URL}/api/templates`, {
                 headers: { 'X-User-ID': user.id }
             });
-            if (res.data) setTemplates(res.data);
+            if (res.data && res.data.success) setTemplates(res.data.data);
         } catch (error) {
             console.error("Error fetching templates", error);
         }
@@ -160,13 +160,15 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
     return (
         <div id="automations-root" className="automations-container fade-in">
             <div className="automations-header">
-                <h2>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                    </svg>
-                    Triggers IA
-                </h2>
-                <p>Automatiza tu flujo de ventas con inteligencia artificial. Conecta eventos del buscador, el CRM y tu Outbox sin escribir código.</p>
+                <div className="header-info">
+                    <h2>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                        Triggers IA
+                    </h2>
+                    <p>Automatiza tu flujo de ventas con inteligencia artificial. Conecta eventos del buscador, el CRM y tu Outbox sin escribir código.</p>
+                </div>
                 
                 <div className="header-actions">
                     {!isFormOpen && (
@@ -362,13 +364,13 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
 
             <div className="automations-content">
                 <div className="rules-section">
-                    <h3 style={{fontFamily: 'var(--font-heading)', fontSize: '2rem', marginBottom: '2rem'}}>Tus Automatizaciones</h3>
+                    <h3 className="section-title">Tus Automatizaciones</h3>
                     
-                    {loading && !rules.length ? <p style={{color: '#64748b'}}>Consultando motor de triggers...</p> : null}
+                    {loading && !rules.length ? <p className="text-slate">Consultando motor de triggers...</p> : null}
                     
                     {!loading && rules.length === 0 ? (
                         <div className="automations-empty-state">
-                            <p style={{fontSize: '1.25rem', color: '#94a3b8', fontStyle: 'italic'}}>No hay procesos activos. Comienza creando uno nuevo arriba.</p>
+                            <p className="text-dim italic">No hay procesos activos. Comienza creando uno nuevo arriba.</p>
                         </div>
                     ) : (
                         <div className="automations-grid">
@@ -377,7 +379,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                     <div className="card-header">
                                         <div>
                                             <h3>{rule.name}</h3>
-                                            <span style={{fontSize: '0.8rem', color: '#94a3b8'}}>{rule.is_active ? 'Activa y monitoreando' : 'En pausa'}</span>
+                                            <span className="text-dim">{rule.is_active ? 'Activa y monitoreando' : 'En pausa'}</span>
                                         </div>
                                         <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
                                             <label className="ios-toggle">
@@ -414,7 +416,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                         </div>
                                     </div>
                                     
-                                    <div style={{fontSize: '0.85rem', color: '#64748b'}}>
+                                    <div className="rule-card-desc">
                                         {rule.trigger_event === 'email_received' ? 'Detecta intención y responde automáticamente vía email.' : 'Procesa nuevos datos del buscador/CRM en tiempo real.'}
                                     </div>
                                 </div>
