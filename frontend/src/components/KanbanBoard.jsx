@@ -41,7 +41,6 @@ const KanbanBoard = ({ conversations, onSelectConversation, onDeleteConversation
     handleCloseMenu();
   };
   const columns = [
-    { id: 'open', title: 'Nuevos Leads', color: '#94a3b8' },
     { id: 'waiting_reply', title: 'Seguimiento', color: '#f59e0b' },
     { id: 'interested', title: 'Interesado', color: '#3b82f6' },
     { id: 'not_interested', title: 'Poco Interés', color: '#64748b' },
@@ -157,9 +156,9 @@ const KanbanBoard = ({ conversations, onSelectConversation, onDeleteConversation
         overflowX: 'auto',
         transition: 'all 0.3s ease'
       }}>
-        <Grid container spacing={3} sx={{ minWidth: selectedLead ? '1000px' : '1250px', height: '100%' }}>
+        <Grid container spacing={3} sx={{ height: '100%', pt: 2, px: 1 }}>
           {columns.map(column => (
-            <Grid item sx={{ width: '250px', height: '100%', display: 'flex', flexDirection: 'column' }} key={column.id}>
+            <Grid item xs={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column', minWidth: '250px' }} key={column.id}>
               <Box sx={{
                 mb: 2,
                 display: 'flex',
@@ -195,7 +194,7 @@ const KanbanBoard = ({ conversations, onSelectConversation, onDeleteConversation
                 border: '1px solid rgba(0, 0, 0, 0.08)'
               }}>
                 {conversations
-                  .filter(c => c.status === column.id || (column.id === 'open' && !c.status))
+                  .filter(c => c.status === column.id || (column.id === 'waiting_reply' && !c.status))
                   .map(renderCard)}
               </Box>
             </Grid>

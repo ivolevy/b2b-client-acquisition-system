@@ -90,6 +90,15 @@ const Communications = ({ onOpenAi }) => {
             status: 'interested',
             channel: 'email'
         },
+        {
+            id: 'demo-456',
+            lead_name: 'Julia Martínez (Demo)',
+            lead_email: 'j.martinez@cloudsystems.es',
+            subject: 'Propuesta Comercial',
+            last_message_at: new Date(Date.now() - 172800000).toISOString(),
+            status: 'not_interested',
+            channel: 'email'
+        }
       ];
 
       // Merge ensuring demo leads are at the top and avoiding duplicates
@@ -403,8 +412,14 @@ const Communications = ({ onOpenAi }) => {
             {
                 id: 'm3',
                 direction: 'outbound',
+                sent_at: new Date(Date.now() - 172800000).toISOString(),
+                body_text: "Hola Julia, te escribo para presentarte nuestra solución de Smart Leads. ¿Te interesaría coordinar una breve charla?"
+            },
+            {
+                id: 'm4',
+                direction: 'inbound',
                 sent_at: new Date(Date.now() - 86400000).toISOString(),
-                body_text: "Hola, te escribo para presentarte nuestra solución de Smart Leads. ¿Te interesaría coordinar una breve charla?"
+                body_text: "Hola, por ahora no estamos buscando nuevas herramientas de ventas. Muchas gracias."
             }
         ]);
     }
@@ -710,7 +725,6 @@ const Communications = ({ onOpenAi }) => {
                              <Chip 
                                 icon={<FlagIcon sx={{ fontSize: '0.8rem !important', color: 'inherit !important' }} />}
                                 label={
-                                    selectedConversation.status === 'open' ? 'Nuevos Leads' :
                                     selectedConversation.status === 'waiting_reply' ? 'Seguimiento' :
                                     selectedConversation.status === 'interested' ? 'Interesado' :
                                     selectedConversation.status === 'not_interested' ? 'Poco Interés' : 'Abierto'
@@ -747,10 +761,6 @@ const Communications = ({ onOpenAi }) => {
                                     }
                                 }}
                             >
-                                <MenuItem onClick={() => handleUpdateStatus('open')}>
-                                    <ListItemIcon><NewLeadIcon sx={{ fontSize: '1rem', color: '#94a3b8' }} /></ListItemIcon>
-                                    Nuevos Leads
-                                </MenuItem>
                                 <MenuItem onClick={() => handleUpdateStatus('waiting_reply')}>
                                     <ListItemIcon><WaitIcon sx={{ fontSize: '1rem', color: '#f59e0b' }} /></ListItemIcon>
                                     Seguimiento
