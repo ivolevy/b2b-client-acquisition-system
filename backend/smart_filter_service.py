@@ -42,13 +42,14 @@ async def apply_smart_filter(leads: List[Dict[str, Any]], ideal_client_descripti
                 
                 if ai_decision['status'] == 'approved':
                     approved_leads.append(lead)
+                else:
+                    logger.info(f"❌ Lead RECHAZADO: {lead.get('nombre')} - Motivo: {ai_decision.get('reason')}")
             else:
                 # If AI didn't return a decision (error or skip), we default to keeping it
-                # or we could reject it. Let's keep it to be safe but mark as unchecked.
                 logger.warning(f"No AI decision for lead {lead.get('nombre')}, keeping it.")
                 approved_leads.append(lead)
                 
-        logger.info(f"📉 Smart Filter: {len(leads)} -> {len(approved_leads)} leads.")
+        logger.info(f"📊 Smart Filter Conclusion: {len(leads)} total -> {len(approved_leads)} aprobados.")
         return approved_leads
 
     except Exception as e:

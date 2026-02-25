@@ -162,7 +162,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
             <div className="automations-header">
                 <div className="header-info">
                     <h2>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                         </svg>
                         Triggers IA
@@ -173,11 +173,11 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                 <div className="header-actions">
                     {!isFormOpen && (
                         <button className="btn-premium" onClick={() => setIsFormOpen(true)}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
-                            Crear Automatización
+                            Crear Nuevo Trigger
                         </button>
                     )}
                 </div>
@@ -190,11 +190,12 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                         <p>Diseña paso a paso cómo debe reaccionar el sistema ante nuevos eventos.</p>
                     </div>
 
-                    <div className="form-group" style={{maxWidth: '400px', margin: '0 auto 3rem auto'}}>
+                    <div className="form-group" style={{marginBottom: '3rem'}}>
                         <label className="node-label">Nombre de la Automatización</label>
                         <input 
                             className="app-input"
                             type="text" 
+                            style={{maxWidth: '500px'}}
                             placeholder="Ej: Auto-reply a pedidos..."
                             value={formData.name}
                             onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -223,7 +224,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                         ))}
                                     </select>
                                 </div>
-                                <p style={{marginTop: '1rem', color: '#64748b', fontSize: '0.9rem'}}>
+                                <p className="node-desc">
                                     {getTriggerInfo(formData.trigger_event).desc}
                                 </p>
                             </div>
@@ -352,7 +353,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                     </div>
 
                     <div style={{marginTop: '4rem', display: 'flex', justifyContent: 'center', gap: '1.5rem'}}>
-                        <button className="btn-secondary" onClick={() => setIsFormOpen(false)} style={{padding: '1rem 2.5rem', borderRadius: '999px', border: 'none', background: '#f1f5f9', fontWeight: '600', cursor: 'pointer'}}>
+                        <button className="btn-secondary" onClick={() => setIsFormOpen(false)}>
                             Descartar
                         </button>
                         <button className="btn-premium" onClick={handleSaveRule} disabled={loading}>
@@ -429,7 +430,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                     <h3 className="logs-title">Monitor en Vivo</h3>
                     
                     {logs.length === 0 ? (
-                        <p style={{color: '#64748b', fontStyle: 'italic'}}>Esperando disparadores...</p>
+                        <p className="text-dim italic">Esperando disparadores...</p>
                     ) : (
                         <div className="timeline-container">
                             {logs.slice(0, 10).map(log => (
@@ -438,7 +439,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                     <p className="log-msg">
                                         <strong>{log.automation_rules?.name || 'Regla'}:</strong> {log.execution_status === 'success' ? 'Ejecutada' : 'Fallida'}
                                     </p>
-                                    <span style={{fontSize: '0.75rem', color: '#4b5563'}}>{log.event_payload?.sender || log.event_payload?.nombre || 'Evento procesado'}</span>
+                                    <span className="log-payload">{log.event_payload?.sender || log.event_payload?.nombre || 'Evento procesado'}</span>
                                 </div>
                             ))}
                         </div>

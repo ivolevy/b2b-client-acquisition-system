@@ -1,18 +1,13 @@
 /* --- AUTOMATIONS MODULE: THE PREMIUM REBIRTH --- */
 
 #automations-root {
-    --glass-bg: rgba(255, 255, 255, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.5);
-    --blur: blur(16px) saturate(180%);
-    --font-heading: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-    --font-body: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-
     padding: 2rem 3rem !important;
-    font-family: var(--font-body) !important;
-    min-height: calc(100vh - 80px);
+    min-height: calc(100vh - 140px);
     background: #ffffff !important;
+    color: #0f172a !important;
     border-radius: 0 0 2.5rem 2.5rem !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+    font-family: inherit !important;
 }
 
 #automations-root .automations-content {
@@ -44,6 +39,7 @@
     font-size: 0.85rem !important;
     color: #475569 !important;
     margin-top: 1rem !important;
+    line-height: 1.5 !important;
 }
 
 /* --- HEADER --- */
@@ -58,22 +54,21 @@
 }
 
 #automations-root .automations-header .header-info {
-    max-width: 700px !important;
+    max-width: 800px !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 0.5rem !important;
+    gap: 0.75rem !important;
 }
 
 #automations-root .automations-header h2 {
-    font-family: var(--font-heading) !important;
-    font-size: 3.5rem !important;
-    font-weight: 400 !important;
-    letter-spacing: -0.02em !important;
+    font-size: 2.5rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.04em !important;
     color: #0f172a !important;
     margin: 0 !important;
     display: flex !important;
     align-items: center !important;
-    gap: 1.5rem !important;
+    gap: 1rem !important;
 }
 
 #automations-root .automations-header h2 svg {
@@ -96,37 +91,57 @@
 
 /* --- BUTTONS --- */
 #automations-root .btn-premium {
-    background: #0f172a !important;
+    background: var(--primary) !important;
     color: white !important;
-    padding: 1rem 2rem !important;
-    border-radius: 9999px !important;
+    padding: 0.75rem 1.75rem !important;
+    border-radius: 0.75rem !important;
     font-weight: 600 !important;
     border: none !important;
     cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
     gap: 0.75rem !important;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1) !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
 }
 
 #automations-root .btn-premium:hover {
-    transform: translateY(-3px) scale(1.02) !important;
-    box-shadow: 0 15px 30px rgba(15, 23, 42, 0.2) !important;
-    background: #1e293b !important;
+    background: var(--primary-dark) !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+#automations-root .btn-secondary {
+    padding: 1rem 2.5rem !important;
+    border-radius: 999px !important;
+    border: none !important;
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+#automations-root .btn-secondary:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+#automations-root .node-inputs {
+    margin-top: 1.5rem !important;
+    display: flex !important;
+    gap: 1rem !important;
+    flex-wrap: wrap !important;
 }
 
 /* --- WORKFLOW BUILDER (THE ZAPIER FEEL) --- */
 #automations-root .builder-container {
-    background: var(--glass-bg) !important;
-    backdrop-filter: var(--blur) !important;
-    -webkit-backdrop-filter: var(--blur) !important;
-    border: 1px solid var(--glass-border) !important;
-    border-radius: 2.5rem !important;
-    padding: 3rem !important;
-    margin-bottom: 4rem !important;
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.2) !important;
-    animation: slideUp 0.6s ease-out !important;
+    background: #ffffff !important;
+    border: 1px solid var(--gray-200) !important;
+    border-radius: 2rem !important;
+    padding: 2rem !important;
+    margin-bottom: 3rem !important;
+    box-shadow: var(--shadow-md) !important;
+    animation: slideUp 0.4s ease-out !important;
 }
 
 @keyframes slideUp {
@@ -143,12 +158,11 @@
 
 #automations-root .builder-title-section {
     margin-bottom: 3rem !important;
-    text-align: center !important;
+    text-align: left !important;
 }
 
 #automations-root .builder-title-section h3 {
-    font-family: var(--font-heading) !important;
-    font-size: 2.5rem !important;
+    font-size: 2.25rem !important;
     margin-bottom: 0.5rem !important;
     color: #0f172a !important;
 }
@@ -164,28 +178,26 @@
 #automations-root .step-node {
     width: 100% !important;
     max-width: 800px !important;
-    background: white !important;
-    border-radius: 1.5rem !important;
-    padding: 2.5rem !important;
+    background: #f8fafc !important;
+    border-radius: 1rem !important;
+    padding: 1.5rem 2rem !important;
     border: 1px solid #e2e8f0 !important;
     display: grid !important;
-    grid-template-columns: 80px 1fr !important;
-    gap: 2rem !important;
+    grid-template-columns: 60px 1fr !important;
+    gap: 1.5rem !important;
     position: relative !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+    transition: all 0.2s ease !important;
 }
 
 #automations-root .step-node:hover {
     border-color: var(--primary) !important;
     box-shadow: 0 12px 24px rgba(37, 99, 235, 0.08) !important;
-    transform: scale(1.01) !important;
 }
 
 #automations-root .node-icon {
-    width: 80px !important;
-    height: 80px !important;
-    border-radius: 1.25rem !important;
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 0.75rem !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -193,20 +205,19 @@
 }
 
 #automations-root .icon-trigger {
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    background: #3b82f6 !important;
 }
 
 #automations-root .icon-condition {
-    background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+    background: #7c3aed !important;
 }
 
 #automations-root .icon-action {
-    background: linear-gradient(135deg, #059669, #10b981) !important;
+    background: #10b981 !important;
 }
 
 #automations-root .node-content h4 {
-    font-family: var(--font-heading) !important;
-    font-size: 1.5rem !important;
+    font-size: 1.25rem !important;
     margin-bottom: 0.25rem !important;
     color: #0f172a !important;
 }
@@ -221,11 +232,10 @@
     display: block !important;
 }
 
-#automations-root .node-inputs {
-    margin-top: 1.5rem !important;
-    display: flex !important;
-    gap: 1rem !important;
-    flex-wrap: wrap !important;
+#automations-root .node-desc {
+    margin-top: 1rem !important;
+    color: #64748b !important;
+    font-size: 0.9rem !important;
 }
 
 #automations-root .app-input,
@@ -237,6 +247,7 @@
     font-size: 1rem !important;
     transition: all 0.2s !important;
     min-width: 200px !important;
+    color: #1e293b !important;
 }
 
 #automations-root .app-input:focus,
@@ -247,9 +258,9 @@
 }
 
 #automations-root .step-connector {
-    width: 3px !important;
-    height: 60px !important;
-    background: linear-gradient(to bottom, var(--primary), #e2e8f0) !important;
+    width: 2px !important;
+    height: 40px !important;
+    background: #e2e8f0 !important;
     margin: 0 !important;
 }
 
@@ -261,27 +272,26 @@
 }
 
 #automations-root .section-title {
-    font-family: var(--font-heading) !important;
-    font-size: 2.5rem !important;
+    font-size: 2rem !important;
     margin-bottom: 2rem !important;
     color: #0f172a !important;
 }
 
 #automations-root .premium-rule-card {
     background: #ffffff !important;
-    border-radius: 2rem !important;
-    padding: 2.5rem !important;
+    border-radius: 1.5rem !important;
+    padding: 2rem !important;
     border: 1px solid #e2e8f0 !important;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: all 0.3s ease !important;
     position: relative !important;
     overflow: hidden !important;
     color: #1e293b !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
 }
 
 #automations-root .premium-rule-card:hover {
-    transform: translateY(-8px) !important;
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08) !important;
+    border-color: var(--primary-light) !important;
 }
 
 #automations-root .card-header {
@@ -292,18 +302,17 @@
 }
 
 #automations-root .card-header h3 {
-    font-family: var(--font-heading) !important;
-    font-size: 1.5rem !important;
+    font-size: 1.25rem !important;
     color: #0f172a !important;
 }
 
 #automations-root .visual-flow-summary {
     display: flex !important;
     align-items: center !important;
-    gap: 1rem !important;
-    padding: 1.5rem !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
     background: #f8fafc !important;
-    border-radius: 1.25rem !important;
+    border-radius: 0.75rem !important;
     margin-bottom: 1.5rem !important;
     border: 1px solid #e2e8f0 !important;
 }
@@ -348,8 +357,7 @@
 }
 
 #automations-root .logs-title {
-    font-family: var(--font-heading) !important;
-    font-size: 2rem !important;
+    font-size: 1.5rem !important;
     color: #0f172a !important;
     margin-bottom: 2rem !important;
 }
@@ -391,6 +399,13 @@
 #automations-root .log-msg {
     font-size: 0.9rem !important;
     color: #1e293b !important;
+    margin-bottom: 0.25rem !important;
+}
+
+#automations-root .log-payload {
+    font-size: 0.75rem !important;
+    color: #64748b !important;
+    opacity: 0.8 !important;
 }
 
 /* --- TOGGLE PREMIUM --- */
@@ -426,10 +441,10 @@
     width: 22px !important;
     left: 3px !important;
     bottom: 3px !important;
-    background-color: white !important;
+    background-color: #ffffff !important;
     transition: .4s !important;
     border-radius: 50% !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
 #automations-root input:checked+.ios-slider {

@@ -287,7 +287,9 @@ async def filter_leads_by_description(leads_list: List[Dict[str, Any]], descript
             "address": lead.get("direccion", ""),
             "rating": lead.get("rating", "N/A"),
             "reviews": lead.get("user_ratings_total", 0),
-            "scraped_summary": lead.get("resumen_ia", "") or lead.get("descripcion_web", "")
+            "website_title": lead.get("website_title", ""),
+            "website_description": lead.get("website_description", ""),
+            "website_content_snippet": lead.get("website_content", "")[:800]
         })
 
     all_results = []
@@ -309,17 +311,17 @@ async def filter_leads_by_description(leads_list: List[Dict[str, Any]], descript
         USER REQUIREMENT: "{description}"
         
         INSTRUCTIONS:
-        1. Analyze each lead below.
+        1. Analyze each lead based on its name, category, and especially its website information (title, description, and content snippet).
         2. Determine if it matches the User Requirement.
-        3. Be STRICT. If a lead clearly contradicts the requirement, REJECT it. 
-        4. If the requirement specifies quality (e.g., "4 stars", "high rated", "5 estrellas"), CHECK THE 'rating' field.
-        5. If there is not enough info but it looks promising/relevant, APPROVE it (benefit of doubt).
-        6. Be intelligent about "Rubros" vs Description. Example: If user wants "Industrial Factories" and lead is "Small Retails", REJECT.
+        3. Be STRICT but intelligent. If the requirement specifies a niche (e.g., "logistics", "software factories"), reject generic or unrelated businesses.
+        4. If the requirement specifies quality or size (e.g., "4 stars", "high rated", "large company"), use available fields like 'rating', 'reviews' and content context.
+        5. If there is not enough info but the lead's category or name strongly suggests a match, APPROVE it (benefit of doubt).
+        6. REJECT clearly irrelevant leads (e.g., user wants "Schools" and lead is a "Gym").
         7. IGNORE location criteria (address/city).
         
         OUTPUT FORMAT (Strict JSON Array of Objects):
         [
-          {"id": "lead_id", "status": "approved" | "rejected", "reason": "Short explanation in Spanish"}
+          {{"id": "lead_id", "status": "approved" | "rejected", "reason": "Short explanation in Spanish explaining why it matches or not based on the data"}}
         ]
         
         LEADS TO ANALYZE:
