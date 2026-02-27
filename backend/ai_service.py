@@ -111,11 +111,11 @@ def get_ai_assistant_response(query: str, context_data: str) -> str:
         prompt = f"""
         1. Sos una IA de soporte para Smart Leads. Tus respuestas deben ser elegantes, útiles y profesionales.
         Smart Leads tiene 3 planes:
-        • Essential: $49 USD / mes (1.500 créditos)
-        • Growth: $89 USD / mes (3.000 créditos)
-        • Agency: $199 USD / mes (15.000 créditos)
+        • Essential: $49 USD / ~$58.900 ARS (1.500 créditos)
+        • Growth: $129 USD / $127.900 ARS (3.000 créditos)
+        • Agency: $299 USD / $285.900 ARS (15.000 créditos)
         
-        Si el usuario pregunta por precios en ARS (Pesos Argentinos), mentioná que el precio se calcula dinámicamente al valor del Dólar Blue del día.
+        Si el usuario pregunta por precios en ARS (Pesos Argentinos), mentioná que para el plan Essential el precio se calcula dinámicamente al valor del Dólar Blue del día (~$1200), mientras que Growth y Agency tienen precios fijos preferenciales.
         
         Si el usuario necesita más ayuda, quiere contactar a un administrador o tiene problemas técnicos, debés proporcionarle los datos de contacto de Ivan Levy de forma clara:
         
@@ -460,7 +460,7 @@ def generate_suggested_reply(messages: List[Dict[str, Any]], lead_data: Optional
         CONOCIMIENTO DE PRODUCTO (Smart Leads):
         - Somos un motor de captación de clientes B2B hiper-segmentado.
         - Usamos IA para encontrar leads en Google Maps y contactarlos por Email/WhatsApp.
-        - Planes: Essential ($49/ms - 1500 cred), Growth ($89/ms - 3000 cred), Agency ($199/ms - 15000 cred).
+        - Planes: Essential ($49 USD / ~$58.900 ARS - 1500 cred), Growth ($129 USD / $127.900 ARS - 3000 cred), Agency ($299 USD / $285.900 ARS - 15000 cred).
         - Conversión: El objetivo es llevar al lead a una reunión o demostrar el valor del sistema.
 
         HISTORIAL:

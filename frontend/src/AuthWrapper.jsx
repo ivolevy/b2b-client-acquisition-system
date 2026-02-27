@@ -31,6 +31,7 @@ const PaymentPage = lazy(() => import('./components/PaymentPage'));
 const CheckoutPage = lazy(() => import('./components/CheckoutPage'));
 const PaymentSuccessPage = lazy(() => import('./components/PaymentSuccessPage'));
 const SetPassword = lazy(() => import('./components/SetPassword'));
+const Support = lazy(() => import('./components/Support'));
 import LandingSkeleton from './components/LandingSkeleton'; // Eager load for instant feedback
 
 
@@ -423,6 +424,15 @@ const AuthWrapper = () => {
                       </main>
                     </div>
                   } />
+                  <Route path="/support" element={
+                    <div className="app pro-theme">
+                      <ProBackground />
+                      <Navbar />
+                      <main className="main-content">
+                        <Support />
+                      </main>
+                    </div>
+                  } />
                   <Route path="*" element={<Navigate to="/profile" replace />} />
                 </>
               ) : (
@@ -433,6 +443,15 @@ const AuthWrapper = () => {
                       <Navbar />
                       <main className="main-content">
                         <UserProfile />
+                      </main>
+                    </div>
+                  } />
+                  <Route path="/support" element={
+                    <div className="app pro-theme">
+                      <ProBackground />
+                      <Navbar />
+                      <main className="main-content">
+                        <Support />
                       </main>
                     </div>
                   } />

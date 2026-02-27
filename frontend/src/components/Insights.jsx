@@ -63,14 +63,8 @@ const InsightsDashboard = () => {
     { label: 'Total Leads', value: data?.kpis?.total_leads || 0, icon: <BarChartIcon />, color: 'var(--primary)', bg: 'var(--primary-light)' },
   ];
 
-  const funnelStages = [
-    { id: 'open', label: 'Nuevos', count: data?.funnel?.open || 0, color: 'var(--gray-400)' },
-    { id: 'waiting_reply', label: 'Seguimiento', count: data?.funnel?.waiting_reply || 0, color: 'var(--warning)' },
-    { id: 'interested', label: 'Interesados', count: data?.funnel?.interested || 0, color: 'var(--primary)' },
-    { id: 'converted', label: 'Éxitos', count: data?.funnel?.converted || 0, color: 'var(--success)' },
-  ];
-
-  const maxCount = Math.max(...funnelStages.map(s => s.count), 1);
+  const intentStats = data?.intents || [];
+  const maxIntentCount = Math.max(...intentStats.map(i => i.count), 1);
 
   return (
     <div id="insights-root">
@@ -114,24 +108,31 @@ const InsightsDashboard = () => {
         <Grid item xs={12} lg={7}>
           <div className="section-card">
             <h3 className="section-title">
-              <TimelineIcon sx={{ color: 'var(--primary)' }} /> Embudo de Conversión
+              <SparklesIcon sx={{ color: 'var(--primary)' }} /> Análisis de Intenciones IA
             </h3>
+            <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+              Distribución de las intenciones detectadas por la IA en tus conversaciones.
+            </p>
             
             <div className="funnel-container">
-              {funnelStages.map((stage) => (
-                <div key={stage.id} className="funnel-step">
+              {intentStats.length > 0 ? intentStats.map((item) => (
+                <div key={item.id} className="funnel-step">
                   <div className="funnel-step-header">
-                    <div className="funnel-label">{stage.label}</div>
-                    <div className="funnel-count">{stage.count} leads</div>
+                    <div className="funnel-label">{item.label}</div>
+                    <div className="funnel-count">{item.count} ejecuciones</div>
                   </div>
                   <div className="funnel-bar-bg">
                     <div className="funnel-bar-fill" style={{ 
-                      width: `${(stage.count / maxCount) * 100}%`,
-                      backgroundColor: stage.color 
+                      width: `${(item.count / maxIntentCount) * 100}%`,
+                      backgroundColor: 'var(--primary)'
                     }} />
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-placeholder)', fontStyle: 'italic', fontSize: '0.85rem' }}>
+                  No hay datos suficientes para el análisis de intenciones aún.
+                </div>
+              )}
             </div>
           </div>
         </Grid>
@@ -177,7 +178,7 @@ const InsightsDashboard = () => {
             </h3>
 
             <div className="activity-feed">
-              {data?.activity?.map((msg) => (
+              {data?.activity?.slice(0, 3).map((msg) => (
                 <div key={msg.id} className="activity-item">
                   <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                     <Avatar sx={{ 

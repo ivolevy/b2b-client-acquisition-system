@@ -3237,12 +3237,50 @@ async def get_communications_stats(request: Request):
             .limit(10)\
             .execute()
 
-        # 4. Cálculo de Conversión
+        # 4. Análisis de Intenciones IA (Más valor: basado en Triggers)
+        intent_stats = []
+        try:
+            # Traer reglas que tienen condición de intención
+            rules_res = admin.table("automation_rules")\
+                .select("id, name, condition_value")\
+                .eq("user_id", user_id)\
+                .eq("condition_type", "ai_intent")\
+                .execute()
+            
+            if rules_res.data:
+                rule_ids = [r['id'] for r in rules_res.data]
+                # Contar ejecuciones exitosas por regla
+                logs_res = admin.table("automation_logs")\
+                    .select("rule_id")\
+                    .eq("execution_status", "success")\
+                    .in_("rule_id", rule_ids)\
+                    .execute()
+                
+                counts = {}
+                for l in (logs_res.data or []):
+                    rid = l['rule_id']
+                    counts[rid] = counts.get(rid, 0) + 1
+                
+                for r in rules_res.data:
+                    intent_label = r['condition_value'].get('intent', 'Desconocido') if isinstance(r['condition_value'], dict) else 'Desconocido'
+                    intent_stats.append({
+                        "id": r['id'],
+                        "label": r['name'] or intent_label,
+                        "intent": intent_label,
+                        "count": counts.get(r['id'], 0)
+                    })
+                # Ordenar por los más frecuentes
+                intent_stats = sorted(intent_stats, key=lambda x: x['count'], reverse=True)
+        except Exception as e:
+            logger.error(f"Error calculating intent stats: {e}")
+
+        # 5. Cálculo de Conversión
         total_leads = sum(status_counts.values())
         conversion_rate = round((status_counts["converted"] / total_leads * 100), 1) if total_leads > 0 else 0
         
         return {
             "funnel": status_counts,
+            "intents": intent_stats,
             "activity": recent_messages.data or [],
             "radar": forgotten_leads.data or [],
             "kpis": {

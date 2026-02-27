@@ -1,7 +1,7 @@
 /* --- AUTOMATIONS MODULE: THE PREMIUM REBIRTH --- */
 
 #automations-root {
-    padding: 2rem 3rem !important;
+    padding: 1.5rem 2rem !important;
     min-height: calc(100vh - 140px);
     background: #ffffff !important;
     color: #0f172a !important;
@@ -61,14 +61,14 @@
 }
 
 #automations-root .automations-header h2 {
-    font-size: 2.5rem !important;
+    font-size: 1.75rem !important;
     font-weight: 800 !important;
     letter-spacing: -0.04em !important;
     color: #0f172a !important;
     margin: 0 !important;
     display: flex !important;
     align-items: center !important;
-    gap: 1rem !important;
+    gap: 0.75rem !important;
 }
 
 #automations-root .automations-header h2 svg {
@@ -242,11 +242,12 @@
 #automations-root .styled-select {
     background: #f8fafc !important;
     border: 1px solid #e2e8f0 !important;
-    padding: 0.875rem 1.25rem !important;
+    padding: 0.75rem 1rem !important;
+    /* Slightly smaller inputs */
     border-radius: 0.75rem !important;
-    font-size: 1rem !important;
+    font-size: 0.95rem !important;
     transition: all 0.2s !important;
-    min-width: 200px !important;
+    min-width: 180px !important;
     color: #1e293b !important;
 }
 
@@ -267,20 +268,20 @@
 /* --- RULE CARDS GRID --- */
 #automations-root .automations-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
-    gap: 2rem !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+    gap: 1.5rem !important;
 }
 
 #automations-root .section-title {
-    font-size: 2rem !important;
-    margin-bottom: 2rem !important;
+    font-size: 1.25rem !important;
+    margin-bottom: 1rem !important;
     color: #0f172a !important;
 }
 
 #automations-root .premium-rule-card {
     background: #ffffff !important;
-    border-radius: 1.5rem !important;
-    padding: 2rem !important;
+    border-radius: 1rem !important;
+    padding: 1.5rem !important;
     border: 1px solid #e2e8f0 !important;
     transition: all 0.3s ease !important;
     position: relative !important;
@@ -302,28 +303,34 @@
 }
 
 #automations-root .card-header h3 {
-    font-size: 1.25rem !important;
+    font-size: 1.1rem !important;
+    /* Smaller card title */
+    font-weight: 700 !important;
     color: #0f172a !important;
+    margin-bottom: 0.1rem !important;
 }
 
 #automations-root .visual-flow-summary {
     display: flex !important;
     align-items: center !important;
-    gap: 0.75rem !important;
-    padding: 1rem !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    padding: 0.75rem !important;
     background: #f8fafc !important;
     border-radius: 0.75rem !important;
-    margin-bottom: 1.5rem !important;
+    margin-bottom: 1rem !important;
     border: 1px solid #e2e8f0 !important;
 }
 
 #automations-root .flow-pill {
-    padding: 0.5rem 1rem !important;
+    padding: 0.35rem 0.75rem !important;
     border-radius: 999px !important;
-    font-size: 0.8rem !important;
+    font-size: 0.7rem !important;
     font-weight: 700 !important;
     background: white !important;
     border: 1px solid #e2e8f0 !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
 }
 
 #automations-root .flow-pill.trigger {
@@ -347,26 +354,32 @@
     background: #ffffff !important;
     color: #1e293b !important;
     border-radius: 2rem !important;
-    padding: 2.5rem !important;
+    padding: 2rem !important;
+    /* Reduced padding */
     border: 1px solid #e2e8f0 !important;
     position: sticky !important;
     top: 100px !important;
-    width: 350px !important;
-    min-height: 400px !important;
+    width: 280px !important;
+    /* Reduced width from 350px */
+    max-height: 500px !important;
+    overflow-y: auto !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
 }
 
 #automations-root .logs-title {
-    font-size: 1.5rem !important;
+    font-size: 1.25rem !important;
+    /* Smaller title */
     color: #0f172a !important;
-    margin-bottom: 2rem !important;
+    margin-bottom: 1.5rem !important;
 }
 
 #automations-root .timeline-item {
     position: relative !important;
-    padding-left: 2rem !important;
-    padding-bottom: 2rem !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding-left: 1.5rem !important;
+    /* Reduced from 2rem */
+    padding-bottom: 1.25rem !important;
+    /* Reduced from 2rem */
+    border-left: 1px solid #f1f5f9 !important;
 }
 
 #automations-root .timeline-item::before {
