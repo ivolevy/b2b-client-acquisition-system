@@ -4,6 +4,7 @@ import {
   Avatar, Chip, Divider, Stack, CircularProgress, 
   Tooltip, useTheme
 } from '@mui/material';
+import { useAuth } from '../context/AuthContext';
 import { 
   BarChart as BarChartIcon,
   Timeline as TimelineIcon,
@@ -18,19 +19,28 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import { API_URL } from '../config';
+import './Insights.css';
 
 const InsightsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (user?.id) {
+      fetchStats();
+    }
+  }, [user?.id]);
 
   const fetchStats = async () => {
+    if (!user?.id) return;
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/api/communications/stats`);
+      const response = await axios.get(`${API_URL}/api/communications/stats`, {
+        headers: {
+          'X-User-ID': user.id
+        }
+      });
       setData(response.data);
     } catch (err) {
       console.error('Error fetching insights:', err);
@@ -42,81 +52,59 @@ const InsightsDashboard = () => {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: '400px' }}>
-        <CircularProgress size={40} sx={{ color: '#3b82f6' }} />
+        <CircularProgress size={30} sx={{ color: 'var(--primary)' }} />
       </Box>
     );
   }
 
   const kpis = [
-    { label: 'Conversión', value: `${data?.kpis?.conversion_rate || 0}%`, icon: <TrendingUpIcon />, color: '#10b981', bg: '#d1fae5' },
-    { label: 'Leads Calientes', value: data?.kpis?.hot_leads || 0, icon: <FlashIcon />, color: '#f59e0b', bg: '#fef3c7' },
-    { label: 'Total Leads', value: data?.kpis?.total_leads || 0, icon: <BarChartIcon />, color: '#3b82f6', bg: '#d1fae5' },
+    { label: 'Conversión', value: `${data?.kpis?.conversion_rate || 0}%`, icon: <TrendingUpIcon />, color: 'var(--success)', bg: '#f0fdf4' },
+    { label: 'Leads Calientes', value: data?.kpis?.hot_leads || 0, icon: <FlashIcon />, color: 'var(--warning)', bg: '#fffbeb' },
+    { label: 'Total Leads', value: data?.kpis?.total_leads || 0, icon: <BarChartIcon />, color: 'var(--primary)', bg: 'var(--primary-light)' },
   ];
 
   const funnelStages = [
-    { id: 'open', label: 'Nuevos', count: data?.funnel?.open || 0, color: '#94a3b8' },
-    { id: 'waiting_reply', label: 'Seguimiento', count: data?.funnel?.waiting_reply || 0, color: '#f59e0b' },
-    { id: 'interested', label: 'Interesados', count: data?.funnel?.interested || 0, color: '#3b82f6' },
-    { id: 'converted', label: 'Éxitos', count: data?.funnel?.converted || 0, color: '#10b981' },
+    { id: 'open', label: 'Nuevos', count: data?.funnel?.open || 0, color: 'var(--gray-400)' },
+    { id: 'waiting_reply', label: 'Seguimiento', count: data?.funnel?.waiting_reply || 0, color: 'var(--warning)' },
+    { id: 'interested', label: 'Interesados', count: data?.funnel?.interested || 0, color: 'var(--primary)' },
+    { id: 'converted', label: 'Éxitos', count: data?.funnel?.converted || 0, color: 'var(--success)' },
   ];
 
   const maxCount = Math.max(...funnelStages.map(s => s.count), 1);
 
   return (
-    <Box sx={{ p: 4, height: '100%', overflowY: 'auto', bgcolor: '#f8fafc' }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', mb: 1 }}>
-            Insights
-          </Typography>
-          <Typography sx={{ color: '#64748b' }}>
-            Tu torre de control para la captación de clientes.
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+    <div id="insights-root">
+      <header className="insights-header">
+        <div className="header-info">
+          <h2>
+            <TimelineIcon /> Insights
+          </h2>
+          <p>Tu torre de control para la captación de clientes.</p>
+        </div>
+        <div className="header-actions">
           <Chip 
-            label="PRÓXIMAMENTE" 
-            sx={{ bgcolor: '#f1f5f9', color: '#64748b', fontWeight: 800, fontSize: '10px', height: '24px' }} 
-          />
-          <Chip 
-            icon={<SparklesIcon sx={{ fontSize: '1rem !important' }} />} 
+            icon={<SparklesIcon sx={{ fontSize: '0.9rem !important' }} />} 
             label="Impulsado por IA" 
-            sx={{ bgcolor: '#e0f2fe', color: '#3b82f6', fontWeight: 700, borderRadius: '8px' }} 
+            sx={{ bgcolor: 'var(--primary-light)', color: 'var(--primary)', fontWeight: 700, borderRadius: '8px', height: '28px', fontSize: '0.75rem' }} 
           />
-        </Box>
-      </Box>
+        </div>
+      </header>
 
       {/* KPI Cards */}
-      <Grid container spacing={3} sx={{ mb: 5 }}>
+      <Grid container spacing={3} className="kpi-grid">
         {kpis.map((kpi, idx) => (
           <Grid item xs={12} md={4} key={idx}>
-            <Card sx={{ 
-              borderRadius: '24px', 
-              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-              border: '1px solid rgba(0,0,0,0.05)',
-              overflow: 'visible',
-              transition: 'transform 0.3s ease',
-              '&:hover': { transform: 'translateY(-5px)' }
-            }}>
-              <CardContent sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
-                <Box sx={{ 
-                  width: 56, 
-                  height: 56, 
-                  borderRadius: '16px', 
-                  bgcolor: kpi.bg, 
-                  color: kpi.color,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+            <div className="premium-kpi-card">
+              <div className="kpi-header">
+                <div className="kpi-icon-wrapper" style={{ backgroundColor: kpi.bg, color: kpi.color }}>
                   {React.cloneElement(kpi.icon, { sx: { fontSize: '2rem' } })}
-                </Box>
-                <Box>
-                  <Typography sx={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>{kpi.label}</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a' }}>{kpi.value}</Typography>
-                </Box>
-              </CardContent>
-            </Card>
+                </div>
+              </div>
+              <div>
+                <div className="kpi-label">{kpi.label}</div>
+                <div className="kpi-value">{kpi.value}</div>
+              </div>
+            </div>
           </Grid>
         ))}
       </Grid>
@@ -124,128 +112,103 @@ const InsightsDashboard = () => {
       <Grid container spacing={4}>
         {/* Funnel Section */}
         <Grid item xs={12} lg={7}>
-          <Paper sx={{ p: 4, borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', height: '100%' }}>
-            <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <TimelineIcon sx={{ color: '#3b82f6' }} />
-              <Typography variant="h6" sx={{ fontWeight: 800 }}>Embudo de Conversión</Typography>
-            </Box>
+          <div className="section-card">
+            <h3 className="section-title">
+              <TimelineIcon sx={{ color: 'var(--primary)' }} /> Embudo de Conversión
+            </h3>
             
-            <Stack spacing={3}>
+            <div className="funnel-container">
               {funnelStages.map((stage) => (
-                <Box key={stage.id}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, alignItems: 'center' }}>
-                    <Typography sx={{ fontWeight: 700, color: '#334155', fontSize: '0.9rem' }}>{stage.label}</Typography>
-                    <Typography sx={{ fontWeight: 800, color: '#0f172a' }}>{stage.count} leads</Typography>
-                  </Box>
-                  <Box sx={{ width: '100%', height: '12px', bgcolor: '#f1f5f9', borderRadius: '6px', position: 'relative', overflow: 'hidden' }}>
-                    <Box sx={{ 
-                      width: `${(stage.count / maxCount) * 100}%`, 
-                      height: '100%', 
-                      bgcolor: stage.color, 
-                      borderRadius: '6px',
-                      transition: 'width 1s ease-in-out'
+                <div key={stage.id} className="funnel-step">
+                  <div className="funnel-step-header">
+                    <div className="funnel-label">{stage.label}</div>
+                    <div className="funnel-count">{stage.count} leads</div>
+                  </div>
+                  <div className="funnel-bar-bg">
+                    <div className="funnel-bar-fill" style={{ 
+                      width: `${(stage.count / maxCount) * 100}%`,
+                      backgroundColor: stage.color 
                     }} />
-                  </Box>
-                </Box>
+                  </div>
+                </div>
               ))}
-            </Stack>
-          </Paper>
+            </div>
+          </div>
         </Grid>
 
         {/* Radar: Forgotten Leads */}
         <Grid item xs={12} lg={5}>
-          <Paper sx={{ p: 4, borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', height: '100%' }}>
-            <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <RadarIcon sx={{ color: '#ef4444' }} />
-              <Typography variant="h6" sx={{ fontWeight: 800 }}>Radar de Atención</Typography>
-            </Box>
-            <Typography sx={{ color: '#64748b', fontSize: '0.85rem', mb: 3 }}>
+          <div className="section-card">
+            <h3 className="section-title">
+              <RadarIcon sx={{ color: '#ef4444' }} /> Radar de Atención
+            </h3>
+            <p style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem', marginBottom: '1.5rem' }}>
               Leads interesados sin respuesta hace más de 3 días. ¡No los pierdas!
-            </Typography>
+            </p>
 
-            <Stack spacing={2}>
+            <div className="radar-list">
               {data?.radar?.length > 0 ? data.radar.map((lead) => (
-                <Box key={lead.id} sx={{ 
-                  p: 2, 
-                  bgcolor: '#fff', 
-                  borderRadius: '16px', 
-                  border: '1px solid rgba(0,0,0,0.05)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  '&:hover': { bgcolor: '#f8fafc' }
-                }}>
-                  <Box>
-                    <Typography sx={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}>{lead.lead_name}</Typography>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8' }}>Último: {new Date(lead.last_message_at).toLocaleDateString()}</Typography>
-                  </Box>
-                  <ArrowIcon sx={{ fontSize: '0.8rem', color: '#cbd5e1' }} />
-                </Box>
+                <div key={lead.id} className="radar-item">
+                  <Avatar sx={{ bgcolor: 'var(--gray-200)', color: 'var(--primary)', width: 32, height: 32, fontSize: '0.85rem' }}>
+                    {lead.lead_name?.charAt(0) || 'L'}
+                  </Avatar>
+                  <div className="radar-item-info">
+                    <span className="radar-item-name">{lead.lead_name}</span>
+                    <span className="radar-item-sub">
+                      Sin respuesta hace {Math.floor((new Date() - new Date(lead.last_message_at)) / (1000 * 60 * 60 * 24))} días
+                    </span>
+                  </div>
+                  <span className="urgent-badge">Urgente</span>
+                </div>
               )) : (
-                <Box sx={{ py: 4, textAlign: 'center' }}>
-                  <Typography sx={{ color: '#94a3b8', fontStyle: 'italic' }}>¡Todo al día!</Typography>
-                </Box>
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-placeholder)', fontStyle: 'italic', fontSize: '0.85rem' }}>
+                  ¡Todo al día! No hay leads olvidados.
+                </div>
               )}
-            </Stack>
-          </Paper>
+            </div>
+          </div>
         </Grid>
 
         {/* Recent Activity */}
         <Grid item xs={12}>
-          <Paper sx={{ p: 4, borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
-            <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <TimelineIcon sx={{ color: '#8b5cf6' }} />
-              <Typography variant="h6" sx={{ fontWeight: 800 }}>Actividad Reciente</Typography>
-            </Box>
+          <div className="section-card">
+            <h3 className="section-title">
+              <FlashIcon sx={{ color: '#8b5cf6' }} /> Actividad Reciente
+            </h3>
 
-            <Stack spacing={0}>
-              {data?.activity?.map((msg, idx) => (
-                <Box key={msg.id} sx={{ 
-                  py: 2, 
-                  display: 'flex', 
-                  gap: 3, 
-                  alignItems: 'flex-start',
-                  position: 'relative',
-                  '&:not(:last-child):after': {
-                    content: '""',
-                    position: 'absolute',
-                    left: '20px',
-                    top: '40px',
-                    bottom: '-10px',
-                    width: '2px',
-                    bgcolor: '#f1f5f9',
-                    zIndex: 0
-                  }
-                }}>
-                  <Avatar sx={{ 
-                    width: 40, 
-                    height: 40, 
-                    bgcolor: msg.direction === 'inbound' ? '#e0f2fe' : '#f1f5f9',
-                    color: msg.direction === 'inbound' ? '#3b82f6' : '#64748b',
-                    zIndex: 1
-                  }}>
-                    {msg.channel === 'whatsapp' ? <WhatsAppIcon fontSize="small" /> : <EmailIcon fontSize="small" />}
-                  </Avatar>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography sx={{ fontWeight: 700, color: '#334155', fontSize: '0.95rem' }}>
-                        {msg.direction === 'inbound' ? msg.email_conversations?.lead_name : 'Tú'}
-                      </Typography>
-                      <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                        {new Date(msg.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </Typography>
-                    </Box>
-                    <Typography sx={{ color: '#64748b', fontSize: '0.85rem' }}>
-                      {msg.snippet || "Sin vista previa"}
-                    </Typography>
-                  </Box>
-                </Box>
+            <div className="activity-feed">
+              {data?.activity?.map((msg) => (
+                <div key={msg.id} className="activity-item">
+                  <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                    <Avatar sx={{ 
+                      width: 32, 
+                      height: 32, 
+                      bgcolor: msg.direction === 'inbound' ? 'var(--primary-light)' : 'var(--gray-100)',
+                      color: msg.direction === 'inbound' ? 'var(--primary)' : 'var(--text-tertiary)'
+                    }}>
+                      {msg.channel === 'whatsapp' ? <WhatsAppIcon fontSize="small" /> : <EmailIcon fontSize="small" />}
+                    </Avatar>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span className="activity-user">
+                          {msg.direction === 'inbound' ? (msg.email_conversations?.lead_name || "Lead") : 'Tú'}
+                        </span>
+                        <span className="activity-time">
+                          {new Date(msg.sent_at).toLocaleDateString()} {new Date(msg.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <p className="activity-msg">
+                        {msg.snippet || "Sin vista previa"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </Stack>
-          </Paper>
+            </div>
+          </div>
         </Grid>
       </Grid>
-    </Box>
+    </div>
   );
 };
 

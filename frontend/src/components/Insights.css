@@ -1,0 +1,256 @@
+/* --- INSIGHTS MODULE: PREMIUM ANALYTICS --- */
+
+#insights-root {
+    padding: 2rem 1.5rem !important;
+    /* Slightly reduced horizontal padding */
+    min-height: calc(100vh - 140px);
+    background: #ffffff !important;
+    color: var(--text-primary) !important;
+    border-radius: 0 0 2.5rem 2.5rem !important;
+    box-shadow: var(--shadow-sm) !important;
+    font-family: inherit !important;
+}
+
+/* --- HEADER --- */
+#insights-root .insights-header {
+    margin-bottom: 2rem !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    position: relative !important;
+}
+
+#insights-root .header-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+}
+
+#insights-root .insights-header h2 {
+    font-size: 1.75rem !important;
+    /* Reduced from 2.5rem */
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    color: var(--text-primary) !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+#insights-root .insights-header h2 svg {
+    width: 28px !important;
+    height: 28px !important;
+    color: var(--primary);
+}
+
+#insights-root .insights-header p {
+    font-size: 0.95rem !important;
+    /* Reduced from 1.1rem */
+    color: var(--text-secondary) !important;
+    margin: 0 !important;
+}
+
+/* --- KPI CARDS --- */
+#insights-root .kpi-grid {
+    margin-bottom: 2rem !important;
+}
+
+#insights-root .premium-kpi-card {
+    background: #ffffff !important;
+    border-radius: 1.25rem !important;
+    /* Slightly smaller radius */
+    padding: 1.25rem !important;
+    border: 1px solid var(--gray-200) !important;
+    transition: all 0.2s ease !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+}
+
+#insights-root .premium-kpi-card:hover {
+    box-shadow: var(--shadow-md) !important;
+    transform: translateY(-2px) !important;
+    border-color: var(--primary);
+}
+
+#insights-root .kpi-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+#insights-root .kpi-icon-wrapper {
+    width: 40px !important;
+    /* Reduced from 48px */
+    height: 40px !important;
+    border-radius: 0.75rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#insights-root .kpi-icon-wrapper svg {
+    font-size: 1.25rem !important;
+}
+
+#insights-root .kpi-value {
+    font-size: 1.75rem !important;
+    /* Reduced from 2rem */
+    font-weight: 800 !important;
+    color: var(--text-primary) !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+
+#insights-root .kpi-label {
+    font-size: 0.75rem !important;
+    /* Reduced from 0.875rem */
+    font-weight: 700 !important;
+    color: var(--text-tertiary) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* --- SECTIONS --- */
+#insights-root .section-card {
+    background: #ffffff !important;
+    border-radius: 1.5rem !important;
+    padding: 1.5rem !important;
+    /* Reduced from 2rem */
+    border: 1px solid var(--gray-200) !important;
+    height: 100% !important;
+}
+
+#insights-root .section-title {
+    font-size: 1.1rem !important;
+    /* Reduced from 1.25rem */
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 1.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+}
+
+/* --- FUNNEL --- */
+#insights-root .funnel-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.25rem !important;
+}
+
+#insights-root .funnel-step {
+    display: flex !important;
+    flex-direction: column !important;
+    /* Changed to stacked for better mobile-like feel or compact rows */
+    gap: 0.5rem !important;
+}
+
+#insights-root .funnel-step-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+#insights-root .funnel-label {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: var(--text-secondary) !important;
+}
+
+#insights-root .funnel-bar-bg {
+    width: 100% !important;
+    height: 10px !important;
+    /* Thinner bars */
+    background: var(--gray-100) !important;
+    border-radius: var(--radius-pill) !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+#insights-root .funnel-bar-fill {
+    height: 100% !important;
+    background: var(--primary) !important;
+    border-radius: var(--radius-pill) !important;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#insights-root .funnel-count {
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    color: var(--text-primary) !important;
+}
+
+/* --- ACTIVITY FEED --- */
+#insights-root .activity-item {
+    padding: 0.875rem 0 !important;
+    border-bottom: 1px solid var(--gray-100) !important;
+}
+
+#insights-root .activity-item:last-child {
+    border-bottom: none !important;
+}
+
+#insights-root .activity-user {
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    font-size: 0.9rem !important;
+}
+
+#insights-root .activity-msg {
+    color: var(--text-tertiary) !important;
+    font-size: 0.8rem !important;
+    margin: 0.15rem 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+#insights-root .activity-time {
+    font-size: 0.7rem !important;
+    color: var(--text-placeholder) !important;
+}
+
+/* --- RADAR --- */
+#insights-root .radar-item {
+    background: var(--gray-50) !important;
+    border: 1px solid var(--gray-200) !important;
+    border-radius: 1rem !important;
+    padding: 0.75rem 1rem !important;
+    margin-bottom: 0.75rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+#insights-root .radar-item-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+#insights-root .radar-item-name {
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    font-size: 0.85rem !important;
+    display: block !important;
+}
+
+#insights-root .radar-item-sub {
+    font-size: 0.75rem !important;
+    color: var(--text-tertiary) !important;
+    display: block !important;
+}
+
+#insights-root .urgent-badge {
+    background: var(--danger) !important;
+    color: white !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    flex-shrink: 0 !important;
+}

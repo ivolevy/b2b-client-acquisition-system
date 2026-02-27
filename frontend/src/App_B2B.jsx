@@ -844,37 +844,15 @@ function AppB2B() {
               <button 
                 type="button"
                 className={view === 'insights' ? 'active' : ''}
-                onClick={() => {
-                  if (false) { // Siempre bloqueado por "Próximamente" por ahora, pero la lógica de plan iría acá
-                     setView('insights');
-                  } else {
-                     if (!isAgency) {
-                        info("Insights disponible exclusivamente en plan Agency.");
-                     } else {
-                        info("El módulo de Insights estará disponible próximamente.");
-                     }
-                  }
-                }}
-                style={{ cursor: 'not-allowed', position: 'relative', opacity: isAgency ? 1 : 0.6 }}
+                onClick={() => setView('insights')}
+                style={{ opacity: isAgency ? 1 : 0.6 }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                    <path d="M3 3v18h18"/>
                    <path d="M18 9l-6 6-2-2-4 4"/>
                 </svg>
                 Insights
-                {!isAgency ? (
-                   <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>
-                ) : (
-                  <span style={{ 
-                    fontSize: '10px', 
-                    background: '#e2e8f0', 
-                    color: '#64748b', 
-                    padding: '2px 6px', 
-                    borderRadius: '10px',
-                    fontWeight: '800',
-                    marginLeft: '4px'
-                  }}>PRÓXIMAMENTE</span>
-                )}
+                {!isAgency && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
               </button>
               <button 
                 type="button"
