@@ -915,16 +915,30 @@ const LandingPage = () => {
            <div className="contact-simple-content">
               <h2>¿Tenés dudas? Hablemos.</h2>
               <div className="contact-links-row">
-                  <a href="mailto:solutionsdota@gmail.com" className="contact-link-item">
+                  <div 
+                      className="contact-link-item" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => {
+                          navigator.clipboard.writeText('solutionsdota@gmail.com');
+                          alert('Email copiado: solutionsdota@gmail.com');
+                      }}
+                  >
                       <div className="icon-box"><FiMail /></div>
                       <span>solutionsdota@gmail.com</span>
-                  </a>
+                  </div>
                   <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
                       <span style={{fontSize:'0.85rem', marginBottom:'8px', fontWeight:'600', color:'var(--text-secondary)'}}>Ivan Levy - CTO</span>
-                      <a href="mailto:ivo.levy03@gmail.com" className="contact-link-item">
+                      <div 
+                          className="contact-link-item" 
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => {
+                              navigator.clipboard.writeText('ivo.levy03@gmail.com');
+                              alert('Email copiado: ivo.levy03@gmail.com');
+                          }}
+                      >
                           <div className="icon-box"><FiMail /></div>
                           <span>ivo.levy03@gmail.com</span>
-                      </a>
+                      </div>
                   </div>
                   <a href="https://wa.me/5491138240929" target="_blank" rel="noopener noreferrer" className="contact-link-item">
                       <div className="icon-box"><FaWhatsapp /></div>

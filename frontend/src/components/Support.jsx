@@ -23,14 +23,18 @@ function Support() {
                         </div>
                         <div className="btn-label-stack">
                             <span className="btn-primary-text">WhatsApp</span>
-                            <span className="btn-secondary-text">Escribinos por cualquier duda</span>
+                            <span className="btn-secondary-text">+54 11 3824 0929</span>
                         </div>
                     </a>
 
                     {/* Email 1 */}
-                    <a 
-                        href="mailto:ivo.levy03@gmail.com" 
+                    <div 
                         className="compact-contact-btn email-flavor"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                            navigator.clipboard.writeText('ivo.levy03@gmail.com');
+                            alert('Email copiado: ivo.levy03@gmail.com');
+                        }}
                     >
                         <div className="btn-icon-wrapper">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -42,12 +46,16 @@ function Support() {
                             <span className="btn-primary-text">Email</span>
                             <span className="btn-secondary-text">ivo.levy03@gmail.com</span>
                         </div>
-                    </a>
+                    </div>
 
                     {/* Email 2 */}
-                    <a 
-                        href="mailto:solutionsdota@gmail.com" 
+                    <div 
                         className="compact-contact-btn email-flavor"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                            navigator.clipboard.writeText('solutionsdota@gmail.com');
+                            alert('Email copiado: solutionsdota@gmail.com');
+                        }}
                     >
                         <div className="btn-icon-wrapper">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -59,7 +67,7 @@ function Support() {
                             <span className="btn-primary-text">Email</span>
                             <span className="btn-secondary-text">solutionsdota@gmail.com</span>
                         </div>
-                    </a>
+                    </div>
                 </div>
 
                 <div className="aesthetic-footer">
