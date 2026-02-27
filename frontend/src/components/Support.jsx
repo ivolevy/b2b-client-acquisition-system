@@ -33,7 +33,6 @@ function Support() {
                         style={{ cursor: 'pointer' }}
                         onClick={() => {
                             navigator.clipboard.writeText('ivo.levy03@gmail.com');
-                            alert('Email copiado: ivo.levy03@gmail.com');
                         }}
                     >
                         <div className="btn-icon-wrapper">
@@ -54,7 +53,6 @@ function Support() {
                         style={{ cursor: 'pointer' }}
                         onClick={() => {
                             navigator.clipboard.writeText('solutionsdota@gmail.com');
-                            alert('Email copiado: solutionsdota@gmail.com');
                         }}
                     >
                         <div className="btn-icon-wrapper">

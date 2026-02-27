@@ -920,7 +920,6 @@ const LandingPage = () => {
                       style={{ cursor: 'pointer' }}
                       onClick={() => {
                           navigator.clipboard.writeText('solutionsdota@gmail.com');
-                          alert('Email copiado: solutionsdota@gmail.com');
                       }}
                   >
                       <div className="icon-box"><FiMail /></div>
@@ -933,7 +932,6 @@ const LandingPage = () => {
                           style={{ cursor: 'pointer' }}
                           onClick={() => {
                               navigator.clipboard.writeText('ivo.levy03@gmail.com');
-                              alert('Email copiado: ivo.levy03@gmail.com');
                           }}
                       >
                           <div className="icon-box"><FiMail /></div>
