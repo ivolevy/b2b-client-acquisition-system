@@ -5,7 +5,6 @@ import './AdminFinancials.css';
 import './AdminLayout.css';
 
 const AdminFinancials = () => {
-    const [activeTab, setActiveTab] = useState('transactions'); // revenue, costs, transactions (overview removed)
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState({
         mrr: [],
@@ -41,7 +40,7 @@ const AdminFinancials = () => {
 
     if (loading) return <div style={{ padding: '40px', color: '#64748b', textAlign: 'center' }}>Cargando métricas financieras...</div>;
 
-    const { overview, mrr, growth, txsARS, txsUSD, exchangeRates } = data;
+    const { txsARS, txsUSD, exchangeRates } = data;
     const formatCurrency = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val);
     const formatCurrencyExact = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
     const formatUSD = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
@@ -50,213 +49,21 @@ const AdminFinancials = () => {
         <div className="admin-financials-container">
             <div className="financials-header">
                 <h1>Panel Financiero</h1>
-                <div className="tab-selector">
-                    {['transactions', 'costs'].map(tab => (
-                        <button
-                            key={tab}
-                            className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-                            onClick={() => setActiveTab(tab)}
-                        >
-                            {tab === 'costs' ? 'Costos' : 'Transacciones'}
-                        </button>
-                    ))}
-                </div>
             </div>
 
-            {/* VIEWS */}
-            {activeTab === 'costs' && (
-                <CostsView overview={overview} formatUSD={formatUSD} formatCurrency={formatCurrency} />
-            )}
-
-            {activeTab === 'transactions' && (
-                <TransactionsView 
-                    txsARS={txsARS} 
-                    txsUSD={txsUSD} 
-                    exchangeRates={exchangeRates}
-                    formatCurrency={formatCurrency} 
-                    formatCurrencyExact={formatCurrencyExact}
-                    formatUSD={formatUSD} 
-                />
-            )}
+            <TransactionsView 
+                txsARS={txsARS} 
+                txsUSD={txsUSD} 
+                exchangeRates={exchangeRates}
+                formatCurrency={formatCurrency} 
+                formatCurrencyExact={formatCurrencyExact}
+                formatUSD={formatUSD} 
+            />
         </div>
     );
 };
 
 // --- SUB-VIEWS ---
-
-const OverviewView = ({ overview, mrrData, formatCurrency, formatUSD }) => (
-    <>
-        <div className="kpi-grid">
-            <KpiCard title="Ingreso Recurrente (MRR)" value={formatCurrency(overview.mrr)} trend="+15%" positive />
-            <KpiCard title="Ganancia Neta" value={formatCurrency(overview.netProfit)} trend="+12%" positive />
-            <KpiCard title="Usuarios Activos" value={overview.activeSubscribers} subtitle={`+${overview.newSubscribers} mes actual`} />
-        </div>
-        <div className="chart-container">
-            <h3>Profit vs Revenue</h3>
-            <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={mrrData}>
-                    <defs>
-                        <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                        </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} tickFormatter={(val) => `$${val/1000}k`} />
-                    <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                    <Legend />
-                    <Area type="monotone" dataKey="revenue" name="Ingreso Total" stroke="#94a3b8" strokeWidth={2} fill="none" />
-                    <Area type="monotone" dataKey="netProfit" name="Ganancia Neta" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorNet)" />
-                </AreaChart>
-            </ResponsiveContainer>
-        </div>
-    </>
-);
-
-
-const CostsView = ({ overview, formatUSD }) => {
-    // Volume Simulator State
-    const [targetLeadsVolume, setTargetLeadsVolume] = useState(10000); // Monthly Leads Goal
-    
-    // Constants from Billing Plan & API
-    const COST_PER_LEAD = 0.03; // Avg risk adjusted (Nearby + Details)
-    const REVENUE_PER_LEAD = 0.13; // Revenue from 5 credits (Starter Plan base)
-    const MARGIN_PER_LEAD = REVENUE_PER_LEAD - COST_PER_LEAD;
-    const FREE_TIER = 200;
-
-    // Projected Calculations
-    const projectedGrossCost = targetLeadsVolume * COST_PER_LEAD;
-    const projectedNetCost = Math.max(0, projectedGrossCost - FREE_TIER);
-    const projectedGrossRevenue = targetLeadsVolume * REVENUE_PER_LEAD;
-    const projectedProfit = projectedGrossRevenue - projectedNetCost;
-    const projectedMargin = (projectedProfit / projectedGrossRevenue) * 100;
-    
-    // Current Period Analysis
-    const freeTierRemaining = Math.max(0, FREE_TIER - overview.grossApiCostUSD);
-    const currentMargin = ((overview.mrr - overview.netApiCostUSD) / overview.mrr) * 100;
-
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            
-            {/* 1. ACTUAL PERFORMANCE (ECONOMIST SUMMARY) */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
-                <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                    <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>STATUS FREE TIER (GOOGLE)</span>
-                    <div style={{ fontSize: '24px', fontWeight: '800', margin: '10px 0', color: freeTierRemaining > 0 ? '#10b981' : '#ef4444' }}>
-                        {formatUSD(freeTierRemaining)} <span style={{ fontSize: '14px', fontWeight: '400', color: '#94a3b8' }}>disp.</span>
-                    </div>
-                    <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                        <div style={{ width: `${Math.min(100, (overview.grossApiCostUSD / FREE_TIER) * 100)}%`, height: '100%', background: 'var(--primary)' }}></div>
-                    </div>
-                </div>
-
-                <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                    <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>COSTO REAL API (MES ACTUAL)</span>
-                    <div style={{ fontSize: '24px', fontWeight: '800', margin: '10px 0', color: '#0f172a' }}>
-                        {formatUSD(overview.netApiCostUSD)}
-                    </div>
-                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>Post-descuento de $200 USD</span>
-                </div>
-
-                <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                    <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>MARGEN OPERATIVO LTM</span>
-                    <div style={{ fontSize: '24px', fontWeight: '800', margin: '10px 0', color: '#16a34a' }}>
-                        {currentMargin.toFixed(1)}%
-                    </div>
-                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>Profit neto sobre facturación</span>
-                </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '30px' }}>
-                
-                {/* 2. UNIT ECONOMICS (THE "CORE") */}
-                <div style={{ background: 'white', padding: '25px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ background: '#eff6ff', color: 'var(--primary)', padding: '4px 8px', borderRadius: '6px' }}>📊</span> 
-                        Unit Economics (Por Lead)
-                    </h3>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontWeight: '600', color: '#334155' }}>Ingreso Bruto / Lead</span>
-                                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Consumo 5 créditos</span>
-                            </div>
-                            <span style={{ color: '#16a34a', fontWeight: '700' }}>+ {formatUSD(REVENUE_PER_LEAD)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontWeight: '600', color: '#334155' }}>Costo API Google</span>
-                                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Search + Details (Avg)</span>
-                            </div>
-                            <span style={{ color: '#ef4444', fontWeight: '700' }}>- {formatUSD(COST_PER_LEAD)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '20px 0', marginTop: '10px' }}>
-                            <span style={{ fontWeight: '800', color: '#0f172a', fontSize: '18px' }}>MARGEN NETO / LEAD</span>
-                            <span style={{ color: '#16a34a', fontWeight: '900', fontSize: '20px' }}>{formatUSD(MARGIN_PER_LEAD)}</span>
-                        </div>
-                        <div style={{ background: '#f0fdf4', padding: '15px', borderRadius: '12px', marginTop: '10px' }}>
-                            <span style={{ fontSize: '13px', color: '#166534', fontWeight: '600' }}>ROI por Unidad: 333%</span>
-                            <p style={{ fontSize: '12px', color: '#166534', margin: '5px 0 0 0' }}>Cada $1 invertido en Google API retorna $4.33 en facturación bruta.</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 3. SCALABILITY PREDICTOR */}
-                <div style={{ background: 'white', padding: '25px', borderRadius: '16px', border: '2px solid var(--primary)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-                        <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>Simulador de Escala (Predicción)</h3>
-                        <span style={{ background: 'var(--primary)', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>PROYECCIÓN LTM</span>
-                    </div>
-
-                    <div style={{ marginBottom: '30px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                            <label style={{ fontSize: '14px', color: '#475569', fontWeight: '600' }}>Volumen de Extracciones Mensuales (Leads)</label>
-                            <span style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '18px' }}>{targetLeadsVolume.toLocaleString()}</span>
-                        </div>
-                        <input 
-                            type="range" min="1000" max="100000" step="1000" value={targetLeadsVolume} 
-                            onChange={(e) => setTargetLeadsVolume(Number(e.target.value))}
-                            style={{ width: '100%', accentColor: 'var(--primary)', height: '6px' }} 
-                        />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                            <span style={{ fontSize: '10px', color: '#94a3b8' }}>Low Volume (1k)</span>
-                            <span style={{ fontSize: '10px', color: '#94a3b8' }}>High Growth (100k)</span>
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                        <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                            <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700' }}>FACTURA GOOGLE (EST.)</span>
-                            <div style={{ fontSize: '20px', fontWeight: '800', marginTop: '5px', color: projectedNetCost > 0 ? '#ef4444' : '#10b981' }}>
-                                {formatUSD(projectedNetCost)}
-                            </div>
-                            {projectedNetCost === 0 && <span style={{ fontSize: '10px', color: '#16a34a' }}>✓ Cubierto por Free Tier</span>}
-                        </div>
-                        <div style={{ background: '#f0f9ff', padding: '15px', borderRadius: '12px', border: '1px solid #e0f2fe' }}>
-                            <span style={{ fontSize: '11px', color: '#0369a1', fontWeight: '700' }}>UTILIDAD PROYECTADA</span>
-                            <div style={{ fontSize: '20px', fontWeight: '800', marginTop: '5px', color: '#0369a1' }}>
-                                {formatUSD(projectedProfit)}
-                            </div>
-                            <span style={{ fontSize: '10px', color: '#0369a1' }}>Margen {projectedMargin.toFixed(1)}%</span>
-                        </div>
-                    </div>
-
-                    <div style={{ marginTop: '25px', padding: '15px', border: '1px dashed #cbd5e1', borderRadius: '12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569' }}>
-                            <span style={{ fontSize: '18px' }}>💡</span>
-                            <span style={{ fontSize: '13px', fontWeight: '500' }}>
-                                Punto de Equilibrio Google API: **{Math.round(FREE_TIER / COST_PER_LEAD).toLocaleString()} leads**. 
-                                <br/><span style={{ fontSize: '11px', color: '#94a3b8' }}>A partir de allí comienzas a pagar consumo real (usualmente {'>'}40 clientes Starter).</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 const TransactionsView = ({ txsARS, txsUSD, exchangeRates, formatCurrency, formatCurrencyExact, formatUSD }) => {
     // State for currency conversion

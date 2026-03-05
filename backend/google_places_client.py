@@ -12,8 +12,9 @@ from backend.db_supabase import increment_api_usage, get_current_month_usage, lo
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Cache de coordenadas para evitar None en distancias
-_SEARCH_CENTER_CACHE = {}
+# Cache de coordenadas y resultados para evitar llamadas duplicadas
+_SEARCH_CACHE = {} 
+_SEARCH_CACHE_TTL = 3600 # 1 hora
 
 load_dotenv()
 
@@ -31,33 +32,30 @@ class GooglePlacesClient:
             logger.error("No se encontró GOOGLE_MAPS_API_KEY en las variables de entorno.")
         
         # Máscaras de campo para optimización de costos según Tiers de Google
-        self.FIELD_MASK_ESSENTIALS = [
+        # Basic: $17.00 USD por 1000 calls
+        self.FIELD_MASK_BASIC = [
             "places.id",
             "places.displayName",
             "places.formattedAddress",
             "places.location",
             "places.types",
             "places.rating",
-            "places.userRatingCount"
-        ]
-        
-        self.FIELD_MASK_PRO = [
-            "places.nationalPhoneNumber",
-            "places.websiteUri",
-            "places.internationalPhoneNumber",
+            "places.userRatingCount",
             "places.businessStatus"
         ]
         
-        
-        # Por defecto usamos ambas para B2B, pero se puede configurar
-        self.default_field_mask = ",".join(self.FIELD_MASK_ESSENTIALS + self.FIELD_MASK_PRO)
+        # Advanced (Pro): $32.00 USD por 1000 calls
+        self.FIELD_MASK_ADVANCED = [
+            "places.nationalPhoneNumber",
+            "places.websiteUri",
+            "places.internationalPhoneNumber"
+        ]
         
         # Configuración de costos y límites
-        # Precio oficial Text Search (Advanced) al 2025: $32.00 USD por 1000 calls
-        self.COST_PER_PRO_CALL = 0.032 
-        self.COST_PER_ESSENTIAL_CALL = 0.00 # Text Search ID Only es free, Basic es $0.017
-        self.BUDGET_LIMIT_USD = 195.00 # Umbral para fallback (de los $200)
-
+        self.COST_PER_ADVANCED_CALL = 0.032 # $32/1k
+        self.COST_PER_BASIC_CALL = 0.017    # $17/1k
+        self.BUDGET_LIMIT_USD = 150.00       # Límite estricto compartido
+        
     async def is_within_budget(self) -> bool:
         """Verifica si aún queda crédito mensual disponible"""
         try:
@@ -76,23 +74,43 @@ class GooglePlacesClient:
         radius: Optional[float] = None,
         bbox: Optional[Dict[str, float]] = None,
         max_results: int = 20,
-        page_token: Optional[str] = None
+        page_token: Optional[str] = None,
+        use_advanced: bool = True # Flag para optimizar costo
     ) -> Dict[str, Any]:
         """
         Realiza una búsqueda de lugares usando Text Search (New).
+        Optimiza el costo seleccionando el FieldMask adecuado.
         """
         if not self.api_key:
             return {"error": "API Key faltante", "places": []}
 
+        # 0. Caching (Simple key based on params)
+        cache_key = f"{query}_{lat}_{lng}_{radius}_{page_token}_{use_advanced}"
+        if cache_key in _SEARCH_CACHE:
+            cached_data, timestamp = _SEARCH_CACHE[cache_key]
+            if time.time() - timestamp < _SEARCH_CACHE_TTL:
+                logger.info(f"Retornando resultado cacheado para: {query}")
+                return cached_data
+
         # 1. Verificar presupuesto antes de llamar
-        if not self.is_within_budget():
-            logger.warning(" Presupuesto de Google agotado o cerca del límite ($195). Activando protección.")
+        if not await self.is_within_budget():
+            logger.error(f"⚠️ PRESUPUESTO AGOTADO: El sistema ha bloqueado la llamada para evitar cargos extra. Límite: ${self.BUDGET_LIMIT_USD}")
             return {"error": "PRESUPUESTO_AGOTADO", "places": []}
+
+        # Determinar SKU y máscara de campos
+        fields = self.FIELD_MASK_BASIC
+        sku = 'basic'
+        cost = self.COST_PER_BASIC_CALL
+        
+        if use_advanced:
+            fields = self.FIELD_MASK_BASIC + self.FIELD_MASK_ADVANCED
+            sku = 'pro' # Mantenemos 'pro' para consistencia con la DB de usuario
+            cost = self.COST_PER_ADVANCED_CALL
 
         headers = {
             "Content-Type": "application/json",
             "X-Goog-Api-Key": self.api_key,
-            "X-Goog-FieldMask": self.default_field_mask + ",nextPageToken"
+            "X-Goog-FieldMask": ",".join(fields) + ",nextPageToken"
         }
 
         payload = {
@@ -105,8 +123,6 @@ class GooglePlacesClient:
             payload["pageToken"] = page_token
 
         # Configurar restricciones geográficas
-        # Usamos locationBias en lugar de locationRestriction para ser más permisivos
-        # y evitar que Google nos devuelva 0 resultados por una restricción demasiado estricta.
         if bbox and isinstance(bbox, dict):
             payload["locationBias"] = {
                 "rectangle": {
@@ -124,7 +140,7 @@ class GooglePlacesClient:
 
         start_time = time.time()
         try:
-            logger.info(f"Buscando en Google Places (Async): '{query}' | Center: {lat}, {lng}")
+            logger.info(f"Buscando en Google Places ({sku}): '{query}'")
             
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(self.BASE_URL, headers=headers, json=payload)
@@ -134,12 +150,12 @@ class GooglePlacesClient:
             if response.status_code != 200:
                 logger.error(f"Error en Google Places API: {response.status_code} - {response.text}")
                 
-                # Log failure (No bloqueante)
+                # Log failure
                 asyncio.create_task(asyncio.to_thread(
                     log_api_call,
                     provider='google',
                     endpoint='places:searchText',
-                    sku='pro',
+                    sku=sku,
                     cost_usd=0,
                     status_code=response.status_code,
                     duration_ms=duration_ms,
@@ -148,26 +164,27 @@ class GooglePlacesClient:
                 
                 return {"error": f"API Error {response.status_code}", "places": []}
 
-            # 2. Registrar el gasto si la llamada fue exitosa (No bloqueante)
+            # 2. Registrar el gasto (No bloqueante)
+            # NOTA: Usamos 'pro' para consistencia con la configuración actual del usuario
             asyncio.create_task(asyncio.to_thread(
-                increment_api_usage, provider='google', sku='pro', cost_usd=self.COST_PER_PRO_CALL
+                increment_api_usage, provider='google', sku=sku, cost_usd=cost
             ))
             
             data = response.json()
-            places = data.get('places', [])
-            places_count = len(places)
-            logger.info(f"Google Places éxito: {places_count} resultados encontrados para '{query}'")
             
-            # Log success detail (No bloqueante)
+            # Guardar en cache
+            _SEARCH_CACHE[cache_key] = (data, time.time())
+            
+            # Log success
             asyncio.create_task(asyncio.to_thread(
                 log_api_call,
                 provider='google',
                 endpoint='places:searchText',
-                sku='pro',
-                cost_usd=self.COST_PER_PRO_CALL,
+                sku=sku,
+                cost_usd=cost,
                 status_code=200,
                 duration_ms=duration_ms,
-                metadata={"query": query, "results_count": places_count}
+                metadata={"query": query, "results_count": len(data.get('places', []))}
             ))
 
             return data
@@ -213,52 +230,39 @@ class GooglePlacesClient:
         optimized_query = query
         
         all_results = {} # Usamos dict con google_id para deduplicar
-
-        # 1. Búsqueda con Paginación (hasta 100 resultados de Google por área)
-        current_page_token = None
         results_this_area = []
+
+        # 1. Búsqueda INICIAL para determinar densidad
+        # Solo hacemos 1 llamada inicial. Si hay muchos resultados (>15), 
+        # saltamos directamente a la subdivisión sin paginar el área grande (ahorro de costos).
+        data = await self.search_places(
+            query=optimized_query,
+            lat=lat,
+            lng=lng,
+            radius=radius,
+            bbox=bbox,
+            use_advanced=False # SKU básico ($17/1k)
+        )
         
-        for _ in range(5): # Max 5 páginas de 20 = 100
-            data = await self.search_places(
-                query=optimized_query,
-                lat=lat,
-                lng=lng,
-                radius=radius,
-                bbox=bbox,
-                page_token=current_page_token
-            )
-            
-            if "error" in data:
-                break
-                
+        if "error" not in data:
             places = data.get("places", [])
             for p in places:
-                # LA CLAVE: lat/lng aquí DEBEN ser las originales del centro de búsqueda
                 mapped = self.map_to_internal_format(p, rubro_nombre, rubro_key, lat, lng)
-                
                 if mapped['google_id'] not in all_results:
                     all_results[mapped['google_id']] = mapped
                     results_this_area.append(mapped)
-                    
-                    if len(all_results) >= max_total_results:
-                        break
-                
-            current_page_token = data.get("nextPageToken")
-            if not current_page_token or len(all_results) >= max_total_results:
-                break
 
-        # 2. Lógica de Quadtree (Subdivisión)
-        # Si llegamos a 20 en esta área (zona con densidad) y no hemos alcanzado el límite de profundidad, subdividimos
-        # Bajamos el umbral de 60 a 20 para ser más agresivos en la búsqueda de leads en zonas densas.
-        if len(results_this_area) >= 20 and depth < max_depth and bbox:
-            logger.info(f" Área con densidad detectada ({len(results_this_area)} leads). Subdividiendo cuadrante (Nivel {depth+1})...")
+        # 2. Lógica de Paginación vs Subdivisión (Optimizada)
+        # Si hay sospecha de que hay más resultados, elegimos la estrategia más eficiente
+        if len(results_this_area) >= 15 and depth < max_depth and bbox:
+            # Estrategia: "Go Deep" (Subdividir)
+            # No paginamos más el área grande, vamos directo a las 4 sub-áreas
+            logger.info(f" Área densa. Subdividiendo cuadrante (Nivel {depth+1}) para mayor resolución...")
             
-            # Calcular subdivisión de bbox
             s, w, n, e = bbox["south"], bbox["west"], bbox["north"], bbox["east"]
             mid_lat = (s + n) / 2
             mid_lng = (w + e) / 2
             
-            # 4 nuevos cuadrantes
             sub_bboxes = [
                 {"south": s, "west": w, "north": mid_lat, "east": mid_lng}, # SW
                 {"south": s, "west": mid_lng, "north": mid_lat, "east": e}, # SE
@@ -266,23 +270,35 @@ class GooglePlacesClient:
                 {"south": mid_lat, "west": mid_lng, "north": n, "east": e}  # NE
             ]
             for sub_bbox in sub_bboxes:
-                if len(all_results) >= max_total_results:
-                    break
-
+                if len(all_results) >= max_total_results: break
                 sub_results = await self.search_all_places(
-                    query=query,
-                    rubro_nombre=rubro_nombre,
-                    rubro_key=rubro_key,
-                    lat=lat, # PERSISTENCIA: Mantener centro original para distancia
-                    lng=lng,
-                    bbox=sub_bbox,
-                    max_total_results=max_total_results,
-                    depth=depth + 1,
-                    max_depth=max_depth
+                    query=query, rubro_nombre=rubro_nombre, rubro_key=rubro_key,
+                    lat=lat, lng=lng, bbox=sub_bbox,
+                    max_total_results=max_total_results, depth=depth + 1, max_depth=max_depth
                 )
                 for res in sub_results:
                     if len(all_results) >= max_total_results: break
                     all_results[res['google_id']] = res
+        elif data.get("nextPageToken") and len(all_results) < max_total_results:
+            # Estrategia: "Stay Here" (Paginar)
+            # Solo si no es tan densa como para subdividir, pero hay más páginas
+            current_page_token = data.get("nextPageToken")
+            for _ in range(4): # Max 4 páginas extra (total 100)
+                if not current_page_token or len(all_results) >= max_total_results: break
+                
+                data_page = await self.search_places(
+                    query=optimized_query, lat=lat, lng=lng, radius=radius, bbox=bbox,
+                    page_token=current_page_token, use_advanced=False
+                )
+                if "error" in data_page: break
+                
+                for p in data_page.get("places", []):
+                    mapped = self.map_to_internal_format(p, rubro_nombre, rubro_key, lat, lng)
+                    if mapped['google_id'] not in all_results:
+                        all_results[mapped['google_id']] = mapped
+                        if len(all_results) >= max_total_results: break
+                
+                current_page_token = data_page.get("nextPageToken")
 
         return list(all_results.values())[:max_total_results]
 

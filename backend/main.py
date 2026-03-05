@@ -1030,9 +1030,17 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
 
         yield f"data: {json.dumps({'type': 'status', 'message': f'Buscando los {MAX_LEADS} mejores prospectos...'})}\n\n"
 
-        # Ejecutar todas las queries en paralelo para obtener candidatos
+        # OPTIMIZACIÓN DE COSTO: 
+        # No disparamos todas las keywords en paralelo con búsqueda recursiva,
+        # esto causaba una explosión de llamadas (1 rubro -> 10 keywords -> 850+ calls).
+        # Usamos solo la descripción principal y quizás 1-2 keywords clave.
+        main_query = search_queries[0]
+        extra_queries = search_queries[1:3] if len(search_queries) > 1 else []
+        
+        queries_to_run = [main_query] + extra_queries
+        
         tasks = []
-        for query in search_queries:
+        for query in queries_to_run:
             tasks.append(google_client.search_all_places(
                 query=query,
                 rubro_nombre=request.rubro,
@@ -1041,7 +1049,7 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
                 lng=c_lng,
                 radius=radius_m,
                 bbox=google_bbox,
-                max_total_results=20 # Buscamos 20 por query para tener candidatos de sobra sin gastar demasiado
+                max_total_results=40 # Aumentamos un poco por query ya que corremos menos queries
             ))
         
         try:
