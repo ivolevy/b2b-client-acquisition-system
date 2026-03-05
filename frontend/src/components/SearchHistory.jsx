@@ -6,7 +6,7 @@ import './SearchHistory.css';
 function SearchHistory({ isOpen, onClose, onSelectSearch }) {
   const { user } = useAuth();
   const [searches, setSearches] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Bloquear scroll del body cuando el modal está abierto
@@ -31,63 +31,19 @@ function SearchHistory({ isOpen, onClose, onSelectSearch }) {
   }, [isOpen]);
 
   const loadSearchHistory = useCallback(async () => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
+    // Función temporalmente desactivada para forzar el estado "Próximamente"
+    setLoading(false);
+    setSearches([]);
     setError(null);
-    
-    try {
-      // Timeout de 20s
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout: El servidor no responde.')), 20000)
-      );
-
-      const fetchPromise = searchHistoryService.getHistory(user.id, 4);
-      const result = await Promise.race([fetchPromise, timeoutPromise]);
-      
-      if (!result) {
-        throw new Error('Sin respuesta del servidor.');
-      }
-
-      const { data, error: fetchError } = result;
-      
-      if (fetchError) {
-        if (fetchError.code === 'PGRST116') {
-          setSearches([]);
-          return;
-        }
-        throw new Error(fetchError.message);
-      }
-      
-      setSearches(data || []);
-    } catch (err) {
-      console.error('Error al cargar historial:', err);
-      setError(err.message || 'Error al cargar el historial');
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.id]);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
-      if (user?.id) {
-        loadSearchHistory();
-      } else {
-        const userWaitTimeout = setTimeout(() => {
-          if (!user?.id) {
-             setLoading(false);
-             setError('Inicia sesión para ver tu historial');
-          }
-        }, 3000);
-        return () => clearTimeout(userWaitTimeout);
-      }
+      loadSearchHistory();
     } else {
       setSearches([]);
     }
-  }, [isOpen, user?.id, loadSearchHistory]);
+  }, [isOpen, loadSearchHistory]);
 
   const handleDeleteSearch = async (searchId, e) => {
     e.stopPropagation();
