@@ -318,6 +318,7 @@ async def filter_leads_by_description(leads_list: List[Dict[str, Any]], descript
         5. If there is not enough info but the lead's category or name strongly suggests a match, APPROVE it (benefit of doubt).
         6. REJECT clearly irrelevant leads (e.g., user wants "Schools" and lead is a "Gym").
         7. IGNORE location criteria (address/city).
+        8. CRITICAL: DO NOT add a trailing comma after the last object in the JSON array. Your response MUST be valid JSON.
         
         OUTPUT FORMAT (Strict JSON Array of Objects):
         [
@@ -338,13 +339,29 @@ async def filter_leads_by_description(leads_list: List[Dict[str, Any]], descript
                  continue
 
             # Robust cleanup for markdown json blocks
-            text = re.sub(r'```json|```', '', response_text).strip()
+            text = re.sub(r'```json\n?|```', '', response_text).strip()
+            # Remove trailing commas before the closing bracket
+            text = re.sub(r',\s*]', ']', text)
             
-            results = json.loads(text)
-            all_results.extend(results)
+            try:
+                results = json.loads(text)
+                all_results.extend(results)
+            except json.JSONDecodeError as je:
+                logger.error(f"JSON Decode Error in Smart Filter. Raw text: {text}")
+                # Secondary attempt: find first [ and last ]
+                start = text.find('[')
+                end = text.rfind(']')
+                if start != -1 and end != -1:
+                    try:
+                        results = json.loads(text[start:end+1])
+                        all_results.extend(results)
+                        continue
+                    except:
+                        pass
+                raise je
 
         except Exception as e:
-            logger.error(f"Error in AI Smart Filter batch: {e}")
+            logger.error(f"Error in AI Smart Filter batch: {e}. Raw Response: {response_text if 'response_text' in locals() else 'None'}")
             # If error, safe fallback: Approve all to avoid data loss, but log error
             all_results.extend([{"id": str(l['id']), "status": "approved", "reason": "AI Error fallback"} for l in batch_leads])
             
