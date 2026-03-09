@@ -51,12 +51,23 @@ def sync_gmail_account(user_id: str, token_data: Dict):
         for msg in messages:
             try:
                 msg_detail = service.users().messages().get(userId='me', id=msg['id']).execute()
-                process_gmail_message(user_id, msg_detail)
+                process_gmail_message(user_id, msg_detail, token_data.get('account_email', ''))
             except Exception as e:
                 logger.error(f"Error procesando mensaje Gmail {msg['id']}: {e}")
 
     except Exception as e:
-        logger.error(f"Error general sync Gmail para usuario {user_id}: {e}")
+        error_msg = str(e).lower()
+        if 'invalid_grant' in error_msg or 'reauth' in error_msg or 'access_denied' in error_msg:
+            logger.warning(f"Google OAuth Token revocado/expirado para {user_id}. Actualizando estado.")
+            from backend.db_supabase import get_supabase_admin
+            admin = get_supabase_admin()
+            if admin:
+                # Actualizar el perfil del usuario para mostrar error en frontend
+                admin.table('users').update({
+                    'gmail_sync_status': 'error'
+                }).eq('id', user_id).execute()
+        else:
+            logger.error(f"Error general sync Gmail para usuario {user_id}: {e}")
 
 def sync_outlook_account(user_id: str, token_data: Dict):
     """Sincroniza correos recientes de Outlook (Microsoft Graph)"""
@@ -82,7 +93,14 @@ def sync_outlook_account(user_id: str, token_data: Dict):
         )
         
         if response.status_code == 401:
-            logger.warning(f"Token Outlook potencialmente expirado para usuario {user_id}")
+            logger.warning(f"Token Outlook revocado o expirado permanentemente para usuario {user_id}")
+            from backend.db_supabase import get_supabase_admin
+            admin = get_supabase_admin()
+            if admin:
+                # Actualizar el perfil del usuario para mostrar error en frontend
+                admin.table('users').update({
+                    'outlook_sync_status': 'error'
+                }).eq('id', user_id).execute()
             return
 
         if response.status_code != 200:

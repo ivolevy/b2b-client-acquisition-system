@@ -293,7 +293,7 @@ async def filter_leads_by_description(leads_list: List[Dict[str, Any]], descript
         })
 
     all_results = []
-    batch_size = 20
+    batch_size = 30 # Aumentado para reducir requests
     
     import asyncio
     import json
@@ -302,6 +302,10 @@ async def filter_leads_by_description(leads_list: List[Dict[str, Any]], descript
 
     for i in range(0, len(leads_minified), batch_size):
         batch_leads = leads_minified[i:i + batch_size]
+        
+        # Artificial delay between batches to respect quotas
+        if i > 0:
+            await asyncio.sleep(2)
         
         prompt = f"""
         You are a B2B Sales Quality Analyst (Smart Filter).
@@ -335,7 +339,8 @@ async def filter_leads_by_description(leads_list: List[Dict[str, Any]], descript
             response_text = await loop.run_in_executor(None, lambda: call_gemini_with_retry(prompt))
             
             if not response_text:
-                 logger.error("Empty response from AI Smart Filter")
+                 logger.error("Empty response from AI Smart Filter. Sleeping briefly.")
+                 await asyncio.sleep(3)
                  continue
 
             # Robust cleanup for markdown json blocks
@@ -362,6 +367,11 @@ async def filter_leads_by_description(leads_list: List[Dict[str, Any]], descript
 
         except Exception as e:
             logger.error(f"Error in AI Smart Filter batch: {e}. Raw Response: {response_text if 'response_text' in locals() else 'None'}")
+            # If rate limit hit at highest level, wait significantly to reset quotas
+            if "429" in str(e) or "quota" in str(e).lower():
+                 logger.warning("Quota completely exhausted for this batch. Sleeping for 10s before continuing.")
+                 await asyncio.sleep(10)
+            
             # If error, safe fallback: Approve all to avoid data loss, but log error
             all_results.extend([{"id": str(l['id']), "status": "approved", "reason": "AI Error fallback"} for l in batch_leads])
             

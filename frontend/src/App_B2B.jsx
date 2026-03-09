@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from './components/Navbar';
@@ -69,7 +69,7 @@ function AppB2B() {
   const loadingIntervalRef = useRef(null);
   const loadingTimeoutRef = useRef(null); 
 
-  const fetchCredits = async () => {
+  const fetchCredits = useCallback(async () => {
     if (!user?.id) return;
     setCreditsLoading(true);
     try {
@@ -82,9 +82,9 @@ function AppB2B() {
     } finally {
       setCreditsLoading(false);
     }
-  };
+  }, [user?.id]);
 
-  const loadRubros = async () => {
+  const loadRubros = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/api/rubros`);
       if (response.data && response.data.rubros) {
@@ -96,7 +96,7 @@ function AppB2B() {
       console.error('Error al cargar rubros:', error);
       setRubros({});
     }
-  };
+  }, []);
 
   const loadEmpresas = async (showError = true) => {
     try {
@@ -141,7 +141,7 @@ function AppB2B() {
     if (user?.id) {
       fetchCredits();
     }
-  }, [location.pathname, view, user?.id]);
+  }, [location.pathname, view, user?.id, loadRubros, fetchCredits]);
 
   
 
@@ -243,8 +243,7 @@ function AppB2B() {
       // loadStats();
     }
     loadRubros();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]); // Ejecutar al montar y cuando el usuario esté listo
+  }, [user?.id, loadRubros]); // Ejecutar al montar y cuando el usuario esté listo
 
   // Persistir estado en sessionStorage cuando cambia
   useEffect(() => {
@@ -622,73 +621,45 @@ function AppB2B() {
     success("Archivo exportado");
   };
 
-  const handleExportPDF = (empresasToExport = empresas) => {
+  const handleExportPDF = async (empresasToExport = empresas) => {
     if (empresasToExport.length === 0) {
       warning("Sin datos para exportar");
       return;
     }
 
     try {
-      // Landscape orientation for better fit
-      const doc = new jsPDF({ orientation: 'landscape' });
+      const response = await api.post('/api/exportar', {
+        rubro: filtroRubro,
+        formato: 'pdf',
+        solo_validas: filtroSoloValidas,
+        user_id: user?.id || 'anonymous'
+      }, {
+        responseType: 'blob' // Importante para manejar binarios
+      });
+
+      // Crear un objeto URL para el blob y descargarlo
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
       
       const now = new Date();
       const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-      const filename = `Smart_Leads_${timestamp}.pdf`;
-
-      // Título
-      doc.setFontSize(18);
-      doc.text('Reporte de Smart Leads', 14, 15);
+      a.download = `Smart_Leads_${timestamp}.pdf`;
       
-      doc.setFontSize(10);
-      doc.setTextColor(100);
-      doc.text(`Generado el: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 14, 22);
-      
-      doc.setFontSize(9);
-      doc.setTextColor(233, 30, 99); // Color pink del tema
-      doc.text('Para más información contactar a Ivan Levy - CTO de Dota', 14, 28);
-      doc.text('LinkedIn: https://www.linkedin.com/in/ivan-levy/ | Email: ivo.levy03@gmail.com', 14, 33);
-      
-      doc.setFontSize(10);
-      doc.setTextColor(100);
-      doc.text(`Total empresas: ${empresasToExport.length}`, 260, 22, { align: 'right' });
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
-      // Columnas para PDF (más columnas aprovechando landscape)
-      const tableHead = [['Empresa', 'Rubro', 'Web', 'Email', 'Teléfono', 'Ubicación']];
-      
-      const tableRows = empresasToExport.map(empresa => [
-        empresa.nombre || '',
-        (rubros && rubros[empresa.rubro]) ? rubros[empresa.rubro] : (empresa.rubro || ''),
-        empresa.sitio_web || empresa.website || '',
-        empresa.email || '',
-        empresa.telefono || '',
-        empresa.direccion || [empresa.ciudad, empresa.pais].filter(Boolean).join(', ') || ''
-      ]);
-
-      autoTable(doc, {
-        head: tableHead,
-        body: tableRows,
-        startY: 38,
-        styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-        columnStyles: {
-          0: { cellWidth: 45 }, // Nombre
-          1: { cellWidth: 35 }, // Rubro
-          2: { cellWidth: 50 }, // Web
-          3: { cellWidth: 55 }, // Email
-          4: { cellWidth: 35 }, // Telefono
-          5: { cellWidth: 40 }  // Ubicacion
-        },
-        headStyles: { fillColor: [233, 30, 99] }, // Pink color matching theme
-        alternateRowStyles: { fillColor: [245, 245, 245] },
-        theme: 'grid'
-      });
-
-      doc.save(filename);
-
-      success("Archivo exportado");
+      success("Archivo PDF generado e iniciando descarga");
     } catch (err) {
-      console.error('Error generando PDF:', err);
-       toastError("Error al generar PDF");
+      console.error('Error exportando:', err);
+      if (err.response?.status === 402) {
+        toastError("Créditos insuficientes para exportar. Necesitás 100 créditos.");
+      } else {
+        toastError("Error al exportar los datos. Intenta nuevamente.");
+      }
     }
   };
 

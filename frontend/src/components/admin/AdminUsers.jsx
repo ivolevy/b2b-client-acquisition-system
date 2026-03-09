@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { adminService } from '../../lib/supabase';
 import UserDetailModal from './UserDetailModal';
 import CreateUserModal from './CreateUserModal';
@@ -36,7 +36,7 @@ function AdminUsers() {
     return matchRole && matchPlan && matchSearch;
   });
 
-  const loadUsers = async (forceRefresh = false) => {
+  const loadUsers = useCallback(async (forceRefresh = false) => {
     setLoading(true);
     setError('');
     
@@ -66,7 +66,7 @@ function AdminUsers() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters.role, filters.search]);
 
   // Cargar usuarios al montar y cuando cambien los filtros
   useEffect(() => {
@@ -87,8 +87,7 @@ function AdminUsers() {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.role, filters.search]);
+  }, [filters.role, filters.search, loadUsers]);
 
   const handleDeleteUser = async () => {
     if (!showDeleteConfirm) return;

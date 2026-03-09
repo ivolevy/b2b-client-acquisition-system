@@ -44,6 +44,7 @@ const Communications = ({ onOpenAi }) => {
   const [channelFilter, setChannelFilter] = useState('all'); // 'all', 'email', 'whatsapp'
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [attachments, setAttachments] = useState([]);
+  const [syncErrorMsg, setSyncErrorMsg] = useState(null);
   const [isSendingReply, setIsSendingReply] = useState(false);
   const [statusMenuAnchor, setStatusMenuAnchor] = useState(null);
   const [threadSummary, setThreadSummary] = useState('');
@@ -322,12 +323,40 @@ const Communications = ({ onOpenAi }) => {
 
   const [isSuggesting, setIsSuggesting] = useState(false);
 
+  // Check auth status on load to show banner if needed
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/api/auth/status/${user.id}`);
+            const data = res.data;
+            if (data.google?.error) {
+                setSyncErrorMsg('Tu conexión con Gmail expiró o fue revocada. Por favor, vuelve a conectar tu cuenta desde Perfil > Integraciones.');
+            } else if (data.outlook?.error) {
+                setSyncErrorMsg('Tu conexión con Outlook expiró o fue revocada. Por favor, vuelve a conectar tu cuenta desde Perfil > Integraciones.');
+            } else {
+                setSyncErrorMsg(null);
+            }
+        } catch (e) {
+            console.error("Error fetching auth status", e);
+        }
+    };
+    if (user?.id) checkAuthStatus();
+  }, [user]);
+
   const handleSync = async () => {
     try {
       setSyncing(true);
       const res = await axios.post(`${API_URL}/api/communications/sync`, {}, {
         headers: { 'X-User-ID': user.id }
       });
+      // Also check status after sync to surface new errors
+      try {
+        const statusRes = await axios.get(`${API_URL}/api/auth/status/${user.id}`);
+        const data = statusRes.data;
+        if (data.google?.error) setSyncErrorMsg('Tu conexión con Gmail expiró. Vuelve a conectar tu cuenta.');
+        else if (data.outlook?.error) setSyncErrorMsg('Tu conexión con Outlook expiró. Vuelve a conectar tu cuenta.');
+        else setSyncErrorMsg(null);
+      } catch (e) {}
       
       // Inject Demo Lead for Investor Demo
       const demoLead = {
@@ -540,6 +569,14 @@ const Communications = ({ onOpenAi }) => {
       </Box>
 
       {/* Main Content Area */}
+      {syncErrorMsg && (
+        <Box sx={{ p: 2, bgcolor: '#fee2e2', borderBottom: '1px solid #fecaca', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ErrorIcon sx={{ color: '#ef4444', fontSize: '1.2rem' }} />
+            <Typography sx={{ color: '#991b1b', fontSize: '0.8rem', fontWeight: 600 }}>
+                {syncErrorMsg}
+            </Typography>
+        </Box>
+      )}
       <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
         {viewMode === 'list' ? (
           <>

@@ -47,13 +47,15 @@ class ScraperSession:
                 else:
                     # Si no hay 200 (404, 500, etc), permitimos por defecto
                     return True
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Error de red/parseo para robots.txt en {robots_url}: {e}")
                 # Ante cualquier error de conexión para el robots.txt, permitimos
                 return True
                 
             self._robots_cache[domain] = rp
             return rp.can_fetch("*", url)
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Error general evaluando can_fetch para {url}: {e}")
             return True
 
     def get_soup(self, url: str, timeout: int = 10) -> Optional[BeautifulSoup]:

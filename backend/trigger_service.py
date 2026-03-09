@@ -1,5 +1,5 @@
 import logging
-import threading
+import asyncio
 import json
 from datetime import datetime
 from typing import Dict, Any
@@ -10,15 +10,31 @@ logger = logging.getLogger(__name__)
 
 def process_triggers_async(user_id: str, trigger_event: str, conversation_id: str = None, lead_data: Dict[str, Any] = None):
     """
-    Kicks off the trigger evaluation in a background thread.
+    Kicks off the trigger evaluation. In Vercel serverless, 
+    we use asyncio.create_task which has a slightly better chance of surviving 
+    the request lifecycle compared to raw threading.Thread.
     - trigger_event: 'email_received', 'lead_extracted', 'lead_saved'
     """
-    thread = threading.Thread(
-        target=_evaluate_rules,
-        args=(user_id, trigger_event, conversation_id, lead_data),
-        daemon=True
-    )
-    thread.start()
+    try:
+        loop = asyncio.get_running_loop()
+        # Schedule the evaluation on the asyncio event loop
+        loop.run_in_executor(
+            None, 
+            _evaluate_rules, 
+            user_id, 
+            trigger_event, 
+            conversation_id, 
+            lead_data
+        )
+    except RuntimeError:
+        # Fallback if no event loop is running
+        import threading
+        thread = threading.Thread(
+            target=_evaluate_rules,
+            args=(user_id, trigger_event, conversation_id, lead_data),
+            daemon=True
+        )
+        thread.start()
 
 def _evaluate_rules(user_id: str, trigger_event: str, conversation_id: str = None, lead_data: Dict[str, Any] = None):
     """

@@ -324,8 +324,8 @@ def buscar_empresas(
         if con_telefono:
             query = query.eq('telefono_valido', True)
             
-        # Ordenar por fecha de creación descendente
-        query = query.order('created_at', desc=True)
+        # Ordenar por fecha de creación descendente y establecer un límite de 1000
+        query = query.order('created_at', desc=True).limit(1000)
         
         response = execute_with_retry(lambda _: query, is_admin=False)
         return response.data
@@ -474,6 +474,104 @@ def exportar_a_json(rubro: Optional[str] = None, solo_validas: bool = True) -> O
         logger.error(f"Error escribiendo JSON: {e}")
         return None
 
+def exportar_a_pdf(rubro: Optional[str] = None, solo_validas: bool = True) -> Optional[str]:
+    """Exporta datos de Supabase a PDF local usando ReportLab"""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import landscape, A4
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    
+    empresas = buscar_empresas(rubro=rubro, solo_validas=solo_validas)
+    
+    if not empresas:
+        return None
+        
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"empresas_b2b_supabase_{rubro or 'todas'}_{timestamp}.pdf"
+    output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', filename)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    try:
+        doc = SimpleDocTemplate(
+            output_path, 
+            pagesize=landscape(A4),
+            rightMargin=20, leftMargin=20, 
+            topMargin=20, bottomMargin=20
+        )
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Headers
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            spaceAfter=10
+        )
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.HexColor('#e91e63'), # Pink theme
+            spaceAfter=20
+        )
+        
+        elements.append(Paragraph('Reporte de Smart Leads', title_style))
+        now_str = datetime.now().strftime("%d/%m/%Y %H:%M")
+        elements.append(Paragraph(f'Generado el: {now_str} | Total empresas: {len(empresas)}', styles['Normal']))
+        elements.append(Paragraph('Para más información contactar a Ivan Levy - CTO de Dota | ivo.levy03@gmail.com', subtitle_style))
+        
+        # Table Data
+        data = [['Empresa', 'Rubro', 'Web', 'Email', 'Teléfono', 'Ubicación']]
+        
+        for e in empresas:
+            ubicacion = ", ".join(filter(None, [e.get('ciudad'), e.get('pais')]))
+            rubro_val = e.get('rubro', '')
+            # Truncate strings to prevent huge wrapped cells
+            empresa_nombre = str(e.get('nombre') or '')[:40]
+            web = str(e.get('sitio_web') or e.get('website') or '')[:45]
+            email = str(e.get('email') or '')[:40]
+            
+            data.append([
+                empresa_nombre,
+                rubro_val[:25],
+                web,
+                email,
+                str(e.get('telefono') or '')[:20],
+                ubicacion[:30]
+            ])
+            
+        # Create Table
+        col_widths = [140, 90, 150, 150, 90, 110]
+        t = Table(data, colWidths=col_widths, repeatRows=1)
+        
+        # Add Style
+        style = TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#e91e63')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 10),
+            ('BOTTOMPADDING', (0,0), (-1,0), 8),
+            ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
+            ('TEXTCOLOR', (0,1), (-1,-1), colors.black),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('FONTNAME', (0,1), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,1), (-1,-1), 8),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f5f5f5')])
+        ])
+        t.setStyle(style)
+        
+        elements.append(t)
+        doc.build(elements)
+        
+        logger.info(f" Exportado a PDF: {output_path}")
+        return output_path
+    except Exception as e:
+        logger.error(f"Error escribiendo PDF: {e}")
+        return None
 
 # --- EMAIL TEMPLATE FUNCTIONS (Supabase Persistence) ---
 

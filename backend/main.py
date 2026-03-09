@@ -248,7 +248,6 @@ else:
     sdk = None
 
 _memoria_codigos_validacion = {}
-SEARCH_PROGRESS = {}  # Diccionario global para guardar el progreso de las búsquedas: {task_id: {progress: int, message: str}}
 
 def get_memoria_codigos():
     global _memoria_codigos_validacion
@@ -256,17 +255,11 @@ def get_memoria_codigos():
 
 def update_search_progress(task_id, current, total, phase="scraping"):
     """
-    Actualiza el progreso de una búsqueda globalmente con soporte de fases
-    Phases:
-      - searching: 0 - 15%
-      - scraping: 15 - 85%
-      - finalizing: 85 - 100%
+    Actualiza el progreso de una búsqueda en la base de datos Supabase
     """
     if not task_id:
         return
         
-    global SEARCH_PROGRESS
-    
     if phase == "searching":
         percent = int((current / (total or 1)) * 15)
         msg = "Buscando prospectos en el área..."
@@ -280,10 +273,17 @@ def update_search_progress(task_id, current, total, phase="scraping"):
     # Asegurar que no pasamos de 100 ni bajamos de 0
     percent = max(0, min(100, percent))
     
-    SEARCH_PROGRESS[task_id] = {
-        "progress": percent,
-        "message": msg
-    }
+    try:
+        from backend.db_supabase import get_supabase_admin
+        admin_client = get_supabase_admin()
+        if admin_client:
+            admin_client.table('search_tasks').update({
+                'progress': percent,
+                'message': msg,
+                'updated_at': 'now()'
+            }).eq('id', task_id).execute()
+    except Exception as e:
+        logger.error(f"Error actualizando progreso en Supabase para tarea {task_id}: {e}")
 
 
 def calcular_distancia_km(lat1, lon1, lat2, lon2):
@@ -971,12 +971,35 @@ async def api_delete_search_history(user_id: str, search_id: str):
     
     return {"success": True, "message": "Entrada eliminada correctamente"}
 
-@app.post("/api/buscar-stream")
+@app.post("/api/b2b/buscar_stream")
 async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
     """
     Versión Streaming de búsqueda: envía prospectos en tiempo real
     usando Server-Sent Events (SSE).
     """
+    logger.info(f"Iniciando búsqueda STREAM de rubro: {request.rubro}")
+    
+    task_id = request.task_id
+    from backend.db_supabase import get_supabase_admin
+    admin = get_supabase_admin()
+    
+    if task_id and admin:
+        try:
+            admin.table('search_tasks').insert({
+                'id': task_id,
+                'user_id': request.user_id,
+                'status': 'processing',
+                'progress': 0,
+                'message': "Iniciando búsqueda stream..."
+            }).execute()
+        except Exception as e:
+            logger.error(f"Error creando task_id {task_id}: {e}")
+
+    try:
+        from backend.validators import validar_empresa
+    except ImportError:
+        def validar_empresa(e): return True
+        
     # 1. Validación de Créditos
     user_id = request.user_id
     if user_id and user_id != 'anonymous':
@@ -1219,11 +1242,19 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         # Inicializar progreso si hay task_id
         if request.task_id:
-            global SEARCH_PROGRESS
-            SEARCH_PROGRESS[request.task_id] = {
-                "progress": 5,
-                "message": "Buscando prospectos..."
-            }
+            from backend.db_supabase import get_supabase_admin
+            admin = get_supabase_admin()
+            if admin:
+                try:
+                    admin.table('search_tasks').upsert({
+                        'id': request.task_id,
+                        'user_id': request.user_id,
+                        'status': 'processing',
+                        'progress': 5,
+                        'message': "Buscando prospectos..."
+                    }).execute()
+                except Exception as e:
+                    logger.error(f"Error creando task_id {request.task_id}: {e}")
         
         # Validar bbox
         bbox_valido = False
@@ -1505,8 +1536,8 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
                             logger.info(f" {empresa.get('nombre', 'Sin nombre')}: Guardada - Sin contacto válido (solo_validadas=False)")
                         else:
                              pass 
-                    except Exception:
-                        pass 
+                    except Exception as e_db:
+                        logger.error(f"Error inesperado al insertar empresa sin contacto válido: {e_db}", exc_info=True)
                 else:
                     # Empresa sin contacto válido y se requiere solo válidas - NO se guarda
                     empresas_rechazadas.append(empresa)
@@ -1553,23 +1584,27 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         
         # Marcar como completado pero NO borrar inmediatamente para que el frontend pueda leer el 100%
         if request.task_id:
-            SEARCH_PROGRESS[request.task_id] = {
-                "progress": 100,
-                "message": "¡Búsqueda completada!",
-                "timestamp": time.time()
-            }
-            
-            # Limpieza lazy de tareas viejas (más de 5 minutos)
             try:
-                now = time.time()
-                keys_to_delete = [
-                    k for k, v in SEARCH_PROGRESS.items() 
-                    if isinstance(v, dict) and v.get('timestamp') and (now - v.get('timestamp') > 300)
-                ]
-                for k in keys_to_delete:
-                    del SEARCH_PROGRESS[k]
+                from backend.db_supabase import get_supabase_admin
+                admin = get_supabase_admin()
+                if admin:
+                    admin.table('search_tasks').update({
+                        'status': 'completed',
+                        'progress': 100,
+                        'message': "¡Búsqueda completada!",
+                        'result_data': {
+                            "success": True,
+                            "total_encontradas": total_encontradas_original,
+                            "guardadas": total_guardadas,
+                            "validas": validas,
+                            "rechazadas": len(empresas_rechazadas),
+                            "estadisticas": stats,
+                            "data": empresas_a_devolver
+                        },
+                        'updated_at': 'now()'
+                    }).eq('id', request.task_id).execute()
             except Exception as e:
-                logger.warning(f"Error en limpieza lazy de tareas: {e}")
+                logger.error(f"Error finalizando tarea {request.task_id}: {e}")
 
         return {
             "success": True,
@@ -1820,7 +1855,8 @@ async def estadisticas():
 
 @app.post("/api/exportar")
 async def exportar(request: ExportRequest):
-    """Exporta empresas a CSV o JSON"""
+    """Exporta empresas a CSV, JSON o PDF"""
+    from fastapi.responses import FileResponse
     # Lógica de Créditos
     # Por ahora cobramos 100 créditos por exportación (valor a ajustar según feedback)
     user_id = getattr(request, 'user_id', None)
@@ -1848,8 +1884,20 @@ async def exportar(request: ExportRequest):
                 rubro=request.rubro,
                 solo_validas=request.solo_validas
             )
+        elif request.formato.lower() == "pdf":
+            from backend.db_supabase import exportar_a_pdf
+            archivo = exportar_a_pdf(
+                rubro=request.rubro,
+                solo_validas=request.solo_validas
+            )
+            if archivo and os.path.exists(archivo):
+                return FileResponse(
+                    path=archivo,
+                    filename=os.path.basename(archivo),
+                    media_type='application/pdf'
+                )
         else:
-            raise HTTPException(status_code=400, detail="Formato debe ser 'csv' o 'json'")
+            raise HTTPException(status_code=400, detail="Formato debe ser 'csv', 'json' o 'pdf'")
         
         if not archivo:
             raise HTTPException(status_code=404, detail="No hay datos para exportar")
@@ -2331,18 +2379,34 @@ async def save_user_rubros(request: UserRubrosRequest):
 
 @app.get("/api/auth/status/{user_id}")
 async def auth_status_global(user_id: str):
-    """Estado de todas las conexiones"""
+    """Estado de todas las conexiones, incluyendo errores de sincronización"""
     google = get_user_oauth_token(user_id, 'google')
     outlook = get_user_oauth_token(user_id, 'outlook')
+    
+    # Obtener estado de error desde la tabla users
+    gmail_error = False
+    outlook_error = False
+    try:
+        from backend.db_supabase import get_supabase_admin
+        admin = get_supabase_admin()
+        if admin:
+            user_data = admin.table('users').select('gmail_sync_status,outlook_sync_status').eq('id', user_id).execute()
+            if user_data.data:
+                gmail_error = user_data.data[0].get('gmail_sync_status') == 'error'
+                outlook_error = user_data.data[0].get('outlook_sync_status') == 'error'
+    except Exception as e:
+        logger.error(f"Error obteniendo sync status del usuario: {e}")
     
     return {
         "google": {
             "connected": bool(google),
-            "email": google.get('account_email') if google else None
+            "email": google.get('account_email') if google else None,
+            "error": gmail_error
         },
         "outlook": {
             "connected": bool(outlook),
-            "email": outlook.get('account_email') if outlook else None
+            "email": outlook.get('account_email') if outlook else None,
+            "error": outlook_error
         }
     }
 
