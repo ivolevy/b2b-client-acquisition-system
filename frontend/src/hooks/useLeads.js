@@ -123,7 +123,7 @@ export function useLeads(user, toasts, fetchCredits) {
       
       const processBuffer = (chunk) => {
         buffer += chunk;
-        const parts = buffer.split('\\n\\n'); // Need to use literal \n\n, let's use newline character directly
+        const parts = buffer.split('\n\n'); 
         buffer = parts.pop();
 
         for (const part of parts) {
@@ -136,8 +136,12 @@ export function useLeads(user, toasts, fetchCredits) {
                 if (eventPayload.message.includes('Iniciando')) setDisplayProgress(5);
               } 
               else if (eventPayload.type === 'lead') {
-                const exists = accumulatedLeads.some(e => e.google_id === eventPayload.data.google_id);
-                if (!exists) accumulatedLeads.push(eventPayload.data);
+                const exists = accumulatedLeads.some(e => (e.google_id || e.id) === (eventPayload.data.google_id || eventPayload.data.id));
+                if (!exists) {
+                  accumulatedLeads.push(eventPayload.data);
+                  // Update UI progressively
+                  setEmpresas([...accumulatedLeads]);
+                }
                 setDisplayProgress(prev => Math.min(prev + 0.3, 85));
               }
               else if (eventPayload.type === 'update') {
