@@ -553,7 +553,7 @@ const Communications = ({ onOpenAi }) => {
           >
             <ToggleButton value="all">Todos</ToggleButton>
             <ToggleButton value="email">Emails</ToggleButton>
-            <ToggleButton value="whatsapp">WhatsApp</ToggleButton>
+            <ToggleButton value="whatsapp" disabled sx={{ opacity: 0.5 }}>WhatsApp (Próximamente)</ToggleButton>
           </ToggleButtonGroup>
 
           <Tooltip title="Actualizar">
@@ -933,7 +933,12 @@ const Communications = ({ onOpenAi }) => {
                             </Box>
                           ) : (
                             <>
-                                <IconButton size="small" sx={{ color: '#64748b' }}>
+                                <Box sx={{ p: 1, textAlign: 'center', width: '100%', opacity: 0.7 }}>
+                                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748b' }}>
+                                        WhatsApp (Próximamente)
+                                    </Typography>
+                                </Box>
+                                <IconButton size="small" sx={{ color: '#64748b', opacity: 0.3 }} disabled>
                                     <AttachFileIcon fontSize="small" />
                                 </IconButton>
                                 <InputBase 
@@ -941,17 +946,16 @@ const Communications = ({ onOpenAi }) => {
                                     maxRows={4}
                                     fullWidth
                                     placeholder="Escribe por WhatsApp..."
+                                    disabled
                                     value={replyText}
-                                    onChange={(e) => setReplyText(e.target.value)}
-                                    sx={{ color: '#0f172a', fontSize: '0.85rem' }}
+                                    sx={{ color: '#0f172a', fontSize: '0.85rem', opacity: 0.3 }}
                                 />
                                 <IconButton 
-                                    onClick={handleSendReply}
-                                    disabled={!replyText.trim() || isSendingReply}
+                                    disabled
                                     size="small"
                                     sx={{ 
-                                        bgcolor: replyText.trim() ? '#25D366' : 'transparent', 
-                                        color: replyText.trim() ? '#fff' : 'rgba(0, 0, 0, 0.1)'
+                                        color: 'rgba(0, 0, 0, 0.1)',
+                                        opacity: 0.3
                                     }}
                                 >
                                     <SendIcon fontSize="small" />

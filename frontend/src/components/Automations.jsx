@@ -311,7 +311,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                     >
                                         <option value="change_status">Mover Etapa del CRM</option>
                                         <option value="send_template">Enviar Email Plantilla</option>
-                                        <option value="send_whatsapp">WhatsApp (Próximamente)</option>
+                                        <option value="send_whatsapp">WhatsApp (Task)</option>
                                     </select>
 
                                     {formData.action_type === 'change_status' && (
