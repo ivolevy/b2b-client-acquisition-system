@@ -37,20 +37,12 @@ import './components/TableView.css';
 function AppB2B() {
   const location = useLocation();
   const navigate = useNavigate();
-  // Estados de carga
-  const [loading, setLoading] = useState(false);
-  const [blockingLoading, setBlockingLoading] = useState(false);
-  const [creditsLoading, setCreditsLoading] = useState(false);
-  
-  // Estados de datos
-  const [empresas, setEmpresas] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [rubros, setRubros] = useState({});
-  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, total_credits: 0, next_reset: null });
+  const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
+  const { user } = useAuth();
   
   // UI States
-  const [searchProgress, setSearchProgress] = useState({ percent: 0, message: '' });
-  const [displayProgress, setDisplayProgress] = useState(0); 
+  const [creditsLoading, setCreditsLoading] = useState(false);
+  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, total_credits: 0, next_reset: null });
   const [showEmailSender, setShowEmailSender] = useState(false);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
   const [historySearchData, setHistorySearchData] = useState(null);
@@ -58,20 +50,26 @@ function AppB2B() {
   const [isFromHistory, setIsFromHistory] = useState(false);
   const [showGlobalAi, setShowGlobalAi] = useState(false);
 
+  // States from hook
+  const {
+    empresas, setEmpresas,
+    rubros, loadRubros,
+    loading,
+    blockingLoading,
+    searchProgress,
+    displayProgress,
+    handleBuscar,
+    handleCancelSearch
+  } = useLeads(user, { success, error: toastError, warning, info }, () => fetchCredits());
+
   // Determinar la vista basada en la ruta
   const isProfilePage = location.pathname === '/profile';
   const [view, setView] = useState(isProfilePage ? 'profile' : 'table');
 
-  const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
-  const { user } = useAuth();
-  
   // Plan Logic
   const plan = user?.plan || 'essential';
   const isAgency = plan === 'agency' || user?.role === 'admin';
   const isGrowthOrHigher = ['growth', 'agency'].includes(plan) || user?.role === 'admin';
-  
-  const loadingIntervalRef = useRef(null);
-  const loadingTimeoutRef = useRef(null); 
 
   const fetchCredits = useCallback(async () => {
     if (!user?.id) return;
@@ -88,47 +86,8 @@ function AppB2B() {
     }
   }, [user?.id]);
 
-  const loadRubros = useCallback(async () => {
-    try {
-      const data = await leadsService.getRubros();
-      if (data && data.rubros) {
-        setRubros(data.rubros);
-      } else {
-        setRubros({});
-      }
-    } catch (error) {
-      console.error('Error al cargar rubros:', error);
-      setRubros({});
-    }
-  }, []);
-
-  const loadEmpresas = async (showError = true) => {
-    try {
-      setLoading(true);
-      const data = await leadsService.getEmpresas();
-      setEmpresas(data.data || []);
-    } catch (err) {
-      console.error('Error al cargar empresas:', err);
-      if (showError) {
-        const errorMsg = err.response?.data?.detail || err.message;
-        if (err.code === 'ERR_NETWORK' || err.response?.status >= 500) {
-          toastError("Error al cargar empresas");
-        }
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-  
   // Sincronizar vista con la ruta cuando cambia
   useEffect(() => {
-    // Limpiar estados de carga inmediatamente al cambiar de ruta (incluyendo admin)
-    setLoading(false);
-    setBlockingLoading(false);
-    if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
-    if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
-    
-    // Si está en admin o backoffice, no hacer nada más
     if (location.pathname.startsWith('/backoffice') || location.pathname.startsWith('/admin')) {
       return;
     }
@@ -137,11 +96,9 @@ function AppB2B() {
       setView('profile');
     } else if (view === 'profile') {
       setView('table');
-      // Refrescar rubros al volver del perfil por si hubo cambios
       loadRubros();
     }
     
-    // Fetch credits whenever ID is available
     if (user?.id) {
       fetchCredits();
     }
@@ -233,19 +190,6 @@ function AppB2B() {
       }
     }
     
-    if (cachedStats) {
-      try {
-        setStats(JSON.parse(cachedStats));
-      } catch (e) {
-        console.error('Error parsing cached stats', e);
-      }
-    }
-
-    // No cargar empresas automáticamente de la API si ya recuperamos del cache o si no es necesario
-    // Solo cargar estadísticas frescas si no hay cacheadas o para actualizar
-    if (!cachedStats) {
-      // loadStats();
-    }
     loadRubros();
   }, [user?.id, loadRubros]); // Ejecutar al montar y cuando el usuario esté listo
 
@@ -264,16 +208,10 @@ function AppB2B() {
     } else {
       document.body.style.overflow = '';
       document.body.style.height = '';
-      // Limpiar timeout si se apaga manualmente
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-        loadingTimeoutRef.current = null;
-      }
     }
     return () => {
       document.body.style.overflow = '';
       document.body.style.height = '';
-      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
     };
   }, [blockingLoading]);
 
@@ -297,10 +235,8 @@ function AppB2B() {
   }, [loading, empresas.length, isFromHistory]);
 
   useEffect(() => {
-    if (stats) {
-      sessionStorage.setItem('b2b_stats_cache', JSON.stringify(stats));
-    }
-  }, [stats]);
+    // Stats removed as they are not used and caused ReferenceError
+  }, []);
   
   // Manejar selección desde historial de búsquedas
   const handleSelectFromHistory = (searchData) => {
@@ -422,45 +358,26 @@ function AppB2B() {
     }
 
     try {
-      const response = await api.post('/api/exportar', {
-        rubro: filtroRubro,
+      // Using leadsService instead of undefined 'api'
+      const response = await leadsService.exportLeads({
         formato: 'pdf',
-        solo_validas: filtroSoloValidas,
         user_id: user?.id || 'anonymous'
-      }, {
-        responseType: 'blob' // Importante para manejar binarios
       });
 
-      // Crear un objeto URL para el blob y descargarlo
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      
-      const now = new Date();
-      const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-      a.download = `Smart_Leads_${timestamp}.pdf`;
-      
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      success("Archivo PDF generado e iniciando descarga");
+      if (response && response.success) {
+        success("Archivo PDF generado");
+      } else {
+        toastError("Error al generar PDF");
+      }
     } catch (err) {
       console.error('Error exportando:', err);
-      if (err.response?.status === 402) {
-        toastError("Créditos insuficientes para exportar. Necesitás 100 créditos.");
-      } else {
-        toastError("Error al exportar los datos. Intenta nuevamente.");
-      }
+      toastError("Error al exportar los datos. Intenta nuevamente.");
     }
   };
 
   const handleDeleteResults = () => {
     // Solo limpiar estado local, no borrar de la BD
     setEmpresas([]);
-    setStats({ total: 0, validadas: 0 });
     // Limpiar también sessionStorage
     sessionStorage.removeItem('b2b_empresas_cache');
     sessionStorage.removeItem('b2b_stats_cache');
