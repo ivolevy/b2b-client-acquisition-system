@@ -57,7 +57,7 @@ function AppB2B() {
     loading,
     blockingLoading,
     searchProgress,
-    displayProgress,
+    displayProgress, setDisplayProgress,
     handleBuscar,
     handleCancelSearch
   } = useLeads(user, { success, error: toastError, warning, info }, () => fetchCredits());
