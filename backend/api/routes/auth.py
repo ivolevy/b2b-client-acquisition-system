@@ -156,7 +156,6 @@ async def outlook_disconnect(request: DisconnectRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/status/{user_id}")
 async def auth_status_global(user_id: str):
     """Estado de todas las conexiones, incluyendo errores de sincronización"""
     google = get_user_oauth_token(user_id, 'google')

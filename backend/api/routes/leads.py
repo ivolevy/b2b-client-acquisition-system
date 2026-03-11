@@ -105,22 +105,20 @@ except ImportError:
         def listar_rubros_disponibles(): return {}
 
 try:
-    from backend.google_places_client import google_client
+    from backend.google_places import google_client
 except ImportError:
     try:
-        from google_places_client import google_client
+        from google_places import google_client
     except ImportError:
         logger.error("No se pudo cargar google_client")
 
 try:
-    from backend.scraper_parallel import enriquecer_empresas_paralelo
-    from backend.scraper import ScraperSession
+    from backend.lead_enricher import enriquecer_empresas_paralelo, ScraperSession
 except ImportError:
     try:
-        from scraper_parallel import enriquecer_empresas_paralelo
-        from scraper import ScraperSession
+        from lead_enricher import enriquecer_empresas_paralelo, ScraperSession
     except ImportError:
-        logger.error("No se pudo cargar scraper_parallel o scraper")
+        logger.error("No se pudo cargar lead_enricher")
 
 try:
     from backend.geocoding import calcular_distancia_km
@@ -192,7 +190,6 @@ def obtener_rubros():
         }
     }
 
-@router.post("/api/buscar-stream")
 async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
     """
     Versión Streaming de búsqueda: envía prospectos en tiempo real

@@ -123,7 +123,7 @@ export function useLeads(user, toasts, fetchCredits) {
       
       const processBuffer = (chunk) => {
         buffer += chunk;
-        const parts = buffer.split('\n\n'); 
+        const parts = buffer.split('\\n\\n'); // Need to use literal \n\n, let's use newline character directly
         buffer = parts.pop();
 
         for (const part of parts) {
