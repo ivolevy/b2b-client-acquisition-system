@@ -105,20 +105,20 @@ except ImportError:
         def listar_rubros_disponibles(): return {}
 
 try:
-    from backend.google_places import google_client
+    from backend.google_places_client import google_client
 except ImportError:
     try:
-        from google_places import google_client
+        from google_places_client import google_client
     except ImportError:
         logger.error("No se pudo cargar google_client")
 
 try:
-    from backend.lead_enricher import enriquecer_empresas_paralelo, ScraperSession
+    from backend.scraper_parallel import enriquecer_empresas_paralelo, ScraperSession
 except ImportError:
     try:
-        from lead_enricher import enriquecer_empresas_paralelo, ScraperSession
+        from scraper_parallel import enriquecer_empresas_paralelo, ScraperSession
     except ImportError:
-        logger.error("No se pudo cargar lead_enricher")
+        logger.error("No se pudo cargar lead_enricher (scraper_parallel)")
 
 try:
     from backend.geocoding import calcular_distancia_km
@@ -129,20 +129,15 @@ except ImportError:
         def calcular_distancia_km(*args): return None
 
 try:
-    from backend.ai_service import apply_smart_filter
+    from backend.smart_filter_service import apply_smart_filter
 except ImportError:
     try:
-        from ai_service import apply_smart_filter
+        from smart_filter_service import apply_smart_filter
     except ImportError:
-        logger.error("No se pudo cargar ai_service")
+        logger.error("No se pudo cargar ai_service (smart_filter_service)")
 
-try:
-    from backend.export_utils import exportar_a_csv, exportar_a_json
-except ImportError:
-    try:
-        from export_utils import exportar_a_csv, exportar_a_json
-    except ImportError:
-        logger.error("No se pudo cargar export_utils")
+# export_utils functions are now in db_supabase
+from backend.db_supabase import exportar_a_csv, exportar_a_json
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Leads"])
@@ -190,6 +185,7 @@ def obtener_rubros():
         }
     }
 
+@router.post("/api/buscar-stream")
 async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
     """
     Versión Streaming de búsqueda: envía prospectos en tiempo real

@@ -1400,3 +1400,26 @@ def cancel_user_plan(user_id: str) -> bool:
     except Exception as e:
         logger.error(f"Error cancelando plan para {user_id}: {e}")
         return False
+
+def buscar_empresas_multiples_rubros(
+    rubros: List[str],
+    pais: Optional[str] = None,
+    ciudad: Optional[str] = None
+) -> Dict[str, List[Dict]]:
+    """Busca empresas para múltiples rubros simultáneamente"""
+    resultados = {}
+    for rubro in rubros:
+        try:
+            # Reutilizar buscar_empresas (que ya tiene lógica de reintento)
+            empresas = buscar_empresas(rubro=rubro, ciudad=ciudad)
+            resultados[rubro] = empresas
+        except Exception as e:
+            logger.error(f"Error en búsqueda múltiple para rubro {rubro}: {e}")
+            resultados[rubro] = []
+    
+    return resultados
+
+def limpiar_base_datos() -> bool:
+    """Implementación de seguridad: No permite limpieza masiva de Supabase vía API pública"""
+    logger.warning("Intento de limpiar base de datos bloqueado por seguridad en producción")
+    return False
