@@ -8,27 +8,141 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 from pydantic import BaseModel
 
+logger = logging.getLogger(__name__)
+SEARCH_PROGRESS = {}
+
+def update_search_progress(task_id, current, total, phase="scraping"):
+    """
+    Actualiza el progreso de una búsqueda en la base de datos Supabase
+    """
+    if not task_id:
+        return
+        
+    if phase == "searching":
+        percent = int((current / (total or 1)) * 15)
+        msg = "Buscando prospectos en el área..."
+    elif phase == "scraping":
+        percent = 15 + int((current / (total or 1)) * 70)
+        msg = f"Rastreando sitios web ({current}/{total})..."
+    else: # finalizing
+        percent = 85 + int((current / (total or 1)) * 15)
+        msg = f"Finalizando y validando ({current}/{total})..."
+    
+    # Asegurar que no pasamos de 100 ni bajamos de 0
+    percent = max(0, min(100, percent))
+    
+    # Actualizar en memoria local para compatibilidad
+    global SEARCH_PROGRESS
+    SEARCH_PROGRESS[task_id] = {
+        "progress": percent,
+        "message": msg,
+        "percent": percent # Para compatibilidad con frontend que a veces usa percent
+    }
+    
+    try:
+        from backend.db_supabase import get_supabase_admin
+        admin_client = get_supabase_admin()
+        if admin_client:
+            admin_client.table('search_tasks').update({
+                'progress': percent,
+                'message': msg,
+                'updated_at': 'now()'
+            }).eq('id', task_id).execute()
+    except Exception as e:
+        logger.error(f"Error actualizando progreso en Supabase para tarea {task_id}: {e}")
+
 try:
     from backend.api.schemas import (
         BusquedaRubroRequest, BusquedaMultipleRequest, FiltroRequest,
         ExportRequest, ActualizarEstadoRequest, ActualizarNotasRequest
     )
+except ImportError:
+    try:
+        from api.schemas import (
+            BusquedaRubroRequest, BusquedaMultipleRequest, FiltroRequest,
+            ExportRequest, ActualizarEstadoRequest, ActualizarNotasRequest
+        )
+    except ImportError:
+        logger.error("No se pudieron cargar Schemas")
+
+try:
     from backend.api.dependencies import get_current_admin
+except ImportError:
+    try:
+        from api.dependencies import get_current_admin
+    except ImportError:
+        logger.error("No se pudo cargar get_current_admin")
+
+try:
     from backend.db_supabase import (
         check_reset_monthly_credits, deduct_credits,
-        insertar_empresa, update_search_progress, SEARCH_PROGRESS,
+        insertar_empresa, 
         obtener_todas_empresas, buscar_empresas_multiples_rubros, buscar_empresas,
-        obtener_estadisticas, limpiar_base_datos, get_supabase_admin
+        obtener_estadisticas, limpiar_base_datos, get_supabase_admin,
+        exportar_a_pdf
     )
-    from backend.rubros_config import listar_rubros_disponibles, RUBROS_DISPONIBLES
-    from backend.google_places import google_client
-    from backend.lead_enricher import enriquecer_empresas_paralelo, ScraperSession
-    from backend.geocoding import calcular_distancia_km
-    from backend.ai_service import apply_smart_filter
-    from backend.export_utils import exportar_a_csv, exportar_a_json
-    from backend.db_supabase import exportar_a_pdf
 except ImportError:
-    pass
+    try:
+        from db_supabase import (
+            check_reset_monthly_credits, deduct_credits,
+            insertar_empresa, 
+            obtener_todas_empresas, buscar_empresas_multiples_rubros, buscar_empresas,
+            obtener_estadisticas, limpiar_base_datos, get_supabase_admin,
+            exportar_a_pdf
+        )
+    except ImportError:
+        logger.error("No se pudieron cargar funciones de db_supabase")
+
+
+try:
+    from backend.rubros_config import listar_rubros_disponibles, RUBROS_DISPONIBLES
+except ImportError:
+    try:
+        from rubros_config import listar_rubros_disponibles, RUBROS_DISPONIBLES
+    except ImportError:
+        logger.error("No se pudo cargar rubros_config. Usando fallback vacío.")
+        RUBROS_DISPONIBLES = {}
+        def listar_rubros_disponibles(): return {}
+
+try:
+    from backend.google_places import google_client
+except ImportError:
+    try:
+        from google_places import google_client
+    except ImportError:
+        logger.error("No se pudo cargar google_client")
+
+try:
+    from backend.lead_enricher import enriquecer_empresas_paralelo, ScraperSession
+except ImportError:
+    try:
+        from lead_enricher import enriquecer_empresas_paralelo, ScraperSession
+    except ImportError:
+        logger.error("No se pudo cargar lead_enricher")
+
+try:
+    from backend.geocoding import calcular_distancia_km
+except ImportError:
+    try:
+        from geocoding import calcular_distancia_km
+    except ImportError:
+        def calcular_distancia_km(*args): return None
+
+try:
+    from backend.ai_service import apply_smart_filter
+except ImportError:
+    try:
+        from ai_service import apply_smart_filter
+    except ImportError:
+        logger.error("No se pudo cargar ai_service")
+
+try:
+    from backend.export_utils import exportar_a_csv, exportar_a_json
+except ImportError:
+    try:
+        from export_utils import exportar_a_csv, exportar_a_json
+    except ImportError:
+        logger.error("No se pudo cargar export_utils")
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Leads"])
