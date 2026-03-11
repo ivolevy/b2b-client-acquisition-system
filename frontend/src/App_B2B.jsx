@@ -27,22 +27,26 @@ import { useToast } from './hooks/useToast';
 import { useAuth } from './context/AuthContext';
 import { searchHistoryService } from './lib/supabase';
 import { API_URL } from './config';
-import { useLeads } from './hooks/useLeads';
-import { leadsService } from './services/leads.service';
-import { userService } from './services/user.service';
-import { aiService } from './services/ai.service';
 import './App.css';
 import './components/TableView.css';
 
 function AppB2B() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
-  const { user } = useAuth();
+  // Estados de carga
+  const [loading, setLoading] = useState(false);
+  const [blockingLoading, setBlockingLoading] = useState(false);
+  const [creditsLoading, setCreditsLoading] = useState(false);
+  
+  // Estados de datos
+  const [empresas, setEmpresas] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [rubros, setRubros] = useState({});
+  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, total_credits: 0, next_reset: null });
   
   // UI States
-  const [creditsLoading, setCreditsLoading] = useState(false);
-  const [creditsInfo, setCreditsInfo] = useState({ credits: 0, total_credits: 0, next_reset: null });
+  const [searchProgress, setSearchProgress] = useState({ percent: 0, message: '' });
+  const [displayProgress, setDisplayProgress] = useState(0); 
   const [showEmailSender, setShowEmailSender] = useState(false);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
   const [historySearchData, setHistorySearchData] = useState(null);
@@ -50,34 +54,28 @@ function AppB2B() {
   const [isFromHistory, setIsFromHistory] = useState(false);
   const [showGlobalAi, setShowGlobalAi] = useState(false);
 
-  // States from hook
-  const {
-    empresas, setEmpresas,
-    rubros, loadRubros,
-    loading,
-    blockingLoading,
-    searchProgress,
-    displayProgress, setDisplayProgress,
-    handleBuscar,
-    handleCancelSearch
-  } = useLeads(user, { success, error: toastError, warning, info }, () => fetchCredits());
-
   // Determinar la vista basada en la ruta
   const isProfilePage = location.pathname === '/profile';
   const [view, setView] = useState(isProfilePage ? 'profile' : 'table');
 
+  const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
+  const { user } = useAuth();
+  
   // Plan Logic
   const plan = user?.plan || 'essential';
   const isAgency = plan === 'agency' || user?.role === 'admin';
   const isGrowthOrHigher = ['growth', 'agency'].includes(plan) || user?.role === 'admin';
+  
+  const loadingIntervalRef = useRef(null);
+  const loadingTimeoutRef = useRef(null); 
 
   const fetchCredits = useCallback(async () => {
     if (!user?.id) return;
     setCreditsLoading(true);
     try {
-      const data = await userService.getCredits(user.id);
-      if (data) {
-        setCreditsInfo(data);
+      const response = await axios.get(`${API_URL}/api/users/${user.id}/credits?_t=${Date.now()}`);
+      if (response.data) {
+        setCreditsInfo(response.data);
       }
     } catch (error) {
       console.error('Error fetching credits in AppB2B:', error);
@@ -86,8 +84,47 @@ function AppB2B() {
     }
   }, [user?.id]);
 
+  const loadRubros = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/rubros`);
+      if (response.data && response.data.rubros) {
+        setRubros(response.data.rubros);
+      } else {
+        setRubros({});
+      }
+    } catch (error) {
+      console.error('Error al cargar rubros:', error);
+      setRubros({});
+    }
+  }, []);
+
+  const loadEmpresas = async (showError = true) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/api/empresas`);
+      setEmpresas(response.data.data || []);
+    } catch (err) {
+      console.error('Error al cargar empresas:', err);
+      if (showError) {
+        const errorMsg = err.response?.data?.detail || err.message;
+        if (err.code === 'ERR_NETWORK' || err.response?.status >= 500) {
+          toastError("Error al cargar empresas");
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   // Sincronizar vista con la ruta cuando cambia
   useEffect(() => {
+    // Limpiar estados de carga inmediatamente al cambiar de ruta (incluyendo admin)
+    setLoading(false);
+    setBlockingLoading(false);
+    if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+    if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
+    
+    // Si está en admin o backoffice, no hacer nada más
     if (location.pathname.startsWith('/backoffice') || location.pathname.startsWith('/admin')) {
       return;
     }
@@ -96,9 +133,11 @@ function AppB2B() {
       setView('profile');
     } else if (view === 'profile') {
       setView('table');
+      // Refrescar rubros al volver del perfil por si hubo cambios
       loadRubros();
     }
     
+    // Fetch credits whenever ID is available
     if (user?.id) {
       fetchCredits();
     }
@@ -190,6 +229,19 @@ function AppB2B() {
       }
     }
     
+    if (cachedStats) {
+      try {
+        setStats(JSON.parse(cachedStats));
+      } catch (e) {
+        console.error('Error parsing cached stats', e);
+      }
+    }
+
+    // No cargar empresas automáticamente de la API si ya recuperamos del cache o si no es necesario
+    // Solo cargar estadísticas frescas si no hay cacheadas o para actualizar
+    if (!cachedStats) {
+      // loadStats();
+    }
     loadRubros();
   }, [user?.id, loadRubros]); // Ejecutar al montar y cuando el usuario esté listo
 
@@ -208,10 +260,16 @@ function AppB2B() {
     } else {
       document.body.style.overflow = '';
       document.body.style.height = '';
+      // Limpiar timeout si se apaga manualmente
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
     }
     return () => {
       document.body.style.overflow = '';
       document.body.style.height = '';
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
     };
   }, [blockingLoading]);
 
@@ -235,8 +293,10 @@ function AppB2B() {
   }, [loading, empresas.length, isFromHistory]);
 
   useEffect(() => {
-    // Stats removed as they are not used and caused ReferenceError
-  }, []);
+    if (stats) {
+      sessionStorage.setItem('b2b_stats_cache', JSON.stringify(stats));
+    }
+  }, [stats]);
   
   // Manejar selección desde historial de búsquedas
   const handleSelectFromHistory = (searchData) => {
@@ -250,15 +310,225 @@ function AppB2B() {
     // Stats disabled per user request
   };
 
+  /* ----------------------------------------------------------------------------------
+   * REF PARA SEGUIR EL PROGRESO VISUAL DENTRO DE FUNCIONES ASÍNCRONAS
+   * ---------------------------------------------------------------------------------- */
+  const displayProgressRef = useRef(0);
+
+  // Mantener el ref sincronizado con el estado visual
+  useEffect(() => {
+    displayProgressRef.current = displayProgress;
+  }, [displayProgress]);
+
+  // Ref para trackear el taskId actual y evitar race conditions
+  const currentTaskIdRef = useRef(null);
+  
+  // Función para esperar a que la barra llegue visualmente al 100%
+  const waitForVisualCompletion = async () => {
+    // Esperar hasta que la barra esté casi llena (>99%)
+    // Timeout de seguridad de 5s por si acaso
+    let attempts = 0;
+    while (displayProgressRef.current < 99 && attempts < 50) {
+      await new Promise(r => setTimeout(r, 100)); // Chequear cada 100ms
+      attempts++;
+    }
+    // Una vez que llegó al 100%, esperar 1 segundo extra para que el usuario lo registre
+    await new Promise(r => setTimeout(r, 1000));
+  };
+
+
+  /* ----------------------------------------------------------------------------------
+   * MANEJO DE BUSQUEDA
+   * ---------------------------------------------------------------------------------- */
+  const handleBuscar = async (params) => {
+    try {
+      setLoading(true);
+      setBlockingLoading(true);
+      setSearchProgress({ percent: 0, message: 'Iniciando búsqueda...' });
+      setDisplayProgress(0);
+      setEmpresas([]); 
+
+      // Timeout de seguridad
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = setTimeout(() => {
+        if (loading) {
+          setBlockingLoading(false);
+          setLoading(false);
+          toastError?.('Tiempo de espera agotado');
+        }
+      }, 120000); 
+
+      const paramsWithUser = { ...params, user_id: user?.id };
+      
+      // Manejo de Audio para Smart Filter
+      if (params.smart_filter_audio_blob) {
+        try {
+            setSearchProgress({ percent: 0, message: '🎙️ Transcribiendo audio...' });
+            
+            const formData = new FormData();
+            formData.append('file', params.smart_filter_audio_blob);
+            
+            const transcribeResponse = await axios.post(`${API_URL}/api/ai/transcribe`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            if (transcribeResponse.data && transcribeResponse.data.text) {
+                // Actualizar el texto del filtro con la transcripción
+                paramsWithUser.smart_filter_text = transcribeResponse.data.text;
+                success(`Audio transcribido: "${transcribeResponse.data.text.substring(0, 30)}..."`);
+            }
+        } catch (audioErr) {
+            console.error("Error transcribiendo audio:", audioErr);
+            warning("No se pudo transcribir el audio. Se usará solo el texto.");
+        }
+        // Limpiar el blob para no enviarlo al endpoint de búsqueda
+        delete paramsWithUser.smart_filter_audio_blob;
+      }
+
+      const response = await fetch(`${API_URL}/api/buscar-stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paramsWithUser),
+      });
+
+      setSearchProgress({ percent: 0, message: 'Iniciando búsqueda...' });
+      setDisplayProgress(0);
+      setEmpresas([]); 
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Error en la búsqueda');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      let accumulatedLeads = [];
+      
+      const processBuffer = (chunk) => {
+        buffer += chunk;
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop();
+
+        for (const part of parts) {
+          const line = part.trim();
+          if (line.startsWith('data: ')) {
+            try {
+              const eventPayload = JSON.parse(line.substring(6));
+              if (eventPayload.type === 'status') {
+                setSearchProgress(prev => ({ ...prev, message: eventPayload.message }));
+                if (eventPayload.message.includes('Iniciando')) setDisplayProgress(5);
+              } 
+              else if (eventPayload.type === 'lead') {
+                const exists = accumulatedLeads.some(e => e.google_id === eventPayload.data.google_id);
+                if (!exists) accumulatedLeads.push(eventPayload.data);
+                setDisplayProgress(prev => Math.min(prev + 0.3, 85));
+              }
+              else if (eventPayload.type === 'update') {
+                accumulatedLeads = accumulatedLeads.map(e => 
+                  e.google_id === eventPayload.data.google_id ? { ...e, ...eventPayload.data } : e
+                );
+              }
+              else if (eventPayload.type === 'complete') {
+                setEmpresas([...accumulatedLeads]);
+                setSearchProgress({ percent: 100, message: '¡Búsqueda completada!' });
+                setDisplayProgress(100);
+              }
+            } catch (e) {
+              console.warn('Error parsing stream event:', e);
+            }
+          }
+        }
+      };
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        processBuffer(decoder.decode(value, { stream: true }));
+      }
+      
+      // Procesar cualquier resto en el buffer al cerrar
+      if (buffer.trim()) processBuffer('');
+
+      // Garantía final de visualización
+      setEmpresas([...accumulatedLeads]);
+
+      // Finalización
+      setSearchProgress({ percent: 100, message: '¡Listo!' });
+      await waitForVisualCompletion();
+      
+      if (user?.id && !isFromHistory) {
+        // Guardar en historial al finalizar (usamos el estado actual)
+        setEmpresas(currentEmpresas => {
+          if (currentEmpresas.length > 0) {
+            searchHistoryService.saveSearch(user.id, {
+              rubro: params.rubro,
+              ubicacion_nombre: params.busqueda_ubicacion_nombre,
+              centro_lat: params.busqueda_centro_lat,
+              centro_lng: params.busqueda_centro_lng,
+              radio_km: params.busqueda_radio_km,
+              bbox: params.bbox,
+              empresas_encontradas: currentEmpresas.length,
+              empresas_validas: currentEmpresas.filter(e => e.email || e.telefono).length
+            }).catch(e => console.warn('Error historial:', e));
+          }
+          return currentEmpresas;
+        });
+      }
+
+      // Limpiar estados de búsqueda del historial
+      if (isFromHistory) {
+        setIsFromHistory(false);
+        setHistorySearchData(null);
+      }
+
+      fetchCredits(); // Actualizar créditos al finalizar
+      success("Búsqueda completada con éxito");
+
+    } catch (err) {
+      console.error('Error en búsqueda stream:', err);
+      toastError(err.message || "Error en la búsqueda");
+    } finally {
+      setBlockingLoading(false);
+      setLoading(false);
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+    }
+  };
+
+  const handleCancelSearch = () => {
+    // 1. Limpiar intervalo de polling y timeout
+    if (loadingIntervalRef.current) {
+      clearInterval(loadingIntervalRef.current);
+      loadingIntervalRef.current = null;
+    }
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+
+    // 2. Resetear estados de carga y progreso
+    setLoading(false);
+    setBlockingLoading(false);
+    setSearchProgress({ percent: 0, message: '' });
+    setDisplayProgress(0);
+
+    // 3. Notificar al usuario (opcional, o simplemente cerrar silenciosamente)
+    info("Búsqueda cancelada");
+  };
+
+
   const handleExportCSV = async () => {
     try {
-      const data = await leadsService.exportLeads({
+      const response = await axios.post(`${API_URL}/exportar`, {
         formato: 'csv',
         solo_validas: true,
         user_id: user?.id
       });
       
-      if (data.success) {
+      if (response.data.success) {
         success("Archivo exportado");
       }
     } catch (err) {
@@ -358,26 +628,45 @@ function AppB2B() {
     }
 
     try {
-      // Using leadsService instead of undefined 'api'
-      const response = await leadsService.exportLeads({
+      const response = await api.post('/api/exportar', {
+        rubro: filtroRubro,
         formato: 'pdf',
+        solo_validas: filtroSoloValidas,
         user_id: user?.id || 'anonymous'
+      }, {
+        responseType: 'blob' // Importante para manejar binarios
       });
 
-      if (response && response.success) {
-        success("Archivo PDF generado");
-      } else {
-        toastError("Error al generar PDF");
-      }
+      // Crear un objeto URL para el blob y descargarlo
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      const now = new Date();
+      const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      a.download = `Smart_Leads_${timestamp}.pdf`;
+      
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      success("Archivo PDF generado e iniciando descarga");
     } catch (err) {
       console.error('Error exportando:', err);
-      toastError("Error al exportar los datos. Intenta nuevamente.");
+      if (err.response?.status === 402) {
+        toastError("Créditos insuficientes para exportar. Necesitás 100 créditos.");
+      } else {
+        toastError("Error al exportar los datos. Intenta nuevamente.");
+      }
     }
   };
 
   const handleDeleteResults = () => {
     // Solo limpiar estado local, no borrar de la BD
     setEmpresas([]);
+    setStats({ total: 0, validadas: 0 });
     // Limpiar también sessionStorage
     sessionStorage.removeItem('b2b_empresas_cache');
     sessionStorage.removeItem('b2b_stats_cache');
@@ -491,7 +780,7 @@ function AppB2B() {
                 type="button"
                 className={view === 'whatsapp' ? 'active' : ''}
                 onClick={() => {
-                   info("El módulo de WhatsApp estará disponible próximamente.");
+                   info("El envío por WhatsApp estará disponible próximamente.");
                 }}
                 style={{ opacity: 0.6, cursor: 'not-allowed' }}
               >
@@ -499,7 +788,6 @@ function AppB2B() {
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
                 </svg>
                 WhatsApp (Próximamente)
-                <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>
               </button>
               <button 
                 type="button"

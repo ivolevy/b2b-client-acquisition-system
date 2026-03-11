@@ -121,20 +121,13 @@ function TemplateManager({ userId, onClose, type: initialType = 'email', embedde
               </button>
               <button 
                 className={`type-pill ${type === 'whatsapp' ? 'active' : ''}`}
-                onClick={() => {}}
-                style={{ opacity: 0.5, cursor: 'not-allowed' }}
-                disabled
+                onClick={() => setType('whatsapp')}
               >
-                <FiMessageSquare /> WhatsApp (Próximamente)
+                <FiMessageSquare /> WhatsApp
               </button>
             </div>
 
-            <button 
-              className="btn-new-template" 
-              onClick={handleNewTemplate}
-              disabled={type === 'whatsapp'}
-              style={type === 'whatsapp' ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-            >
+            <button className="btn-new-template" onClick={handleNewTemplate}>
               <FiPlus /> Nueva {type === 'email' ? 'Plantilla Email' : 'Mensaje WhatsApp'}
             </button>
             
