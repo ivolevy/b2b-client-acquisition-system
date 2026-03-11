@@ -271,7 +271,7 @@
 
 /* --- NAVBAR (Floating Pill Style - Light Mode) --- */
 .landing-page {
-    background-color: #f1f5f9 !important;
+    background-color: #ffffff !important;
     color: var(--text-primary);
     min-height: 100vh;
     position: relative;
