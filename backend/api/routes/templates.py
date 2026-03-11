@@ -27,13 +27,15 @@ def get_user_id_from_header(request: Request) -> Optional[str]:
     return request.headers.get("X-User-ID")
 
 @router.get("")
-async def listar_templates(request: Request, type: Optional[str] = None):
+async def listar_templates(request: Request, type: Optional[str] = None, user_id: Optional[str] = None):
     """Lista todos los templates del usuario + defaults"""
-    user_id = get_user_id_from_header(request)
-    if not user_id:
-        raise HTTPException(status_code=401, detail="X-User-ID header missing")
+    header_user_id = get_user_id_from_header(request)
+    uid = header_user_id or user_id
+    
+    if not uid:
+        raise HTTPException(status_code=401, detail="X-User-ID header or user_id query param missing")
     try:
-        templates = db_get_templates(user_id, tipo=type)
+        templates = db_get_templates(uid, tipo=type)
         return {
             "success": True,
             "total": len(templates),

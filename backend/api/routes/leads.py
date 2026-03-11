@@ -190,6 +190,7 @@ def obtener_rubros():
         }
     }
 
+@router.post("/api/buscar-stream")
 async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
     """
     Versión Streaming de búsqueda: envía prospectos en tiempo real
