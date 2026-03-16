@@ -75,7 +75,7 @@ class GooglePlacesClient:
         bbox: Optional[Dict[str, float]] = None,
         max_results: int = 20,
         page_token: Optional[str] = None,
-        use_advanced: bool = True # Flag para optimizar costo
+        use_advanced: bool = True # Flag para optimizar costo - default True now to get website/phone
     ) -> Dict[str, Any]:
         """
         Realiza una búsqueda de lugares usando Text Search (New).
@@ -241,7 +241,7 @@ class GooglePlacesClient:
             lng=lng,
             radius=radius,
             bbox=bbox,
-            use_advanced=False # SKU básico ($17/1k)
+            use_advanced=True # SKU avanzado ($32/1k) para traer website y phone
         )
         
         if "error" not in data:
@@ -288,7 +288,7 @@ class GooglePlacesClient:
                 
                 data_page = await self.search_places(
                     query=optimized_query, lat=lat, lng=lng, radius=radius, bbox=bbox,
-                    page_token=current_page_token, use_advanced=False
+                    page_token=current_page_token, use_advanced=True
                 )
                 if "error" in data_page: break
                 

@@ -295,6 +295,9 @@ def enriquecer_empresa_b2b(empresa: Dict, session: Optional[ScraperSession] = No
         empresa['telefono'] = datos_scraped['telefonos'][0]
     
     empresa.update({
+        'instagram': datos_scraped.get('instagram', ''),
+        'youtube': datos_scraped.get('youtube', ''),
+        'tiktok': datos_scraped.get('tiktok', ''),
         'linkedin': datos_scraped.get('linkedin', ''),
         'facebook': datos_scraped.get('facebook', ''),
         'twitter': datos_scraped.get('twitter', ''),

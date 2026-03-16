@@ -148,6 +148,8 @@ export function useLeads(user, toasts, fetchCredits) {
                 accumulatedLeads = accumulatedLeads.map(e => 
                   e.google_id === eventPayload.data.google_id ? { ...e, ...eventPayload.data } : e
                 );
+                // Trigger re-render with updated leads
+                setEmpresas([...accumulatedLeads]);
               }
               else if (eventPayload.type === 'complete') {
                 setEmpresas([...accumulatedLeads]);
