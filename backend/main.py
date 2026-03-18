@@ -1,15 +1,3 @@
-"""
-API FastAPI para sistema B2B de captación de clientes por rubro
-Enfocado en empresas, no en propiedades por zona
-"""
-
-from fastapi import FastAPI, HTTPException, Request, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response, StreamingResponse, RedirectResponse, HTMLResponse
-from starlette.middleware.base import BaseHTTPMiddleware
-from pydantic import BaseModel
-from backend.api.schemas import *
-from typing import Optional, List, Dict, Any
 import logging
 import sys
 import os
@@ -22,6 +10,14 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 if current_dir not in sys.path:
     sys.path.append(current_dir)
+
+from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response, StreamingResponse, RedirectResponse, HTMLResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from pydantic import BaseModel
+from backend.api.schemas import *
+from typing import Optional, List, Dict, Any
 import time
 import asyncio
 import math

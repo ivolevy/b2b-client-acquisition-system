@@ -3,6 +3,15 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import { useAuth } from '../context/AuthContext';
 import './Automations.css';
+import { 
+    Bolt as FlashIcon, 
+    AutoAwesome as SparklesIcon,
+    SmartToy as AiIcon, 
+    Send as SendIcon,
+    Add as AddIcon,
+    Close as CloseIcon,
+    AccessTime as WaitIcon
+} from '@mui/icons-material';
 
 const Automations = ({ toastSuccess, toastError, toastWarning }) => {
     const { user } = useAuth();
@@ -162,54 +171,37 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
             <div className="automations-header">
                 <div className="header-info">
                     <h2>
-                        Triggers IA
+                        <SparklesIcon sx={{ fontSize: '1.8rem', color: 'var(--primary)' }} /> Triggers IA
                     </h2>
-                    <p>Automatiza tu flujo de ventas con inteligencia artificial. Conecta eventos del buscador, el CRM y tu Outbox sin escribir código.</p>
+                    <p>Automatiza respuestas y flujos basados en intenciones detectadas.</p>
                 </div>
-                
+
                 <div className="header-actions">
-                    {!isFormOpen && (
-                        <button className="btn-premium" onClick={() => setIsFormOpen(true)}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Crear Nuevo Trigger
-                        </button>
-                    )}
+                    <button 
+                        className="btn-premium"
+                        onClick={() => setIsFormOpen(!isFormOpen)}
+                    >
+                        {isFormOpen ? <CloseIcon /> : <AddIcon />}
+                        {isFormOpen ? "Cancelar" : "Nuevo Trigger"}
+                    </button>
                 </div>
             </div>
 
             {isFormOpen && (
                 <div className="builder-container">
                     <div className="builder-title-section">
-                        <h3>Constructor de Flujos</h3>
-                        <p>Diseña paso a paso cómo debe reaccionar el sistema ante nuevos eventos.</p>
-                    </div>
-
-                    <div className="form-group" style={{marginBottom: '3rem'}}>
-                        <label className="node-label">Nombre de la Automatización</label>
-                        <input 
-                            className="app-input"
-                            type="text" 
-                            style={{maxWidth: '500px'}}
-                            placeholder="Ej: Auto-reply a pedidos..."
-                            value={formData.name}
-                            onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        />
+                        <h3>Configurar Automatización</h3>
+                        <p className="text-dim">Define el disparador, la condición y la acción resultante.</p>
                     </div>
 
                     <div className="builder-steps">
                         {/* STEP 1: TRIGGER */}
                         <div className="step-node">
                             <div className="node-icon icon-trigger">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-                                </svg>
+                                <FlashIcon />
                             </div>
                             <div className="node-content">
-                                <span className="node-label">1. DISPARADOR (TRIGGER)</span>
-                                <h4>¿Cuándo debe iniciar?</h4>
+                                <h4>Disparador</h4>
                                 <div className="node-inputs">
                                     <select 
                                         className="styled-select"
@@ -221,9 +213,6 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                         ))}
                                     </select>
                                 </div>
-                                <p className="node-desc">
-                                    {getTriggerInfo(formData.trigger_event).desc}
-                                </p>
                             </div>
                         </div>
 
@@ -232,14 +221,10 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                         {/* STEP 2: CONDITION */}
                         <div className="step-node">
                             <div className="node-icon icon-condition">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 3l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z"></path>
-                                    <path d="M19 14l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7z"></path>
-                                </svg>
+                                <AiIcon />
                             </div>
                             <div className="node-content">
-                                <span className="node-label">2. FILTRO (CONDITION)</span>
-                                <h4>¿Bajo qué condiciones?</h4>
+                                <h4>Condición</h4>
                                 <div className="node-inputs">
                                     <select 
                                         className="styled-select"
@@ -250,9 +235,9 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                             condition_value: e.target.value === 'ai_intent' ? { intent: '' } : { keyword: '' }
                                         })}
                                     >
-                                        <option value="no_condition">Sin condición (Siempre)</option>
-                                        <option value="ai_intent">Intención detectada por IA</option>
-                                        <option value="keyword">Contiene palabra clave</option>
+                                        <option value="no_condition">Siempre</option>
+                                        <option value="ai_intent">Intención IA</option>
+                                        <option value="keyword">Palabra Clave</option>
                                     </select>
 
                                     {formData.condition_type === 'ai_intent' && (
@@ -264,7 +249,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                                 condition_value: { intent: e.target.value }
                                             })}
                                         >
-                                            <option value="">-- Seleccionar intención --</option>
+                                            <option value="">-- Intención --</option>
                                             {definedIntents.map(intent => (
                                                 <option key={intent} value={intent}>{intent.replace(/_/g, ' ')}</option>
                                             ))}
@@ -275,8 +260,8 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                         <input 
                                             className="app-input"
                                             type="text"
-                                            placeholder="Palabra... (ej: presupuesto)"
-                                            value={formData.condition_value.keyword}
+                                            placeholder="Ej: presupuesto"
+                                            value={formData.condition_value.keyword || ''}
                                             onChange={(e) => setFormData({
                                                 ...formData,
                                                 condition_value: { keyword: e.target.value }
@@ -292,13 +277,10 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                         {/* STEP 3: ACTION */}
                         <div className="step-node">
                             <div className="node-icon icon-action">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <polyline points="9 18 15 12 9 6"></polyline>
-                                </svg>
+                                <SendIcon />
                             </div>
                             <div className="node-content">
-                                <span className="node-label">3. RESPUESTA (ACTION)</span>
-                                <h4>¿Qué acción realizar?</h4>
+                                <h4>Acción</h4>
                                 <div className="node-inputs">
                                     <select 
                                         className="styled-select"
@@ -309,9 +291,9 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                             action_payload: e.target.value === 'change_status' ? { status: 'interested' } : { template_id: '' }
                                         })}
                                     >
-                                        <option value="change_status">Mover Etapa del CRM</option>
-                                        <option value="send_template">Enviar Email Plantilla</option>
-                                        <option value="send_whatsapp">WhatsApp (Task)</option>
+                                        <option value="change_status">Mover Etapa</option>
+                                        <option value="send_template">Enviar Email</option>
+                                        <option value="send_whatsapp">WhatsApp (Tarea)</option>
                                     </select>
 
                                     {formData.action_type === 'change_status' && (
@@ -338,7 +320,7 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                                                 action_payload: { template_id: e.target.value }
                                             })}
                                         >
-                                            <option value="">-- Seleccionar Plantilla --</option>
+                                            <option value="">-- Plantilla --</option>
                                             {templates.map(t => (
                                                 <option key={t.id} value={t.id}>{t.nombre || t.name}</option>
                                             ))}
@@ -349,13 +331,23 @@ const Automations = ({ toastSuccess, toastError, toastWarning }) => {
                         </div>
                     </div>
 
-                    <div style={{marginTop: '4rem', display: 'flex', justifyContent: 'center', gap: '1.5rem'}}>
-                        <button className="btn-secondary" onClick={() => setIsFormOpen(false)}>
-                            Descartar
-                        </button>
-                        <button className="btn-premium" onClick={handleSaveRule} disabled={loading}>
-                            {loading ? 'Activando...' : 'Publicar Automatización'}
-                        </button>
+                    <div style={{marginTop: '2.5rem', display: 'flex', justifyContent: 'center', gap: '1rem', flexDirection: 'column', alignItems: 'center'}}>
+                        <input 
+                            className="app-input"
+                            type="text" 
+                            style={{width: '100%', maxWidth: '400px', textAlign: 'center', fontWeight: 600}}
+                            placeholder="Nombre de la regla..."
+                            value={formData.name}
+                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        />
+                        <div style={{display: 'flex', gap: '1rem', marginTop: '0.5rem'}}>
+                            <button className="btn-secondary" style={{padding: '0.6rem 1.5rem'}} onClick={() => setIsFormOpen(false)}>
+                                Descartar
+                            </button>
+                            <button className="btn-premium" style={{padding: '0.6rem 2rem'}} onClick={handleSaveRule} disabled={loading}>
+                                {loading ? 'Activando...' : 'Publicar'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

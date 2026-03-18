@@ -44,6 +44,7 @@ const KanbanBoard = ({ conversations, onSelectConversation, onDeleteConversation
     { id: 'waiting_reply', title: 'Seguimiento', color: '#f59e0b' },
     { id: 'interested', title: 'Interesado', color: '#3b82f6' },
     { id: 'not_interested', title: 'Poco Interés', color: '#64748b' },
+    { id: 'desisted', title: 'Para Recontactar', color: '#8b5cf6' },
     { id: 'converted', title: '¡Éxito!', color: '#10b981' },
   ];
 
@@ -58,16 +59,16 @@ const KanbanBoard = ({ conversations, onSelectConversation, onDeleteConversation
       onClick={() => onSelectConversation(conv)}
       sx={{ 
         mb: 2, 
-        bgcolor: conv.status === 'interested' ? '#e0f2fe' : conv.status === 'not_interested' ? '#f8fafc' : conv.status === 'converted' ? '#d1fae5' : '#ffffff', 
+        bgcolor: conv.status === 'interested' ? '#e0f2fe' : conv.status === 'not_interested' ? '#f8fafc' : conv.status === 'desisted' ? '#f3e8ff' : conv.status === 'converted' ? '#d1fae5' : '#ffffff', 
         border: '1px solid',
-        borderColor: conv.status === 'interested' ? 'rgba(59, 130, 246, 0.3)' : conv.status === 'not_interested' ? 'rgba(148, 163, 184, 0.2)' : conv.status === 'converted' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(0, 0, 0, 0.12)',
+        borderColor: conv.status === 'interested' ? 'rgba(59, 130, 246, 0.3)' : conv.status === 'not_interested' ? 'rgba(148, 163, 184, 0.2)' : conv.status === 'desisted' ? 'rgba(139, 92, 246, 0.3)' : conv.status === 'converted' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(0, 0, 0, 0.12)',
         borderRadius: '16px',
         cursor: 'pointer',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
         '&:hover': {
           transform: 'translateY(-4px)',
-          bgcolor: conv.status === 'interested' ? '#bae6fd' : conv.status === 'not_interested' ? '#f1f5f9' : conv.status === 'converted' ? '#a7f3d0' : '#ffffff',
+          bgcolor: conv.status === 'interested' ? '#bae6fd' : conv.status === 'not_interested' ? '#f1f5f9' : conv.status === 'desisted' ? '#ede9fe' : conv.status === 'converted' ? '#a7f3d0' : '#ffffff',
           boxShadow: '0 16px 32px rgba(0,0,0,0.12)'
         }
       }}

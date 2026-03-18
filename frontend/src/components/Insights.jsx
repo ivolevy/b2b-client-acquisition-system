@@ -51,7 +51,15 @@ const InsightsDashboard = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: '400px' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100%', 
+        minHeight: '400px',
+        bgcolor: '#ffffff',
+        borderRadius: '24px'
+      }}>
         <CircularProgress size={30} sx={{ color: 'var(--primary)' }} />
       </Box>
     );
@@ -61,6 +69,14 @@ const InsightsDashboard = () => {
     { label: 'Conversión', value: `${data?.kpis?.conversion_rate || 0}%`, icon: <TrendingUpIcon />, color: 'var(--success)', bg: '#f0fdf4' },
     { label: 'Leads Calientes', value: data?.kpis?.hot_leads || 0, icon: <FlashIcon />, color: 'var(--warning)', bg: '#fffbeb' },
     { label: 'Total Leads', value: data?.kpis?.total_leads || 0, icon: <BarChartIcon />, color: 'var(--primary)', bg: 'var(--primary-light)' },
+  ];
+
+  const funnelData = [
+    { name: 'Abiertos', value: data?.funnel?.open || 0, color: '#6366f1' },
+    { name: 'Seguimiento', value: data?.funnel?.waiting_reply || 0, color: '#f59e0b' },
+    { name: 'Interesado', value: data?.funnel?.interested || 0, color: '#3b82f6' },
+    { name: 'Para Recontactar', value: data?.funnel?.desisted || 0, color: '#8b5cf6' },
+    { name: '¡Éxito!', value: data?.funnel?.converted || 0, color: '#10b981' },
   ];
 
   const intentStats = data?.intents || [];

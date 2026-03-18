@@ -1,21 +1,20 @@
 /* --- AUTOMATIONS MODULE: THE PREMIUM REBIRTH --- */
 
 #automations-root {
-    padding: 1.5rem 2rem !important;
+    padding: 1.5rem 2.5rem !important;
     min-height: calc(100vh - 140px);
     background: #ffffff !important;
-    color: #0f172a !important;
-    border-radius: 0 0 2.5rem 2.5rem !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
-    font-family: inherit !important;
+    color: #1e293b !important;
+    border-radius: 0 0 2rem 2rem !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
 }
 
 #automations-root .automations-content {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 3rem !important;
+    gap: 2rem !important;
     align-items: flex-start !important;
-    margin-top: 2rem !important;
+    margin-top: 1rem !important;
 }
 
 #automations-root .rules-section {
@@ -44,13 +43,14 @@
 
 /* --- HEADER --- */
 #automations-root .automations-header {
-    margin-bottom: 3rem !important;
+    margin-bottom: 2rem !important;
     display: flex !important;
     justify-content: space-between !important;
-    align-items: flex-start !important;
+    align-items: flex-end !important;
     gap: 2rem !important;
     position: relative !important;
-    padding-bottom: 2rem !important;
+    padding-bottom: 1.5rem !important;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 #automations-root .automations-header .header-info {
@@ -61,25 +61,25 @@
 }
 
 #automations-root .automations-header h2 {
-    font-size: 1.75rem !important;
-    font-weight: 800 !important;
-    letter-spacing: -0.04em !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
     color: #0f172a !important;
     margin: 0 !important;
     display: flex !important;
     align-items: center !important;
-    gap: 0.75rem !important;
+    gap: 0.5rem !important;
 }
 
 #automations-root .automations-header h2 svg {
-    width: 40px !important;
-    height: 40px !important;
+    width: 28px !important;
+    height: 28px !important;
     color: var(--primary);
 }
 
 #automations-root .automations-header p {
-    font-size: 1.1rem !important;
-    color: #475569 !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
     margin: 0 !important;
 }
 
@@ -136,12 +136,16 @@
 /* --- WORKFLOW BUILDER (THE ZAPIER FEEL) --- */
 #automations-root .builder-container {
     background: #ffffff !important;
-    border: 1px solid var(--gray-200) !important;
-    border-radius: 2rem !important;
-    padding: 2rem !important;
-    margin-bottom: 3rem !important;
-    box-shadow: var(--shadow-md) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 1.25rem !important;
+    padding: 1.25rem 2rem !important;
+    margin-bottom: 2rem !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.04) !important;
     animation: slideUp 0.4s ease-out !important;
+    max-width: 800px !important;
+    /* Center the form */
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 @keyframes slideUp {
@@ -162,9 +166,10 @@
 }
 
 #automations-root .builder-title-section h3 {
-    font-size: 2.25rem !important;
-    margin-bottom: 0.5rem !important;
-    color: #0f172a !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.1rem !important;
+    color: #1e293b !important;
 }
 
 #automations-root .builder-steps {
@@ -177,14 +182,14 @@
 
 #automations-root .step-node {
     width: 100% !important;
-    max-width: 800px !important;
-    background: #f8fafc !important;
-    border-radius: 1rem !important;
-    padding: 1.5rem 2rem !important;
-    border: 1px solid #e2e8f0 !important;
+    max-width: 650px !important;
+    background: #ffffff !important;
+    border-radius: 0.75rem !important;
+    padding: 0.75rem 1.25rem !important;
+    border: 1px solid #f1f5f9 !important;
     display: grid !important;
-    grid-template-columns: 60px 1fr !important;
-    gap: 1.5rem !important;
+    grid-template-columns: 40px 1fr !important;
+    gap: 1rem !important;
     position: relative !important;
     transition: all 0.2s ease !important;
 }
@@ -195,13 +200,17 @@
 }
 
 #automations-root .node-icon {
-    width: 60px !important;
-    height: 60px !important;
-    border-radius: 0.75rem !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 0.5rem !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     color: white !important;
+}
+#automations-root .node-icon svg {
+    width: 20px !important;
+    height: 20px !important;
 }
 
 #automations-root .icon-trigger {
@@ -217,9 +226,9 @@
 }
 
 #automations-root .node-content h4 {
-    font-size: 1.25rem !important;
-    margin-bottom: 0.25rem !important;
-    color: #0f172a !important;
+    font-size: 1rem !important;
+    margin-bottom: 0.1rem !important;
+    color: #1e293b !important;
 }
 
 #automations-root .node-label {
@@ -260,8 +269,8 @@
 
 #automations-root .step-connector {
     width: 2px !important;
-    height: 40px !important;
-    background: #e2e8f0 !important;
+    height: 20px !important;
+    background: #cbd5e1 !important;
     margin: 0 !important;
 }
 
@@ -299,7 +308,7 @@
     display: flex !important;
     justify-content: space-between !important;
     align-items: flex-start !important;
-    margin-bottom: 2rem !important;
+    margin-bottom: 1.25rem !important;
 }
 
 #automations-root .card-header h3 {
@@ -353,17 +362,15 @@
 #automations-root .logs-sidebar {
     background: #ffffff !important;
     color: #1e293b !important;
-    border-radius: 2rem !important;
-    padding: 2rem !important;
-    /* Reduced padding */
-    border: 1px solid #e2e8f0 !important;
+    border-radius: 1.5rem !important;
+    padding: 1.25rem !important;
+    border: 1px solid #f1f5f9 !important;
     position: sticky !important;
     top: 100px !important;
-    width: 280px !important;
-    /* Reduced width from 350px */
+    width: 260px !important;
     max-height: 500px !important;
     overflow-y: auto !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
 }
 
 #automations-root .logs-title {

@@ -764,13 +764,14 @@ const Communications = ({ onOpenAi }) => {
                                 label={
                                     selectedConversation.status === 'waiting_reply' ? 'Seguimiento' :
                                     selectedConversation.status === 'interested' ? 'Interesado' :
-                                    selectedConversation.status === 'not_interested' ? 'Poco Interés' : 'Abierto'
+                                    selectedConversation.status === 'not_interested' ? 'Poco Interés' : 
+                                    selectedConversation.status === 'desisted' ? 'Para Recontactar' : 'Abierto'
                                 }
                                 size="small"
                                 onClick={(e) => setStatusMenuAnchor(e.currentTarget)}
                                 sx={{ 
-                                    bgcolor: selectedConversation.status === 'interested' ? '#e0f2fe' : selectedConversation.status === 'not_interested' ? '#fee2e2' : '#f1f5f9',
-                                    color: selectedConversation.status === 'interested' ? '#3b82f6' : selectedConversation.status === 'not_interested' ? '#ef4444' : '#64748b',
+                                    bgcolor: selectedConversation.status === 'interested' ? '#e0f2fe' : selectedConversation.status === 'not_interested' ? '#fee2e2' : selectedConversation.status === 'desisted' ? '#f3e8ff' : '#f1f5f9',
+                                    color: selectedConversation.status === 'interested' ? '#3b82f6' : selectedConversation.status === 'not_interested' ? '#ef4444' : selectedConversation.status === 'desisted' ? '#8b5cf6' : '#64748b',
                                     fontWeight: 700,
                                     fontSize: '0.7rem',
                                     borderRadius: '8px',
@@ -807,8 +808,12 @@ const Communications = ({ onOpenAi }) => {
                                     Interesado
                                 </MenuItem>
                                 <MenuItem onClick={() => handleUpdateStatus('not_interested')}>
-                                    <ListItemIcon><CancelIcon sx={{ fontSize: '1rem', color: '#ef4444' }} /></ListItemIcon>
-                                    Poco Interés
+                                    <ListItemIcon><CancelIcon sx={{ color: '#ef4444', fontSize: '1rem' }} /></ListItemIcon>
+                                    <ListItemText primary="Poco Interés" />
+                                </MenuItem>
+                                <MenuItem onClick={() => handleUpdateStatus('desisted')}>
+                                    <ListItemIcon><WaitIcon sx={{ color: '#8b5cf6', fontSize: '1rem' }} /></ListItemIcon>
+                                    <ListItemText primary="Para Recontactar (Desistido)" />
                                 </MenuItem>
                             </Menu>
                         </Box>

@@ -37,10 +37,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.8);
-  /* Slightly transparent blue overlay */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.9);
+  /* White overlay */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -79,7 +79,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-sm);
-  color: white;
+  color: #1e293b;
   font-size: 0.9rem;
   font-weight: 500;
 }
@@ -91,7 +91,7 @@
 
 .loading-message {
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: #64748b;
   margin-top: var(--spacing-sm);
 }
 

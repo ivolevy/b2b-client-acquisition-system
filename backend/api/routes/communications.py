@@ -267,6 +267,7 @@ async def get_communications_stats(request: Request):
             "waiting_reply": 0,
             "interested": 0,
             "not_interested": 0,
+            "desisted": 0,
             "converted": 0
         }
         
