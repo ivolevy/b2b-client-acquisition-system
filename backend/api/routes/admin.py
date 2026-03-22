@@ -34,12 +34,10 @@ async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
         current_month = datetime.now().replace(day=1).date().isoformat()
         res = execute_with_retry(lambda c: c.table('api_usage_stats').select('*').eq('month', current_month))
         
-        total_cost = sum([float(item.get('estimated_cost_usd', 0)) for item in res.data])
-        
         return {
             "success": True,
             "month": current_month,
-            "total_estimated_cost_usd": total_cost,
+            "total_estimated_cost_usd": 0, # Const to 0 as prices are incorrect
             "stats": res.data,
             "provider_status": "google"
         }

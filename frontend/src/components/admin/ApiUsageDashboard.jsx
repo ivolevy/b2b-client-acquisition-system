@@ -76,12 +76,10 @@ function ApiUsageDashboard() {
     </div>
   );
 
-  const totalCost = stats?.total_estimated_cost_usd || 0;
-  const limit = 200; // Google Cloud Free Credits
-  const percentage = Math.min((totalCost / limit) * 100, 100);
+  const totalCalls = (stats?.stats || []).reduce((acc, s) => acc + s.calls_count, 0);
+  const limit = 28500 * (1/3); // Approx monthly safe volume calculation or similar
+  const percentage = Math.min((totalCalls / 6000) * 100, 100); // Using 6000 as a reference volume
   const isFallback = stats?.provider_status === 'osm';
-  const remainingBudget = Math.max(0, limit - totalCost);
-  const extraSpending = Math.max(0, totalCost - limit);
 
   // Formatting for UI Clarity
   const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
@@ -115,46 +113,31 @@ function ApiUsageDashboard() {
           </span>
         </div>
       </header>
-
       <div className="credit-tracker-box glass-panel">
         <div className="tracker-main-row">
           <div className="tracker-cell">
-            <span className="tracker-label">GASTO ACUMULADO</span>
-            <span className="tracker-value highlight">${totalCost.toFixed(2)}</span>
+            <span className="tracker-label">VOLUMEN ACUMULADO (MES)</span>
+            <span className="tracker-value highlight">{totalCalls}</span>
           </div>
           
           <div className="tracker-divider"></div>
           
           <div className="tracker-cell">
-            <span className="tracker-label">SALDO RESTANTE</span>
-            <span className="tracker-value accent">${remainingBudget.toFixed(2)}</span>
+            <span className="tracker-label">LLAMADAS GOOGLE PLACES</span>
+            <span className="tracker-value accent">{(stats?.stats || []).find(s => s.sku !== 'osm')?.calls_count || 0}</span>
           </div>
 
           <div className="tracker-divider"></div>
-
-          <div className="tracker-cell">
-            <span className="tracker-label">TOPE MENSUAL</span>
-            <span className="tracker-value muted">${limit}</span>
-          </div>
-
-          <div className="tracker-divider"></div>
-
-          <div className="tracker-cell">
-            <span className="tracker-label">GASTO EXTRA</span>
-            <span className={`tracker-value ${extraSpending > 0 ? 'danger-text' : 'muted'}`}>
-              ${extraSpending.toFixed(2)}
-            </span>
-          </div>
 
           <div className="tracker-cell right-aligned">
              <div className="progress-mini-ring">
                <div className="progress-bar-bg">
                  <div 
-                   className={`progress-bar-fill ${percentage > 85 ? 'danger' : ''}`} 
+                   className={`progress-bar-fill ${percentage > 85 ? 'warning' : ''}`} 
                    style={{ width: `${percentage}%` }}
                  />
                </div>
-               <span className="progress-percent">{percentage.toFixed(0)}% USADO</span>
+               <span className="progress-percent">{percentage.toFixed(0)}% DEL TOPE RECOMENDADO</span>
              </div>
           </div>
         </div>
@@ -170,9 +153,8 @@ function ApiUsageDashboard() {
             <table className="clean-table">
               <thead>
                 <tr>
-                  <th>TIPO</th>
-                  <th className="text-right">COSTO UNIT.</th>
-                  <th className="text-right">VOLUMEN</th>
+                  <th>TIPO DE SERVICIO</th>
+                  <th className="text-right">VOLUMEN DE LLAMADAS</th>
                 </tr>
               </thead>
               <tbody>
@@ -188,9 +170,6 @@ function ApiUsageDashboard() {
                       </div>
                     </td>
                     <td className="text-right">
-                       <span className="val-sub-compact">{s.sku === 'pro' ? '$0.032' : '$0.00'}</span>
-                    </td>
-                    <td className="text-right">
                        <span className="val-main">{s.calls_count}</span>
                     </td>
                   </tr>
@@ -203,23 +182,8 @@ function ApiUsageDashboard() {
           </div>
 
           <div className="pricing-guide mt-4 pt-4 border-t border-white/5">
-            <div className="guide-header mb-3">
-              <span className="text-xs font-bold text-slate-500 tracking-widest uppercase">Guía de Referencia de Tiers (Google)</span>
-            </div>
-            <div className="guide-grid">
-              <div className="guide-item">
-                <span className="guide-price text-slate-400">$0.017</span>
-                <span className="guide-label text-slate-500">Tier Básico:</span>
-                <span className="guide-desc text-slate-300">Nombre, Dirección, Ratings y GPS.</span>
-              </div>
-              <div className="guide-item highlight">
-                <span className="guide-price text-blue-400">$0.032</span>
-                <span className="guide-label text-blue-500">Tier Avanzado:</span>
-                <span className="guide-desc text-slate-300">Teléfono y Website (B2B Full).</span>
-              </div>
-            </div>
             <p className="guide-note mt-3 text-xs italic text-slate-600">
-              * El Tier Básico se incluye sin costo adicional cuando se solicitan campos del Tier Avanzado.
+              * El volumen de uso se monitorea para asegurar la disponibilidad del servicio.
             </p>
           </div>
         </section>
@@ -234,12 +198,11 @@ function ApiUsageDashboard() {
             <div className="table-container">
               <table className="clean-table compact">
                 <thead>
-                  <tr>
-                    <th>Hora</th>
-                    <th>Endpoint</th>
-                    <th>Status</th>
-                    <th className="text-right">Costo</th>
-                  </tr>
+                    <tr>
+                      <th>Hora</th>
+                      <th>Endpoint</th>
+                      <th className="text-right">Status</th>
+                    </tr>
                 </thead>
                 <tbody>
                   {logs.filter(log => log.status_code !== 200).map((log) => (
@@ -250,11 +213,8 @@ function ApiUsageDashboard() {
                       <td className="text-sm">
                         <span className="endpoint-name-compact">{log.endpoint.split(':').pop()}</span>
                       </td>
-                      <td>
+                      <td className="text-right">
                         <span className="status-badge-mini error">{log.status_code}</span>
-                      </td>
-                      <td className="text-right text-xs">
-                         ${parseFloat(log.cost_usd).toFixed(3)}
                       </td>
                     </tr>
                   ))}
