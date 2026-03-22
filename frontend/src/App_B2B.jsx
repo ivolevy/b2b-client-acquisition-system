@@ -519,51 +519,59 @@ function AppB2B() {
                 Leads
                 {!isGrowthOrHigher && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
               </button>
-              <button 
-                type="button"
-                className={view === 'insights' ? 'active' : ''}
-                onClick={() => setView('insights')}
-                style={{ opacity: isAgency ? 1 : 0.6 }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                   <path d="M3 3v18h18"/>
-                   <path d="M18 9l-6 6-2-2-4 4"/>
-                </svg>
-                Insights
-                {!isAgency && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
-              </button>
-              <button 
-                type="button"
-                className={view === 'automations' ? 'active' : ''}
-                onClick={() => {
-                  if (isAgency) {
-                     setView('automations');
-                  } else {
-                     info("Las Automatizaciones con IA están disponibles exclusivamente en el plan Agency.");
-                  }
-                }}
-                style={{ opacity: isAgency ? 1 : 0.6, cursor: isAgency ? 'pointer' : 'not-allowed' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                </svg>
-                Triggers IA
-                {!isAgency && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
-              </button>
+              {/* 
+523:               <button 
+524:                 type="button"
+525:                 className={view === 'insights' ? 'active' : ''}
+526:                 onClick={() => setView('insights')}
+527:                 style={{ opacity: isAgency ? 1 : 0.6 }}
+528:               >
+529:                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+530:                    <path d="M3 3v18h18"/>
+531:                    <path d="M18 9l-6 6-2-2-4 4"/>
+532:                 </svg>
+533:                 Insights
+534:                 {!isAgency && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
+535:               </button>
+                */}
+              {/* 
+536:               <button 
+537:                 type="button"
+538:                 className={view === 'automations' ? 'active' : ''}
+539:                 onClick={() => {
+540:                   if (isAgency) {
+541:                      setView('automations');
+542:                   } else {
+543:                      info("Las Automatizaciones con IA están disponibles exclusivamente en el plan Agency.");
+544:                   }
+545:                 }}
+546:                 style={{ opacity: isAgency ? 1 : 0.6, cursor: isAgency ? 'pointer' : 'not-allowed' }}
+547:               >
+548:                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+549:                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+550:                 </svg>
+551:                 Triggers IA
+552:                 {!isAgency && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
+553:               </button>
+                    */}
             </div>
           </div>
 
-          {view === 'insights' && (
-             <InsightsDashboard />
-          )}
+          {/* 
+557:           {view === 'insights' && (
+558:              <InsightsDashboard />
+559:           )}
+             */}
 
-          {view === 'automations' && (
-             <Automations 
-                toastSuccess={success}
-                toastError={toastError}
-                toastWarning={warning}
-             />
-          )}
+          {/* 
+561:           {view === 'automations' && (
+562:              <Automations 
+563:                 toastSuccess={success}
+564:                 toastError={toastError}
+565:                 toastWarning={warning}
+566:              />
+567:           )}
+             */}
 
           {view === 'table' && (
             <TableViewB2B 
