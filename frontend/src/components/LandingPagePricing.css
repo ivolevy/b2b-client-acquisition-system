@@ -1,7 +1,7 @@
 /* --- PRICING SECTION (New Design) --- */
 .pricing-section-new {
     padding: 100px 0;
-    background: #ffffff;
+    background: var(--bg-alt);
 }
 
 .pricing-controls {

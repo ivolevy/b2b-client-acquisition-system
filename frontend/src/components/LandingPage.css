@@ -396,8 +396,10 @@
 
 .btn-demo-nav:hover {
     transform: translateY(-1px) !important;
+    background: white !important;
+    color: var(--primary) !important;
+    border: 1px solid var(--primary) !important;
     box-shadow: 0 6px 16px var(--primary-glow) !important;
-    background: var(--primary-dark) !important;
 }
 
 /* Hide mobile elements on desktop */
@@ -1970,8 +1972,8 @@
 /* --- TESTIMONIALS SLIDER --- */
 .testimonials-section {
     padding: 60px 0;
-    background: #ffffff;
-    /* Clean white background to match pricing */
+    background: var(--bg-alt);
+    /* Soft grey background to unite testimonials and pricing */
     position: relative;
     overflow: hidden;
 }
