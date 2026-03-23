@@ -45,9 +45,7 @@ function AppB2B() {
   const [creditsInfo, setCreditsInfo] = useState({ credits: 0, total_credits: 0, next_reset: null });
   const [showEmailSender, setShowEmailSender] = useState(false);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
-  const [historySearchData, setHistorySearchData] = useState(null);
   const [showAllResults, setShowAllResults] = useState(false);
-  const [isFromHistory, setIsFromHistory] = useState(false);
   const [showGlobalAi, setShowGlobalAi] = useState(false);
 
   // States from hook
@@ -223,7 +221,7 @@ function AppB2B() {
 
   useEffect(() => {
     // Si estaba cargando y ahora no, y tenemos empresas, scrollear
-    if (prevLoadingRef.current && !loading && empresas.length > 0 && !isFromHistory) {
+    if (prevLoadingRef.current && !loading && empresas.length > 0) {
       // Pequeño timeout para asegurar que el DOM se renderizó
       setTimeout(() => {
         if (resultsRef.current) {
@@ -238,12 +236,6 @@ function AppB2B() {
     // Stats removed as they are not used and caused ReferenceError
   }, []);
   
-  // Manejar selección desde historial de búsquedas
-  const handleSelectFromHistory = (searchData) => {
-    setIsFromHistory(true);
-    setHistorySearchData(searchData);
-      info("Búsqueda cargada del historial");
-  };
 
 
   const loadStats = async () => {
@@ -413,8 +405,6 @@ function AppB2B() {
             loading={loading}
             rubros={rubros}
             toastWarning={warning}
-            onSelectFromHistory={handleSelectFromHistory}
-            historySearchData={historySearchData}
           />
           
           {/* El overlay bloqueante se muestra abajo si blockingLoading es true */}
@@ -486,20 +476,6 @@ function AppB2B() {
                   <polyline points="22,6 12,13 2,6"/>
                 </svg>
                 Emails
-              </button>
-              <button 
-                type="button"
-                className={view === 'whatsapp' ? 'active' : ''}
-                onClick={() => {
-                   info("El módulo de WhatsApp estará disponible próximamente.");
-                }}
-                style={{ opacity: 0.6, cursor: 'not-allowed' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                </svg>
-                WhatsApp (Próximamente)
-                <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>
               </button>
               <button 
                 type="button"

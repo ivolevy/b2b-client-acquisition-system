@@ -553,7 +553,7 @@ const Communications = ({ onOpenAi }) => {
           >
             <ToggleButton value="all">Todos</ToggleButton>
             <ToggleButton value="email">Emails</ToggleButton>
-            <ToggleButton value="whatsapp" disabled sx={{ opacity: 0.5 }}>WhatsApp (Próximamente)</ToggleButton>
+            <ToggleButton value="whatsapp" disabled sx={{ opacity: 0.5 }}>WhatsApp</ToggleButton>
           </ToggleButtonGroup>
 
           <Tooltip title="Actualizar">

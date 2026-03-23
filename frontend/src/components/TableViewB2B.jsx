@@ -453,9 +453,8 @@ function TableViewB2B({
                   </th>
               <th>Email</th>
               <th>Teléfono</th>
-                  <th>Web</th>
+              <th>Web</th>
               <th>Redes</th>
-              <th>Apertura IA</th>
               <th style={{ width: '80px', textAlign: 'center' }}>Ir</th>
             </tr>
           </thead>
@@ -530,7 +529,7 @@ function TableViewB2B({
                           <a href={empresa.twitter} target="_blank" rel="noopener noreferrer" className="social-icon twitter" title="Twitter/X">
                         <FaXTwitter />
                       </a>
-                  )}
+                    )}
                   {empresa.linkedin && (
                           <a href={empresa.linkedin} target="_blank" rel="noopener noreferrer" className="social-icon linkedin" title="LinkedIn">
                         <FaLinkedin />
@@ -551,26 +550,6 @@ function TableViewB2B({
                       <span className="no-data">-</span>
                     )}
                   </div>
-                </td>
-                <td>
-                  {empresa.icebreaker ? (
-                     <div title={empresa.icebreaker} style={{
-                        fontSize: '11px',
-                        color: '#475569',
-                        background: '#f1f5f9',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        maxWidth: '200px',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        borderLeft: '3px solid #8b5cf6'
-                     }}>
-                        {empresa.icebreaker}
-                     </div>
-                  ) : (
-                    <span className="no-data">-</span>
-                  )}
                 </td>
                 <td style={{ textAlign: 'center' }}>
                         {(empresa.direccion || empresa.ciudad || (empresa.latitud && empresa.longitud)) && (

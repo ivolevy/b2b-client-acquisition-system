@@ -780,13 +780,7 @@ const LandingPage = () => {
                 onClick={() => setCurrency('USD')}
                 style={{ position: 'relative' }}
               >
-                🌎 USD <span style={{ 
-                  fontSize: '0.65rem', 
-                  opacity: 0.8, 
-                  fontWeight: 400,
-                  marginLeft: '4px',
-                  verticalAlign: 'middle'
-                }}>(Próximamente)</span>
+                🌎 USD
               </button>
             </div>
 

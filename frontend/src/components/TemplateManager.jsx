@@ -125,7 +125,7 @@ function TemplateManager({ userId, onClose, type: initialType = 'email', embedde
                 style={{ opacity: 0.5, cursor: 'not-allowed' }}
                 disabled
               >
-                <FiMessageSquare /> WhatsApp (Próximamente)
+                <FiMessageSquare /> WhatsApp
               </button>
             </div>
 

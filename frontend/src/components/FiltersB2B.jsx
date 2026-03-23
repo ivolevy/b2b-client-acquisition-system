@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import GoogleLocationPicker from './GoogleLocationPicker';
 import LocationPicker from './LocationPicker';
 import { useAuth } from '../context/AuthContext';
-import SearchHistory from './SearchHistory';
 import axios from 'axios';
 import './Filters.css';
 
@@ -10,7 +9,7 @@ import SmartFilterInput from './SmartFilterInput';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHistory, historySearchData }) {
+function FiltersB2B({ onBuscar, loading, rubros, toastWarning }) {
   const { user } = useAuth();
   
   // Plan Logic
@@ -18,7 +17,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
   const isAgency = plan === 'agency' || user?.role === 'admin';
   const isGrowthOrHigher = ['growth', 'agency'].includes(plan) || user?.role === 'admin';
 
-  const [showHistory, setShowHistory] = useState(false);
   
   // Estados para búsqueda
   const [rubro, setRubro] = useState('');
@@ -27,62 +25,13 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
   const [smartFilterAudio, setSmartFilterAudio] = useState(null);
   
   // Estado para inicializar el mapa desde historial
-  const [initialMapLocation, setInitialMapLocation] = useState(null);
-  
-  // Ref para evitar ejecuciones múltiples de búsqueda desde historial
-  const historySearchExecutedRef = useRef(false);
   
   // Verificar si hay API key de Google Maps - Migración a GPA desactivada temporalmente
   const GOOGLE_API_KEY = null; // import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   
-  // Efecto para cargar datos desde historial
-  useEffect(() => {
-    if (historySearchData) {
-      console.log('🔄 FiltersB2B: Cargando desde historial:', historySearchData);
-      historySearchExecutedRef.current = false;
-      setRubro(historySearchData.rubro);
-      
-      if (historySearchData.centro_lat && historySearchData.centro_lng) {
-        setInitialMapLocation({
-          lat: historySearchData.centro_lat,
-          lng: historySearchData.centro_lng,
-          name: historySearchData.ubicacion_nombre,
-          radius: historySearchData.radio_km ? historySearchData.radio_km * 1000 : 5000
-        });
-      }
-    }
-  }, [historySearchData]);
-  
+
   const [scrapearWebsites, setScrapearWebsites] = useState(true);
   const [modoBusqueda, setModoBusqueda] = useState('nueva');
-  
-  // Efecto separado para ejecutar búsqueda cuando locationData esté listo después de cargar historial
-  useEffect(() => {
-    if (historySearchData && locationData && historySearchData.rubro && !historySearchExecutedRef.current) {
-      // Solo ejecutar si el locationData coincide con el historial (para evitar loops)
-      const matchesHistory = 
-        locationData.center?.lat &&
-        locationData.center?.lng &&
-        Math.abs(locationData.center.lat - historySearchData.centro_lat) < 0.0001 &&
-        Math.abs(locationData.center.lng - historySearchData.centro_lng) < 0.0001;
-      
-      if (matchesHistory && historySearchData.bbox) {
-        historySearchExecutedRef.current = true;
-        const params = {
-          rubro: historySearchData.rubro,
-          bbox: historySearchData.bbox,
-          scrapear_websites: scrapearWebsites,
-          limpiar_anterior: false,
-          busqueda_ubicacion_nombre: historySearchData.ubicacion_nombre || null,
-          busqueda_centro_lat: historySearchData.centro_lat || null,
-          busqueda_centro_lng: historySearchData.centro_lng || null,
-          busqueda_radio_km: historySearchData.radio_km || null
-        };
-        
-        onBuscar(params);
-      }
-    }
-  }, [locationData, historySearchData, scrapearWebsites, onBuscar]);
 
   const handleBuscarSubmit = (e) => {
     e.preventDefault();
@@ -119,12 +68,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
     onBuscar(params);
   };
 
-  const handleSelectFromHistory = (searchData) => {
-    setRubro(searchData.rubro);
-    if (onSelectFromHistory) {
-      onSelectFromHistory(searchData);
-    }
-  };
 
   const handleTranscribe = async (audioBlob) => {
     try {
@@ -176,20 +119,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
       <div className="filter-section fetch-section">
         <div className="section-header-with-action">
           <h3>Buscar empresas por rubro y ubicación</h3>
-          <button 
-            type="button" 
-            className="btn-history"
-            onClick={() => {
-              setShowHistory(true);
-            }}
-            disabled={loading}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
-            Próximamente
-          </button>
         </div>
         <form onSubmit={handleBuscarSubmit}>
             
@@ -197,7 +126,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
           {GOOGLE_API_KEY ? (
             <GoogleLocationPicker 
               onLocationChange={setLocationData}
-              initialLocation={initialMapLocation}
               loading={loading}
               rubroSelect={
                 <div className="form-group-compact rubro-inline">
@@ -225,7 +153,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
           ) : (
             <LocationPicker 
               onLocationChange={setLocationData}
-              initialLocation={initialMapLocation}
               loading={loading}
               rubroSelect={
                 <div className="form-group-compact rubro-inline">
@@ -342,12 +269,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning, onSelectFromHisto
         </form>
       </div>
 
-      {/* Modal de historial de búsquedas (solo PRO) */}
-      <SearchHistory 
-        isOpen={showHistory}
-        onClose={() => setShowHistory(false)}
-        onSelectSearch={handleSelectFromHistory}
-      />
     </div>
   );
 }

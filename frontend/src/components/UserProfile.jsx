@@ -52,7 +52,6 @@ function UserProfile() {
   });
   const [passwordStep, setPasswordStep] = useState('request'); // 'request', 'verify', 'change'
   const { success: toastSuccess, error: toastError, warning: toastWarning, removeToast, toasts } = useToast();
-  const [rubrosSaved, setRubrosSaved] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
@@ -83,12 +82,7 @@ function UserProfile() {
     number: ''
   });
   
-  // Custom Rubros State
-  const [availableRubros, setAvailableRubros] = useState({});
-  const [selectedRubros, setSelectedRubros] = useState([]);
-  const [rubrosLoading, setRubrosLoading] = useState(false);
-  const [savingRubros, setSavingRubros] = useState(false);
-  const [rubrosError, setRubrosError] = useState('');
+  
 
   // Bloquear scroll del body cuando cualquier modal está abierto
   useEffect(() => {
@@ -138,10 +132,8 @@ function UserProfile() {
     return () => window.removeEventListener('focus', handleFocus);
   }, [user?.id]);
 
-  // Fetch rubros del usuario
   useEffect(() => {
     if (user?.id) {
-      fetchUserRubros();
       fetchAuthStatus();
       fetchCredits();
     }
@@ -234,113 +226,7 @@ function UserProfile() {
     setShowDisconnectModal(true);
   };
 
-  const fetchUserRubros = async () => {
-    if (!user?.id) return;
-    
-    setRubrosLoading(true);
-    setRubrosError('');
-    try {
-      console.log('Fetching rubros for user:', user.id);
-      const response = await axios.get(`${API_URL}/api/users/${user.id}/rubros?t=${Date.now()}`);
-      console.log('Rubros response:', response.data);
-      
-      if (response.data.success) {
-        let all = response.data.all_rubros;
-        const selected = response.data.selected_rubros || [];
-        
-        // Fallback: si no viene all_rubros, intentar pedirlo del endpoint general
-        if (!all || Object.keys(all).length === 0) {
-          console.warn('all_rubros empty in user endpoint, falling back to /rubros');
-          const fallbackRes = await axios.get(`${API_URL}/api/rubros`);
-          if (fallbackRes.data && fallbackRes.data.rubros) {
-            all = fallbackRes.data.rubros;
-          }
-        }
-        
-        const rubrosDict = all || {};
-        setAvailableRubros(rubrosDict);
-        
-        // Si no hay nada guardado, por defecto seleccionamos todos
-        if (selected.length === 0 && Object.keys(rubrosDict).length > 0) {
-          setSelectedRubros(Object.keys(rubrosDict));
-        } else {
-          setSelectedRubros(selected);
-        }
-      }
-    } catch (err) {
-      console.error('Error fetching user rubros:', err);
-      // Último intento: cargar rubros generales si falla el endpoint de usuario
-      try {
-        const fallbackRes = await axios.get(`${API_URL}/api/rubros`);
-        if (fallbackRes.data && fallbackRes.data.rubros) {
-          setAvailableRubros(fallbackRes.data.rubros);
-          setSelectedRubros(Object.keys(fallbackRes.data.rubros));
-          return;
-        }
-      } catch (e) {
-        console.error('Final fallback failed:', e);
-      }
-      setRubrosError('No se pudieron cargar tus rubros preferidos.');
-    } finally {
-      setRubrosLoading(false);
-    }
-  };
 
-  const handleSaveRubros = async () => {
-    setSavingRubros(true);
-    setRubrosError('');
-    if (selectedRubros.length === 0) {
-      toastWarning?.(
-        <>
-          <strong>Selección requerida</strong>
-          <p>Debes elegir al menos un rubro para poder buscar empresas.</p>
-        </>
-      );
-      setSavingRubros(false);
-      return;
-    }
-
-    try {
-      const response = await axios.post(`${API_URL}/api/users/rubros`, {
-        user_id: user.id,
-        rubro_keys: selectedRubros
-      });
-      if (response.data.success) {
-        setRubrosSaved(true);
-        toastSuccess?.("Preferencias de rubros guardadas correctamente.");
-        setTimeout(() => setRubrosSaved(false), 3000);
-      }
-    } catch (err) {
-      console.error('Error saving rubros:', err);
-      setRubrosError('Error al guardar tus preferencias.');
-    } finally {
-      setSavingRubros(false);
-    }
-  };
-
-  const toggleRubro = (key) => {
-    setSelectedRubros(prev => 
-      prev.includes(key) 
-        ? prev.filter(k => k !== key) 
-        : [...prev, key]
-    );
-  };
-
-  const handleSelectAll = () => {
-    setSelectedRubros(Object.keys(availableRubros));
-  };
-
-  const handleDeselectAll = () => {
-    // Dejamos el primero o simplemente vaciamos y validamos al guardar
-    // El usuario pidió "mínimo 1", así que al guardar validaremos.
-    setSelectedRubros([]);
-    toastWarning?.(
-      <>
-        <strong>Selección vacía</strong>
-        <p>Recuerda que debes tener al menos un rubro seleccionado para guardar.</p>
-      </>
-    );
-  };
 
 
   const handleRequestCode = async () => {
@@ -695,19 +581,8 @@ function UserProfile() {
               <FiActivity size={18} />
               <span>Mi Plan</span>
             </button>
-            <button 
-              className={`profile-nav-item ${activeTab === 'rubros' ? 'active' : ''} ${isCancelled ? 'disabled' : ''}`}
-              onClick={() => !isCancelled && setActiveTab('rubros')}
-              disabled={isCancelled}
-              title={isCancelled ? "Debes tener un plan activo" : ""}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-              </svg>
-              <span>Mis Rubros</span>
-            </button>
-            <button 
-              className={`profile-nav-item ${activeTab === 'templates' ? 'active' : ''} ${isCancelled ? 'disabled' : ''}`}
+             <button 
+               className={`profile-nav-item ${activeTab === 'templates' ? 'active' : ''} ${isCancelled ? 'disabled' : ''}`}
               onClick={() => !isCancelled && setActiveTab('templates')}
               disabled={isCancelled}
               title={isCancelled ? "Debes tener un plan activo" : ""}
@@ -1036,22 +911,7 @@ function UserProfile() {
             </div>
           )}
 
-          {activeTab === 'rubros' && (
-            <div className="profile-section-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', height: '100%' }}>
-              <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.7 }}>
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" style={{ marginBottom: '1.5rem' }}>
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>Próximamente</h3>
-                <p style={{ color: '#64748b', fontSize: '1rem', maxWidth: '300px', margin: '0 auto', lineHeight: '1.6' }}>
-                  Estamos trabajando en nuevas funcionalidades para que puedas personalizar aún más tu experiencia.
-                </p>
-                <div style={{ marginTop: '2rem', display: 'inline-flex', padding: '0.5rem 1rem', background: '#f1f5f9', borderRadius: '100px', fontSize: '0.85rem', color: '#64748b', fontWeight: '500' }}>
-                  Disponible muy pronto
-                </div>
-              </div>
-            </div>
-          )}
+
 
           {activeTab === 'templates' && (
             <div className="profile-section-fade-in">
