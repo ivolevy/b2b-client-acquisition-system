@@ -1626,8 +1626,8 @@
 /* --- FOOTER --- */
 .footer-section {
     padding: 80px 0 32px;
-    border-top: 1px solid var(--border);
-    background: #ffffff;
+    background: var(--primary);
+    color: white;
 }
 
 .footer-grid {
@@ -1640,6 +1640,7 @@
 .footer-brand p {
     margin-top: 16px;
     margin-bottom: 24px;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .social-links {
@@ -1647,16 +1648,16 @@
     gap: 16px;
     font-size: 1.2rem;
     cursor: pointer;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .social-links a:hover {
-    color: var(--primary);
+    color: #ffffff;
 }
 
 .footer-col h4 {
     font-size: 1rem;
-    color: var(--text-primary);
+    color: #ffffff;
     margin-bottom: 24px;
     font-weight: 600;
     font-family: var(--font-body);
@@ -1665,20 +1666,20 @@
 .footer-col a {
     display: block;
     margin-bottom: 12px;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.8);
     font-size: 0.95rem;
 }
 
 .footer-col a:hover {
-    color: var(--primary);
+    color: #ffffff;
 }
 
 .footer-bottom {
     text-align: center;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 32px;
     font-size: 0.9rem;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 /* --- RESPONSIVE --- */
@@ -3414,7 +3415,6 @@
 .contact-simple-section {
     padding: 80px 0;
     background: #ffffff;
-    border-top: 1px solid var(--border);
 }
 
 .contact-simple-content {
@@ -3555,7 +3555,7 @@
 .footer-link-btn {
     background: transparent;
     border: none;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.8);
     font-size: 0.95rem;
     padding: 0;
     margin-bottom: 12px;
@@ -3567,7 +3567,7 @@
 }
 
 .footer-link-btn:hover {
-    color: var(--primary);
+    color: #ffffff;
 }
 
 /* --- SALES TEAM AI SECTION --- */
