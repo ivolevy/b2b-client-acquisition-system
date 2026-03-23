@@ -300,10 +300,9 @@
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.landing-header:hover {
-    /* border-color: rgba(255, 255, 255, 0.2); REMOVED per user request */
+/* .landing-header:hover {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-}
+} */
 
 .header-container {
     display: flex;
@@ -354,15 +353,12 @@
     opacity: 0.9;
 }
 
-.main-nav button:hover {
+/* .main-nav button:hover {
     color: var(--primary);
-    /* Celeste / Light Blue */
     opacity: 1;
     border: none !important;
-    /* Explicitly prevent border */
     background: none !important;
-    /* Explicitly prevent background */
-}
+} */
 
 .btn-primary-small {
     background: var(--primary);
@@ -394,13 +390,13 @@
     margin-left: 8px;
 }
 
-.btn-demo-nav:hover {
+/* .btn-demo-nav:hover {
     transform: translateY(-1px) !important;
     background: white !important;
     color: var(--primary) !important;
     border: 1px solid var(--primary) !important;
     box-shadow: 0 6px 16px var(--primary-glow) !important;
-}
+} */
 
 /* Hide mobile elements on desktop */
 .mobile-menu-toggle,
@@ -1972,8 +1968,8 @@
 /* --- TESTIMONIALS SLIDER --- */
 .testimonials-section {
     padding: 60px 0;
-    background: var(--bg-alt);
-    /* Soft grey background to unite testimonials and pricing */
+    background: #ffffff;
+    /* Clean white background to match the rest of the site */
     position: relative;
     overflow: hidden;
 }
