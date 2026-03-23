@@ -380,6 +380,26 @@
     transform: translateY(-1px);
 }
 
+.btn-demo-nav {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 18px !important;
+    border-radius: 999px !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px var(--primary-glow) !important;
+    margin-left: 8px;
+}
+
+.btn-demo-nav:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px var(--primary-glow) !important;
+    background: var(--primary-dark) !important;
+}
+
 /* Hide mobile elements on desktop */
 .mobile-menu-toggle,
 .mobile-nav {
@@ -1950,8 +1970,8 @@
 /* --- TESTIMONIALS SLIDER --- */
 .testimonials-section {
     padding: 60px 0;
-    background: var(--bg-alt);
-    /* Light grey background to contrast with white cards */
+    background: #ffffff;
+    /* Clean white background to match pricing */
     position: relative;
     overflow: hidden;
 }

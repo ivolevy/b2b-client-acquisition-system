@@ -285,6 +285,7 @@ const LandingPage = () => {
             <button onClick={() => scrollToSection('features')}>Módulos</button>
             <button onClick={() => scrollToSection('pricing')}>Precios</button>
             <button onClick={() => scrollToSection('contact-simple')}>Contactanos</button>
+            <button className="btn-demo-nav" onClick={() => scrollToSection('features')}>Ver Demo</button>
           </nav>
 
           <div className="header-actions">
@@ -327,6 +328,12 @@ const LandingPage = () => {
               scrollToSection('contact-simple');
             }}>
               <span className="nav-num">03</span> Contactanos
+            </button>
+            <button onClick={() => {
+              setMobileMenuOpen(false);
+              scrollToSection('features');
+            }}>
+              <span className="nav-num">04</span> Ver Demo
             </button>
           </div>
 

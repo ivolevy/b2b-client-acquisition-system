@@ -1,7 +1,6 @@
 /* --- PRICING SECTION (New Design) --- */
 .pricing-section-new {
     padding: 100px 0;
-    /* position: relative; Removed to avoid stacking context issues */
     background: #ffffff;
 }
 
