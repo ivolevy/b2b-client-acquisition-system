@@ -13,6 +13,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Logging básico a consola (stdout) para que Vercel lo capture
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger("vercel_startup")
+app = None
 
 try:
     logger.info("Iniciando carga del backend...")
@@ -51,5 +52,5 @@ except Exception as e:
             "trace": trace.split('\n')
         }
 
-# Exponer handler para Vercel (eliminado para que detecte 'app' automáticamente)
-# handler = app
+# Exponer handler para Vercel
+handler = app
