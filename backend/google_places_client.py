@@ -27,9 +27,9 @@ class GooglePlacesClient:
     BASE_URL = "https://places.googleapis.com/v1/places:searchText"
     
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv("GOOGLE_MAPS_API_KEY")
+        self.api_key = api_key or os.getenv("GOOGLE_MAPS_API_KEY") or os.getenv("VITE_GOOGLE_MAPS_API_KEY")
         if not self.api_key:
-            logger.error("No se encontró GOOGLE_MAPS_API_KEY en las variables de entorno.")
+            logger.error("No se encontró GOOGLE_MAPS_API_KEY ni VITE_GOOGLE_MAPS_API_KEY en las variables de entorno.")
         
         # Máscaras de campo para optimización de costos según Tiers de Google
         # Basic: $17.00 USD por 1000 calls
