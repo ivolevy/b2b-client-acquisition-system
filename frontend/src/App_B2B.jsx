@@ -230,7 +230,7 @@ function AppB2B() {
       }, 300);
     }
     prevLoadingRef.current = loading;
-  }, [loading, empresas.length, isFromHistory]);
+  }, [loading, empresas.length]);
 
   useEffect(() => {
     // Stats removed as they are not used and caused ReferenceError
