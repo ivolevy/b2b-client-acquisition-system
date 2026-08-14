@@ -36,7 +36,7 @@ const GmailConnection = ({ user, onSuccess, onError, variant = 'default', minima
       }
     } catch (error) {
       console.error("Error getting auth URL:", error);
-      onError("No se pudo iniciar la conexión con Google");
+      onError?.("No se pudo iniciar la conexión con Google");
     } finally {
       setLoading(false);
     }
@@ -59,7 +59,7 @@ const GmailConnection = ({ user, onSuccess, onError, variant = 'default', minima
       }
     } catch (error) {
       console.error("Error disconnecting Gmail:", error);
-      onError("Error al desconectar la cuenta");
+      onError?.("Error al desconectar la cuenta");
     } finally {
       setLoading(false);
     }

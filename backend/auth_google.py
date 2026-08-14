@@ -11,10 +11,11 @@ from email.message import EmailMessage
 
 logger = logging.getLogger(__name__)
 
-# Configuración desde variables de entorno
-CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback")
+def get_credentials():
+    client_id = os.getenv("GOOGLE_CLIENT_ID") or os.getenv("VITE_GOOGLE_CLIENT_ID")
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "https://b2b-client-acquisition-system-hlll.vercel.app/auth/google/callback")
+    return client_id, client_secret, redirect_uri
 
 # Permitir que los scopes cambien sin lanzar error (necesario si el usuario modifica permisos o google devuelve diferente orden)
 os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
@@ -29,17 +30,18 @@ SCOPES = [
 
 def get_google_auth_url(state: str) -> str:
     """Genera la URL para iniciar el flujo de OAuth"""
-    if not CLIENT_ID or not CLIENT_SECRET:
-        logger.error("Faltan GOOGLE_CLIENT_ID o GOOGLE_CLIENT_SECRET")
-        raise ValueError("Google OAuth no está configurado en el servidor")
+    client_id, client_secret, redirect_uri = get_credentials()
+    if not client_id or not client_secret:
+        logger.error(f"Faltan credenciales: CLIENT_ID={bool(client_id)}, CLIENT_SECRET={bool(client_secret)}")
+        raise ValueError("Google OAuth no está configurado en las variables de entorno del servidor. Verificá GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en Vercel.")
 
     client_config = {
         "web": {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
+            "client_id": client_id,
+            "client_secret": client_secret,
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
-            "redirect_uris": [REDIRECT_URI]
+            "redirect_uris": [redirect_uri]
         }
     }
 
@@ -48,7 +50,7 @@ def get_google_auth_url(state: str) -> str:
         scopes=SCOPES,
         state=state
     )
-    flow.redirect_uri = REDIRECT_URI
+    flow.redirect_uri = redirect_uri
 
     auth_url, _ = flow.authorization_url(
         access_type='offline',
@@ -59,13 +61,14 @@ def get_google_auth_url(state: str) -> str:
 
 def exchange_code_for_token(code: str) -> Dict:
     """Intercambia el código de autorización por tokens"""
+    client_id, client_secret, redirect_uri = get_credentials()
     client_config = {
         "web": {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
+            "client_id": client_id,
+            "client_secret": client_secret,
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
-            "redirect_uris": [REDIRECT_URI]
+            "redirect_uris": [redirect_uri]
         }
     }
 
@@ -73,7 +76,7 @@ def exchange_code_for_token(code: str) -> Dict:
         client_config,
         scopes=SCOPES
     )
-    flow.redirect_uri = REDIRECT_URI
+    flow.redirect_uri = redirect_uri
     flow.fetch_token(code=code)
 
     credentials = flow.credentials
@@ -95,12 +98,13 @@ def exchange_code_for_token(code: str) -> Dict:
 
 def get_gmail_service(token_data: Dict):
     """Obtiene el servicio de Gmail API, refrescando el token si es necesario"""
+    client_id, client_secret, _ = get_credentials()
     creds = Credentials(
         token=token_data.get('access_token'),
         refresh_token=token_data.get('refresh_token'),
         token_uri="https://oauth2.googleapis.com/token",
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
+        client_id=client_id,
+        client_secret=client_secret,
         scopes=SCOPES
     )
 
