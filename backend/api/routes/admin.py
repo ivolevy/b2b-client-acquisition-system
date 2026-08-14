@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def replace_app(text):
     return text.replace("@app.", "@router.")
 
-router = APIRouter(prefix="/api/admin", tags=["Admin"])
+router = APIRouter(tags=["Admin"])
 @router.get("/api/admin/users")
 async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
     """Obtiene las estadísticas de uso de API para el dashboard"""

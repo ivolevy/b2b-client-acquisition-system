@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def replace_app(text):
     return text.replace("@app.", "@router.")
 
-router = APIRouter(prefix="/api/auth", tags=["Auth"])
+router = APIRouter(tags=["Auth"])
 # ========== GMAIL OAUTH ENDPOINTS ==========
 
 @router.post("/api/auth/google/url")
@@ -156,6 +156,7 @@ async def outlook_disconnect(request: DisconnectRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/api/auth/status/{user_id}")
 async def auth_status_global(user_id: str):
     """Estado de todas las conexiones, incluyendo errores de sincronización"""
     google = get_user_oauth_token(user_id, 'google')
