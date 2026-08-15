@@ -11,8 +11,17 @@ try:
     from backend.api.schemas import *
     from backend.api.dependencies import get_current_admin
     from backend.db_supabase import *
+    from backend.auth_google import get_google_auth_url, exchange_code_for_token
+    from backend.auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
 except ImportError:
-    pass
+    try:
+        from api.schemas import *
+        from api.dependencies import get_current_admin
+        from db_supabase import *
+        from auth_google import get_google_auth_url, exchange_code_for_token
+        from auth_outlook import get_outlook_auth_url, exchange_code_for_token as exchange_outlook_token
+    except ImportError:
+        pass
 
 logger = logging.getLogger(__name__)
 
