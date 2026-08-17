@@ -11,10 +11,17 @@ from email.message import EmailMessage
 
 logger = logging.getLogger(__name__)
 
+import urllib.parse
+
 def get_credentials():
-    client_id = (os.getenv("GOOGLE_CLIENT_ID") or os.getenv("VITE_GOOGLE_CLIENT_ID") or "").strip().replace('\n', '').replace('\r', '').replace(' ', '')
-    client_secret = (os.getenv("GOOGLE_CLIENT_SECRET") or "").strip().replace('\n', '').replace('\r', '').replace(' ', '')
-    redirect_uri = (os.getenv("GOOGLE_REDIRECT_URI") or "https://b2b-client-acquisition-system-hlll.vercel.app/auth/google/callback").strip().replace('\n', '').replace('\r', '').replace(' ', '')
+    raw_client_id = os.getenv("GOOGLE_CLIENT_ID") or os.getenv("VITE_GOOGLE_CLIENT_ID") or ""
+    raw_client_secret = os.getenv("GOOGLE_CLIENT_SECRET") or ""
+    raw_redirect_uri = os.getenv("GOOGLE_REDIRECT_URI") or "https://b2b-client-acquisition-system-hlll.vercel.app/auth/google/callback"
+    
+    client_id = urllib.parse.unquote(raw_client_id).replace('%0A', '').replace('%0a', '').replace('\n', '').replace('\r', '').replace(' ', '').strip()
+    client_secret = urllib.parse.unquote(raw_client_secret).replace('%0A', '').replace('%0a', '').replace('\n', '').replace('\r', '').replace(' ', '').strip()
+    redirect_uri = urllib.parse.unquote(raw_redirect_uri).replace('%0A', '').replace('%0a', '').replace('\n', '').replace('\r', '').replace(' ', '').strip()
+    
     return client_id, client_secret, redirect_uri
 
 # Permitir que los scopes cambien sin lanzar error (necesario si el usuario modifica permisos o google devuelve diferente orden)
