@@ -18,10 +18,14 @@ def get_credentials():
     raw_client_secret = os.getenv("GOOGLE_CLIENT_SECRET") or ""
     raw_redirect_uri = os.getenv("GOOGLE_REDIRECT_URI") or "https://b2b-client-acquisition-system-hlll.vercel.app/auth/google/callback"
     
-    client_id = urllib.parse.unquote(raw_client_id).replace('%0A', '').replace('%0a', '').replace('\n', '').replace('\r', '').replace(' ', '').strip()
-    client_secret = urllib.parse.unquote(raw_client_secret).replace('%0A', '').replace('%0a', '').replace('\n', '').replace('\r', '').replace(' ', '').strip()
-    redirect_uri = urllib.parse.unquote(raw_redirect_uri).replace('%0A', '').replace('%0a', '').replace('\n', '').replace('\r', '').replace(' ', '').strip()
+    # Strict character whitelisting to eliminate any hidden \\n, \\r, %0A, or control chars from Vercel env vars
+    client_id = "".join(c for c in urllib.parse.unquote(raw_client_id) if c.isalnum() or c in '-._')
+    client_secret = "".join(c for c in urllib.parse.unquote(raw_client_secret) if c.isalnum() or c in '-._')
+    redirect_uri = "".join(c for c in urllib.parse.unquote(raw_redirect_uri) if c.isalnum() or c in ':-_./')
     
+    if not redirect_uri:
+        redirect_uri = "https://b2b-client-acquisition-system-hlll.vercel.app/auth/google/callback"
+        
     return client_id, client_secret, redirect_uri
 
 # Permitir que los scopes cambien sin lanzar error (necesario si el usuario modifica permisos o google devuelve diferente orden)
