@@ -12,9 +12,9 @@ from email.message import EmailMessage
 logger = logging.getLogger(__name__)
 
 def get_credentials():
-    client_id = (os.getenv("GOOGLE_CLIENT_ID") or os.getenv("VITE_GOOGLE_CLIENT_ID") or "").strip()
-    client_secret = (os.getenv("GOOGLE_CLIENT_SECRET") or "").strip()
-    redirect_uri = (os.getenv("GOOGLE_REDIRECT_URI") or "https://b2b-client-acquisition-system-hlll.vercel.app/auth/google/callback").strip()
+    client_id = (os.getenv("GOOGLE_CLIENT_ID") or os.getenv("VITE_GOOGLE_CLIENT_ID") or "").strip().replace('\n', '').replace('\r', '').replace(' ', '')
+    client_secret = (os.getenv("GOOGLE_CLIENT_SECRET") or "").strip().replace('\n', '').replace('\r', '').replace(' ', '')
+    redirect_uri = (os.getenv("GOOGLE_REDIRECT_URI") or "https://b2b-client-acquisition-system-hlll.vercel.app/auth/google/callback").strip().replace('\n', '').replace('\r', '').replace(' ', '')
     return client_id, client_secret, redirect_uri
 
 # Permitir que los scopes cambien sin lanzar error (necesario si el usuario modifica permisos o google devuelve diferente orden)
