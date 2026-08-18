@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 
 try:
     from backend.api.schemas import *
-    from backend.api.dependencies import get_current_admin
+    from backend.api.dependencies import get_current_admin, get_current_user_client
     from backend.db_supabase import *
 except ImportError:
     pass
@@ -224,20 +224,21 @@ async def obtener_historial_email(empresa_id: Optional[str] = None, template_id:
 
 # --- MODULE: COMMUNICATIONS (INBOX) ---
 
-def get_user_id_from_header(request: Request) -> Optional[str]:
-    # Helper simple para extraer user_id del header (usado en endpoints protegidos)
-    return request.headers.get("X-User-ID")
+async def get_user_data(request: Request):
+    from backend.api.dependencies import get_current_user_client
+    return await get_current_user_client(request)
 
 @router.get("/api/communications/inbox")
 async def get_inbox_conversations(request: Request, channel: Optional[str] = None):
     """Obtiene la lista de conversaciones (Inbox) filtrada opcionalmente por canal"""
-    user_id = get_user_id_from_header(request)
-    if not user_id:
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
         
     try:
-        admin = get_supabase_admin()
-        query = admin.table("email_conversations").select("*").eq("user_id", user_id)
+        # admin = get_supabase_admin() - using local client
+        query = client.table("email_conversations").select("*").eq("user_id", user_id)
         
         if channel and channel != 'all':
             query = query.eq("channel", channel)
@@ -252,15 +253,16 @@ async def get_inbox_conversations(request: Request, channel: Optional[str] = Non
 @router.get("/api/communications/stats")
 async def get_communications_stats(request: Request):
     """Obtiene estadísticas detalladas para el módulo Insights"""
-    user_id = get_user_id_from_header(request)
-    if not user_id:
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
         
     try:
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         
         # 1. Agregación de estados (Funnel)
-        raw_convs = admin.table("email_conversations").select("status").eq("user_id", user_id).execute()
+        raw_convs = client.table("email_conversations").select("status").eq("user_id", user_id).execute()
         
         status_counts = {
             "open": 0,
@@ -280,7 +282,7 @@ async def get_communications_stats(request: Request):
                 
         # 2. Activity Feed (Últimos 20 mensajes)
         # Necesitamos unir con email_conversations para tener el lead_name
-        recent_messages = admin.table("email_messages")\
+        recent_messages = client.table("email_messages")\
             .select("*, email_conversations(lead_name, channel)")\
             .order("sent_at", desc=True)\
             .limit(20)\
@@ -288,7 +290,7 @@ async def get_communications_stats(request: Request):
             
         # 3. Radar: Leads Olvidados (Interesados sin actividad por > 3 días)
         three_days_ago = (datetime.now() - timedelta(days=3)).isoformat()
-        forgotten_leads = admin.table("email_conversations")\
+        forgotten_leads = client.table("email_conversations")\
             .select("id, lead_name, last_message_at, subject")\
             .eq("user_id", user_id)\
             .eq("status", "interested")\
@@ -301,7 +303,7 @@ async def get_communications_stats(request: Request):
         intent_stats = []
         try:
             # Traer reglas que tienen condición de intención
-            rules_res = admin.table("automation_rules")\
+            rules_res = client.table("automation_rules")\
                 .select("id, name, condition_value")\
                 .eq("user_id", user_id)\
                 .eq("condition_type", "ai_intent")\
@@ -310,7 +312,7 @@ async def get_communications_stats(request: Request):
             if rules_res.data:
                 rule_ids = [r['id'] for r in rules_res.data]
                 # Contar ejecuciones exitosas por regla
-                logs_res = admin.table("automation_logs")\
+                logs_res = client.table("automation_logs")\
                     .select("rule_id")\
                     .eq("execution_status", "success")\
                     .in_("rule_id", rule_ids)\
@@ -356,17 +358,18 @@ async def get_communications_stats(request: Request):
 @router.post("/api/communications/cleanup")
 async def cleanup_inactive_leads(request: Request):
     """Elimina automáticamente leads en 'Poco Interés' inactivos por > 14 días"""
-    user_id = get_user_id_from_header(request)
-    if not user_id:
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
         
     try:
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         # Calculamos la fecha límite (hace 14 días)
         cutoff_date = (datetime.now() - timedelta(days=14)).isoformat()
         
         # 1. Buscar conversaciones que cumplen el criterio
-        to_delete = admin.table("email_conversations")\
+        to_delete = client.table("email_conversations")\
             .select("id")\
             .eq("user_id", user_id)\
             .eq("status", "not_interested")\
@@ -378,9 +381,9 @@ async def cleanup_inactive_leads(request: Request):
             for conv in to_delete.data:
                 conv_id = conv['id']
                 # Eliminar mensajes primero
-                admin.table("email_messages").delete().eq("conversation_id", conv_id).execute()
+                client.table("email_messages").delete().eq("conversation_id", conv_id).execute()
                 # Eliminar conversación
-                admin.table("email_conversations").delete().eq("id", conv_id).execute()
+                client.table("email_conversations").delete().eq("id", conv_id).execute()
                 deleted_count += 1
                 
         return {"status": "success", "deleted_count": deleted_count}
@@ -391,17 +394,18 @@ async def cleanup_inactive_leads(request: Request):
 @router.delete("/api/communications/conversations/{conversation_id}")
 async def delete_conversation(conversation_id: str, request: Request):
     """Elimina una conversación y sus mensajes asociados"""
-    user_id = get_user_id_from_header(request)
-    if not user_id:
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
         
     try:
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         # Primero eliminar mensajes (si no hay cascade delete en DB)
-        admin.table("email_messages").delete().eq("conversation_id", conversation_id).execute()
+        client.table("email_messages").delete().eq("conversation_id", conversation_id).execute()
         
         # Eliminar conversación (verificando user_id por seguridad)
-        res = admin.table("email_conversations")\
+        res = client.table("email_conversations")\
             .delete()\
             .eq("id", conversation_id)\
             .eq("user_id", user_id)\
@@ -415,9 +419,10 @@ async def delete_conversation(conversation_id: str, request: Request):
 @router.post("/api/communications/whatsapp/log")
 async def log_whatsapp_message(req: LogWhatsAppRequest, request: Request):
     """Registra un mensaje de WhatsApp enviado manualmente"""
-    user_id = get_user_id_from_header(request)
-    if not user_id:
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
         
     try:
         from backend.email_sync_service import get_or_create_conversation, store_message
@@ -456,20 +461,21 @@ async def log_whatsapp_message(req: LogWhatsAppRequest, request: Request):
 @router.patch("/api/communications/conversations/{conversation_id}/status")
 async def update_conversation_status(conversation_id: str, req: UpdateConversationStatusRequest, request: Request):
     """Actualiza el estado de una conversación"""
-    user_id = get_user_id_from_header(request)
-    if not user_id:
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
         
     try:
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         
         # Verificar pertenencia
-        conv = admin.table("email_conversations").select("user_id").eq("id", conversation_id).execute()
+        conv = client.table("email_conversations").select("user_id").eq("id", conversation_id).execute()
         if not conv.data or str(conv.data[0]['user_id']) != user_id:
              return JSONResponse(status_code=403, content={"detail": "Forbidden"})
 
         # Actualizar estado
-        res = admin.table("email_conversations").update({
+        res = client.table("email_conversations").update({
             "status": req.status,
             "updated_at": datetime.now().isoformat()
         }).eq("id", conversation_id).execute()
@@ -482,20 +488,21 @@ async def update_conversation_status(conversation_id: str, req: UpdateConversati
 @router.get("/api/communications/thread/{conversation_id}")
 async def get_conversation_thread(conversation_id: str, request: Request):
     """Obtiene el hilo de mensajes de una conversación"""
-    user_id = get_user_id_from_header(request)
-    if not user_id:
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
         
     try:
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         
         # Verificar pertenencia
-        conv = admin.table("email_conversations").select("user_id").eq("id", conversation_id).execute()
+        conv = client.table("email_conversations").select("user_id").eq("id", conversation_id).execute()
         if not conv.data or str(conv.data[0]['user_id']) != user_id:
              return JSONResponse(status_code=403, content={"detail": "Forbidden"})
 
         # Traer mensajes
-        res = admin.table("email_messages")\
+        res = client.table("email_messages")\
             .select("*")\
             .eq("conversation_id", conversation_id)\
             .order("sent_at", desc=False)\
@@ -509,9 +516,10 @@ async def get_conversation_thread(conversation_id: str, request: Request):
 @router.post("/api/communications/sync")
 async def trigger_email_sync(request: Request):
     """Dispara la sincronización manual de emails"""
-    user_id = get_user_id_from_header(request)
-    if not user_id:
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
         
     try:
         # Importar dinámicamente para evitar ciclos
@@ -544,8 +552,10 @@ async def trigger_email_sync(request: Request):
 @router.post("/api/debug/mock-inbound")
 async def mock_inbound_email(req: Dict, request: Request):
     """Simula la llegada de un correo entrante para pruebas de UI"""
-    user_id = get_user_id_from_header(request)
-    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
     
     try:
         from backend.email_sync_service import store_message
@@ -569,9 +579,10 @@ async def mock_inbound_email(req: Dict, request: Request):
 @router.post("/api/communications/email/reply")
 async def send_email_reply(req: SendEmailReplyRequest, request: Request):
     """Envía una respuesta formal a un correo y actualiza el hilo"""
-    user_id = get_user_id_from_header(request)
-    if not user_id:
-        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
         
     try:
         from backend.email_service import enviar_email
@@ -613,10 +624,10 @@ async def send_email_reply(req: SendEmailReplyRequest, request: Request):
 async def redirect_tracked_link(slug: str):
     """Redirige un link trackeado y registra el click"""
     try:
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         
         # 1. Buscar el link original
-        res = admin.table("link_tracking").select("*").eq("slug", slug).execute()
+        res = client.table("link_tracking").select("*").eq("slug", slug).execute()
         
         if not res.data:
              return HTMLResponse(status_code=404, content="<h1>404 - Link Not Found</h1>")
@@ -625,7 +636,7 @@ async def redirect_tracked_link(slug: str):
         original_url = link_data['original_url']
         
         # 2. Incrementar contador de clicks
-        admin.table("link_tracking").update({
+        client.table("link_tracking").update({
             "clicks": link_data.get('clicks', 0) + 1,
             "last_click_at": datetime.now().isoformat()
         }).eq("slug", slug).execute()
@@ -639,14 +650,16 @@ async def redirect_tracked_link(slug: str):
 @router.post("/api/communications/link-tracking")
 async def create_tracking_link(req: CreateLinkTrackingRequest, request: Request):
     """Crea un link trackeado manual"""
-    user_id = get_user_id_from_header(request)
-    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
     
     import secrets
     import string
     
     try:
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         
         # Generar slug único
         slug = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
@@ -659,7 +672,7 @@ async def create_tracking_link(req: CreateLinkTrackingRequest, request: Request)
             "conversation_id": req.conversation_id
         }
         
-        admin.table("link_tracking").insert(insert_data).execute()
+        client.table("link_tracking").insert(insert_data).execute()
         
         # Construir URL pública
         api_url = os.getenv("API_URL", "http://localhost:8000")
@@ -673,18 +686,20 @@ async def create_tracking_link(req: CreateLinkTrackingRequest, request: Request)
 @router.post("/api/ai/assistant")
 async def chat_with_ai_assistant(req: AIAssistantRequest, request: Request):
     """Interactúa con el asistente de IA usando contexto de leads"""
-    user_id = get_user_id_from_header(request)
-    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
     
     try:
         from backend.ai_service import get_ai_assistant_response
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         
         # 1. Traer contexto (Usuario / Leads recientes)
-        user_res = admin.table("users").select("email, plan, credits").eq("id", user_id).single().execute()
+        user_res = client.table("users").select("email, plan, credits").eq("id", user_id).single().execute()
         u = user_res.data or {}
         
-        leads_res = admin.table("email_conversations")\
+        leads_res = client.table("email_conversations")\
             .select("lead_name, lead_email, status, last_message_at, subject")\
             .eq("user_id", user_id)\
             .order("last_message_at", desc=True)\
@@ -708,12 +723,14 @@ async def chat_with_ai_assistant(req: AIAssistantRequest, request: Request):
 @router.get("/api/automations/rules")
 async def get_automation_rules(request: Request):
     """Obtiene las reglas de automatización del usuario"""
-    user_id = get_user_id_from_header(request)
-    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
     try:
         from backend.db_supabase import get_supabase_admin
-        admin = get_supabase_admin()
-        res = admin.table("automation_rules").select("*").eq("user_id", user_id).order("created_at", desc=True).execute()
+        # admin = get_supabase_admin() - using local client
+        res = client.table("automation_rules").select("*").eq("user_id", user_id).order("created_at", desc=True).execute()
         return res.data
     except Exception as e:
         logger.error(f"Error fetching rules: {e}")
@@ -722,14 +739,16 @@ async def get_automation_rules(request: Request):
 @router.post("/api/automations/rules")
 async def create_automation_rule(req: AutomationRuleRequest, request: Request):
     """Crea una nueva regla de automatización"""
-    user_id = get_user_id_from_header(request)
-    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
     try:
         from backend.db_supabase import get_supabase_admin
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         data = req.dict()
         data["user_id"] = user_id
-        res = admin.table("automation_rules").insert(data).execute()
+        res = client.table("automation_rules").insert(data).execute()
         return res.data[0]
     except Exception as e:
         logger.error(f"Error creating rule: {e}")
@@ -738,13 +757,15 @@ async def create_automation_rule(req: AutomationRuleRequest, request: Request):
 @router.put("/api/automations/rules/{rule_id}")
 async def update_automation_rule(rule_id: str, req: AutomationRuleRequest, request: Request):
     """Actualiza una regla de automatización"""
-    user_id = get_user_id_from_header(request)
-    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
     try:
         from backend.db_supabase import get_supabase_admin
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         data = req.dict()
-        res = admin.table("automation_rules").update(data).eq("id", rule_id).eq("user_id", user_id).execute()
+        res = client.table("automation_rules").update(data).eq("id", rule_id).eq("user_id", user_id).execute()
         # if res.data is empty it could throw IndexError but Supabase update returns updated row
         return res.data[0] if res.data else {"success": True}
     except Exception as e:
@@ -754,12 +775,14 @@ async def update_automation_rule(rule_id: str, req: AutomationRuleRequest, reque
 @router.delete("/api/automations/rules/{rule_id}")
 async def delete_automation_rule(rule_id: str, request: Request):
     """Elimina una regla de automatización"""
-    user_id = get_user_id_from_header(request)
-    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
     try:
         from backend.db_supabase import get_supabase_admin
-        admin = get_supabase_admin()
-        admin.table("automation_rules").delete().eq("id", rule_id).eq("user_id", user_id).execute()
+        # admin = get_supabase_admin() - using local client
+        client.table("automation_rules").delete().eq("id", rule_id).eq("user_id", user_id).execute()
         return {"success": True}
     except Exception as e:
         logger.error(f"Error deleting rule: {e}")
@@ -768,14 +791,16 @@ async def delete_automation_rule(rule_id: str, request: Request):
 @router.get("/api/automations/logs")
 async def get_automation_logs(request: Request):
     """Obtiene el historial de ejecuciones de reglas del usuario"""
-    user_id = get_user_id_from_header(request)
-    if not user_id: return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    from backend.api.dependencies import get_current_user_client
+    user_data = await get_current_user_client(request)
+    user_id = user_data["user_id"]
+    client = user_data["client"]
     try:
         from backend.db_supabase import get_supabase_admin
-        admin = get_supabase_admin()
+        # admin = get_supabase_admin() - using local client
         # Try a join, but Supabase SDK joins require the foreign key to be explicitly set or valid
         # We'll just fetch flat logs to avoid GraphQL issues
-        res = admin.table("automation_logs").select("*").eq("user_id", user_id).order("created_at", desc=True).limit(50).execute()
+        res = client.table("automation_logs").select("*").eq("user_id", user_id).order("created_at", desc=True).limit(50).execute()
         return res.data
     except Exception as e:
         logger.error(f"Error fetching logs: {e}")

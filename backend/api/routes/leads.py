@@ -66,10 +66,10 @@ except ImportError:
         logger.error("No se pudieron cargar Schemas")
 
 try:
-    from backend.api.dependencies import get_current_admin
+    from backend.api.dependencies import get_current_admin, get_current_user_client
 except ImportError:
     try:
-        from api.dependencies import get_current_admin
+        from api.dependencies import get_current_admin, get_current_user_client
     except ImportError:
         logger.error("No se pudo cargar get_current_admin")
 
@@ -186,7 +186,8 @@ def obtener_rubros():
     }
 
 @router.post("/api/buscar-stream")
-async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
+async def buscar_por_rubro_stream(request: BusquedaRubroRequest, user_data: dict = Depends(get_current_user_client)):
+    if getattr(request, "user_id", None) != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """
     Versión Streaming de búsqueda: envía prospectos en tiempo real
     usando Server-Sent Events (SSE).
@@ -414,7 +415,8 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest):
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @router.post("/api/buscar")
-async def buscar_por_rubro(request: BusquedaRubroRequest):
+async def buscar_por_rubro(request: BusquedaRubroRequest, user_data: dict = Depends(get_current_user_client)):
+    if getattr(request, "user_id", None) != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """
     Busca empresas de un rubro específico con validación de contactos
     Puede buscar por bbox (bounding box) o por ciudad/país
@@ -835,7 +837,8 @@ async def buscar_por_rubro(request: BusquedaRubroRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/api/buscar-multiple")
-async def buscar_multiples_rubros(request: BusquedaMultipleRequest):
+async def buscar_multiples_rubros(request: BusquedaMultipleRequest, user_data: dict = Depends(get_current_user_client)):
+    if getattr(request, "user_id", None) != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Busca empresas de múltiples rubros simultáneamente"""
     # Lógica de Créditos
     user_id = request.user_id
@@ -880,7 +883,7 @@ async def buscar_multiples_rubros(request: BusquedaMultipleRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/empresas")
-async def listar_empresas():
+async def listar_empresas(user_data: dict = Depends(get_current_user_client)):
     """Lista todas las empresas almacenadas en memoria (resultado de última búsqueda)"""
     try:
         global _memoria_empresas
@@ -901,7 +904,7 @@ async def listar_empresas():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/filtrar")
-async def filtrar(request: FiltroRequest):
+async def filtrar(request: FiltroRequest, user_data: dict = Depends(get_current_user_client)):
     """Filtra empresas con criterios específicos"""
     try:
         empresas = buscar_empresas(
@@ -932,7 +935,7 @@ async def filtrar(request: FiltroRequest):
 
 
 @router.get("/api/estadisticas")
-async def estadisticas():
+async def estadisticas(user_data: dict = Depends(get_current_user_client)):
     """Obtiene estadísticas del sistema"""
     try:
         stats = obtener_estadisticas()
@@ -958,7 +961,8 @@ async def estadisticas():
         raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
 
 @router.post("/api/exportar")
-async def exportar(request: ExportRequest):
+async def exportar(request: ExportRequest, user_data: dict = Depends(get_current_user_client)):
+    pass # Require auth
     """Exporta empresas a CSV, JSON o PDF"""
     from fastapi.responses import FileResponse
     # Lógica de Créditos
@@ -1036,7 +1040,8 @@ async def clear_database():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/api/empresa/estado")
-async def actualizar_estado(request: ActualizarEstadoRequest):
+async def actualizar_estado(request: ActualizarEstadoRequest, user_data: dict = Depends(get_current_user_client)):
+    if getattr(request, "user_id", None) and request.user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Actualiza el estado Kanban de una empresa"""
     try:
         from lead_utils import validar_estado
@@ -1077,7 +1082,8 @@ async def actualizar_estado(request: ActualizarEstadoRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/api/empresa/notas")
-async def actualizar_notas(request: ActualizarNotasRequest):
+async def actualizar_notas(request: ActualizarNotasRequest, user_data: dict = Depends(get_current_user_client)):
+    if getattr(request, "user_id", None) and request.user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Actualiza las notas de una empresa"""
     try:
         from datetime import datetime

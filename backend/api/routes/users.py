@@ -11,7 +11,7 @@ try:
         get_search_history, save_search_history, delete_search_history,
         get_supabase_admin, execute_with_retry
     )
-    from backend.api.dependencies import get_current_admin
+    from backend.api.dependencies import get_current_admin, get_current_user_client
     from backend.rubros_config import listar_rubros_disponibles
 except ImportError:
     from api.schemas import SearchHistoryRequest, UserRubrosRequest
@@ -20,7 +20,7 @@ except ImportError:
         get_search_history, save_search_history, delete_search_history,
         get_supabase_admin, execute_with_retry
     )
-    from api.dependencies import get_current_admin
+    from api.dependencies import get_current_admin, get_current_user_client
     from rubros_config import listar_rubros_disponibles
 
 logger = logging.getLogger(__name__)
@@ -28,14 +28,16 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/users", tags=["Users"])
 
 @router.get("/{user_id}/credits")
-async def api_get_user_credits(user_id: str):
+async def api_get_user_credits(user_id: str, user_data: dict = Depends(get_current_user_client)):
+    if user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Obtiene créditos y próxima fecha de reset"""
     # Primero verificar si corresponde reset
     check_reset_monthly_credits(user_id)
     return get_user_credits(user_id)
 
 @router.post("/{user_id}/cancel-plan")
-async def api_cancel_user_plan(user_id: str):
+async def api_cancel_user_plan(user_id: str, user_data: dict = Depends(get_current_user_client)):
+    if user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Cancela el plan activo del usuario"""
     success = cancel_user_plan(user_id)
     if not success:
@@ -43,7 +45,8 @@ async def api_cancel_user_plan(user_id: str):
     return {"success": True, "message": "Plan cancelado correctamente"}
 
 @router.get("/{user_id}/history")
-async def api_get_search_history(user_id: str, limit: int = 10):
+async def api_get_search_history(user_id: str, limit: int = 10, user_data: dict = Depends(get_current_user_client)):
+    if user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Obtiene el historial de búsquedas de un usuario"""
     history = get_search_history(user_id, limit)
     return {
@@ -53,7 +56,8 @@ async def api_get_search_history(user_id: str, limit: int = 10):
     }
 
 @router.post("/history")
-async def api_save_search_history(request: SearchHistoryRequest):
+async def api_save_search_history(request: SearchHistoryRequest, user_data: dict = Depends(get_current_user_client)):
+    if request.user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Guarda una búsqueda en el historial"""
     result = save_search_history(request.user_id, request.dict())
     if not result.get("success"):
@@ -62,7 +66,8 @@ async def api_save_search_history(request: SearchHistoryRequest):
     return result
 
 @router.delete("/{user_id}/history/{search_id}")
-async def api_delete_search_history(user_id: str, search_id: str):
+async def api_delete_search_history(user_id: str, search_id: str, user_data: dict = Depends(get_current_user_client)):
+    if user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Elimina una entrada del historial"""
     success = delete_search_history(user_id, search_id)
     if not success:
@@ -71,14 +76,15 @@ async def api_delete_search_history(user_id: str, search_id: str):
     return {"success": True, "message": "Entrada eliminada correctamente"}
 
 @router.get("/{user_id}/rubros")
-async def get_user_rubros(user_id: str):
+async def get_user_rubros(user_id: str, user_data: dict = Depends(get_current_user_client)):
+    if user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Obtiene los rubros seleccionados por el usuario y todos los disponibles"""
     try:
         # Obtener todos los disponibles
         all_rubros = listar_rubros_disponibles()
         
         # Obtener seleccionados de la BD
-        client = get_supabase_admin()
+        client = user_data["client"] # using local authenticated client
         selected_rubros = []
         
         if client:
@@ -104,10 +110,11 @@ async def get_user_rubros(user_id: str):
         }
 
 @router.post("/rubros")
-async def save_user_rubros(request: UserRubrosRequest):
+async def save_user_rubros(request: UserRubrosRequest, user_data: dict = Depends(get_current_user_client)):
+    if request.user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Guarda los rubros seleccionados por el usuario"""
     try:
-        client = get_supabase_admin()
+        client = user_data["client"] # using local authenticated client
         if not client:
             raise HTTPException(status_code=500, detail="Error de conexión a base de datos")
             
@@ -135,7 +142,7 @@ async def list_users(admin: Dict = Depends(get_current_admin)):
     """Lista todos los usuarios usando Service Role y combina con Auth data"""
     client = None
     try:
-        client = get_supabase_admin()
+        client = user_data["client"] # using local authenticated client
         if not client:
             return {"success": False, "error": "Supabase Admin (Service Role) not configured. Check env vars."}
             

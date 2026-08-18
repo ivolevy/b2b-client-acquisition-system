@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
+from backend.api.dependencies import get_current_user_client
 
 try:
     from backend.api.schemas import TemplateCreateRequest, TemplateModifyRequest
@@ -27,9 +28,9 @@ def get_user_id_from_header(request: Request) -> Optional[str]:
     return request.headers.get("X-User-ID")
 
 @router.get("")
-async def listar_templates(request: Request, type: Optional[str] = None, user_id: Optional[str] = None):
+async def listar_templates(request: Request, type: Optional[str] = None, user_id: Optional[str] = None, user_data: dict = Depends(get_current_user_client)):
     """Lista todos los templates del usuario + defaults"""
-    uid = user_id or get_user_id_from_header(request)
+    uid = user_data["user_id"]
     if not uid:
         raise HTTPException(status_code=401, detail="X-User-ID header or user_id param missing")
     try:
@@ -44,7 +45,8 @@ async def listar_templates(request: Request, type: Optional[str] = None, user_id
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{template_id}")
-async def obtener_template_endpoint(template_id: str, user_id: str):
+async def obtener_template_endpoint(template_id: str, user_id: str, user_data: dict = Depends(get_current_user_client)):
+    if user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Obtiene un template por ID (validando pertenencia o default)"""
     try:
         templates = db_get_templates(user_id)
@@ -63,14 +65,13 @@ async def obtener_template_endpoint(template_id: str, user_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("")
-async def crear_template_endpoint(data: TemplateCreateRequest):
+async def crear_template_endpoint(data: TemplateCreateRequest, user_data: dict = Depends(get_current_user_client)):
     """Crea un nuevo template persistente"""
     try:
         logger.info(f"POST /api/templates - Received data type: {type(data)}")
         
-        uid = getattr(data, 'user_id', None)
-        if not uid:
-             raise HTTPException(status_code=400, detail=f"Falta user_id en el objeto")
+        uid = user_data['user_id']
+        
 
         template_id = db_create_template(
             user_id=uid,
@@ -98,10 +99,10 @@ async def crear_template_endpoint(data: TemplateCreateRequest):
         raise HTTPException(status_code=500, detail=f"Error creando template: {str(e)}")
 
 @router.put("/{template_id}")
-async def actualizar_template_endpoint(template_id: str, data: TemplateModifyRequest):
+async def actualizar_template_endpoint(template_id: str, data: TemplateModifyRequest, user_data: dict = Depends(get_current_user_client)):
     """Actualiza un template persistente"""
     try:
-        uid = getattr(data, 'user_id', None)
+        uid = user_data['user_id']
         success = db_update_template(
             template_id=template_id,
             user_id=uid,
@@ -130,7 +131,8 @@ async def actualizar_template_endpoint(template_id: str, data: TemplateModifyReq
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{template_id}")
-async def eliminar_template_endpoint(template_id: str, user_id: str):
+async def eliminar_template_endpoint(template_id: str, user_id: str, user_data: dict = Depends(get_current_user_client)):
+    if user_id != user_data["user_id"]: raise HTTPException(status_code=403, detail="Forbidden")
     """Elimina un template"""
     try:
         success = db_delete_template(template_id, user_id)

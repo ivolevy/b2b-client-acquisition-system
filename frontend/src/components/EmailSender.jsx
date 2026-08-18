@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { API_URL } from '../config';
 import './EmailSender.css';
+import DOMPurify from 'dompurify';
 import GmailConnection from './GmailConnection';
 import OutlookConnection from './OutlookConnection';
 import { useAuth } from '../context/AuthContext';
@@ -800,7 +801,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                                                 padding: '16px', backgroundColor: '#fdfdfd', 
                                                 border: '1px solid #f1f5f9', borderRadius: '8px'
                                             }}
-                                            dangerouslySetInnerHTML={{ __html: renderPreviewContent(previewEmpresa).body }}
+                                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderPreviewContent(previewEmpresa).body) }}
                                         />
                                     </div>
                                 </>
