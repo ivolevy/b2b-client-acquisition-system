@@ -59,15 +59,15 @@ async def google_callback(code: str, state: str):
         
         if not success:
             logger.error(f"Error guardando token OAuth para usuario {user_id}")
-            return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=error&reason=save_failed"})
+            return RedirectResponse(url=f"{frontend_url}/?gmail=error&reason=save_failed", status_code=302)
             
         # Redirigir de vuelta al frontend (ajustar URL según sea necesario)
         logger.info(f"Gmail conectado exitosamente para usuario {user_id}")
-        return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=success"})
+        return RedirectResponse(url=f"{frontend_url}/?gmail=success", status_code=302)
         
     except Exception as e:
         logger.error(f"Error en callback de Google Auth: {e}")
-        return Response(status_code=302, headers={"Location": f"{frontend_url}/?gmail=error&reason={str(e)}"})
+        return RedirectResponse(url=f"{frontend_url}/?gmail=error&reason={urllib.parse.quote(str(e))}", status_code=302)
 
 # ========== OUTLOOK OAUTH ENDPOINTS (CONSOLIDATED) ==========
 
@@ -122,13 +122,13 @@ async def outlook_callback(code: str, state: str):
         
         if not success:
             logger.error(f"Error guardando token Outlook en BD para usuario {user_id}")
-            return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason=db_error"})
+            return RedirectResponse(url=f"{frontend_url}/?outlook=error&reason=db_error", status_code=302)
             
-        return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=success"})
+        return RedirectResponse(url=f"{frontend_url}/?outlook=success", status_code=302)
         
     except Exception as e:
         logger.error(f"Error crítico en callback de Outlook: {e}")
-        return Response(status_code=302, headers={"Location": f"{frontend_url}/?outlook=error&reason={str(e)}"})
+        return RedirectResponse(url=f"{frontend_url}/?outlook=error&reason={urllib.parse.quote(str(e))}", status_code=302)
 
 @router.get("/api/auth/google/status/{user_id}")
 async def google_status(user_id: str):
