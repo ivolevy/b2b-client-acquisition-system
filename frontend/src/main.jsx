@@ -3,6 +3,20 @@ import ReactDOM from 'react-dom/client'
 import AuthWrapper from './AuthWrapper'
 import './index.css'
 
+import axios from 'axios';
+import { authStorage } from './utils/storage';
+
+// Configurar un interceptor global para axios
+axios.interceptors.request.use((config) => {
+  const token = authStorage.getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 // Manejar errores de extensiones del navegador y mensajería asíncrona
 window.addEventListener('error', (event) => {
   // Silenciar errores de extensiones del navegador relacionados con mensajería
