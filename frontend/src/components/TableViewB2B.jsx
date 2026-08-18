@@ -491,7 +491,7 @@ function TableViewB2B({
                 </td>
                 <td>
                   {empresa.telefono ? (
-                        <a href={`tel:${empresa.telefono}`} className="link" style={{ fontSize: '12px' }}>
+                        <a href={`https://wa.me/${empresa.telefono.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="link" style={{ fontSize: '12px' }}>
                       {empresa.telefono}
                     </a>
                   ) : (
