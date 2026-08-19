@@ -1208,3 +1208,52 @@
   background: #dc2626;
   transform: translateY(-1px);
 }
+
+/* ============================================
+   RESPONSIVE MOBILE
+   ============================================ */
+@media (max-width: 768px) {
+  .email-sender-split {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .es-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--es-border);
+    padding: 16px;
+    gap: 16px;
+  }
+  .es-main {
+    width: 100%;
+    overflow: visible;
+  }
+  .es-nav-tabs {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .pro-editor {
+    padding: 16px;
+  }
+  .view-toolbar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .es-row {
+    grid-template-columns: 40px 1fr;
+    grid-template-rows: auto auto;
+  }
+  .es-row .meta-badge,
+  .es-row .stats-badge {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    justify-self: flex-start;
+  }
+  .auth-links-container {
+    flex-direction: column;
+  }
+  .auth-link-divider {
+    display: none;
+  }
+}

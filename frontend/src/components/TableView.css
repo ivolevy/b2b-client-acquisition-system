@@ -391,73 +391,40 @@
 
     /* --- FIX MOBILE FILTERS LAYOUT --- */
     .filters-inline-bar {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr;
-        /* Two equal columns */
-        grid-gap: 12px;
-        padding: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px;
+        padding: 16px !important;
         align-items: stretch;
     }
 
-    /* GRID AREAS / ASSIGNMENTS */
-
-    /* Row 1: Rubro (Left) | Sort (Right) */
-    .filter-item-rubro {
-        grid-column: 1 / 2;
-        grid-row: 1;
+    .filter-item-rubro,
+    .filter-item-sort,
+    .filter-item-distance,
+    .filter-item-toggles,
+    .filter-item-redes {
         width: 100% !important;
-    }
-
-    .filter-item-sort {
-        grid-column: 2 / 3;
-        grid-row: 1;
-        width: 100% !important;
-    }
-
-    /* Row 2: Distance (Full width) */
-    .filter-item-distance {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        width: 100% !important;
-        margin-top: 4px;
-    }
-
-    /* Row 3: Toggles (Left) | Redes (Right) OR Full width depending on preference */
-    /* Let's make Toggles Left and Redes Right for balance */
-    .filter-item-toggles {
-        grid-column: 1 / 2;
-        grid-row: 3;
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
-        justify-content: center;
+        align-items: stretch;
         gap: 8px;
     }
 
-    .filter-item-redes {
-        grid-column: 2 / 3;
-        grid-row: 3;
-        width: 100% !important;
-    }
-
-    /* Clear Button usually absolute or small */
     .filter-item-clear {
-        grid-column: 2 / 3;
-        grid-row: 1;
-        justify-self: end;
-        margin-right: -4px;
-        margin-top: -36px;
-        /* HACK: overlapping floating clear button? */
-        /* Or just place it in a better spot. Let's make it a small icon next to sort? */
-        position: absolute;
-        right: 12px;
-        top: 12px;
-        z-index: 10;
+        position: relative;
+        align-self: flex-end;
+        right: 0;
+        top: 0;
+        margin-top: 8px;
     }
 
-    /* Better clear button: Row 3 after networks? Or maybe just float it */
-
-
-    /* ELEMENT SPECIFIC STYLES FOR MOBILE GRID */
+    .filter-inline-input,
+    .rubro-dropdown,
+    .rubro-dropdown-trigger,
+    .custom-select-wrapper {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
 
     .rubro-dropdown {
         width: 100%;
@@ -512,33 +479,13 @@
         display: contents;
     }
 
-    /* HIDE Clear button from grid flow if we used absolute, or place it nicely */
-    .filter-item-clear {
-        position: static;
-        grid-column: 2;
-        grid-row: 3;
-        justify-self: end;
-        margin-top: 0;
+    /* Rest of mobile grid styles removed because we are using flex column now */
+    .filter-checkboxes-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
     }
-
-    /* If clear button is present, maybe Redes needs to shrink? 
-     Let's put Clear button in Row 1 absolute top right to save space 
-  */
-    .filters-inline-bar {
-        position: relative;
-    }
-
-    .filter-item-clear {
-        position: absolute;
-        right: 8px;
-        top: 8px;
-        z-index: 20;
-        background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Adjust Sort Select padding to not overlap with absolute clear button if needed */
-    /* Actually clear button is only there if filters active. */
 }
 
 @media (max-width: 480px) {

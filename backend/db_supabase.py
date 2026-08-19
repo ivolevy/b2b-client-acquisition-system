@@ -434,8 +434,15 @@ def exportar_a_csv(rubro: Optional[str] = None, solo_validas: bool = True) -> Op
             if not empresas:
                 return None
             
-            # Usar las claves del primer elemento como headers
-            campos = list(empresas[0].keys())
+            # Filtrar columnas no deseadas
+            campos_excluidos = {'ciudad', 'codigo_postal', 'pais'}
+            campos = [c for c in list(empresas[0].keys()) if c not in campos_excluidos]
+            
+            # Limpiar los datos antes de escribir
+            for emp in empresas:
+                for k in campos_excluidos:
+                    emp.pop(k, None)
+            
             writer = csv.DictWriter(
                 csvfile, 
                 fieldnames=campos, 
@@ -522,10 +529,9 @@ def exportar_a_pdf(rubro: Optional[str] = None, solo_validas: bool = True) -> Op
         elements.append(Paragraph('Para más información contactar a Ivan Levy - CTO de Dota | ivo.levy03@gmail.com', subtitle_style))
         
         # Table Data
-        data = [['Empresa', 'Rubro', 'Web', 'Email', 'Teléfono', 'Ubicación']]
+        data = [['Empresa', 'Rubro', 'Web', 'Email', 'Teléfono']]
         
         for e in empresas:
-            ubicacion = ", ".join(filter(None, [e.get('ciudad'), e.get('pais')]))
             rubro_val = e.get('rubro', '')
             # Truncate strings to prevent huge wrapped cells
             empresa_nombre = str(e.get('nombre') or '')[:40]
@@ -537,12 +543,11 @@ def exportar_a_pdf(rubro: Optional[str] = None, solo_validas: bool = True) -> Op
                 rubro_val[:25],
                 web,
                 email,
-                str(e.get('telefono') or '')[:20],
-                ubicacion[:30]
+                str(e.get('telefono') or '')[:20]
             ])
             
         # Create Table
-        col_widths = [140, 90, 150, 150, 90, 110]
+        col_widths = [180, 110, 160, 160, 110]
         t = Table(data, colWidths=col_widths, repeatRows=1)
         
         # Add Style
