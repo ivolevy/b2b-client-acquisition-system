@@ -3,7 +3,7 @@
     justify-content: center;
     align-items: center;
     min-height: 70vh;
-    padding: 2rem;
+    padding: 6rem 2rem 2rem 2rem;
     animation: supportFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -20,16 +20,14 @@
 }
 
 .support-aesthetic-card {
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 2.5rem;
     padding: 3rem 2.5rem;
     max-width: 420px;
     width: 100%;
     text-align: center;
-    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
 }
@@ -40,20 +38,20 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
 }
 
 .support-aesthetic-card h1 {
     font-size: 1.75rem;
     font-weight: 800;
-    color: white;
+    color: #0f172a;
     margin-bottom: 0.75rem;
     letter-spacing: -0.04em;
 }
 
 .support-aesthetic-card p {
-    color: rgba(255, 255, 255, 0.5);
+    color: #64748b;
     font-size: 0.95rem;
     line-height: 1.5;
     margin-bottom: 2.5rem;
@@ -84,14 +82,14 @@
 }
 
 .btn-icon-wrapper {
-    width: 24px;
-    /* Reduced since no box is needed */
-    height: 24px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
-    color: white;
+    background: #f1f5f9;
+    border-radius: 8px;
+    color: #334155;
 }
 
 .btn-label-stack {
@@ -103,20 +101,27 @@
 .btn-primary-text {
     font-weight: 700;
     font-size: 0.9rem;
-    color: white;
+    color: #1e293b;
 }
 
 .btn-secondary-text {
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: #64748b;
 }
 
 .whatsapp-flavor .btn-icon-wrapper {
     color: #25d366;
+    background: #dcf8c6;
 }
 
 .email-flavor .btn-icon-wrapper {
     color: #3b82f6;
+    background: #dbeafe;
+}
+
+.instagram-flavor .btn-icon-wrapper {
+    color: #e1306c;
+    background: #fce7f3;
 }
 
 .aesthetic-footer {
@@ -129,12 +134,12 @@
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    color: rgba(255, 255, 255, 0.3);
+    color: #94a3b8;
     font-weight: 700;
 }
 
 .footer-name {
     font-size: 0.9rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
+    color: #334155;
 }
