@@ -120,7 +120,7 @@ def get_ai_assistant_response(query: str, context_data: str) -> str:
         Si el usuario necesita más ayuda, quiere contactar a un administrador o tiene problemas técnicos, debés proporcionarle los datos de contacto de Ivan Levy de forma clara:
         
         CONTACTO DE SOPORTE:
-        Email: ivo.levy03@gmail.com / solutionsdota@gmail.com
+        Email: ivo.levy03@gmail.com / softwaresmartleads@gmail.com
         WhatsApp: +54 9 11 3824-0929
         
         2. Conocimiento: Sos experto en búsqueda de leads en Google Maps, exportación a Excel, y el sistema de envío de emails/WhatsApp integrado.

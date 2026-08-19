@@ -57,11 +57,7 @@ const AIAssistant = ({ open, onClose }) => {
       anchor="right"
       open={open}
       onClose={onClose}
-      slotProps={{
-        backdrop: {
-          sx: { backgroundColor: 'transparent' }
-        }
-      }}
+      variant="persistent"
       PaperProps={{
         sx: {
           width: { xs: '100%', sm: '400px' },

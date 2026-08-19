@@ -1692,7 +1692,7 @@ function Login({ onLogin }) {
                 className="contact-option-card"
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
-                  navigator.clipboard.writeText("solutionsdota@gmail.com");
+                  navigator.clipboard.writeText("softwaresmartleads@gmail.com");
                   setEmailCopied(true);
                   setTimeout(() => setEmailCopied(false), 2000);
                 }}
@@ -1702,7 +1702,7 @@ function Login({ onLogin }) {
                 </div>
                 <div className="contact-option-info">
                   <strong>Email</strong>
-                  <span>{emailCopied ? '¡Copiado!' : 'solutionsdota@gmail.com'}</span>
+                  <span>{emailCopied ? '¡Copiado!' : 'softwaresmartleads@gmail.com'}</span>
                 </div>
                 {emailCopied && (
                   <div className="copy-feedback-bubble">✓ Copiado</div>

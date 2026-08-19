@@ -1160,7 +1160,7 @@ async def registrar_pago_exitoso(
             except ImportError:
                 from email_service import enviar_email, wrap_premium_template
                 
-            html_body = wrap_premium_template(content, "Ivan Levy", "solutionsdota@gmail.com")
+            html_body = wrap_premium_template(content, "Ivan Levy", "softwaresmartleads@gmail.com")
             
             res_email = enviar_email(
                 destinatario=email,

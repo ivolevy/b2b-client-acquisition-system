@@ -920,11 +920,11 @@ const LandingPage = () => {
                       className="contact-link-item" 
                       style={{ cursor: 'pointer' }}
                       onClick={() => {
-                          navigator.clipboard.writeText('solutionsdota@gmail.com');
+                          navigator.clipboard.writeText('softwaresmartleads@gmail.com');
                       }}
                   >
                       <div className="icon-box"><FiMail /></div>
-                      <span>solutionsdota@gmail.com</span>
+                      <span>softwaresmartleads@gmail.com</span>
                   </div>
                   <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
                       <span style={{fontSize:'0.85rem', marginBottom:'8px', fontWeight:'600', color:'var(--text-secondary)'}}>Ivan Levy - CTO</span>

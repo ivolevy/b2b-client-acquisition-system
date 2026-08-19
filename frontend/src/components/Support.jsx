@@ -52,7 +52,7 @@ function Support() {
                         className="compact-contact-btn email-flavor"
                         style={{ cursor: 'pointer' }}
                         onClick={() => {
-                            navigator.clipboard.writeText('solutionsdota@gmail.com');
+                            navigator.clipboard.writeText('softwaresmartleads@gmail.com');
                         }}
                     >
                         <div className="btn-icon-wrapper">
@@ -63,7 +63,7 @@ function Support() {
                         </div>
                         <div className="btn-label-stack">
                             <span className="btn-primary-text">Email</span>
-                            <span className="btn-secondary-text">solutionsdota@gmail.com</span>
+                            <span className="btn-secondary-text">softwaresmartleads@gmail.com</span>
                         </div>
                     </div>
                 </div>

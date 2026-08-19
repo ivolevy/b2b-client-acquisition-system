@@ -288,7 +288,7 @@ const NotFound = () => {
                <ContactItem 
                 icon={FiMail} 
                 label="Soporte Técnico" 
-                value="solutionsdota@gmail.com" 
+                value="softwaresmartleads@gmail.com" 
                 href="#"
                 color="244, 63, 94" // pink
                 isCopy={true}

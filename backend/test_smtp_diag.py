@@ -11,9 +11,9 @@ load_dotenv(env_path)
 
 SMTP_HOST = os.getenv('SMTP_HOST', 'smtp.gmail.com')
 SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
-SMTP_USER = os.getenv('SMTP_USER', 'solutionsdota@gmail.com')
+SMTP_USER = os.getenv('SMTP_USER', 'softwaresmartleads@gmail.com')
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')
-SMTP_FROM_EMAIL = os.getenv('SMTP_FROM_EMAIL', 'solutionsdota@gmail.com')
+SMTP_FROM_EMAIL = os.getenv('SMTP_FROM_EMAIL', 'softwaresmartleads@gmail.com')
 
 def test_smtp():
     print(f"Testing SMTP with {SMTP_USER} via {SMTP_HOST}:{SMTP_PORT}...")
