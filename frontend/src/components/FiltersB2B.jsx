@@ -23,6 +23,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning }) {
   const [locationData, setLocationData] = useState(null);
   const [smartFilterText, setSmartFilterText] = useState('');
   const [smartFilterAudio, setSmartFilterAudio] = useState(null);
+  const [resetKey, setResetKey] = useState(0);
   
   // Estado para inicializar el mapa desde historial
   
@@ -125,6 +126,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning }) {
           {/* Controles en una sola línea: Rubro + Radio + Dirección + Botón */}
           {GOOGLE_API_KEY ? (
             <GoogleLocationPicker 
+              key={resetKey}
               onLocationChange={setLocationData}
               loading={loading}
               rubroSelect={
@@ -152,6 +154,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning }) {
             />
           ) : (
             <LocationPicker 
+              key={resetKey}
               onLocationChange={setLocationData}
               loading={loading}
               rubroSelect={
@@ -244,14 +247,31 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning }) {
 
             </div>
 
-            <button 
-              type="submit" 
-              className="btn-search-distinct" 
-              disabled={loading}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              Buscar
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                type="button" 
+                className="btn-search-distinct" 
+                onClick={() => {
+                  setRubro('');
+                  setSmartFilterText('');
+                  setSmartFilterAudio(null);
+                  setLocationData(null);
+                  setResetKey(prev => prev + 1);
+                }}
+                disabled={loading}
+                style={{ background: '#f1f5f9', color: '#64748b', border: '1px solid #cbd5e1' }}
+              >
+                Limpiar
+              </button>
+              <button 
+                type="submit" 
+                className="btn-search-distinct" 
+                disabled={loading}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Buscar
+              </button>
+            </div>
           </div>
 
           {/* Texto de ayuda dinámico */}
