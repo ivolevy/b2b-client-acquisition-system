@@ -8,7 +8,7 @@ const api = axios.create({
   },
 });
 
-import { authStorage } from './utils/storage';
+import { authStorage } from '../utils/storage';
 
 api.interceptors.request.use((config) => {
   const token = authStorage.getToken();
