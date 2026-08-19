@@ -198,6 +198,12 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest, user_data: dict
     from backend.db_supabase import get_supabase_admin
     admin = get_supabase_admin()
     
+@router.get("/api/test-auth")
+async def test_auth_route(request: Request):
+    """Echoes headers for debugging 401s in Vercel"""
+    auth = request.headers.get("Authorization", "MISSING")
+    return {"authorization_header_received": auth, "all_headers": dict(request.headers)}
+    
     if task_id and admin:
         try:
             admin.table('search_tasks').insert({

@@ -34,7 +34,7 @@ async def get_current_user_client(request: Request) -> Dict[str, Any]:
         user_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY, options=opts)
         
         # Opcionalmente, podemos pedir el usuario actual para validar el token y obtener el ID
-        user_res = user_client.auth.get_user()
+        user_res = user_client.auth.get_user(jwt=token)
         if not user_res or not user_res.user:
             raise HTTPException(status_code=401, detail="Token inválido o expirado")
             
