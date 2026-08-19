@@ -343,13 +343,10 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest, user_data: dict
                 
                 yield f"data: {json.dumps({'type': 'status', 'message': f'Encontrados {len(all_candidates)} prospectos. Buscando datos de contacto...'})}\n\n"
                 
-                # Emitir todos los leads INMEDIATAMENTE para que el usuario los vea al instante
-                # y para evitar timeouts de Vercel si el scraping demora
-                # NOTA: Solo lo hacemos si NO hay smart_filter, porque sino poblaríamos la UI con basura
+                # NOTA: Ya no emitimos todos los leads inmediatamente para poder filtrarlos
+                # basados en si obtuvieron un email o si ya tenían teléfono.
                 if not request.smart_filter_text:
-                    for r in leads_to_process:
-                        yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
-                        emitted_count += 1
+                    pass # Solo mantenemos la estructura por si acaso
                 
                 # Crear sesión persistente para todo el proceso
                 session = ScraperSession()
@@ -377,35 +374,41 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest, user_data: dict
                                 filtered_batch_leads = await apply_smart_filter(enriched_batch, request.smart_filter_text)
                                 
                                 for r in filtered_batch_leads:
-                                    yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
-                                    emitted_count += 1
-                                    enriched_count += 1
+                                    has_email = bool(r.get('email'))
+                                    has_phone = bool(r.get('telefono'))
+                                    if has_email or has_phone:
+                                        yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
+                                        emitted_count += 1
+                                        enriched_count += 1
                                     await asyncio.sleep(0.02)
                                     
                             else:
-                                # Comportamiento standard: emitir inmediatamente
+                                # Comportamiento standard: emitir después de enriquecer si tienen contacto
                                 for r in enriched_batch:
-                                    yield f"data: {json.dumps({'type': 'update', 'data': r})}\n\n"
-                                    emitted_count += 1
-                                    enriched_count += 1
-                                    
-                                    # Trigger: Lead Extracted
-                                    try:
-                                        from backend.trigger_service import process_triggers_async
-                                        process_triggers_async(request.user_id, "lead_extracted", lead_data=r)
-                                    except:
-                                        pass
+                                    has_email = bool(r.get('email'))
+                                    has_phone = bool(r.get('telefono'))
+                                    if has_email or has_phone:
+                                        yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
+                                        emitted_count += 1
+                                        enriched_count += 1
                                         
-                                    await asyncio.sleep(0.02) 
+                                        # Trigger: Lead Extracted
+                                        try:
+                                            from backend.trigger_service import process_triggers_async
+                                            process_triggers_async(request.user_id, "lead_extracted", lead_data=r)
+                                        except:
+                                            pass
+                                            
+                                        await asyncio.sleep(0.02) 
                                 
                     except Exception as e:
                         logger.error(f"Error en enriquecimiento batch: {e}")
-                        # Si falla, emitimos originales
-                        # Fallback seguro para ambos casos
+                        # Si falla, emitimos originales pero solo si tienen telefono
                         for r in batch:
-                            yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
-                            emitted_count += 1
-                            enriched_count += 1
+                            if r.get('telefono'):
+                                yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
+                                emitted_count += 1
+                                enriched_count += 1
 
                 # (Bloque acumulado eliminado - ya se procesó en tiempo real)
                 # Finalización normal
