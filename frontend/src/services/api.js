@@ -8,6 +8,18 @@ const api = axios.create({
   },
 });
 
+import { authStorage } from './utils/storage';
+
+api.interceptors.request.use((config) => {
+  const token = authStorage.getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 export const setAuthToken = (token) => {
   if (token) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;

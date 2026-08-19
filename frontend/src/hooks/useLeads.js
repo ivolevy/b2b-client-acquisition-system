@@ -3,6 +3,7 @@ import { aiService } from '../services/ai.service';
 import { leadsService } from '../services/leads.service';
 import { searchHistoryService } from '../lib/supabase';
 import { API_URL } from '../config';
+import { authStorage } from '../utils/storage';
 
 export function useLeads(user, toasts, fetchCredits) {
   const { success, error: toastError, warning, info } = toasts;
@@ -100,9 +101,13 @@ export function useLeads(user, toasts, fetchCredits) {
         delete paramsWithUser.smart_filter_audio_blob;
       }
 
+      const token = authStorage.getToken();
       const response = await fetch(`${API_URL}/api/buscar-stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
         body: JSON.stringify(paramsWithUser),
       });
 
