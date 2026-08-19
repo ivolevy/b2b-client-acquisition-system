@@ -20,7 +20,7 @@ def replace_app(text):
     return text.replace("@app.", "@router.")
 
 router = APIRouter(tags=["Admin"])
-@router.get("/api/admin/users")
+@router.get("/api/admin/usage-stats")
 async def get_usage_stats(admin: Dict = Depends(get_current_admin)):
     """Obtiene las estadísticas de uso de API para el dashboard"""
     # No es necesario el import local si ya está arriba
