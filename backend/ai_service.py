@@ -22,7 +22,7 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("VITE_GOOGLE_MAPS_API_
 # Let's hope it's in the .env that db_supabase loads.
 # db_supabase loads .env from BASE_DIR/.env
 # Modelo unificado para evitar confusiones de cuota
-DEFAULT_MODEL = 'gemini-2.0-flash'
+DEFAULT_MODEL = 'gemini-3.6-flash'
 
 def get_ai_client():
     if not GOOGLE_API_KEY:
