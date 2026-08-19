@@ -165,6 +165,7 @@ const AuthWrapper = () => {
             const userData = authService.buildUserData(session.user, profile);
             setUser(userData);
             setToken(session.access_token);
+            authStorage.setToken(session.access_token); // <-- GUARDAR TOKEN
           }
         } catch (error) {
           console.warn('[AuthWrapper] Error en initAuth, limpiando sesión...', error);
@@ -199,9 +200,11 @@ const AuthWrapper = () => {
               const userData = authService.buildUserData(session.user, profile);
               setUser(userData);
               setToken(session.access_token);
+              authStorage.setToken(session.access_token); // <-- GUARDAR TOKEN
             } else if (event === 'SIGNED_OUT') {
               setUser(null);
               setToken(null);
+              authStorage.removeToken();
             }
           }
         );
@@ -242,6 +245,9 @@ const AuthWrapper = () => {
     const userData = authService.buildUserData(data.user, data.profile);
     setUser(userData);
     setToken(data.session?.access_token || null);
+    if (data.session?.access_token) {
+      authStorage.setToken(data.session.access_token); // <-- GUARDAR TOKEN
+    }
 
     return userData;
   };
