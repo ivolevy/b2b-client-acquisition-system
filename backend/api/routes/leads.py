@@ -349,6 +349,14 @@ async def test_auth_route(request: Request):
                 
                 yield f"data: {json.dumps({'type': 'status', 'message': f'Encontrados {len(all_candidates)} prospectos. Buscando datos de contacto...'})}\n\n"
                 
+                # Emitir todos los leads INMEDIATAMENTE para que el usuario los vea al instante
+                # y para evitar timeouts de Vercel si el scraping demora
+                # NOTA: Solo lo hacemos si NO hay smart_filter, porque sino poblaríamos la UI con basura
+                if not request.smart_filter_text:
+                    for r in leads_to_process:
+                        yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
+                        emitted_count += 1
+                
                 # Crear sesión persistente para todo el proceso
                 session = ScraperSession()
                 
@@ -383,7 +391,7 @@ async def test_auth_route(request: Request):
                             else:
                                 # Comportamiento standard: emitir inmediatamente
                                 for r in enriched_batch:
-                                    yield f"data: {json.dumps({'type': 'lead', 'data': r})}\n\n"
+                                    yield f"data: {json.dumps({'type': 'update', 'data': r})}\n\n"
                                     emitted_count += 1
                                     enriched_count += 1
                                     
