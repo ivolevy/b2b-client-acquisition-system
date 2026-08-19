@@ -38,7 +38,7 @@ function AppB2B() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toasts, success, error: toastError, warning, info, removeToast } = useToast();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   
   // UI States
   const [creditsLoading, setCreditsLoading] = useState(false);
@@ -58,7 +58,7 @@ function AppB2B() {
     displayProgress, setDisplayProgress,
     handleBuscar,
     handleCancelSearch
-  } = useLeads(user, { success, error: toastError, warning, info }, () => fetchCredits());
+  } = useLeads(user, token, { success, error: toastError, warning, info }, () => fetchCredits());
 
   // Determinar la vista basada en la ruta
   const isProfilePage = location.pathname === '/profile';
