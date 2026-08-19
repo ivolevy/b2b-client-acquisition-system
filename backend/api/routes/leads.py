@@ -222,11 +222,8 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest, user_data: dict
         deduction = deduct_credits(user_id, 100)
         if not deduction.get("success"):
             error_msg = deduction.get("error", "Error desconocido")
-            if "insuficientes" in error_msg.lower():
-                raise HTTPException(status_code=402, detail=f"Créditos insuficientes. Balance: {deduction.get('current', 0)}")
-            else:
-                logger.error(f"Error sistémico en deducción de créditos: {error_msg}")
-                raise HTTPException(status_code=500, detail=f"Error en el sistema de créditos: {error_msg}")
+            logger.warning(f"Error sistémico en deducción de créditos: {error_msg}")
+            raise HTTPException(status_code=402, detail=f"No se puede realizar la búsqueda: {error_msg}")
 
     async def event_generator():
         seen_ids = set()
