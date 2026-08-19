@@ -223,12 +223,8 @@ function LocationPicker(props) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleMapClickFromMap = async (latlng) => {
+  const fallbackReverseGeocoding = async (latlng) => {
     try {
-      // Notificar selección inmediata de coordenadas
-      handleLocationSelect(latlng, null);
-
-      // Intentar obtener nombre de la dirección (Reverse Geocoding)
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&addressdetails=1`,
         {
@@ -244,6 +240,31 @@ function LocationPicker(props) {
         const nombre = data.display_name || `Ubicación (${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)})`;
         setSearchQuery(nombre);
         handleLocationSelect(latlng, nombre);
+      }
+    } catch (error) {
+      console.error('Error en reverse geocoding fallback:', error);
+    }
+  };
+
+  const handleMapClickFromMap = async (latlng) => {
+    try {
+      // Notificar selección inmediata de coordenadas
+      handleLocationSelect(latlng, null);
+
+      if (useGooglePlaces && window.google?.maps?.Geocoder) {
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ location: latlng }, (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            const nombre = results[0].formatted_address;
+            setSearchQuery(nombre);
+            handleLocationSelect(latlng, nombre);
+          } else {
+            console.error('Google Geocoder fallback:', status);
+            fallbackReverseGeocoding(latlng);
+          }
+        });
+      } else {
+        await fallbackReverseGeocoding(latlng);
       }
     } catch (error) {
       console.error('Error en reverse geocoding:', error);
@@ -493,26 +514,55 @@ function LocationPicker(props) {
             lng: position.coords.longitude
           };
 
-          // Reverse geocoding with Nominatim to get the address
+          // Reverse geocoding with Google Geocoder or Nominatim to get the address
           let addressName = 'Mi ubicación actual';
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`,
-              {
-                headers: {
-                  'Accept-Language': 'es',
-                  'User-Agent': 'b2b-client-acquisition-system/1.0'
+          
+          const getAddressFromNominatim = async () => {
+            try {
+              const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`,
+                {
+                  headers: {
+                    'Accept-Language': 'es',
+                    'User-Agent': 'b2b-client-acquisition-system/1.0'
+                  }
+                }
+              );
+              if (response.ok) {
+                const data = await response.json();
+                if (data && data.display_name) {
+                  return data.display_name;
                 }
               }
-            );
-            if (response.ok) {
-              const data = await response.json();
-              if (data && data.display_name) {
-                addressName = data.display_name;
-              }
+            } catch (err) {
+              console.error('Error in reverse geocoding fallback:', err);
             }
-          } catch (err) {
-            console.error('Error in reverse geocoding:', err);
+            return addressName;
+          };
+
+          if (useGooglePlaces && window.google?.maps?.Geocoder) {
+            const geocoder = new window.google.maps.Geocoder();
+            geocoder.geocode({ location: latlng }, async (results, status) => {
+              if (status === 'OK' && results && results[0]) {
+                addressName = results[0].formatted_address;
+              } else {
+                addressName = await getAddressFromNominatim();
+              }
+              
+              setSearchQuery(addressName);
+              setMapCenter({ lat: latlng.lat, lng: latlng.lng });
+              setMapZoom(15);
+              handleLocationSelect(latlng, addressName);
+              success(
+                <>
+                  <strong>Ubicación obtenida</strong>
+                  <p>Se ha establecido tu ubicación actual en el mapa.</p>
+                </>
+              );
+            });
+            return; // Exit early as the callback will handle the rest
+          } else {
+            addressName = await getAddressFromNominatim();
           }
 
           setSearchQuery(addressName);
