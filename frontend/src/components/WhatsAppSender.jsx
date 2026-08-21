@@ -38,11 +38,7 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
     const [showTemplateEditor, setShowTemplateEditor] = useState(false);
     const [currentTemplateIdToEdit, setCurrentTemplateIdToEdit] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [generatingIcebreakers, setGeneratingIcebreakers] = useState(false);
-    const [loadingIcebreakers, setLoadingIcebreakers] = useState({}); // { [id]: boolean }
     const [previewEmpresa, setPreviewEmpresa] = useState(null);
-    const [generatedIcebreakers, setGeneratedIcebreakers] = useState({});
-    const [autoPersonalize, setAutoPersonalize] = useState(false);
 
     const loadTemplates = async () => {
         if (!user?.id) return;
@@ -67,16 +63,6 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
         loadTemplates();
     }, []);
 
-    // Auto-generación de Icebreakers al SELECCIONAR empresas (Ahorro de créditos)
-    // Auto-generación ELIMINADA a pedido del usuario (ahora es manual con botón)
-    /*
-    useEffect(() => {
-        const generateIcebreakersAutomatically = async () => {
-             // ... (código comentado)
-        };
-        // generateIcebreakersAutomatically();
-    }, [selectedEmpresas]); 
-    */
 
     const handleNewTemplate = () => {
         setCurrentTemplateIdToEdit(null);
@@ -180,19 +166,10 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
         const template = templates.find(t => t.id === selectedTemplateId);
         
         let message = template ? (template.body_text || template.body) : '';
-        const currentIcebreaker = empresa.icebreaker || generatedIcebreakers[String(empresa.id || empresa.google_id)] || '';
-
-        // Auto-Personalizar
-        if (autoPersonalize && currentIcebreaker && !message.includes('{{ai_icebreaker}}') && !message.includes('{ai_icebreaker}')) {
-            message = `${currentIcebreaker}\n\n${message}`;
-        }
-
         message = message.replace(/{nombre}/g, empresa.nombre || 'cliente');
         message = message.replace(/{empresa}/g, empresa.nombre || ''); 
         message = message.replace(/{rubro}/g, empresa.rubro || '');
         message = message.replace(/{ciudad}/g, empresa.ciudad || '');
-        message = message.replace(/{ai_icebreaker}/g, currentIcebreaker);
-        message = message.replace(/{{ai_icebreaker}}/g, currentIcebreaker);
 
         const phone = empresa.telefono.replace(/\D/g, '');
         
@@ -264,69 +241,14 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
         }
     };
 
-    const handleGenerateIcebreakersSelected = async () => {
-        if (selectedEmpresas.length === 0) {
-            warning("Seleccioná al menos una empresa.");
-            return;
-        }
-
-        setGeneratingIcebreakers(true);
-        info(`Generando aperturas personalizadas con Gemini para ${selectedEmpresas.length} leads...`);
-        
-        try {
-            const response = await axios.post(`${API_URL}/api/leads/generate-icebreakers`, {
-                empresas: selectedEmpresas,
-                user_id: user.id
-            });
-
-            if (response.data && response.data.results) {
-                const results = response.data.results;
-                const successCount = results.filter(r => r.status === 'success').length;
-                
-                const newIcebreakers = { ...generatedIcebreakers };
-                
-                // Actualizar localmente las empresas seleccionadas con los nuevos icebreakers
-                const updatedSelected = selectedEmpresas.map(emp => {
-                    const empId = String(emp.id || emp.google_id);
-                    const result = results.find(r => String(r.id) === empId);
-                    if (result && result.status === 'success') {
-                        newIcebreakers[empId] = result.icebreaker;
-                        return { ...emp, icebreaker: result.icebreaker };
-                    }
-                    return emp;
-                });
-                
-                setGeneratedIcebreakers(newIcebreakers);
-                setSelectedEmpresas(updatedSelected);
-                success(`¡Listo! Se generaron ${successCount} aperturas.`);
-            }
-        } catch (err) {
-            console.error('Error generating icebreakers in WhatsApp sender:', err);
-            error("Error al generar aperturas con IA.");
-        } finally {
-            setGeneratingIcebreakers(false);
-        }
-    };
 
     const renderPreviewMessage = (empresa) => {
         const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
-        // Sincronizar con la versión más reciente (que tiene el icebreaker)
-        const empId = String(empresa.id || empresa.google_id);
-        const currentIcebreaker = generatedIcebreakers[empId] || empresa.icebreaker || '';
-        
-        let message = selectedTemplate ? (selectedTemplate.body_text || selectedTemplate.body) : '';
-
-        // Auto-Personalizar para la previsualización
-        if (autoPersonalize && currentIcebreaker && !message.includes('{{ai_icebreaker}}') && !message.includes('{ai_icebreaker}')) {
-            message = `${currentIcebreaker}\n\n${message}`;
-        }
-
         const variables = {
             nombre: empresa.nombre || 'Prospecto',
             empresa: empresa.nombre || '',
             rubro: empresa.rubro || '',
-            ciudad: empresa.ciudad || '',
-            ai_icebreaker: currentIcebreaker
+            ciudad: empresa.ciudad || ''
         };
 
         Object.entries(variables).forEach(([key, val]) => {
@@ -389,17 +311,6 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
                                 )}
                             </div>
 
-                            <div className="sidebar-field-toggle">
-                                <div className="toggle-container" onClick={() => setAutoPersonalize(!autoPersonalize)}>
-                                    <div className={`toggle-switch ${autoPersonalize ? 'active' : ''}`}>
-                                        <div className="toggle-handle"></div>
-                                    </div>
-                                    <div className="toggle-label-group">
-                                        <span className="toggle-main-label">✨ Auto-Personalizar</span>
-                                        <span className="toggle-sub-label">Inyectar apertura IA al inicio</span>
-                                    </div>
-                                </div>
-                            </div>
 
                             <div className="sending-summary-minimal">
                                 <span>{selectedEmpresas.length} prospectos</span>
@@ -490,12 +401,6 @@ const WhatsAppSender = ({ empresas = [], onClose, embedded = false, toastSuccess
                                                  <div className="row-main-info">
                                                      <span className="row-name">
                                                          {empresa.nombre}
-                                                         {loadingIcebreakers[String(empresa.id || empresa.google_id)] && (
-                                                             <FiLoader className="spin" style={{ marginLeft: '8px', color: '#6366f1' }} size={14}/>
-                                                         )}
-                                                         {!loadingIcebreakers[String(empresa.id || empresa.google_id)] && generatedIcebreakers[String(empresa.id || empresa.google_id)] && (
-                                                             <span className="icebreaker-indicator" title="Apertura IA lista"> ✨</span>
-                                                         )}
                                                      </span>
                                                      <span className="row-phone">{empresa.telefono || 'Sin teléfono'}</span>
                                                  </div>

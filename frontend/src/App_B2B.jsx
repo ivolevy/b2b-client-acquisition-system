@@ -129,51 +129,7 @@ function AppB2B() {
     }
   }, [location.search, navigate, success, toastError]);
 
-  // Efecto para interpolar el progreso visual suavemente
-  useEffect(() => {
-    if (!blockingLoading) {
-      setDisplayProgress(0);
-      return;
-    }
 
-    const target = searchProgress.percent;
-    const interval = setInterval(() => {
-      setDisplayProgress(prev => {
-        // Definir un objetivo efectivo
-        // Si estamos en fase inicial (buscando en OSM, <= 15%), aplicamos "creep" para dar feedback visual
-        // Si ya estamos validando (> 15%), confiamos en el backend que ahora es granular
-        let effectiveTarget = target;
-        if (target <= 15) {
-           // Fase inicial: simulamos avance hasta 45% mientras busca
-           effectiveTarget = Math.max(target, Math.min(prev + 0.5, 45));
-        }
-
-        // Si ya llegamos al target real y es 100, fin.
-        if (prev >= 100) return 100;
-        
-        // Calcular velocidad
-        // Si es final (100%), disparo rápido
-        let speedFactor = target === 100 ? 0.3 : 0.05;
-        let step = (effectiveTarget - prev) * speedFactor;
-        
-        // Ajustes finos de velocidad
-        if (target === 100) {
-            // Modo disparo: mínimo avance grande
-            if (step < 1.0) step = 1.2; 
-            // Máximo muy grande
-            if (step > 15.0) step = 15.0;
-        } else {
-            // Modo normal/creep - Reducido para que sea menos agresivo
-            if (step < 0.02) step = 0.02;
-            if (step > 1.5) step = 1.5; 
-        }
-
-        return Math.max(prev, Math.min(prev + step, effectiveTarget)); 
-      });
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [searchProgress.percent, blockingLoading]);
 
   useEffect(() => {
     // Intentar recuperar estado del sessionStorage al montar
@@ -232,15 +188,6 @@ function AppB2B() {
     prevLoadingRef.current = loading;
   }, [loading, empresas.length]);
 
-  useEffect(() => {
-    // Stats removed as they are not used and caused ReferenceError
-  }, []);
-  
-
-
-  const loadStats = async () => {
-    // Stats disabled per user request
-  };
 
   const handleExportCSV = async () => {
     try {
@@ -413,33 +360,33 @@ function AppB2B() {
               <div className="loading-progress-container">
                 <div className="progress-info">
                   <span>Buscando prospectos...</span>
-                  <span className="progress-percentage">{Math.round(displayProgress)}%</span>
+                  <span className="progress-percentage">{Math.round(searchProgress.percent)}%</span>
                 </div>
                 <div className="progress-bar-bg">
                   <div 
                     className="progress-bar-fill" 
-                    style={{ width: `${Math.min(displayProgress, 100)}%` }}
+                    style={{ width: `${Math.min(searchProgress.percent, 100)}%`, transition: 'width 0.3s ease-out' }}
                   ></div>
                 </div>
                 <p className="loading-message">{searchProgress.message}</p>
                 
-                <button 
+                  <button 
                   onClick={handleCancelSearch}
                   className="btn-cancel-search"
                   style={{
                     marginTop: '15px',
-                    background: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    color: 'white',
-                    padding: '6px 16px',
+                    background: '#f1f5f9',
+                    border: '1px solid #cbd5e1',
+                    color: '#334155',
+                    padding: '8px 20px',
                     borderRadius: '20px',
                     cursor: 'pointer',
                     fontSize: '14px',
-                    backdropFilter: 'blur(5px)',
+                    fontWeight: '500',
                     transition: 'all 0.2s'
                   }}
-                  onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
-                  onMouseOut={(e) => e.target.style.background = 'transparent'}
+                  onMouseOver={(e) => { e.target.style.background = '#e2e8f0'; e.target.style.borderColor = '#94a3b8'; }}
+                  onMouseOut={(e) => { e.target.style.background = '#f1f5f9'; e.target.style.borderColor = '#cbd5e1'; }}
                 >
                   Cancelar
                 </button>
@@ -466,17 +413,7 @@ function AppB2B() {
                 </svg>
                 Tabla
               </button>
-              <button 
-                type="button"
-                className={view === 'emails' ? 'active' : ''}
-                onClick={() => setView('emails')}
-              >
-               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
-                </svg>
-                Emails
-              </button>
+
               <button 
                 type="button"
                 className={view === 'communications' ? 'active' : ''}
@@ -495,59 +432,9 @@ function AppB2B() {
                 Leads
                 {!isGrowthOrHigher && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
               </button>
-              {/* 
-523:               <button 
-524:                 type="button"
-525:                 className={view === 'insights' ? 'active' : ''}
-526:                 onClick={() => setView('insights')}
-527:                 style={{ opacity: isAgency ? 1 : 0.6 }}
-528:               >
-529:                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-530:                    <path d="M3 3v18h18"/>
-531:                    <path d="M18 9l-6 6-2-2-4 4"/>
-532:                 </svg>
-533:                 Insights
-534:                 {!isAgency && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
-535:               </button>
-                */}
-              {/* 
-536:               <button 
-537:                 type="button"
-538:                 className={view === 'automations' ? 'active' : ''}
-539:                 onClick={() => {
-540:                   if (isAgency) {
-541:                      setView('automations');
-542:                   } else {
-543:                      info("Las Automatizaciones con IA están disponibles exclusivamente en el plan Agency.");
-544:                   }
-545:                 }}
-546:                 style={{ opacity: isAgency ? 1 : 0.6, cursor: isAgency ? 'pointer' : 'not-allowed' }}
-547:               >
-548:                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-549:                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-550:                 </svg>
-551:                 Triggers IA
-552:                 {!isAgency && <span style={{ marginLeft: '4px', opacity: 0.7 }}>🔒</span>}
-553:               </button>
-                    */}
             </div>
           </div>
 
-          {/* 
-557:           {view === 'insights' && (
-558:              <InsightsDashboard />
-559:           )}
-             */}
-
-          {/* 
-561:           {view === 'automations' && (
-562:              <Automations 
-563:                 toastSuccess={success}
-564:                 toastError={toastError}
-565:                 toastWarning={warning}
-566:              />
-567:           )}
-             */}
 
           {view === 'table' && (
             <TableViewB2B 

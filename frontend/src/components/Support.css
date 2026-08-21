@@ -3,7 +3,7 @@
     justify-content: center;
     align-items: center;
     min-height: 70vh;
-    padding: 6rem 2rem 2rem 2rem;
+    padding: 8rem 2rem 2rem 2rem;
     animation: supportFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

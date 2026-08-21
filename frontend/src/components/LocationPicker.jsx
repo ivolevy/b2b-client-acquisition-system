@@ -35,12 +35,14 @@ const formatNominatimResult = (item) => {
   };
 };
 
+const libraries = ['places'];
+
 function LocationPicker(props) {
-  const { onLocationChange, initialLocation, rubroSelect = null } = props;
+  const { onLocationChange, initialLocation, rubroSelect = null, clearTrigger } = props;
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: GOOGLE_API_KEY,
-    libraries: ['places']
+    libraries: libraries
   });
 
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -98,6 +100,19 @@ function LocationPicker(props) {
       setInitialLocationApplied(false);
     }
   }, [initialLocation]);
+
+  // Limpiar estado interno cuando se dispara el reset
+  useEffect(() => {
+    if (clearTrigger && clearTrigger > 0) {
+      setSelectedLocation(null);
+      setRadius('');
+      setSearchQuery('');
+      setSuggestions([]);
+      // Restablecer el centro a Buenos Aires por defecto
+      setMapCenter({ lat: -34.6037, lng: -58.3816 });
+      setMapZoom(12);
+    }
+  }, [clearTrigger]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

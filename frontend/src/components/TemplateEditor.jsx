@@ -208,7 +208,7 @@ function TemplateEditor({ templateId, userId, onClose, onSave, type = 'email' })
               <button type="button" className="variable-chip" onClick={() => insertVariable('empresa')}>Empresa</button>
               <button type="button" className="variable-chip" onClick={() => insertVariable('rubro')}>Rubro</button>
               <button type="button" className="variable-chip" onClick={() => insertVariable('ciudad')}>Ciudad</button>
-              <button type="button" className="variable-chip" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', color: 'white', border: 'none' }} onClick={() => insertVariable('ai_icebreaker')}>✨ Apertura IA</button>
+
             </div>
           </div>
 

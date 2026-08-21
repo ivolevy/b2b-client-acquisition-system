@@ -115,8 +115,15 @@ export function useLeads(user, token, toasts, fetchCredits) {
       setEmpresas([]); 
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Error en la búsqueda');
+        const errorText = await response.text();
+        let errorData = {};
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          console.warn('Error response is not JSON:', errorText);
+        }
+        const message = errorData.detail || errorData.message || (response.status === 402 ? 'Créditos insuficientes para realizar la búsqueda' : 'Error en la búsqueda');
+        throw new Error(message);
       }
 
       const reader = response.body.getReader();

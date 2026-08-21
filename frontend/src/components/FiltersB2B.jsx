@@ -31,7 +31,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning }) {
   const GOOGLE_API_KEY = null; // import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   
 
-  const [scrapearWebsites, setScrapearWebsites] = useState(true);
+
   const [modoBusqueda, setModoBusqueda] = useState('nueva');
 
   const handleBuscarSubmit = (e) => {
@@ -55,7 +55,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning }) {
     const params = {
       rubro: rubro,
       bbox: locationData.bbox.bbox_string,
-      scrapear_websites: scrapearWebsites,
+      scrapear_websites: true,
       limpiar_anterior: modoBusqueda === 'nueva',
       busqueda_ubicacion_nombre: locationData.ubicacion_nombre || null,
       busqueda_centro_lat: locationData.center?.lat || null,
@@ -126,7 +126,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning }) {
           {/* Controles en una sola línea: Rubro + Radio + Dirección + Botón */}
           {GOOGLE_API_KEY ? (
             <GoogleLocationPicker 
-              key={resetKey}
+              clearTrigger={resetKey}
               onLocationChange={setLocationData}
               loading={loading}
               rubroSelect={
@@ -154,7 +154,7 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning }) {
             />
           ) : (
             <LocationPicker 
-              key={resetKey}
+              clearTrigger={resetKey}
               onLocationChange={setLocationData}
               loading={loading}
               rubroSelect={
@@ -179,25 +179,6 @@ function FiltersB2B({ onBuscar, loading, rubros, toastWarning }) {
                   </select>
                 </div>
               }
-                smartFilterComponent={
-                isGrowthOrHigher ? (
-                  <SmartFilterInput 
-                    value={smartFilterText}
-                    onChange={setSmartFilterText}
-                    onAudioRecord={setSmartFilterAudio}
-                    onTranscribe={handleTranscribe}
-                    onSearch={(e) => handleBuscarSubmit(e || { preventDefault: () => {} })}
-                    onInterpret={handleInterpret}
-                    onConfirm={handleConfirmInterpretation}
-                  />
-                ) : (
-                  <div className="smart-filter-container locked" onClick={() => toastWarning("El Filtro Inteligente está disponible desde el plan Growth. ¡Mejorá tu plan!")}>
-                    <div className="smart-filter-trigger-text" style={{ opacity: 0.6, cursor: 'not-allowed', background: '#f1f5f9' }}>
-                        <span className="trigger-label">Filtro Inteligente (IA) 🔒 (Plan Growth)</span>
-                    </div>
-                  </div>
-                )
-                  }
             />
           )}
 

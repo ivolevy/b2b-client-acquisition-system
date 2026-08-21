@@ -57,11 +57,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
     // Attachments State
     const [files, setFiles] = useState([]);
     const fileInputRef = useRef(null);
-    const [generatingIcebreakers, setGeneratingIcebreakers] = useState(false);
-    const [loadingIcebreakers, setLoadingIcebreakers] = useState({}); // { [id]: boolean }
     const [previewEmpresa, setPreviewEmpresa] = useState(null);
-    const [generatedIcebreakers, setGeneratedIcebreakers] = useState({});
-    const [autoPersonalize, setAutoPersonalize] = useState(false);
 
     const isAnyConnected = authStatus.google || authStatus.outlook;
 
@@ -82,16 +78,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
         checkAuthStatus();
     }, [validEmpresas]);
 
-    // Auto-generación de Icebreakers al SELECCIONAR empresas (Ahorro de créditos)
-    // Auto-generación ELIMINADA a pedido del usuario (ahora es manual con botón)
-    /*
-    useEffect(() => {
-        const generateIcebreakersAutomatically = async () => {
-             // ... (código comentado para respetar flujo manual)
-        };
-        // generateIcebreakersAutomatically();
-    }, [selectedEmpresas]); 
-    */
+
 
     const loadTemplates = async () => {
         if (!user?.id) return;
@@ -238,7 +225,6 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                 user_id: user.id,
                 provider: senderProvider,
                 delay_segundos: 2.0,
-                auto_personalize: autoPersonalize,
                 attachments: files.map(f => ({
                     filename: f.name,
                     content_base64: f.base64,
@@ -278,65 +264,11 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
         }
     };
 
-    const handleGenerateIcebreakersSelected = async () => {
-        if (selectedEmpresas.length === 0) {
-            warning("Seleccioná al menos una empresa.");
-            return;
-        }
-
-        setGeneratingIcebreakers(true);
-        info(`Generando aperturas personalizadas para ${selectedEmpresas.length} leads...`);
-        
-        try {
-            const response = await axios.post(`${API_URL}/api/leads/generate-icebreakers`, {
-                empresas: selectedEmpresas,
-                user_id: user.id
-            });
-
-            if (response.data && response.data.results) {
-                const results = response.data.results;
-                const successCount = results.filter(r => r.status === 'success').length;
-                
-                // Actualizar localmente las empresas con los nuevos icebreakers
-                const newIcebreakers = { ...generatedIcebreakers };
-                
-                const updatedSelected = selectedEmpresas.map(emp => {
-                    const empId = String(emp.id || emp.google_id);
-                    const result = results.find(r => String(r.id) === empId);
-                    if (result && result.status === 'success') {
-                        newIcebreakers[empId] = result.icebreaker;
-                        return { ...emp, icebreaker: result.icebreaker };
-                    }
-                    return emp;
-                });
-                
-                setGeneratedIcebreakers(newIcebreakers);
-                setSelectedEmpresas(updatedSelected);
-                success(`¡Listo! Se generaron ${successCount} aperturas.`);
-            }
-        } catch (err) {
-            console.error('Error generating icebreakers in sender:', err);
-            error("Error al generar aperturas con IA.");
-        } finally {
-            setGeneratingIcebreakers(false);
-        }
-    };
 
     const renderPreviewContent = (empresa) => {
         if (!selectedTemplate || !empresa) return { subject: '', body: '' };
         
-        // Buscamos la versión más reciente de la empresa en selectedEmpresas
-        // para asegurarnos de tener el icebreaker recién generado.
-        const empId = String(empresa.id || empresa.google_id);
-        const currentIcebreaker = generatedIcebreakers[empId] || empresa.icebreaker || '';
-        
         let bodyHtml = selectedTemplate.body_html || selectedTemplate.body_text || '';
-        
-        // Auto-Personalizar: Inyectar al principio si el toggle está activo 
-        // y no hay ya un tag manual en el template
-        if (autoPersonalize && currentIcebreaker && !bodyHtml.includes('{{ai_icebreaker}}') && !bodyHtml.includes('{ai_icebreaker}')) {
-            bodyHtml = `<p>${currentIcebreaker}</p>\n${bodyHtml}`;
-        }
 
         const variables = {
             nombre_empresa: empresa.nombre,
@@ -344,9 +276,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
             empresa: empresa.nombre,
             rubro: empresa.rubro,
             ciudad: empresa.ciudad,
-            website: empresa.website,
-            ai_icebreaker: currentIcebreaker,
-            icebreaker: currentIcebreaker
+            website: empresa.website
         };
 
         const replaceVars = (text) => {
@@ -434,17 +364,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                                 </select>
                             </div>
 
-                            <div className="sidebar-field-toggle">
-                                <div className="toggle-container" onClick={() => setAutoPersonalize(!autoPersonalize)}>
-                                    <div className={`toggle-switch ${autoPersonalize ? 'active' : ''}`}>
-                                        <div className="toggle-handle"></div>
-                                    </div>
-                                    <div className="toggle-label-group">
-                                        <span className="toggle-main-label">✨ Auto-Personalizar</span>
-                                        <span className="toggle-sub-label">Inyectar apertura IA al inicio</span>
-                                    </div>
-                                </div>
-                            </div>
+
 
                             <div className="sidebar-field">
                                 <label className="field-label-small">
@@ -527,27 +447,7 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                                                 <div className="stats-selected-badge">{selectedEmpresas.length} seleccionados</div>
                                             </div>
 
-                                            <button 
-                                                className="btn-ai-generate-selected"
-                                                onClick={handleGenerateIcebreakersSelected}
-                                                disabled={generatingIcebreakers || selectedEmpresas.length === 0}
-                                                style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px',
-                                                    padding: '6px 12px',
-                                                    borderRadius: '8px',
-                                                    border: 'none',
-                                                    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-                                                    color: 'white',
-                                                    fontSize: '0.8rem',
-                                                    fontWeight: 600,
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.2s ease'
-                                                }}
-                                            >
-                                                {generatingIcebreakers ? 'Generando...' : 'Generar Aperturas IA'}
-                                            </button>
+
                                         </div>
                                     <div className="es-list-container">
                                         {paginatedEmpresas.map(empresa => (
@@ -586,12 +486,6 @@ const EmailSender = ({ empresas = [], onClose, embedded = false, toastSuccess, t
                                                  <div className="row-main-info">
                                                      <span className="row-name">
                                                          {empresa.nombre}
-                                                         {loadingIcebreakers[String(empresa.id || empresa.google_id)] && (
-                                                             <FiLoader className="spin" style={{ marginLeft: '8px', color: '#6366f1' }} size={14}/>
-                                                         )}
-                                                         {!loadingIcebreakers[String(empresa.id || empresa.google_id)] && generatedIcebreakers[String(empresa.id || empresa.google_id)] && (
-                                                             <span className="icebreaker-indicator" title="Apertura IA lista"> ✨</span>
-                                                         )}
                                                      </span>
                                                      <span className="row-email">{empresa.email || 'Sin email'}</span>
                                                  </div>
