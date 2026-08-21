@@ -13,8 +13,6 @@ import ToastContainer from './components/ToastContainer';
 import ProBackground from './components/ProBackground';
 import OfflineView from './components/OfflineView';
 import Communications from './components/Communications';
-import InsightsDashboard from './components/Insights';
-import Automations from './components/Automations';
 import AIAssistant from './components/AIAssistant';
 import { Fab, Tooltip, Zoom } from '@mui/material';
 import { Face as FaceIcon } from '@mui/icons-material';

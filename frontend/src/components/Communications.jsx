@@ -27,10 +27,8 @@ import {
   AutoAwesome as SparklesIcon
 } from '@mui/icons-material';
 import ListIcon from '@mui/icons-material/ListAlt';
-import KanbanIcon from '@mui/icons-material/Dashboard';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import KanbanBoard from './KanbanBoard';
 
 const Communications = ({ onOpenAi }) => {
   const { user } = useAuth();
@@ -40,7 +38,6 @@ const Communications = ({ onOpenAi }) => {
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [replyText, setReplyText] = useState('');
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'kanban'
   const [channelFilter, setChannelFilter] = useState('all'); // 'all', 'email', 'whatsapp'
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [attachments, setAttachments] = useState([]);
@@ -121,7 +118,7 @@ const Communications = ({ onOpenAi }) => {
 
   useEffect(() => {
     fetchConversations();
-  }, [channelFilter, viewMode]);
+  }, [channelFilter]);
 
   // No longer needed here as it's handled in fetchConversations
 
@@ -477,39 +474,7 @@ const Communications = ({ onOpenAi }) => {
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
 
-          <ToggleButtonGroup
-            value={viewMode}
-            exclusive
-            onChange={(e, next) => next && setViewMode(next)}
-            size="small"
-            sx={{ 
-              bgcolor: '#f1f5f9', 
-              borderRadius: '12px',
-              p: 0.5,
-              border: '1px solid rgba(0,0,0,0.05)',
-              '& .MuiToggleButton-root': {
-                color: '#64748b',
-                border: 'none',
-                borderRadius: '8px',
-                px: 1.5,
-                py: 0.5,
-                textTransform: 'none',
-                '&.Mui-selected': {
-                  bgcolor: '#ffffff',
-                  color: '#3b82f6',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                  '&:hover': { bgcolor: '#ffffff' }
-                }
-              }
-            }}
-          >
-            <ToggleButton value="list">
-              <Typography sx={{ fontSize: '0.8rem', fontWeight: 700 }}>Inbox</Typography>
-            </ToggleButton>
-            <ToggleButton value="kanban">
-              <Typography sx={{ fontSize: '0.8rem', fontWeight: 700 }}>Sales Pipeline</Typography>
-            </ToggleButton>
-          </ToggleButtonGroup>
+
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -578,7 +543,6 @@ const Communications = ({ onOpenAi }) => {
         </Box>
       )}
       <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-        {viewMode === 'list' ? (
           <>
             {/* Sidebar: Conversations */}
             <Box sx={{ 
@@ -979,16 +943,6 @@ const Communications = ({ onOpenAi }) => {
               )}
             </Box>
           </>
-        ) : (
-          <KanbanBoard 
-            conversations={conversations} 
-            onSelectConversation={(conv) => {
-              setSelectedConversation(conv);
-              setViewMode('list');
-            }} 
-            onDeleteConversation={handleDeleteConversation}
-          />
-        )}
       </Box>
 
       <style>

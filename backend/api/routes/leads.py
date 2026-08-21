@@ -389,13 +389,7 @@ async def buscar_por_rubro_stream(request: BusquedaRubroRequest, user_data: dict
                                         emitted_count += 1
                                         enriched_count += 1
                                         
-                                        # Trigger: Lead Extracted
-                                        try:
-                                            from backend.trigger_service import process_triggers_async
-                                            process_triggers_async(request.user_id, "lead_extracted", lead_data=r)
-                                        except:
-                                            pass
-                                            
+
                                         await asyncio.sleep(0.02) 
                                 
                     except Exception as e:
